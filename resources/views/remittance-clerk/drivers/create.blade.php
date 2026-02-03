@@ -1,0 +1,65 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Create New Driver</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('drivers.store') }}" method="POST">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="name">Name *</label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required>
+                                    @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="license_number">License Number *</label>
+                                    <input type="text" class="form-control @error('license_number') is-invalid @enderror" name="license_number" value="{{ old('license_number') }}" required>
+                                    @error('license_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="contact_number">Contact Number *</label>
+                                    <input type="text" class="form-control @error('contact_number') is-invalid @enderror" name="contact_number" value="{{ old('contact_number') }}" required>
+                                    @error('contact_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="email">Email *</label>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required>
+                                    @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="address">Address</label>
+                            <textarea class="form-control" name="address">{{ old('address') }}</textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="date_of_hire">Date of Hire *</label>
+                            <input type="date" class="form-control @error('date_of_hire') is-invalid @enderror" name="date_of_hire" value="{{ old('date_of_hire') }}" required>
+                            @error('date_of_hire')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Create Driver</button>
+                            <a href="{{ route('drivers.index') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
