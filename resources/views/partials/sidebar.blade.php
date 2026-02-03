@@ -1,0 +1,154 @@
+<nav class="nxl-navigation">
+        <div class="navbar-wrapper">
+            <div class="m-header">
+                <a href="index.html" class="b-brand">
+                    <!-- ========   change your logo hear   ============ -->
+                    <img src="assets/images/logo-full.png" alt="" class="logo logo-lg" />
+                    <img src="assets/images/logo-abbr.png" alt="" class="logo logo-sm" />
+                </a>
+            </div>
+            <div class="navbar-content">
+                <ul class="nxl-navbar">
+                    <!-- Remittance Clerk Section -->
+                    <li class="nxl-item nxl-caption">
+                        <label>Remittance Clerk</label>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-users"></i></span>
+                            <span class="nxl-mtext">Driver / PAO Records</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="#">List of Drivers</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">List of PAO / Conductors</a></li>
+                        </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-activity"></i></span>
+                            <span class="nxl-mtext">Daily Remittance</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="#">Route</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Assigned Driver & PAO</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Vehicle Plate Number</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Fare / Collection Entry</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Trip Expenses</a></li>
+                        </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-file-text"></i></span>
+                            <span class="nxl-mtext">Remittance Report</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="#">Remittance Details</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Remittance Summary</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- HR Section -->
+                    <li class="nxl-item nxl-caption">
+                        <label>HR Management</label>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-user-plus"></i></span>
+                            <span class="nxl-mtext">Employee Management</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{  route ('employees.create') }}">Add / Edit Employee Information</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Salary & Rate Setup</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Allowances and Benefits Setup</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Deduction / Contribution Setup</a></li>
+                        </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-clock"></i></span>
+                            <span class="nxl-mtext">Attendance (QR Based)</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="#">QR Time IN / OUT Records</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Leave Management</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Overtime / Undertime Logging</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Attendance Adjustment</a></li>
+                        </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-dollar-sign"></i></span>
+                            <span class="nxl-mtext">Payroll Processing</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="#">Salary Computation</a></li>
+                            <li class="nxl-item nxl-hasmenu">
+                                <a href="javascript:void(0);" class="nxl-link">
+                                    <span class="nxl-mtext">Statutory Deductions</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                                </a>
+                                <ul class="nxl-submenu">
+                                    <li class="nxl-item"><a class="nxl-link" href="#">SSS</a></li>
+                                    <li class="nxl-item"><a class="nxl-link" href="#">PhilHealth</a></li>
+                                    <li class="nxl-item"><a class="nxl-link" href="#">Pag-IBIG</a></li>
+                                    <li class="nxl-item"><a class="nxl-link" href="#">Withholding Tax</a></li>
+                                </ul>
+                            </li>
+                            <li class="nxl-item nxl-hasmenu">
+                                <a href="javascript:void(0);" class="nxl-link">
+                                    <span class="nxl-mtext">Payroll Receivables</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                                </a>
+                                <ul class="nxl-submenu">
+                                    <li class="nxl-item"><a class="nxl-link" href="#">Cash-Advance Recording</a></li>
+                                    <li class="nxl-item"><a class="nxl-link" href="#">Salary Loan Recording</a></li>
+                                </ul>
+                            </li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Generate Payslip</a></li>
+                        </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>
+                            <span class="nxl-mtext">Payroll Report</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="#">Payslips</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Payroll Summary Report</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Deduction Summary</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="#">Government Contribution Summary</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Accountant Section -->
+                    <li class="nxl-item nxl-caption">
+                        <label>Accounting</label>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-check-circle"></i></span>
+                            <span class="nxl-mtext">Payroll Approvals</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="#">Payroll Release Approval</a></li>
+                        </ul>
+                    </li>
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-file-text"></i></span>
+                            <span class="nxl-mtext">Reports</span><span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="#">Remittance Reports</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="feather-settings fs-4 text-dark"></i>
+                        <h6 class="mt-4 text-dark fw-bolder">System Settings</h6>
+                        <p class="fs-11 my-3 text-dark">Smart Accounting System - Manage your payroll, HR, and remittance operations efficiently.</p>
+                        <a href="#" class="btn btn-primary text-dark w-100">Settings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
