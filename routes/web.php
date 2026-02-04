@@ -11,8 +11,8 @@ use App\Http\Controllers\Accounting\PayrollApprovalController;
 use App\Http\Controllers\Accounting\ReportController;
 
 Route::get('/', function () {
-    return view('login');
-})->name('login');
+    return view('auth/login');
+});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
