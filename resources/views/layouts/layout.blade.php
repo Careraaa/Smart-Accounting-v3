@@ -9,7 +9,7 @@
     <meta name="keyword" content="" />
     <meta name="author" content="flexilecode" />
     <!--! BEGIN: Apps Title-->
-    <title>Smart Accounting v3 || Dashboard</title>
+    <title>Smart Accounting v3</title>
     <!--! END:  Apps Title-->
     <!--! BEGIN: Favicon-->
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}" />
