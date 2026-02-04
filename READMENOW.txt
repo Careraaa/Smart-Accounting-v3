@@ -5,9 +5,13 @@ RUN IN TERMINAL
 
 !--Make sure to have a ready database (smart_accounting_v3)--!
 
-4. php artisan migrate
-5. now go to localhost(browser). Go to Smart-Accounting-v3/public
- 	--If error appears double check steps 1 to 4.
+4. run xampp and open apache and mysql
+!-- Run this in terminal again. --!
+5. php artisan migrate
+6. php artisan db:seed
+7. now go to localhost(browser). Go to Smart-Accounting-v3/public
+ 	--If error appears double check steps 1 to 4.--
+    --Accounts Passwords: password123--
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 * All CSS, JS, SCSS can be found under 'public' folder.
