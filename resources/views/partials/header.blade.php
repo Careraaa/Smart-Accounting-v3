@@ -2444,7 +2444,10 @@
                             <span>Account Settings</span>
                         </a>
                         <div class="dropdown-divider"></div>
-                        <a href="./auth-login-minimal.html" class="dropdown-item">
+                        <form method="POST" action="{{ route('logout') }}" style="display: none;" id="logout-form">
+                            @csrf
+                        </form>
+                        <a href="javascript:void(0);" class="dropdown-item" onclick="document.getElementById('logout-form').submit();">
                             <i class="feather-log-out"></i>
                             <span>Logout</span>
                         </a>
