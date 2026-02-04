@@ -1,0 +1,7 @@
+/* LOGO SIDE BAR NEGATIVE FIX! */
+#logo {
+    filter: none !important;
+}
+.b-brand img {
+    filter: none !important;
+}

@@ -23,6 +23,7 @@
     <!--! END: Vendors CSS-->
     <!--! BEGIN: Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{ asset('css/theme.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/overrides.css') }}">
 </head>
 
 <body>
@@ -67,6 +68,9 @@
     <!--! BEGIN: Theme Customizer  !-->
     <script src="{{ asset('js/theme-customizer-init.min.js') }}"></script>
     <!--! END: Theme Customizer !-->
+    <!-- Logo Dark Mode -->
+    <script src="{{ asset('js/overrides/darkmode.js') }}"></script>
+
     @yield('scripts')
 </body>
 
