@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="zxx">
+@extends('layouts.layout')
 
 <head>
     <meta charset="utf-8" />
