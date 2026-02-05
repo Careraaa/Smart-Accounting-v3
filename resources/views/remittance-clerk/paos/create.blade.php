@@ -6,10 +6,10 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title">Create New Driver</h5>
+                    <h5 class="card-title">Create New PAO</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('drivers.store') }}" method="POST">
+                    <form action="{{ route('paos.store') }}" method="POST">
                         @csrf
                         <div class="row">
                             <div class="col-md-6">
@@ -21,9 +21,9 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label for="license_number">License Number *</label>
-                                    <input type="text" class="form-control @error('license_number') is-invalid @enderror" name="license_number" value="{{ old('license_number') }}" required>
-                                    @error('license_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                    <label for="conductor_id">Conductor ID *</label>
+                                    <input type="text" class="form-control @error('conductor_id') is-invalid @enderror" name="conductor_id" value="{{ old('conductor_id') }}" required>
+                                    @error('conductor_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                         </div>
@@ -47,14 +47,9 @@
                             <label for="address">Address</label>
                             <textarea class="form-control" name="address">{{ old('address') }}</textarea>
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="date_of_hire">Date of Hire *</label>
-                            <input type="date" class="form-control @error('date_of_hire') is-invalid @enderror" name="date_of_hire" value="{{ old('date_of_hire') }}" required>
-                            @error('date_of_hire')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                        </div>
                         <div class="form-group d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Create Driver</button>
-                            <a href="{{ route('drivers.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Create PAO</button>
+                            <a href="{{ route('paos.index') }}" class="btn btn-outline-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>

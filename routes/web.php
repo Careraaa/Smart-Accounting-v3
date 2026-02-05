@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RemittanceClerk\DriverController;
 use App\Http\Controllers\RemittanceClerk\PAOController;
+use App\Http\Controllers\RemittanceClerk\RouteController;
+use App\Http\Controllers\RemittanceClerk\VehicleController;
 use App\Http\Controllers\RemittanceClerk\DailyRemittanceController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\AttendanceController;
@@ -18,6 +20,44 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// ===== PROFILE & ACCOUNT ROUTES =====
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/profile/details', function () {
+        return view('partials.profile.profile-details');
+    })->name('profile.details');
+    
+    Route::get('/profile/edit', function () {
+        return view('partials.profile.edit-profile');
+    })->name('profile.edit');
+    
+    Route::put('/profile/update', function (\Illuminate\Http\Request $request) {
+        $user = auth()->user();
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+        
+        if ($request->hasFile('profile_picture')) {
+            $path = $request->file('profile_picture')->store('profiles', 'public');
+            $validated['profile_picture'] = $path;
+        }
+        
+        $user->update($validated);
+        
+        return redirect()->route('profile.details')->with('success', 'Profile updated successfully.');
+    })->name('profile.update');
+    
+    Route::get('/settings/account', function () {
+        return view('partials.profile.account-settings');
+    })->name('settings.account');
+    
+    Route::post('/settings/update-password', function () {
+        return redirect()->back()->with('success', 'Password updated successfully.');
+    })->name('settings.update-password');
+});
+
 // ===== REMITTANCE CLERK ROUTES =====
 Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function () {
     Route::get('/remittance-clerk', function () {
@@ -30,9 +70,14 @@ Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function
     // PAO Routes
     Route::resource('paos', PAOController::class);
     
+    // Routes Management
+    Route::resource('routes', RouteController::class);
+    
+    // Vehicles Management
+    Route::resource('vehicles', VehicleController::class);
+    
     // Remittance Routes
     Route::resource('remittances', DailyRemittanceController::class);
-    
     // Daily Remittance Routes
     Route::get('/remittance/assigned-driver', function () {
         return view('remittance-clerk.remittances.assigned-driver');
@@ -52,11 +97,13 @@ Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function
     
     // Remittance Report Routes
     Route::get('/reports/remittance-details', function () {
-        return view('remittance-clerk.reports.remittance-details');
+        $remittances = \App\Models\DailyRemittance::all();
+        return view('remittance-clerk.reports.remittance-details', compact('remittances'));
     })->name('reports.remittance-details');
     
     Route::get('/reports/remittance-summary', function () {
-        return view('remittance-clerk.reports.remittance-summary');
+        $remittances = \App\Models\DailyRemittance::all();
+        return view('remittance-clerk.reports.remittance-summary', compact('remittances'));
     })->name('reports.remittance-summary');
 });
 

@@ -1,7 +1,7 @@
 <nav class="nxl-navigation">
     <div class="navbar-wrapper">
         <div class="m-header">
-            <a href="index.html" class="b-brand">
+            <a href="{{ route('dashboard') }}" class="b-brand">
                 <img id="logo" src="{{ asset('images/knights_logo.png') }}" alt="Logo"
                     class="logo logo-lg" />
             </a>
@@ -24,6 +24,8 @@
                                     Drivers</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('paos.index') }}">List of PAO /
                                     Conductors</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('routes.index') }}">Manage Routes</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('vehicles.index') }}">Manage Vehicles</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
@@ -33,16 +35,8 @@
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittances.index') }}">Route</a>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittances.index') }}">Record Remittance</a>
                             </li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittances.create') }}">Assigned
-                                    Driver & PAO</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittances.show', 1) }}">Vehicle
-                                    Plate Number</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittances.index') }}">Fare /
-                                    Collection Entry</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittances.index') }}">Trip
-                                    Expenses</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
@@ -52,9 +46,9 @@
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance') }}">Remittance
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance-details') }}">Remittance
                                     Details</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance') }}">Remittance
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance-summary') }}">Remittance
                                     Summary</a></li>
                         </ul>
                     </li>

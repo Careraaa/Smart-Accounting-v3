@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title">Employees</h5>
-                    <a href="{{ route('employees.create') }}" class="btn btn-primary btn-sm">Add Employee</a>
+                    <a href="{{ route('employees.create') }}" class="btn btn-primary">Add Employee</a>
                 </div>
                 <div class="card-body">
                     <table class="table table-striped">
@@ -33,10 +33,10 @@
                                     <td>{{ $employee->department }}</td>
                                     <td>₱{{ number_format($employee->salary_rate, 2) }}</td>
                                     <td><span class="badge bg-success">{{ $employee->status }}</span></td>
-                                    <td>
+                                    <td class="d-flex gap-2">
                                         <a href="{{ route('employees.show', $employee) }}" class="btn btn-info btn-sm">View</a>
                                         <a href="{{ route('employees.edit', $employee) }}" class="btn btn-warning btn-sm">Edit</a>
-                                        <form action="{{ route('employees.destroy', $employee) }}" method="POST" style="display:inline;">
+                                        <form action="{{ route('employees.destroy', $employee) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
