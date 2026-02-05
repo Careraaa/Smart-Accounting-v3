@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title">Daily Remittance</h5>
-                    <a href="{{ route('remittances.create') }}" class="btn btn-primary">Add Remittance</a>
+                    <a href="{{ route('remittances.create') }}" class="btn btn-primary btn-sm">Add Remittance</a>
                 </div>
                 <div class="card-body">
                     <table class="table table-striped">
@@ -37,9 +37,24 @@
                                     <td>₱{{ number_format($remittance->total_expenses, 2) }}</td>
                                     <td>₱{{ number_format($remittance->net_remittance, 2) }}</td>
                                     <td><span class="badge bg-info">{{ $remittance->status }}</span></td>
-                                    <td class="d-flex gap-2">
-                                        <a href="{{ route('remittances.show', $remittance) }}" class="btn btn-info btn-sm">View</a>
-                                        <a href="{{ route('remittances.edit', $remittance) }}" class="btn btn-warning btn-sm">Edit</a>
+                                    <td class="text-center">
+                                        <div class="d-inline-flex gap-2">
+                                            <a href="{{ route('remittances.show', $remittance) }}" 
+                                            class="btn btn-info btn-sm" title="View">
+                                                <i class="feather-eye"></i>
+                                            </a>
+                                            <a href="{{ route('remittances.edit', $remittance) }}" 
+                                            class="btn btn-warning btn-sm" title="Edit">
+                                                <i class="feather-edit"></i>
+                                            </a>
+                                            <form action="{{ route('remittances.destroy', $remittance) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')" title="Delete">
+                                                <i class="feather-trash-2"></i>
+                                            </button>
+                                        </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

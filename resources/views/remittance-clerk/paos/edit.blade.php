@@ -49,8 +49,8 @@
                             <textarea class="form-control" name="address">{{ old('address', $pao->address) }}</textarea>
                         </div>
                         <div class="form-group d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Update PAO</button>
-                            <a href="{{ route('paos.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-sm">Update PAO</button>
+                            <a href="{{ route('paos.index') }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
                         </div>
                     </form>
                 </div>

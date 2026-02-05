@@ -16,7 +16,7 @@
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-users"></i></span>
-                            <span class="nxl-mtext">Driver / PAO Records</span><span class="nxl-arrow"><i
+                            <span class="nxl-mtext">Operational Records</span><span class="nxl-arrow"><i
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
@@ -24,8 +24,7 @@
                                     Drivers</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('paos.index') }}">List of PAO /
                                     Conductors</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('routes.index') }}">Manage Routes</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('vehicles.index') }}">Manage Vehicles</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('routes.index') }}">Manage Routes &amp; Vehicles</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
@@ -66,8 +65,7 @@
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('employees.index') }}">Add / Edit
-                                    Employee Information</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('employees.index') }}">Employee Information</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="#">Salary & Rate Setup</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="#">Allowances and Benefits Setup</a>
                             </li>
@@ -101,31 +99,8 @@
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Salary
                                     Computation</a></li>
-                            <li class="nxl-item nxl-hasmenu">
-                                <a href="javascript:void(0);" class="nxl-link">
-                                    <span class="nxl-mtext">Statutory Deductions</span><span class="nxl-arrow"><i
-                                            class="feather-chevron-right"></i></span>
-                                </a>
-                                <ul class="nxl-submenu">
-                                    <li class="nxl-item"><a class="nxl-link" href="#">SSS</a></li>
-                                    <li class="nxl-item"><a class="nxl-link" href="#">PhilHealth</a></li>
-                                    <li class="nxl-item"><a class="nxl-link" href="#">Pag-IBIG</a></li>
-                                    <li class="nxl-item"><a class="nxl-link" href="#">Withholding Tax</a></li>
-                                </ul>
-                            </li>
-                            <li class="nxl-item nxl-hasmenu">
-                                <a href="javascript:void(0);" class="nxl-link">
-                                    <span class="nxl-mtext">Payroll Receivables</span><span class="nxl-arrow"><i
-                                            class="feather-chevron-right"></i></span>
-                                </a>
-                                <ul class="nxl-submenu">
-                                    <li class="nxl-item"><a class="nxl-link" href="#">Cash-Advance
-                                            Recording</a>
-                                    </li>
-                                    <li class="nxl-item"><a class="nxl-link" href="#">Salary Loan Recording</a>
-                                    </li>
-                                </ul>
-                            </li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Statutory Deductions</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Payroll Receivables</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Generate
                                     Payslip</a></li>
                         </ul>

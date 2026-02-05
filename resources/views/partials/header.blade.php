@@ -188,13 +188,13 @@
                         data-bs-auto-close="outside">
                         <!--PROFILE PICTURE IS HERE!-->
                         <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('images/avatar/avatar.png') }}" alt="user-image" 
-                            class="img-fluid user-avtar me-0" />
+                            class="user-avtar me-0" />
                     </a>
                     <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-user-dropdown">
                         <div class="dropdown-header">
                             <div class="d-flex align-items-center">
                                 <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('images/avatar/avatar.png') }}" alt="user-image"
-                                    class="img-fluid user-avtar" />
+                                    class="user-avtar" />
                                 <div>
                                     <h6 class="text-dark mb-0">{{ auth()->user()->name }}</h6>
                                     <span class="fs-12 fw-medium text-muted">{{ auth()->user()->email }}</span>

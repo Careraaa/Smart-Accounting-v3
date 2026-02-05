@@ -16,7 +16,7 @@
                         <!-- Profile Picture -->
                         <div class="mb-4 text-center">
                             <div class="mb-3">
-                                <img id="profilePreview" src="{{ asset('images/avatar/avatar.png') }}" alt="profile-picture" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                <img id="profilePreview" src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('images/avatar/avatar.png') }}" alt="profile-picture" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
                             </div>
                             <div class="form-group">
                                 <label for="profile_picture" class="form-label">Profile Picture</label>

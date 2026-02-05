@@ -6,6 +6,9 @@ use App\Http\Controllers\RemittanceClerk\PAOController;
 use App\Http\Controllers\RemittanceClerk\RouteController;
 use App\Http\Controllers\RemittanceClerk\VehicleController;
 use App\Http\Controllers\RemittanceClerk\DailyRemittanceController;
+use App\Http\Controllers\RemittanceClerk\DashboardController as RemittanceClerkDashboardController;
+use App\Http\Controllers\Accountant\DashboardController as AccountantDashboardController;
+use App\Http\Controllers\HR\DashboardController as HRDashboardController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\AttendanceController;
 use App\Http\Controllers\HR\PayrollController;
@@ -17,6 +20,17 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+    if (auth()->user()->role === 'remittance_clerk') {
+        $controller = new RemittanceClerkDashboardController();
+        return $controller->index();
+    } elseif (auth()->user()->role === 'accountant') {
+        $controller = new AccountantDashboardController();
+        return $controller->index();
+    } elseif (auth()->user()->role === 'hr') {
+        $controller = new HRDashboardController();
+        return $controller->index();
+    }
+    // Default dashboard for other roles
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -40,6 +54,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
         
         if ($request->hasFile('profile_picture')) {
+            // Delete old profile picture if it exists
+            if ($user->profile_picture) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
+            }
             $path = $request->file('profile_picture')->store('profiles', 'public');
             $validated['profile_picture'] = $path;
         }
@@ -60,9 +78,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // ===== REMITTANCE CLERK ROUTES =====
 Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function () {
-    Route::get('/remittance-clerk', function () {
-        return view('remittance-clerk.index');
-    })->name('remittance-clerk.index');
+    Route::get('/remittance-clerk', [DashboardController::class, 'index'])->name('remittance-clerk.index');
+    
+    // Management (Routes & Vehicles Combined)
+    Route::get('/management', function () {
+        return redirect()->route('routes.index');
+    })->name('management.index');
     
     // Driver Routes
     Route::resource('drivers', DriverController::class);
@@ -182,10 +203,6 @@ Route::middleware(['auth', 'verified', 'role:accountant'])->group(function () {
         return view('accounting.reports.payroll-approval');
     })->name('reports.payroll-approval');
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
-    Route::get('/reports/payslips', [ReportController::class, 'payslips'])->name('reports.payslips');
-    Route::get('/reports/payroll-summary', [ReportController::class, 'payrollSummary'])->name('reports.payroll-summary');
-    Route::get('/reports/deduction-summary', [ReportController::class, 'deductionSummary'])->name('reports.deduction-summary');
-    Route::get('/reports/government-contribution', [ReportController::class, 'governmentContributionSummary'])->name('reports.government-contribution');
 });
 
 require __DIR__.'/auth.php';

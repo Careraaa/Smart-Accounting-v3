@@ -53,8 +53,8 @@
                             @error('date_of_hire')<span class="invalid-feedback">{{ $message }}</span>@enderror
                         </div>
                         <div class="form-group d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Create Driver</button>
-                            <a href="{{ route('drivers.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-sm">Create Driver</button>
+                            <a href="{{ route('drivers.index') }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
                         </div>
                     </form>
                 </div>

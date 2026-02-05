@@ -11,18 +11,15 @@ class Vehicle extends Model
 
     protected $fillable = [
         'plate_number',
-        'vehicle_type',
-        'make',
-        'model',
-        'year',
-        'capacity',
+        'route_id',
+        'operator',
         'status',
-        'date_purchased',
     ];
 
-    protected $casts = [
-        'date_purchased' => 'date',
-    ];
+    public function route()
+    {
+        return $this->belongsTo(Route::class);
+    }
 
     public function dailyRemittances()
     {

@@ -8,8 +8,8 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title">Driver Details</h5>
                     <div class="d-flex gap-2">
-                        <a href="{{ route('drivers.edit', $driver) }}" class="btn btn-warning">Edit</a>
-                        <a href="{{ route('drivers.index') }}" class="btn btn-outline-secondary">Back</a>
+                        <a href="{{ route('drivers.edit', $driver) }}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{{ route('drivers.index') }}" class="btn btn-outline-secondary btn-sm">Back</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -57,7 +57,7 @@
                         <form action="{{ route('drivers.destroy', $driver) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this driver?')">Delete Driver</button>
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this driver?')">Delete Driver</button>
                         </form>
                     </div>
                 </div>

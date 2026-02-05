@@ -48,30 +48,18 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label for="route_id">Route *</label>
-                                    <select class="form-control @error('route_id') is-invalid @enderror" name="route_id" required>
-                                        <option value="">Select Route</option>
-                                        @foreach($routes as $route)
-                                            <option value="{{ $route->id }}" {{ old('route_id', $remittance->route_id) == $route->id ? 'selected' : '' }}>{{ $route->route_name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('route_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
                                     <label for="vehicle_id">Vehicle *</label>
                                     <select class="form-control @error('vehicle_id') is-invalid @enderror" name="vehicle_id" required>
                                         <option value="">Select Vehicle</option>
                                         @foreach($vehicles as $vehicle)
-                                            <option value="{{ $vehicle->id }}" {{ old('vehicle_id', $remittance->vehicle_id) == $vehicle->id ? 'selected' : '' }}>{{ $vehicle->plate_number }}</option>
+                                            <option value="{{ $vehicle->id }}" {{ old('vehicle_id', $remittance->vehicle_id) == $vehicle->id ? 'selected' : '' }}>{{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})</option>
                                         @endforeach
                                     </select>
                                     @error('vehicle_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="status">Status *</label>
@@ -83,8 +71,6 @@
                                     @error('status')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="total_collection">Total Collection *</label>
@@ -108,8 +94,8 @@
                             </div>
                         </div>
                         <div class="form-group d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Update Remittance</button>
-                            <a href="{{ route('remittances.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-sm">Update Remittance</button>
+                            <a href="{{ route('remittances.index') }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
                         </div>
                     </form>
                 </div>

@@ -19,6 +19,11 @@ class Route extends Model
         'status',
     ];
 
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
     public function dailyRemittances()
     {
         return $this->hasMany(DailyRemittance::class);

@@ -43,13 +43,22 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="date_of_hire">Date of Hire *</label>
+                                    <input type="date" class="form-control @error('date_of_hire') is-invalid @enderror" name="date_of_hire" value="{{ old('date_of_hire') }}" required>
+                                    @error('date_of_hire')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                </div>
+                            </div>
+                        </div>
                         <div class="form-group mb-3">
                             <label for="address">Address</label>
                             <textarea class="form-control" name="address">{{ old('address') }}</textarea>
                         </div>
                         <div class="form-group d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Create PAO</button>
-                            <a href="{{ route('paos.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-sm">Create PAO</button>
+                            <a href="{{ route('paos.index') }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
                         </div>
                     </form>
                 </div>

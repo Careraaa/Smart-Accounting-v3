@@ -22,9 +22,8 @@ class DailyRemittanceController extends Controller
     {
         $drivers = Driver::where('status', 'active')->get();
         $paos = PAO::where('status', 'active')->get();
-        $routes = Route::where('status', 'active')->get();
         $vehicles = Vehicle::where('status', 'active')->get();
-        return view('remittance-clerk.remittances.create', compact('drivers', 'paos', 'routes', 'vehicles'));
+        return view('remittance-clerk.remittances.create', compact('drivers', 'paos', 'vehicles'));
     }
 
     public function store(Request $request)
@@ -32,14 +31,17 @@ class DailyRemittanceController extends Controller
         $validated = $request->validate([
             'driver_id' => 'required|exists:drivers,id',
             'pao_id' => 'required|exists:paos,id',
-            'route_id' => 'required|exists:routes,id',
             'vehicle_id' => 'required|exists:vehicles,id',
             'remittance_date' => 'required|date',
             'total_collection' => 'required|numeric',
             'total_expenses' => 'required|numeric',
         ]);
 
+        // Get the vehicle and its associated route
+        $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+        $validated['route_id'] = $vehicle->route_id;
         $validated['net_remittance'] = $validated['total_collection'] - $validated['total_expenses'];
+        
         DailyRemittance::create($validated);
 
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance created successfully.');
@@ -55,9 +57,8 @@ class DailyRemittanceController extends Controller
     {
         $drivers = Driver::where('status', 'active')->get();
         $paos = PAO::where('status', 'active')->get();
-        $routes = Route::where('status', 'active')->get();
         $vehicles = Vehicle::where('status', 'active')->get();
-        return view('remittance-clerk.remittances.edit', compact('remittance', 'drivers', 'paos', 'routes', 'vehicles'));
+        return view('remittance-clerk.remittances.edit', compact('remittance', 'drivers', 'paos', 'vehicles'));
     }
 
     public function update(Request $request, DailyRemittance $remittance)
@@ -65,14 +66,17 @@ class DailyRemittanceController extends Controller
         $validated = $request->validate([
             'driver_id' => 'required|exists:drivers,id',
             'pao_id' => 'required|exists:paos,id',
-            'route_id' => 'required|exists:routes,id',
             'vehicle_id' => 'required|exists:vehicles,id',
             'remittance_date' => 'required|date',
             'total_collection' => 'required|numeric',
             'total_expenses' => 'required|numeric',
         ]);
 
+        // Get the vehicle and its associated route
+        $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+        $validated['route_id'] = $vehicle->route_id;
         $validated['net_remittance'] = $validated['total_collection'] - $validated['total_expenses'];
+        
         $remittance->update($validated);
 
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance updated successfully.');

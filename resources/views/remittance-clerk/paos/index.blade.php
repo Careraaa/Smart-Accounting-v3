@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title">PAO / Conductors List</h5>
-                    <a href="{{ route('paos.create') }}" class="btn btn-primary">Add PAO</a>
+                    <a href="{{ route('paos.create') }}" class="btn btn-primary btn-sm">Add PAO</a>
                 </div>
                 <div class="card-body">
                     <table class="table table-striped">
@@ -30,12 +30,18 @@
                                     <td>{{ $pao->email }}</td>
                                     <td><span class="badge bg-success">{{ $pao->status }}</span></td>
                                     <td class="d-flex gap-2">
-                                        <a href="{{ route('paos.show', $pao) }}" class="btn btn-info btn-sm">View</a>
-                                        <a href="{{ route('paos.edit', $pao) }}" class="btn btn-warning btn-sm">Edit</a>
+                                        <a href="{{ route('paos.show', $pao) }}" class="btn btn-info btn-sm" title="View">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{{ route('paos.edit', $pao) }}" class="btn btn-warning btn-sm" title="Edit">
+                                            <i class="feather-edit"></i>
+                                        </a>
                                         <form action="{{ route('paos.destroy', $pao) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')" title="Delete">
+                                                <i class="feather-trash-2"></i>
+                                            </button>
                                         </form>
                                     </td>
                                 </tr>

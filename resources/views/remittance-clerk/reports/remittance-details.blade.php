@@ -33,7 +33,9 @@
                                     <td>₱{{ number_format($remittance->total_collection, 2) }}</td>
                                     <td><span class="badge bg-info">{{ $remittance->status }}</span></td>
                                     <td>
-                                        <a href="{{ route('remittances.show', $remittance) }}" class="btn btn-info btn-sm">View</a>
+                                        <a href="{{ route('remittances.show', $remittance) }}" class="btn btn-info btn-sm" title="View">
+                                            <i class="feather-eye"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             @empty

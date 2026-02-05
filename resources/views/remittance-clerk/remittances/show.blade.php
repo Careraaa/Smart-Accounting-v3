@@ -8,8 +8,8 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title">Remittance Details</h5>
                     <div class="d-flex gap-2">
-                        <a href="{{ route('remittances.edit', $remittance) }}" class="btn btn-warning">Edit</a>
-                        <a href="{{ route('remittances.index') }}" class="btn btn-outline-secondary">Back</a>
+                        <a href="{{ route('remittances.edit', $remittance) }}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{{ route('remittances.index') }}" class="btn btn-outline-secondary btn-sm">Back</a>
                     </div>
                 </div>
                 <div class="card-body">

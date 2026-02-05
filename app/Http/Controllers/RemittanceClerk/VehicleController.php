@@ -4,61 +4,93 @@ namespace App\Http\Controllers\RemittanceClerk;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
+use App\Models\Route;
 use Illuminate\Http\Request;
 
 class VehicleController extends Controller
 {
     public function index()
     {
+        $routes = Route::all();
         $vehicles = Vehicle::all();
-        return view('remittance-clerk.vehicles.index', compact('vehicles'));
+        return view('remittance-clerk.management.index', compact('routes', 'vehicles'));
     }
 
     public function create()
     {
-        return view('remittance-clerk.vehicles.create');
+        return view('remittance-clerk.management.vehicles-create');
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles',
-            'make' => 'required|string',
-            'model' => 'required|string',
-            'year' => 'required|integer',
-            'engine_number' => 'nullable|string',
-            'remarks' => 'nullable|string',
+            'origin' => 'required|string',
+            'destination' => 'required|string',
+            'operator' => 'required|string',
         ]);
 
-        Vehicle::create($validated);
+        // Find or create route with the given origin and destination
+        $route = Route::firstOrCreate(
+            [
+                'origin' => $validated['origin'],
+                'destination' => $validated['destination'],
+            ],
+            [
+                'route_name' => $validated['origin'] . ' - ' . $validated['destination'],
+            ]
+        );
 
-        return redirect()->route('vehicles.index')->with('success', 'Vehicle created successfully.');
+        $vehicleData = [
+            'plate_number' => $validated['plate_number'],
+            'operator' => $validated['operator'],
+            'route_id' => $route->id,
+        ];
+
+        Vehicle::create($vehicleData);
+
+        return redirect()->route('routes.index')->with('success', 'Vehicle created successfully.');
     }
 
     public function show(Vehicle $vehicle)
     {
-        return view('remittance-clerk.vehicles.show', compact('vehicle'));
+        return view('remittance-clerk.management.vehicles-show', compact('vehicle'));
     }
 
     public function edit(Vehicle $vehicle)
     {
-        return view('remittance-clerk.vehicles.edit', compact('vehicle'));
+        return view('remittance-clerk.management.vehicles-edit', compact('vehicle'));
     }
 
     public function update(Request $request, Vehicle $vehicle)
     {
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles,plate_number,' . $vehicle->id,
-            'make' => 'required|string',
-            'model' => 'required|string',
-            'year' => 'required|integer',
-            'engine_number' => 'nullable|string',
-            'remarks' => 'nullable|string',
+            'origin' => 'required|string',
+            'destination' => 'required|string',
+            'operator' => 'required|string',
         ]);
 
-        $vehicle->update($validated);
+        // Find or create route with the given origin and destination
+        $route = Route::firstOrCreate(
+            [
+                'origin' => $validated['origin'],
+                'destination' => $validated['destination'],
+            ],
+            [
+                'route_name' => $validated['origin'] . ' - ' . $validated['destination'],
+            ]
+        );
 
-        return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
+        $vehicleData = [
+            'plate_number' => $validated['plate_number'],
+            'operator' => $validated['operator'],
+            'route_id' => $route->id,
+        ];
+
+        $vehicle->update($vehicleData);
+
+        return redirect()->route('routes.index')->with('success', 'Vehicle updated successfully.');
     }
 
     public function destroy(Vehicle $vehicle)

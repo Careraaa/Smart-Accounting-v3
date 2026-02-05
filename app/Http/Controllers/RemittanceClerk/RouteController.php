@@ -4,6 +4,7 @@ namespace App\Http\Controllers\RemittanceClerk;
 
 use App\Http\Controllers\Controller;
 use App\Models\Route;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 
 class RouteController extends Controller
@@ -11,55 +12,43 @@ class RouteController extends Controller
     public function index()
     {
         $routes = Route::all();
-        return view('remittance-clerk.routes.index', compact('routes'));
+        $vehicles = Vehicle::all();
+        return view('remittance-clerk.management.index', compact('routes', 'vehicles'));
     }
 
     public function create()
     {
-        return view('remittance-clerk.routes.create');
+        // Routes are now managed through vehicles, redirect to vehicle creation
+        return redirect()->route('vehicles.create')->with('info', 'Create a vehicle to add a new route.');
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'origin' => 'required|string',
-            'destination' => 'required|string',
-        ]);
-
-        $validated['route_name'] = $validated['origin'] . ' - ' . $validated['destination'];
-
-        Route::create($validated);
-
-        return redirect()->route('routes.index')->with('success', 'Route created successfully.');
+        // Routes are now managed through vehicles, redirect back
+        return redirect()->route('routes.index')->with('info', 'Routes are managed through vehicle creation.');
     }
 
     public function show(Route $route)
     {
-        return view('remittance-clerk.routes.show', compact('route'));
+        // Routes are now managed through vehicles
+        return redirect()->route('routes.index')->with('info', 'Routes are managed through vehicles.');
     }
 
     public function edit(Route $route)
     {
-        return view('remittance-clerk.routes.edit', compact('route'));
+        // Routes are now managed through vehicles, redirect to vehicle management
+        return redirect()->route('routes.index')->with('info', 'Routes are managed through vehicle editing.');
     }
 
     public function update(Request $request, Route $route)
     {
-        $validated = $request->validate([
-            'origin' => 'required|string',
-            'destination' => 'required|string',
-        ]);
-
-        $validated['route_name'] = $validated['origin'] . ' - ' . $validated['destination'];
-
-        $route->update($validated);
-
-        return redirect()->route('routes.index')->with('success', 'Route updated successfully.');
+        // Routes are now managed through vehicles
+        return redirect()->route('routes.index')->with('info', 'Routes are updated through vehicle management.');
     }
 
     public function destroy(Route $route)
     {
-        $route->delete();
-        return redirect()->route('routes.index')->with('success', 'Route deleted successfully.');
+        // Routes are now managed through vehicles
+        return redirect()->route('routes.index')->with('info', 'Route management is handled through vehicles.');
     }
 }
