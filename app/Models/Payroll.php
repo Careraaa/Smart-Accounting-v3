@@ -18,7 +18,7 @@ class Payroll extends Model
         'total_deductions',
         'gross_pay',
         'net_pay',
-        'status',
+        'status', 
         'payment_date',
         'approved_by',
     ];
@@ -31,7 +31,7 @@ class Payroll extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 
     public function approvedBy()
@@ -42,5 +42,14 @@ class Payroll extends Model
     public function deductions()
     {
         return $this->hasMany(PayrollDeduction::class);
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($payroll) {
+            if (empty($payroll->status)) {
+                $payroll->status = 'draft';
+            }
+        });
     }
 }

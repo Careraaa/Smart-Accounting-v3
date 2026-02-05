@@ -102,15 +102,28 @@
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Salary
-                                    Computation</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Statutory
-                                    Deductions</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Payroll
-                                    Receivables</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Generate
-                                    Payslip</a></li>
+                            <li class="nxl-item">
+                                <a class="nxl-link {{ request()->routeIs('payroll.salary-computation.*') ? 'active' : '' }}"
+                                    href="{{ route('payroll.salary-computation.index') }}">Salary Computation</a>
+                            </li>
+                            <li class="nxl-item">
+                                <a class="nxl-link {{ request()->routeIs('payroll.statutory-deductions.*') ? 'active' : '' }}"
+                                    href="{{ route('payroll.statutory-deductions.index') }}">Statutory Deductions</a>
+                            </li>
+                            <li class="nxl-item">
+                                <a class="nxl-link {{ request()->routeIs('payroll.receivables.index') ? 'active' : '' }}"
+                                    href="{{ route('payroll.receivables.index') }}">
+                                    Payroll Receivables
+                                </a>
+                            </li>
+                            <li class="nxl-item">
+                                <a class="nxl-link {{ request()->routeIs('payroll.generate-payslip.index') ? 'active' : '' }}"
+                                    href="{{ route('payroll.generate-payslip.index') }}">
+                                    Generate Payslip
+                                </a>
+                            </li>
                         </ul>
+
                     </li>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
