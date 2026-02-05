@@ -6,6 +6,8 @@
     filter: none !important;
 }
 
+/* Logo Dark Mode */
+
 /* USER AVATAR STYLING */
 .user-avtar {
     width: 40px !important;
@@ -29,4 +31,45 @@
     max-width: 50px !important;
     max-height: 50px !important;
     margin-right: 12px !important;
+}
+
+/* ===== RESET ALL LOGOS ===== */
+.m-header .b-brand img {
+    display: none !important;
+}
+
+/* ===== EXPANDED NAVIGATION ===== */
+html:not(.minimenu) .m-header .b-brand .logo-full {
+    display: inline-block !important;
+}
+
+html:not(.minimenu) .m-header .b-brand .logo-mini {
+    display: none !important;
+}
+
+/* ===== COLLAPSED NAVIGATION ===== */
+html.minimenu .m-header .b-brand .logo-full {
+    display: none !important;
+}
+
+html.minimenu .m-header .b-brand .logo-mini {
+    display: inline-block !important;
+}
+
+/* Center the mini logo when sidebar is collapsed */
+html.minimenu .m-header .b-brand {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0 !important;
+    width: 100%;
+}
+
+html.minimenu .m-header .b-brand .logo-mini {
+    margin: 0 !important;
+}
+
+/* Dark mode */
+html.darkmode:not(.minimenu) .m-header .b-brand .logo-full.logo-dark {
+    display: inline-block !important;
 }

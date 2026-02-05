@@ -12,7 +12,7 @@
     <title>Smart Accounting v3</title>
     <!--! END:  Apps Title-->
     <!--! BEGIN: Favicon-->
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights.ico') }}" />
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}" />
     <!--! END: Favicon-->
     <!--! BEGIN: Bootstrap CSS-->
     <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap.min.css') }}" />
@@ -68,9 +68,6 @@
     <!--! BEGIN: Theme Customizer  !-->
     <script src="{{ asset('js/theme-customizer-init.min.js') }}"></script>
     <!--! END: Theme Customizer !-->
-    <!-- Logo Dark Mode -->
-    <script src="{{ asset('js/overrides/darkmode.js') }}"></script>
-
     @yield('scripts')
 </body>
 

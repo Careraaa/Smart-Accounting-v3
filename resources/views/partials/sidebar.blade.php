@@ -2,8 +2,8 @@
     <div class="navbar-wrapper">
         <div class="m-header">
             <a href="{{ route('dashboard') }}" class="b-brand">
-                <img id="logo" src="{{ asset('images/knights_logo.png') }}" alt="Logo"
-                    class="logo logo-lg" />
+                <img src="{{ asset('images/knights_logo.png') }}" class="logo-full" alt="Logo">
+                <img src="{{ asset('images/knights_logo_icon.png') }}" class="logo-mini" alt="Logo">
             </a>
         </div>
         <div class="navbar-content">
@@ -24,7 +24,8 @@
                                     Drivers</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('paos.index') }}">List of PAO /
                                     Conductors</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('routes.index') }}">Manage Routes &amp; Vehicles</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('routes.index') }}">Manage Routes
+                                    &amp; Vehicles</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
@@ -34,7 +35,8 @@
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittances.index') }}">Record Remittance</a>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittances.index') }}">Record
+                                    Remittance</a>
                             </li>
                         </ul>
                     </li>
@@ -45,9 +47,11 @@
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance-details') }}">Remittance
+                            <li class="nxl-item"><a class="nxl-link"
+                                    href="{{ route('reports.remittance-details') }}">Remittance
                                     Details</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance-summary') }}">Remittance
+                            <li class="nxl-item"><a class="nxl-link"
+                                    href="{{ route('reports.remittance-summary') }}">Remittance
                                     Summary</a></li>
                         </ul>
                     </li>
@@ -65,7 +69,8 @@
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('employees.index') }}">Employee Information</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('employees.index') }}">Employee
+                                    Information</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="#">Salary & Rate Setup</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="#">Allowances and Benefits Setup</a>
                             </li>
@@ -99,8 +104,10 @@
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Salary
                                     Computation</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Statutory Deductions</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Payroll Receivables</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Statutory
+                                    Deductions</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Payroll
+                                    Receivables</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll.index') }}">Generate
                                     Payslip</a></li>
                         </ul>
