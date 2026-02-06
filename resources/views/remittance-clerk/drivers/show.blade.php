@@ -39,7 +39,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted">Status</label>
-                                <p><span class="badge bg-success">{{ $driver->status }}</span></p>
+                                <p><span class="badge bg-soft-success text-success">{{ $driver->status }}</span></p>
                             </div>
                         </div>
                     </div>

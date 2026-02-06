@@ -20,10 +20,6 @@
                                 <p class="fs-5">{{ $pao->name }}</p>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label text-muted">Conductor ID</label>
-                                <p class="fs-5">{{ $pao->conductor_id }}</p>
-                            </div>
-                            <div class="mb-3">
                                 <label class="form-label text-muted">Contact Number</label>
                                 <p class="fs-5">{{ $pao->contact_number }}</p>
                             </div>
@@ -35,7 +31,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted">Status</label>
-                                <p><span class="badge bg-success">{{ $pao->status }}</span></p>
+                                <p><span class="badge bg-soft-success text-success">{{ $pao->status }}</span></p>
                             </div>
                         </div>
                     </div>

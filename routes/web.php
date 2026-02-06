@@ -14,6 +14,7 @@ use App\Http\Controllers\HR\AttendanceController;
 use App\Http\Controllers\HR\PayrollController;
 use App\Http\Controllers\Accounting\PayrollApprovalController;
 use App\Http\Controllers\Accounting\ReportController;
+use App\Http\Controllers\Accounting\RemittanceApprovalController;
 
 Route::get('/', function () {
     return view('auth/login');
@@ -222,6 +223,11 @@ Route::middleware(['auth', 'verified', 'role:accountant'])->group(function () {
     Route::resource('payroll-approval', PayrollApprovalController::class, ['only' => ['index', 'show']]);
     Route::post('payroll-approval/{payroll}/approve', [PayrollApprovalController::class, 'approve'])->name('payroll-approval.approve');
     Route::post('payroll-approval/{payroll}/reject', [PayrollApprovalController::class, 'reject'])->name('payroll-approval.reject');
+
+    // Remittance Approval Routes
+    Route::get('/remittance-approval', [RemittanceApprovalController::class, 'index'])->name('remittance-approval.index');
+    Route::post('/remittance-approval/{remittance}/approve', [RemittanceApprovalController::class, 'approve'])->name('remittance-approval.approve');
+    Route::post('/remittance-approval/{remittance}/reject', [RemittanceApprovalController::class, 'reject'])->name('remittance-approval.reject');
 
     // Reports Routes
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');

@@ -31,9 +31,17 @@
                                     <td>{{ $remittance->route->route_name }}</td>
                                     <td>{{ $remittance->vehicle->plate_number }}</td>
                                     <td>₱{{ number_format($remittance->total_collection, 2) }}</td>
-                                    <td><span class="badge bg-info">{{ $remittance->status }}</span></td>
                                     <td>
-                                        <a href="{{ route('remittances.show', $remittance) }}" class="btn btn-info btn-sm" title="View">
+                                        @if($remittance->status === 'pending')
+                                            <div class="badge bg-soft-warning text-warning">{{ ucfirst($remittance->status) }}</div>
+                                        @elseif($remittance->status === 'approved')
+                                            <div class="badge bg-soft-success text-success">{{ ucfirst($remittance->status) }}</div>
+                                        @else
+                                            <div class="badge bg-soft-danger text-danger">{{ ucfirst($remittance->status) }}</div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('remittances.show', $remittance) }}" class="avatar-text avatar-md text-info" title="View">
                                             <i class="feather-eye"></i>
                                         </a>
                                     </td>

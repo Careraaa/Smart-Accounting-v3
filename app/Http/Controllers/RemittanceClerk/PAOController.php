@@ -23,7 +23,6 @@ class PAOController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string',
-            'conductor_id' => 'required|unique:paos',
             'contact_number' => 'required',
             'email' => 'required|email|unique:paos',
             'address' => 'nullable|string',
@@ -49,7 +48,6 @@ class PAOController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string',
-            'conductor_id' => 'required|unique:paos,conductor_id,' . $pao->id,
             'contact_number' => 'required',
             'email' => 'required|email|unique:paos,email,' . $pao->id,
             'address' => 'nullable|string',

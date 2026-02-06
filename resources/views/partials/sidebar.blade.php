@@ -154,12 +154,14 @@
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-check-circle"></i></span>
-                            <span class="nxl-mtext">Payroll Approvals</span><span class="nxl-arrow"><i
+                            <span class="nxl-mtext">Approvals</span><span class="nxl-arrow"><i
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link"
                                     href="{{ route('payroll-approval.index') }}">Payroll Release Approval</a></li>
+                            <li class="nxl-item"><a class="nxl-link"
+                                    href="{{ route('remittance-approval.index') }}">Remittance Approval</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">

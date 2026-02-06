@@ -41,6 +41,7 @@ class DailyRemittanceController extends Controller
         $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
         $validated['route_id'] = $vehicle->route_id;
         $validated['net_remittance'] = $validated['total_collection'] - $validated['total_expenses'];
+        $validated['status'] = 'pending'; // Set default status to pending
         
         DailyRemittance::create($validated);
 
@@ -76,6 +77,11 @@ class DailyRemittanceController extends Controller
         $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
         $validated['route_id'] = $vehicle->route_id;
         $validated['net_remittance'] = $validated['total_collection'] - $validated['total_expenses'];
+        
+        // If remittance is approved or rejected, reset status to pending when changes are made
+        if (in_array($remittance->status, ['approved', 'rejected'])) {
+            $validated['status'] = 'pending';
+        }
         
         $remittance->update($validated);
 

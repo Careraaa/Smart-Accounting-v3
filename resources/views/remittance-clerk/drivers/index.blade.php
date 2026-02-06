@@ -10,44 +10,42 @@
                     <a href="{{ route('drivers.create') }}" class="btn btn-primary btn-sm">Add Driver</a>
                 </div>
                 <div class="card-body">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>License Number</th>
-                                <th>Contact</th>
-                                <th>Email</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($drivers as $driver)
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>{{ $driver->name }}</td>
-                                    <td>{{ $driver->license_number }}</td>
-                                    <td>{{ $driver->contact_number }}</td>
-                                    <td>{{ $driver->email }}</td>
-                                    <td><span class="badge bg-success">{{ $driver->status }}</span></td>
-                                    <td class="d-flex gap-2">
-                                        <a href="{{ route('drivers.show', $driver) }}" class="btn btn-info btn-sm" title="View">
-                                            <i class="feather-eye"></i>
-                                        </a>
-                                        <a href="{{ route('drivers.edit', $driver) }}" class="btn btn-warning btn-sm" title="Edit">
-                                            <i class="feather-edit"></i>
-                                        </a>
-                                        <form action="{{ route('drivers.destroy', $driver) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')" title="Delete">
-                                                <i class="feather-trash-2"></i>
-                                            </button>
-                                        </form>
-                                    </td>
+                                    <th>Name</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach($drivers as $driver)
+                                    <tr>
+                                        <td>{{ $driver->name }}</td>
+                                        <td>{{ $driver->contact_number }}</td>
+                                        <td><span class="badge bg-soft-success text-success">{{ $driver->status }}</span></td>
+                                        <td class="d-flex gap-2">
+                                            <a href="{{ route('drivers.show', $driver) }}" class="avatar-text avatar-md text-info" title="View">
+                                                <i class="feather-eye"></i>
+                                            </a>
+                                            <a href="{{ route('drivers.edit', $driver) }}" class="avatar-text avatar-md text-warning" title="Edit">
+                                                <i class="feather-edit"></i>
+                                            </a>
+                                            <form action="{{ route('drivers.destroy', $driver) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="avatar-text avatar-md text-danger" onclick="return confirm('Are you sure?')" title="Delete">
+                                                    <i class="feather-trash-2"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

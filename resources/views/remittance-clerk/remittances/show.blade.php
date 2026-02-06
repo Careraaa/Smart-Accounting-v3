@@ -39,7 +39,13 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted">Status</label>
-                                <p><span class="badge bg-info">{{ $remittance->status }}</span></p>
+                                <p>@if($remittance->status === 'pending')
+                                                <span class="badge bg-soft-warning text-warning">{{ ucfirst($remittance->status) }}</span>
+                                            @elseif($remittance->status === 'approved')
+                                                <span class="badge bg-soft-success text-success">{{ ucfirst($remittance->status) }}</span>
+                                            @else
+                                                <span class="badge bg-soft-danger text-danger">{{ ucfirst($remittance->status) }}</span>
+                                            @endif</p>
                             </div>
                         </div>
                     </div>

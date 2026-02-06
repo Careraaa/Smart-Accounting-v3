@@ -59,35 +59,24 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="status">Status *</label>
-                                    <select class="form-control @error('status') is-invalid @enderror" name="status" required>
-                                        <option value="">Select Status</option>
-                                        <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                    </select>
-                                    @error('status')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="total_collection">Total Collection *</label>
-                                    <input type="number" step="0.01" class="form-control @error('total_collection') is-invalid @enderror" name="total_collection" value="{{ old('total_collection') }}" required>
+                                    <input type="number" min = "0" step="1" class="form-control @error('total_collection') is-invalid @enderror" name="total_collection" value="{{ old('total_collection') }}" required>
                                     @error('total_collection')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="total_expenses">Total Expenses *</label>
-                                    <input type="number" step="0.01" class="form-control @error('total_expenses') is-invalid @enderror" name="total_expenses" value="{{ old('total_expenses') }}" required>
+                                    <input type="number" min = "0" step="1" class="form-control @error('total_expenses') is-invalid @enderror" name="total_expenses" value="{{ old('total_expenses') }}" required>
                                     @error('total_expenses')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="net_remittance">Net Remittance *</label>
-                                    <input type="number" step="0.01" class="form-control @error('net_remittance') is-invalid @enderror" name="net_remittance" value="{{ old('net_remittance') }}" required>
+                                    <input type="number" min = "0" step="1" class="form-control @error('net_remittance') is-invalid @enderror" name="net_remittance" value="{{ old('net_remittance') }}" required>
                                     @error('net_remittance')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>

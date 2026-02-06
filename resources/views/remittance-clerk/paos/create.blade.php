@@ -21,20 +21,13 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label for="conductor_id">Conductor ID *</label>
-                                    <input type="text" class="form-control @error('conductor_id') is-invalid @enderror" name="conductor_id" value="{{ old('conductor_id') }}" required>
-                                    @error('conductor_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
                                     <label for="contact_number">Contact Number *</label>
                                     <input type="text" class="form-control @error('contact_number') is-invalid @enderror" name="contact_number" value="{{ old('contact_number') }}" required>
                                     @error('contact_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="email">Email *</label>
@@ -42,8 +35,6 @@
                                     @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="date_of_hire">Date of Hire *</label>

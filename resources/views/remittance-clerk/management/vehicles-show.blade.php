@@ -37,7 +37,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-muted">Status</label>
-                                <p><span class="badge bg-success">{{ $vehicle->status ?? 'Active' }}</span></p>
+                                <p><span class="badge bg-soft-success text-success">{{ $vehicle->status ?? 'Active' }}</span></p>
                             </div>
                         </div>
                     </div>

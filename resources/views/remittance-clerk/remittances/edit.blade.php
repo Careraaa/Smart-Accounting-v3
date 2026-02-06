@@ -9,6 +9,13 @@
                     <h5 class="card-title">Edit Remittance</h5>
                 </div>
                 <div class="card-body">
+                    @if(in_array($remittance->status, ['approved', 'rejected']))
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="feather-alert-triangle"></i>
+                            <strong>Notice:</strong> This remittance is currently {{ ucfirst($remittance->status) }}. Any changes will reset the status back to <strong>Pending</strong> for re-approval.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <form action="{{ route('remittances.update', $remittance) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -16,7 +23,7 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="remittance_date">Remittance Date *</label>
-                                    <input type="date" class="form-control @error('remittance_date') is-invalid @enderror" name="remittance_date" value="{{ old('remittance_date', $remittance->remittance_date) }}" required>
+                                    <input type="date" class="form-control @error('remittance_date') is-invalid @enderror" name="remittance_date" value="{{ old('remittance_date', $remittance->remittance_date ? $remittance->remittance_date->format('Y-m-d') : '') }}" required>
                                     @error('remittance_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
@@ -60,17 +67,6 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="status">Status *</label>
-                                    <select class="form-control @error('status') is-invalid @enderror" name="status" required>
-                                        <option value="">Select Status</option>
-                                        <option value="pending" {{ old('status', $remittance->status) == 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="completed" {{ old('status', $remittance->status) == 'completed' ? 'selected' : '' }}>Completed</option>
-                                    </select>
-                                    @error('status')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                                </div>
-                            </div>
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="total_collection">Total Collection *</label>

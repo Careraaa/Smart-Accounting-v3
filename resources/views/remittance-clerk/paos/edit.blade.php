@@ -22,25 +22,25 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label for="conductor_id">Conductor ID *</label>
-                                    <input type="text" class="form-control @error('conductor_id') is-invalid @enderror" name="conductor_id" value="{{ old('conductor_id', $pao->conductor_id) }}" required>
-                                    @error('conductor_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                    <label for="contact_number">Contact Number *</label>
+                                    <input type="text" class="form-control @error('contact_number') is-invalid @enderror" name="contact_number" value="{{ old('contact_number', $pao->contact_number) }}" required>
+                                    @error('contact_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label for="contact_number">Contact Number *</label>
-                                    <input type="text" class="form-control @error('contact_number') is-invalid @enderror" name="contact_number" value="{{ old('contact_number', $pao->contact_number) }}" required>
-                                    @error('contact_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                    <label for="email">Email *</label>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $pao->email) }}" required>
+                                    @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label for="email">Email *</label>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $pao->email) }}" required>
-                                    @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                                    <label for="date_of_hire">Date of Hire *</label>
+                                    <input type="date" class="form-control @error('date_of_hire') is-invalid @enderror" name="date_of_hire" value="{{ old('date_of_hire', $pao->date_of_hire?->format('Y-m-d')) }}" required>
+                                    @error('date_of_hire')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                         </div>
