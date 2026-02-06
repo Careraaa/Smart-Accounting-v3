@@ -58,25 +58,16 @@
                 @endif
 
                 <!-- HR Section -->
+                <!-- HR Section -->
                 @if (auth()->user()->role === 'hr')
                     <li class="nxl-item nxl-caption">
                         <label>HR Management</label>
                     </li>
-                    <li class="nxl-item nxl-hasmenu">
-                        <a href="javascript:void(0);" class="nxl-link">
+                    <li class="nxl-item">
+                        <a href="{{ route('employees.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-user-plus"></i></span>
-                            <span class="nxl-mtext">Employee Management</span><span class="nxl-arrow"><i
-                                    class="feather-chevron-right"></i></span>
+                            <span class="nxl-mtext">Employee Management</span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('employees.index') }}">Employee
-                                    Information</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="#">Salary & Rate Setup</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="#">Allowances and Benefits Setup</a>
-                            </li>
-                            <li class="nxl-item"><a class="nxl-link" href="#">Deduction / Contribution Setup</a>
-                            </li>
-                        </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
@@ -91,8 +82,8 @@
                                     Management</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Overtime
                                     / Undertime Logging</a></li>
-                            <li class="nxl-item"><a class="nxl-link"
-                                    href="{{ route('attendance.index') }}">Attendance Adjustment</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance
+                                    Adjustment</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu">
@@ -123,7 +114,6 @@
                                 </a>
                             </li>
                         </ul>
-
                     </li>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">

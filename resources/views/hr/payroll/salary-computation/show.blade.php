@@ -22,8 +22,11 @@
                         </div>
 
                         <div class="mb-3">
-                            <strong>Basic Salary:</strong>
-                            <span>₱{{ number_format($payroll->basic_salary, 2) }}</span>
+                            <strong>Basic Salary (15 days):</strong>
+                            @php
+                                $basicSalary = $payroll->employee ? $payroll->employee->salary_rate * 15 : 0;
+                            @endphp
+                            <span>₱{{ number_format($basicSalary, 2) }}</span>
                         </div>
 
                         <div class="mb-3">
@@ -38,12 +41,12 @@
 
                         <div class="mb-3">
                             <strong>Gross Pay:</strong>
-                            <span>₱{{ number_format($payroll->gross_pay, 2) }}</span>
+                            <span>₱{{ number_format($basicSalary + $payroll->total_allowances, 2) }}</span>
                         </div>
 
                         <div class="mb-3">
                             <strong>Net Pay:</strong>
-                            <span>₱{{ number_format($payroll->net_pay, 2) }}</span>
+                            <span>₱{{ number_format($basicSalary + $payroll->total_allowances - $payroll->total_deductions, 2) }}</span>
                         </div>
 
                         <div class="mb-3">
@@ -54,6 +57,7 @@
                                     'submitted' => 'info',
                                     'approved' => 'primary',
                                     'paid' => 'success',
+                                    'pending' => 'warning',
                                 ];
                             @endphp
                             <span class="badge bg-{{ $statusColors[$payroll->status] ?? 'secondary' }}">

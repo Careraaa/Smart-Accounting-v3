@@ -68,7 +68,7 @@
     <!--! BEGIN: Theme Customizer  !-->
     <script src="{{ asset('js/theme-customizer-init.min.js') }}"></script>
     <!--! END: Theme Customizer !-->
-    @yield('scripts')
+    @stack('scripts')
 </body>
 
 </html>

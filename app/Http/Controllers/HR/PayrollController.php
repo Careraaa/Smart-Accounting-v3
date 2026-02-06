@@ -79,25 +79,27 @@ class PayrollController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'payroll_period_start' => 'required|date',
             'payroll_period_end' => 'required|date',
-            'basic_salary' => 'required|numeric',
             'total_allowances' => 'required|numeric',
             'total_deductions' => 'required|numeric',
-            'status' => 'required|in:draft,submitted,approved,paid',
         ]);
 
+        // Compute basic salary dynamically
+        $employee = Employee::findOrFail($validated['employee_id']);
+        $basicSalary = $employee->salary_rate * 15;
+
         $payroll = new Payroll();
-        $payroll->employee_id = $validated['employee_id'];
+        $payroll->employee_id = $employee->id;
         $payroll->payroll_period_start = $validated['payroll_period_start'];
         $payroll->payroll_period_end = $validated['payroll_period_end'];
-        $payroll->basic_salary = $validated['basic_salary'];
         $payroll->total_allowances = $validated['total_allowances'];
         $payroll->total_deductions = $validated['total_deductions'];
-        $payroll->gross_pay = $validated['basic_salary'] + $validated['total_allowances'];
+        $payroll->gross_pay = $basicSalary + $validated['total_allowances'];
         $payroll->net_pay = $payroll->gross_pay - $validated['total_deductions'];
-        $payroll->status = $validated['status'];
+        $payroll->status = 'pending';
         $payroll->save();
 
-        return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll created successfully.');
+        return redirect()->route('payroll.salary-computation.index')
+            ->with('success', 'Payroll created successfully.');
     }
 
     public function show(Payroll $payroll)
@@ -118,30 +120,33 @@ class PayrollController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'payroll_period_start' => 'required|date',
             'payroll_period_end' => 'required|date',
-            'basic_salary' => 'required|numeric',
             'total_allowances' => 'required|numeric',
             'total_deductions' => 'required|numeric',
-            'status' => 'required|in:draft,submitted,approved,paid',
         ]);
 
-        $payroll->employee_id = $validated['employee_id'];
+        // Compute basic salary dynamically
+        $employee = Employee::findOrFail($validated['employee_id']);
+        $basicSalary = $employee->salary_rate * 15;
+
+        $payroll->employee_id = $employee->id;
         $payroll->payroll_period_start = $validated['payroll_period_start'];
         $payroll->payroll_period_end = $validated['payroll_period_end'];
-        $payroll->basic_salary = $validated['basic_salary'];
         $payroll->total_allowances = $validated['total_allowances'];
         $payroll->total_deductions = $validated['total_deductions'];
-        $payroll->gross_pay = $validated['basic_salary'] + $validated['total_allowances'];
+        $payroll->gross_pay = $basicSalary + $validated['total_allowances'];
         $payroll->net_pay = $payroll->gross_pay - $validated['total_deductions'];
-        $payroll->status = $validated['status'];
+        // keep current status; HR cannot change it here
         $payroll->save();
 
-        return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll updated successfully.');
+        return redirect()->route('payroll.salary-computation.index')
+            ->with('success', 'Payroll updated successfully.');
     }
 
     public function destroy(Payroll $payroll)
     {
         $payroll->delete();
-        return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll deleted successfully.');
+        return redirect()->route('payroll.salary-computation.index')
+            ->with('success', 'Payroll deleted successfully.');
     }
 
     public function generatePayslip(Payroll $payroll)

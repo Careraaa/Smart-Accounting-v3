@@ -28,6 +28,7 @@ class Employee extends Model
         'date_of_hire' => 'date',
     ];
 
+    // Relationships
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
@@ -61,5 +62,11 @@ class Employee extends Model
     public function salaryLoans()
     {
         return $this->hasMany(SalaryLoan::class);
+    }
+
+    //basic salary for 15-day period
+    public function getBasicSalaryAttribute()
+    {
+        return $this->salary_rate * 15;
     }
 }

@@ -13,7 +13,6 @@ class Payroll extends Model
         'employee_id',
         'payroll_period_start',
         'payroll_period_end',
-        'basic_salary',
         'total_allowances',
         'total_deductions',
         'gross_pay',
