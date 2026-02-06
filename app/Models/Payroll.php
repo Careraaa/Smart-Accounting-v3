@@ -9,18 +9,7 @@ class Payroll extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'employee_id',
-        'payroll_period_start',
-        'payroll_period_end',
-        'total_allowances',
-        'total_deductions',
-        'gross_pay',
-        'net_pay',
-        'status', 
-        'payment_date',
-        'approved_by',
-    ];
+    protected $fillable = ['employee_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'approved_by', 'basic_salary', 'total_allowances', 'total_deductions', 'net_salary'];
 
     protected $casts = [
         'payroll_period_start' => 'date',
@@ -43,12 +32,18 @@ class Payroll extends Model
         return $this->hasMany(PayrollDeduction::class);
     }
 
-    protected static function booted()
+    public function allowances()
     {
-        static::creating(function ($payroll) {
-            if (empty($payroll->status)) {
-                $payroll->status = 'draft';
-            }
-        });
+        return $this->hasMany(PayrollAllowance::class);
+    }
+
+    public function getGrossPayAttribute()
+    {
+        return ($this->employee->salary_rate ?? 0) * 15 + $this->total_allowances;
+    }
+
+    public function getNetPayAttribute()
+    {
+        return $this->gross_pay - $this->total_deductions;
     }
 }

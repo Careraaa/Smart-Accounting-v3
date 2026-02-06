@@ -16,9 +16,9 @@ class DashboardController extends Controller
     {
         // Payroll Statistics
         $totalEmployees = Employee::count();
-        $totalPayroll = Payroll::sum('net_pay') ?? 0;
-        $totalAllowances = Allowance::sum('amount') ?? 0;
-        $totalDeductions = Deduction::sum('amount') ?? 0;
+        $totalPayroll = Payroll::sum('net_salary') ?? 0; // fixed column name
+        $totalAllowances = Payroll::with('allowances')->get()->sum(fn($p) => $p->total_allowances);
+        $totalDeductions = Payroll::with('deductions')->get()->sum(fn($p) => $p->total_deductions);
 
         // Payroll status breakdown
         $processingPayroll = Payroll::where('status', 'processing')->count();
@@ -30,14 +30,12 @@ class DashboardController extends Controller
         $totalOutstandingLoans = SalaryLoan::where('status', '!=', 'fully_paid')->sum('remaining_balance') ?? 0;
         $activeSalaryLoans = SalaryLoan::where('status', 'active')->count();
 
-        // Average calculations
-        $averageBasicSalary = $totalEmployees > 0 ? Payroll::avg('basic_salary') ?? 0 : 0;
+        // Average basic salary
+        $averageBasicSalary = Payroll::avg('basic_salary');
 
         // Deduction vs Allowance ratio
         $baseAmount = $totalAllowances + $totalDeductions;
-
         $deductionPercentage = $baseAmount > 0 ? ($totalDeductions / $baseAmount) * 100 : 0;
-
         $allowancePercentage = $baseAmount > 0 ? ($totalAllowances / $baseAmount) * 100 : 0;
 
         // Recent payroll records
@@ -47,7 +45,7 @@ class DashboardController extends Controller
         $monthlyPayrollTrend = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $total = Payroll::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month)->sum('net_pay') ?? 0;
+            $total = Payroll::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month)->get()->sum(fn($p) => $p->basic_salary + $p->total_allowances - $p->total_deductions); // dynamic net_salary
             $monthlyPayrollTrend[] = [
                 'month' => $month->format('M'),
                 'total' => $total,

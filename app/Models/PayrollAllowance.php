@@ -5,8 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PayrollDeduction extends Model
+class PayrollAllowance extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'payroll_id',
         'name',
@@ -18,4 +20,3 @@ class PayrollDeduction extends Model
         return $this->belongsTo(Payroll::class);
     }
 }
-

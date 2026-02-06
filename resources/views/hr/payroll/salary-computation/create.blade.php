@@ -12,7 +12,7 @@
                         <form action="{{ route('payroll.store') }}" method="POST">
                             @csrf
 
-                            <!-- Select Employee -->
+                            <!-- Employee Selection -->
                             <div class="mb-3">
                                 <label for="employee_id" class="form-label">Employee *</label>
                                 <select name="employee_id" id="employee_id"
@@ -52,7 +52,7 @@
                                 </div>
                             </div>
 
-                            <!-- Basic Salary Display -->
+                            <!-- Basic Salary -->
                             <div class="mb-3">
                                 <label class="form-label">Basic Salary (15 days)</label>
                                 <p id="basic_salary_display" class="form-control-plaintext">₱0.00</p>
@@ -80,6 +80,12 @@
                                 @enderror
                             </div>
 
+                            <!-- Net Salary Display -->
+                            <div class="mb-3">
+                                <label class="form-label">Net Salary</label>
+                                <p id="net_salary_display" class="form-control-plaintext">₱0.00</p>
+                            </div>
+
                             <!-- Buttons -->
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">Create Payroll</button>
@@ -97,18 +103,30 @@
         <script>
             const employeeSelect = document.getElementById('employee_id');
             const basicSalaryDisplay = document.getElementById('basic_salary_display');
+            const totalAllowancesInput = document.getElementById('total_allowances');
+            const totalDeductionsInput = document.getElementById('total_deductions');
+            const netSalaryDisplay = document.getElementById('net_salary_display');
 
-            function updateBasicSalary() {
+            function updateSalary() {
                 const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
                 const salaryRate = parseFloat(selectedOption.dataset.salaryRate || 0);
-                basicSalaryDisplay.innerText = `₱${(salaryRate * 15).toFixed(2)}`;
+                const basicSalary = salaryRate * 15;
+                basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
+
+                const allowances = parseFloat(totalAllowancesInput.value) || 0;
+                const deductions = parseFloat(totalDeductionsInput.value) || 0;
+                const netSalary = basicSalary + allowances - deductions;
+
+                netSalaryDisplay.innerText = `₱${netSalary.toFixed(2)}`;
             }
 
-            // update on page load if old value exists
-            updateBasicSalary();
+            // Update on changes
+            employeeSelect.addEventListener('change', updateSalary);
+            totalAllowancesInput.addEventListener('input', updateSalary);
+            totalDeductionsInput.addEventListener('input', updateSalary);
 
-            // update dynamically on employee change
-            employeeSelect.addEventListener('change', updateBasicSalary);
+            // Initial call
+            updateSalary();
         </script>
     @endpush
 @endsection

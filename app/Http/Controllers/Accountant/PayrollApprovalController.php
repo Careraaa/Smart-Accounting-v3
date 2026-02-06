@@ -10,35 +10,36 @@ class PayrollApprovalController extends Controller
 {
     public function index()
     {
-        $payrolls = Payroll::where('status', 'submitted')->with('employee')->get();
+        $payrolls = Payroll::with('employee')->where('status', 'pending')->get();
         return view('accountant.payroll-approval.index', compact('payrolls'));
     }
 
-    public function show(Payroll $payroll)
+    public function show($id)
     {
-        $payroll->load('employee', 'deductions');
+        $payroll = Payroll::with('employee', 'deductions', 'allowances')->findOrFail($id);
         return view('accountant.payroll-approval.show', compact('payroll'));
     }
 
     public function approve(Payroll $payroll)
     {
-        $payroll->update([
-            'status' => 'approved',
-            'approved_by' => auth()->id(),
-        ]);
+        if ($payroll->status != 'pending') {
+            return redirect()->back()->with('error', 'Payroll already processed.');
+        }
 
-        return redirect()->route('payroll-approval.index')->with('success', 'Payroll approved successfully.');
+        $payroll->status = 'approved';
+        $payroll->save();
+
+        return redirect()->route('payroll-approval.index')->with('success', 'Payroll approved.');
     }
 
-    public function reject(Request $request, Payroll $payroll)
+    public function reject(Payroll $payroll)
     {
-        $request->validate([
-            'reason' => 'required|string',
-        ]);
+        if ($payroll->status != 'pending') {
+            return redirect()->back()->with('error', 'Payroll already processed.');
+        }
 
-        $payroll->update([
-            'status' => 'rejected',
-        ]);
+        $payroll->status = 'rejected';
+        $payroll->save();
 
         return redirect()->route('payroll-approval.index')->with('success', 'Payroll rejected.');
     }
