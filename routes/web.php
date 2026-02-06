@@ -12,9 +12,9 @@ use App\Http\Controllers\HR\DashboardController as HRDashboardController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\AttendanceController;
 use App\Http\Controllers\HR\PayrollController;
-use App\Http\Controllers\Accounting\PayrollApprovalController;
-use App\Http\Controllers\Accounting\ReportController;
-use App\Http\Controllers\Accounting\RemittanceApprovalController;
+use App\Http\Controllers\Accountant\PayrollApprovalController;
+use App\Http\Controllers\Accountant\ReportController;
+use App\Http\Controllers\Accountant\RemittanceApprovalController;
 
 Route::get('/', function () {
     return view('auth/login');
@@ -215,9 +215,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // ===== ACCOUNTANT ROUTES =====
 Route::middleware(['auth', 'verified', 'role:accountant'])->group(function () {
-    Route::get('/accounting', function () {
-        return view('accounting.index');
-    })->name('accounting.index');
+    Route::get('/accountant', function () {
+        return view('accountant.index');
+    })->name('accountant.index');
 
     // Payroll Approval Routes
     Route::resource('payroll-approval', PayrollApprovalController::class, ['only' => ['index', 'show']]);
@@ -232,7 +232,7 @@ Route::middleware(['auth', 'verified', 'role:accountant'])->group(function () {
     // Reports Routes
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');
     Route::get('/reports/payroll-approval', function () {
-        return view('accounting.reports.payroll-approval');
+        return view('accountant.reports.payroll-approval');
     })->name('reports.payroll-approval');
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
 });

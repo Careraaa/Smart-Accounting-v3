@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Accounting;
+namespace App\Http\Controllers\Accountant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payroll;
@@ -11,13 +11,13 @@ class PayrollApprovalController extends Controller
     public function index()
     {
         $payrolls = Payroll::where('status', 'submitted')->with('employee')->get();
-        return view('accounting.payroll-approval.index', compact('payrolls'));
+        return view('accountant.payroll-approval.index', compact('payrolls'));
     }
 
     public function show(Payroll $payroll)
     {
         $payroll->load('employee', 'deductions');
-        return view('accounting.payroll-approval.show', compact('payroll'));
+        return view('accountant.payroll-approval.show', compact('payroll'));
     }
 
     public function approve(Payroll $payroll)

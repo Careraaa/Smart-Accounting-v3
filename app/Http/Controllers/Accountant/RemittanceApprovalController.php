@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Accounting;
+namespace App\Http\Controllers\Accountant;
 
 use App\Http\Controllers\Controller;
 use App\Models\DailyRemittance;
@@ -11,7 +11,7 @@ class RemittanceApprovalController extends Controller
     public function index()
     {
         $remittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')->get();
-        return view('accountant.remittances.index', compact('remittances'));
+        return view('accountant.remittances-approval.index', compact('remittances'));
     }
 
     public function approve(DailyRemittance $remittance)
