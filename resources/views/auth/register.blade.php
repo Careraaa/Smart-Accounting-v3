@@ -48,6 +48,20 @@
             @enderror
         </div>
 
+        <div class="mb-4">
+            <label for="role" class="form-label">Role</label>
+            <select id="role" class="form-control @error('role') is-invalid @enderror" 
+                    name="role" required>
+                <option value="">Select a role</option>
+                <option value="remittance_clerk" {{ old('role') === 'remittance_clerk' ? 'selected' : '' }}>Remittance Clerk</option>
+                <option value="hr" {{ old('role') === 'hr' ? 'selected' : '' }}>HR</option>
+                <option value="accountant" {{ old('role') === 'accountant' ? 'selected' : '' }}>Accountant</option>
+            </select>
+            @error('role')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+        </div>
+
         <div class="form-check mb-3">
             <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
             <label class="form-check-label" for="terms">
