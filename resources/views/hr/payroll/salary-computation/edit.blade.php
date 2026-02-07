@@ -4,7 +4,7 @@
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card">
+                <div class="card shadow-sm">
                     <div class="card-header">
                         <h5 class="card-title mb-0">Edit Payroll</h5>
                     </div>
@@ -39,9 +39,6 @@
                                         class="form-control @error('payroll_period_start') is-invalid @enderror"
                                         value="{{ old('payroll_period_start', $payroll->payroll_period_start->format('Y-m-d')) }}"
                                         required>
-                                    @error('payroll_period_start')
-                                        <span class="invalid-feedback">{{ $message }}</span>
-                                    @enderror
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="payroll_period_end" class="form-label">Period End *</label>
@@ -49,9 +46,6 @@
                                         class="form-control @error('payroll_period_end') is-invalid @enderror"
                                         value="{{ old('payroll_period_end', $payroll->payroll_period_end->format('Y-m-d')) }}"
                                         required>
-                                    @error('payroll_period_end')
-                                        <span class="invalid-feedback">{{ $message }}</span>
-                                    @enderror
                                 </div>
                             </div>
 
@@ -64,59 +58,53 @@
                             <!-- Allowances -->
                             <div class="mb-3">
                                 <label class="form-label">Allowances</label>
-                                <div id="allowances_container">
-                                    @if ($payroll->allowances->count())
-                                        @foreach ($payroll->allowances as $index => $allowance)
-                                            <div class="input-group mb-2">
-                                                <input type="text" name="allowances[name][]" class="form-control"
-                                                    value="{{ $allowance->name }}" placeholder="Allowance Name">
-                                                <input type="number" step="0.01" name="allowances[amount][]"
-                                                    class="form-control" value="{{ $allowance->amount }}"
-                                                    placeholder="Amount">
-                                                <button type="button" class="btn btn-danger remove-row">-</button>
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        <div class="input-group mb-2">
-                                            <input type="text" name="allowances[name][]" class="form-control"
-                                                placeholder="Allowance Name">
-                                            <input type="number" step="0.01" name="allowances[amount][]"
-                                                class="form-control" placeholder="Amount">
-                                            <button type="button" class="btn btn-danger remove-row">-</button>
-                                        </div>
-                                    @endif
+                                <ul class="list-group mb-2" id="allowance_list"></ul>
+                                <input type="hidden" name="total_allowances" id="total_allowances" value="0">
+                                <div id="allowances_inputs"></div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <input type="text" id="allowance_name" class="form-control"
+                                            placeholder="Allowance name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" step="0.01" id="allowance_amount" class="form-control"
+                                            placeholder="Amount">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-outline-success w-100 border-1 rounded"
+                                            onclick="addAllowance()">
+                                            <i class="bi bi-plus-lg"></i> Add
+                                        </button>
+                                    </div>
                                 </div>
-                                <button type="button" id="add_allowance" class="btn btn-sm btn-primary">Add
-                                    Allowance</button>
+                                <small class="text-muted">Total Allowances: ₱<span
+                                        id="allowance_total_display">0.00</span></small>
                             </div>
 
                             <!-- Deductions -->
                             <div class="mb-3">
                                 <label class="form-label">Deductions</label>
-                                <div id="deductions_container">
-                                    @if ($payroll->deductions->count())
-                                        @foreach ($payroll->deductions as $index => $deduction)
-                                            <div class="input-group mb-2">
-                                                <input type="text" name="deductions[name][]" class="form-control"
-                                                    value="{{ $deduction->deduction_type }}" placeholder="Deduction Name">
-                                                <input type="number" step="0.01" name="deductions[amount][]"
-                                                    class="form-control" value="{{ $deduction->amount }}"
-                                                    placeholder="Amount">
-                                                <button type="button" class="btn btn-danger remove-row">-</button>
-                                            </div>
-                                        @endforeach
-                                    @else
-                                        <div class="input-group mb-2">
-                                            <input type="text" name="deductions[name][]" class="form-control"
-                                                placeholder="Deduction Name">
-                                            <input type="number" step="0.01" name="deductions[amount][]"
-                                                class="form-control" placeholder="Amount">
-                                            <button type="button" class="btn btn-danger remove-row">-</button>
-                                        </div>
-                                    @endif
+                                <ul class="list-group mb-2" id="deduction_list"></ul>
+                                <input type="hidden" name="total_deductions" id="total_deductions" value="0">
+                                <div id="deductions_inputs"></div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <input type="text" id="deduction_name" class="form-control"
+                                            placeholder="Deduction name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" step="0.01" id="deduction_amount" class="form-control"
+                                            placeholder="Amount">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-outline-danger w-100 border-1 rounded"
+                                            onclick="addDeduction()">
+                                            <i class="bi bi-plus-lg"></i> Add
+                                        </button>
+                                    </div>
                                 </div>
-                                <button type="button" id="add_deduction" class="btn btn-sm btn-primary">Add
-                                    Deduction</button>
+                                <small class="text-muted">Total Deductions: ₱<span
+                                        id="deduction_total_display">0.00</span></small>
                             </div>
 
                             <!-- Net Salary Display -->
@@ -126,44 +114,142 @@
                             </div>
 
                             <!-- Buttons -->
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">Update Payroll</button>
+                            <div class="d-flex gap-2 mt-3 mb-2">
+                                <button type="submit" class="btn btn-outline-primary border-1 rounded">
+                                    <i class="bi bi-check-lg"></i> Update Payroll
+                                </button>
                                 <a href="{{ route('payroll.salary-computation.index') }}"
-                                    class="btn btn-outline-secondary">Cancel</a>
+                                    class="btn btn-outline-secondary border-1 rounded">
+                                    <i class="bi bi-x-lg"></i> Cancel
+                                </a>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    @push('scripts')
-        <script>
-            function addRow(container, nameField, amountField) {
-                let row = document.createElement('div');
-                row.classList.add('input-group', 'mb-2');
-                row.innerHTML = `
-            <input type="text" name="${nameField}[]" class="form-control" placeholder="Name">
-            <input type="number" step="0.01" name="${amountField}[]" class="form-control" placeholder="Amount">
-            <button type="button" class="btn btn-danger remove-row">-</button>
-        `;
-                container.appendChild(row);
-            }
+        @push('scripts')
+            <script>
+                const employeeSelect = document.getElementById('employee_id');
+                const basicSalaryDisplay = document.getElementById('basic_salary_display');
+                const netSalaryDisplay = document.getElementById('net_salary_display');
 
-            document.getElementById('add_allowance').addEventListener('click', function() {
-                addRow(document.getElementById('allowances_container'), 'allowances[name]', 'allowances[amount]');
-            });
+                const allowanceList = document.getElementById('allowance_list');
+                const deductionList = document.getElementById('deduction_list');
 
-            document.getElementById('add_deduction').addEventListener('click', function() {
-                addRow(document.getElementById('deductions_container'), 'deductions[name]', 'deductions[amount]');
-            });
+                const allowanceTotalInput = document.getElementById('total_allowances');
+                const deductionTotalInput = document.getElementById('total_deductions');
 
-            document.addEventListener('click', function(e) {
-                if (e.target && e.target.classList.contains('remove-row')) {
-                    e.target.closest('.input-group').remove();
+                const allowanceTotalDisplay = document.getElementById('allowance_total_display');
+                const deductionTotalDisplay = document.getElementById('deduction_total_display');
+
+                let allowances = @json(
+                    $payroll->allowances->map(fn($a) => [
+                            'name' => $a->allowance_type ?? $a->name,
+                            'amount' => floatval($a->amount),
+                        ]));
+
+                let deductions = @json(
+                    $payroll->deductions->map(fn($d) => [
+                            'name' => $d->deduction_type,
+                            'amount' => floatval($d->amount),
+                        ]));
+
+                function updateSalary() {
+                    const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
+                    const salaryRate = parseFloat(selectedOption.dataset.salaryRate || 0);
+                    const basicSalary = salaryRate * 15;
+
+                    basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
+
+                    const totalAllowances = allowances.reduce((sum, a) => sum + a.amount, 0);
+                    const totalDeductions = deductions.reduce((sum, d) => sum + d.amount, 0);
+
+                    allowanceTotalInput.value = totalAllowances;
+                    deductionTotalInput.value = totalDeductions;
+
+                    allowanceTotalDisplay.innerText = totalAllowances.toFixed(2);
+                    deductionTotalDisplay.innerText = totalDeductions.toFixed(2);
+
+                    const netSalary = basicSalary + totalAllowances - totalDeductions;
+                    netSalaryDisplay.innerText = `₱${netSalary.toFixed(2)}`;
                 }
-            });
-        </script>
-    @endpush
+
+                function renderList(list, container, type) {
+                    container.innerHTML = '';
+                    const hiddenContainer = type === 'allowance' ? document.getElementById('allowances_inputs') : document
+                        .getElementById('deductions_inputs');
+                    hiddenContainer.innerHTML = '';
+
+                    list.forEach((item, index) => {
+                        container.innerHTML += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>${item.name}</span>
+                            <div>
+                                ₱${item.amount.toFixed(2)}
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeItem('${type}', ${index})">✕</button>
+                            </div>
+                        </li>
+                    `;
+                        hiddenContainer.innerHTML += `
+                        <input type="hidden" name="${type}s[${index}][name]" value="${item.name}">
+                        <input type="hidden" name="${type}s[${index}][amount]" value="${item.amount}">
+                    `;
+                    });
+                }
+
+                function addAllowance() {
+                    const name = document.getElementById('allowance_name').value.trim();
+                    const amount = parseFloat(document.getElementById('allowance_amount').value);
+                    if (!name || amount <= 0) return;
+
+                    allowances.push({
+                        name,
+                        amount
+                    });
+                    renderList(allowances, allowanceList, 'allowance');
+
+                    document.getElementById('allowance_name').value = '';
+                    document.getElementById('allowance_amount').value = '';
+
+                    updateSalary();
+                }
+
+                function addDeduction() {
+                    const name = document.getElementById('deduction_name').value.trim();
+                    const amount = parseFloat(document.getElementById('deduction_amount').value);
+                    if (!name || amount <= 0) return;
+
+                    deductions.push({
+                        name,
+                        amount
+                    });
+                    renderList(deductions, deductionList, 'deduction');
+
+                    document.getElementById('deduction_name').value = '';
+                    document.getElementById('deduction_amount').value = '';
+
+                    updateSalary();
+                }
+
+                function removeItem(type, index) {
+                    if (type === 'allowance') {
+                        allowances.splice(index, 1);
+                        renderList(allowances, allowanceList, 'allowance');
+                    } else {
+                        deductions.splice(index, 1);
+                        renderList(deductions, deductionList, 'deduction');
+                    }
+                    updateSalary();
+                }
+
+                employeeSelect.addEventListener('change', updateSalary);
+
+                renderList(allowances, allowanceList, 'allowance');
+                renderList(deductions, deductionList, 'deduction');
+                updateSalary();
+            </script>
+        @endpush
+    </div>
 @endsection

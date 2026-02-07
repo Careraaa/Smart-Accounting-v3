@@ -58,27 +58,67 @@
                                 <p id="basic_salary_display" class="form-control-plaintext">₱0.00</p>
                             </div>
 
-                            <!-- Total Allowances -->
+                            <!-- Allowances -->
                             <div class="mb-3">
-                                <label for="total_allowances" class="form-label">Total Allowances *</label>
-                                <input type="number" step="0.01" name="total_allowances" id="total_allowances"
-                                    class="form-control @error('total_allowances') is-invalid @enderror"
-                                    value="{{ old('total_allowances', 0) }}" required>
-                                @error('total_allowances')
-                                    <span class="invalid-feedback">{{ $message }}</span>
-                                @enderror
+                                <label class="form-label">Allowances</label>
+
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <input type="text" id="allowance_name" class="form-control"
+                                            placeholder="Allowance name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" step="0.01" id="allowance_amount" class="form-control"
+                                            placeholder="Amount">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-success w-100"
+                                            onclick="addAllowance()">Add</button>
+                                    </div>
+                                </div>
+
+                                <ul class="list-group mb-2" id="allowance_list"></ul>
+
+                                <!-- Hidden total -->
+                                <input type="hidden" name="total_allowances" id="total_allowances" value="0">
+                                <div id="allowances_inputs"></div>
+
+                                <small class="text-muted">
+                                    Total Allowances: ₱<span id="allowance_total_display">0.00</span>
+                                </small>
                             </div>
 
-                            <!-- Total Deductions -->
+
+                            <!-- Deductions -->
                             <div class="mb-3">
-                                <label for="total_deductions" class="form-label">Total Deductions *</label>
-                                <input type="number" step="0.01" name="total_deductions" id="total_deductions"
-                                    class="form-control @error('total_deductions') is-invalid @enderror"
-                                    value="{{ old('total_deductions', 0) }}" required>
-                                @error('total_deductions')
-                                    <span class="invalid-feedback">{{ $message }}</span>
-                                @enderror
+                                <label class="form-label">Deductions</label>
+
+                                <div class="row g-2 mb-2">
+                                    <div class="col-md-6">
+                                        <input type="text" id="deduction_name" class="form-control"
+                                            placeholder="Deduction name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" step="0.01" id="deduction_amount" class="form-control"
+                                            placeholder="Amount">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger w-100"
+                                            onclick="addDeduction()">Add</button>
+                                    </div>
+                                </div>
+
+                                <ul class="list-group mb-2" id="deduction_list"></ul>
+
+                                <!-- Hidden total -->
+                                <input type="hidden" name="total_deductions" id="total_deductions" value="0">
+                                <div id="deductions_inputs"></div>
+
+                                <small class="text-muted">
+                                    Total Deductions: ₱<span id="deduction_total_display">0.00</span>
+                                </small>
                             </div>
+
 
                             <!-- Net Salary Display -->
                             <div class="mb-3">
@@ -103,29 +143,127 @@
         <script>
             const employeeSelect = document.getElementById('employee_id');
             const basicSalaryDisplay = document.getElementById('basic_salary_display');
-            const totalAllowancesInput = document.getElementById('total_allowances');
-            const totalDeductionsInput = document.getElementById('total_deductions');
             const netSalaryDisplay = document.getElementById('net_salary_display');
 
+            const allowanceList = document.getElementById('allowance_list');
+            const deductionList = document.getElementById('deduction_list');
+
+            const allowanceTotalInput = document.getElementById('total_allowances');
+            const deductionTotalInput = document.getElementById('total_deductions');
+
+            const allowanceTotalDisplay = document.getElementById('allowance_total_display');
+            const deductionTotalDisplay = document.getElementById('deduction_total_display');
+
+            let allowances = [];
+            let deductions = [];
+
+            // Update salary display
             function updateSalary() {
                 const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
                 const salaryRate = parseFloat(selectedOption.dataset.salaryRate || 0);
                 const basicSalary = salaryRate * 15;
+
                 basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
 
-                const allowances = parseFloat(totalAllowancesInput.value) || 0;
-                const deductions = parseFloat(totalDeductionsInput.value) || 0;
-                const netSalary = basicSalary + allowances - deductions;
+                const totalAllowances = allowances.reduce((sum, a) => sum + a.amount, 0);
+                const totalDeductions = deductions.reduce((sum, d) => sum + d.amount, 0);
 
+                allowanceTotalInput.value = totalAllowances;
+                deductionTotalInput.value = totalDeductions;
+
+                allowanceTotalDisplay.innerText = totalAllowances.toFixed(2);
+                deductionTotalDisplay.innerText = totalDeductions.toFixed(2);
+
+                const netSalary = basicSalary + totalAllowances - totalDeductions;
                 netSalaryDisplay.innerText = `₱${netSalary.toFixed(2)}`;
             }
 
-            // Update on changes
-            employeeSelect.addEventListener('change', updateSalary);
-            totalAllowancesInput.addEventListener('input', updateSalary);
-            totalDeductionsInput.addEventListener('input', updateSalary);
+            // Render list and hidden inputs for form
+            function renderList(list, container, type) {
+                container.innerHTML = '';
 
-            // Initial call
+                const hiddenContainer = type === 'allowance' ?
+                    document.getElementById('allowances_inputs') :
+                    document.getElementById('deductions_inputs');
+
+                hiddenContainer.innerHTML = '';
+
+                list.forEach((item, index) => {
+                    // Visible list
+                    container.innerHTML += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>${item.name}</span>
+                    <div>
+                        ₱${item.amount.toFixed(2)}
+                        <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                            onclick="removeItem('${type}', ${index})">✕</button>
+                    </div>
+                </li>
+            `;
+
+                    // Hidden inputs for submission
+                    hiddenContainer.innerHTML += `
+                <input type="hidden" name="${type}s[${index}][name]" value="${item.name}">
+                <input type="hidden" name="${type}s[${index}][amount]" value="${item.amount}">
+            `;
+                });
+            }
+
+            // Add allowance
+            function addAllowance() {
+                const name = document.getElementById('allowance_name').value.trim();
+                const amount = parseFloat(document.getElementById('allowance_amount').value);
+
+                if (!name || amount <= 0) return;
+
+                allowances.push({
+                    name,
+                    amount
+                });
+
+                renderList(allowances, allowanceList, 'allowance');
+
+                document.getElementById('allowance_name').value = '';
+                document.getElementById('allowance_amount').value = '';
+
+                updateSalary();
+            }
+
+            // Add deduction
+            function addDeduction() {
+                const name = document.getElementById('deduction_name').value.trim();
+                const amount = parseFloat(document.getElementById('deduction_amount').value);
+
+                if (!name || amount <= 0) return;
+
+                deductions.push({
+                    name,
+                    amount
+                });
+
+                renderList(deductions, deductionList, 'deduction');
+
+                document.getElementById('deduction_name').value = '';
+                document.getElementById('deduction_amount').value = '';
+
+                updateSalary();
+            }
+
+            // Remove item from list
+            function removeItem(type, index) {
+                if (type === 'allowance') {
+                    allowances.splice(index, 1);
+                    renderList(allowances, allowanceList, 'allowance');
+                } else {
+                    deductions.splice(index, 1);
+                    renderList(deductions, deductionList, 'deduction');
+                }
+                updateSalary();
+            }
+
+            employeeSelect.addEventListener('change', updateSalary);
+
+            // Initialize salary display
             updateSalary();
         </script>
     @endpush

@@ -64,24 +64,49 @@ class PayrollController extends Controller
             'payroll_period_end' => 'required|date',
             'total_allowances' => 'required|numeric|min:0',
             'total_deductions' => 'required|numeric|min:0',
+
+            'allowances.*.name' => 'nullable|string',
+            'allowances.*.amount' => 'nullable|numeric|min:0',
+
+            'deductions.*.name' => 'nullable|string',
+            'deductions.*.amount' => 'nullable|numeric|min:0',
         ]);
 
         $employee = Employee::findOrFail($validated['employee_id']);
         $basicSalary = $employee->salary_rate * 15;
-        $totalAllowances = $validated['total_allowances'];
-        $totalDeductions = $validated['total_deductions'];
-        $netSalary = $basicSalary + $totalAllowances - $totalDeductions;
 
-        Payroll::create([
+        $netSalary = $basicSalary + $validated['total_allowances'] - $validated['total_deductions'];
+
+        $payroll = Payroll::create([
             'employee_id' => $employee->id,
             'payroll_period_start' => $validated['payroll_period_start'],
             'payroll_period_end' => $validated['payroll_period_end'],
             'basic_salary' => $basicSalary,
-            'total_allowances' => $totalAllowances,
-            'total_deductions' => $totalDeductions,
+            'total_allowances' => $validated['total_allowances'],
+            'total_deductions' => $validated['total_deductions'],
             'net_salary' => $netSalary,
             'status' => 'pending',
         ]);
+
+        // Save allowances
+        foreach ($request->allowances ?? [] as $allowance) {
+            if (!empty($allowance['name']) && $allowance['amount'] > 0) {
+                $payroll->allowances()->create([
+                    'allowance_type' => $allowance['name'],
+                    'amount' => $allowance['amount'],
+                ]);
+            }
+        }
+
+        // Save deductions
+        foreach ($request->deductions ?? [] as $deduction) {
+            if (!empty($deduction['name']) && $deduction['amount'] > 0) {
+                $payroll->deductions()->create([
+                    'deduction_type' => $deduction['name'],
+                    'amount' => $deduction['amount'],
+                ]);
+            }
+        }
 
         return redirect()->route('payroll.index')->with('success', 'Payroll created successfully.');
     }
@@ -121,14 +146,16 @@ class PayrollController extends Controller
 
         $totalAllowances = 0;
         if ($request->allowances) {
-            foreach ($request->allowances['amount'] as $amount) {
+            foreach ($request->allowances as $allowance) {
+                $amount = $allowance['amount'] ?? 0; // default to 0 if missing
                 $totalAllowances += floatval($amount);
             }
         }
 
         $totalDeductions = 0;
         if ($request->deductions) {
-            foreach ($request->deductions['amount'] as $amount) {
+            foreach ($request->deductions as $deduction) {
+                $amount = $deduction['amount'] ?? 0;
                 $totalDeductions += floatval($amount);
             }
         }
@@ -151,12 +178,15 @@ class PayrollController extends Controller
 
         // Re-save allowances
         if ($request->allowances) {
-            foreach ($request->allowances['name'] as $index => $name) {
-                $amount = $request->allowances['amount'][$index] ?? 0;
+            foreach ($request->allowances as $allowance) {
+                $name = $allowance['name'] ?? null;
+                $amount = $allowance['amount'] ?? 0;
+
                 if ($name && $amount > 0) {
                     $payroll->allowances()->create([
-                        'name' => $name,
+                        'allowance_type' => $name, // matches your column
                         'amount' => $amount,
+                        // optional: add effective_date or status only if your table has those columns
                     ]);
                 }
             }
@@ -164,8 +194,10 @@ class PayrollController extends Controller
 
         // Re-save deductions
         if ($request->deductions) {
-            foreach ($request->deductions['name'] as $index => $name) {
-                $amount = $request->deductions['amount'][$index] ?? 0;
+            foreach ($request->deductions as $deduction) {
+                $name = $deduction['name'] ?? null;
+                $amount = $deduction['amount'] ?? 0;
+
                 if ($name && $amount > 0) {
                     $payroll->deductions()->create([
                         'deduction_type' => $name,

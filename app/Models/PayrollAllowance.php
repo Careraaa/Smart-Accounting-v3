@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class PayrollAllowance extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'payroll_id',
-        'name',
+        'employee_id',
+        'allowance_type',
         'amount',
+        'effective_date',
+        'status'
     ];
 
     public function payroll()
@@ -20,3 +21,4 @@ class PayrollAllowance extends Model
         return $this->belongsTo(Payroll::class);
     }
 }
+

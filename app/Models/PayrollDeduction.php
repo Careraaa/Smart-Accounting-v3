@@ -9,8 +9,11 @@ class PayrollDeduction extends Model
 {
     protected $fillable = [
         'payroll_id',
-        'name',
+        'employee_id',
+        'deduction_type',
         'amount',
+        'effective_date',
+        'status'
     ];
 
     public function payroll()
@@ -18,4 +21,5 @@ class PayrollDeduction extends Model
         return $this->belongsTo(Payroll::class);
     }
 }
+
 

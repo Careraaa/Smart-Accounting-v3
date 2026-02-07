@@ -47,20 +47,27 @@
                                                     {{ ucfirst($payroll->status) }}
                                                 </span>
                                             </td>
-                                            <td class="text-center d-flex justify-content-center gap-2">
-                                                <a href="{{ route('payroll.show', $payroll) }}"
-                                                    class="btn btn-info btn-sm">View</a>
-                                                <a href="{{ route('payroll.edit', $payroll) }}"
-                                                    class="btn btn-warning btn-sm">Edit</a>
-                                                <form action="{{ route('payroll.destroy', $payroll) }}" method="POST"
-                                                    class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm"
-                                                        onclick="return confirm('Are you sure you want to delete this payroll?')">
-                                                        Delete
-                                                    </button>
-                                                </form>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-1">
+                                                    <a href="{{ route('payroll.show', $payroll) }}"
+                                                        class="btn btn-outline-info btn-sm border-1 rounded">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </a>
+                                                    <a href="{{ route('payroll.edit', $payroll) }}"
+                                                        class="btn btn-outline-warning btn-sm border-1 rounded">
+                                                        <i class="bi bi-pencil"></i> Edit
+                                                    </a>
+                                                    <form action="{{ route('payroll.destroy', $payroll) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="btn btn-outline-danger btn-sm border-1 rounded"
+                                                            onclick="return confirm('Are you sure you want to delete this payroll?')">
+                                                            <i class="bi bi-trash"></i> Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty
