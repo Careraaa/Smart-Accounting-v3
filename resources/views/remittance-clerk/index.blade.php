@@ -190,12 +190,16 @@
                                 <td>₱{{ number_format($remittance->total_expenses, 2) }}</td>
                                 <td><strong>₱{{ number_format($remittance->net_remittance, 2) }}</strong></td>
                                 <td>
-                                    <span class="badge bg-{{ $remittance->status === 'completed' ? 'success' : 'warning' }}">
-                                        {{ ucfirst($remittance->status) }}
-                                    </span>
+                                    @if($remittance->status === 'pending')
+                                        <div class="badge bg-soft-warning text-warning">{{ ucfirst($remittance->status) }}</div>
+                                    @elseif($remittance->status === 'approved')
+                                        <div class="badge bg-soft-success text-success">{{ ucfirst($remittance->status) }}</div>
+                                    @else
+                                        <div class="badge bg-soft-danger text-danger">{{ ucfirst($remittance->status) }}</div>
+                                    @endif
                                 </td>
                                 <td>
-                                    <a href="{{ route('remittances.show', $remittance) }}" class="btn btn-info btn-sm" title="View">
+                                    <a href="{{ route('remittances.show', $remittance) }}" class="avatar-text avatar-md text-info" title="View">
                                         <i class="feather-eye"></i>
                                     </a>
                                 </td>
