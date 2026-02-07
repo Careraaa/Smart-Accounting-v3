@@ -35,54 +35,6 @@
         <!--! [Start] Header Right !-->
         <div class="header-right ms-auto">
             <div class="d-flex align-items-center">
-                <div class="dropdown nxl-h-item nxl-header-search">
-                    <a href="javascript:void(0);" class="nxl-head-link me-0" data-bs-toggle="dropdown"
-                        data-bs-auto-close="outside">
-                        <i class="feather-search"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown nxl-search-dropdown">
-                        <div class="input-group search-form">
-                            <span class="input-group-text">
-                                <i class="feather-search fs-6 text-muted"></i>
-                            </span>
-                            <input type="text" class="form-control search-input-field"
-                                placeholder="Search...." />
-                            <span class="input-group-text">
-                                <button type="button" class="btn-close"></button>
-                            </span>
-                        </div>
-                        <div class="dropdown-divider mt-0"></div>
-                        <div class="search-items-wrapper">
-                            <div class="searching-for px-4 py-2">
-                                <p class="fs-11 fw-medium text-muted">I'm searching for...</p>
-                                <div class="d-flex flex-wrap gap-1">
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Projects</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Leads</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Contacts</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Inbox</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Invoices</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Tasks</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Customers</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Notes</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Affiliate</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Storage</a>
-                                    <a href="javascript:void(0);"
-                                        class="flex-fill border rounded py-1 px-2 text-center fs-11 fw-semibold">Calendar</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div class="nxl-h-item d-none d-sm-flex">
                     <div class="full-screen-switcher">
                         <a href="javascript:void(0);" class="nxl-head-link me-0"
@@ -91,14 +43,6 @@
                             <i class="feather-minimize minimize"></i>
                         </a>
                     </div>
-                </div>
-                <div class="nxl-h-item dark-light-theme">
-                    <a href="javascript:void(0);" class="nxl-head-link me-0 dark-button">
-                        <i class="feather-moon"></i>
-                    </a>
-                    <a href="javascript:void(0);" class="nxl-head-link me-0 light-button" style="display: none">
-                        <i class="feather-sun"></i>
-                    </a>
                 </div>
                 <div class="dropdown nxl-h-item">
                     <a class="nxl-head-link me-3" data-bs-toggle="dropdown" href="#" role="button"
