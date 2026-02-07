@@ -1,4 +1,4 @@
-<nav class="nxl-navigation">
+<nav class="nxl-navigation mob-navigation-active">
     <div class="navbar-wrapper">
         <div class="m-header">
             <a href="{{ route('dashboard') }}" class="b-brand">
@@ -6,13 +6,20 @@
                 <img src="{{ asset('images/knights_logo_icon.png') }}" class="logo-mini" alt="Logo">
             </a>
         </div>
-        <div class="navbar-content">
+        <div class="navbar-content ps ps--active-y">
             <ul class="nxl-navbar">
+                <li class="nxl-item nxl-caption">
+                        <label>Navigation</label>
+                </li>
+                <li class="nxl-item">
+                    <a href="{{ route('dashboard') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-airplay"></i></span>
+                        <span class="nxl-mtext">Dashboard</span>
+                    </a>
+                </li>
+
                 <!-- Remittance Clerk Section -->
                 @if (auth()->user()->role === 'remittance_clerk')
-                    <li class="nxl-item nxl-caption">
-                        <label>Remittance Clerk</label>
-                    </li>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-users"></i></span>
@@ -58,11 +65,7 @@
                 @endif
 
                 <!-- HR Section -->
-                <!-- HR Section -->
                 @if (auth()->user()->role === 'hr')
-                    <li class="nxl-item nxl-caption">
-                        <label>HR Management</label>
-                    </li>
                     <li class="nxl-item">
                         <a href="{{ route('employees.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-user-plus"></i></span>
@@ -138,9 +141,6 @@
 
                 <!-- Accountant Section -->
                 @if (auth()->user()->role === 'accountant')
-                    <li class="nxl-item nxl-caption">
-                        <label>Accounting</label>
-                    </li>
                     <li class="nxl-item nxl-hasmenu">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-check-circle"></i></span>
@@ -167,15 +167,6 @@
                     </li>
                 @endif
             </ul>
-            <div class="card text-center">
-                <div class="card-body">
-                    <i class="feather-settings fs-4 text-dark"></i>
-                    <h6 class="mt-4 text-dark fw-bolder">System Settings</h6>
-                    <p class="fs-11 my-3 text-dark">Smart Accounting System - Manage your payroll, HR, and remittance
-                        operations efficiently.</p>
-                    <a href="#" class="btn btn-primary text-dark w-100">Settings</a>
-                </div>
-            </div>
         </div>
     </div>
 </nav>
