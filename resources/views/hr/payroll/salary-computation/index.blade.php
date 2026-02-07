@@ -7,7 +7,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title">Payrolls</h5>
-                        <a href="{{ route('payroll.create') }}" class="btn btn-primary">Create Payroll</a>
+                        <a href="{{ route('payroll.create') }}" class="btn btn-outline-primary border-1 rounded">Create Payroll</a>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
