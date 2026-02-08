@@ -1,72 +1,92 @@
 @extends('layouts.layout')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">Payroll Approval</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover w-100">
-                            <thead>
-                                <tr>
-                                    <th class="w-25">Employee</th>
-                                    <th class="w-25">Period</th>
-                                    <th class="w-15">Gross Pay</th>
-                                    <th class="w-15">Net Pay</th>
-                                    <th class="w-10 text-center">Status</th>
-                                    <th class="w-10 text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($payrolls as $payroll)
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title">Payroll Approval</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover w-100">
+                                <thead>
                                     <tr>
-                                        <td>{{ $payroll->employee ? $payroll->employee->first_name . ' ' . $payroll->employee->last_name : 'N/A' }}</td>
-                                        <td>{{ $payroll->payroll_period_start->format('M d, Y') }} - {{ $payroll->payroll_period_end->format('M d, Y') }}</td>
-                                        <td>₱{{ number_format($payroll->gross_pay, 2) }}</td>
-                                        <td>₱{{ number_format($payroll->net_pay, 2) }}</td>
-                                        <td class="text-center">
-                                            @php
-                                                $statusStyles = [
-                                                    'pending' => 'bg-soft-warning text-warning',
-                                                    'approved' => 'bg-soft-info text-info',
-                                                    'rejected' => 'bg-soft-danger text-danger',
-                                                ];
-                                            @endphp
-                                            <span class="badge px-3 {{ $statusStyles[$payroll->status] ?? 'bg-secondary text-white' }}">
-                                                {{ ucfirst($payroll->status) }}
-                                            </span>
-                                        </td>
-                                        <td class="text-center d-flex justify-content-center gap-2">
-                                            <a href="{{ route('payroll-approval.show', $payroll) }}" class="btn btn-info btn-sm">Review</a>
-
-                                            @if($payroll->status == 'pending')
-                                                <form action="{{ route('payroll-approval.approve', $payroll) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Approve this payroll?')">Approve</button>
-                                                </form>
-
-                                                <form action="{{ route('payroll-approval.reject', $payroll) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Reject this payroll?')">Reject</button>
-                                                </form>
-                                            @endif
-                                        </td>
+                                        <th class="w-25">Employee</th>
+                                        <th class="w-25">Period</th>
+                                        <th class="w-15">Gross Pay</th>
+                                        <th class="w-15">Net Pay</th>
+                                        <th class="w-10 text-center">Status</th>
+                                        <th class="w-10 text-center">Actions</th>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted">No payrolls pending approval</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @forelse($payrolls as $payroll)
+                                        <tr>
+                                            <td>
+                                                {{ $payroll->employee ? $payroll->employee->first_name . ' ' . $payroll->employee->last_name : 'N/A' }}
+                                            </td>
+                                            <td>{{ $payroll->payroll_period_start->format('M d, Y') }} -
+                                                {{ $payroll->payroll_period_end->format('M d, Y') }}</td>
+                                            <td>₱{{ number_format($payroll->gross_pay, 2) }}</td>
+                                            <td>₱{{ number_format($payroll->net_pay, 2) }}</td>
+                                            <td class="text-center">
+                                                @php
+                                                    $statusStyles = [
+                                                        'pending' => 'bg-soft-warning text-warning',
+                                                        'approved' => 'bg-soft-info text-info',
+                                                        'rejected' => 'bg-soft-danger text-danger',
+                                                    ];
+                                                @endphp
+                                                <span
+                                                    class="badge px-3 {{ $statusStyles[$payroll->status] ?? 'bg-secondary text-white' }}">
+                                                    {{ ucfirst($payroll->status) }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-1">
+                                                    <a href="{{ route('payroll-approval.show', $payroll) }}"
+                                                        class="btn btn-outline-info btn-sm border-1 rounded">
+                                                        <i class="bi bi-eye"></i> Review
+                                                    </a>
+
+                                                    @if ($payroll->status == 'pending')
+                                                        <form action="{{ route('payroll-approval.approve', $payroll) }}"
+                                                            method="POST" class="d-inline">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                class="btn btn-outline-success btn-sm border-1 rounded"
+                                                                onclick="return confirm('Approve this payroll?')">
+                                                                <i class="bi bi-check2"></i> Approve
+                                                            </button>
+                                                        </form>
+
+                                                        <form action="{{ route('payroll-approval.reject', $payroll) }}"
+                                                            method="POST" class="d-inline">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                class="btn btn-outline-danger btn-sm border-1 rounded"
+                                                                onclick="return confirm('Reject this payroll?')">
+                                                                <i class="bi bi-x"></i> Reject
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">No payrolls pending approval
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 @endsection
