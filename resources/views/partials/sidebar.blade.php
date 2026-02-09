@@ -18,6 +18,16 @@
                     </a>
                 </li>
 
+                <!-- Employee Section -->
+                @if (auth()->user()->role === 'employee')
+                    <li class="nxl-item">
+                        <a href="{{ route('attendance.scan') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-camera"></i></span>
+                            <span class="nxl-mtext">Scan QR Attendance</span>
+                        </a>
+                    </li>
+                @endif
+
                 <!-- Remittance Clerk Section -->
                 @if (auth()->user()->role === 'remittance_clerk')
                     <li class="nxl-item nxl-hasmenu">
@@ -79,7 +89,7 @@
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">QR Time
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('hr.qr') }}">QR Time
                                     IN / OUT Records</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Leave
                                     Management</a></li>

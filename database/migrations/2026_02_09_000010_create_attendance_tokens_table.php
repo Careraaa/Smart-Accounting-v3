@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('routes', function (Blueprint $table) {
-            $table->dropColumn(['route_code', 'fare_amount']);
+        Schema::create('attendance_tokens', function (Blueprint $table) {
+            $table->id();
+            $table->string('token')->unique();
+            $table->timestamp('expires_at');
+            $table->boolean('used')->default(false);
+            $table->timestamps();
         });
     }
 
@@ -21,9 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('routes', function (Blueprint $table) {
-            $table->string('route_code')->nullable()->after('route_name');
-            $table->decimal('fare_amount', 10, 2)->nullable()->after('distance');
-        });
+        Schema::dropIfExists('attendance_tokens');
     }
 };

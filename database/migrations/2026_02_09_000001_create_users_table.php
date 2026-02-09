@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('role')->default('hr'); // Options: 'remittance-clerk', 'hr', 'accounting'
+            $table->string('role')->default('employee'); 
+            $table->string('profile_picture')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

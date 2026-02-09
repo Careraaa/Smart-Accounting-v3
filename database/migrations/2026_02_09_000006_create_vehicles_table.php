@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('drivers', function (Blueprint $table) {
+        Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('license_number')->unique();
-            $table->string('contact_number');
-            $table->string('email')->unique();
-            $table->text('address')->nullable();
-            $table->date('date_of_hire');
+            $table->string('plate_number')->unique();
             $table->string('status')->default('active');
             $table->timestamps();
         });
@@ -29,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('drivers');
+        Schema::dropIfExists('vehicles');
     }
 };

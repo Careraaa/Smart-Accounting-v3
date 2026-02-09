@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payroll_allowances', function (Blueprint $table) {
+        Schema::create('paos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('payroll_id')->constrained()->onDelete('cascade'); // link to payroll
-            $table->string('name'); // allowance name, e.g., "Transportation"
-            $table->decimal('amount', 12, 2); // allowance amount
+            $table->string('name');
+            $table->string('contact_number');
+            $table->string('email')->unique();
+            $table->text('address')->nullable();
+            $table->date('date_of_hire');
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }
@@ -25,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payroll_allowances');
+        Schema::dropIfExists('paos');
     }
 };

@@ -2,26 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Attendance extends Model
 {
     use HasFactory;
+    protected $table = 'attendance';
 
     protected $fillable = [
         'employee_id',
+        'date',
         'time_in',
         'time_out',
-        'date',
-        'qr_code',
-        'status',
+        'status'
     ];
 
     protected $casts = [
-        'time_in' => 'datetime',
-        'time_out' => 'datetime',
         'date' => 'date',
+        'time_in' => 'datetime',
+        'time_out' => 'datetime'
     ];
 
     public function employee()

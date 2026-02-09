@@ -16,12 +16,11 @@ return new class extends Migration
             $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
             $table->date('payroll_period_start');
             $table->date('payroll_period_end');
-            $table->decimal('basic_salary', 10, 2);
+            $table->decimal('basic_salary', 10, 2)->default(0);
             $table->decimal('total_allowances', 10, 2)->default(0);
             $table->decimal('total_deductions', 10, 2)->default(0);
-            $table->decimal('gross_pay', 10, 2);
-            $table->decimal('net_pay', 10, 2);
-            $table->string('status')->default('draft');
+            $table->decimal('net_salary', 10, 2)->default(0);
+            $table->string('status')->default('pending');
             $table->date('payment_date')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('employees')->onDelete('set null');
             $table->timestamps();
