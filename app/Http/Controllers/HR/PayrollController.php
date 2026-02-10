@@ -170,6 +170,7 @@ class PayrollController extends Controller
             'total_allowances' => $totalAllowances,
             'total_deductions' => $totalDeductions,
             'net_salary' => $netSalary,
+            'status' => 'pending',
         ]);
 
         // Reset old allowances/deductions
