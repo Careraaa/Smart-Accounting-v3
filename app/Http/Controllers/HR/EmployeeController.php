@@ -27,22 +27,24 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'first_name'    => 'required|string',
-            'last_name'     => 'required|string',
-            'email'         => 'required|email|unique:employees',
-            'phone'         => 'required',
-            'address'       => 'nullable|string',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email|unique:employees',
+            'phone' => 'required',
+            'address' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
-            'date_of_hire'  => 'required|date',
-            'position'      => 'required|string',
-            'department'    => 'required|string',
-            'salary_rate'   => 'required|numeric',
+            'date_of_hire' => 'required|date',
+            'position' => 'required|string',
+            'department' => 'required|string',
+            'salary_rate' => 'required|numeric',
         ]);
+
+        $validated['has_sss'] = $request->has('has_sss') ? true : false;
+        $validated['has_pagibig'] = $request->has('has_pagibig') ? true : false;
 
         Employee::create($validated);
 
-        return redirect()->route('employees.index')
-            ->with('success', 'Employee created successfully.');
+        return redirect()->route('employees.index')->with('success', 'Employee created successfully.');
     }
 
     // Show employee details
@@ -65,29 +67,30 @@ class EmployeeController extends Controller
     public function update(Request $request, Employee $employee)
     {
         $validated = $request->validate([
-            'first_name'    => 'required|string',
-            'last_name'     => 'required|string',
-            'email'         => 'required|email|unique:employees,email,' . $employee->id,
-            'phone'         => 'required',
-            'address'       => 'nullable|string',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|email|unique:employees,email,' . $employee->id,
+            'phone' => 'required',
+            'address' => 'nullable|string',
             'date_of_birth' => 'nullable|date',
-            'date_of_hire'  => 'required|date',
-            'position'      => 'required|string',
-            'department'    => 'required|string',
-            'salary_rate'   => 'required|numeric',
+            'date_of_hire' => 'required|date',
+            'position' => 'required|string',
+            'department' => 'required|string',
+            'salary_rate' => 'required|numeric',
         ]);
+
+        $validated['has_sss'] = $request->has('has_sss') ? true : false;
+        $validated['has_pagibig'] = $request->has('has_pagibig') ? true : false;
 
         $employee->update($validated);
 
-        return redirect()->route('employees.index')
-            ->with('success', 'Employee updated successfully.');
+        return redirect()->route('employees.index')->with('success', 'Employee updated successfully.');
     }
 
     // Delete employee
     public function destroy(Employee $employee)
     {
         $employee->delete();
-        return redirect()->route('employees.index')
-            ->with('success', 'Employee deleted successfully.');
+        return redirect()->route('employees.index')->with('success', 'Employee deleted successfully.');
     }
 }

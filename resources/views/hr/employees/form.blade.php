@@ -115,7 +115,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="date_of_hire" class="form-label">Date of Hire *</label>
-                                            <input type="date" name="date_of_hire"
+                                            <input type="date" name="date_of_hire" id="date_of_hire"
                                                 class="form-control @error('date_of_hire') is-invalid @enderror"
                                                 value="{{ old('date_of_hire', isset($employee) ? $employee->date_of_hire?->format('Y-m-d') : '') }}"
                                                 required>
@@ -123,6 +123,7 @@
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
                                         </div>
+
                                         <div class="col-md-6 mb-3">
                                             <label for="status" class="form-label">Status *</label>
                                             <select name="status"
@@ -163,37 +164,103 @@
                                 </div>
 
                                 <!-- Allowances & Benefits -->
+                                <!-- Allowances & Benefits -->
                                 <div class="tab-pane fade" id="allowances" role="tabpanel"
                                     aria-labelledby="allowances-tab">
-                                    <p class="text-muted">Manage employee allowances and benefits here, for example:</p>
-                                    <ul>
-                                        <li>Transportation Allowance</li>
-                                        <li>Meal Allowance</li>
-                                        <li>Health Insurance / Medical Benefits</li>
-                                    </ul>
+                                    <p class="text-muted">Manage employee allowances and benefits here. Fill in placeholder
+                                        values for now:</p>
+
+                                    <!-- Transportation Allowance -->
+                                    <div class="mb-3">
+                                        <label for="transportation_allowance" class="form-label">Transportation
+                                            Allowance</label>
+                                        <input type="number" step="0.01" name="transportation_allowance"
+                                            id="transportation_allowance" class="form-control"
+                                            value="{{ old('transportation_allowance', $employee->transportation_allowance ?? '') }}"
+                                            placeholder="₱0.00">
+                                    </div>
+
+                                    <!-- Meal Allowance -->
+                                    <div class="mb-3">
+                                        <label for="meal_allowance" class="form-label">Meal Allowance</label>
+                                        <input type="number" step="0.01" name="meal_allowance" id="meal_allowance"
+                                            class="form-control"
+                                            value="{{ old('meal_allowance', $employee->meal_allowance ?? '') }}"
+                                            placeholder="₱0.00">
+                                    </div>
+
+                                    <!-- Health / Medical Benefits -->
+                                    <div class="mb-3">
+                                        <label for="medical_benefits" class="form-label">Health / Medical Benefits</label>
+                                        <input type="number" step="0.01" name="medical_benefits"
+                                            id="medical_benefits" class="form-control"
+                                            value="{{ old('medical_benefits', $employee->medical_benefits ?? '') }}"
+                                            placeholder="₱0.00">
+                                    </div>
+
+                                    <!-- Other Allowances Not Working Yet -->
+                                    <div class="mb-3">
+                                        <label for="other_allowances" class="form-label">Other Allowances /
+                                            Benefits</label>
+                                        <input type="text" name="other_allowances" id="other_allowances"
+                                            class="form-control"
+                                            value="{{ old('other_allowances', $employee->other_allowances ?? '') }}"
+                                            placeholder="List any other allowances (optional)">
+                                    </div>
                                 </div>
 
+
+                                <!-- Deductions & Contributions -->
                                 <!-- Deductions & Contributions -->
                                 <div class="tab-pane fade" id="deductions" role="tabpanel"
                                     aria-labelledby="deductions-tab">
-                                    <p class="text-muted">Manage deductions and contributions here, for example:</p>
-                                    <ul>
-                                        <li>SSS / PhilHealth / HDMF contributions</li>
-                                        <li>Tax Withholding</li>
-                                        <li>Other deductions</li>
-                                    </ul>
+                                    <p class="text-muted">Manage deductions and contributions here. Placeholder fields for
+                                        now:</p>
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="has_sss" id="has_sss"
+                                            {{ old('has_sss', $employee->has_sss ?? false) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="has_sss">
+                                            Enrolled in SSS
+                                        </label>
+                                    </div>
+                                    <input type="text" name="sss_placeholder" class="form-control mb-3"
+                                        value="{{ old('sss_placeholder', $employee->sss_placeholder ?? '') }}"
+                                        placeholder="SSS Number / Details (placeholder)">
+
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="has_pagibig"
+                                            id="has_pagibig"
+                                            {{ old('has_pagibig', $employee->has_pagibig ?? false) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="has_pagibig">
+                                            Enrolled in Pag-IBIG
+                                        </label>
+                                    </div>
+                                    <input type="text" name="pagibig_placeholder" class="form-control mb-3"
+                                        value="{{ old('pagibig_placeholder', $employee->pagibig_placeholder ?? '') }}"
+                                        placeholder="Pag-IBIG Number / Details (placeholder)">
+
+                                    <hr>
+                                    <p class="text-muted">Other deductions can be added later in payroll.</p>
                                 </div>
+
                             </div>
 
                             <!-- Buttons -->
-                            <div class="d-flex gap-2 mt-4">
-                                <button type="submit" class="btn btn-outline-primary border-1 rounded">
-                                    {{ $isEdit ? 'Update Employee' : 'Create Employee' }}
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary border-1 rounded" id="prevBtn"
+                                    style="display: none;">
+                                    Previous
                                 </button>
-                                <a href="{{ route('employees.index') }}"
-                                    class="btn btn-outline-secondary border-1 rounded">
-                                    Cancel
-                                </a>
+
+                                <button type="button" class="btn btn-outline-primary border-1 rounded" id="nextBtn">
+                                    Next
+                                </button>
+
+                                <button type="submit" class="btn btn-success border-1 rounded" id="submitBtn"
+                                    style="display: none;">
+                                    {{ $isEdit ? 'Update Employee' : 'Add Employee' }}
+                                </button>
                             </div>
 
                         </form>
@@ -201,5 +268,10 @@
                 </div>
             </div>
         </div>
+        @push('scripts')
+            <script src="{{ asset('js/Employee/calendar.js') }}"></script>
+            <script src="{{ asset('js/Employee/employee-form.js') }}"></script>
+        @endpush
+
     </div>
 @endsection

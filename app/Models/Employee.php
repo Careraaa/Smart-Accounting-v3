@@ -21,6 +21,8 @@ class Employee extends Model
         'department',
         'status',
         'salary_rate',
+        'has_sss',
+        'has_pagibig',
     ];
 
     protected $casts = [
