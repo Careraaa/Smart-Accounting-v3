@@ -12,6 +12,7 @@ use App\Http\Controllers\HR\DashboardController as HRDashboardController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\AttendanceController;
 use App\Http\Controllers\HR\PayrollController;
+use App\Http\Controllers\HR\StatutoryDeductionController;
 use App\Http\Controllers\Accountant\PayrollApprovalController;
 use App\Http\Controllers\Accountant\ReportController;
 use App\Http\Controllers\Accountant\RemittanceApprovalController;
@@ -161,11 +162,13 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
     Route::prefix('payroll/statutory-deductions')
         ->name('payroll.statutory-deductions.')
         ->group(function () {
-            Route::get('/', function () {
-                return view('hr.payroll.statutory-deductions.index');
-            })->name('index');
+            Route::get('/', [StatutoryDeductionController::class, 'index'])->name('index');
+            Route::get('/create', [StatutoryDeductionController::class, 'create'])->name('create');
+            Route::post('/', [StatutoryDeductionController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [StatutoryDeductionController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [StatutoryDeductionController::class, 'update'])->name('update');
+            Route::delete('/{id}', [StatutoryDeductionController::class, 'destroy'])->name('destroy');
         });
-
     // Payroll Receivables
     Route::prefix('payroll/receivables')
         ->name('payroll.receivables.')

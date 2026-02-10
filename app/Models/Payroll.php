@@ -9,7 +9,7 @@ class Payroll extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['employee_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'approved_by', 'basic_salary', 'total_allowances', 'total_deductions', 'net_salary'];
+    protected $fillable = ['employee_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'approved_by', 'total_allowances', 'total_deductions'];
 
     protected $casts = [
         'payroll_period_start' => 'date',
@@ -17,9 +17,13 @@ class Payroll extends Model
         'payment_date' => 'date',
     ];
 
+    /* ======================
+     |  RELATIONSHIPS
+     ====================== */
+
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id');
+        return $this->belongsTo(Employee::class);
     }
 
     public function approvedBy()
@@ -37,11 +41,29 @@ class Payroll extends Model
         return $this->hasMany(PayrollAllowance::class);
     }
 
-    public function getGrossPayAttribute()
+    /* ======================
+     |  COMPUTED ATTRIBUTES
+     ====================== */
+
+    // Per-day rate (from employee)
+    public function getPerDayRateAttribute()
     {
-        return ($this->employee->salary_rate ?? 0) * 15 + $this->total_allowances;
+        return $this->employee->salary_rate ?? 0;
     }
 
+    // Basic Pay (15 days semi-monthly)
+    public function getBasicSalaryAttribute()
+    {
+        return $this->per_day_rate * 15;
+    }
+
+    // Gross Pay
+    public function getGrossPayAttribute()
+    {
+        return $this->basic_salary + $this->total_allowances;
+    }
+
+    // Net Pay
     public function getNetPayAttribute()
     {
         return $this->gross_pay - $this->total_deductions;
