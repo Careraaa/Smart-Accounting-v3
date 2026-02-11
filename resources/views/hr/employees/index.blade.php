@@ -47,7 +47,7 @@
                                                     {{ ucfirst($employee->status) }}
                                                 </span>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center align-middle">
                                                 <div class="d-flex justify-content-center gap-1">
                                                     <a href="{{ route('employees.show', $employee) }}"
                                                         class="btn btn-outline-info btn-sm border-1 rounded" title="View">
@@ -77,6 +77,10 @@
                                             <td colspan="8" class="text-center text-muted">No employees found</td>
                                         </tr>
                                     @endforelse
+
+                                    <tr style="height: 8px;">
+                                        <td colspan="8"></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

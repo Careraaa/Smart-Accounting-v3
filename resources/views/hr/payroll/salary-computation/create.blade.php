@@ -133,12 +133,11 @@
 
         @push('scripts')
             <script>
-                // Load statutory table
                 window.statutoryDeductions = @json(\App\Models\StatutoryDeduction::all());
                 window.initialAllowances = @json(old('allowances', []));
                 window.initialDeductions = @json(old('deductions', []));
             </script>
-            <script src="{{ asset('js/Payroll/payroll.js') }}"></script>
+            <script src="{{ asset('js/Payroll/create-payroll.js') }}"></script>
         @endpush
     </div>
 @endsection

@@ -7,7 +7,8 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title">Payrolls</h5>
-                        <a href="{{ route('payroll.create') }}" class="btn btn-outline-primary border-1 rounded">Create Payroll</a>
+                        <a href="{{ route('payroll.create') }}" class="btn btn-outline-primary border-1 rounded">Create
+                            Payroll</a>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -47,7 +48,7 @@
                                                     {{ ucfirst($payroll->status) }}
                                                 </span>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center align-middle">
                                                 <div class="d-flex justify-content-center gap-1">
                                                     <a href="{{ route('payroll.show', $payroll) }}"
                                                         class="btn btn-outline-info btn-sm border-1 rounded">
@@ -75,6 +76,11 @@
                                             <td colspan="6" class="text-center text-muted">No payrolls found</td>
                                         </tr>
                                     @endforelse
+
+                                    <!-- Invisible spacer row to fully show bottom button outlines -->
+                                    <tr style="height: 8px;">
+                                        <td colspan="6"></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

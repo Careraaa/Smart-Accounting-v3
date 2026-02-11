@@ -1,4 +1,15 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // ==============================
+    // 1. Datepicker auto-popup
+    // ==============================
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach((input) =>
+        input.addEventListener("click", () => input.showPicker?.()),
+    );
+
+    // ==============================
+    // 2. Multi-tab form navigation
+    // ==============================
     const tabs = document.querySelectorAll("#employeeTabs button");
     const tabContents = document.querySelectorAll(".tab-pane");
     const prevBtn = document.getElementById("prevBtn");
@@ -33,6 +44,6 @@ document.addEventListener("DOMContentLoaded", function () {
         showTab(currentTab);
     });
 
-    // Initialize
+    // Initialize first tab
     showTab(currentTab);
 });

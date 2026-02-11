@@ -1,8 +1,16 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // --- Datepicker auto-open ---
+    const payrollDateInputs = document.querySelectorAll(
+        "#payroll_period_start, #payroll_period_end",
+    );
+    payrollDateInputs.forEach((input) =>
+        input.addEventListener("click", () => input.showPicker?.()),
+    );
+
+    // --- Salary calculation logic ---
     const employeeSelect = document.getElementById("employee_id");
     const basicSalaryDisplay = document.getElementById("basic_salary_display");
     const netSalaryDisplay = document.getElementById("net_salary_display");
-    const statutoryDisplay = document.getElementById("statutory_display");
 
     const allowanceList = document.getElementById("allowance_list");
     const deductionList = document.getElementById("deduction_list");
@@ -17,13 +25,14 @@ document.addEventListener("DOMContentLoaded", function () {
         "deduction_total_display",
     );
 
+    // Load existing allowances/deductions from Blade
     let allowances = window.initialAllowances || [];
     let deductions = window.initialDeductions || [];
 
     function updateSalary() {
         const selectedOption =
             employeeSelect.options[employeeSelect.selectedIndex];
-        const salaryRate = parseFloat(selectedOption?.dataset.salaryRate || 0);
+        const salaryRate = parseFloat(selectedOption.dataset.salaryRate || 0);
         const basicSalary = salaryRate * 15;
 
         basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
@@ -47,94 +56,21 @@ document.addEventListener("DOMContentLoaded", function () {
         netSalaryDisplay.innerText = `₱${netSalary.toFixed(2)}`;
     }
 
-    function computeStatutoryDeductions(basicSalary, hasSSS, hasPagibig) {
-        // Remove old statutory deductions
-        deductions = deductions.filter((d) => !d.statutory);
-
-        // Convert 15-day basic to monthly equivalent
-        const monthlySalary = basicSalary * 2;
-
-        let sssAmount = 0;
-        let pagibigAmount = 0;
-
-        if (hasSSS) {
-            const sss = window.statutoryDeductions.find(
-                (d) =>
-                    d.name === "SSS" &&
-                    monthlySalary >= d.min_salary &&
-                    monthlySalary <= d.max_salary,
-            );
-
-            if (sss) {
-                // Use table fixed share or percentage of monthly salary
-                sssAmount =
-                    sss.employee_share ??
-                    monthlySalary * (sss.percentage_employee / 100);
-
-                // Semi-monthly portion
-                sssAmount = sssAmount / 2;
-
-                deductions.push({
-                    name: "SSS",
-                    amount: sssAmount,
-                    statutory: true,
-                });
-            }
-        }
-
-        if (hasPagibig) {
-            const pagibig = window.statutoryDeductions.find(
-                (d) =>
-                    d.name === "Pag-IBIG" &&
-                    monthlySalary >= d.min_salary &&
-                    monthlySalary <= d.max_salary,
-            );
-
-            if (pagibig) {
-                // Use employee_share if > 0, else use percentage
-                pagibigAmount =
-                    pagibig.employee_share && pagibig.employee_share > 0
-                        ? pagibig.employee_share
-                        : monthlySalary * (pagibig.percentage_employee / 100);
-
-                pagibigAmount = pagibigAmount / 2; // semi-monthly
-                deductions.push({
-                    name: "Pag-IBIG",
-                    amount: pagibigAmount,
-                    statutory: true,
-                });
-            }
-        }
-
-        renderList(deductions, deductionList, "deduction");
-
-        // Update statutory display
-        statutoryDisplay.innerHTML = `
-        ${sssAmount ? `SSS: ₱${sssAmount.toFixed(2)}` : ""}
-        ${sssAmount && pagibigAmount ? " | " : ""}
-        ${pagibigAmount ? `Pag-IBIG: ₱${pagibigAmount.toFixed(2)}` : ""}
-    `;
-
-        updateSalary();
-    }
-
     function renderList(list, container, type) {
         container.innerHTML = "";
-        const hiddenContainer = document.getElementById(
-            type === "allowance" ? "allowances_inputs" : "deductions_inputs",
-        );
+        const hiddenContainer =
+            type === "allowance"
+                ? document.getElementById("allowances_inputs")
+                : document.getElementById("deductions_inputs");
         hiddenContainer.innerHTML = "";
 
         list.forEach((item, index) => {
             container.innerHTML += `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>
-                        ${item.name}
-                        ${item.statutory ? '<span class="badge bg-secondary ms-2">Statutory</span>' : ""}
-                    </span>
+                    <span>${item.name}</span>
                     <div>
                         ₱${item.amount.toFixed(2)}
-                        ${item.statutory ? "" : `<button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeItem('${type}', ${index})">✕</button>`}
+                        <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removeItem('${type}', ${index})">✕</button>
                     </div>
                 </li>
             `;
@@ -150,7 +86,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const amount = parseFloat(
             document.getElementById("allowance_amount").value,
         );
-
         if (!name || amount <= 0) return;
 
         allowances.push({ name, amount });
@@ -167,10 +102,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const amount = parseFloat(
             document.getElementById("deduction_amount").value,
         );
-
         if (!name || amount <= 0) return;
 
-        deductions.push({ name, amount, statutory: false });
+        deductions.push({ name, amount });
         renderList(deductions, deductionList, "deduction");
 
         document.getElementById("deduction_name").value = "";
@@ -190,18 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
         updateSalary();
     };
 
-    employeeSelect.addEventListener("change", function () {
-        const option = this.options[this.selectedIndex];
-        const salaryRate = parseFloat(option.dataset.salaryRate || 0);
-        const basicSalary = salaryRate * 15;
-
-        const hasSSS = option.dataset.hasSss === "1";
-        const hasPagibig = option.dataset.hasPagibig === "1";
-
-        basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
-
-        computeStatutoryDeductions(basicSalary, hasSSS, hasPagibig);
-    });
+    employeeSelect.addEventListener("change", updateSalary);
 
     renderList(allowances, allowanceList, "allowance");
     renderList(deductions, deductionList, "deduction");
