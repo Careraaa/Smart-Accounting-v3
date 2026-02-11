@@ -8,6 +8,7 @@
     <meta name="description" content="" />
     <meta name="keyword" content="" />
     <meta name="author" content="flexilecode" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!--! BEGIN: Apps Title-->
     <title>Smart Accounting v3</title>
     <!--! END:  Apps Title-->

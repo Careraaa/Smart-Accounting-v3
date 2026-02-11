@@ -28,15 +28,22 @@
                                 {{ $payroll->payroll_period_end->format('M d, Y') }}
                             </div>
                             <div class="mt-1">
+                                @php
+                                    $statusStyles = [
+                                        'draft' => 'bg-secondary text-white',
+                                        'pending' => 'bg-soft-warning text-warning',
+                                        'submitted' => 'bg-soft-warning text-warning',
+                                        'approved' => 'bg-soft-info text-info',
+                                        'paid' => 'bg-success text-white',
+                                        'rejected' => 'bg-soft-danger text-danger',
+                                    ];
+                                @endphp
+
                                 Status:
-                                <span
-                                    class="badge
-                @if ($payroll->status === 'pending') bg-warning
-                @elseif($payroll->status === 'approved') bg-info
-                @elseif($payroll->status === 'rejected') bg-danger
-                @else bg-secondary @endif">
+                                <span class="badge px-3 {{ $statusStyles[$payroll->status] ?? 'bg-secondary text-white' }}">
                                     {{ ucfirst($payroll->status) }}
                                 </span>
+
                             </div>
 
                             <div class="text-muted mt-1">

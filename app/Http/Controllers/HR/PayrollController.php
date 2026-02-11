@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\Leave;
 use Illuminate\Http\Request;
+use App\Models\StatutoryDeduction;
 
 class PayrollController extends Controller
 {
@@ -64,16 +65,14 @@ class PayrollController extends Controller
             'payroll_period_end' => 'required|date',
             'total_allowances' => 'required|numeric|min:0',
             'total_deductions' => 'required|numeric|min:0',
-
             'allowances.*.name' => 'nullable|string',
             'allowances.*.amount' => 'nullable|numeric|min:0',
-
             'deductions.*.name' => 'nullable|string',
             'deductions.*.amount' => 'nullable|numeric|min:0',
         ]);
 
         $employee = Employee::findOrFail($validated['employee_id']);
-        $basicSalary = $employee->salary_rate * 15;
+        $basicSalary = $employee->salary_rate * 15; // semi-monthly
 
         $netSalary = $basicSalary + $validated['total_allowances'] - $validated['total_deductions'];
 
@@ -133,10 +132,8 @@ class PayrollController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'payroll_period_start' => 'required|date',
             'payroll_period_end' => 'required|date',
-
             'allowances.name.*' => 'nullable|string',
             'allowances.amount.*' => 'nullable|numeric|min:0',
-
             'deductions.name.*' => 'nullable|string',
             'deductions.amount.*' => 'nullable|numeric|min:0',
         ]);
@@ -145,19 +142,13 @@ class PayrollController extends Controller
         $basicSalary = $employee->salary_rate * 15;
 
         $totalAllowances = 0;
-        if ($request->allowances) {
-            foreach ($request->allowances as $allowance) {
-                $amount = $allowance['amount'] ?? 0; // default to 0 if missing
-                $totalAllowances += floatval($amount);
-            }
+        foreach ($request->allowances ?? [] as $allowance) {
+            $totalAllowances += floatval($allowance['amount'] ?? 0);
         }
 
         $totalDeductions = 0;
-        if ($request->deductions) {
-            foreach ($request->deductions as $deduction) {
-                $amount = $deduction['amount'] ?? 0;
-                $totalDeductions += floatval($amount);
-            }
+        foreach ($request->deductions ?? [] as $deduction) {
+            $totalDeductions += floatval($deduction['amount'] ?? 0);
         }
 
         $netSalary = $basicSalary + $totalAllowances - $totalDeductions;
@@ -178,33 +169,26 @@ class PayrollController extends Controller
         $payroll->deductions()->delete();
 
         // Re-save allowances
-        if ($request->allowances) {
-            foreach ($request->allowances as $allowance) {
-                $name = $allowance['name'] ?? null;
-                $amount = $allowance['amount'] ?? 0;
-
-                if ($name && $amount > 0) {
-                    $payroll->allowances()->create([
-                        'allowance_type' => $name, // matches your column
-                        'amount' => $amount,
-                        // optional: add effective_date or status only if your table has those columns
-                    ]);
-                }
+        foreach ($request->allowances ?? [] as $allowance) {
+            $name = $allowance['name'] ?? null;
+            $amount = $allowance['amount'] ?? 0;
+            if ($name && $amount > 0) {
+                $payroll->allowances()->create([
+                    'allowance_type' => $name,
+                    'amount' => $amount,
+                ]);
             }
         }
 
         // Re-save deductions
-        if ($request->deductions) {
-            foreach ($request->deductions as $deduction) {
-                $name = $deduction['name'] ?? null;
-                $amount = $deduction['amount'] ?? 0;
-
-                if ($name && $amount > 0) {
-                    $payroll->deductions()->create([
-                        'deduction_type' => $name,
-                        'amount' => $amount,
-                    ]);
-                }
+        foreach ($request->deductions ?? [] as $deduction) {
+            $name = $deduction['name'] ?? null;
+            $amount = $deduction['amount'] ?? 0;
+            if ($name && $amount > 0) {
+                $payroll->deductions()->create([
+                    'deduction_type' => $name,
+                    'amount' => $amount,
+                ]);
             }
         }
 
@@ -226,5 +210,52 @@ class PayrollController extends Controller
     {
         $payroll->load('employee', 'allowances', 'deductions');
         return view('hr.payroll.payslip', compact('payroll'));
+    }
+
+    // =========================
+    // Compute statutory deductions
+    // =========================
+    public function computeStatutory(Request $request)
+    {
+        $request->validate([
+            'basic_salary' => 'required|numeric|min:0',
+            'has_sss' => 'required|boolean',
+            'has_pagibig' => 'required|boolean',
+        ]);
+
+        $semiMonthlySalary = $request->basic_salary;
+        $monthlySalary = $semiMonthlySalary * 2; // Convert semi-monthly to monthly
+        $results = [];
+
+        // --------- SSS ----------
+        if ($request->has_sss) {
+            $sss = StatutoryDeduction::where('name', 'SSS')->where('min_salary', '<=', $monthlySalary)->where('max_salary', '>=', $monthlySalary)->first();
+
+            if ($sss) {
+                // Use fixed employee_share if available, else percentage
+                $amount = $sss->employee_share ?? $monthlySalary * ($sss->percentage_employee / 100);
+
+                // For semi-monthly payroll, divide by 2
+                $results[] = [
+                    'name' => 'SSS',
+                    'amount' => round($amount / 2, 2),
+                ];
+            }
+        }
+
+        // --------- Pag-IBIG ----------
+        if ($request->has_pagibig) {
+            $pagibig = StatutoryDeduction::where('name', 'Pag-IBIG')->where('min_salary', '<=', $monthlySalary)->where('max_salary', '>=', $monthlySalary)->first();
+
+            if ($pagibig) {
+                $amount = $pagibig->employee_share ?? $monthlySalary * ($pagibig->percentage_employee / 100);
+                $results[] = [
+                    'name' => 'Pag-IBIG',
+                    'amount' => round($amount / 2, 2), // Semi-monthly
+                ];
+            }
+        }
+
+        return response()->json($results);
     }
 }

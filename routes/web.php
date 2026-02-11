@@ -178,6 +178,8 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
             })->name('index');
         });
 
+    Route::post('/payroll/statutory-deductions/compute', [PayrollController::class, 'computeStatutory'])->name('payroll.statutory.compute');
+
     // Generate Payslip
     Route::prefix('payroll/generate-payslip')
         ->name('payroll.generate-payslip.')

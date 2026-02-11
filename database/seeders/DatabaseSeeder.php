@@ -53,5 +53,6 @@ class DatabaseSeeder extends Seeder
             ],
         ]);
 
+        $this->call([StatutoryDeductionsSeeder::class]);
     }
 }

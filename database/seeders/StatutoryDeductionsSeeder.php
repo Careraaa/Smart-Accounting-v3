@@ -64,7 +64,7 @@ class StatutoryDeductionsSeeder extends Seeder
 
         foreach ($pagibigContributions as $row) {
             DB::table('statutory_deductions')->insert([
-                'name' => 'HDMF',
+                'name' => 'Pag-IBIG',
                 'min_salary' => $row['min_salary'],
                 'max_salary' => $row['max_salary'],
                 'employee_share' => $row['ee'],

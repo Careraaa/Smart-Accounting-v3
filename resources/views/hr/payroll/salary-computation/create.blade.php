@@ -20,6 +20,8 @@
                                     <option value="">-- Select Employee --</option>
                                     @foreach ($employees as $employee)
                                         <option value="{{ $employee->id }}" data-salary-rate="{{ $employee->salary_rate }}"
+                                            data-has-sss="{{ $employee->has_sss ? 1 : 0 }}"
+                                            data-has-pagibig="{{ $employee->has_pagibig ? 1 : 0 }}"
                                             {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
                                             {{ $employee->first_name }} {{ $employee->last_name }}
                                         </option>
@@ -28,6 +30,10 @@
                                 @error('employee_id')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
+
+                                <div id="statutory_display" class="text-muted mt-1">
+                                    Statutory deductions (SSS / Pag-IBIG) will appear here.
+                                </div>
                             </div>
 
                             <!-- Payroll Period -->
@@ -72,17 +78,14 @@
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-outline-success w-100 border-1 rounded"
-                                            onclick="addAllowance()">
-                                            <i class="bi bi-plus-lg"></i>Add
-                                        </button>
+                                            onclick="addAllowance()"><i class="bi bi-plus-lg"></i>Add</button>
                                     </div>
                                 </div>
                                 <ul class="list-group mb-2" id="allowance_list"></ul>
                                 <input type="hidden" name="total_allowances" id="total_allowances" value="0">
                                 <div id="allowances_inputs"></div>
-                                <small class="text-muted">
-                                    Total Allowances: ₱<span id="allowance_total_display">0.00</span>
-                                </small>
+                                <small class="text-muted">Total Allowances: ₱<span
+                                        id="allowance_total_display">0.00</span></small>
                             </div>
 
                             <!-- Deductions -->
@@ -99,20 +102,17 @@
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-outline-danger w-100 border-1 rounded"
-                                            onclick="addDeduction()">
-                                            <i class="bi bi-plus-lg"></i>Add
-                                        </button>
+                                            onclick="addDeduction()"><i class="bi bi-plus-lg"></i>Add</button>
                                     </div>
                                 </div>
                                 <ul class="list-group mb-2" id="deduction_list"></ul>
                                 <input type="hidden" name="total_deductions" id="total_deductions" value="0">
                                 <div id="deductions_inputs"></div>
-                                <small class="text-muted">
-                                    Total Deductions: ₱<span id="deduction_total_display">0.00</span>
-                                </small>
+                                <small class="text-muted">Total Deductions: ₱<span
+                                        id="deduction_total_display">0.00</span></small>
                             </div>
 
-                            <!-- Net Salary Display -->
+                            <!-- Net Salary -->
                             <div class="mb-3">
                                 <label class="form-label">Net Salary</label>
                                 <p id="net_salary_display" class="form-control-plaintext">₱0.00</p>
@@ -132,8 +132,9 @@
         </div>
 
         @push('scripts')
-            {{-- Include the external JS --}}
             <script>
+                // Load statutory table
+                window.statutoryDeductions = @json(\App\Models\StatutoryDeduction::all());
                 window.initialAllowances = @json(old('allowances', []));
                 window.initialDeductions = @json(old('deductions', []));
             </script>
