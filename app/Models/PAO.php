@@ -13,7 +13,7 @@ class PAO extends Model
     
     protected $fillable = [
         'name',
-        'conductor_id',
+        'conductor_id', // nullable for now
         'contact_number',
         'email',
         'address',

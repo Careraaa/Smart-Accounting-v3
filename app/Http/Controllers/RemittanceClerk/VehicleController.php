@@ -28,6 +28,10 @@ class VehicleController extends Controller
             'origin' => 'required|string',
             'destination' => 'required|string',
             'operator' => 'required|string',
+            'vehicle_type' => 'nullable|string',
+            'make' => 'nullable|string',
+            'model' => 'nullable|string',
+            'year' => 'nullable|integer',
         ]);
 
         // Find or create route with the given origin and destination
@@ -38,13 +42,17 @@ class VehicleController extends Controller
             ],
             [
                 'route_name' => $validated['origin'] . ' - ' . $validated['destination'],
-            ]
+            ],
         );
 
         $vehicleData = [
             'plate_number' => $validated['plate_number'],
             'operator' => $validated['operator'],
             'route_id' => $route->id,
+            'vehicle_type' => $validated['vehicle_type'] ?? null,
+            'make' => $validated['make'] ?? null,
+            'model' => $validated['model'] ?? null,
+            'year' => $validated['year'] ?? null,
         ];
 
         Vehicle::create($vehicleData);
@@ -69,6 +77,10 @@ class VehicleController extends Controller
             'origin' => 'required|string',
             'destination' => 'required|string',
             'operator' => 'required|string',
+            'vehicle_type' => 'nullable|string',
+            'make' => 'nullable|string',
+            'model' => 'nullable|string',
+            'year' => 'nullable|integer',
         ]);
 
         // Find or create route with the given origin and destination
@@ -79,13 +91,17 @@ class VehicleController extends Controller
             ],
             [
                 'route_name' => $validated['origin'] . ' - ' . $validated['destination'],
-            ]
+            ],
         );
 
         $vehicleData = [
             'plate_number' => $validated['plate_number'],
             'operator' => $validated['operator'],
             'route_id' => $route->id,
+            'vehicle_type' => $validated['vehicle_type'] ?? null,
+            'make' => $validated['make'] ?? null,
+            'model' => $validated['model'] ?? null,
+            'year' => $validated['year'] ?? null,
         ];
 
         $vehicle->update($vehicleData);
