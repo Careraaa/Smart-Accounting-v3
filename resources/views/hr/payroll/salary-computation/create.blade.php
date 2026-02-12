@@ -73,7 +73,7 @@
                                             placeholder="Allowance name">
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="number" step="0.01" id="allowance_amount" class="form-control"
+                                        <input type="number" min = "0" step="0.1" id="allowance_amount" class="form-control"
                                             placeholder="Amount">
                                     </div>
                                     <div class="col-md-2">
@@ -97,7 +97,7 @@
                                             placeholder="Deduction name">
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="number" step="0.01" id="deduction_amount" class="form-control"
+                                        <input type="number" min = "0" step="0.1" id="deduction_amount" class="form-control"
                                             placeholder="Amount">
                                     </div>
                                     <div class="col-md-2">

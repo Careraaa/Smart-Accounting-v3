@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class StatutoryDeductionsSeeder extends Seeder
+class StatutoryDeductions_Seeder extends Seeder
 {
     public function run()
     {

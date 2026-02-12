@@ -7,7 +7,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Drivers List</h5>
-                        <a href="{{ route('drivers.create') }}" class="btn btn-outline-primary border-1 rounded">Add
+                        <a href="{{ route('drivers.create') }}" class="btn btn-outline-primary border-1 rounded"><i class="bi bi-plus-lg"></i> Add
                             Driver</a>
                     </div>
                     <div class="card-body">

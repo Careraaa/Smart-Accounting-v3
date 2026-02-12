@@ -151,7 +151,7 @@
                                 <div class="tab-pane fade" id="salary" role="tabpanel" aria-labelledby="salary-tab">
                                     <div class="mb-3">
                                         <label for="salary_rate" class="form-label">Salary Rate *</label>
-                                        <input type="number" step="0.01" name="salary_rate"
+                                        <input type="number" min = "0" step="0.1" name="salary_rate"
                                             class="form-control @error('salary_rate') is-invalid @enderror"
                                             value="{{ old('salary_rate', $employee->salary_rate ?? '') }}" required>
                                         @error('salary_rate')
@@ -174,7 +174,7 @@
                                     <div class="mb-3">
                                         <label for="transportation_allowance" class="form-label">Transportation
                                             Allowance</label>
-                                        <input type="number" step="0.01" name="transportation_allowance"
+                                        <input type="number" min = "0" step="0.1" name="transportation_allowance"
                                             id="transportation_allowance" class="form-control"
                                             value="{{ old('transportation_allowance', $employee->transportation_allowance ?? '') }}"
                                             placeholder="₱0.00">
@@ -183,7 +183,7 @@
                                     <!-- Meal Allowance -->
                                     <div class="mb-3">
                                         <label for="meal_allowance" class="form-label">Meal Allowance</label>
-                                        <input type="number" step="0.01" name="meal_allowance" id="meal_allowance"
+                                        <input type="number" min = "0" step="0.1" name="meal_allowance" id="meal_allowance"
                                             class="form-control"
                                             value="{{ old('meal_allowance', $employee->meal_allowance ?? '') }}"
                                             placeholder="₱0.00">
@@ -192,7 +192,7 @@
                                     <!-- Health / Medical Benefits -->
                                     <div class="mb-3">
                                         <label for="medical_benefits" class="form-label">Health / Medical Benefits</label>
-                                        <input type="number" step="0.01" name="medical_benefits"
+                                        <input type="number" min = "0" step="0.1" name="medical_benefits"
                                             id="medical_benefits" class="form-control"
                                             value="{{ old('medical_benefits', $employee->medical_benefits ?? '') }}"
                                             placeholder="₱0.00">

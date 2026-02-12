@@ -62,7 +62,7 @@
                             <div class="col-md-4">
                                 <div class="form-group mb-3">
                                     <label for="total_collection">Total Collection *</label>
-                                    <input type="number" min = "0" step="1" class="form-control @error('total_collection') is-invalid @enderror" name="total_collection" value="{{ old('total_collection') }}" required>
+                                    <input type="number" min = "0" step="0.1" class="form-control @error('total_collection') is-invalid @enderror" name="total_collection" value="{{ old('total_collection') }}" required>
                                     @error('total_collection')<span class="invalid-feedback">{{ $message }}</span>@enderror
                                 </div>
                             </div>
