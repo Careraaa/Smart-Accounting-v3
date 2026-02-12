@@ -87,6 +87,28 @@ class AttendanceController extends Controller
 
     public function scanPage()
     {
-        return view('attendance.scan');
+        $lastLog = AttendanceLog::where('user_id', auth()->user()->id)
+            ->latest('logged_at')
+            ->select(['type', 'logged_at'])
+            ->first();
+
+        return view('attendance.scan', ['lastLog' => $lastLog]);
+    }
+
+    public function getLastLog()
+    {
+        $lastLog = AttendanceLog::where('user_id', auth()->user()->id)
+            ->latest('logged_at')
+            ->select(['type', 'logged_at'])
+            ->first();
+
+        if ($lastLog) {
+            return response()->json([
+                'type' => $lastLog->type,
+                'time' => $lastLog->logged_at->format('g:i A')
+            ]);
+        }
+
+        return response()->json(null);
     }
 }
