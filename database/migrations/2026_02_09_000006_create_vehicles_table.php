@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
             $table->string('plate_number')->unique();
+            $table->foreignId('route_id')->constrained()->onDelete('cascade');
+            $table->string('operator');
             $table->string('status')->default('active');
             $table->timestamps();
         });

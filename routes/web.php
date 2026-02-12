@@ -139,6 +139,9 @@ Route::middleware(['auth', 'verified', 'role:employee'])->group(function () {
     Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])
         ->name('attendance.scan');
 
+    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
+        ->name('attendance.lastlog');
+
     Route::post('/hr/attendance/qr/submit', [AttendanceController::class, 'submit'])
         ->name('hr.qr.submit');
 });
@@ -159,6 +162,9 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
 
     Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])
         ->name('hr.qr.generate');
+
+    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
+        ->name('attendance.lastlog');
 
     // ---------------- PAYROLL ROUTES ----------------//
     // Salary Computation

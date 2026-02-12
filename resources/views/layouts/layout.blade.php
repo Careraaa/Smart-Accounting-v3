@@ -69,6 +69,47 @@
     <script src="{{ asset('js/theme-customizer-init.min.js') }}"></script>
     <!--! END: Theme Customizer !-->
     @stack('scripts')
+
+    <!--! BEGIN: Mobile Menu Handler  !-->
+    <script>
+        // Mobile sidebar toggle
+        const mobileCollapse = document.getElementById('mobile-collapse');
+        const navigation = document.querySelector('.nxl-navigation');
+        const body = document.body;
+
+        if (mobileCollapse && navigation) {
+            mobileCollapse.addEventListener('click', function(e) {
+                e.preventDefault();
+                navigation.classList.toggle('active');
+                body.classList.toggle('sidebar-open');
+            });
+
+            // Close sidebar when clicking on a link
+            const navLinks = navigation.querySelectorAll('.nxl-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // Only close for non-submenu links or for actual navigation
+                    setTimeout(() => {
+                        if (!this.closest('.nxl-hasmenu') || this.classList.contains('nxl-link')) {
+                            navigation.classList.remove('active');
+                            body.classList.remove('sidebar-open');
+                        }
+                    }, 100);
+                });
+            });
+
+            // Close sidebar when clicking backdrop
+            document.addEventListener('click', function(e) {
+                if (body.classList.contains('sidebar-open') && 
+                    !navigation.contains(e.target) && 
+                    !mobileCollapse.contains(e.target)) {
+                    navigation.classList.remove('active');
+                    body.classList.remove('sidebar-open');
+                }
+            });
+        }
+    </script>
+    <!--! END: Mobile Menu Handler  !-->
 </body>
 
 </html>
