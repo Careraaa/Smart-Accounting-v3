@@ -160,8 +160,17 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
     Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])
         ->name('hr.qr');
 
+    Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])
+        ->name('hr.attendance.monitor');
+
     Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])
         ->name('hr.qr.generate');
+
+    Route::get('/api/attendance/recent', [AttendanceController::class, 'getRecentAttendance'])
+        ->name('api.attendance.recent');
+
+    Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])
+        ->name('api.qr.token-status');
 
     Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
         ->name('attendance.lastlog');

@@ -44,7 +44,7 @@
 
                     <!-- Video Stream -->
                     <div class="video-container mb-4" id="video-container" style="position: relative; overflow: hidden; border-radius: 8px; background: #000; min-height: 300px; display: none; align-items: center; justify-content: center;">
-                        <video id="camera-stream" playsinline autoplay muted webkit-playsinline style="width: 100%; height: auto; max-height: 400px; transform: scaleX(-1);"></video>
+                        <video id="camera-stream" playsinline autoplay muted webkit-playsinline style="width: 100%; height: auto; max-height: 400px;"></video>
                         <canvas id="canvas" style="display: none;"></canvas>
                         <div id="no-camera-message" class="text-white text-center" style="display: none;">
                             <i class="feather-camera-off" style="font-size: 48px; margin-bottom: 10px;"></i>
@@ -150,6 +150,14 @@
         console.log('Device is iOS:', isIOS());
         console.log('User Agent:', navigator.userAgent);
         
+        // Check if jsQR is available
+        if (typeof jsQR === 'undefined') {
+            console.error('jsQR library not loaded');
+            showDebugInfo('ERROR: QR scanning library not loaded');
+        } else {
+            console.log('✓ jsQR library available');
+        }
+        
         // Check if mediaDevices API is available
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             console.error('getUserMedia not supported');
@@ -160,7 +168,7 @@
         }
         
         console.log('Camera API available');
-        showDebugInfo('Device: ' + (isIOS() ? 'iPhone/iPad' : 'Other') + ' | Camera API: Available');
+        showDebugInfo('Device: ' + (isIOS() ? 'iPhone/iPad' : 'Other') + ' | Camera API: Available | jsQR: Ready');
 
         // Update current time
         updateTime();
@@ -412,6 +420,12 @@
         }
 
         try {
+            // Ensure canvas dimensions match video
+            if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            }
+            
             // Draw current video frame to canvas
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);

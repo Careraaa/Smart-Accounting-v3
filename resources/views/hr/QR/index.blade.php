@@ -11,7 +11,7 @@
 
                 <div class="card-body">
                     <p class="text-muted">
-                        QR code refreshes every <strong>10 seconds</strong>
+                        QR code refreshes every <strong>50 seconds</strong>
                     </p>
 
                     <div id="qrcode" class="d-flex justify-content-center my-4"></div>
@@ -54,6 +54,6 @@ function loadQR() {
 }
 
 loadQR();
-setInterval(loadQR, 10000);
+setInterval(loadQR, 50000);
 </script>
 @endsection

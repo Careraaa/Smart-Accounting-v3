@@ -28,13 +28,13 @@ class AttendanceController extends Controller
 
         AttendanceToken::create([
             'token' => $token,
-            'expires_at' => now()->addSeconds(10)
+            'expires_at' => now()->addSeconds(60)
         ]);
 
-        // Generate a complete URL for the QR code
-        $qrUrl = route('hr.qr.submit', [], false) . '?token=' . $token;
+        // Store current token in cache for monitoring
+        cache()->put('current_qr_token', $token, 65);
 
-        return response()->json(['token' => $qrUrl]);
+        return response()->json(['token' => $token]);
     }
 
     public function showQR()
@@ -80,8 +80,12 @@ class AttendanceController extends Controller
 
         $token->update(['used' => true]);
 
+        $employeeName = $user->employee ? $user->employee->name : $user->name;
+
         return response()->json([
-            'message' => ucfirst(str_replace('_', ' ', $type)) . ' recorded'
+            'message' => ucfirst(str_replace('_', ' ', $type)) . ' recorded',
+            'type' => $type,
+            'employee_name' => $employeeName
         ]);
     }
 
@@ -110,5 +114,54 @@ class AttendanceController extends Controller
         }
 
         return response()->json(null);
+    }
+
+    public function showMonitorDisplay()
+    {
+        return view('hr.attendance.monitor');
+    }
+
+    public function getRecentAttendance()
+    {
+        $recentLogs = AttendanceLog::with(['user.employee'])
+            ->latest('logged_at')
+            ->limit(20)
+            ->get()
+            ->map(function ($log) {
+                // Convert from UTC to the app's timezone
+                $localTime = $log->logged_at->setTimezone(config('app.timezone'));
+                
+                return [
+                    'id' => $log->id,
+                    'employee_name' => $log->user->employee ? $log->user->employee->name : $log->user->name,
+                    'type' => $log->type,
+                    'time' => $localTime->format('g:i A'),
+                    'date' => $localTime->format('M d, Y'),
+                    'badge_color' => $log->type === 'time_in' ? 'success' : 'warning'
+                ];
+            });
+
+        return response()->json($recentLogs);
+    }
+
+    public function checkQRTokenStatus()
+    {
+        $currentToken = cache()->get('current_qr_token');
+
+        if (!$currentToken) {
+            return response()->json(['status' => 'no_token', 'used' => false]);
+        }
+
+        $token = AttendanceToken::where('token', $currentToken)->first();
+
+        if (!$token) {
+            return response()->json(['status' => 'expired', 'used' => false]);
+        }
+
+        return response()->json([
+            'status' => 'active',
+            'used' => (bool) $token->used,
+            'token' => $token->token
+        ]);
     }
 }
