@@ -1,135 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Attendance Monitoring" />
-    <meta name="keyword" content="" />
-    <meta name="author" content="flexilecode" />
-    <title>Attendance Monitoring - Smart Accounting</title>
+    <title>Attendance • Knights Transport</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/vendors.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/theme.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/overrides.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- Keep your existing vendors/theme if needed, but we're minimizing external dependency here -->
 </head>
 
-<body class="attendance-monitor-page">
+<body class="attendance-page">
 
-    <!-- Top Bar with Logo, Title, and Time -->
-    <div class="attendance-topbar bg-white shadow-sm p-3 mb-3">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div class="d-flex align-items-center gap-3">
-                <img src="{{ asset('images/knights_logo_icon.png') }}" alt="Logo" class="attendance-logo">
-                <h4 class="mb-0 fw-bold text-dark">KNIGHTS TRANSPORT SERVICES CORPORATION</h4>
-            </div>
-            <div class="text-end">
-                <div class="fw-bold text-dark" id="current-date"></div>
-                <div class="fw-bold fs-5" id="digital-clock"></div>
+    <!-- Top Bar -->
+    <header class="top-bar bg-white border-bottom shadow-sm py-2">
+        <div class="container-fluid px-4 px-lg-5">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="{{ asset('images/knights_logo_icon.png') }}" alt="Knights Logo" class="logo">
+                    <h4 class="mb-0 fw-semibold fs-6 text-dark">KNIGHTS TRANSPORT SERVICES CORPORATION</h4>
+                </div>
+                <div class="text-end">
+                    <div class="fw-medium text-secondary small" id="current-date"></div>
+                    <div class="fw-bold fs-4 text-dark" id="digital-clock"></div>
+                </div>
             </div>
         </div>
-    </div>
+    </header>
 
-    <div class="container-fluid px-5 px-lg-5 py-4 attendance-bg">
-        <div class="row align-items-stretch g-4 attendance-row">
+    <main class="main-content">
+        <div class="container-fluid px-4 px-lg-5 py-4">
+            <div class="row g-4 align-items-stretch">
 
-            <!-- LEFT COLUMN: Instructions -->
-            <div class="col-12 col-lg-8 d-flex">
-                <div class="card shadow-lg attendance-card d-flex flex-column flex-fill">
-
-                    <!-- Main Content -->
-                    <div class="card-body d-flex flex-column justify-content-center flex-grow-1 p-5">
-                        <div class="instructions-container text-start px-4 py-3">
-                            <h5 class="mb-4 fw-bold text-dark">Scan this code in the website on your phone</h5>
-                            <ol class="instruction-list">
-                                <li class="mb-3">
-                                    <strong>Open the Smart Accounting website</strong>
-                                    <small class="d-block text-muted mt-1">on your mobile device</small>
+                <!-- Left – Instructions -->
+                <div class="col-12 col-lg-7">
+                    <div class="card glass-card h-100 shadow-xl border-0">
+                        <div class="card-body p-3 p-lg-4">
+                            <h5 class="fw-semibold mb-4 text-dark text-center">HOW TO LOG ATTENDANCE</h5>
+                            
+                            <ol class="instruction-steps list-unstyled">
+                                <li>
+                                    <strong>Open Smart Accounting</strong>
+                                    <span class="text-muted d-block mt-1 small">on your mobile device</span>
                                 </li>
-                                <li class="mb-3">
-                                    <strong>Sign in with your registered email</strong>
-                                    <small class="d-block text-muted mt-1">If prompted, enter the OTP sent to your email</small>
+                                <li>
+                                    <strong>Sign in</strong>
+                                    <span class="text-muted d-block mt-1 small">using your registered email (complete OTP if required)</span>
                                 </li>
-                                <li class="mb-3">
-                                    <strong>Navigate to the Scan QR section</strong>
-                                    <small class="d-block text-muted mt-1">from the app's main menu</small>
+                                <li>
+                                    <strong>Go to Scan QR</strong>
+                                    <span class="text-muted d-block mt-1 small">from the main menu</span>
                                 </li>
-                                <li class="mb-3">
-                                    <strong>Point your camera at the QR code</strong>
-                                    <small class="d-block text-muted mt-1">on this screen</small>
+                                <li>
+                                    <strong>Scan the code below</strong>
+                                    <span class="text-muted d-block mt-1 small">align your camera with this screen</span>
                                 </li>
-                                <li class="mb-3">
-                                    <strong>Wait for the scan to complete</strong>
-                                    <small class="d-block text-muted mt-1">You'll see the "Attendance logged" confirmation with your time in/out</small>
+                                <li>
+                                    <strong>Confirmation appears</strong>
+                                    <span class="text-muted d-block mt-1 small">“Attendance logged” + time in/out</span>
                                 </li>
                             </ol>
                         </div>
                     </div>
-
                 </div>
-            </div>
 
-            <!-- RIGHT COLUMN: QR Code Display -->
-            <div class="col-12 col-lg-4 d-flex">
-                <div class="card shadow-lg attendance-card d-flex flex-column flex-fill qr-card">
-
-                    <!-- Main Content -->
-                    <div class="card-body d-flex flex-column bg-primary align-items-center justify-content-center text-center flex-grow-1 p-5 position-relative">
-                        <h5 class="text-white mb-4 fw-bold">SCAN ME</h5>
-                        <div class="qr-border p-3 mb-4 d-flex flex-column align-items-center justify-content-center">
-                            <div id="qrcode"></div>
-                            <div id="scan-success" class="alert alert-success d-none success-flash w-100" style="margin: 0;">
-                                <i class="feather-check-circle me-2"></i>
-                                Attendance Recorded Successfully!
+                <!-- Right – QR Code -->
+                <div class="col-12 col-lg-5">
+                    <div class="card glass-card h-100 shadow-xl border-0 qr-panel">
+                        <div class="card-body p-4 p-lg-5 d-flex flex-column align-items-center justify-content-center text-center position-relative">
+                            <h5 class="fw-semibold mb-4 text-white">SCAN HERE</h5>
+                            
+                            <div class="qr-container">
+                                <div id="qrcode" class="qr-code"></div>
+                                <div id="scan-success" class="alert alert-success d-none success-flash">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Attendance Recorded!
+                                </div>
                             </div>
-                        </div>
-                        <small class="text-white-50" id="qr-timer">30 SECONDS<br>BEFORE CHANGING QR</small>
 
+                            <div class="mt-4 text-white-75 small fw-medium" id="qr-timer">30 SECONDS <br> QR REFRESHING SOON</div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- QR Code Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
-    <!-- Scripts -->
     <script>
-        let currentToken       = null;
-        let tokenCheckInterval = null;
-        let qrRefreshInterval  = null;
-        let qrCountdown        = 30;
-
-        // Digital Clock & Date
+        // ────────────────────────────────────────────────
+        // Clock & Date
         function updateClock() {
             const now = new Date();
-            document.getElementById("digital-clock").innerText = now.toLocaleTimeString();
-            
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById("current-date").innerText = now.toLocaleDateString('en-US', options);
+            document.getElementById("digital-clock").textContent = now.toLocaleTimeString([], {hour12: true});
+            document.getElementById("current-date").textContent = now.toLocaleDateString('en-US', {
+                weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+            });
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        // QR Code Countdown 
+        // ────────────────────────────────────────────────
+        let currentToken = null;
+        let tokenCheckInterval = null;
+        let qrRefreshInterval  = null;
+        let qrCountdown = 30;
+
         function updateQRTimer() {
-            const timerEl = document.getElementById("qr-timer");
+            const el = document.getElementById("qr-timer");
             if (qrCountdown > 0) {
                 qrCountdown--;
-                timerEl.innerText = qrCountdown + ' SECONDS\nBEFORE CHANGING QR';
+                el.innerHTML = `${qrCountdown} SECONDS<br>QR REFRESHING SOON`;
             }
         }
 
-        // QR Code Generation
         function loadQR() {
             fetch("{{ route('hr.qr.generate') }}", {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
             })
-            .then(res => res.json())
+            .then(r => r.json())
             .then(data => {
                 currentToken = data.token;
                 const qrDiv = document.getElementById('qrcode');
@@ -137,8 +131,10 @@
 
                 new QRCode(qrDiv, {
                     text: data.token,
-                    width: 320,
-                    height: 320,
+                    width: 260,
+                    height: 260,
+                    colorDark: "#1a1a1a",
+                    colorLight: "#ffffff",
                     correctLevel: QRCode.CorrectLevel.H
                 });
 
@@ -159,10 +155,9 @@
             }, 1000);
         }
 
-        // Token Status Checking
         function checkTokenStatus() {
             fetch("{{ route('api.qr.token-status') }}")
-                .then(res => res.json())
+                .then(r => r.json())
                 .then(data => {
                     if (data.used) {
                         triggerSuccess();
@@ -181,184 +176,149 @@
             if (tokenCheckInterval) clearInterval(tokenCheckInterval);
         }
 
-        // Success Feedback
         function triggerSuccess() {
-            const successBox = document.getElementById("scan-success");
-            const qrBorder = document.querySelector(".qr-border");
+            const success = document.getElementById("scan-success");
+            const container = document.querySelector(".qr-container");
 
-            qrBorder.classList.add("success-active");
-            successBox.classList.remove("d-none");
-            successBox.classList.add("animate-success");
+            container.classList.add("success-active");
+            success.classList.remove("d-none");
+            success.classList.add("animate__animated", "animate__fadeInUp");
 
             setTimeout(() => {
-                successBox.classList.add("d-none");
-                successBox.classList.remove("animate-success");
-                qrBorder.classList.remove("success-active");
-            }, 3000);
+                success.classList.add("d-none");
+                success.classList.remove("animate__animated", "animate__fadeInUp");
+                container.classList.remove("success-active");
+            }, 3200);
         }
 
-        // Initialization
-        window.addEventListener('load', () => {
-            loadQR();
-        });
+        window.addEventListener('load', loadQR);
     </script>
 
-    <!-- Styles -->
     <style>
-        html, body {
-            height: 100%;
+        :root {
+            --primary: #cc3d38;   
+            --primary-dark: #530a0a;
+            --bg: #e6e6e6;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
             margin: 0;
         }
-        .attendance-row {
-            min-height: calc(100vh - 140px); 
+
+        .top-bar {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
-        .attendance-topbar {
-            border-bottom: 3px solid #007bff;
-        }
-
-        .attendance-logo {
-            width: 45px;
-            height: 45px;
+        .logo {
+            width: 48px;
+            height: 48px;
             object-fit: contain;
-        }
-
-        .attendance-bg {
-            background: linear-gradient(135deg, #f0f4ff, #e0f7fa);
-            min-height: calc(100vh - 120px);
-        }
-
-        .attendance-card {
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .qr-border {
-            background: white;
-            border: 8px solid white;
             border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .qr-border.success-active #qrcode {
-        opacity: 0.2;
+        .glass-card {
+            background: rgb(255, 255, 255);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
-        #qr-timer {
-            text-transform: uppercase;
-        }
-
-        #qrcode {
-            min-height: 320px;
-            min-width: 320px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .instructions-container h5 {
-            color: #000000;
-            font-size: 1.25rem;
-        }
-
-        .instruction-list {
-            list-style: none;
-            padding: 0;
-            counter-reset: step-counter;
-            font-size: 1.05rem;
-            line-height: 1.8;
-        }
-
-        .instruction-list li {
-            counter-increment: step-counter;
-            padding: 0.2rem 0;
-            padding-left: 4rem;
-            position: relative;
-            border-left: 3px solid #007bff;
-            margin-left: 0.5rem;
-        }
-
-        .instruction-list li::before {
-            content: counter(step-counter);
-            position: absolute;
-            left: -1.5rem;
-            top: 0;
-            background: #007bff;
+        .qr-panel {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
-            width: 2.5rem;
-            height: 2.5rem;
+            border-radius: 20px;
+        }
+
+        .qr-container {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: all 0.4s ease;
+        }
+
+        .qr-container.success-active {
+            box-shadow: 0 0 0 6px rgba(34,197,94,0.4);
+            transform: scale(1.04);
+        }
+
+        .qr-code {
+            min-width: 260px;
+            min-height: 260px;
+            margin: 0 auto;
+        }
+
+        .instruction-steps {
+            counter-reset: step;
+            padding-left: 0;
+        }
+
+        .instruction-steps li {
+            counter-increment: step;
+            position: relative;
+            padding: 0.5rem 0.5rem 0.5rem 3.8rem;
+            margin-bottom: 1rem;
+            border-left: 3px solid var(--primary);
+            background: rgb(247, 231, 231);
+            border-radius: 0 12px 12px 0;
+            transition: all 0.2s ease;
+        }
+
+        .instruction-steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary);
+            color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .instruction-list li:last-child {
-            border-left: none;
-        }
-
-        .instruction-list li strong {
-            color: #333;
             font-weight: 600;
+            font-size: 0.95rem;
         }
 
-        .pulse-badge {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%   { transform: scale(1); }
-            50%  { transform: scale(1.08); }
-            100% { transform: scale(1); }
-        }
-
-        .animate-success {
-            animation: pop 0.5s ease;
-        }
-
-        @keyframes pop {
-            from { transform: scale(0.8); opacity: 0; }
-            to   { transform: scale(1);   opacity: 1; }
+        .success-flash {
+            position: absolute;
+            inset: 0;
+            margin: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+            background: rgba(34,197,94,0.95);
+            color: white;
+            border-radius: 16px;
+            z-index: 10;
         }
 
         @media (max-width: 992px) {
-            .attendance-bg {
-                height: auto !important;
+            .instruction-steps li {
+                padding: 0.9rem 0.9rem 0.9rem 3.4rem;
             }
-
-            #qrcode {
-                min-height: 250px;
-                min-width: 250px;
-            }
-
-            .instruction-list {
-                font-size: 0.95rem;
-            }
-
-            .instruction-list li {
-                padding-left: 3.5rem;
-            }
-
-            .instruction-list li::before {
-                width: 2rem;
-                height: 2rem;
-                font-size: 0.95rem;
-                left: -1.2rem;
+            .instruction-steps li::before {
+                width: 2.2rem;
+                height: 2.2rem;
+                left: -1.4rem;
+                font-size: 0.9rem;
             }
         }
     </style>
 
-    <!--! BEGIN: Vendors JS !-->
-    <script src="{{ asset('vendors/js/vendors.min.js') }}"></script>
-    <!--! END: Vendors JS !-->
-    <!--! BEGIN: Apps Init  !-->
-    <script src="{{ asset('js/common-init.min.js') }}"></script>
-    <!--! END: Apps Init !-->
+    <!-- Optional: animate.css for smoother success animation -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
 </body>
-
 </html>
