@@ -1,12 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // --- Datepicker auto-open ---
-    const payrollDateInputs = document.querySelectorAll(
-        "#payroll_period_start, #payroll_period_end",
-    );
-    payrollDateInputs.forEach((input) =>
-        input.addEventListener("click", () => input.showPicker?.()),
-    );
-
     // --- Salary calculation logic ---
     const employeeSelect = document.getElementById("employee_id");
     const basicSalaryDisplay = document.getElementById("basic_salary_display");

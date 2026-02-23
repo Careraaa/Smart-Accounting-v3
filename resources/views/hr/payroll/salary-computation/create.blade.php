@@ -138,6 +138,7 @@
                 window.initialDeductions = @json(old('deductions', []));
             </script>
             <script src="{{ asset('js/Payroll/create-payroll.js') }}"></script>
+            <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
         @endpush
     </div>
 @endsection

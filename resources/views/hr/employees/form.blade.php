@@ -270,6 +270,7 @@
         </div>
         @push('scripts')
             <script src="{{ asset('js/Employee/employee-form.js') }}"></script>
+            <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
         @endpush
 
 

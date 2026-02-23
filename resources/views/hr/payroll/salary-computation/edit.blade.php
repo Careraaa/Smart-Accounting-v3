@@ -135,6 +135,7 @@
                 window.initialDeductions = @json($payroll->deductions->map(fn($d) => ['name' => $d->deduction_type, 'amount' => floatval($d->amount)]));
             </script>
             <script src="{{ asset('js/Payroll/edit-payroll.js') }}"></script>
+            <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
         @endpush
     </div>
 @endsection

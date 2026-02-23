@@ -197,12 +197,4 @@ document.addEventListener("DOMContentLoaded", function () {
     renderList(allowances, allowanceList, "allowance");
     renderList(deductions, deductionList, "deduction");
     updateSalary();
-
-    // --- Datepicker auto-open ---
-    const payrollDateInputs = document.querySelectorAll(
-        "#payroll_period_start, #payroll_period_end",
-    );
-    payrollDateInputs.forEach((input) =>
-        input.addEventListener("click", () => input.showPicker?.()),
-    );
 });
