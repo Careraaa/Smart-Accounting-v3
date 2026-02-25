@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('allowances', function (Blueprint $table) {
+        Schema::create('routes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
-            $table->string('allowance_type');
-            $table->decimal('amount', 10, 2);
-            $table->date('effective_date');
+            $table->string('route_name');
+            $table->string('origin');
+            $table->string('destination');
             $table->string('status')->default('active');
             $table->timestamps();
         });
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('allowances');
+        Schema::dropIfExists('routes');
     }
 };

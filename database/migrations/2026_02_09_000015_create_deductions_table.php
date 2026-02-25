@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('drivers', function (Blueprint $table) {
+        Schema::create('deductions', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('license_number')->unique();
-            $table->string('contact_number');
-            $table->string('email')->unique();
-            $table->text('address')->nullable();
-            $table->date('date_of_hire');
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('payroll_id')->nullable()->constrained('payrolls')->onDelete('cascade');
+            $table->string('deduction_type');
+            $table->decimal('amount', 10, 2);
+            $table->date('effective_date');
             $table->string('status')->default('active');
             $table->timestamps();
         });
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('drivers');
+        Schema::dropIfExists('deductions');
     }
 };

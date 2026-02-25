@@ -11,15 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('attendance', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
-            $table->dateTime('time_in')->nullable();
-            $table->dateTime('time_out')->nullable();
+            $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
             $table->date('date');
-            $table->string('qr_code')->nullable();
-            $table->string('status')->default('present');
+            $table->time('time_in')->nullable();
+            $table->time('time_out')->nullable();
+            $table->enum('status', ['present', 'late', 'absent'])->nullable();
             $table->timestamps();
+
+            $table->unique(['employee_id', 'date']);
         });
     }
 
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('attendance');
     }
 };

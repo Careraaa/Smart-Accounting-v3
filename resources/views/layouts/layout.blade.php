@@ -8,7 +8,7 @@
     <meta name="description" content="" />
     <meta name="keyword" content="" />
     <meta name="author" content="flexilecode" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <!--! BEGIN: Apps Title-->
     <title>Smart Accounting v3</title>
     <!--! END:  Apps Title-->
@@ -70,6 +70,62 @@
     <script src="{{ asset('js/theme-customizer-init.min.js') }}"></script>
     <!--! END: Theme Customizer !-->
     @stack('scripts')
+
+    <!--! BEGIN: Mobile Menu Handler  !-->
+    <script>
+        // Mobile sidebar toggle
+        const mobileCollapse = document.getElementById('mobile-collapse');
+        const navigation = document.querySelector('.nxl-navigation');
+        const body = document.body;
+
+        if (mobileCollapse && navigation) {
+            // Toggle sidebar on button click
+            mobileCollapse.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                navigation.classList.toggle('active');
+                body.classList.toggle('sidebar-open');
+            });
+
+            // Close sidebar when clicking on a navigation link (except submenu toggles)
+            const navLinks = navigation.querySelectorAll('a.nxl-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Check if this is a submenu toggle (has nxl-hasmenu parent without href)
+                    const parent = this.closest('.nxl-hasmenu');
+                    if (parent && this.getAttribute('href') === 'javascript:void(0);') {
+                        // This is a submenu toggle, don't close sidebar
+                        return;
+                    }
+                    
+                    // Close sidebar for regular navigation links
+                    if (window.innerWidth < 1200) {
+                        navigation.classList.remove('active');
+                        body.classList.remove('sidebar-open');
+                    }
+                });
+            });
+
+            // Close sidebar when clicking backdrop/outside
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth < 1200 && body.classList.contains('sidebar-open')) {
+                    if (!navigation.contains(e.target) && !mobileCollapse.contains(e.target)) {
+                        navigation.classList.remove('active');
+                        body.classList.remove('sidebar-open');
+                    }
+                }
+            });
+
+            // Close sidebar when window is resized to desktop size
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1200) {
+                    navigation.classList.remove('active');
+                    body.classList.remove('sidebar-open');
+                }
+            });
+        }
+    </script>
+    <!--! END: Mobile Menu Handler  !-->
 </body>
 
 </html>
