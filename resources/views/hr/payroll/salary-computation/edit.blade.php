@@ -9,7 +9,7 @@
                         <h5 class="card-title mb-0">Edit Payroll</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('payroll.salary-computation.update', $payroll) }}" method="POST">
+                        <form action="{{ route('payroll.update', $payroll) }}" method="POST">
                             @csrf
                             @method('PUT')
 
@@ -21,6 +21,8 @@
                                     <option value="">-- Select Employee --</option>
                                     @foreach ($employees as $employee)
                                         <option value="{{ $employee->id }}" data-salary-rate="{{ $employee->salary_rate }}"
+                                            data-has-sss="{{ $employee->has_sss ? 1 : 0 }}"
+                                            data-has-pagibig="{{ $employee->has_pagibig ? 1 : 0 }}"
                                             {{ $payroll->employee_id == $employee->id ? 'selected' : '' }}>
                                             {{ $employee->first_name }} {{ $employee->last_name }}
                                         </option>
@@ -39,6 +41,9 @@
                                         class="form-control @error('payroll_period_start') is-invalid @enderror"
                                         value="{{ old('payroll_period_start', $payroll->payroll_period_start->format('Y-m-d')) }}"
                                         required>
+                                    @error('payroll_period_start')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="payroll_period_end" class="form-label">Period End *</label>
@@ -46,6 +51,9 @@
                                         class="form-control @error('payroll_period_end') is-invalid @enderror"
                                         value="{{ old('payroll_period_end', $payroll->payroll_period_end->format('Y-m-d')) }}"
                                         required>
+                                    @error('payroll_period_end')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
 
@@ -67,8 +75,8 @@
                                             placeholder="Allowance name">
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="number" min = "0" step="0.1" id="allowance_amount" class="form-control"
-                                            placeholder="Amount">
+                                        <input type="number" min="0" step="0.1" id="allowance_amount"
+                                            class="form-control" placeholder="Amount">
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-outline-success w-100 border-1 rounded"
@@ -93,8 +101,8 @@
                                             placeholder="Deduction name">
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="number" min = "0" step="0.1" id="deduction_amount" class="form-control"
-                                            placeholder="Amount">
+                                        <input type="number" min="0" step="0.1" id="deduction_amount"
+                                            class="form-control" placeholder="Amount">
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-outline-danger w-100 border-1 rounded"
@@ -107,7 +115,7 @@
                                         id="deduction_total_display">0.00</span></small>
                             </div>
 
-                            <!-- Net Salary Display -->
+                            <!-- Net Salary -->
                             <div class="mb-3">
                                 <label class="form-label">Net Salary</label>
                                 <p id="net_salary_display" class="form-control-plaintext">₱0.00</p>
@@ -118,7 +126,7 @@
                                 <button type="submit" class="btn btn-outline-primary border-1 rounded">
                                     <i class="bi bi-check-lg"></i> Update Payroll
                                 </button>
-                                <a href="{{ route('payroll.salary-computation.index') }}"
+                                <a href="{{ route('payroll.index') }}"
                                     class="btn btn-outline-secondary border-1 rounded">
                                     <i class="bi bi-x-lg"></i> Cancel
                                 </a>
@@ -128,14 +136,14 @@
                 </div>
             </div>
         </div>
-
-        @push('scripts')
-            <script>
-                window.initialAllowances = @json($payroll->allowances->map(fn($a) => ['name' => $a->allowance_type ?? $a->name, 'amount' => floatval($a->amount)]));
-                window.initialDeductions = @json($payroll->deductions->map(fn($d) => ['name' => $d->deduction_type, 'amount' => floatval($d->amount)]));
-            </script>
-            <script src="{{ asset('js/Payroll/edit-payroll.js') }}"></script>
-            <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
-        @endpush
     </div>
+
+    @push('scripts')
+        <script>
+            window.initialAllowances = @json($payroll->allowances->map(fn($a) => ['name' => $a->allowance_type ?? $a->name, 'amount' => floatval($a->amount)]));
+            window.initialDeductions = @json($payroll->deductions->map(fn($d) => ['name' => $d->deduction_type, 'amount' => floatval($d->amount)]));
+        </script>
+        <script src="{{ asset('js/Payroll/edit-payroll.js') }}"></script>
+        <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
+    @endpush
 @endsection

@@ -30,7 +30,6 @@
                                 @error('employee_id')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
-
                                 <div id="statutory_display" class="text-muted mt-1">
                                     Statutory deductions (SSS / Pag-IBIG) will appear here.
                                 </div>
@@ -73,12 +72,14 @@
                                             placeholder="Allowance name">
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="number" min = "0" step="0.1" id="allowance_amount" class="form-control"
-                                            placeholder="Amount">
+                                        <input type="number" min="0" step="0.1" id="allowance_amount"
+                                            class="form-control" placeholder="Amount">
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-outline-success w-100 border-1 rounded"
-                                            onclick="addAllowance()"><i class="bi bi-plus-lg"></i>Add</button>
+                                            onclick="addAllowance()">
+                                            <i class="bi bi-plus-lg"></i> Add
+                                        </button>
                                     </div>
                                 </div>
                                 <ul class="list-group mb-2" id="allowance_list"></ul>
@@ -97,12 +98,14 @@
                                             placeholder="Deduction name">
                                     </div>
                                     <div class="col-md-4">
-                                        <input type="number" min = "0" step="0.1" id="deduction_amount" class="form-control"
-                                            placeholder="Amount">
+                                        <input type="number" min="0" step="0.1" id="deduction_amount"
+                                            class="form-control" placeholder="Amount">
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-outline-danger w-100 border-1 rounded"
-                                            onclick="addDeduction()"><i class="bi bi-plus-lg"></i>Add</button>
+                                            onclick="addDeduction()">
+                                            <i class="bi bi-plus-lg"></i> Add
+                                        </button>
                                     </div>
                                 </div>
                                 <ul class="list-group mb-2" id="deduction_list"></ul>
@@ -122,7 +125,7 @@
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-outline-primary border-1 rounded">Create
                                     Payroll</button>
-                                <a href="{{ route('payroll.salary-computation.index') }}"
+                                <a href="{{ route('payroll.index') }}"
                                     class="btn btn-outline-secondary border-1 rounded">Cancel</a>
                             </div>
                         </form>
@@ -130,15 +133,15 @@
                 </div>
             </div>
         </div>
-
-        @push('scripts')
-            <script>
-                window.statutoryDeductions = @json(\App\Models\StatutoryDeduction::all());
-                window.initialAllowances = @json(old('allowances', []));
-                window.initialDeductions = @json(old('deductions', []));
-            </script>
-            <script src="{{ asset('js/Payroll/create-payroll.js') }}"></script>
-            <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
-        @endpush
     </div>
+
+    @push('scripts')
+        <script>
+            window.statutoryDeductions = @json(\App\Models\StatutoryDeduction::all());
+            window.initialAllowances = @json(old('allowances', []));
+            window.initialDeductions = @json(old('deductions', []));
+        </script>
+        <script src="{{ asset('js/Payroll/create-payroll.js') }}"></script>
+        <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
+    @endpush
 @endsection

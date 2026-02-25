@@ -1,0 +1,81 @@
+<h5 class="mb-4">Employment Information</h5>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label for="date_of_hire" class="form-label">Date of Hire *</label>
+        <input type="date" name="date_of_hire" id="date_of_hire"
+            class="form-control @error('date_of_hire') is-invalid @enderror"
+            value="{{ old('date_of_hire', isset($employee->date_of_hire) ? $employee->date_of_hire?->format('Y-m-d') : '') }}"
+            required>
+        @error('date_of_hire')
+            <span class="invalid-feedback">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="col-md-4 mb-3">
+        <label for="position" class="form-label">Position *</label>
+        <input type="text" name="position" id="position"
+            class="form-control @error('position') is-invalid @enderror"
+            placeholder="e.g. Accounting Staff"
+            value="{{ old('position', $employee->position ?? '') }}" required>
+        @error('position')
+            <span class="invalid-feedback">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="col-md-4 mb-3">
+        <label for="department" class="form-label">Department *</label>
+        <input type="text" name="department" id="department"
+            class="form-control @error('department') is-invalid @enderror"
+            placeholder="e.g. Finance"
+            value="{{ old('department', $employee->department ?? '') }}" required>
+        @error('department')
+            <span class="invalid-feedback">{{ $message }}</span>
+        @enderror
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label for="status" class="form-label">Status *</label>
+        <select name="status" id="status"
+            class="form-select @error('status') is-invalid @enderror" required>
+            <option value="active"   {{ old('status', $employee->status ?? 'active') == 'active'   ? 'selected' : '' }}>Active</option>
+            <option value="inactive" {{ old('status', $employee->status ?? '')        == 'inactive' ? 'selected' : '' }}>Inactive</option>
+        </select>
+        @error('status')
+            <span class="invalid-feedback">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="salary_rate" class="form-label">Salary Rate *</label>
+        <div class="input-group">
+            <span class="input-group-text">₱</span>
+            <input type="number" name="salary_rate" id="salary_rate"
+                class="form-control @error('salary_rate') is-invalid @enderror"
+                placeholder="0.00"
+                step="0.01" min="0"
+                value="{{ old('salary_rate', $employee->salary_rate ?? '') }}" required>
+            @error('salary_rate')
+                <span class="invalid-feedback">{{ $message }}</span>
+            @enderror
+        </div>
+    </div>
+</div>
+
+<hr class="my-4">
+<h6 class="mb-3">Driver's License</h6>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label for="driver_license_number" class="form-label">License Number</label>
+        <input type="text" name="driver_license_number" id="driver_license_number"
+            class="form-control"
+            placeholder="e.g. N01-12-345678"
+            value="{{ old('driver_license_number', $employee->driver_license_number ?? '') }}">
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="driver_license_validity" class="form-label">License Validity</label>
+        <input type="date" name="driver_license_validity" id="driver_license_validity"
+            class="form-control"
+            value="{{ old('driver_license_validity', isset($employee->driver_license_validity) ? $employee->driver_license_validity?->format('Y-m-d') : '') }}">
+    </div>
+</div>

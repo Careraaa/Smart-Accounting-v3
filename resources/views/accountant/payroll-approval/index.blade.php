@@ -24,14 +24,16 @@
                                 <tbody>
                                     @forelse($payrolls as $payroll)
                                         <tr>
-                                            <td>
+                                            <td class="align-middle">
                                                 {{ $payroll->employee ? $payroll->employee->first_name . ' ' . $payroll->employee->last_name : 'N/A' }}
                                             </td>
-                                            <td>{{ $payroll->payroll_period_start->format('M d, Y') }} -
-                                                {{ $payroll->payroll_period_end->format('M d, Y') }}</td>
-                                            <td>₱{{ number_format($payroll->gross_pay, 2) }}</td>
-                                            <td>₱{{ number_format($payroll->net_pay, 2) }}</td>
-                                            <td class="text-center">
+                                            <td class="align-middle">
+                                                {{ $payroll->payroll_period_start->format('M d, Y') }} -
+                                                {{ $payroll->payroll_period_end->format('M d, Y') }}
+                                            </td>
+                                            <td class="align-middle">₱{{ number_format($payroll->gross_pay, 2) }}</td>
+                                            <td class="align-middle">₱{{ number_format($payroll->net_pay, 2) }}</td>
+                                            <td class="text-center align-middle">
                                                 @php
                                                     $statusStyles = [
                                                         'pending' => 'bg-soft-warning text-warning',
@@ -44,7 +46,7 @@
                                                     {{ ucfirst($payroll->status) }}
                                                 </span>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center align-middle">
                                                 <div class="d-flex justify-content-center gap-1">
                                                     <a href="{{ route('payroll-approval.show', $payroll) }}"
                                                         class="btn btn-outline-info btn-sm border-1 rounded">
@@ -81,6 +83,11 @@
                                             </td>
                                         </tr>
                                     @endforelse
+
+                                    <!-- Invisible spacer row to fully show bottom button outlines -->
+                                    <tr style="height: 8px;">
+                                        <td colspan="6"></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>

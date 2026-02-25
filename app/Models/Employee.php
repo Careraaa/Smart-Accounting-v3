@@ -11,11 +11,18 @@ class Employee extends Model
 
     protected $fillable = [
         'first_name',
+        'middle_name',
         'last_name',
         'email',
         'phone',
         'address',
+        'civil_status',
+        'spouse_name',
         'date_of_birth',
+        'place_of_birth',
+        'educational_attainment',
+        'driver_license_number',
+        'driver_license_validity',
         'date_of_hire',
         'position',
         'department',
@@ -23,52 +30,38 @@ class Employee extends Model
         'salary_rate',
         'has_sss',
         'has_pagibig',
+        'has_tin',
+        'sss_number',
+        'tin_number',
+        'pagibig_number',
+        'signature_path',
+        'attachments', // ← added
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
         'date_of_hire' => 'date',
+        'driver_license_validity' => 'date',
+        'attachments' => 'array',
     ];
 
-    // Relationships
-    public function attendances()
+    public function beneficiaries()
     {
-        return $this->hasMany(Attendance::class);
+        return $this->hasMany(Beneficiary::class);
     }
 
-    public function leaves()
+    public function workExperiences()
     {
-        return $this->hasMany(Leave::class);
+        return $this->hasMany(WorkExperience::class);
     }
 
-    public function payrollRecords()
+    public function specialSkills()
     {
-        return $this->hasMany(Payroll::class);
+        return $this->hasMany(SpecialSkill::class);
     }
 
-    public function allowances()
+    public function characterReferences()
     {
-        return $this->hasMany(Allowance::class);
-    }
-
-    public function deductions()
-    {
-        return $this->hasMany(Deduction::class);
-    }
-
-    public function cashAdvances()
-    {
-        return $this->hasMany(CashAdvance::class);
-    }
-
-    public function salaryLoans()
-    {
-        return $this->hasMany(SalaryLoan::class);
-    }
-
-    //basic salary for 15-day period
-    public function getBasicSalaryAttribute()
-    {
-        return $this->salary_rate * 15;
+        return $this->hasMany(CharacterReference::class);
     }
 }

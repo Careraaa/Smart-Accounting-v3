@@ -4,165 +4,323 @@
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-10">
-                <div class="card shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Employee Details</h5>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('employees.edit', $employee) }}"
-                                class="btn btn-outline-primary border-1 rounded">Edit</a>
-                            <a href="{{ route('employees.index') }}"
-                                class="btn btn-outline-secondary border-1 rounded">Back</a>
-                        </div>
-                    </div>
-                    <div class="card-body">
 
-                        <!-- Tabs -->
-                        <ul class="nav nav-tabs mb-4" id="employeeViewTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="general-tab" data-bs-toggle="tab"
-                                    data-bs-target="#general" type="button" role="tab" aria-controls="general"
-                                    aria-selected="true">General Info</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary"
-                                    type="button" role="tab" aria-controls="salary" aria-selected="false">Salary &
-                                    Setup</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="allowances-tab" data-bs-toggle="tab"
-                                    data-bs-target="#allowances" type="button" role="tab" aria-controls="allowances"
-                                    aria-selected="false">Allowances & Benefits</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="deductions-tab" data-bs-toggle="tab"
-                                    data-bs-target="#deductions" type="button" role="tab" aria-controls="deductions"
-                                    aria-selected="false">Deductions & Contributions</button>
-                            </li>
-                        </ul>
-
-                        <div class="tab-content" id="employeeViewTabsContent">
-                            <!-- General Info -->
-                            <div class="tab-pane fade show active" id="general" role="tabpanel"
-                                aria-labelledby="general-tab">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <strong>First Name:</strong>
-                                        <p>{{ $employee->first_name }}</p>
-                                        <strong>Last Name:</strong>
-                                        <p>{{ $employee->last_name }}</p>
-                                        <strong>Email:</strong>
-                                        <p>{{ $employee->email }}</p>
-                                        <strong>Phone:</strong>
-                                        <p>{{ $employee->phone }}</p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Position:</strong>
-                                        <p>{{ $employee->position }}</p>
-                                        <strong>Department:</strong>
-                                        <p>{{ $employee->department }}</p>
-                                        <strong>Date of Hire:</strong>
-                                        <p>{{ $employee->date_of_hire?->format('M d, Y') ?? 'N/A' }}</p>
-                                        <strong>Status:</strong>
-                                        <p>
-                                            <span
-                                                class="badge px-3 {{ $employee->status === 'active' ? 'bg-soft-info text-info' : 'bg-soft-danger text-danger' }}">
-                                                {{ ucfirst($employee->status) }}
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-                                @if ($employee->address)
-                                    <div class="mb-3">
-                                        <strong>Address:</strong>
-                                        <p>{{ $employee->address }}</p>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Salary & Setup -->
-                            <div class="tab-pane fade" id="salary" role="tabpanel" aria-labelledby="salary-tab">
-                                <div class="mb-3">
-                                    <strong>Salary Rate:</strong>
-                                    <p>₱{{ number_format($employee->salary_rate, 2) }}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Basic Salary (15 days):</strong>
-                                    <p>₱{{ number_format($employee->basic_salary, 2) }}</p>
-                                </div>
-                                <p class="text-muted">Other salary setup details can be added here.</p>
-                            </div>
-
-                            <!-- Allowances & Benefits -->
-                            <div class="tab-pane fade" id="allowances" role="tabpanel" aria-labelledby="allowances-tab">
-                                <div class="mb-3">
-                                    <strong>Transportation Allowance:</strong>
-                                    <p>₱{{ number_format($employee->transportation_allowance ?? 0, 2) }}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Meal Allowance:</strong>
-                                    <p>₱{{ number_format($employee->meal_allowance ?? 0, 2) }}</p>
-                                </div>
-                                <div class="mb-3">
-                                    <strong>Health / Medical Benefits:</strong>
-                                    <p>₱{{ number_format($employee->medical_benefits ?? 0, 2) }}</p>
-                                </div>
-                                @if ($employee->other_allowances)
-                                    <div class="mb-3">
-                                        <strong>Other Allowances / Benefits:</strong>
-                                        <p>{{ $employee->other_allowances }}</p>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Deductions & Contributions -->
-                            <div class="tab-pane fade" id="deductions" role="tabpanel" aria-labelledby="deductions-tab">
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" disabled
-                                        {{ $employee->has_sss ? 'checked' : '' }}>
-                                    <label class="form-check-label">Enrolled in SSS</label>
-                                </div>
-                                @if ($employee->sss_placeholder)
-                                    <div class="mb-3">
-                                        <strong>SSS Number / Details:</strong>
-                                        <p>{{ $employee->sss_placeholder }}</p>
-                                    </div>
-                                @endif
-
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" disabled
-                                        {{ $employee->has_pagibig ? 'checked' : '' }}>
-                                    <label class="form-check-label">Enrolled in Pag-IBIG</label>
-                                </div>
-                                @if ($employee->pagibig_placeholder)
-                                    <div class="mb-3">
-                                        <strong>Pag-IBIG Number / Details:</strong>
-                                        <p>{{ $employee->pagibig_placeholder }}</p>
-                                    </div>
-                                @endif
-
-                                <p class="text-muted">Other deductions can be added later in payroll.</p>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <hr>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('employees.edit', $employee) }}"
-                                class="btn btn-outline-primary border-1 rounded">Edit Employee</a>
-                            <a href="{{ route('employees.index') }}"
-                                class="btn btn-outline-secondary border-1 rounded">Back</a>
-                            <form action="{{ route('employees.destroy', $employee) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger border-1 rounded"
-                                    onclick="return confirm('Are you sure you want to delete this employee?')">
-                                    Delete Employee
-                                </button>
-                            </form>
-                        </div>
-
+                {{-- Header --}}
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">
+                        {{ $employee->first_name }} {{ $employee->middle_name }} {{ $employee->last_name }}
+                    </h4>
+                    <div>
+                        <a href="{{ route('employees.edit', $employee) }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </a>
+                        <form action="{{ route('employees.destroy', $employee) }}" method="POST" class="d-inline"
+                            onsubmit="return confirm('Are you sure you want to delete this employee?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </button>
+                        </form>
+                        <a href="{{ route('employees.index') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left me-1"></i> Back
+                        </a>
                     </div>
                 </div>
+
+                {{-- Personal Information --}}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Personal Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">First Name</small>
+                                <span>{{ $employee->first_name ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Middle Name</small>
+                                <span>{{ $employee->middle_name ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Last Name</small>
+                                <span>{{ $employee->last_name ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Email</small>
+                                <span>{{ $employee->email ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Phone</small>
+                                <span>{{ $employee->phone ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Civil Status</small>
+                                <span>{{ ucfirst($employee->civil_status) ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Spouse Name</small>
+                                <span>{{ $employee->spouse_name ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Date of Birth</small>
+                                <span>{{ $employee->date_of_birth?->format('F d, Y') ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Place of Birth</small>
+                                <span>{{ $employee->place_of_birth ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted d-block">Educational Attainment</small>
+                                <span>{{ $employee->educational_attainment ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <small class="text-muted d-block">Address</small>
+                                <span>{{ $employee->address ?? '—' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Employment Information --}}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Employment Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Date of Hire</small>
+                                <span>{{ $employee->date_of_hire?->format('F d, Y') ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Position</small>
+                                <span>{{ $employee->position ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Department</small>
+                                <span>{{ $employee->department ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Status</small>
+                                <span class="badge {{ $employee->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ ucfirst($employee->status) }}
+                                </span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Salary Rate</small>
+                                <span>₱{{ number_format($employee->salary_rate, 2) }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Driver's License</small>
+                                <span>{{ $employee->driver_license_number ?? '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">License Validity</small>
+                                <span>{{ $employee->driver_license_validity?->format('F d, Y') ?? '—' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Government Numbers --}}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Government Numbers</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">SSS Number</small>
+                                <span>{{ $employee->sss_number ?? '—' }}</span>
+                                @if ($employee->has_sss)
+                                    <span class="badge bg-success ms-1">Enrolled</span>
+                                @endif
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">TIN Number</small>
+                                <span>{{ $employee->tin_number ?? '—' }}</span>
+                                @if ($employee->has_tin)
+                                    <span class="badge bg-success ms-1">Has TIN</span>
+                                @endif
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <small class="text-muted d-block">Pag-IBIG Number</small>
+                                <span>{{ $employee->pagibig_number ?? '—' }}</span>
+                                @if ($employee->has_pagibig)
+                                    <span class="badge bg-success ms-1">Enrolled</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Work Experience --}}
+                @if ($employee->workExperiences->count())
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Work Experience</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Company</th>
+                                            <th>Position</th>
+                                            <th>Duration</th>
+                                            <th>Responsibilities</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($employee->workExperiences as $we)
+                                            <tr>
+                                                <td>{{ $we->company_name }}</td>
+                                                <td>{{ $we->position }}</td>
+                                                <td>{{ $we->duration }}</td>
+                                                <td>{{ $we->responsibilities }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Special Skills --}}
+                @if ($employee->specialSkills->count())
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Special Skills</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Skill</th>
+                                            <th>Proficiency</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($employee->specialSkills as $skill)
+                                            <tr>
+                                                <td>{{ $skill->skill_name }}</td>
+                                                <td>{{ ucfirst($skill->proficiency) }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Beneficiaries --}}
+                @if ($employee->beneficiaries->count())
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Beneficiaries</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Relationship</th>
+                                            <th>Date of Birth</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($employee->beneficiaries as $b)
+                                            <tr>
+                                                <td>{{ $b->name }}</td>
+                                                <td>{{ ucfirst($b->relationship) }}</td>
+                                                <td>{{ $b->date_of_birth ? \Carbon\Carbon::parse($b->date_of_birth)->format('F d, Y') : '—' }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Character References --}}
+                @if ($employee->characterReferences->count())
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Character References</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Address</th>
+                                            <th>Contact Number</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($employee->characterReferences as $ref)
+                                            <tr>
+                                                <td>{{ $ref->name }}</td>
+                                                <td>{{ $ref->address }}</td>
+                                                <td>{{ $ref->contact_number }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Attachments --}}
+                @if ($employee->attachments && count($employee->attachments))
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Attachments</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                @php
+                                    $attachmentLabels = [
+                                        'drivers_license' => "Driver's License",
+                                        'valid_id_1' => 'Valid ID 1',
+                                        'valid_id_2' => 'Valid ID 2',
+                                        '2x2_picture' => '2x2 Picture',
+                                        '1x1_picture' => '1x1 Picture',
+                                        'police_clearance' => 'Police Clearance',
+                                        'barangay_clearance' => 'Barangay Clearance',
+                                        'house_sketch' => 'House Sketch',
+                                        'medical_cert' => 'Medical Certificate',
+                                        'drug_test' => 'Drug Test Result',
+                                        'x_ray' => 'X-Ray Result',
+                                    ];
+                                @endphp
+                                @foreach ($employee->attachments as $key => $path)
+                                    @if ($path)
+                                        <div class="col-md-4 mb-3">
+                                            <small
+                                                class="text-muted d-block">{{ $attachmentLabels[$key] ?? ucwords(str_replace('_', ' ', $key)) }}</small>
+                                            <a href="{{ Storage::url($path) }}" target="_blank"
+                                                class="btn btn-outline-primary btn-sm mt-1">
+                                                <i class="bi bi-file-earmark me-1"></i> View File
+                                            </a>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>
