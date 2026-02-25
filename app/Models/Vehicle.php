@@ -14,10 +14,6 @@ class Vehicle extends Model
         'route_id',
         'operator',
         'status',
-        'vehicle_type', // Nullable for now
-        'make',         // Nullable for now
-        'model',        // Nullable for now
-        'year',         // Nullable for now
     ];
 
     public function route()

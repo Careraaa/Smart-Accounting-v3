@@ -144,7 +144,7 @@
         if (typeof jsQR === 'undefined') {
             console.error('jsQR library not loaded');
         } else {
-            console.log('✓ jsQR library available');
+            console.log('jsQR library available');
         }
         
         // Check if mediaDevices API is available

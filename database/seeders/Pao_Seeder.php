@@ -17,7 +17,6 @@ class Pao_Seeder extends Seeder
         DB::table('paos')->insert([
             [
                 'name' => 'Pedro Reyes',
-                'conductor_id' => null,
                 'contact_number' => '09151111111',
                 'email' => 'pedro.reyes@example.com',
                 'address' => '789 Pine Street, Makati City',
@@ -28,7 +27,6 @@ class Pao_Seeder extends Seeder
             ],
             [
                 'name' => 'Rosa Garcia',
-                'conductor_id' => null,
                 'contact_number' => '09162222222',
                 'email' => 'rosa.garcia@example.com',
                 'address' => '321 Maple Drive, Pasig City',
