@@ -74,4 +74,64 @@ html.darkmode:not(.minimenu) .m-header .b-brand .logo-full.logo-dark {
     display: inline-block !important;
 }
 
+/* ===== MOBILE SIDEBAR FIX ===== */
+/* Hide sidebar by default on mobile devices */
+@media (max-width: 1199px) {
+    .nxl-navigation {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 280px !important;
+        height: 100vh !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s ease !important;
+        z-index: 1040 !important;
+        overflow-y: auto !important;
+    }
+    
+    /* Show sidebar when active */
+    .nxl-navigation.active {
+        transform: translateX(0) !important;
+    }
+    
+    /* Add overlay/backdrop when sidebar is open */
+    .sidebar-open::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1039;
+        pointer-events: none;
+    }
+    
+    /* Main content should not be blocked */
+    .nxl-container {
+        margin-left: 0 !important;
+    }
+    
+    /* Ensure toggle button is visible and clickable */
+    .nxl-head-mobile-toggler {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        padding: 8px 12px !important;
+        z-index: 1041 !important;
+    }
+}
+
+/* Show hamburger menu on mobile */
+@media (max-width: 1199px) {
+    .nxl-head-mobile-toggler {
+        display: flex !important;
+    }
+    
+    .nxl-navigation-toggle {
+        display: none !important;
+    }
+}
+
 

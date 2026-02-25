@@ -8,6 +8,7 @@
     <meta name="description" content="" />
     <meta name="keyword" content="" />
     <meta name="author" content="flexilecode" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     <!--! BEGIN: Apps Title-->
     <title>Smart Accounting v3</title>
     <!--! END:  Apps Title-->
@@ -78,31 +79,46 @@
         const body = document.body;
 
         if (mobileCollapse && navigation) {
+            // Toggle sidebar on button click
             mobileCollapse.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 navigation.classList.toggle('active');
                 body.classList.toggle('sidebar-open');
             });
 
-            // Close sidebar when clicking on a link
-            const navLinks = navigation.querySelectorAll('.nxl-link');
+            // Close sidebar when clicking on a navigation link (except submenu toggles)
+            const navLinks = navigation.querySelectorAll('a.nxl-link');
             navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    // Only close for non-submenu links or for actual navigation
-                    setTimeout(() => {
-                        if (!this.closest('.nxl-hasmenu') || this.classList.contains('nxl-link')) {
-                            navigation.classList.remove('active');
-                            body.classList.remove('sidebar-open');
-                        }
-                    }, 100);
+                link.addEventListener('click', function(e) {
+                    // Check if this is a submenu toggle (has nxl-hasmenu parent without href)
+                    const parent = this.closest('.nxl-hasmenu');
+                    if (parent && this.getAttribute('href') === 'javascript:void(0);') {
+                        // This is a submenu toggle, don't close sidebar
+                        return;
+                    }
+                    
+                    // Close sidebar for regular navigation links
+                    if (window.innerWidth < 1200) {
+                        navigation.classList.remove('active');
+                        body.classList.remove('sidebar-open');
+                    }
                 });
             });
 
-            // Close sidebar when clicking backdrop
+            // Close sidebar when clicking backdrop/outside
             document.addEventListener('click', function(e) {
-                if (body.classList.contains('sidebar-open') && 
-                    !navigation.contains(e.target) && 
-                    !mobileCollapse.contains(e.target)) {
+                if (window.innerWidth < 1200 && body.classList.contains('sidebar-open')) {
+                    if (!navigation.contains(e.target) && !mobileCollapse.contains(e.target)) {
+                        navigation.classList.remove('active');
+                        body.classList.remove('sidebar-open');
+                    }
+                }
+            });
+
+            // Close sidebar when window is resized to desktop size
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1200) {
                     navigation.classList.remove('active');
                     body.classList.remove('sidebar-open');
                 }

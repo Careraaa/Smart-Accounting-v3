@@ -43,10 +43,10 @@
                     </div>
 
                     <!-- Video Stream -->
-                    <div class="video-container mb-4" id="video-container" style="position: relative; overflow: hidden; border-radius: 8px; background: #000; min-height: 300px; display: none; align-items: center; justify-content: center;">
-                        <video id="camera-stream" playsinline autoplay muted webkit-playsinline style="width: 100%; height: auto; max-height: 400px;"></video>
+                    <div class="video-container mb-4" id="video-container" style="position: relative; overflow: hidden; border-radius: 8px; background: #000; width: 100%; max-width: 100%; aspect-ratio: 4/3; display: none; align-items: center; justify-content: center; flex-direction: column; margin: 0; padding: 0;">
+                        <video id="camera-stream" playsinline autoplay muted webkit-playsinline style="width: 100%; height: 100%; object-fit: contain; display: block; max-width: 100%; max-height: 100%;"></video>
                         <canvas id="canvas" style="display: none;"></canvas>
-                        <div id="no-camera-message" class="text-white text-center" style="display: none;">
+                        <div id="no-camera-message" class="text-white text-center" style="display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0;">
                             <i class="feather-camera-off" style="font-size: 48px; margin-bottom: 10px;"></i>
                             <p>Camera Not Available</p>
                             <p class="small">Allow camera access or use a device with a camera</p>
@@ -59,35 +59,23 @@
                         <span id="status-text">Initializing camera...</span>
                     </div>
 
-                    <!-- Debug Info -->
-                    <div class="alert alert-secondary mb-3" role="alert" style="font-size: 12px; display: none;" id="debug-info">
-                        <strong>Debug Info:</strong>
-                        <br><span id="debug-text"></span>
-                        <br><button class="btn btn-sm btn-outline-secondary mt-2" type="button" id="test-camera-btn">Test Camera Access</button>
-                    </div>
-
                     <!-- Scan Result -->
                     <div id="scan-result" style="display: none;" class="alert mb-4">
                         <div id="result-message"></div>
                     </div>
 
-                    <!-- Manual Token Input (Fallback) -->
+                    <!-- Manual Token Input -->
                     <div class="mt-4">
-                        <button class="btn btn-link btn-sm w-100" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#manual-input" aria-expanded="false" aria-controls="manual-input">
-                            <i class="feather-edit-2 me-1"></i>Or enter token manually
-                        </button>
-                        <div class="collapse mt-3" id="manual-input">
-                            <form id="manual-form">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="manual-token"
-                                        placeholder="Paste or enter QR token here..." required>
-                                    <button class="btn btn-primary" type="submit">
-                                        <i class="feather-send me-1"></i>Submit
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                        <form id="manual-form">
+                            <label class="form-label">Enter Token:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" id="manual-token"
+                                    placeholder="Enter 8-character token" required maxlength="8">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="feather-send me-1"></i>Submit
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
@@ -123,8 +111,7 @@
 
                     <strong>If Camera Still Doesn't Work:</strong>
                     <ul class="mb-0">
-                        <li>Click "Test Camera Access" button (debug section) to check permission status</li>
-                        <li>Use "Or enter token manually" option to submit attendance</li>
+                        <li>Use "Enter Token Manually" option to submit attendance</li>
                         <li>Ask your administrator for a QR token</li>
                     </ul>
                 </div>
@@ -153,7 +140,6 @@
         // Check if jsQR is available
         if (typeof jsQR === 'undefined') {
             console.error('jsQR library not loaded');
-            showDebugInfo('ERROR: QR scanning library not loaded');
         } else {
             console.log('✓ jsQR library available');
         }
@@ -161,14 +147,12 @@
         // Check if mediaDevices API is available
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             console.error('getUserMedia not supported');
-            showDebugInfo('ERROR: Camera API not supported in this browser');
             updateScannerStatus('Browser does not support camera access', 'danger');
             document.getElementById('start-camera-btn').disabled = true;
             return;
         }
         
         console.log('Camera API available');
-        showDebugInfo('Device: ' + (isIOS() ? 'iPhone/iPad' : 'Other') + ' | Camera API: Available | jsQR: Ready');
 
         // Update current time
         updateTime();
@@ -176,6 +160,10 @@
 
         // Fetch last log from server
         await fetchLastLog();
+
+        // Fetch and display current token
+        await fetchCurrentToken();
+        setInterval(fetchCurrentToken, 5000); // Refresh token every 5 seconds
 
         // Add click handler to Start Camera button
         const startCameraBtn = document.getElementById('start-camera-btn');
@@ -200,6 +188,29 @@
     function updateTime() {
         const now = new Date();
         document.getElementById('current-time').textContent = now.toLocaleTimeString();
+    }
+
+    async function fetchCurrentToken() {
+        try {
+            const response = await fetch("{{ route('hr.qr.generate') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.token) {
+                    document.getElementById('display-token').textContent = data.token;
+                    console.log('✓ Current token loaded:', data.token);
+                }
+            }
+        } catch (e) {
+            console.error('Failed to fetch current token:', e);
+            document.getElementById('display-token').textContent = 'Unable to load';
+        }
     }
 
     async function fetchLastLog() {
@@ -255,13 +266,7 @@
         timeEl.textContent = logData.time;
     }
 
-    function showDebugInfo(message) {
-        const debugEl = document.getElementById('debug-info');
-        const txtEl = document.getElementById('debug-text');
-        debugEl.style.display = 'block';
-        txtEl.textContent = message;
-        console.log('[DEBUG]', message);
-    }
+
 
     async function initializeCamera() {
         video = document.getElementById('camera-stream');
@@ -269,7 +274,6 @@
         ctx = canvas.getContext('2d', { willReadFrequently: true });
 
         try {
-            showDebugInfo('Requesting camera permission...');
             console.log('Requesting camera access');
             
             // Ultra-permissive constraints for maximum compatibility
@@ -284,7 +288,6 @@
             const stream = await navigator.mediaDevices.getUserMedia(constraints);
             
             console.log('✓ Camera access granted, stream active:', stream.active);
-            showDebugInfo('✓ Camera access granted, setting up video...');
             video.srcObject = stream;
             
             // Force play for iOS
@@ -323,19 +326,12 @@
                     if (video.videoWidth > 0 && video.videoHeight > 0) {
                         console.log('Video has dimensions now, starting scan');
                         startScanning();
-                    } else {
-                        showDebugInfo('⚠️ Video stream not responding. Check browser console.');
                     }
                 }
             }, 5000);
 
         } catch (error) {
-            console.error('❌ Camera error:', {
-                name: error.name,
-                message: error.message,
-                code: error.code
-            });
-            
+            console.error('Camera error:', error);
             handleCameraError(error);
         }
     }
@@ -344,11 +340,14 @@
         console.log('⏹️ Starting QR scan');
         const videoContainer = document.getElementById('video-container');
         const cameraControls = document.getElementById('camera-controls');
+        const noCameraMsg = document.getElementById('no-camera-message');
         const startBtn = document.getElementById('start-camera-btn');
         
         // Hide button, show video container
         cameraControls.style.display = 'none';
         videoContainer.style.display = 'flex';
+        document.getElementById('camera-stream').style.display = 'block';
+        noCameraMsg.style.display = 'none';
         
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -358,8 +357,6 @@
     }
 
     function handleCameraError(error) {
-        showDebugInfo(`❌ Error: ${error.name} - ${error.message}`);
-        
         // Show detailed error message
         let errorMessage = 'Camera not available.';
         let instructions = 'Use manual token input below.';
@@ -396,7 +393,7 @@
         const noCameraMsg = document.getElementById('no-camera-message');
         noCameraMsg.style.display = 'flex';
         noCameraMsg.innerHTML = `
-            <div style="text-align: center; padding: 20px;">
+            <div style="text-align: center; padding: 20px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <i class="feather-camera-off" style="font-size: 48px; margin-bottom: 10px; display: block;"></i>
                 <p><strong>${errorMessage}</strong></p>
                 <p class="small">${instructions}</p>
@@ -555,41 +552,19 @@
         }
     }
 
-    // Test camera button
-    const testCameraBtn = document.getElementById('test-camera-btn');
-    if (testCameraBtn) {
-        testCameraBtn.addEventListener('click', async () => {
-            showDebugInfo('Testing camera access...');
-            testCameraBtn.disabled = true;
-            testCameraBtn.textContent = 'Testing...';
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: true, 
-                    audio: false 
-                });
-                
-                showDebugInfo('✓ Test successful! Camera is accessible.');
-                // Stop the test stream
-                stream.getTracks().forEach(track => track.stop());
-                testCameraBtn.textContent = '✓ Camera Test Passed';
-                testCameraBtn.className = 'btn btn-sm btn-success mt-2';
-            } catch (err) {
-                showDebugInfo(`✗ Test failed: ${err.name} - ${err.message}`);
-                testCameraBtn.textContent = '✗ Camera Test Failed';
-                testCameraBtn.className = 'btn btn-sm btn-danger mt-2';
-            }
-        });
-    }
-
     // Manual form submission
     document.getElementById('manual-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const tokenInput = document.getElementById('manual-token');
-        const token = tokenInput.value.trim();
+        const token = tokenInput.value.trim().toUpperCase();
         
         if (!token) {
             showResult('Please enter a token', 'danger');
+            return;
+        }
+        
+        if (token.length !== 8) {
+            showResult('Token must be 8 characters', 'danger');
             return;
         }
         
@@ -627,11 +602,37 @@
 <style>
     .video-container {
         aspect-ratio: 4/3;
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .video-container video {
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+    }
+
+    .video-container #no-camera-message {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .video-container #no-camera-message[style*="display: flex"] {
+        display: flex !important;
     }
 
     @media (max-width: 576px) {
         .video-container {
-            min-height: 250px;
+            aspect-ratio: 16/9;
         }
     }
 

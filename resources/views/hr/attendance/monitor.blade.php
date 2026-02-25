@@ -80,7 +80,11 @@
                                 </div>
                             </div>
 
-                            <div class="mt-4 text-white-75 small fw-medium" id="qr-timer">30 SECONDS <br> QR REFRESHING SOON</div>
+                            <div class="mt-3 text-white fw-bold font-monospace" id="token-display" style="font-size: 1.5rem; letter-spacing: 2px;">
+                                Loading...
+                            </div>
+
+                            <div class="mt-4 text-white-75 small fw-medium" id="qr-timer">60 SECONDS <br> QR REFRESHING SOON</div>
                         </div>
                     </div>
                 </div>
@@ -108,7 +112,7 @@
         let currentToken = null;
         let tokenCheckInterval = null;
         let qrRefreshInterval  = null;
-        let qrCountdown = 30;
+        let qrCountdown = 60;
 
         function updateQRTimer() {
             const el = document.getElementById("qr-timer");
@@ -138,7 +142,10 @@
                     correctLevel: QRCode.CorrectLevel.H
                 });
 
-                qrCountdown = 30;
+                // Display token text under QR code
+                document.getElementById('token-display').textContent = data.token;
+
+                qrCountdown = 60;
                 startTokenStatusCheck();
                 startQRRefresh();
             });

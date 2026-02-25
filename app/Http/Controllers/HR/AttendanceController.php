@@ -24,7 +24,12 @@ class AttendanceController extends Controller
     {
         AttendanceToken::where('expires_at', '<', now())->delete();
 
-        $token = Str::random(20);
+        // Generate 8 random alphanumeric characters (uppercase)
+        $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $token = '';
+        for ($i = 0; $i < 8; $i++) {
+            $token .= $characters[rand(0, strlen($characters) - 1)];
+        }
 
         AttendanceToken::create([
             'token' => $token,
