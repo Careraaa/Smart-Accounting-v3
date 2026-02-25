@@ -158,7 +158,6 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
 
     Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])->name('hr.qr');
 
-    Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])->name('hr.attendance.monitor');
 
     // ---------------- PAYROLL ROUTES ----------------//
     Route::prefix('payroll/salary-computation')

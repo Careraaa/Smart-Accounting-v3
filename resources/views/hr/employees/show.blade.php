@@ -10,18 +10,21 @@
                     <h4 class="mb-0">
                         {{ $employee->first_name }} {{ $employee->middle_name }} {{ $employee->last_name }}
                     </h4>
-                    <div>
+                    <div class="d-flex gap-2"> {{-- flex container for buttons --}}
                         <a href="{{ route('employees.edit', $employee) }}" class="btn btn-primary btn-sm">
                             <i class="bi bi-pencil me-1"></i> Edit
                         </a>
-                        <form action="{{ route('employees.destroy', $employee) }}" method="POST" class="d-inline"
-                            onsubmit="return confirm('Are you sure you want to delete this employee?')">
+
+                        <form action="{{ route('employees.destroy', $employee) }}" method="POST"
+                            onsubmit="return confirm('Are you sure you want to delete this employee?')" class="d-inline">
+                            {{-- keep d-inline --}}
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm">
                                 <i class="bi bi-trash me-1"></i> Delete
                             </button>
                         </form>
+
                         <a href="{{ route('employees.index') }}" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-arrow-left me-1"></i> Back
                         </a>
