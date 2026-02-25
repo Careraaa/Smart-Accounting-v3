@@ -31,7 +31,6 @@ Route::get('/dashboard', function () {
     } elseif (auth()->user()->role === 'employee') {
         return redirect()->route('employee.index');
     }
-    // Default dashboard for other roles
     return view('dashboard');
 })
     ->middleware(['auth', 'verified'])
@@ -57,7 +56,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ]);
 
         if ($request->hasFile('profile_picture')) {
-            // Delete old profile picture if it exists
             if ($user->profile_picture) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
             }
@@ -83,26 +81,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function () {
     Route::get('/remittance-clerk', [RemittanceClerkDashboardController::class, 'index'])->name('remittance-clerk.index');
 
-    // Management (Routes & Vehicles Combined)
     Route::get('/management', function () {
         return redirect()->route('routes.index');
     })->name('management.index');
 
-    // Driver Routes
     Route::resource('drivers', DriverController::class);
-
-    // PAO Routes
     Route::resource('paos', PAOController::class);
-
-    // Routes Management
     Route::resource('routes', RouteController::class);
-
-    // Vehicles Management
     Route::resource('vehicles', VehicleController::class);
-
-    // Remittance Routes
     Route::resource('remittances', DailyRemittanceController::class);
-    // Daily Remittance Routes
+
     Route::get('/remittance/assigned-driver', function () {
         return view('remittance-clerk.remittances.assigned-driver');
     })->name('remittance.assigned-driver');
@@ -119,7 +107,6 @@ Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function
         return view('remittance-clerk.remittances.trip-expenses');
     })->name('remittance.trip-expenses');
 
-    // Remittance Report Routes
     Route::get('/reports/remittance-details', function () {
         $remittances = \App\Models\DailyRemittance::all();
         return view('remittance-clerk.reports.remittance-details', compact('remittances'));
@@ -138,53 +125,42 @@ Route::middleware(['auth', 'verified', 'role:employee'])->group(function () {
     })->name('employee.index');
 });
 
-// ===== EMPLOYEE DASHBOARD (All authenticated users) =====
+// ===== EMPLOYEE / ALL AUTH ROUTES =====
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/employee', function () {
         return view('employee.dashboard');
     })->name('employee.dashboard');
 
-    Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])
-        ->name('attendance.scan');
+    // Attendance scan (phone users)
+    Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])->name('attendance.scan');
 
-    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
-        ->name('attendance.lastlog');
+    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])->name('attendance.lastlog');
 
-    Route::post('/hr/attendance/qr/submit', [AttendanceController::class, 'submit'])
-        ->name('hr.qr.submit');
+    // Submit QR scan (phone users POST here)
+    Route::post('/hr/attendance/qr/submit', [AttendanceController::class, 'submit'])->name('hr.qr.submit');
+
+    // ── These must be accessible by the monitor display (HR session) ──
+    // and also by the phone for token-status checks.
+    // Moved OUT of role:hr so they work across sessions/roles.
+    Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])->name('hr.qr.generate');
+
+    Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])->name('api.qr.token-status');
+
+    Route::get('/api/attendance/recent', [AttendanceController::class, 'getRecentAttendance'])->name('api.attendance.recent');
 });
 
 // ===== HR ROUTES =====
 Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
-    Route::get('/hr', [HRDashboardController::class, 'index'])
-        ->name('hr.index');
+    Route::get('/hr', [HRDashboardController::class, 'index'])->name('hr.index');
 
-    // Employee Routes - Full CRUD
     Route::resource('employees', EmployeeController::class);
-
-    // Attendance Routes
     Route::resource('attendance', AttendanceController::class);
 
-    Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])
-        ->name('hr.qr');
+    Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])->name('hr.qr');
 
-    Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])
-        ->name('hr.attendance.monitor');
-
-    Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])
-        ->name('hr.qr.generate');
-
-    Route::get('/api/attendance/recent', [AttendanceController::class, 'getRecentAttendance'])
-        ->name('api.attendance.recent');
-
-    Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])
-        ->name('api.qr.token-status');
-
-    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
-        ->name('attendance.lastlog');
+    Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])->name('hr.attendance.monitor');
 
     // ---------------- PAYROLL ROUTES ----------------//
-    // Salary Computation
     Route::prefix('payroll/salary-computation')
         ->name('payroll.salary-computation.')
         ->group(function () {
@@ -197,7 +173,6 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
             Route::delete('/{payroll}', [PayrollController::class, 'destroy'])->name('destroy');
         });
 
-    // Statutory Deductions
     Route::prefix('payroll/statutory-deductions')
         ->name('payroll.statutory-deductions.')
         ->group(function () {
@@ -208,7 +183,7 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
             Route::put('/{id}', [StatutoryDeductionController::class, 'update'])->name('update');
             Route::delete('/{id}', [StatutoryDeductionController::class, 'destroy'])->name('destroy');
         });
-    // Payroll Receivables
+
     Route::prefix('payroll/receivables')
         ->name('payroll.receivables.')
         ->group(function () {
@@ -219,7 +194,6 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
 
     Route::post('/payroll/statutory-deductions/compute', [PayrollController::class, 'computeStatutory'])->name('payroll.statutory.compute');
 
-    // Generate Payslip
     Route::prefix('payroll/generate-payslip')
         ->name('payroll.generate-payslip.')
         ->group(function () {
@@ -228,11 +202,9 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
             })->name('index');
         });
 
-    // Payroll CRUD resource routes
     Route::resource('payroll', PayrollController::class);
     Route::get('payroll/{payroll}/payslip', [PayrollController::class, 'generatePayslip'])->name('payroll.generatePayslip');
 
-    // Payroll Report Routes
     Route::get('/reports/payslips', function () {
         return view('hr.reports.payslips');
     })->name('reports.payslips');
@@ -261,17 +233,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'role:accountant'])->group(function () {
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
 
-    // Payroll Approval Routes
     Route::resource('payroll-approval', PayrollApprovalController::class, ['only' => ['index', 'show']]);
     Route::post('payroll-approval/{payroll}/approve', [PayrollApprovalController::class, 'approve'])->name('payroll-approval.approve');
     Route::post('payroll-approval/{payroll}/reject', [PayrollApprovalController::class, 'reject'])->name('payroll-approval.reject');
 
-    // Remittance Approval Routes
     Route::get('/remittance-approval', [RemittanceApprovalController::class, 'index'])->name('remittance-approval.index');
     Route::post('/remittance-approval/{remittance}/approve', [RemittanceApprovalController::class, 'approve'])->name('remittance-approval.approve');
     Route::post('/remittance-approval/{remittance}/reject', [RemittanceApprovalController::class, 'reject'])->name('remittance-approval.reject');
 
-    // Reports Routes
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');
     Route::get('/reports/payroll-approval', function () {
         return view('accountant.reports.payroll-approval');

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="IE=edge" />
@@ -39,7 +40,7 @@
                     <div class="card glass-card h-100 shadow-xl border-0">
                         <div class="card-body p-3 p-lg-4">
                             <h5 class="fw-semibold mb-4 text-dark text-center">HOW TO LOG ATTENDANCE</h5>
-                            
+
                             <ol class="instruction-steps list-unstyled">
                                 <li>
                                     <strong>Open Smart Accounting</strong>
@@ -47,7 +48,8 @@
                                 </li>
                                 <li>
                                     <strong>Sign in</strong>
-                                    <span class="text-muted d-block mt-1 small">using your registered email (complete OTP if required)</span>
+                                    <span class="text-muted d-block mt-1 small">using your registered email (complete
+                                        OTP if required)</span>
                                 </li>
                                 <li>
                                     <strong>Go to Scan QR</strong>
@@ -55,7 +57,8 @@
                                 </li>
                                 <li>
                                     <strong>Scan the code below</strong>
-                                    <span class="text-muted d-block mt-1 small">align your camera with this screen</span>
+                                    <span class="text-muted d-block mt-1 small">align your camera with this
+                                        screen</span>
                                 </li>
                                 <li>
                                     <strong>Confirmation appears</strong>
@@ -69,9 +72,10 @@
                 <!-- Right – QR Code -->
                 <div class="col-12 col-lg-5">
                     <div class="card glass-card h-100 shadow-xl border-0 qr-panel">
-                        <div class="card-body p-4 p-lg-5 d-flex flex-column align-items-center justify-content-center text-center position-relative">
+                        <div
+                            class="card-body p-4 p-lg-5 d-flex flex-column align-items-center justify-content-center text-center position-relative">
                             <h5 class="fw-semibold mb-4 text-white">SCAN HERE</h5>
-                            
+
                             <div class="qr-container">
                                 <div id="qrcode" class="qr-code"></div>
                                 <div id="scan-success" class="alert alert-success d-none success-flash">
@@ -80,11 +84,13 @@
                                 </div>
                             </div>
 
-                            <div class="mt-3 text-white fw-bold font-monospace" id="token-display" style="font-size: 1.5rem; letter-spacing: 2px;">
+                            <div class="mt-3 text-white fw-bold font-monospace" id="token-display"
+                                style="font-size: 1.5rem; letter-spacing: 2px;">
                                 Loading...
                             </div>
 
-                            <div class="mt-4 text-white-75 small fw-medium" id="qr-timer">60 SECONDS <br> QR REFRESHING SOON</div>
+                            <div class="mt-4 text-white-75 small fw-medium" id="qr-timer">60 SECONDS <br> QR REFRESHING
+                                SOON</div>
                         </div>
                     </div>
                 </div>
@@ -100,9 +106,14 @@
         // Clock & Date
         function updateClock() {
             const now = new Date();
-            document.getElementById("digital-clock").textContent = now.toLocaleTimeString([], {hour12: true});
+            document.getElementById("digital-clock").textContent = now.toLocaleTimeString([], {
+                hour12: true
+            });
             document.getElementById("current-date").textContent = now.toLocaleDateString('en-US', {
-                weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
             });
         }
         setInterval(updateClock, 1000);
@@ -111,7 +122,7 @@
         // ────────────────────────────────────────────────
         let currentToken = null;
         let tokenCheckInterval = null;
-        let qrRefreshInterval  = null;
+        let qrRefreshInterval = null;
         let qrCountdown = 60;
 
         function updateQRTimer() {
@@ -124,31 +135,33 @@
 
         function loadQR() {
             fetch("{{ route('hr.qr.generate') }}", {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-            })
-            .then(r => r.json())
-            .then(data => {
-                currentToken = data.token;
-                const qrDiv = document.getElementById('qrcode');
-                qrDiv.innerHTML = '';
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    currentToken = data.token;
+                    const qrDiv = document.getElementById('qrcode');
+                    qrDiv.innerHTML = '';
 
-                new QRCode(qrDiv, {
-                    text: data.token,
-                    width: 260,
-                    height: 260,
-                    colorDark: "#1a1a1a",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
+                    new QRCode(qrDiv, {
+                        text: data.token,
+                        width: 260,
+                        height: 260,
+                        colorDark: "#1a1a1a",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+
+                    // Display token text under QR code
+                    document.getElementById('token-display').textContent = data.token;
+
+                    qrCountdown = 60;
+                    startTokenStatusCheck();
+                    startQRRefresh();
                 });
-
-                // Display token text under QR code
-                document.getElementById('token-display').textContent = data.token;
-
-                qrCountdown = 60;
-                startTokenStatusCheck();
-                startQRRefresh();
-            });
         }
 
         function startQRRefresh() {
@@ -203,7 +216,7 @@
 
     <style>
         :root {
-            --primary: #cc3d38;   
+            --primary: #cc3d38;
             --primary-dark: #530a0a;
             --bg: #e6e6e6;
         }
@@ -247,12 +260,12 @@
             background: white;
             border-radius: 16px;
             padding: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             transition: all 0.4s ease;
         }
 
         .qr-container.success-active {
-            box-shadow: 0 0 0 6px rgba(34,197,94,0.4);
+            box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.4);
             transform: scale(1.04);
         }
 
@@ -305,7 +318,7 @@
             justify-content: center;
             font-size: 1.3rem;
             font-weight: 600;
-            background: rgba(34,197,94,0.95);
+            background: rgba(34, 197, 94, 0.95);
             color: white;
             border-radius: 16px;
             z-index: 10;
@@ -315,6 +328,7 @@
             .instruction-steps li {
                 padding: 0.9rem 0.9rem 0.9rem 3.4rem;
             }
+
             .instruction-steps li::before {
                 width: 2.2rem;
                 height: 2.2rem;
@@ -325,7 +339,8 @@
     </style>
 
     <!-- Optional: animate.css for smoother success animation -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
 </body>
+
 </html>

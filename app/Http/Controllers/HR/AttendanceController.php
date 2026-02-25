@@ -33,7 +33,8 @@ class AttendanceController extends Controller
 
         AttendanceToken::create([
             'token' => $token,
-            'expires_at' => now()->addSeconds(60)
+            'expires_at' => now()->addSeconds(60),
+            'user_id' => auth()->id(),
         ]);
 
         // Store current token in cache for monitoring
