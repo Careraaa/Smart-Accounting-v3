@@ -134,22 +134,30 @@
     // Load today's attendance logs
     window.addEventListener('load', async () => {
         try {
-            // For now, we'll show a sample message
-            // This can be expanded to fetch actual logs via an API
-            const lastLog = localStorage.getItem('lastAttendanceLog');
-            
-            if (lastLog) {
-                const logData = JSON.parse(lastLog);
-                document.getElementById('current-status').textContent = logData.type.replace('_', ' ').toUpperCase();
-                document.getElementById('current-status').className = `badge bg-${logData.type === 'time_in' ? 'success' : 'warning'}`;
-                document.getElementById('last-log-time').textContent = logData.time;
+            // Fetch last log from server
+            const response = await fetch("{{ route('attendance.lastlog') }}", {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.type) {
+                    document.getElementById('current-status').textContent = data.type.replace('_', ' ').toUpperCase();
+                    document.getElementById('current-status').className = `badge bg-${data.type === 'time_in' ? 'success' : 'warning'}`;
+                    document.getElementById('last-log-time').textContent = data.time;
+                } else {
+                    document.getElementById('current-status').textContent = 'NOT LOGGED';
+                    document.getElementById('current-status').className = 'badge bg-danger';
+                }
             } else {
                 document.getElementById('current-status').textContent = 'NOT LOGGED';
                 document.getElementById('current-status').className = 'badge bg-danger';
             }
 
             // Fetch attendance logs for today
-            // This would need an endpoint to be created to fetch real data
             const logsHtml = `
                 <div class="list-group-item">
                     <div class="d-flex justify-content-between align-items-center">
@@ -162,7 +170,9 @@
             `;
             document.getElementById('attendance-logs').innerHTML = logsHtml;
         } catch (e) {
-            console.log('No logs available');
+            console.log('Error loading attendance logs:', e);
+            document.getElementById('current-status').textContent = 'NOT LOGGED';
+            document.getElementById('current-status').className = 'badge bg-danger';
         }
     });
 </script>

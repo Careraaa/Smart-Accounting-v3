@@ -83,6 +83,35 @@ class AttendanceController extends Controller
             'logged_at' => now()
         ]);
 
+        // Save to Attendance table
+        if ($user->employee) {
+            $today = today();
+            $currentTime = now()->format('H:i:s');
+            
+            if ($type === 'time_in') {
+                // Create new attendance record for today
+                Attendance::updateOrCreate(
+                    [
+                        'employee_id' => $user->employee->id,
+                        'date' => $today
+                    ],
+                    [
+                        'time_in' => $currentTime,
+                        'status' => 'present'
+                    ]
+                );
+            } else { // time_out
+                // Update existing attendance record
+                $attendance = Attendance::where('employee_id', $user->employee->id)
+                    ->where('date', $today)
+                    ->first();
+                
+                if ($attendance) {
+                    $attendance->update(['time_out' => $currentTime]);
+                }
+            }
+        }
+
         $token->update(['used' => true]);
 
         $employeeName = $user->employee ? $user->employee->name : $user->name;

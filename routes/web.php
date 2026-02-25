@@ -135,6 +135,13 @@ Route::middleware(['auth', 'verified', 'role:employee'])->group(function () {
     Route::get('/employee', function () {
         return view('employee.dashboard');
     })->name('employee.index');
+});
+
+// ===== EMPLOYEE DASHBOARD (All authenticated users) =====
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard/employee', function () {
+        return view('employee.dashboard');
+    })->name('employee.dashboard');
 
     Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])
         ->name('attendance.scan');

@@ -137,6 +137,9 @@
         console.log('Device is iOS:', isIOS());
         console.log('User Agent:', navigator.userAgent);
         
+        // Clear any stale localStorage from previous user sessions
+        localStorage.removeItem('lastAttendanceLog');
+        
         // Check if jsQR is available
         if (typeof jsQR === 'undefined') {
             console.error('jsQR library not loaded');
@@ -230,28 +233,12 @@
                 }
             }
 
-            // Fallback to localStorage
-            const lastLog = localStorage.getItem('lastAttendanceLog');
-            if (lastLog) {
-                try {
-                    const logData = JSON.parse(lastLog);
-                    displayLastLog(logData);
-                } catch (e) {
-                    console.log('Failed to parse localStorage lastAttendanceLog');
-                }
-            }
+            // No log found - hide the last log element
+            document.getElementById('last-log').style.display = 'none';
         } catch (e) {
             console.log('No previous log found');
-            // Fallback to localStorage
-            const lastLog = localStorage.getItem('lastAttendanceLog');
-            if (lastLog) {
-                try {
-                    const logData = JSON.parse(lastLog);
-                    displayLastLog(logData);
-                } catch (e) {
-                    console.log('Failed to parse localStorage');
-                }
-            }
+            // Hide last log element on error
+            document.getElementById('last-log').style.display = 'none';
         }
     }
 
@@ -495,18 +482,13 @@
                 const logTime = new Date().toLocaleTimeString();
                 const logType = data.message.toLowerCase().includes('time in') ? 'time_in' : 'time_out';
 
-                // Store in localStorage
-                localStorage.setItem('lastAttendanceLog', JSON.stringify({
-                    type: logType,
-                    time: logTime
-                }));
-
                 showResult(data.message, 'success');
                 updateScannerStatus('✓ Attendance recorded successfully!', 'success');
                 displayLastLog({ type: logType, time: logTime });
 
-                // Resume scanning after delay
-                setTimeout(() => {
+                // Refresh last log from server after scan
+                setTimeout(async () => {
+                    await fetchLastLog();
                     resumeScanning();
                 }, 3000);
             } else {

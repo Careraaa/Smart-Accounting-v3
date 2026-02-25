@@ -19,14 +19,12 @@
                 </li>
 
                 <!-- Employee Section -->
-                @if (auth()->user()->role === 'employee')
-                    <li class="nxl-item">
-                        <a href="{{ route('attendance.scan') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-camera"></i></span>
-                            <span class="nxl-mtext">Scan QR Attendance</span>
-                        </a>
-                    </li>
-                @endif
+                <li class="nxl-item">
+                    <a href="{{ route('attendance.scan') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-camera"></i></span>
+                        <span class="nxl-mtext">Scan QR Attendance</span>
+                    </a>
+                </li>
 
                 <!-- Remittance Clerk Section -->
                 @if (auth()->user()->role === 'remittance_clerk')
