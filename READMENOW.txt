@@ -11,7 +11,17 @@ RUN IN TERMINAL
 5. php artisan migrate
 6. php artisan db:seed (or php artisan migrate:fresh --seed)
 7. php artisan storage:link
+
+-- FOR LOCALHOST --
 8. now go to localhost(browser). Go to Smart-Accounting-v3/public
+    --If error appears double check steps 1 to 4.--
+    --Accounts Passwords: password123--
+
+-- FOR NGROK --
+8. install ngrok
+9. open cmd and paste this : ngrok config add-authtoken 3A0lcxa4hy862Tte1EdW5Hf3DB5_6W46w9Pmi5vjkGzRKkNr4
+10. edit .env file APP_URL, change into this : https://tami-radioactive-spectacularly.ngrok-free.dev
+11. go back to cmd and run this : ngrok http 80
     --If error appears double check steps 1 to 4.--
     --Accounts Passwords: password123--
 

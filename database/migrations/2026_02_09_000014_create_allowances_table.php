@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trip_expenses', function (Blueprint $table) {
+        Schema::create('allowances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('daily_remittance_id')->constrained('daily_remittances')->onDelete('cascade');
-            $table->string('expense_type');
-            $table->text('description')->nullable();
+            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('payroll_id')->nullable()->constrained('payrolls')->onDelete('cascade');
+            $table->string('allowance_type');
             $table->decimal('amount', 10, 2);
-            $table->date('expense_date');
-            $table->text('notes')->nullable();
+            $table->date('effective_date');
+            $table->string('status')->default('active');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('trip_expenses');
+        Schema::dropIfExists('allowances');
     }
 };

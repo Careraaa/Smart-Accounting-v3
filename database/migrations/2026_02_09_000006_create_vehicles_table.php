@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('paos', function (Blueprint $table) {
+        Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('conductor_id')->unique();
-            $table->string('contact_number');
-            $table->string('email')->unique();
-            $table->text('address')->nullable();
-            $table->date('date_of_hire');
+            $table->string('plate_number')->unique();
+            $table->foreignId('route_id')->constrained()->onDelete('cascade');
+            $table->string('operator');
             $table->string('status')->default('active');
             $table->timestamps();
         });
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('paos');
+        Schema::dropIfExists('vehicles');
     }
 };

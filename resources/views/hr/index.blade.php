@@ -286,7 +286,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">Recent Attendance Records</h5>
-                <a href="#" class="btn btn-primary btn-sm">View All</a>
+                <a href="{{ route('attendance.index') }}" class="btn btn-primary btn-sm">View All</a>
             </div>
             <div class="card-body">
                 <div class="table-responsive">

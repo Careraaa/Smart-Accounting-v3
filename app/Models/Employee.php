@@ -35,15 +35,32 @@ class Employee extends Model
         'tin_number',
         'pagibig_number',
         'signature_path',
-        'attachments', // ← added
+        'attachments',
     ];
 
     protected $casts = [
-        'date_of_birth' => 'date',
-        'date_of_hire' => 'date',
+        'date_of_birth'           => 'date',
+        'date_of_hire'            => 'date',
         'driver_license_validity' => 'date',
-        'attachments' => 'array',
+        'attachments'             => 'array',
     ];
+
+    // Accessor
+    public function getNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
+    // Relationships
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 
     public function beneficiaries()
     {

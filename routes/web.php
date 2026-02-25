@@ -23,14 +23,13 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     if (auth()->user()->role === 'remittance_clerk') {
-        $controller = new RemittanceClerkDashboardController();
-        return $controller->index();
+        return redirect()->route('remittance-clerk.index');
     } elseif (auth()->user()->role === 'accountant') {
-        $controller = new AccountantDashboardController();
-        return $controller->index();
+        return redirect()->route('accountant.index');
     } elseif (auth()->user()->role === 'hr') {
-        $controller = new HRDashboardController();
-        return $controller->index();
+        return redirect()->route('hr.index');
+    } elseif (auth()->user()->role === 'employee') {
+        return redirect()->route('employee.index');
     }
     // Default dashboard for other roles
     return view('dashboard');
@@ -82,7 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // ===== REMITTANCE CLERK ROUTES =====
 Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function () {
-    Route::get('/remittance-clerk', [DashboardController::class, 'index'])->name('remittance-clerk.index');
+    Route::get('/remittance-clerk', [RemittanceClerkDashboardController::class, 'index'])->name('remittance-clerk.index');
 
     // Management (Routes & Vehicles Combined)
     Route::get('/management', function () {
@@ -132,17 +131,57 @@ Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function
     })->name('reports.remittance-summary');
 });
 
+// ===== EMPLOYEE ROUTES =====
+Route::middleware(['auth', 'verified', 'role:employee'])->group(function () {
+    Route::get('/employee', function () {
+        return view('employee.dashboard');
+    })->name('employee.index');
+});
+
+// ===== EMPLOYEE DASHBOARD (All authenticated users) =====
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard/employee', function () {
+        return view('employee.dashboard');
+    })->name('employee.dashboard');
+
+    Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])
+        ->name('attendance.scan');
+
+    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
+        ->name('attendance.lastlog');
+
+    Route::post('/hr/attendance/qr/submit', [AttendanceController::class, 'submit'])
+        ->name('hr.qr.submit');
+});
+
 // ===== HR ROUTES =====
 Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
-    Route::get('/hr', function () {
-        return view('hr.index');
-    })->name('hr.index');
+    Route::get('/hr', [HRDashboardController::class, 'index'])
+        ->name('hr.index');
 
     // Employee Routes - Full CRUD
     Route::resource('employees', EmployeeController::class);
 
     // Attendance Routes
     Route::resource('attendance', AttendanceController::class);
+
+    Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])
+        ->name('hr.qr');
+
+    Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])
+        ->name('hr.attendance.monitor');
+
+    Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])
+        ->name('hr.qr.generate');
+
+    Route::get('/api/attendance/recent', [AttendanceController::class, 'getRecentAttendance'])
+        ->name('api.attendance.recent');
+
+    Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])
+        ->name('api.qr.token-status');
+
+    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
+        ->name('attendance.lastlog');
 
     // ---------------- PAYROLL ROUTES ----------------//
     // Salary Computation
@@ -220,9 +259,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // ===== ACCOUNTANT ROUTES =====
 Route::middleware(['auth', 'verified', 'role:accountant'])->group(function () {
-    Route::get('/accountant', function () {
-        return view('accountant.index');
-    })->name('accountant.index');
+    Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
 
     // Payroll Approval Routes
     Route::resource('payroll-approval', PayrollApprovalController::class, ['only' => ['index', 'show']]);
