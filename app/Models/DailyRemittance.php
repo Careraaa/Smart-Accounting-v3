@@ -44,14 +44,4 @@ class DailyRemittance extends Model
     {
         return $this->belongsTo(Vehicle::class);
     }
-
-    public function fares()
-    {
-        return $this->hasMany(FareCollection::class);
-    }
-
-    public function expenses()
-    {
-        return $this->hasMany(TripExpense::class);
-    }
 }

@@ -50,7 +50,7 @@ class DailyRemittanceController extends Controller
 
     public function show(DailyRemittance $remittance)
     {
-        $remittance->load('driver', 'pao', 'route', 'vehicle', 'fares', 'expenses');
+        $remittance->load('driver', 'pao', 'route', 'vehicle');
         return view('remittance-clerk.remittances.show', compact('remittance'));
     }
 

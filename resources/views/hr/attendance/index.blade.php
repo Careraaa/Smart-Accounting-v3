@@ -21,29 +21,30 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">Attendance Records</h5>
+                    <h5 class="card-title mb-0">Attendance Records</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                <th>Date</th>
-                                <th>Time In</th>
-                                <th>Time Out</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Recent QR Scans Section -->
-                            <tbody id="recent-scans-tbody">
+                    <div class="table-responsive">
+                        <table class="table table-hover w-100">
+                            <thead>
                                 <tr>
-                                    <td colspan="6" class="text-muted text-center py-3">Loading recent scans...</td>
+                                    <th>Employee</th>
+                                    <th>Date</th>
+                                    <th>Time In</th>
+                                    <th>Time Out</th>
+                                    <th>Status</th>
                                 </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Recent QR Scans Section -->
+                                <tbody id="recent-scans-tbody">
+                                    <tr>
+                                        <td colspan="5" class="text-muted text-center py-3">Loading recent scans...</td>
+                                    </tr>
+                                </tbody>
                             </tbody>
-                        </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,7 +64,7 @@
             console.log('API Response:', logs);
 
             if (!logs || logs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center py-3">No recent QR scans</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center py-3">No recent QR scans</td></tr>';
                 return;
             }
 
@@ -113,11 +114,13 @@
                 `;
             });
 
+            // Add invisible spacer row to fix bottom button clipping
+            html += '<tr style="height: 8px;"><td colspan="5"></td></tr>';
             tbody.innerHTML = html;
         } catch (error) {
             console.error('Failed to load recent scans:', error);
             document.getElementById('recent-scans-tbody').innerHTML = 
-                '<tr><td colspan="6" class="text-danger text-center py-3"><i class="feather-alert-circle me-2"></i>Failed to load recent scans</td></tr>';
+                '<tr><td colspan="5" class="text-danger text-center py-3"><i class="feather-alert-circle me-2"></i>Failed to load recent scans</td></tr>';
         }
     }
 

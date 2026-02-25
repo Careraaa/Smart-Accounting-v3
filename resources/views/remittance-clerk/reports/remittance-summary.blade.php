@@ -10,8 +10,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover w-100"
-                                style="border-collapse: separate; border-spacing: 0 0.25rem;">
+                            <table class="table table-hover w-100">
                                 <thead>
                                     <tr>
                                         <th style="width:20%">Driver</th>
@@ -36,9 +35,8 @@
                                             </td>
                                             <td class="text-center align-middle">
                                                 <a href="{{ route('remittances.index') }}?driver_id={{ $driverRemittances->first()->driver_id }}"
-                                                    class="btn btn-outline-info btn-sm border-1 rounded"
-                                                    title="View Details">
-                                                    <i class="feather-eye"></i> View
+                                                    class="btn btn-outline-info btn-sm border-1 rounded" title="View Details">
+                                                    <i class="feather-eye"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -49,25 +47,11 @@
                                         </tr>
                                     @endforelse
 
+                                    <!-- Invisible spacer row to fix bottom button clipping -->
                                     <tr style="height: 8px;">
                                         <td colspan="6"></td>
                                     </tr>
                                 </tbody>
-
-                                <tfoot>
-                                    <tr style="border-top: 2px solid #dee2e6;" class="fw-bold">
-                                        <td>TOTAL</td>
-                                        <td>{{ $remittances->count() }}</td>
-                                        <td>₱{{ number_format($remittances->sum('total_collection'), 2) }}</td>
-                                        <td>₱{{ number_format($remittances->sum('total_expenses'), 2) }}</td>
-                                        <td>
-                                            <span class="badge bg-soft-success text-success px-3">
-                                                ₱{{ number_format($remittances->sum('net_remittance'), 2) }}
-                                            </span>
-                                        </td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
                             </table>
                         </div>
                     </div>
