@@ -89,7 +89,7 @@
                                     class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('hr.qr') }}">QR Time
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">QR Time
                                     IN / OUT Records</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Leave
                                     Management</a></li>
