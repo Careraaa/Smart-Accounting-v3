@@ -3,29 +3,29 @@
 @section('title', 'Confirm Password - Smart Accounting')
 
 @section('content')
-    <h2 class="fs-20 fw-bolder mb-4">Confirm Password</h2>
-    <h4 class="fs-13 fw-bold mb-2">Security Check</h4>
-    <p class="fs-12 fw-medium text-muted">Please confirm your password to continue with this sensitive operation.</p>
+    <div class="mb-5">
+        <h1 class="auth-page-title">Confirm Password</h1>
+        <p class="auth-page-sub">This area requires your password to continue.</p>
+    </div>
 
-    <form method="POST" action="{{ route('password.confirm') }}" class="w-100 mt-4 pt-2">
+    <form method="POST" action="{{ route('password.confirm') }}" class="w-100">
         @csrf
 
         <div class="mb-4">
             <label for="password" class="form-label">Password</label>
-            <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" 
-                   name="password" required autocomplete="current-password" placeholder="••••••••">
+            <input id="password" type="password"
+                class="form-control @error('password') is-invalid @enderror"
+                name="password" required autocomplete="current-password"
+                placeholder="••••••••">
             @error('password')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
         </div>
 
-        <div class="mt-5">
-            <button type="submit" class="btn btn-lg btn-primary w-100">Confirm Password</button>
-        </div>
+        <button type="submit" class="btn-auth">Confirm &amp; Continue</button>
     </form>
 
-    <div class="mt-5 text-muted text-center">
-        <span>Don't have access?</span>
-        <a href="{{ route('password.request') }}" class="fw-bold">Reset Password</a>
+    <div class="auth-footer-text">
+        Need to reset? <a href="{{ route('password.request') }}">Reset Password</a>
     </div>
 @endsection

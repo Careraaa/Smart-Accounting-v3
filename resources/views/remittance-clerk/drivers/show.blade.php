@@ -1,68 +1,122 @@
 @extends('layouts.layout')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title">Driver Details</h5>
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('drivers.edit', $driver) }}" class="btn btn-warning btn-sm">Edit</a>
-                        <a href="{{ route('drivers.index') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+<div class="col-md-10 offset-md-1">
+
+    {{-- Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="fw-bold mb-0" style="color:#1c1c1e;">{{ $driver->name }}</h5>
+            <span class="emp-view-label">Driver</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('drivers.edit', $driver) }}" class="emp-action-btn emp-action-edit">
+                <i class="feather-edit-2 me-1"></i> Edit
+            </a>
+            <form action="{{ route('drivers.destroy', $driver) }}" method="POST"
+                onsubmit="return confirm('Are you sure you want to delete this driver?')" class="d-inline">
+                @csrf @method('DELETE')
+                <button type="submit" class="emp-action-btn emp-action-danger">
+                    <i class="feather-trash-2 me-1"></i> Delete
+                </button>
+            </form>
+            <a href="{{ route('drivers.index') }}" class="emp-action-btn emp-action-back">
+                <i class="feather-arrow-left me-1"></i> Back
+            </a>
+        </div>
+    </div>
+
+    {{-- Driver Information --}}
+    <div class="card mb-3">
+        <div class="card-header"><span class="card-title mb-0">Driver Information</span></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <span class="emp-field-label">Name</span>
+                    <div class="emp-field-value">{{ $driver->name ?? '—' }}</div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <span class="emp-field-label">License Number</span>
+                    <div class="emp-field-value">{{ $driver->license_number ?? '—' }}</div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <span class="emp-field-label">Contact Number</span>
+                    <div class="emp-field-value">{{ $driver->contact_number ?? '—' }}</div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <span class="emp-field-label">Email</span>
+                    <div class="emp-field-value">{{ $driver->email ?? '—' }}</div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <span class="emp-field-label">Date of Hire</span>
+                    <div class="emp-field-value">{{ $driver->date_of_hire?->format('F d, Y') ?? '—' }}</div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <span class="emp-field-label">Status</span>
+                    <div class="mt-1">
+                        @if ($driver->status === 'active')
+                            <span class="emp-badge emp-badge-active">Active</span>
+                        @elseif ($driver->status === 'pending')
+                            <span class="emp-badge emp-badge-pending">Pending</span>
+                        @else
+                            <span class="emp-badge emp-badge-inactive">Inactive</span>
+                        @endif
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Name</label>
-                                <p class="fs-5">{{ $driver->name }}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted">License Number</label>
-                                <p class="fs-5">{{ $driver->license_number }}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Contact Number</label>
-                                <p class="fs-5">{{ $driver->contact_number }}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Email</label>
-                                <p class="fs-5">{{ $driver->email }}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Date of Hire</label>
-                                <p class="fs-5">{{ $driver->date_of_hire ? $driver->date_of_hire->format('M d, Y') : 'N/A' }}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-muted">Status</label>
-                                <p><span class="badge bg-soft-success text-success">{{ $driver->status }}</span></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if($driver->address)
-                        <div class="mb-3">
-                            <label class="form-label text-muted">Address</label>
-                            <p class="fs-5">{{ $driver->address }}</p>
-                        </div>
-                    @endif
-
-                    <hr>
-
-                    <div class="d-flex gap-2">
-                        <form action="{{ route('drivers.destroy', $driver) }}" method="POST">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this driver?')">Delete Driver</button>
-                        </form>
-                    </div>
+                @if ($driver->address)
+                <div class="col-md-12 mb-3">
+                    <span class="emp-field-label">Address</span>
+                    <div class="emp-field-value">{{ $driver->address }}</div>
                 </div>
+                @endif
             </div>
         </div>
     </div>
+
 </div>
+
+<style>
+.emp-field-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9898a8;
+    display: block;
+    margin-bottom: 3px;
+}
+.emp-field-value { font-size: 0.875rem; color: #4a4a58; }
+.emp-view-label  { font-size: 0.8rem; color: #9898a8; margin-top: 2px; display: block; }
+.emp-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+.emp-badge-active   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.emp-badge-inactive { background: #fff5f5; color: #c8292a; border: 1px solid #fcd0d0; }
+.emp-badge-pending  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+.emp-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 6px;
+    background: #f4f5f7;
+    border: none;
+    color: #9898a8;
+    font-size: 0.815rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.13s, color 0.13s;
+    white-space: nowrap;
+}
+.emp-action-btn.emp-action-edit:hover   { background: #fffbeb; color: #d97706; }
+.emp-action-btn.emp-action-danger:hover { background: #fff1f2; color: #e11d48; }
+.emp-action-btn.emp-action-back:hover   { background: #f0f9ff; color: #3b82f6; }
+</style>
 @endsection

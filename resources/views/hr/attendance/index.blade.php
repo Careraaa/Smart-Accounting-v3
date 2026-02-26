@@ -1,363 +1,342 @@
 @extends('layouts.layout')
 
 @section('content')
-    <div class="container-fluid">
+<div class="container-fluid">
 
-        <!-- Quick Actions -->
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="d-flex gap-2">
-                    <a href="{{ route('attendance.create') }}" class="btn btn-primary btn-sm">
-                        <i class="feather-plus me-2"></i>Record Attendance
-                    </a>
-                    <button class="btn btn-success btn-sm" onclick="toggleQRMonitor()">
-                        <i class="feather-monitor me-2"></i><span id="qr-btn-label">Show QR Monitor</span>
-                    </button>
-                </div>
+    {{-- Quick Actions --}}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex gap-2">
+                <a href="{{ route('attendance.create') }}" class="btn btn-primary btn-sm">
+                    <i class="feather-plus me-2"></i>Record Attendance
+                </a>
+                <button class="btn btn-secondary btn-sm" onclick="toggleQRMonitor()">
+                    <i class="feather-monitor me-2"></i><span id="qr-btn-label">Show QR Monitor</span>
+                </button>
             </div>
         </div>
-
-        <!-- QR Monitor Panel (hidden by default) -->
-        <div id="qr-monitor-section" style="display:none;">
-            <div class="row g-4 align-items-stretch mb-4">
-
-                <!-- Instructions -->
-                <div class="col-12 col-lg-7">
-                    <div class="card stretch stretch-full">
-                        <div class="card-header">
-                            <h5 class="card-title mb-0">How to Log Attendance</h5>
-                        </div>
-                        <div class="card-body">
-                            <ol class="instruction-steps list-unstyled mb-0">
-                                <li>
-                                    <strong>Open Smart Accounting</strong>
-                                    <span class="text-muted d-block mt-1 small">on your mobile device</span>
-                                </li>
-                                <li>
-                                    <strong>Sign in</strong>
-                                    <span class="text-muted d-block mt-1 small">using your registered email (complete OTP if
-                                        required)</span>
-                                </li>
-                                <li>
-                                    <strong>Go to Scan QR</strong>
-                                    <span class="text-muted d-block mt-1 small">from the main menu</span>
-                                </li>
-                                <li>
-                                    <strong>Scan the code on the right</strong>
-                                    <span class="text-muted d-block mt-1 small">align your camera with the QR code</span>
-                                </li>
-                                <li>
-                                    <strong>Confirmation appears</strong>
-                                    <span class="text-muted d-block mt-1 small">"Attendance logged" + time in/out</span>
-                                </li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- QR Code -->
-                <div class="col-12 col-lg-5">
-                    <div class="card stretch stretch-full qr-panel">
-                        <div
-                            class="card-body d-flex flex-column align-items-center justify-content-center text-center position-relative py-5">
-                            <h5 class="fw-semibold mb-4 text-white">SCAN HERE</h5>
-
-                            <div class="qr-wrapper position-relative">
-                                <div id="qrcode" class="qr-code"></div>
-                                <div id="scan-success" class="success-flash d-none">
-                                    <i class="feather-check-circle me-2 fs-3"></i>
-                                    <span>Attendance Recorded!</span>
-                                </div>
-                            </div>
-
-                            <div class="mt-3 text-white fw-bold font-monospace" id="token-display"
-                                style="font-size: 1.4rem; letter-spacing: 3px;">
-                                Loading...
-                            </div>
-
-                            <div class="mt-2 text-white-50 small fw-medium" id="qr-timer">
-                                60 SECONDS &nbsp;|&nbsp; QR REFRESHING SOON
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Attendance Records Table -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Attendance Records</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover w-100">
-                                <thead>
-                                    <tr>
-                                        <th>Employee</th>
-                                        <th>Date</th>
-                                        <th>Time In</th>
-                                        <th>Time Out</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="recent-scans-tbody">
-                                    <tr>
-                                        <td colspan="5" class="text-muted text-center py-3">Loading recent scans...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    {{-- QR Monitor Panel --}}
+    <div id="qr-monitor-section" style="display:none;" class="mb-4">
+        <div class="row g-3 align-items-stretch">
 
-    <script>
-        // ── QR Monitor Toggle ──────────────────────────────
-        let qrActive = false;
-        let tokenCheckInterval = null;
-        let qrRefreshInterval = null;
-        let qrCountdown = 60;
+            {{-- Instructions --}}
+            <div class="col-12 col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <span class="card-title mb-0">How to log attendance</span>
+                    </div>
+                    <div class="card-body d-flex align-items-center">
+                        <ol class="att-steps mb-0">
+                            <li>Open <strong>Smart Accounting</strong> on your phone</li>
+                            <li>Sign in with your registered email</li>
+                            <li>Tap <strong>Scan QR</strong> from the main menu</li>
+                            <li>Point your camera at the code on the right</li>
+                            <li>Wait for the <strong>"Attendance Recorded"</strong> confirmation</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
 
-        function toggleQRMonitor() {
-            qrActive = !qrActive;
-            const section = document.getElementById('qr-monitor-section');
-            const label = document.getElementById('qr-btn-label');
+            {{-- QR Code --}}
+            <div class="col-12 col-lg-5">
+                <div class="att-qr-card h-100">
+                    <div class="att-qr-label">Scan to log attendance</div>
 
-            if (qrActive) {
-                section.style.display = 'block';
-                label.textContent = 'Hide QR Monitor';
-                loadQR();
-            } else {
-                section.style.display = 'none';
-                label.textContent = 'Show QR Monitor';
-                clearInterval(tokenCheckInterval);
-                clearInterval(qrRefreshInterval);
-            }
-        }
+                    <div class="att-qr-wrapper" id="qr-wrapper">
+                        <div id="qrcode"></div>
+                        <div id="scan-success" class="att-success-overlay d-none">
+                            <i class="feather-check-circle"></i>
+                            <span>Attendance Recorded</span>
+                        </div>
+                    </div>
 
-        function updateQRTimer() {
-            if (qrCountdown > 0) {
-                qrCountdown--;
-                document.getElementById("qr-timer").innerHTML =
-                    `${qrCountdown} SECONDS &nbsp;|&nbsp; QR REFRESHING SOON`;
-            }
-        }
+                    <div class="att-token" id="token-display">——</div>
+                    <div class="att-timer" id="qr-timer">60s · refreshing soon</div>
+                </div>
+            </div>
 
-        function loadQR() {
-            fetch("{{ route('hr.qr.generate') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(r => r.json())
-                .then(data => {
-                    const qrDiv = document.getElementById('qrcode');
-                    qrDiv.innerHTML = '';
+        </div>
+    </div>
 
-                    new QRCode(qrDiv, {
-                        text: data.token,
-                        width: 220,
-                        height: 220,
-                        colorDark: "#1a1a1a",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
+    {{-- Attendance Records --}}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title mb-0">Attendance Records</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover w-100">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Date</th>
+                                    <th>Time In</th>
+                                    <th>Time Out</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-scans-tbody">
+                                <tr>
+                                    <td colspan="5" class="text-muted text-center py-3">Loading…</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    document.getElementById('token-display').textContent = data.token;
-                    qrCountdown = 60;
-                    startTokenStatusCheck();
-                    startQRRefresh();
-                });
-        }
+</div>
 
-        function startQRRefresh() {
-            if (qrRefreshInterval) clearInterval(qrRefreshInterval);
-            qrRefreshInterval = setInterval(() => {
-                updateQRTimer();
-                if (qrCountdown <= 0) {
-                    clearInterval(qrRefreshInterval);
-                    loadQR();
-                }
-            }, 1000);
-        }
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+let qrActive = false;
+let tokenCheckInterval = null;
+let qrRefreshInterval = null;
+let qrCountdown = 60;
 
-        function checkTokenStatus() {
-            fetch("{{ route('api.qr.token-status') }}")
-                .then(r => r.json())
-                .then(data => {
-                    if (data.used) {
-                        triggerSuccess();
-                        stopTokenStatusCheck();
-                        loadQR();
-                        loadRecentScans(); // refresh table immediately on scan
-                    }
-                });
-        }
+function toggleQRMonitor() {
+    qrActive = !qrActive;
+    const section = document.getElementById('qr-monitor-section');
+    const label   = document.getElementById('qr-btn-label');
+    if (qrActive) {
+        section.style.display = 'block';
+        label.textContent = 'Hide QR Monitor';
+        loadQR();
+    } else {
+        section.style.display = 'none';
+        label.textContent = 'Show QR Monitor';
+        clearInterval(tokenCheckInterval);
+        clearInterval(qrRefreshInterval);
+    }
+}
 
-        function startTokenStatusCheck() {
-            if (tokenCheckInterval) clearInterval(tokenCheckInterval);
-            tokenCheckInterval = setInterval(checkTokenStatus, 2000);
-        }
+function updateQRTimer() {
+    if (qrCountdown > 0) qrCountdown--;
+    document.getElementById('qr-timer').textContent =
+        `${qrCountdown}s · refreshing soon`;
+}
 
-        function stopTokenStatusCheck() {
-            clearInterval(tokenCheckInterval);
-        }
-
-        function triggerSuccess() {
-            const success = document.getElementById("scan-success");
-            const wrapper = document.querySelector(".qr-wrapper");
-            wrapper.classList.add("success-active");
-            success.classList.remove("d-none");
-            setTimeout(() => {
-                success.classList.add("d-none");
-                wrapper.classList.remove("success-active");
-            }, 3200);
-        }
-
-        // ── Attendance Table ───────────────────────────────
-        async function loadRecentScans() {
-            try {
-                const response = await fetch("{{ route('api.attendance.recent') }}", {
-                    credentials: 'include'
-                });
-                const logs = await response.json();
-                const tbody = document.getElementById('recent-scans-tbody');
-
-                if (!logs || logs.length === 0) {
-                    tbody.innerHTML =
-                        '<tr><td colspan="5" class="text-muted text-center py-3">No recent QR scans</td></tr>';
-                    return;
-                }
-
-                const consolidated = {};
-                logs.forEach(log => {
-                    const key = `${log.employee_name}|${log.date}`;
-                    if (!consolidated[key]) {
-                        consolidated[key] = {
-                            employee_name: log.employee_name,
-                            date: log.date,
-                            time_in: 'N/A',
-                            time_out: 'N/A',
-                            time_in_id: null,
-                            time_out_id: null
-                        };
-                    }
-                    if (log.type === 'time_in') {
-                        consolidated[key].time_in = log.time;
-                        consolidated[key].time_in_id = log.id;
-                    } else if (log.type === 'time_out') {
-                        consolidated[key].time_out = log.time;
-                        consolidated[key].time_out_id = log.id;
-                    }
-                });
-
-                let html = '';
-                Object.values(consolidated).forEach(record => {
-                    html += `
-                    <tr>
-                        <td><strong>${record.employee_name}</strong></td>
-                        <td><small class="text-muted">${record.date}</small></td>
-                        <td>${record.time_in}</td>
-                        <td>${record.time_out}</td>
-                        <td><span class="badge bg-success">QR Scanned</span></td>
-                    </tr>
-                `;
-                });
-
-                tbody.innerHTML = html;
-            } catch (error) {
-                document.getElementById('recent-scans-tbody').innerHTML =
-                    '<tr><td colspan="5" class="text-danger text-center py-3"><i class="feather-alert-circle me-2"></i>Failed to load recent scans</td></tr>';
-            }
-        }
-
-        window.addEventListener('load', () => {
-            loadRecentScans();
-            setInterval(loadRecentScans, 30000);
+function loadQR() {
+    fetch("{{ route('hr.qr.generate') }}", {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        const qrDiv = document.getElementById('qrcode');
+        qrDiv.innerHTML = '';
+        new QRCode(qrDiv, {
+            text: data.token,
+            width: 200,
+            height: 200,
+            colorDark: '#1c1c1e',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
         });
-    </script>
+        document.getElementById('token-display').textContent = data.token;
+        qrCountdown = 60;
+        startTokenStatusCheck();
+        startQRRefresh();
+    });
+}
 
-    <style>
-        .qr-panel {
-            background: linear-gradient(135deg, #cc3d38 0%, #530a0a 100%);
-            border: none !important;
+function startQRRefresh() {
+    if (qrRefreshInterval) clearInterval(qrRefreshInterval);
+    qrRefreshInterval = setInterval(() => {
+        updateQRTimer();
+        if (qrCountdown <= 0) { clearInterval(qrRefreshInterval); loadQR(); }
+    }, 1000);
+}
+
+function checkTokenStatus() {
+    fetch("{{ route('api.qr.token-status') }}")
+        .then(r => r.json())
+        .then(data => {
+            if (data.used) {
+                triggerSuccess();
+                stopTokenStatusCheck();
+                loadQR();
+                loadRecentScans();
+            }
+        });
+}
+
+function startTokenStatusCheck() {
+    if (tokenCheckInterval) clearInterval(tokenCheckInterval);
+    tokenCheckInterval = setInterval(checkTokenStatus, 2000);
+}
+
+function stopTokenStatusCheck() { clearInterval(tokenCheckInterval); }
+
+function triggerSuccess() {
+    const overlay  = document.getElementById('scan-success');
+    const wrapper  = document.getElementById('qr-wrapper');
+    wrapper.classList.add('success-active');
+    overlay.classList.remove('d-none');
+    setTimeout(() => {
+        overlay.classList.add('d-none');
+        wrapper.classList.remove('success-active');
+    }, 3200);
+}
+
+async function loadRecentScans() {
+    try {
+        const response = await fetch("{{ route('api.attendance.recent') }}", { credentials: 'include' });
+        const logs = await response.json();
+        const tbody = document.getElementById('recent-scans-tbody');
+
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center py-3">No recent QR scans</td></tr>';
+            return;
         }
 
-        .qr-wrapper {
-            background: #fff;
-            border-radius: 16px;
-            padding: 1.25rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transition: all 0.4s ease;
-        }
+        const consolidated = {};
+        logs.forEach(log => {
+            const key = `${log.employee_name}|${log.date}`;
+            if (!consolidated[key]) {
+                consolidated[key] = { employee_name: log.employee_name, date: log.date, time_in: 'N/A', time_out: 'N/A' };
+            }
+            if (log.type === 'time_in')  consolidated[key].time_in  = log.time;
+            if (log.type === 'time_out') consolidated[key].time_out = log.time;
+        });
 
-        .qr-wrapper.success-active {
-            box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.5);
-            transform: scale(1.04);
-        }
+        tbody.innerHTML = Object.values(consolidated).map(r => `
+            <tr>
+                <td><strong>${r.employee_name}</strong></td>
+                <td><small class="text-muted">${r.date}</small></td>
+                <td>${r.time_in}</td>
+                <td>${r.time_out}</td>
+                <td><span class="badge bg-success">QR Scanned</span></td>
+            </tr>
+        `).join('');
+    } catch {
+        document.getElementById('recent-scans-tbody').innerHTML =
+            '<tr><td colspan="5" class="text-danger text-center py-3"><i class="feather-alert-circle me-2"></i>Failed to load</td></tr>';
+    }
+}
 
-        .qr-code {
-            width: 220px;
-            height: 220px;
-            margin: 0 auto;
-        }
+window.addEventListener('load', () => {
+    loadRecentScans();
+    setInterval(loadRecentScans, 30000);
+});
+</script>
 
-        .success-flash {
-            position: absolute;
-            inset: 0;
-            background: rgba(34, 197, 94, 0.95);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 600;
-            z-index: 10;
-        }
+<style>
+/* -- QR card --------------------------------------------------- */
+.att-qr-card {
+    background: #1c1c1e;
+    border-radius: 12px;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    min-height: 360px;
+}
 
-        .instruction-steps {
-            counter-reset: step;
-            padding-left: 0;
-        }
+.att-qr-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+}
 
-        .instruction-steps li {
-            counter-increment: step;
-            position: relative;
-            padding: 0.6rem 0.75rem 0.6rem 3.8rem;
-            margin-bottom: 0.85rem;
-            border-left: 3px solid #cc3d38;
-            background: #fdf2f2;
-            border-radius: 0 12px 12px 0;
-        }
+.att-qr-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px;
+    position: relative;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.att-qr-wrapper.success-active {
+    box-shadow: 0 0 0 5px rgba(34,197,94,0.5);
+    transform: scale(1.03);
+}
 
-        .instruction-steps li::before {
-            content: counter(step);
-            position: absolute;
-            left: 0.85rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 2rem;
-            height: 2rem;
-            background: #cc3d38;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-    </style>
+#qrcode {
+    width: 200px;
+    height: 200px;
+}
+
+/* Success overlay inside qr box */
+.att-success-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(22,163,74,0.95);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    gap: 8px;
+    z-index: 10;
+}
+.att-success-overlay i {
+    font-size: 2rem;
+}
+
+/* Token text */
+.att-token {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+}
+
+/* Timer */
+.att-timer {
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+}
+
+/* -- Instructions list ----------------------------------------- */
+.att-steps {
+    padding-left: 0;
+    list-style: none;
+    counter-reset: att;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+.att-steps li {
+    counter-increment: att;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 0.875rem;
+    color: #4a4a58;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #f4f5f7;
+}
+.att-steps li::before {
+    content: counter(att);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #c8292a;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+</style>
 @endsection

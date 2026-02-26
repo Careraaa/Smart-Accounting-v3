@@ -3,30 +3,29 @@
 @section('title', 'Forgot Password - Smart Accounting')
 
 @section('content')
-    <h2 class="fs-20 fw-bolder mb-4">Forgot Password</h2>
-    <h4 class="fs-13 fw-bold mb-2">Reset Your Password</h4>
-    <p class="fs-12 fw-medium text-muted">Enter your email address and we'll send you a link to reset your password.</p>
+    <div class="mb-5">
+        <h1 class="auth-page-title">Forgot Password</h1>
+        <p class="auth-page-sub">Enter your email and we'll send you a reset link.</p>
+    </div>
 
-    <form method="POST" action="{{ route('password.email') }}" class="w-100 mt-4 pt-2">
+    <form method="POST" action="{{ route('password.email') }}" class="w-100">
         @csrf
 
         <div class="mb-4">
             <label for="email" class="form-label">Email Address</label>
-            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" 
-                   name="email" value="{{ old('email') }}" required autofocus autocomplete="email" 
-                   placeholder="your@email.com">
+            <input id="email" type="email"
+                class="form-control @error('email') is-invalid @enderror"
+                name="email" value="{{ old('email') }}" required autofocus
+                autocomplete="email" placeholder="your@email.com">
             @error('email')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
         </div>
 
-        <div class="mt-5">
-            <button type="submit" class="btn btn-lg btn-primary w-100">Send Reset Link</button>
-        </div>
+        <button type="submit" class="btn-auth">Send Reset Link</button>
     </form>
 
-    <div class="mt-5 text-muted text-center">
-        <span>Remember your password?</span>
-        <a href="{{ route('login') }}" class="fw-bold">Back to Login</a>
+    <div class="auth-footer-text">
+        Remember your password? <a href="{{ route('login') }}">Back to Sign In</a>
     </div>
 @endsection

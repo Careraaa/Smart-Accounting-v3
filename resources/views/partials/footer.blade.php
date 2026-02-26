@@ -1,15 +1,11 @@
-<!-- [ Footer ] start -->
-<footer class="footer">
-    <p class="fs-11 text-muted fw-medium text-uppercase mb-0 copyright">
-        <span>Copyright © Smart Accounting</span>
-        <script>
-            document.write(new Date().getFullYear());
-        </script>
-    </p>
-    <div class="d-flex align-items-center gap-4">
-        <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Help</a>
-        <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Terms</a>
-        <a href="javascript:void(0);" class="fs-11 fw-semibold text-uppercase">Privacy</a>
+<footer class="kt-footer">
+    <span class="kt-footer-copy">
+        &copy; <script>document.write(new Date().getFullYear())</script>
+        Knights Transport Services Corporation
+    </span>
+    <div class="kt-footer-links">
+        <a href="javascript:void(0);">Help</a>
+        <a href="javascript:void(0);">Terms</a>
+        <a href="javascript:void(0);">Privacy</a>
     </div>
 </footer>
-<!-- [ Footer ] end -->
