@@ -1,7 +1,7 @@
-<h5 class="mb-4">Employment Information</h5>
+<h5 class="mb-5">Employment Information</h5>
 
 <div class="row">
-    <div class="col-md-4 mb-3">
+    <div class="col-lg-6 mb-4">
         <label for="date_of_hire" class="form-label">Date of Hire *</label>
         <input type="date" name="date_of_hire" id="date_of_hire"
             class="form-control @error('date_of_hire') is-invalid @enderror"
@@ -11,7 +11,7 @@
             <span class="invalid-feedback">{{ $message }}</span>
         @enderror
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-lg-6 mb-4">
         <label for="position" class="form-label">Position *</label>
         <input type="text" name="position" id="position"
             class="form-control @error('position') is-invalid @enderror"
@@ -21,20 +21,22 @@
             <span class="invalid-feedback">{{ $message }}</span>
         @enderror
     </div>
-    <div class="col-md-4 mb-3">
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
         <label for="department" class="form-label">Department *</label>
-        <input type="text" name="department" id="department"
-            class="form-control @error('department') is-invalid @enderror"
-            placeholder="e.g. Finance"
-            value="{{ old('department', $employee->department ?? '') }}" required>
+        <select name="department" id="department"
+            class="form-select @error('department') is-invalid @enderror" required>
+            <option value="">-- Select Department --</option>
+            <option value="admin" {{ old('department', $employee->department ?? '') == 'admin' ? 'selected' : '' }}>Admin</option>
+            <option value="operation" {{ old('department', $employee->department ?? '') == 'operation' ? 'selected' : '' }}>Operation</option>
+        </select>
         @error('department')
             <span class="invalid-feedback">{{ $message }}</span>
         @enderror
     </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6 mb-3">
+    <div class="col-lg-6 mb-4">
         <label for="status" class="form-label">Status *</label>
         <select name="status" id="status"
             class="form-select @error('status') is-invalid @enderror" required>
@@ -45,7 +47,10 @@
             <span class="invalid-feedback">{{ $message }}</span>
         @enderror
     </div>
-    <div class="col-md-6 mb-3">
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
         <label for="salary_rate" class="form-label">Salary Rate *</label>
         <div class="input-group">
             <span class="input-group-text">₱</span>
@@ -61,18 +66,18 @@
     </div>
 </div>
 
-<hr class="my-4">
-<h6 class="mb-3">Driver's License</h6>
+<hr class="my-5">
+<h6 class="mb-4">Driver's License</h6>
 
 <div class="row">
-    <div class="col-md-6 mb-3">
+    <div class="col-lg-6 mb-4">
         <label for="driver_license_number" class="form-label">License Number</label>
         <input type="text" name="driver_license_number" id="driver_license_number"
             class="form-control"
             placeholder="e.g. N01-12-345678"
             value="{{ old('driver_license_number', $employee->driver_license_number ?? '') }}">
     </div>
-    <div class="col-md-6 mb-3">
+    <div class="col-lg-6 mb-4">
         <label for="driver_license_validity" class="form-label">License Validity</label>
         <input type="date" name="driver_license_validity" id="driver_license_validity"
             class="form-control"
