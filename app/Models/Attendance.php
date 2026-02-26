@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Attendance extends Model
 {
     use HasFactory;
-    protected $table = 'attendances';
+    protected $table = 'attendance';
 
     protected $fillable = [
         'employee_id',

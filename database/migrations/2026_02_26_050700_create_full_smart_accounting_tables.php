@@ -69,7 +69,6 @@ return new class extends Migration {
         Schema::create('paos', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('conductor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('contact_number');
             $table->string('email')->unique();
             $table->text('address')->nullable();
@@ -83,7 +82,6 @@ return new class extends Migration {
             $table->string('route_name');
             $table->string('origin');
             $table->string('destination');
-            $table->decimal('distance', 8, 2)->nullable();
             $table->string('status')->default('active');
             $table->timestamps();
         });
@@ -93,13 +91,7 @@ return new class extends Migration {
             $table->string('plate_number')->unique();
             $table->foreignId('route_id')->constrained()->onDelete('cascade');
             $table->string('operator');
-            $table->string('vehicle_type')->nullable();
-            $table->string('make')->nullable();
-            $table->string('model')->nullable();
-            $table->integer('year')->nullable();
-            $table->integer('capacity')->nullable();
             $table->string('status')->default('active');
-            $table->date('date_purchased')->nullable();
             $table->timestamps();
         });
 
@@ -114,27 +106,6 @@ return new class extends Migration {
             $table->decimal('total_expenses', 10, 2)->default(0);
             $table->decimal('net_remittance', 10, 2)->default(0);
             $table->string('status')->default('pending');
-            $table->timestamps();
-        });
-
-        Schema::create('fare_collections', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('daily_remittance_id')->constrained('daily_remittances')->onDelete('cascade');
-            $table->integer('passenger_count')->default(0);
-            $table->decimal('fare_amount', 10, 2)->default(0);
-            $table->datetime('collection_time')->nullable();
-            $table->text('notes')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('trip_expenses', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('daily_remittance_id')->constrained('daily_remittances')->onDelete('cascade');
-            $table->string('expense_type');
-            $table->text('description')->nullable();
-            $table->decimal('amount', 10, 2)->default(0);
-            $table->date('expense_date')->nullable();
-            $table->text('notes')->nullable();
             $table->timestamps();
         });
 
@@ -227,15 +198,16 @@ return new class extends Migration {
         // ATTENDANCE TABLES
         // -------------------------
 
-        Schema::create('attendances', function (Blueprint $table) {
+        Schema::create('attendance', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
-            $table->datetime('time_in')->nullable();
-            $table->datetime('time_out')->nullable();
+            $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
             $table->date('date');
-            $table->string('qr_code')->nullable();
-            $table->string('status')->default('present');
+            $table->time('time_in')->nullable();
+            $table->time('time_out')->nullable();
+            $table->enum('status', ['present', 'late', 'absent'])->nullable();
             $table->timestamps();
+
+            $table->unique(['employee_id', 'date']);
         });
 
         Schema::create('attendance_logs', function (Blueprint $table) {
@@ -386,15 +358,13 @@ return new class extends Migration {
         Schema::dropIfExists('leaves');
         Schema::dropIfExists('attendance_tokens');
         Schema::dropIfExists('attendance_logs');
-        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('attendance');
         Schema::dropIfExists('employee_attachments');
         Schema::dropIfExists('employee_references');
         Schema::dropIfExists('employee_beneficiaries');
         Schema::dropIfExists('employee_skills');
         Schema::dropIfExists('employee_experiences');
         Schema::dropIfExists('employees');
-        Schema::dropIfExists('trip_expenses');
-        Schema::dropIfExists('fare_collections');
         Schema::dropIfExists('daily_remittances');
         Schema::dropIfExists('vehicles');
         Schema::dropIfExists('routes');
