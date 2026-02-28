@@ -14,14 +14,32 @@
                 <table class="table table-hover w-100 mb-0">
                     <thead>
                         <tr>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Email</th>
-                            <th>Position</th>
-                            <th>Department</th>
-                            <th>Salary Rate</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Actions</th>
+                            @php
+                                $headers = [
+                                    'first_name' => 'First Name',
+                                    'last_name' => 'Last Name',
+                                    'position' => 'Position',
+                                    'department' => 'Department',
+                                    'salary_rate' => 'Salary Rate'
+                                ];
+                            @endphp
+                            
+                            @foreach($headers as $column => $label)
+                                <th class="sortable-header" data-column="{{ $column }}">
+                                    <a href="{{ route('employees.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
+                                       class="sort-link">
+                                        {{ $label }}
+                                        @if($sortBy === $column)
+                                            <i class="feather-arrow-{{ $sortOrder === 'asc' ? 'up' : 'down' }} ms-1" style="font-size: 0.875rem;"></i>
+                                        @else
+                                            <i class="feather-arrow-up-down ms-1" style="font-size: 0.875rem; opacity: 0.3;"></i>
+                                        @endif
+                                    </a>
+                                </th>
+                            @endforeach
+                            
+                            <th class="sortable-header text-center"><div class="sort-link justify-content-center">Status</div></th>
+                            <th class="sortable-header text-center"><div class="sort-link justify-content-center">Actions</div></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,7 +47,6 @@
                             <tr>
                                 <td>{{ $employee->first_name }}</td>
                                 <td>{{ $employee->last_name }}</td>
-                                <td class="text-muted">{{ $employee->email }}</td>
                                 <td>{{ $employee->position }}</td>
                                 <td>{{ $employee->department }}</td>
                                 <td>₱{{ number_format($employee->salary_rate, 2) }}</td>
@@ -79,6 +96,40 @@
 </div>
 
 <style>
+/* Sortable header styles */
+.sortable-header {
+    padding: 0 !important;
+}
+
+.sort-link {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+    justify-content: flex-start;
+}
+
+.sortable-header.text-center .sort-link {
+    justify-content: center;
+}
+
+.sortable-header.text-end .sort-link {
+    justify-content: flex-end;
+}
+
+.sort-link:hover {
+    background-color: #f5f5f5;
+    color: #0066cc;
+}
+
+.sort-link i {
+    display: inline-flex;
+}
+
 /* Status badges */
 .emp-badge {
     display: inline-block;

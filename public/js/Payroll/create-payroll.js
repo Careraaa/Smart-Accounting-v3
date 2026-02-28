@@ -2,8 +2,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- Payroll inputs ---
     const employeeSelect = document.getElementById("employee_id");
     const basicSalaryDisplay = document.getElementById("basic_salary_display");
+    const basicSalaryInput = document.getElementById("basic_salary_input");
     const netSalaryDisplay = document.getElementById("net_salary_display");
     const statutoryDisplay = document.getElementById("statutory_display");
+    
+    // Attendance fields
+    const daysWorkedDisplay = document.getElementById("days_worked_display");
+    const hoursWorkedDisplay = document.getElementById("hours_worked_display");
+    const presentDaysDisplay = document.getElementById("present_days_display");
+    const basicSalaryHint = document.getElementById("basic_salary_hint");
+    const periodStartInput = document.getElementById("payroll_period_start");
+    const periodEndInput = document.getElementById("payroll_period_end");
 
     const allowanceList = document.getElementById("allowance_list");
     const deductionList = document.getElementById("deduction_list");
@@ -21,14 +30,81 @@ document.addEventListener("DOMContentLoaded", function () {
     let allowances = window.initialAllowances || [];
     let deductions = window.initialDeductions || [];
 
-    // --- Salary update ---
-    function updateSalary() {
-        const selectedOption =
-            employeeSelect.options[employeeSelect.selectedIndex];
+    // Fetch attendance data and calculate
+    async function calculateFromAttendance() {
+        const employeeId = employeeSelect.value;
+        const periodStart = periodStartInput.value;
+        const periodEnd = periodEndInput.value;
+
+        if (!employeeId || !periodStart || !periodEnd) {
+            // Clear fields if not all data available
+            daysWorkedDisplay.innerText = "0";
+            hoursWorkedDisplay.innerText = "0.00";
+            presentDaysDisplay.innerText = "0";
+            basicSalaryDisplay.innerText = `₱0.00`;
+            basicSalaryInput.value = "0";
+            updateSalary();
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `/api/attendance/summary?employee_id=${employeeId}&period_start=${periodStart}&period_end=${periodEnd}`
+            );
+
+            if (!response.ok) {
+                console.error("API response not OK, using default calculation");
+                calculateAttendanceManual(employeeId, periodStart, periodEnd);
+                return;
+            }
+
+            const data = await response.json();
+            
+            daysWorkedDisplay.innerText = data.present_days || 0;
+            hoursWorkedDisplay.innerText = (data.total_hours_worked || 0).toFixed(2);
+            presentDaysDisplay.innerText = data.present_days || 0;
+
+            // Calculate basic salary
+            const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
+            const salaryRate = parseFloat(selectedOption?.dataset.salaryRate || 0);
+            const basicSalary = salaryRate * (data.present_days || 0); // salaryRate is already daily rate
+
+            basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
+            basicSalaryInput.value = basicSalary.toFixed(2);
+            basicSalaryHint.innerText = `(${data.present_days} days worked)`;
+
+            updateSalary();
+        } catch (error) {
+            console.error("Error fetching attendance:", error);
+            // Use fallback calculation
+            calculateAttendanceManual(employeeId, periodStart, periodEnd);
+        }
+    }
+
+    // Fallback: calculate manually without API
+    function calculateAttendanceManual(employeeId, periodStart, periodEnd) {
+        const start = new Date(periodStart);
+        const end = new Date(periodEnd);
+        const daysInPeriod = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+        const selectedOption = employeeSelect.options[employeeSelect.selectedIndex];
         const salaryRate = parseFloat(selectedOption?.dataset.salaryRate || 0);
-        const basicSalary = salaryRate * 15;
+        const estimatedDaysWorked = Math.ceil(daysInPeriod / 1.5);
+        const basicSalary = salaryRate * estimatedDaysWorked; // salaryRate is already daily rate
+
+        daysWorkedDisplay.innerText = estimatedDaysWorked;
+        hoursWorkedDisplay.innerText = (estimatedDaysWorked * 8).toFixed(2);
+        presentDaysDisplay.innerText = estimatedDaysWorked;
 
         basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
+        basicSalaryInput.value = basicSalary.toFixed(2);
+
+        updateSalary();
+    }
+
+    // --- Salary update ---
+    function updateSalary() {
+        const basicSalary = parseFloat(basicSalaryInput.value || 0);
 
         const totalAllowances = allowances.reduce(
             (sum, a) => sum + a.amount,
@@ -185,12 +261,24 @@ document.addEventListener("DOMContentLoaded", function () {
     employeeSelect.addEventListener("change", function () {
         const option = this.options[this.selectedIndex];
         const salaryRate = parseFloat(option.dataset.salaryRate || 0);
-        const basicSalary = salaryRate * 15;
         const hasSSS = option.dataset.hasSss === "1";
         const hasPagibig = option.dataset.hasPagibig === "1";
 
-        basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
+        // Always recalculate from attendance
+        calculateFromAttendance();
+        
+        // Get the calculated basic salary from the input
+        const basicSalary = parseFloat(basicSalaryInput.value || 0);
         computeStatutoryDeductions(basicSalary, hasSSS, hasPagibig);
+    });
+
+    // Recalculate when date range changes
+    periodStartInput.addEventListener("change", function () {
+        calculateFromAttendance();
+    });
+
+    periodEndInput.addEventListener("change", function () {
+        calculateFromAttendance();
     });
 
     // --- Initialize ---

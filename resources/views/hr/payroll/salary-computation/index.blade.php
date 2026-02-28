@@ -5,21 +5,45 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span class="card-title mb-0">Payrolls</span>
-            <a href="{{ route('payroll.create') }}" class="btn btn-primary btn-sm">
-                <i class="feather-plus me-1"></i> Create Payroll
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('payroll.salary-computation.batch-generate') }}" class="btn btn-success btn-sm">
+                    <i class="feather-zap me-1"></i> Generate Batch
+                </a>
+                <a href="{{ route('payroll.create') }}" class="btn btn-primary btn-sm">
+                    <i class="feather-plus me-1"></i> Create Payroll
+                </a>
+            </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover w-100 mb-0">
                     <thead>
                         <tr>
-                            <th>Employee</th>
-                            <th>Period</th>
-                            <th>Gross Pay</th>
-                            <th>Net Pay</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Actions</th>
+                            <th class="sortable-header"><div class="sort-link">Employee</div></th>
+                            @php
+                                $headers = [
+                                    'payroll_period_start' => 'Period',
+                                    'gross_pay' => 'Gross Pay',
+                                    'net_pay' => 'Net Pay',
+                                    'status' => 'Status'
+                                ];
+                            @endphp
+                            
+                            @foreach($headers as $column => $label)
+                                <th class="sortable-header @if($column === 'status') text-center @endif" data-column="{{ $column }}">
+                                    <a href="{{ route('payroll.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
+                                       class="sort-link">
+                                        {{ $label }}
+                                        @if($sortBy === $column)
+                                            <i class="feather-arrow-{{ $sortOrder === 'asc' ? 'up' : 'down' }} ms-1" style="font-size: 0.875rem;"></i>
+                                        @else
+                                            <i class="feather-arrow-up-down ms-1" style="font-size: 0.875rem; opacity: 0.3;"></i>
+                                        @endif
+                                    </a>
+                                </th>
+                            @endforeach
+                            
+                            <th class="sortable-header text-center"><div class="sort-link justify-content-center">Actions</div></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -69,7 +93,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-5">
+                                <td colspan="8" class="text-center text-muted py-5">
                                     <i class="feather-file-text d-block mb-2" style="font-size:28px; opacity:.3;"></i>
                                     No payrolls found
                                 </td>
@@ -83,6 +107,41 @@
 </div>
 
 <style>
+/* Sortable header styles */
+.sortable-header {
+    padding: 0 !important;
+}
+
+.sort-link {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+    justify-content: flex-start;
+}
+
+.sortable-header.text-center .sort-link {
+    justify-content: center;
+}
+
+.sortable-header.text-end .sort-link {
+    justify-content: flex-end;
+}
+
+.sort-link:hover {
+    background-color: #f5f5f5;
+    color: #0066cc;
+}
+
+.sort-link i {
+    display: inline-flex;
+}
+
+/* Action buttons */
 .emp-action-btn {
     display: inline-flex;
     align-items: center;

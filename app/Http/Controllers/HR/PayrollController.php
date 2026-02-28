@@ -7,14 +7,38 @@ use App\Models\Payroll;
 use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\Leave;
+use App\Services\AttendanceService;
 use Illuminate\Http\Request;
 use App\Models\StatutoryDeduction;
+use Carbon\Carbon;
 
 class PayrollController extends Controller
 {
-    public function index()
+    protected $attendanceService;
+
+    public function __construct(AttendanceService $attendanceService)
     {
-        $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])->get();
+        $this->attendanceService = $attendanceService;
+    }
+
+    public function index(Request $request)
+    {
+        $sortBy = $request->get('sort_by', 'payroll_period_start');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['payroll_period_start', 'gross_pay', 'net_pay', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'payroll_period_start';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'desc';
+        }
+        
+        $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])
+            ->orderBy($sortBy, $sortOrder)->get();
 
         $totalEmployees = Employee::count();
         $activeEmployees = Employee::where('status', 'active')->count();
@@ -45,12 +69,12 @@ class PayrollController extends Controller
             )
             ->values();
 
-        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'attendanceTrend'));
+        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'attendanceTrend', 'sortBy', 'sortOrder'));
     }
 
     public function create()
     {
-        $employees = Employee::where('status', 'active')->get();
+        $employees = Employee::all();
         return view('hr.payroll.salary-computation.create', compact('employees'));
     }
 
@@ -60,20 +84,47 @@ class PayrollController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'payroll_period_start' => 'required|date',
             'payroll_period_end' => 'required|date',
-            'total_allowances' => 'required|numeric|min:0',
-            'total_deductions' => 'required|numeric|min:0',
+            'total_allowances' => 'nullable|numeric|min:0',
+            'total_deductions' => 'nullable|numeric|min:0',
             'allowances.*.name' => 'nullable|string',
             'allowances.*.amount' => 'nullable|numeric|min:0',
             'deductions.*.name' => 'nullable|string',
             'deductions.*.amount' => 'nullable|numeric|min:0',
         ]);
 
+        $employee = Employee::find($validated['employee_id']);
+        $periodStart = Carbon::parse($validated['payroll_period_start']);
+        $periodEnd = Carbon::parse($validated['payroll_period_end']);
+
+        // Always calculate basic salary from attendance
+        $daysWorked = $this->attendanceService->countWorkDaysInPeriod(
+            $validated['employee_id'],
+            $periodStart,
+            $periodEnd
+        );
+        $hoursWorked = $this->attendanceService->calculateTotalHoursWorked(
+            $validated['employee_id'],
+            $periodStart,
+            $periodEnd
+        );
+        $basicSalary = $this->attendanceService->calculateBasicSalary(
+            $employee,
+            $periodStart,
+            $periodEnd
+        );
+
+        $totalAllowances = floatval($validated['total_allowances'] ?? 0);
+        $totalDeductions = floatval($validated['total_deductions'] ?? 0);
+
         $payroll = Payroll::create([
             'employee_id' => $validated['employee_id'],
-            'payroll_period_start' => $validated['payroll_period_start'],
-            'payroll_period_end' => $validated['payroll_period_end'],
-            'total_allowances' => $validated['total_allowances'],
-            'total_deductions' => $validated['total_deductions'],
+            'payroll_period_start' => $periodStart,
+            'payroll_period_end' => $periodEnd,
+            'total_allowances' => $totalAllowances,
+            'total_deductions' => $totalDeductions,
+            'basic_salary' => $basicSalary,
+            'days_worked' => $daysWorked,
+            'hours_worked' => $hoursWorked,
             'status' => 'pending',
         ]);
 
@@ -95,13 +146,16 @@ class PayrollController extends Controller
             }
         }
 
-        return redirect()->route('payroll.index')->with('success', 'Payroll created successfully.');
+        return redirect()->route('payroll.index')->with('success', 'Payroll created successfully with attendance data.');
     }
 
     public function show(Payroll $payroll)
     {
         $payroll->load('employee', 'allowances', 'deductions');
-        return view('hr.payroll.salary-computation.show', compact('payroll'));
+        $attendanceSummary = $payroll->attendance_summary;
+        $attendanceBreakdown = $payroll->getAttendanceBreakdown();
+        
+        return view('hr.payroll.salary-computation.show', compact('payroll', 'attendanceSummary', 'attendanceBreakdown'));
     }
 
     public function edit(Payroll $payroll)
@@ -109,7 +163,9 @@ class PayrollController extends Controller
         // Include all employees so payrolls linked to inactive employees still show correctly
         $employees = Employee::all();
         $payroll->load('allowances', 'deductions');
-        return view('hr.payroll.salary-computation.edit', compact('payroll', 'employees'));
+        $attendanceSummary = $payroll->attendance_summary;
+        
+        return view('hr.payroll.salary-computation.edit', compact('payroll', 'employees', 'attendanceSummary'));
     }
 
     public function update(Request $request, Payroll $payroll)
@@ -118,6 +174,7 @@ class PayrollController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'payroll_period_start' => 'required|date',
             'payroll_period_end' => 'required|date',
+            'recalculate_from_attendance' => 'nullable|boolean',
             'allowances.*.name' => 'nullable|string',
             'allowances.*.amount' => 'nullable|numeric|min:0',
             'deductions.*.name' => 'nullable|string',
@@ -134,14 +191,43 @@ class PayrollController extends Controller
             $totalDeductions += floatval($deduction['amount'] ?? 0);
         }
 
-        $payroll->update([
+        $periodStart = Carbon::parse($validated['payroll_period_start']);
+        $periodEnd = Carbon::parse($validated['payroll_period_end']);
+
+        $updateData = [
             'employee_id' => $validated['employee_id'],
-            'payroll_period_start' => $validated['payroll_period_start'],
-            'payroll_period_end' => $validated['payroll_period_end'],
+            'payroll_period_start' => $periodStart,
+            'payroll_period_end' => $periodEnd,
             'total_allowances' => $totalAllowances,
             'total_deductions' => $totalDeductions,
             'status' => 'pending',
-        ]);
+        ];
+
+        // Recalculate from attendance if requested
+        if ($request->boolean('recalculate_from_attendance')) {
+            $employee = Employee::find($validated['employee_id']);
+            $daysWorked = $this->attendanceService->countWorkDaysInPeriod(
+                $validated['employee_id'],
+                $periodStart,
+                $periodEnd
+            );
+            $hoursWorked = $this->attendanceService->calculateTotalHoursWorked(
+                $validated['employee_id'],
+                $periodStart,
+                $periodEnd
+            );
+            $basicSalary = $this->attendanceService->calculateBasicSalary(
+                $employee,
+                $periodStart,
+                $periodEnd
+            );
+
+            $updateData['basic_salary'] = $basicSalary;
+            $updateData['days_worked'] = $daysWorked;
+            $updateData['hours_worked'] = $hoursWorked;
+        }
+
+        $payroll->update($updateData);
 
         $payroll->allowances()->delete();
         $payroll->deductions()->delete();
@@ -182,6 +268,84 @@ class PayrollController extends Controller
         return view('hr.payroll.payslip', compact('payroll'));
     }
 
+    /**
+     * Generate payroll for multiple employees for a specific period
+     */
+    public function generatePayrollBatch(Request $request)
+    {
+        $validated = $request->validate([
+            'period_start' => 'required|date',
+            'period_end' => 'required|date',
+            'employees' => 'nullable|array',
+            'employees.*' => 'exists:employees,id',
+        ]);
+
+        $periodStart = Carbon::parse($validated['period_start']);
+        $periodEnd = Carbon::parse($validated['period_end']);
+
+        $query = Employee::query();
+        if ($validated['employees'] ?? null) {
+            $query->whereIn('id', $validated['employees']);
+        }
+
+        $employees = $query->get();
+        $createdCount = 0;
+
+        foreach ($employees as $employee) {
+            // Check if payroll already exists for this period
+            $existingPayroll = Payroll::where('employee_id', $employee->id)
+                ->whereBetween('payroll_period_start', [$periodStart, $periodEnd])
+                ->first();
+
+            if ($existingPayroll) {
+                continue;
+            }
+
+            $daysWorked = $this->attendanceService->countWorkDaysInPeriod(
+                $employee->id,
+                $periodStart,
+                $periodEnd
+            );
+
+            $hoursWorked = $this->attendanceService->calculateTotalHoursWorked(
+                $employee->id,
+                $periodStart,
+                $periodEnd
+            );
+
+            $basicSalary = $this->attendanceService->calculateBasicSalary(
+                $employee,
+                $periodStart,
+                $periodEnd
+            );
+
+            Payroll::create([
+                'employee_id' => $employee->id,
+                'payroll_period_start' => $periodStart,
+                'payroll_period_end' => $periodEnd,
+                'basic_salary' => $basicSalary,
+                'days_worked' => $daysWorked,
+                'hours_worked' => $hoursWorked,
+                'total_allowances' => 0,
+                'total_deductions' => 0,
+                'status' => 'pending',
+            ]);
+
+            $createdCount++;
+        }
+
+        return redirect()->route('payroll.index')
+            ->with('success', "Payroll generated for $createdCount employee(s) based on attendance.");
+    }
+
+    public function recalculatePayroll(Payroll $payroll)
+    {
+        $payroll->recalculateFromAttendance();
+
+        return redirect()->route('payroll.show', $payroll)
+            ->with('success', 'Payroll recalculated from attendance records.');
+    }
+
     public function computeStatutory(Request $request)
     {
         $request->validate([
@@ -213,5 +377,28 @@ class PayrollController extends Controller
         }
 
         return response()->json($results);
+    }
+
+    /**
+     * Get attendance summary for a specific period (API endpoint)
+     */
+    public function getAttendanceSummary(Request $request)
+    {
+        $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'period_start' => 'required|date',
+            'period_end' => 'required|date',
+        ]);
+
+        $periodStart = Carbon::parse($request->period_start);
+        $periodEnd = Carbon::parse($request->period_end);
+
+        $summary = $this->attendanceService->getAttendanceSummary(
+            $request->employee_id,
+            $periodStart,
+            $periodEnd
+        );
+
+        return response()->json($summary);
     }
 }

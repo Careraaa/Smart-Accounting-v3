@@ -9,11 +9,25 @@ use Illuminate\Http\Request;
 
 class VehicleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $sortBy = $request->get('sort_by', 'plate_number');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['plate_number', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'plate_number';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+        
         $routes = Route::all();
-        $vehicles = Vehicle::all();
-        return view('remittance-clerk.management.index', compact('routes', 'vehicles'));
+        $vehicles = Vehicle::orderBy($sortBy, $sortOrder)->get();
+        return view('remittance-clerk.management.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder'));
     }
 
     public function create()

@@ -50,10 +50,30 @@
                     </div>
                 </div>
 
+                {{-- Attendance Fields --}}
+                <div id="attendance_fields" class="mb-4 p-3 bg-light rounded">
+                    <h6 class="mb-3">Attendance Summary</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Days Worked</label>
+                            <p id="days_worked_display" class="prl-computed">0</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Hours Worked</label>
+                            <p id="hours_worked_display" class="prl-computed">0.00</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Present Days</label>
+                            <p id="present_days_display" class="prl-computed">0</p>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Basic Salary --}}
                 <div class="mb-4">
-                    <label class="form-label">Basic Salary <span class="prl-hint">(15 days)</span></label>
+                    <label class="form-label">Basic Salary <span class="prl-hint" id="basic_salary_hint">(calculated from attendance)</span></label>
                     <p id="basic_salary_display" class="prl-computed">₱0.00</p>
+                    <input type="hidden" name="basic_salary" id="basic_salary_input" value="0">
                 </div>
 
                 {{-- Divider --}}

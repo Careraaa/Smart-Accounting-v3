@@ -191,11 +191,18 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
             Route::get('/', [PayrollController::class, 'index'])->name('index');
             Route::get('/create', [PayrollController::class, 'create'])->name('create');
             Route::post('/', [PayrollController::class, 'store'])->name('store');
+            Route::get('/batch-generate', function() {
+                return view('hr.payroll.salary-computation.batch-generate');
+            })->name('batch-generate');
             Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
             Route::get('/{payroll}/edit', [PayrollController::class, 'edit'])->name('edit');
             Route::put('/{payroll}', [PayrollController::class, 'update'])->name('update');
             Route::delete('/{payroll}', [PayrollController::class, 'destroy'])->name('destroy');
+            Route::post('/{payroll}/recalculate', [PayrollController::class, 'recalculatePayroll'])->name('recalculate');
         });
+
+    // Batch Payroll Generation
+    Route::post('/payroll/generate-batch', [PayrollController::class, 'generatePayrollBatch'])->name('payroll.generate-batch');
 
     // Statutory Deductions
     Route::prefix('payroll/statutory-deductions')
@@ -218,6 +225,9 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
         });
 
     Route::post('/payroll/statutory-deductions/compute', [PayrollController::class, 'computeStatutory'])->name('payroll.statutory.compute');
+
+    // API: Attendance Summary (for AJAX calls from create payroll)
+    Route::get('/api/attendance/summary', [PayrollController::class, 'getAttendanceSummary'])->name('api.attendance.summary');
 
     // Generate Payslip
     Route::prefix('payroll/generate-payslip')

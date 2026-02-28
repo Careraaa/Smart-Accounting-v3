@@ -274,6 +274,9 @@ return new class extends Migration {
             $table->decimal('total_allowances', 10, 2)->default(0);
             $table->decimal('total_deductions', 10, 2)->default(0);
             $table->string('status')->default('pending');
+            $table->decimal('basic_salary', 12, 2)->default(0);
+            $table->integer('days_worked')->default(0);
+            $table->decimal('hours_worked', 8, 2)->default(0);
             $table->date('payment_date')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

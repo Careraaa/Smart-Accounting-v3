@@ -9,10 +9,25 @@ use Illuminate\Support\Facades\Storage;
 
 class EmployeeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $employees = Employee::all();
-        return view('hr.employees.index', compact('employees'));
+        $sortBy = $request->get('sort_by', 'first_name');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['first_name', 'last_name', 'position', 'department', 'salary_rate', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'first_name';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+        
+        $employees = Employee::orderBy($sortBy, $sortOrder)->get();
+        
+        return view('hr.employees.index', compact('employees', 'sortBy', 'sortOrder'));
     }
 
     public function create()

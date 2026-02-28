@@ -14,20 +14,37 @@
                 <table class="table table-hover w-100 mb-0">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Route</th>
-                            <th>Vehicle</th>
-                            <th class="text-end">Net Remittance</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Actions</th>
+                            @php
+                                $headers = [
+                                    'remittance_date' => 'Date',
+                                    'net_remittance' => 'Net Remittance',
+                                    'status' => 'Status'
+                                ];
+                            @endphp
+                            
+                            @foreach($headers as $column => $label)
+                                <th class="sortable-header @if($column === 'net_remittance') text-end @elseif($column === 'status') text-center @endif" data-column="{{ $column }}">
+                                    <a href="{{ route('remittances.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
+                                       class="sort-link">
+                                        {{ $label }}
+                                        @if($sortBy === $column)
+                                            <i class="feather-arrow-{{ $sortOrder === 'asc' ? 'up' : 'down' }} ms-1" style="font-size: 0.875rem;"></i>
+                                        @else
+                                            <i class="feather-arrow-up-down ms-1" style="font-size: 0.875rem; opacity: 0.3;"></i>
+                                        @endif
+                                    </a>
+                                </th>
+                            @endforeach
+                            
+                            <th class="sortable-header"><div class="sort-link">Route</div></th>
+                            <th class="sortable-header"><div class="sort-link">Vehicle</div></th>
+                            <th class="sortable-header text-center"><div class="sort-link justify-content-center">Actions</div></th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($remittances as $remittance)
                             <tr>
                                 <td class="text-muted">{{ $remittance->remittance_date?->format('M d, Y') }}</td>
-                                <td><strong>{{ $remittance->route->route_name }}</strong></td>
-                                <td>{{ $remittance->vehicle->plate_number }}</td>
                                 <td class="text-end">₱{{ number_format($remittance->net_remittance, 2) }}</td>
                                 <td class="text-center">
                                     @if ($remittance->status === 'approved')
@@ -38,6 +55,8 @@
                                         <span class="emp-badge emp-badge-inactive">Rejected</span>
                                     @endif
                                 </td>
+                                <td><strong>{{ $remittance->route->route_name }}</strong></td>
+                                <td>{{ $remittance->vehicle->plate_number }}</td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
                                         <a href="{{ route('remittances.show', $remittance) }}"
@@ -61,7 +80,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-5">
+                                <td colspan="8" class="text-center text-muted py-5">
                                     <i class="feather-file-text d-block mb-2" style="font-size:28px; opacity:.3;"></i>
                                     No remittances found
                                 </td>
@@ -75,6 +94,41 @@
 </div>
 
 <style>
+/* Sortable header styles */
+.sortable-header {
+    padding: 0 !important;
+}
+
+.sort-link {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+    justify-content: flex-start;
+}
+
+.sortable-header.text-center .sort-link {
+    justify-content: center;
+}
+
+.sortable-header.text-end .sort-link {
+    justify-content: flex-end;
+}
+
+.sort-link:hover {
+    background-color: #f5f5f5;
+    color: #0066cc;
+}
+
+.sort-link i {
+    display: inline-flex;
+}
+
+/* Badge styles */
 .emp-badge {
     display: inline-block;
     font-size: 0.7rem;
@@ -87,6 +141,8 @@
 .emp-badge-inactive { background: #fff5f5; color: #c8292a; border: 1px solid #fcd0d0; }
 .emp-badge-pending  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
 .emp-badge-approved { background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; }
+
+/* Action buttons */
 .emp-action-btn {
     display: inline-flex;
     align-items: center;

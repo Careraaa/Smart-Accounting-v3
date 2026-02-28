@@ -8,10 +8,24 @@ use Illuminate\Http\Request;
 
 class PAOController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $paos = PAO::all();
-        return view('remittance-clerk.paos.index', compact('paos'));
+        $sortBy = $request->get('sort_by', 'name');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['name', 'contact_number', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'name';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+        
+        $paos = PAO::orderBy($sortBy, $sortOrder)->get();
+        return view('remittance-clerk.paos.index', compact('paos', 'sortBy', 'sortOrder'));
     }
 
     public function create()

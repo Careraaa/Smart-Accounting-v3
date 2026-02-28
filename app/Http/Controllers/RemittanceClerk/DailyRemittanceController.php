@@ -12,10 +12,25 @@ use Illuminate\Http\Request;
 
 class DailyRemittanceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $remittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')->get();
-        return view('remittance-clerk.remittances.index', compact('remittances'));
+        $sortBy = $request->get('sort_by', 'remittance_date');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['remittance_date', 'net_remittance', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'remittance_date';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'desc';
+        }
+        
+        $remittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
+            ->orderBy($sortBy, $sortOrder)->get();
+        return view('remittance-clerk.remittances.index', compact('remittances', 'sortBy', 'sortOrder'));
     }
 
     public function create()

@@ -8,10 +8,24 @@ use Illuminate\Http\Request;
 
 class DriverController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $drivers = Driver::all();
-        return view('remittance-clerk.drivers.index', compact('drivers'));
+        $sortBy = $request->get('sort_by', 'name');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['name', 'contact_number', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'name';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+        
+        $drivers = Driver::orderBy($sortBy, $sortOrder)->get();
+        return view('remittance-clerk.drivers.index', compact('drivers', 'sortBy', 'sortOrder'));
     }
 
     public function create()
