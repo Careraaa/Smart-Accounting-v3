@@ -20,10 +20,28 @@ RUN IN TERMINAL
 -- FOR NGROK --
 8. install ngrok
 9. open cmd and paste this : ngrok config add-authtoken 3A0lcxa4hy862Tte1EdW5Hf3DB5_6W46w9Pmi5vjkGzRKkNr4
-10. edit .env file APP_URL, change into this : https://tami-radioactive-spectacularly.ngrok-free.dev
+10. edit .env file APP_URL, change into this : APP_URL=https://tami-radioactive-spectacularly.ngrok-free.dev
 11. go back to cmd and run this : ngrok http 80
     --If error appears double check steps 1 to 4.--
     --Accounts Passwords: password123--
+
+-- FOR CLOUDFLARE --
+8. edit .env file APP_URL, change into this: APP_URL=http://localhost
+9. open cmd or powershell and paste this: winget install --id Cloudflare.cloudflared
+10. open httpd-vhosts.conf file located at xampp\apache\conf\extra
+11. replace the <Virtual Host> with this then save: 
+
+<VirtualHost *:80>
+    ##ServerAdmin webmaster@dummy-host.example.com
+    DocumentRoot "C:/xampp/htdocs/Smart-Accounting-v3/public"
+    ##ServerName smart-accounting.local
+    <Directory "C:/xampp/htdocs/Smart-Accounting-v3/public">
+    	AllowOverride All 
+    	Require all granted 
+    </Directory>
+</VirtualHost>
+
+12. go back to cmd run this: cloudflared tunnel --url http://localhost:80
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
