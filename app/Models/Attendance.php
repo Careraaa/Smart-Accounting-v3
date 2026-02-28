@@ -15,7 +15,8 @@ class Attendance extends Model
         'date',
         'time_in',
         'time_out',
-        'status'
+        'status',
+        'is_manual'
     ];
 
     protected $casts = [

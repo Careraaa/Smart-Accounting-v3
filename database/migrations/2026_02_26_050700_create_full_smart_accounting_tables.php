@@ -205,6 +205,7 @@ return new class extends Migration {
             $table->time('time_in')->nullable();
             $table->time('time_out')->nullable();
             $table->enum('status', ['present', 'late', 'absent'])->nullable();
+            $table->boolean('is_manual')->default(false);
             $table->timestamps();
 
             $table->unique(['employee_id', 'date']);

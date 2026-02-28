@@ -77,15 +77,46 @@
                                     <th>Time In</th>
                                     <th>Time Out</th>
                                     <th>Status</th>
+                                    <th>Entry Type</th>
                                 </tr>
                             </thead>
-                            <tbody id="recent-scans-tbody">
-                                <tr>
-                                    <td colspan="5" class="text-muted text-center py-3">Loading…</td>
-                                </tr>
+                            <tbody>
+                                @forelse($attendances as $attendance)
+                                    <tr>
+                                        <td><strong>{{ $attendance->employee->first_name }} {{ $attendance->employee->last_name }}</strong></td>
+                                        <td><small class="text-muted">{{ $attendance->date->format('M d, Y') }}</small></td>
+                                        <td>{{ $attendance->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $attendance->time_in)->format('g:i A') : '—' }}</td>
+                                        <td>{{ $attendance->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $attendance->time_out)->format('g:i A') : '—' }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 
+                                                $attendance->status === 'present' ? 'success' : 
+                                                ($attendance->status === 'absent' ? 'danger' : 
+                                                ($attendance->status === 'late' ? 'warning' : 'info')) 
+                                            }}">
+                                                {{ ucfirst(str_replace('_', ' ', $attendance->status)) }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if($attendance->is_manual)
+                                                <span class="badge bg-info"><i class="feather-edit-2 me-1" style="font-size: 0.75rem;"></i>Manual</span>
+                                            @else
+                                                <span class="badge bg-success"><i class="feather-check-circle me-1" style="font-size: 0.75rem;"></i>QR Scanned</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-muted text-center py-3">No attendance records found</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
+                    @if($attendances->hasPages())
+                        <div class="d-flex justify-content-end mt-3">
+                            {{ $attendances->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -189,40 +220,21 @@ async function loadRecentScans() {
     try {
         const response = await fetch("{{ route('api.attendance.recent') }}", { credentials: 'include' });
         const logs = await response.json();
-        const tbody = document.getElementById('recent-scans-tbody');
 
         if (!logs || logs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center py-3">No recent QR scans</td></tr>';
             return;
         }
 
-        const consolidated = {};
-        logs.forEach(log => {
-            const key = `${log.employee_name}|${log.date}`;
-            if (!consolidated[key]) {
-                consolidated[key] = { employee_name: log.employee_name, date: log.date, time_in: 'N/A', time_out: 'N/A' };
-            }
-            if (log.type === 'time_in')  consolidated[key].time_in  = log.time;
-            if (log.type === 'time_out') consolidated[key].time_out = log.time;
-        });
-
-        tbody.innerHTML = Object.values(consolidated).map(r => `
-            <tr>
-                <td><strong>${r.employee_name}</strong></td>
-                <td><small class="text-muted">${r.date}</small></td>
-                <td>${r.time_in}</td>
-                <td>${r.time_out}</td>
-                <td><span class="badge bg-success">QR Scanned</span></td>
-            </tr>
-        `).join('');
+        // Refresh the page to show new manual entry
+        location.reload();
     } catch {
-        document.getElementById('recent-scans-tbody').innerHTML =
-            '<tr><td colspan="5" class="text-danger text-center py-3"><i class="feather-alert-circle me-2"></i>Failed to load</td></tr>';
+        // Silent fail - page will still work
     }
 }
 
 window.addEventListener('load', () => {
-    loadRecentScans();
+    // Initial load not needed since table is server-rendered
+    // Just set up automatic refresh for real-time updates
     setInterval(loadRecentScans, 30000);
 });
 </script>

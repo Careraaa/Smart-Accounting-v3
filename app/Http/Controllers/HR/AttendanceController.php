@@ -199,4 +199,37 @@ class AttendanceController extends Controller
             'token' => $token->token
         ]);
     }
+
+    public function create()
+    {
+        $employees = Employee::all();
+        return view('hr.attendance.create', compact('employees'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'employee_id' => 'required|exists:employees,id',
+            'date' => 'required|date',
+            'time_in' => 'nullable|date_format:H:i',
+            'time_out' => 'nullable|date_format:H:i',
+            'status' => 'required|in:present,absent,late,early_leave'
+        ]);
+
+        $attendance = Attendance::updateOrCreate(
+            [
+                'employee_id' => $request->employee_id,
+                'date' => $request->date
+            ],
+            [
+                'time_in' => $request->time_in,
+                'time_out' => $request->time_out,
+                'status' => $request->status,
+                'is_manual' => true
+            ]
+        );
+
+        return redirect()->route('attendance.index')
+            ->with('success', 'Attendance record saved successfully');
+    }
 }
