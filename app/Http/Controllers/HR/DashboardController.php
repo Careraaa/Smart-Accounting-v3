@@ -13,13 +13,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Employee Statistics
-        $totalEmployees = Employee::count();
-        $activeEmployees = Employee::where('status', 'active')->count();
-        $inactiveEmployees = Employee::where('status', 'inactive')->count();
+        // Employee Statistics (exclude superadmin)
+        $totalEmployees = Employee::where('role', '!=', 'superadmin')->count();
+        $activeEmployees = Employee::where('role', '!=', 'superadmin')->where('status', 'active')->count();
+        $inactiveEmployees = Employee::where('role', '!=', 'superadmin')->where('status', 'inactive')->count();
         $onLeaveEmployees = Leave::where('start_date', '<=', now())
             ->where('end_date', '>=', now())
-            ->distinct('employee_id')
+            ->distinct('user_id')
             ->count();
         
         // Attendance Statistics (Today)

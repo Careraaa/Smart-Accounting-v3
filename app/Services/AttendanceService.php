@@ -19,7 +19,7 @@ class AttendanceService
      */
     public function countWorkDaysInPeriod($employeeId, $periodStart, $periodEnd)
     {
-        return Attendance::where('employee_id', $employeeId)
+        return Attendance::where('user_id', $employeeId)
             ->whereBetween('date', [$periodStart, $periodEnd])
             ->where('status', 'present')
             ->count();
@@ -35,7 +35,7 @@ class AttendanceService
      */
     public function calculateTotalHoursWorked($employeeId, $periodStart, $periodEnd)
     {
-        $attendances = Attendance::where('employee_id', $employeeId)
+        $attendances = Attendance::where('user_id', $employeeId)
             ->whereBetween('date', [$periodStart, $periodEnd])
             ->where('status', 'present')
             ->where('time_in', '!=', null)
@@ -108,7 +108,7 @@ class AttendanceService
         // Create or update today's attendance record
         Attendance::updateOrCreate(
             [
-                'employee_id' => $employee->id,
+                'user_id' => $employee->id,
                 'date' => today(),
             ],
             [
@@ -129,7 +129,7 @@ class AttendanceService
      */
     public function getAttendanceSummary($employeeId, $periodStart, $periodEnd)
     {
-        $attendances = Attendance::where('employee_id', $employeeId)
+        $attendances = Attendance::where('user_id', $employeeId)
             ->whereBetween('date', [$periodStart, $periodEnd])
             ->get();
 

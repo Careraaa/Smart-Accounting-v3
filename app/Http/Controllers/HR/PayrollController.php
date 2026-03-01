@@ -40,8 +40,9 @@ class PayrollController extends Controller
         $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])
             ->orderBy($sortBy, $sortOrder)->get();
 
-        $totalEmployees = Employee::count();
-        $activeEmployees = Employee::where('status', 'active')->count();
+        // Exclude superadmin from employee counts
+        $totalEmployees = Employee::where('role', '!=', 'superadmin')->count();
+        $activeEmployees = Employee::where('role', '!=', 'superadmin')->where('status', 'active')->count();
         $inactiveEmployees = $totalEmployees - $activeEmployees;
 
         $presentToday = Attendance::whereDate('date', now())->where('status', 'present')->count();
@@ -74,14 +75,15 @@ class PayrollController extends Controller
 
     public function create()
     {
-        $employees = Employee::all();
+        // Exclude superadmin from employee list
+        $employees = Employee::where('role', '!=', 'superadmin')->get();
         return view('hr.payroll.salary-computation.create', compact('employees'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'user_id' => 'required|exists:users,id',
             'payroll_period_start' => 'required|date',
             'payroll_period_end' => 'required|date',
             'total_allowances' => 'nullable|numeric|min:0',
@@ -92,18 +94,18 @@ class PayrollController extends Controller
             'deductions.*.amount' => 'nullable|numeric|min:0',
         ]);
 
-        $employee = Employee::find($validated['employee_id']);
+        $employee = Employee::find($validated['user_id']);
         $periodStart = Carbon::parse($validated['payroll_period_start']);
         $periodEnd = Carbon::parse($validated['payroll_period_end']);
 
         // Always calculate basic salary from attendance
         $daysWorked = $this->attendanceService->countWorkDaysInPeriod(
-            $validated['employee_id'],
+            $validated['user_id'],
             $periodStart,
             $periodEnd
         );
         $hoursWorked = $this->attendanceService->calculateTotalHoursWorked(
-            $validated['employee_id'],
+            $validated['user_id'],
             $periodStart,
             $periodEnd
         );
@@ -117,7 +119,7 @@ class PayrollController extends Controller
         $totalDeductions = floatval($validated['total_deductions'] ?? 0);
 
         $payroll = Payroll::create([
-            'employee_id' => $validated['employee_id'],
+            'user_id' => $validated['user_id'],
             'payroll_period_start' => $periodStart,
             'payroll_period_end' => $periodEnd,
             'total_allowances' => $totalAllowances,
@@ -160,8 +162,8 @@ class PayrollController extends Controller
 
     public function edit(Payroll $payroll)
     {
-        // Include all employees so payrolls linked to inactive employees still show correctly
-        $employees = Employee::all();
+        // Include all employees except superadmin so payrolls linked to inactive employees still show correctly
+        $employees = Employee::where('role', '!=', 'superadmin')->get();
         $payroll->load('allowances', 'deductions');
         $attendanceSummary = $payroll->attendance_summary;
         
@@ -171,7 +173,7 @@ class PayrollController extends Controller
     public function update(Request $request, Payroll $payroll)
     {
         $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'user_id' => 'required|exists:users,id',
             'payroll_period_start' => 'required|date',
             'payroll_period_end' => 'required|date',
             'recalculate_from_attendance' => 'nullable|boolean',
@@ -195,7 +197,7 @@ class PayrollController extends Controller
         $periodEnd = Carbon::parse($validated['payroll_period_end']);
 
         $updateData = [
-            'employee_id' => $validated['employee_id'],
+            'user_id' => $validated['user_id'],
             'payroll_period_start' => $periodStart,
             'payroll_period_end' => $periodEnd,
             'total_allowances' => $totalAllowances,
@@ -205,7 +207,7 @@ class PayrollController extends Controller
 
         // Recalculate from attendance if requested
         if ($request->boolean('recalculate_from_attendance')) {
-            $employee = Employee::find($validated['employee_id']);
+            $employee = Employee::find($validated['user_id']);
             $daysWorked = $this->attendanceService->countWorkDaysInPeriod(
                 $validated['employee_id'],
                 $periodStart,
@@ -293,7 +295,7 @@ class PayrollController extends Controller
 
         foreach ($employees as $employee) {
             // Check if payroll already exists for this period
-            $existingPayroll = Payroll::where('employee_id', $employee->id)
+            $existingPayroll = Payroll::where('user_id', $employee->id)
                 ->whereBetween('payroll_period_start', [$periodStart, $periodEnd])
                 ->first();
 
@@ -320,7 +322,7 @@ class PayrollController extends Controller
             );
 
             Payroll::create([
-                'employee_id' => $employee->id,
+                'user_id' => $employee->id,
                 'payroll_period_start' => $periodStart,
                 'payroll_period_end' => $periodEnd,
                 'basic_salary' => $basicSalary,
@@ -385,7 +387,7 @@ class PayrollController extends Controller
     public function getAttendanceSummary(Request $request)
     {
         $request->validate([
-            'employee_id' => 'required|exists:employees,id',
+            'user_id' => 'required|exists:users,id',
             'period_start' => 'required|date',
             'period_end' => 'required|date',
         ]);
@@ -394,7 +396,7 @@ class PayrollController extends Controller
         $periodEnd = Carbon::parse($request->period_end);
 
         $summary = $this->attendanceService->getAttendanceSummary(
-            $request->employee_id,
+            $request->user_id,
             $periodStart,
             $periodEnd
         );

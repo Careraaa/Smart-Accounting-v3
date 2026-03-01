@@ -9,30 +9,22 @@ class PayrollDeduction extends Model
 {
     use HasFactory;
 
-    protected $table = 'deductions';
+    protected $table = 'payroll_deductions';
 
     protected $fillable = [
         'payroll_id',
-        'employee_id',
         'deduction_type',
         'amount',
-        'effective_date',
-        'status'
+        'description',
     ];
 
     protected $casts = [
-        'effective_date' => 'date',
         'amount' => 'float',
     ];
 
     public function payroll()
     {
         return $this->belongsTo(Payroll::class);
-    }
-
-    public function employee()
-    {
-        return $this->belongsTo(Employee::class);
     }
 }
 

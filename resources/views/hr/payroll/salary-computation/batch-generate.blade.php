@@ -35,7 +35,7 @@
                     
                     <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
                         @php
-                            $activeEmployees = \App\Models\Employee::where('status', 'active')->orderBy('first_name')->get();
+                            $activeEmployees = \App\Models\Employee::where('role', '!=', 'superadmin')->where('status', 'active')->orderBy('first_name')->get();
                         @endphp
                         @forelse($activeEmployees as $employee)
                             <div class="form-check mb-2">

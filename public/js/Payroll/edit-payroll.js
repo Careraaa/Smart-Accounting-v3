@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     // --- Salary calculation logic ---
-    const employeeSelect = document.getElementById("employee_id");
+    const employeeSelect = document.getElementById("user_id");
     const basicSalaryDisplay = document.getElementById("basic_salary_display");
     const netSalaryDisplay = document.getElementById("net_salary_display");
 

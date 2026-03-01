@@ -126,6 +126,8 @@
         }
     </script>
     <!--! END: Mobile Menu Handler  !-->
+    
+    @yield('scripts')
 </body>
 
 </html>

@@ -10,7 +10,7 @@ class CashAdvance extends Model
     use HasFactory;
 
     protected $fillable = [
-        'employee_id',
+        'user_id',
         'amount',
         'request_date',
         'approval_date',
@@ -25,6 +25,6 @@ class CashAdvance extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class, 'user_id');
     }
 }

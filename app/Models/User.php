@@ -18,11 +18,39 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        // Authentication fields
         'name',
-        'email',
+        'username',
         'password',
         'role',
         'profile_picture',
+        // Employee information fields
+        'first_name',
+        'middle_name',
+        'last_name',
+        'email',
+        'phone',
+        'address',
+        'civil_status',
+        'spouse_name',
+        'date_of_birth',
+        'place_of_birth',
+        'educational_attainment',
+        'driver_license_number',
+        'driver_license_validity',
+        'date_of_hire',
+        'position',
+        'department',
+        'status',
+        'salary_rate',
+        'has_sss',
+        'has_pagibig',
+        'has_tin',
+        'sss_number',
+        'tin_number',
+        'pagibig_number',
+        'signature_path',
+        'attachments',
     ];
 
     /**
@@ -43,19 +71,77 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'date_of_birth' => 'date',
+            'date_of_hire' => 'date',
+            'driver_license_validity' => 'date',
+            'attachments' => 'array',
         ];
     }
 
     // Relationships
-    public function employee()
-    {
-        return $this->hasOne(Employee::class);
-    }
-
     public function attendanceLogs()
     {
         return $this->hasMany(AttendanceLog::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'user_id');
+    }
+
+    public function payrolls()
+    {
+        return $this->hasMany(Payroll::class, 'user_id');
+    }
+
+    public function beneficiaries()
+    {
+        return $this->hasMany(Beneficiary::class, 'user_id');
+    }
+
+    public function workExperiences()
+    {
+        return $this->hasMany(WorkExperience::class, 'user_id');
+    }
+
+    public function specialSkills()
+    {
+        return $this->hasMany(SpecialSkill::class, 'user_id');
+    }
+
+    public function charRefs()
+    {
+        return $this->hasMany(CharacterReference::class, 'user_id');
+    }
+
+    public function leaves()
+    {
+        return $this->hasMany(Leave::class, 'user_id');
+    }
+
+    public function allowances()
+    {
+        return $this->hasMany(Allowance::class, 'user_id');
+    }
+
+    public function deductions()
+    {
+        return $this->hasMany(Deduction::class, 'user_id');
+    }
+
+    public function salaryLoans()
+    {
+        return $this->hasMany(SalaryLoan::class, 'user_id');
+    }
+
+    public function cashAdvances()
+    {
+        return $this->hasMany(CashAdvance::class, 'user_id');
+    }
+
+    public function overtimeUndertimes()
+    {
+        return $this->hasMany(OvertimeUndertime::class, 'user_id');
     }
 }

@@ -9,6 +9,6 @@ class CharacterReference extends Model
     protected $table = 'employee_references';
 
     protected $fillable = [
-        'employee_id', 'name', 'address', 'contact_number', 'sequence',
+        'user_id', 'name', 'address', 'contact_number', 'sequence',
     ];
 }

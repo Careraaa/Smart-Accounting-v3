@@ -12,16 +12,16 @@
 
                 {{-- Employee --}}
                 <div class="mb-4">
-                    <label for="employee_id" class="form-label">Employee <span class="text-danger">*</span></label>
-                    <select name="employee_id" id="employee_id" class="form-control @error('employee_id') is-invalid @enderror" required>
-                        <option value="">— Select Employee —</option>
+                    <label for="user_id" class="form-label">Employee <span class="text-danger">*</span></label>
+                    <select name="user_id" id="user_id" class="form-control @error('user_id') is-invalid @enderror" required>
+                        <option value="">Select an employee</option>
                         @foreach($employees as $employee)
-                            <option value="{{ $employee->id }}" @selected(old('employee_id') == $employee->id)>
+                            <option value="{{ $employee->id }}" @selected(old('user_id') == $employee->id)>
                                 {{ $employee->first_name }} {{ $employee->last_name }}
                             </option>
                         @endforeach
                     </select>
-                    @error('employee_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    @error('user_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
                 {{-- Date --}}

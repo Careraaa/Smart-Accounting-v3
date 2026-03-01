@@ -14,12 +14,12 @@
             @csrf
 
             <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
-                <input id="email" type="email"
-                    class="form-control @error('email') is-invalid @enderror"
-                    name="email" value="{{ old('email') }}" required autofocus
-                    autocomplete="username" placeholder="your@email.com">
-                @error('email')
+                <label for="username" class="form-label">Username</label>
+                <input id="username" type="text"
+                    class="form-control @error('username') is-invalid @enderror"
+                    name="username" value="{{ old('username') }}" required autofocus
+                    autocomplete="username" placeholder="your_username">
+                @error('username')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
                 @enderror
             </div>

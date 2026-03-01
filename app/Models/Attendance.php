@@ -11,7 +11,7 @@ class Attendance extends Model
     protected $table = 'attendance';
 
     protected $fillable = [
-        'employee_id',
+        'user_id',
         'date',
         'time_in',
         'time_out',
@@ -27,7 +27,7 @@ class Attendance extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class, 'user_id');
     }
 
     /**

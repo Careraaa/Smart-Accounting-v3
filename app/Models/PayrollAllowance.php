@@ -9,30 +9,21 @@ class PayrollAllowance extends Model
 {
     use HasFactory;
 
-    protected $table = 'allowances';
+    protected $table = 'payroll_allowances';
 
     protected $fillable = [
         'payroll_id',
-        'employee_id',
         'allowance_type',
         'amount',
-        'effective_date',
-        'status'
     ];
 
     protected $casts = [
-        'effective_date' => 'date',
         'amount' => 'float',
     ];
 
     public function payroll()
     {
         return $this->belongsTo(Payroll::class);
-    }
-
-    public function employee()
-    {
-        return $this->belongsTo(Employee::class);
     }
 }
 

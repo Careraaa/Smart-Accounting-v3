@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     // --- Payroll inputs ---
-    const employeeSelect = document.getElementById("employee_id");
+    const employeeSelect = document.getElementById("user_id");
     const basicSalaryDisplay = document.getElementById("basic_salary_display");
     const basicSalaryInput = document.getElementById("basic_salary_input");
     const netSalaryDisplay = document.getElementById("net_salary_display");
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             const response = await fetch(
-                `/api/attendance/summary?employee_id=${employeeId}&period_start=${periodStart}&period_end=${periodEnd}`
+                `/api/attendance/summary?user_id=${employeeId}&period_start=${periodStart}&period_end=${periodEnd}`
             );
 
             if (!response.ok) {

@@ -16,6 +16,5 @@ class DatabaseSeeder extends Seeder
         $this->call([StatutoryDeductions_Seeder::class]);
         $this->call([Drivers_Seeder::class]);
         $this->call([Pao_Seeder::class]);
-        $this->call([Employees_Seeder::class]);
     }
 }

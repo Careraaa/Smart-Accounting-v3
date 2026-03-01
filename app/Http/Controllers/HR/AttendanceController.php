@@ -202,7 +202,8 @@ class AttendanceController extends Controller
 
     public function create()
     {
-        $employees = Employee::all();
+        // Get all employees excluding superadmin
+        $employees = Employee::where('role', '!=', 'superadmin')->get();
         return view('hr.attendance.create', compact('employees'));
     }
 

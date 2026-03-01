@@ -10,7 +10,7 @@ class SalaryLoan extends Model
     use HasFactory;
 
     protected $fillable = [
-        'employee_id',
+        'user_id',
         'loan_amount',
         'monthly_deduction',
         'remaining_balance',
@@ -27,6 +27,6 @@ class SalaryLoan extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class, 'user_id');
     }
 }

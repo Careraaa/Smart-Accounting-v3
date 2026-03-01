@@ -19,7 +19,7 @@ trait AttendanceCalculations
         $attendanceService = new AttendanceService();
         
         return $attendanceService->getAttendanceSummary(
-            $this->employee_id,
+            $this->user_id,
             $periodStart,
             $periodEnd
         );

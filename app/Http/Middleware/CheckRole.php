@@ -19,6 +19,11 @@ class CheckRole
             return redirect()->route('login');
         }
 
+        // Superadmin has access to all modules
+        if ($request->user()->role === 'superadmin') {
+            return $next($request);
+        }
+
         if (in_array($request->user()->role, $roles)) {
             return $next($request);
         }

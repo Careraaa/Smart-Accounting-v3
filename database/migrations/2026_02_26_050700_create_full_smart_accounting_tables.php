@@ -13,20 +13,43 @@ return new class extends Migration {
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            // User Authentication
             $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('username')->unique();
             $table->string('password');
             $table->string('role')->default('employee');
             $table->string('profile_picture')->nullable();
             $table->rememberToken();
+            
+            // Employee Information
+            $table->string('first_name')->nullable();
+            $table->string('middle_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('email')->unique()->nullable();
+            $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+            $table->string('civil_status')->nullable();
+            $table->string('spouse_name')->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->string('place_of_birth')->nullable();
+            $table->string('educational_attainment')->nullable();
+            $table->string('driver_license_number')->nullable();
+            $table->date('driver_license_validity')->nullable();
+            $table->date('date_of_hire')->nullable();
+            $table->string('position')->nullable();
+            $table->string('department')->nullable();
+            $table->string('status')->default('active');
+            $table->decimal('salary_rate', 10, 2)->default(0);
+            $table->boolean('has_sss')->default(false);
+            $table->string('sss_number')->nullable();
+            $table->string('tin_number')->nullable();
+            $table->boolean('has_tin')->default(false);
+            $table->string('pagibig_number')->nullable();
+            $table->boolean('has_pagibig')->default(false);
+            $table->string('signature_path')->nullable();
+            $table->json('attachments')->nullable();
+            
             $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -110,44 +133,12 @@ return new class extends Migration {
         });
 
         // -------------------------
-        // EMPLOYEE TABLES
+        // EMPLOYEE RELATED TABLES
         // -------------------------
-
-        Schema::create('employees', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('first_name');
-            $table->string('middle_name')->nullable();
-            $table->string('last_name');
-            $table->string('email')->unique();
-            $table->string('phone');
-            $table->text('address')->nullable();
-            $table->string('civil_status')->nullable();
-            $table->string('spouse_name')->nullable();
-            $table->date('date_of_birth')->nullable();
-            $table->string('place_of_birth')->nullable();
-            $table->string('educational_attainment')->nullable();
-            $table->string('driver_license_number')->nullable();
-            $table->date('driver_license_validity')->nullable();
-            $table->date('date_of_hire');
-            $table->string('position');
-            $table->string('department')->nullable();
-            $table->string('status')->default('active');
-            $table->decimal('salary_rate', 10, 2)->default(0);
-            $table->boolean('has_sss')->default(false);
-            $table->string('sss_number')->nullable();
-            $table->string('tin_number')->nullable();
-            $table->boolean('has_tin')->default(false);
-            $table->string('pagibig_number')->nullable();
-            $table->boolean('has_pagibig')->default(false);
-            $table->string('signature_path')->nullable();
-            $table->json('attachments')->nullable();
-            $table->timestamps();
-        });
 
         Schema::create('employee_experiences', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('company_name');
             $table->string('position')->nullable();
             $table->string('duration')->nullable();
@@ -158,7 +149,7 @@ return new class extends Migration {
 
         Schema::create('employee_skills', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('skill_name');
             $table->string('proficiency')->nullable();
             $table->integer('sequence')->default(1);
@@ -167,7 +158,7 @@ return new class extends Migration {
 
         Schema::create('employee_beneficiaries', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('name');
             $table->date('date_of_birth')->nullable();
             $table->string('relationship')->nullable();
@@ -177,7 +168,7 @@ return new class extends Migration {
 
         Schema::create('employee_references', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('name');
             $table->string('address')->nullable();
             $table->string('contact_number')->nullable();
@@ -187,7 +178,7 @@ return new class extends Migration {
 
         Schema::create('employee_attachments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('attachment_type');
             $table->string('file_path')->nullable();
             $table->boolean('provided')->default(false);
@@ -200,7 +191,7 @@ return new class extends Migration {
 
         Schema::create('attendance', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->date('date');
             $table->time('time_in')->nullable();
             $table->time('time_out')->nullable();
@@ -208,7 +199,7 @@ return new class extends Migration {
             $table->boolean('is_manual')->default(false);
             $table->timestamps();
 
-            $table->unique(['employee_id', 'date']);
+            $table->unique(['user_id', 'date']);
         });
 
         Schema::create('attendance_logs', function (Blueprint $table) {
@@ -234,7 +225,7 @@ return new class extends Migration {
 
         Schema::create('leaves', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('leave_type');
             $table->date('start_date');
             $table->date('end_date');
@@ -246,7 +237,7 @@ return new class extends Migration {
 
         Schema::create('overtime_undertimes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->date('date');
             $table->string('type');
             $table->decimal('hours', 5, 2);
@@ -269,7 +260,7 @@ return new class extends Migration {
 
         Schema::create('payrolls', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->date('payroll_period_start');
             $table->date('payroll_period_end');
             $table->decimal('total_allowances', 10, 2)->default(0);
@@ -285,7 +276,7 @@ return new class extends Migration {
 
         Schema::create('allowances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('payroll_id')->nullable()->constrained('payrolls')->nullOnDelete();
             $table->string('allowance_type');
             $table->decimal('amount', 10, 2)->default(0);
@@ -296,7 +287,7 @@ return new class extends Migration {
 
         Schema::create('deductions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('payroll_id')->nullable()->constrained('payrolls')->nullOnDelete();
             $table->string('deduction_type');
             $table->decimal('amount', 10, 2)->default(0);
@@ -324,7 +315,7 @@ return new class extends Migration {
 
         Schema::create('salary_loans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->decimal('loan_amount', 10, 2)->default(0);
             $table->decimal('monthly_deduction', 10, 2)->default(0);
             $table->decimal('remaining_balance', 10, 2)->default(0);
@@ -337,7 +328,7 @@ return new class extends Migration {
 
         Schema::create('cash_advances', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->decimal('amount', 10, 2)->default(0);
             $table->date('request_date')->nullable();
             $table->date('approval_date')->nullable();
@@ -368,7 +359,6 @@ return new class extends Migration {
         Schema::dropIfExists('employee_beneficiaries');
         Schema::dropIfExists('employee_skills');
         Schema::dropIfExists('employee_experiences');
-        Schema::dropIfExists('employees');
         Schema::dropIfExists('daily_remittances');
         Schema::dropIfExists('vehicles');
         Schema::dropIfExists('routes');
@@ -377,7 +367,6 @@ return new class extends Migration {
         Schema::dropIfExists('cache_locks');
         Schema::dropIfExists('cache');
         Schema::dropIfExists('sessions');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('users');
     }
 };

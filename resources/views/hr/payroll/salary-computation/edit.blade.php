@@ -12,21 +12,21 @@
 
                 {{-- Employee --}}
                 <div class="mb-4">
-                    <label for="employee_id" class="form-label">Employee <span class="text-danger">*</span></label>
-                    <select name="employee_id" id="employee_id"
-                        class="form-control @error('employee_id') is-invalid @enderror" required>
+                    <label for="user_id" class="form-label">Employee <span class="text-danger">*</span></label>
+                    <select name="user_id" id="user_id"
+                        class="form-control @error('user_id') is-invalid @enderror" required>
                         <option value="">— Select Employee —</option>
                         @foreach ($employees as $employee)
                             <option value="{{ $employee->id }}"
                                 data-salary-rate="{{ $employee->salary_rate }}"
                                 data-has-sss="{{ $employee->has_sss ? 1 : 0 }}"
                                 data-has-pagibig="{{ $employee->has_pagibig ? 1 : 0 }}"
-                                {{ $payroll->employee_id == $employee->id ? 'selected' : '' }}>
+                                {{ $payroll->user_id == $employee->id ? 'selected' : '' }}>
                                 {{ $employee->first_name }} {{ $employee->last_name }}
                             </option>
                         @endforeach
                     </select>
-                    @error('employee_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    @error('user_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
                 {{-- Period --}}

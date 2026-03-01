@@ -11,7 +11,7 @@ class Payroll extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['employee_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'approved_by', 'total_allowances', 'total_deductions', 'days_worked', 'hours_worked', 'basic_salary'];
+    protected $fillable = ['user_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'approved_by', 'total_allowances', 'total_deductions', 'days_worked', 'hours_worked', 'basic_salary'];
 
     protected $casts = [
         'payroll_period_start' => 'date',
@@ -25,7 +25,7 @@ class Payroll extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class, 'user_id');
     }
 
     public function approvedBy()

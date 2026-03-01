@@ -10,7 +10,7 @@ class Leave extends Model
     use HasFactory;
 
     protected $fillable = [
-        'employee_id',
+        'user_id',
         'leave_type',
         'start_date',
         'end_date',
@@ -26,7 +26,7 @@ class Leave extends Model
 
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+        return $this->belongsTo(Employee::class, 'user_id');
     }
 
     public function approvedBy()

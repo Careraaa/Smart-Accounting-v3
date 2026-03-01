@@ -31,6 +31,122 @@
                     </a>
                 </li>
 
+                {{-- ── SUPERADMIN ── --}}
+                @if (auth()->user()->role === 'superadmin')
+                    <li class="nxl-item nxl-caption"><label>HR Management</label></li>
+
+                    <li class="nxl-item {{ request()->routeIs('employees.*') ? 'active' : '' }}">
+                        <a href="{{ route('employees.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-user-plus"></i></span>
+                            <span class="nxl-mtext">Employee Management</span>
+                        </a>
+                    </li>
+
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-clock"></i></span>
+                            <span class="nxl-mtext">Attendance</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance Records</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.index') }}">Leave Management</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('overtime.index') }}">Overtime / Undertime</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance Adjustment</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nxl-item nxl-caption"><label>Payroll</label></li>
+
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('payroll.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-dollar-sign"></i></span>
+                            <span class="nxl-mtext">Payroll Processing</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item {{ request()->routeIs('payroll.salary-computation.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('payroll.salary-computation.index') }}">Salary Computation</a>
+                            </li>
+                            <li class="nxl-item {{ request()->routeIs('payroll.statutory-deductions.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('payroll.statutory-deductions.index') }}">Statutory Deductions</a>
+                            </li>
+                            <li class="nxl-item {{ request()->routeIs('payroll.receivables.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('payroll.receivables.index') }}">Payroll Receivables</a>
+                            </li>
+                            <li class="nxl-item {{ request()->routeIs('payroll.generate-payslip.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('payroll.generate-payslip.index') }}">Generate Payslip</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nxl-item nxl-caption"><label>Operational Records</label></li>
+
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-users"></i></span>
+                            <span class="nxl-mtext">Transport Management</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item {{ request()->routeIs('drivers.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('drivers.index') }}">List of Drivers</a>
+                            </li>
+                            <li class="nxl-item {{ request()->routeIs('paos.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('paos.index') }}">List of PAO / Conductors</a>
+                            </li>
+                            <li class="nxl-item {{ request()->routeIs('routes.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('routes.index') }}">Routes &amp; Vehicles</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('remittances.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-activity"></i></span>
+                            <span class="nxl-mtext">Daily Remittance</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item">
+                                <a class="nxl-link" href="{{ route('remittances.index') }}">Record Remittance</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="nxl-item nxl-caption"><label>Approvals</label></li>
+
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-check-circle"></i></span>
+                            <span class="nxl-mtext">Approvals</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll-approval.index') }}">Payroll Release Approval</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittance-approval.index') }}">Remittance Approval</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nxl-item nxl-caption"><label>Reports</label></li>
+
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-file-text"></i></span>
+                            <span class="nxl-mtext">Reports</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance-details') }}">Remittance Details</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance-summary') }}">Remittance Summary</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.payslips') }}">Payslips</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.payroll-summary') }}">Payroll Summary</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.deduction-summary') }}">Deduction Summary</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.government-contribution') }}">Government Contribution</a></li>
+                        </ul>
+                    </li>
+                @endif
+
                 {{-- ── Remittance Clerk ── --}}
                 @if (auth()->user()->role === 'remittance_clerk')
                     <li class="nxl-item nxl-caption"><label>Operations</label></li>
@@ -103,8 +219,8 @@
                         </a>
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">QR Time IN / OUT Records</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Leave Management</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Overtime / Undertime</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.index') }}">Leave Management</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('overtime.index') }}">Overtime / Undertime</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance Adjustment</a></li>
                         </ul>
                     </li>

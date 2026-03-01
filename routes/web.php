@@ -13,6 +13,8 @@ use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\AttendanceController;
 use App\Http\Controllers\HR\PayrollController;
 use App\Http\Controllers\HR\StatutoryDeductionController;
+use App\Http\Controllers\HR\LeaveController;
+use App\Http\Controllers\HR\OvertimeUndertimeController;
 use App\Http\Controllers\Accountant\PayrollApprovalController;
 use App\Http\Controllers\Accountant\ReportController;
 use App\Http\Controllers\Accountant\RemittanceApprovalController;
@@ -22,7 +24,9 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    if (auth()->user()->role === 'remittance_clerk') {
+    if (auth()->user()->role === 'superadmin') {
+        return view('superadmin.dashboard');
+    } elseif (auth()->user()->role === 'remittance_clerk') {
         return redirect()->route('remittance-clerk.index');
     } elseif (auth()->user()->role === 'accountant') {
         return redirect()->route('accountant.index');
@@ -34,11 +38,11 @@ Route::get('/dashboard', function () {
     // Default dashboard for other roles
     return view('dashboard');
 })
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth'])
     ->name('dashboard');
 
 // ===== PROFILE & ACCOUNT ROUTES =====
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile/details', function () {
         return view('partials.profile.profile-details');
     })->name('profile.details');
@@ -52,7 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'username' => 'required|string|unique:users,username,' . $user->id,
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -80,7 +84,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // ===== REMITTANCE CLERK ROUTES =====
-Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function () {
+Route::middleware(['auth', 'role:remittance_clerk'])->group(function () {
     Route::get('/remittance-clerk', [RemittanceClerkDashboardController::class, 'index'])->name('remittance-clerk.index');
 
     // Management (Routes & Vehicles Combined)
@@ -132,14 +136,14 @@ Route::middleware(['auth', 'verified', 'role:remittance_clerk'])->group(function
 });
 
 // ===== EMPLOYEE ROUTES =====
-Route::middleware(['auth', 'verified', 'role:employee'])->group(function () {
+Route::middleware(['auth', 'role:employee'])->group(function () {
     Route::get('/employee', function () {
         return view('employee.dashboard');
     })->name('employee.index');
 });
 
 // ===== EMPLOYEE DASHBOARD (All authenticated users) =====
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/employee', function () {
         return view('employee.dashboard');
     })->name('employee.dashboard');
@@ -155,7 +159,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // ===== HR ROUTES =====
-Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
+Route::middleware(['auth', 'role:hr'])->group(function () {
     Route::get('/hr', [HRDashboardController::class, 'index'])
         ->name('hr.index');
 
@@ -182,6 +186,16 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
 
     Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
         ->name('attendance.lastlog');
+
+    // ================ LEAVE MANAGEMENT ROUTES ================
+    Route::resource('leave', LeaveController::class);
+    Route::post('/leave/{leave}/approve', [LeaveController::class, 'approve'])->name('leave.approve');
+    Route::post('/leave/{leave}/reject', [LeaveController::class, 'reject'])->name('leave.reject');
+
+    // ================ OVERTIME/UNDERTIME ROUTES ================
+    Route::resource('overtime', OvertimeUndertimeController::class);
+    Route::post('/overtime/{overtime}/approve', [OvertimeUndertimeController::class, 'approve'])->name('overtime.approve');
+    Route::post('/overtime/{overtime}/reject', [OvertimeUndertimeController::class, 'reject'])->name('overtime.reject');
 
     // ---------------- PAYROLL ROUTES ----------------//
     // Salary Computation
@@ -261,14 +275,14 @@ Route::middleware(['auth', 'verified', 'role:hr'])->group(function () {
 });
 
 // ===== PAYROLL REPORTS (All authenticated users) =====
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/reports/payroll', function () {
         return view('reports.payroll');
     })->name('reports.payroll');
 });
 
 // ===== ACCOUNTANT ROUTES =====
-Route::middleware(['auth', 'verified', 'role:accountant'])->group(function () {
+Route::middleware(['auth', 'role:accountant'])->group(function () {
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
 
     // Payroll Approval Routes

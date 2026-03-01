@@ -25,7 +25,8 @@ class EmployeeController extends Controller
             $sortOrder = 'asc';
         }
         
-        $employees = Employee::orderBy($sortBy, $sortOrder)->get();
+        // Exclude superadmin from employee list
+        $employees = Employee::where('role', '!=', 'superadmin')->orderBy($sortBy, $sortOrder)->get();
         
         return view('hr.employees.index', compact('employees', 'sortBy', 'sortOrder'));
     }
