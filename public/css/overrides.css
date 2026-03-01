@@ -110,7 +110,7 @@ html.minimenu .m-header .b-brand .logo-mini {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
-    border: none !important; /* removes the white border line */
+    border: none !important;
     border-radius: 0 !important;
     margin: 0 !important;
     box-shadow: none !important;
@@ -616,12 +616,36 @@ html.minimenu .nxl-navigation:hover .navbar-content {
 .card-header {
     background: var(--kt-white) !important;
     border-bottom: 1px solid var(--kt-border) !important;
-    font-weight: 700 !important;
-    font-size: 0.875rem !important;
-    color: var(--kt-dark) !important;
     border-radius: var(--kt-radius) var(--kt-radius) 0 0 !important;
     padding: 16px 20px !important;
+    /* Fix: force all text in card headers to be dark */
+    color: var(--kt-dark) !important;
+    font-weight: 700 !important;
+    font-size: 0.875rem !important;
 }
+
+/* Explicitly target every possible child that could go white */
+.card-header *,
+.card-header .card-title,
+.card-header span.card-title,
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6,
+.card-header p,
+.card-header label {
+    color: var(--kt-dark) !important;
+}
+
+/* Icons in card headers get muted colour, not white */
+.card-header i[class*="feather"],
+.card-header i[class*="ti-"],
+.card-header i[class*="fa"] {
+    color: var(--kt-muted) !important;
+}
+
 .card-body {
     padding: 20px !important;
 }
@@ -1037,16 +1061,12 @@ hr {
 }
 
 /* -- Dropdown position fix ------------------------------------- */
-
-/* Desktop: align flush to the right of the trigger, not the viewport */
 .kt-user-dropdown.dropdown-menu-end {
     right: 0 !important;
     left: auto !important;
     margin-top: 8px !important;
 }
 
-/* Mobile: pin both dropdowns to the top of the screen,
-   stretched 12px from each edge so they never clip */
 @media (max-width: 767px) {
     .kt-user-dropdown,
     .kt-notif-dropdown {
