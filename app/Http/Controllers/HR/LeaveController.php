@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\Leave;
 use App\Models\Employee;
+use App\Notifications\LeaveNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -81,7 +82,12 @@ class LeaveController extends Controller
             'reason' => 'required|string',
         ]);
 
-        Leave::create($validated);
+        $leave = Leave::create($validated);
+        $leave->load('employee');
+
+        // Send notifications
+        LeaveNotification::leaveSubmitted($leave);
+        LeaveNotification::notifyManagersOfNewRequest($leave);
 
         return redirect()->route('leave.index')->with('success', 'Leave request created successfully.');
     }
@@ -112,12 +118,21 @@ class LeaveController extends Controller
         ]);
 
         $leave->update($validated);
+        $leave->load('employee');
+
+        // Send notification
+        LeaveNotification::leaveUpdated($leave);
 
         return redirect()->route('leave.show', $leave->id)->with('success', 'Leave request updated successfully.');
     }
 
     public function destroy(Leave $leave)
     {
+        $leave->load('employee');
+
+        // Send notification
+        LeaveNotification::leaveDeleted($leave);
+
         $leave->delete();
 
         return redirect()->route('leave.index')->with('success', 'Leave request deleted successfully.');
@@ -129,6 +144,10 @@ class LeaveController extends Controller
             'status' => 'approved',
             'approved_by' => auth()->user()->employee->id ?? null,
         ]);
+        $leave->load('employee');
+
+        // Send notification
+        LeaveNotification::leaveApproved($leave);
 
         return redirect()->back()->with('success', 'Leave request approved successfully.');
     }
@@ -143,6 +162,10 @@ class LeaveController extends Controller
             'status' => 'rejected',
             'approved_by' => auth()->user()->employee->id ?? null,
         ]);
+        $leave->load('employee');
+
+        // Send notification
+        LeaveNotification::leaveRejected($leave);
 
         return redirect()->back()->with('success', 'Leave request rejected successfully.');
     }

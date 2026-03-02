@@ -336,11 +336,27 @@ return new class extends Migration {
             $table->text('notes')->nullable();
             $table->timestamps();
         });
+
+        // NOTIFICATIONS TABLE
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('type'); // e.g., 'leave_approved', 'overtime_submitted', 'payroll_processed'
+            $table->string('title');
+            $table->text('message');
+            $table->json('data')->nullable(); // Additional data like related IDs
+            $table->timestamp('read_at')->nullable();
+            $table->timestamps();
+
+            $table->index(['user_id', 'created_at']);
+            $table->index(['user_id', 'read_at']);
+        });
     }
 
     public function down(): void
     {
         // Drop in reverse order to respect foreign keys
+        Schema::dropIfExists('notifications');
         Schema::dropIfExists('cash_advances');
         Schema::dropIfExists('salary_loans');
         Schema::dropIfExists('payroll_deductions');

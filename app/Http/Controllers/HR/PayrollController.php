@@ -8,6 +8,8 @@ use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\Leave;
 use App\Services\AttendanceService;
+use App\Services\NotificationService;
+use App\Notifications\PayrollNotification;
 use Illuminate\Http\Request;
 use App\Models\StatutoryDeduction;
 use Carbon\Carbon;
@@ -95,6 +97,13 @@ class PayrollController extends Controller
         ]);
 
         $employee = Employee::find($validated['user_id']);
+        
+        // Prevent payroll creation for superadmin
+        if ($employee->role === 'superadmin') {
+            return redirect()->route('payroll.create')
+                ->withErrors(['user_id' => 'Cannot create payroll for superadmin accounts.']);
+        }
+        
         $periodStart = Carbon::parse($validated['payroll_period_start']);
         $periodEnd = Carbon::parse($validated['payroll_period_end']);
 
@@ -148,6 +157,9 @@ class PayrollController extends Controller
             }
         }
 
+        // Send notification to employee
+        PayrollNotification::payrollCreated($payroll);
+
         return redirect()->route('payroll.index')->with('success', 'Payroll created successfully with attendance data.');
     }
 
@@ -183,6 +195,14 @@ class PayrollController extends Controller
             'deductions.*.amount' => 'nullable|numeric|min:0',
         ]);
 
+        $employee = Employee::find($validated['user_id']);
+        
+        // Prevent payroll assignment to superadmin
+        if ($employee->role === 'superadmin') {
+            return redirect()->route('payroll.edit', $payroll)
+                ->withErrors(['user_id' => 'Cannot assign payroll to superadmin accounts.']);
+        }
+
         $totalAllowances = 0;
         foreach ($request->allowances ?? [] as $allowance) {
             $totalAllowances += floatval($allowance['amount'] ?? 0);
@@ -209,12 +229,12 @@ class PayrollController extends Controller
         if ($request->boolean('recalculate_from_attendance')) {
             $employee = Employee::find($validated['user_id']);
             $daysWorked = $this->attendanceService->countWorkDaysInPeriod(
-                $validated['employee_id'],
+                $validated['user_id'],
                 $periodStart,
                 $periodEnd
             );
             $hoursWorked = $this->attendanceService->calculateTotalHoursWorked(
-                $validated['employee_id'],
+                $validated['user_id'],
                 $periodStart,
                 $periodEnd
             );
@@ -252,14 +272,37 @@ class PayrollController extends Controller
             }
         }
 
+        // Send notification to employee
+        PayrollNotification::payrollUpdated($payroll);
+
         return redirect()->route('payroll.index')->with('success', 'Payroll updated successfully.');
     }
 
     public function destroy(Payroll $payroll)
     {
+        // Load employee relationship before deletion
+        $payroll->load('employee');
+        $employee = $payroll->employee;
+        $payrollPeriodStart = $payroll->payroll_period_start;
+        $payrollPeriodEnd = $payroll->payroll_period_end;
+        
         $payroll->allowances()->delete();
         $payroll->deductions()->delete();
         $payroll->delete();
+
+        // Send notification to employee
+        if ($employee) {
+            app(NotificationService::class)->send(
+                $employee,
+                'payroll_deleted',
+                'Payroll Deleted',
+                "Your payroll for {$payrollPeriodStart->format('M d, Y')} to {$payrollPeriodEnd->format('M d, Y')} has been deleted.",
+                [
+                    'period_start' => $payrollPeriodStart,
+                    'period_end' => $payrollPeriodEnd,
+                ]
+            );
+        }
 
         return redirect()->route('payroll.index')->with('success', 'Payroll deleted successfully.');
     }
@@ -285,7 +328,8 @@ class PayrollController extends Controller
         $periodStart = Carbon::parse($validated['period_start']);
         $periodEnd = Carbon::parse($validated['period_end']);
 
-        $query = Employee::query();
+        // Exclude superadmin from payroll generation
+        $query = Employee::query()->where('role', '!=', 'superadmin');
         if ($validated['employees'] ?? null) {
             $query->whereIn('id', $validated['employees']);
         }
@@ -336,6 +380,11 @@ class PayrollController extends Controller
             $createdCount++;
         }
 
+        // Send notification to accountants
+        if ($createdCount > 0) {
+            PayrollNotification::notifyAccountantsPayrollGenerated($periodStart, $periodEnd, $createdCount);
+        }
+
         return redirect()->route('payroll.index')
             ->with('success', "Payroll generated for $createdCount employee(s) based on attendance.");
     }
@@ -343,6 +392,9 @@ class PayrollController extends Controller
     public function recalculatePayroll(Payroll $payroll)
     {
         $payroll->recalculateFromAttendance();
+
+        // Send notification to employee
+        PayrollNotification::payrollRecalculated($payroll);
 
         return redirect()->route('payroll.show', $payroll)
             ->with('success', 'Payroll recalculated from attendance records.');

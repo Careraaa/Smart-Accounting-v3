@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\OvertimeUndertime;
 use App\Models\Employee;
+use App\Notifications\OvertimeNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -94,7 +95,12 @@ class OvertimeUndertimeController extends Controller
             'reason' => 'required|string',
         ]);
 
-        OvertimeUndertime::create($validated);
+        $overtime = OvertimeUndertime::create($validated);
+        $overtime->load('employee');
+
+        // Send notifications
+        OvertimeNotification::submitted($overtime);
+        OvertimeNotification::notifyManagersForApproval($overtime);
 
         return redirect()->route('overtime.index')->with('success', 'Overtime/Undertime record created successfully.');
     }
@@ -125,12 +131,21 @@ class OvertimeUndertimeController extends Controller
         ]);
 
         $overtime->update($validated);
+        $overtime->load('employee');
+
+        // Send notification
+        OvertimeNotification::updated($overtime);
 
         return redirect()->route('overtime.show', $overtime->id)->with('success', 'Overtime/Undertime record updated successfully.');
     }
 
     public function destroy(OvertimeUndertime $overtime)
     {
+        $overtime->load('employee');
+
+        // Send notification
+        OvertimeNotification::deleted($overtime);
+
         $overtime->delete();
 
         return redirect()->route('overtime.index')->with('success', 'Overtime/Undertime record deleted successfully.');
@@ -141,6 +156,10 @@ class OvertimeUndertimeController extends Controller
         $overtime->update([
             'status' => 'approved',
         ]);
+        $overtime->load('employee');
+
+        // Send notification
+        OvertimeNotification::approved($overtime);
 
         return redirect()->back()->with('success', 'Record approved successfully.');
     }
@@ -154,6 +173,10 @@ class OvertimeUndertimeController extends Controller
         $overtime->update([
             'status' => 'rejected',
         ]);
+        $overtime->load('employee');
+
+        // Send notification
+        OvertimeNotification::rejected($overtime);
 
         return redirect()->back()->with('success', 'Record rejected successfully.');
     }

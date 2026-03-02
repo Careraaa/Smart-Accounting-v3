@@ -18,6 +18,7 @@ use App\Http\Controllers\HR\OvertimeUndertimeController;
 use App\Http\Controllers\Accountant\PayrollApprovalController;
 use App\Http\Controllers\Accountant\ReportController;
 use App\Http\Controllers\Accountant\RemittanceApprovalController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return view('auth/login');
@@ -43,6 +44,23 @@ Route::get('/dashboard', function () {
 
 // ===== PROFILE & ACCOUNT ROUTES =====
 Route::middleware(['auth'])->group(function () {
+    // ================ NOTIFICATION ROUTES ================
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        // Specific routes MUST come before parameterized routes
+        Route::get('/count', [NotificationController::class, 'unreadCount'])->name('count');
+        Route::get('/stats', [NotificationController::class, 'stats'])->name('stats');
+        Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-as-read');
+        Route::delete('/delete-read/all', [NotificationController::class, 'deleteReadNotifications'])->name('delete-read');
+        Route::delete('/delete-all', [NotificationController::class, 'deleteAllNotifications'])->name('delete-all');
+        
+        // Parameterized routes go last
+        Route::get('/',  [NotificationController::class, 'index'])->name('index');
+        Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
+        Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/{notification}/unread', [NotificationController::class, 'markAsUnread'])->name('unread');
+        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+    });
+
     Route::get('/profile/details', function () {
         return view('partials.profile.profile-details');
     })->name('profile.details');

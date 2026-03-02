@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceLog;
 use App\Models\AttendanceToken;
 use App\Models\Employee;
+use App\Notifications\AttendanceNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -117,6 +118,11 @@ class AttendanceController extends Controller
 
         $employeeName = $user->employee ? $user->employee->name : $user->name;
 
+        // Send notification for attendance recorded
+        if ($user->employee) {
+            AttendanceNotification::attendanceRecorded($user, $type, today());
+        }
+
         return response()->json([
             'message' => ucfirst(str_replace('_', ' ', $type)) . ' recorded',
             'type' => $type,
@@ -217,6 +223,9 @@ class AttendanceController extends Controller
             'status' => 'required|in:present,absent,late,early_leave'
         ]);
 
+        $employee = Employee::find($request->employee_id);
+        $attendanceDate = \Carbon\Carbon::parse($request->date);
+
         $attendance = Attendance::updateOrCreate(
             [
                 'employee_id' => $request->employee_id,
@@ -229,6 +238,11 @@ class AttendanceController extends Controller
                 'is_manual' => true
             ]
         );
+
+        // Send notification for manual attendance entry
+        if ($employee) {
+            AttendanceNotification::attendanceRecorded($employee, 'manual_entry', $attendanceDate);
+        }
 
         return redirect()->route('attendance.index')
             ->with('success', 'Attendance record saved successfully');

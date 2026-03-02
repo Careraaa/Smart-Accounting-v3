@@ -8,6 +8,7 @@ use App\Models\Driver;
 use App\Models\PAO;
 use App\Models\Route;
 use App\Models\Vehicle;
+use App\Notifications\RemittanceNotification;
 use Illuminate\Http\Request;
 
 class DailyRemittanceController extends Controller
@@ -58,7 +59,10 @@ class DailyRemittanceController extends Controller
         $validated['net_remittance'] = $validated['total_collection'] - $validated['total_expenses'];
         $validated['status'] = 'pending'; // Set default status to pending
         
-        DailyRemittance::create($validated);
+        $remittance = DailyRemittance::create($validated);
+        $remittance->load('driver', 'pao', 'vehicle');
+
+        RemittanceNotification::remittanceCreated($remittance);
 
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance created successfully.');
     }
@@ -99,12 +103,19 @@ class DailyRemittanceController extends Controller
         }
         
         $remittance->update($validated);
+        $remittance->load('driver', 'pao', 'vehicle');
+
+        RemittanceNotification::remittanceUpdated($remittance);
 
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance updated successfully.');
     }
 
     public function destroy(DailyRemittance $remittance)
     {
+        $remittance->load('driver', 'pao', 'vehicle');
+        
+        RemittanceNotification::remittanceDeleted($remittance);
+        
         $remittance->delete();
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance deleted successfully.');
     }

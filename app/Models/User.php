@@ -144,4 +144,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(OvertimeUndertime::class, 'user_id');
     }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
 }
