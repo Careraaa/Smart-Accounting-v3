@@ -21,11 +21,11 @@ class AttendanceController extends Controller
 
         return view('hr.attendance.index', compact('attendances'));
     }
+
     public function generateQR()
     {
         AttendanceToken::where('expires_at', '<', now())->delete();
 
-        // Generate 8 random alphanumeric characters (uppercase)
         $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $token = '';
         for ($i = 0; $i < 8; $i++) {
@@ -33,12 +33,11 @@ class AttendanceController extends Controller
         }
 
         AttendanceToken::create([
-            'token' => $token,
+            'token'      => $token,
             'expires_at' => now()->addSeconds(60),
-            'user_id' => auth()->id(),
+            'user_id'    => auth()->id(),
         ]);
 
-        // Store current token in cache for monitoring
         cache()->put('current_qr_token', $token, 65);
 
         return response()->json(['token' => $token]);
@@ -80,34 +79,25 @@ class AttendanceController extends Controller
         $type = $last && $last->type === 'time_in' ? 'time_out' : 'time_in';
 
         AttendanceLog::create([
-            'user_id' => $user->id,
-            'type' => $type,
-            'logged_at' => now()
+            'user_id'   => $user->id,
+            'type'      => $type,
+            'logged_at' => now(),
         ]);
 
-        // Save to Attendance table
         if ($user->employee) {
-            $today = today();
+            $today       = today();
             $currentTime = now()->format('H:i:s');
-            
+
             if ($type === 'time_in') {
-                // Create new attendance record for today
                 Attendance::updateOrCreate(
-                    [
-                        'employee_id' => $user->employee->id,
-                        'date' => $today
-                    ],
-                    [
-                        'time_in' => $currentTime,
-                        'status' => 'present'
-                    ]
+                    ['employee_id' => $user->employee->id, 'date' => $today],
+                    ['time_in' => $currentTime, 'status' => 'present']
                 );
-            } else { // time_out
-                // Update existing attendance record
+            } else {
                 $attendance = Attendance::where('employee_id', $user->employee->id)
                     ->where('date', $today)
                     ->first();
-                
+
                 if ($attendance) {
                     $attendance->update(['time_out' => $currentTime]);
                 }
@@ -124,15 +114,15 @@ class AttendanceController extends Controller
         }
 
         return response()->json([
-            'message' => ucfirst(str_replace('_', ' ', $type)) . ' recorded',
-            'type' => $type,
-            'employee_name' => $employeeName
+            'message'       => ucfirst(str_replace('_', ' ', $type)) . ' recorded',
+            'type'          => $type,
+            'employee_name' => $employeeName,
         ]);
     }
 
     public function scanPage()
     {
-        $lastLog = AttendanceLog::where('user_id', auth()->user()->id)
+        $lastLog = AttendanceLog::where('user_id', auth()->id())
             ->latest('logged_at')
             ->select(['type', 'logged_at'])
             ->first();
@@ -140,21 +130,34 @@ class AttendanceController extends Controller
         return view('attendance.scan', ['lastLog' => $lastLog]);
     }
 
+    /**
+     * Returns the authenticated user's last log entry for today,
+     * plus the full list of today's logs — used by the employee dashboard.
+     */
     public function getLastLog()
     {
-        $lastLog = AttendanceLog::where('user_id', auth()->user()->id)
-            ->latest('logged_at')
-            ->select(['type', 'logged_at'])
-            ->first();
+        $userId = auth()->id();
+        $today  = now()->toDateString();
 
-        if ($lastLog) {
-            return response()->json([
-                'type' => $lastLog->type,
-                'time' => $lastLog->logged_at->format('g:i A')
+        // Fetch every log entry for today in chronological order
+        $logs = AttendanceLog::where('user_id', $userId)
+            ->whereDate('logged_at', $today)
+            ->orderBy('logged_at')
+            ->get()
+            ->map(fn ($log) => [
+                'type' => $log->type,
+                'time' => $log->logged_at
+                    ->setTimezone(config('app.timezone'))
+                    ->format('g:i A'),
             ]);
-        }
 
-        return response()->json(null);
+        $last = $logs->last();
+
+        return response()->json([
+            'type' => $last['type'] ?? null,
+            'time' => $last['time'] ?? null,
+            'logs' => $logs->values(),
+        ]);
     }
 
     public function showMonitorDisplay()
@@ -169,16 +172,17 @@ class AttendanceController extends Controller
             ->limit(20)
             ->get()
             ->map(function ($log) {
-                // Convert from UTC to the app's timezone
                 $localTime = $log->logged_at->setTimezone(config('app.timezone'));
-                
+
                 return [
-                    'id' => $log->id,
-                    'employee_name' => $log->user->employee ? $log->user->employee->name : $log->user->name,
-                    'type' => $log->type,
-                    'time' => $localTime->format('g:i A'),
-                    'date' => $localTime->format('M d, Y'),
-                    'badge_color' => $log->type === 'time_in' ? 'success' : 'warning'
+                    'id'            => $log->id,
+                    'employee_name' => $log->user->employee
+                        ? $log->user->employee->name
+                        : $log->user->name,
+                    'type'         => $log->type,
+                    'time'         => $localTime->format('g:i A'),
+                    'date'         => $localTime->format('M d, Y'),
+                    'badge_color'  => $log->type === 'time_in' ? 'success' : 'warning',
                 ];
             });
 
@@ -201,14 +205,13 @@ class AttendanceController extends Controller
 
         return response()->json([
             'status' => 'active',
-            'used' => (bool) $token->used,
-            'token' => $token->token
+            'used'   => (bool) $token->used,
+            'token'  => $token->token,
         ]);
     }
 
     public function create()
     {
-        // Get all employees excluding superadmin
         $employees = Employee::where('role', '!=', 'superadmin')->get();
         return view('hr.attendance.create', compact('employees'));
     }
@@ -217,25 +220,28 @@ class AttendanceController extends Controller
     {
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
-            'date' => 'required|date',
-            'time_in' => 'nullable|date_format:H:i',
-            'time_out' => 'nullable|date_format:H:i',
-            'status' => 'required|in:present,absent,late,early_leave'
+            'date'        => 'required|date',
+            'time_in'     => 'nullable|date_format:H:i',
+            'time_out'    => 'nullable|date_format:H:i',
+            'status'      => 'required|in:present,absent,late,early_leave',
         ]);
 
         $employee = Employee::find($request->employee_id);
         $attendanceDate = \Carbon\Carbon::parse($request->date);
 
-        $attendance = Attendance::updateOrCreate(
+        $employee = Employee::find($request->employee_id);
+        $attendanceDate = \Carbon\Carbon::parse($request->date);
+
+        Attendance::updateOrCreate(
             [
                 'employee_id' => $request->employee_id,
-                'date' => $request->date
+                'date'        => $request->date,
             ],
             [
-                'time_in' => $request->time_in,
-                'time_out' => $request->time_out,
-                'status' => $request->status,
-                'is_manual' => true
+                'time_in'   => $request->time_in,
+                'time_out'  => $request->time_out,
+                'status'    => $request->status,
+                'is_manual' => true,
             ]
         );
 

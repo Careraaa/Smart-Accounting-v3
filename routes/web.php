@@ -36,7 +36,6 @@ Route::get('/dashboard', function () {
     } elseif (auth()->user()->role === 'employee') {
         return redirect()->route('employee.index');
     }
-    // Default dashboard for other roles
     return view('dashboard');
 })
     ->middleware(['auth'])
@@ -73,13 +72,12 @@ Route::middleware(['auth'])->group(function () {
         $user = auth()->user();
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|unique:users,username,' . $user->id,
+            'name'            => 'required|string|max:255',
+            'username'        => 'required|string|unique:users,username,' . $user->id,
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($request->hasFile('profile_picture')) {
-            // Delete old profile picture if it exists
             if ($user->profile_picture) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
             }
@@ -105,26 +103,16 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:remittance_clerk'])->group(function () {
     Route::get('/remittance-clerk', [RemittanceClerkDashboardController::class, 'index'])->name('remittance-clerk.index');
 
-    // Management (Routes & Vehicles Combined)
     Route::get('/management', function () {
         return redirect()->route('routes.index');
     })->name('management.index');
 
-    // Driver Routes
     Route::resource('drivers', DriverController::class);
-
-    // PAO Routes
     Route::resource('paos', PAOController::class);
-
-    // Routes Management
     Route::resource('routes', RouteController::class);
-
-    // Vehicles Management
     Route::resource('vehicles', VehicleController::class);
-
-    // Remittance Routes
     Route::resource('remittances', DailyRemittanceController::class);
-    // Daily Remittance Routes
+
     Route::get('/remittance/assigned-driver', function () {
         return view('remittance-clerk.remittances.assigned-driver');
     })->name('remittance.assigned-driver');
@@ -141,7 +129,6 @@ Route::middleware(['auth', 'role:remittance_clerk'])->group(function () {
         return view('remittance-clerk.remittances.trip-expenses');
     })->name('remittance.trip-expenses');
 
-    // Remittance Report Routes
     Route::get('/reports/remittance-details', function () {
         $remittances = \App\Models\DailyRemittance::all();
         return view('remittance-clerk.reports.remittance-details', compact('remittances'));
@@ -160,7 +147,9 @@ Route::middleware(['auth', 'role:employee'])->group(function () {
     })->name('employee.index');
 });
 
-// ===== EMPLOYEE DASHBOARD (All authenticated users) =====
+// ===== SHARED ATTENDANCE ROUTES (all authenticated users) =====
+// These must be defined BEFORE the HR group so the named route
+// resolves here and not to the HR-protected duplicate.
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/employee', function () {
         return view('employee.dashboard');
@@ -169,6 +158,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])
         ->name('attendance.scan');
 
+    // ✅ Single authoritative definition — accessible by ALL roles
     Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
         ->name('attendance.lastlog');
 
@@ -181,10 +171,7 @@ Route::middleware(['auth', 'role:hr'])->group(function () {
     Route::get('/hr', [HRDashboardController::class, 'index'])
         ->name('hr.index');
 
-    // Employee Routes - Full CRUD
     Route::resource('employees', EmployeeController::class);
-
-    // Attendance Routes
     Route::resource('attendance', AttendanceController::class);
 
     Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])
@@ -202,8 +189,8 @@ Route::middleware(['auth', 'role:hr'])->group(function () {
     Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])
         ->name('api.qr.token-status');
 
-    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
-        ->name('attendance.lastlog');
+    // ❌ REMOVED duplicate attendance.lastlog — it was overriding the shared route above
+    //    and blocking employees with a 403.
 
     // ================ LEAVE MANAGEMENT ROUTES ================
     Route::resource('leave', LeaveController::class);
@@ -215,15 +202,14 @@ Route::middleware(['auth', 'role:hr'])->group(function () {
     Route::post('/overtime/{overtime}/approve', [OvertimeUndertimeController::class, 'approve'])->name('overtime.approve');
     Route::post('/overtime/{overtime}/reject', [OvertimeUndertimeController::class, 'reject'])->name('overtime.reject');
 
-    // ---------------- PAYROLL ROUTES ----------------//
-    // Salary Computation
+    // ---------------- PAYROLL ROUTES ----------------
     Route::prefix('payroll/salary-computation')
         ->name('payroll.salary-computation.')
         ->group(function () {
             Route::get('/', [PayrollController::class, 'index'])->name('index');
             Route::get('/create', [PayrollController::class, 'create'])->name('create');
             Route::post('/', [PayrollController::class, 'store'])->name('store');
-            Route::get('/batch-generate', function() {
+            Route::get('/batch-generate', function () {
                 return view('hr.payroll.salary-computation.batch-generate');
             })->name('batch-generate');
             Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
@@ -233,10 +219,8 @@ Route::middleware(['auth', 'role:hr'])->group(function () {
             Route::post('/{payroll}/recalculate', [PayrollController::class, 'recalculatePayroll'])->name('recalculate');
         });
 
-    // Batch Payroll Generation
     Route::post('/payroll/generate-batch', [PayrollController::class, 'generatePayrollBatch'])->name('payroll.generate-batch');
 
-    // Statutory Deductions
     Route::prefix('payroll/statutory-deductions')
         ->name('payroll.statutory-deductions.')
         ->group(function () {
@@ -247,7 +231,7 @@ Route::middleware(['auth', 'role:hr'])->group(function () {
             Route::put('/{id}', [StatutoryDeductionController::class, 'update'])->name('update');
             Route::delete('/{id}', [StatutoryDeductionController::class, 'destroy'])->name('destroy');
         });
-    // Payroll Receivables
+
     Route::prefix('payroll/receivables')
         ->name('payroll.receivables.')
         ->group(function () {
@@ -258,10 +242,8 @@ Route::middleware(['auth', 'role:hr'])->group(function () {
 
     Route::post('/payroll/statutory-deductions/compute', [PayrollController::class, 'computeStatutory'])->name('payroll.statutory.compute');
 
-    // API: Attendance Summary (for AJAX calls from create payroll)
     Route::get('/api/attendance/summary', [PayrollController::class, 'getAttendanceSummary'])->name('api.attendance.summary');
 
-    // Generate Payslip
     Route::prefix('payroll/generate-payslip')
         ->name('payroll.generate-payslip.')
         ->group(function () {
@@ -270,11 +252,9 @@ Route::middleware(['auth', 'role:hr'])->group(function () {
             })->name('index');
         });
 
-    // Payroll CRUD resource routes
     Route::resource('payroll', PayrollController::class);
     Route::get('payroll/{payroll}/payslip', [PayrollController::class, 'generatePayslip'])->name('payroll.generatePayslip');
 
-    // Payroll Report Routes
     Route::get('/reports/payslips', function () {
         return view('hr.reports.payslips');
     })->name('reports.payslips');
@@ -303,17 +283,14 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:accountant'])->group(function () {
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
 
-    // Payroll Approval Routes
     Route::resource('payroll-approval', PayrollApprovalController::class, ['only' => ['index', 'show']]);
     Route::post('payroll-approval/{payroll}/approve', [PayrollApprovalController::class, 'approve'])->name('payroll-approval.approve');
     Route::post('payroll-approval/{payroll}/reject', [PayrollApprovalController::class, 'reject'])->name('payroll-approval.reject');
 
-    // Remittance Approval Routes
     Route::get('/remittance-approval', [RemittanceApprovalController::class, 'index'])->name('remittance-approval.index');
     Route::post('/remittance-approval/{remittance}/approve', [RemittanceApprovalController::class, 'approve'])->name('remittance-approval.approve');
     Route::post('/remittance-approval/{remittance}/reject', [RemittanceApprovalController::class, 'reject'])->name('remittance-approval.reject');
 
-    // Reports Routes
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');
     Route::get('/reports/payroll-approval', function () {
         return view('accountant.reports.payroll-approval');
