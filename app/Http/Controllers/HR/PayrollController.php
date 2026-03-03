@@ -7,6 +7,7 @@ use App\Models\Payroll;
 use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\Leave;
+use App\Models\OvertimeUndertime;
 use App\Services\AttendanceService;
 use App\Services\NotificationService;
 use App\Notifications\PayrollNotification;
@@ -25,59 +26,60 @@ class PayrollController extends Controller
 
     public function index(Request $request)
     {
-        $sortBy = $request->get('sort_by', 'payroll_period_start');
+        $sortBy    = $request->get('sort_by', 'payroll_period_start');
         $sortOrder = $request->get('sort_order', 'desc');
-        
-        // Whitelist allowed columns to prevent SQL injection
+
         $allowedColumns = ['payroll_period_start', 'gross_pay', 'net_pay', 'status'];
         if (!in_array($sortBy, $allowedColumns)) {
             $sortBy = 'payroll_period_start';
         }
-        
-        // Validate sort order
         if (!in_array($sortOrder, ['asc', 'desc'])) {
             $sortOrder = 'desc';
         }
-        
+
         $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])
             ->orderBy($sortBy, $sortOrder)->get();
 
-        // Exclude superadmin from employee counts
-        $totalEmployees = Employee::where('role', '!=', 'superadmin')->count();
-        $activeEmployees = Employee::where('role', '!=', 'superadmin')->where('status', 'active')->count();
+        $totalEmployees    = Employee::where('role', '!=', 'superadmin')->count();
+        $activeEmployees   = Employee::where('role', '!=', 'superadmin')->where('status', 'active')->count();
         $inactiveEmployees = $totalEmployees - $activeEmployees;
 
         $presentToday = Attendance::whereDate('date', now())->where('status', 'present')->count();
-        $absentToday = Attendance::whereDate('date', now())->where('status', 'absent')->count();
-        $lateToday = Attendance::whereDate('date', now())->where('status', 'late')->count();
+        $absentToday  = Attendance::whereDate('date', now())->where('status', 'absent')->count();
+        $lateToday    = Attendance::whereDate('date', now())->where('status', 'late')->count();
 
-        $onLeaveEmployees = Leave::where('status', 'approved')->whereDate('start_date', '<=', now())->whereDate('end_date', '>=', now())->count();
+        $onLeaveEmployees = Leave::where('status', 'approved')
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->count();
 
-        $totalLeaves = Leave::count();
+        $totalLeaves   = Leave::count();
         $pendingLeaves = Leave::where('status', 'pending')->count();
         $approvedLeaves = Leave::where('status', 'approved')->count();
 
-        $attendanceRate = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
+        $attendanceRate  = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
 
         $attendanceTrend = Attendance::whereDate('date', '>=', now()->subDays(6))
             ->get()
             ->groupBy(fn($item) => $item->date->format('Y-m-d'))
-            ->map(
-                fn($group) => [
-                    'date' => $group->first()->date->format('M d, Y'),
-                    'present' => $group->where('status', 'present')->count(),
-                    'absent' => $group->where('status', 'absent')->count(),
-                    'late' => $group->where('status', 'late')->count(),
-                ],
-            )
+            ->map(fn($group) => [
+                'date'    => $group->first()->date->format('M d, Y'),
+                'present' => $group->where('status', 'present')->count(),
+                'absent'  => $group->where('status', 'absent')->count(),
+                'late'    => $group->where('status', 'late')->count(),
+            ])
             ->values();
 
-        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'attendanceTrend', 'sortBy', 'sortOrder'));
+        return view('hr.payroll.salary-computation.index', compact(
+            'payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees',
+            'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees',
+            'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate',
+            'attendanceTrend', 'sortBy', 'sortOrder'
+        ));
     }
 
     public function create()
     {
-        // Exclude superadmin from employee list
         $employees = Employee::where('role', '!=', 'superadmin')->get();
         return view('hr.payroll.salary-computation.create', compact('employees'));
     }
@@ -85,194 +87,259 @@ class PayrollController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id'              => 'required|exists:users,id',
             'payroll_period_start' => 'required|date',
-            'payroll_period_end' => 'required|date',
-            'total_allowances' => 'nullable|numeric|min:0',
-            'total_deductions' => 'nullable|numeric|min:0',
-            'allowances.*.name' => 'nullable|string',
-            'allowances.*.amount' => 'nullable|numeric|min:0',
-            'deductions.*.name' => 'nullable|string',
-            'deductions.*.amount' => 'nullable|numeric|min:0',
+            'payroll_period_end'   => 'required|date',
+            'total_allowances'     => 'nullable|numeric|min:0',
+            'total_deductions'     => 'nullable|numeric|min:0',
+            'allowances.*.name'    => 'nullable|string',
+            'allowances.*.amount'  => 'nullable|numeric|min:0',
+            'deductions.*.name'    => 'nullable|string',
+            'deductions.*.amount'  => 'nullable|numeric|min:0',
         ]);
 
         $employee = Employee::find($validated['user_id']);
-        
-        // Prevent payroll creation for superadmin
+
         if ($employee->role === 'superadmin') {
             return redirect()->route('payroll.create')
                 ->withErrors(['user_id' => 'Cannot create payroll for superadmin accounts.']);
         }
-        
+
         $periodStart = Carbon::parse($validated['payroll_period_start']);
-        $periodEnd = Carbon::parse($validated['payroll_period_end']);
+        $periodEnd   = Carbon::parse($validated['payroll_period_end']);
 
-        // Always calculate basic salary from attendance
-        $daysWorked = $this->attendanceService->countWorkDaysInPeriod(
-            $validated['user_id'],
-            $periodStart,
-            $periodEnd
-        );
-        $hoursWorked = $this->attendanceService->calculateTotalHoursWorked(
-            $validated['user_id'],
-            $periodStart,
-            $periodEnd
-        );
-        $basicSalary = $this->attendanceService->calculateBasicSalary(
-            $employee,
-            $periodStart,
-            $periodEnd
-        );
+        // --- Attendance ---
+        $daysWorked  = $this->attendanceService->countWorkDaysInPeriod($validated['user_id'], $periodStart, $periodEnd);
+        $hoursWorked = $this->attendanceService->calculateTotalHoursWorked($validated['user_id'], $periodStart, $periodEnd);
+        $basicSalary = $this->attendanceService->calculateBasicSalary($employee, $periodStart, $periodEnd);
 
-        $totalAllowances = floatval($validated['total_allowances'] ?? 0);
-        $totalDeductions = floatval($validated['total_deductions'] ?? 0);
+        // --- Hourly rate (daily rate ÷ 8) ---
+        $hourlyRate = $employee->salary_rate / 8;
 
+        // --- Overtime: flat hourly rate × OT hours ---
+        $approvedOvertimes = OvertimeUndertime::where('user_id', $validated['user_id'])
+            ->whereBetween('date', [$periodStart, $periodEnd])
+            ->where('status', 'approved')
+            ->where('type', 'overtime')
+            ->get();
+
+        $totalOTHours = $approvedOvertimes->sum('hours');
+        $overtimePay  = round($hourlyRate * $totalOTHours, 2);
+
+        // --- Undertime: deduct flat hourly rate × undertime hours ---
+        $approvedUndertimes = OvertimeUndertime::where('user_id', $validated['user_id'])
+            ->whereBetween('date', [$periodStart, $periodEnd])
+            ->where('status', 'approved')
+            ->where('type', 'undertime')
+            ->get();
+
+        $totalUTHours      = $approvedUndertimes->sum('hours');
+        $undertimeDeduction = round($hourlyRate * $totalUTHours, 2);
+
+        // --- Flag undertime attendance records ---
+        if ($totalUTHours > 0) {
+            $undertimeDates = $approvedUndertimes->pluck('date')->map(fn($d) => Carbon::parse($d)->format('Y-m-d'));
+            Attendance::where('user_id', $validated['user_id'])
+                ->whereIn('date', $undertimeDates)
+                ->update(['status' => 'late']);
+        }
+
+        // --- Merge manual deductions with undertime deduction ---
+        $manualDeductions = collect($request->deductions ?? [])
+            ->filter(fn($d) => !empty($d['name']) && floatval($d['amount']) > 0);
+
+        $totalManualDeductions = $manualDeductions->sum(fn($d) => floatval($d['amount']));
+        $totalAllowances       = floatval($validated['total_allowances'] ?? 0);
+        $totalDeductions       = $totalManualDeductions + $undertimeDeduction;
+
+        // --- Create payroll ---
         $payroll = Payroll::create([
-            'user_id' => $validated['user_id'],
+            'user_id'              => $validated['user_id'],
             'payroll_period_start' => $periodStart,
-            'payroll_period_end' => $periodEnd,
-            'total_allowances' => $totalAllowances,
-            'total_deductions' => $totalDeductions,
-            'basic_salary' => $basicSalary,
-            'days_worked' => $daysWorked,
-            'hours_worked' => $hoursWorked,
-            'status' => 'pending',
+            'payroll_period_end'   => $periodEnd,
+            'total_allowances'     => $totalAllowances + $overtimePay, // OT added to allowances side
+            'total_deductions'     => $totalDeductions,
+            'basic_salary'         => $basicSalary,
+            'days_worked'          => $daysWorked,
+            'hours_worked'         => $hoursWorked,
+            'status'               => 'pending',
         ]);
 
+        // --- Save allowances ---
         foreach ($request->allowances ?? [] as $allowance) {
-            if (!empty($allowance['name']) && $allowance['amount'] > 0) {
+            if (!empty($allowance['name']) && floatval($allowance['amount']) > 0) {
                 $payroll->allowances()->create([
                     'allowance_type' => $allowance['name'],
-                    'amount' => $allowance['amount'],
+                    'amount'         => $allowance['amount'],
                 ]);
             }
         }
 
+        // --- Save overtime as an allowance line item ---
+        if ($overtimePay > 0) {
+            $payroll->allowances()->create([
+                'allowance_type' => 'Overtime Pay (' . round($totalOTHours, 2) . ' hrs)',
+                'amount'         => $overtimePay,
+            ]);
+        }
+
+        // --- Save manual deductions ---
         foreach ($request->deductions ?? [] as $deduction) {
-            if (!empty($deduction['name']) && $deduction['amount'] > 0) {
+            if (!empty($deduction['name']) && floatval($deduction['amount']) > 0) {
                 $payroll->deductions()->create([
                     'deduction_type' => $deduction['name'],
-                    'amount' => $deduction['amount'],
+                    'amount'         => $deduction['amount'],
                 ]);
             }
         }
 
-        // Send notification to employee
+        // --- Save undertime as a deduction line item ---
+        if ($undertimeDeduction > 0) {
+            $payroll->deductions()->create([
+                'deduction_type' => 'Undertime Deduction (' . round($totalUTHours, 2) . ' hrs)',
+                'amount'         => $undertimeDeduction,
+                'description'    => 'Auto-computed from approved undertime records. Attendance flagged.',
+            ]);
+        }
+
         PayrollNotification::payrollCreated($payroll);
 
-        return redirect()->route('payroll.index')->with('success', 'Payroll created successfully with attendance data.');
+        return redirect()->route('payroll.index')
+            ->with('success', 'Payroll created successfully with attendance, overtime, and undertime data.');
     }
 
     public function show(Payroll $payroll)
     {
         $payroll->load('employee', 'allowances', 'deductions');
-        $attendanceSummary = $payroll->attendance_summary;
-        $attendanceBreakdown = $payroll->getAttendanceBreakdown();
-        
-        return view('hr.payroll.salary-computation.show', compact('payroll', 'attendanceSummary', 'attendanceBreakdown'));
+        $attendanceSummary      = $payroll->attendance_summary;
+        $attendanceBreakdown    = $payroll->getAttendanceBreakdown();
+        $overtimeUndertimeBreakdown = $payroll->getOvertimeUndertimeBreakdown();
+
+        return view('hr.payroll.salary-computation.show', compact(
+            'payroll', 'attendanceSummary', 'attendanceBreakdown', 'overtimeUndertimeBreakdown'
+        ));
     }
 
     public function edit(Payroll $payroll)
     {
-        // Include all employees except superadmin so payrolls linked to inactive employees still show correctly
         $employees = Employee::where('role', '!=', 'superadmin')->get();
         $payroll->load('allowances', 'deductions');
         $attendanceSummary = $payroll->attendance_summary;
-        
+
         return view('hr.payroll.salary-computation.edit', compact('payroll', 'employees', 'attendanceSummary'));
     }
 
     public function update(Request $request, Payroll $payroll)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'payroll_period_start' => 'required|date',
-            'payroll_period_end' => 'required|date',
-            'recalculate_from_attendance' => 'nullable|boolean',
-            'allowances.*.name' => 'nullable|string',
-            'allowances.*.amount' => 'nullable|numeric|min:0',
-            'deductions.*.name' => 'nullable|string',
-            'deductions.*.amount' => 'nullable|numeric|min:0',
+            'user_id'                      => 'required|exists:users,id',
+            'payroll_period_start'         => 'required|date',
+            'payroll_period_end'           => 'required|date',
+            'recalculate_from_attendance'  => 'nullable|boolean',
+            'allowances.*.name'            => 'nullable|string',
+            'allowances.*.amount'          => 'nullable|numeric|min:0',
+            'deductions.*.name'            => 'nullable|string',
+            'deductions.*.amount'          => 'nullable|numeric|min:0',
         ]);
 
         $employee = Employee::find($validated['user_id']);
-        
-        // Prevent payroll assignment to superadmin
+
         if ($employee->role === 'superadmin') {
             return redirect()->route('payroll.edit', $payroll)
                 ->withErrors(['user_id' => 'Cannot assign payroll to superadmin accounts.']);
         }
 
-        $totalAllowances = 0;
-        foreach ($request->allowances ?? [] as $allowance) {
-            $totalAllowances += floatval($allowance['amount'] ?? 0);
-        }
-
-        $totalDeductions = 0;
-        foreach ($request->deductions ?? [] as $deduction) {
-            $totalDeductions += floatval($deduction['amount'] ?? 0);
-        }
-
         $periodStart = Carbon::parse($validated['payroll_period_start']);
-        $periodEnd = Carbon::parse($validated['payroll_period_end']);
+        $periodEnd   = Carbon::parse($validated['payroll_period_end']);
+        $hourlyRate  = $employee->salary_rate / 8;
+
+        // --- Recalculate overtime/undertime for updated period ---
+        $approvedOvertimes = OvertimeUndertime::where('user_id', $validated['user_id'])
+            ->whereBetween('date', [$periodStart, $periodEnd])
+            ->where('status', 'approved')
+            ->where('type', 'overtime')
+            ->get();
+
+        $totalOTHours = $approvedOvertimes->sum('hours');
+        $overtimePay  = round($hourlyRate * $totalOTHours, 2);
+
+        $approvedUndertimes = OvertimeUndertime::where('user_id', $validated['user_id'])
+            ->whereBetween('date', [$periodStart, $periodEnd])
+            ->where('status', 'approved')
+            ->where('type', 'undertime')
+            ->get();
+
+        $totalUTHours       = $approvedUndertimes->sum('hours');
+        $undertimeDeduction = round($hourlyRate * $totalUTHours, 2);
+
+        // --- Re-flag undertime attendance ---
+        if ($totalUTHours > 0) {
+            $undertimeDates = $approvedUndertimes->pluck('date')->map(fn($d) => Carbon::parse($d)->format('Y-m-d'));
+            Attendance::where('user_id', $validated['user_id'])
+                ->whereIn('date', $undertimeDates)
+                ->update(['status' => 'late']);
+        }
+
+        $manualDeductions      = collect($request->deductions ?? [])->filter(fn($d) => !empty($d['name']) && floatval($d['amount']) > 0);
+        $totalManualDeductions = $manualDeductions->sum(fn($d) => floatval($d['amount']));
+        $manualAllowances      = collect($request->allowances ?? [])->filter(fn($a) => !empty($a['name']) && floatval($a['amount']) > 0);
+        $totalManualAllowances = $manualAllowances->sum(fn($a) => floatval($a['amount']));
+
+        $totalAllowances = $totalManualAllowances + $overtimePay;
+        $totalDeductions = $totalManualDeductions + $undertimeDeduction;
 
         $updateData = [
-            'user_id' => $validated['user_id'],
+            'user_id'              => $validated['user_id'],
             'payroll_period_start' => $periodStart,
-            'payroll_period_end' => $periodEnd,
-            'total_allowances' => $totalAllowances,
-            'total_deductions' => $totalDeductions,
-            'status' => 'pending',
+            'payroll_period_end'   => $periodEnd,
+            'total_allowances'     => $totalAllowances,
+            'total_deductions'     => $totalDeductions,
+            'status'               => 'pending',
         ];
 
-        // Recalculate from attendance if requested
         if ($request->boolean('recalculate_from_attendance')) {
-            $employee = Employee::find($validated['user_id']);
-            $daysWorked = $this->attendanceService->countWorkDaysInPeriod(
-                $validated['user_id'],
-                $periodStart,
-                $periodEnd
-            );
-            $hoursWorked = $this->attendanceService->calculateTotalHoursWorked(
-                $validated['user_id'],
-                $periodStart,
-                $periodEnd
-            );
-            $basicSalary = $this->attendanceService->calculateBasicSalary(
-                $employee,
-                $periodStart,
-                $periodEnd
-            );
-
-            $updateData['basic_salary'] = $basicSalary;
-            $updateData['days_worked'] = $daysWorked;
-            $updateData['hours_worked'] = $hoursWorked;
+            $updateData['basic_salary'] = $this->attendanceService->calculateBasicSalary($employee, $periodStart, $periodEnd);
+            $updateData['days_worked']  = $this->attendanceService->countWorkDaysInPeriod($validated['user_id'], $periodStart, $periodEnd);
+            $updateData['hours_worked'] = $this->attendanceService->calculateTotalHoursWorked($validated['user_id'], $periodStart, $periodEnd);
         }
 
         $payroll->update($updateData);
 
+        // --- Rebuild allowances ---
         $payroll->allowances()->delete();
-        $payroll->deductions()->delete();
-
         foreach ($request->allowances ?? [] as $allowance) {
-            if (!empty($allowance['name']) && $allowance['amount'] > 0) {
+            if (!empty($allowance['name']) && floatval($allowance['amount']) > 0) {
                 $payroll->allowances()->create([
                     'allowance_type' => $allowance['name'],
-                    'amount' => $allowance['amount'],
+                    'amount'         => $allowance['amount'],
                 ]);
             }
         }
+        if ($overtimePay > 0) {
+            $payroll->allowances()->create([
+                'allowance_type' => 'Overtime Pay (' . round($totalOTHours, 2) . ' hrs)',
+                'amount'         => $overtimePay,
+            ]);
+        }
 
+        // --- Rebuild deductions ---
+        $payroll->deductions()->delete();
         foreach ($request->deductions ?? [] as $deduction) {
-            if (!empty($deduction['name']) && $deduction['amount'] > 0) {
+            if (!empty($deduction['name']) && floatval($deduction['amount']) > 0) {
                 $payroll->deductions()->create([
                     'deduction_type' => $deduction['name'],
-                    'amount' => $deduction['amount'],
+                    'amount'         => $deduction['amount'],
                 ]);
             }
         }
+        if ($undertimeDeduction > 0) {
+            $payroll->deductions()->create([
+                'deduction_type' => 'Undertime Deduction (' . round($totalUTHours, 2) . ' hrs)',
+                'amount'         => $undertimeDeduction,
+                'description'    => 'Auto-computed from approved undertime records. Attendance flagged.',
+            ]);
+        }
 
-        // Send notification to employee
         PayrollNotification::payrollUpdated($payroll);
 
         return redirect()->route('payroll.index')->with('success', 'Payroll updated successfully.');
@@ -280,27 +347,22 @@ class PayrollController extends Controller
 
     public function destroy(Payroll $payroll)
     {
-        // Load employee relationship before deletion
         $payroll->load('employee');
-        $employee = $payroll->employee;
+        $employee           = $payroll->employee;
         $payrollPeriodStart = $payroll->payroll_period_start;
-        $payrollPeriodEnd = $payroll->payroll_period_end;
-        
+        $payrollPeriodEnd   = $payroll->payroll_period_end;
+
         $payroll->allowances()->delete();
         $payroll->deductions()->delete();
         $payroll->delete();
 
-        // Send notification to employee
         if ($employee) {
             app(NotificationService::class)->send(
                 $employee,
                 'payroll_deleted',
                 'Payroll Deleted',
                 "Your payroll for {$payrollPeriodStart->format('M d, Y')} to {$payrollPeriodEnd->format('M d, Y')} has been deleted.",
-                [
-                    'period_start' => $payrollPeriodStart,
-                    'period_end' => $payrollPeriodEnd,
-                ]
+                ['period_start' => $payrollPeriodStart, 'period_end' => $payrollPeriodEnd]
             );
         }
 
@@ -313,89 +375,106 @@ class PayrollController extends Controller
         return view('hr.payroll.payslip', compact('payroll'));
     }
 
-    /**
-     * Generate payroll for multiple employees for a specific period
-     */
     public function generatePayrollBatch(Request $request)
     {
         $validated = $request->validate([
-            'period_start' => 'required|date',
-            'period_end' => 'required|date',
-            'employees' => 'nullable|array',
-            'employees.*' => 'exists:employees,id',
+            'period_start'   => 'required|date',
+            'period_end'     => 'required|date',
+            'employees'      => 'nullable|array',
+            'employees.*'    => 'exists:employees,id',
         ]);
 
         $periodStart = Carbon::parse($validated['period_start']);
-        $periodEnd = Carbon::parse($validated['period_end']);
+        $periodEnd   = Carbon::parse($validated['period_end']);
 
-        // Exclude superadmin from payroll generation
         $query = Employee::query()->where('role', '!=', 'superadmin');
         if ($validated['employees'] ?? null) {
             $query->whereIn('id', $validated['employees']);
         }
 
-        $employees = $query->get();
+        $employees    = $query->get();
         $createdCount = 0;
 
         foreach ($employees as $employee) {
-            // Check if payroll already exists for this period
             $existingPayroll = Payroll::where('user_id', $employee->id)
                 ->whereBetween('payroll_period_start', [$periodStart, $periodEnd])
                 ->first();
 
-            if ($existingPayroll) {
-                continue;
+            if ($existingPayroll) continue;
+
+            $hourlyRate  = $employee->salary_rate / 8;
+            $daysWorked  = $this->attendanceService->countWorkDaysInPeriod($employee->id, $periodStart, $periodEnd);
+            $hoursWorked = $this->attendanceService->calculateTotalHoursWorked($employee->id, $periodStart, $periodEnd);
+            $basicSalary = $this->attendanceService->calculateBasicSalary($employee, $periodStart, $periodEnd);
+
+            // Overtime
+            $approvedOvertimes = OvertimeUndertime::where('user_id', $employee->id)
+                ->whereBetween('date', [$periodStart, $periodEnd])
+                ->where('status', 'approved')
+                ->where('type', 'overtime')
+                ->get();
+            $totalOTHours = $approvedOvertimes->sum('hours');
+            $overtimePay  = round($hourlyRate * $totalOTHours, 2);
+
+            // Undertime
+            $approvedUndertimes = OvertimeUndertime::where('user_id', $employee->id)
+                ->whereBetween('date', [$periodStart, $periodEnd])
+                ->where('status', 'approved')
+                ->where('type', 'undertime')
+                ->get();
+            $totalUTHours       = $approvedUndertimes->sum('hours');
+            $undertimeDeduction = round($hourlyRate * $totalUTHours, 2);
+
+            // Flag undertime attendance
+            if ($totalUTHours > 0) {
+                $undertimeDates = $approvedUndertimes->pluck('date')->map(fn($d) => Carbon::parse($d)->format('Y-m-d'));
+                Attendance::where('user_id', $employee->id)
+                    ->whereIn('date', $undertimeDates)
+                    ->update(['status' => 'late']);
             }
 
-            $daysWorked = $this->attendanceService->countWorkDaysInPeriod(
-                $employee->id,
-                $periodStart,
-                $periodEnd
-            );
-
-            $hoursWorked = $this->attendanceService->calculateTotalHoursWorked(
-                $employee->id,
-                $periodStart,
-                $periodEnd
-            );
-
-            $basicSalary = $this->attendanceService->calculateBasicSalary(
-                $employee,
-                $periodStart,
-                $periodEnd
-            );
-
-            Payroll::create([
-                'user_id' => $employee->id,
+            $payroll = Payroll::create([
+                'user_id'              => $employee->id,
                 'payroll_period_start' => $periodStart,
-                'payroll_period_end' => $periodEnd,
-                'basic_salary' => $basicSalary,
-                'days_worked' => $daysWorked,
-                'hours_worked' => $hoursWorked,
-                'total_allowances' => 0,
-                'total_deductions' => 0,
-                'status' => 'pending',
+                'payroll_period_end'   => $periodEnd,
+                'basic_salary'         => $basicSalary,
+                'days_worked'          => $daysWorked,
+                'hours_worked'         => $hoursWorked,
+                'total_allowances'     => $overtimePay,
+                'total_deductions'     => $undertimeDeduction,
+                'status'               => 'pending',
             ]);
+
+            if ($overtimePay > 0) {
+                $payroll->allowances()->create([
+                    'allowance_type' => 'Overtime Pay (' . round($totalOTHours, 2) . ' hrs)',
+                    'amount'         => $overtimePay,
+                ]);
+            }
+
+            if ($undertimeDeduction > 0) {
+                $payroll->deductions()->create([
+                    'deduction_type' => 'Undertime Deduction (' . round($totalUTHours, 2) . ' hrs)',
+                    'amount'         => $undertimeDeduction,
+                    'description'    => 'Auto-computed from approved undertime records. Attendance flagged.',
+                ]);
+            }
 
             $createdCount++;
         }
 
-        // Send notification to accountants
         if ($createdCount > 0) {
             PayrollNotification::notifyAccountantsPayrollGenerated($periodStart, $periodEnd, $createdCount);
         }
 
         return redirect()->route('payroll.index')
-            ->with('success', "Payroll generated for $createdCount employee(s) based on attendance.");
+            ->with('success', "Payroll generated for $createdCount employee(s) with overtime and undertime applied.");
     }
 
     public function recalculatePayroll(Payroll $payroll)
     {
         $payroll->recalculateFromAttendance();
-
-        // Send notification to employee
         PayrollNotification::payrollRecalculated($payroll);
-
         return redirect()->route('payroll.show', $payroll)
             ->with('success', 'Payroll recalculated from attendance records.');
     }
@@ -404,28 +483,32 @@ class PayrollController extends Controller
     {
         $request->validate([
             'basic_salary' => 'required|numeric|min:0',
-            'has_sss' => 'required|boolean',
-            'has_pagibig' => 'required|boolean',
+            'has_sss'      => 'required|boolean',
+            'has_pagibig'  => 'required|boolean',
         ]);
 
         $semiMonthlySalary = $request->basic_salary;
-        $monthlySalary = $semiMonthlySalary * 2;
-        $results = [];
+        $monthlySalary     = $semiMonthlySalary * 2;
+        $results           = [];
 
         if ($request->has_sss) {
-            $sss = StatutoryDeduction::where('name', 'SSS')->where('min_salary', '<=', $monthlySalary)->where('max_salary', '>=', $monthlySalary)->first();
-
+            $sss = StatutoryDeduction::where('name', 'SSS')
+                ->where('min_salary', '<=', $monthlySalary)
+                ->where('max_salary', '>=', $monthlySalary)
+                ->first();
             if ($sss) {
-                $amount = $sss->employee_share ?? $monthlySalary * ($sss->percentage_employee / 100);
+                $amount    = $sss->employee_share ?? $monthlySalary * ($sss->percentage_employee / 100);
                 $results[] = ['name' => 'SSS', 'amount' => round($amount / 2, 2)];
             }
         }
 
         if ($request->has_pagibig) {
-            $pagibig = StatutoryDeduction::where('name', 'Pag-IBIG')->where('min_salary', '<=', $monthlySalary)->where('max_salary', '>=', $monthlySalary)->first();
-
+            $pagibig = StatutoryDeduction::where('name', 'Pag-IBIG')
+                ->where('min_salary', '<=', $monthlySalary)
+                ->where('max_salary', '>=', $monthlySalary)
+                ->first();
             if ($pagibig) {
-                $amount = $pagibig->employee_share ?? $monthlySalary * ($pagibig->percentage_employee / 100);
+                $amount    = $pagibig->employee_share ?? $monthlySalary * ($pagibig->percentage_employee / 100);
                 $results[] = ['name' => 'Pag-IBIG', 'amount' => round($amount / 2, 2)];
             }
         }
@@ -433,25 +516,42 @@ class PayrollController extends Controller
         return response()->json($results);
     }
 
-    /**
-     * Get attendance summary for a specific period (API endpoint)
-     */
     public function getAttendanceSummary(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id'      => 'required|exists:users,id',
             'period_start' => 'required|date',
-            'period_end' => 'required|date',
+            'period_end'   => 'required|date',
         ]);
 
         $periodStart = Carbon::parse($request->period_start);
-        $periodEnd = Carbon::parse($request->period_end);
+        $periodEnd   = Carbon::parse($request->period_end);
 
         $summary = $this->attendanceService->getAttendanceSummary(
             $request->user_id,
             $periodStart,
             $periodEnd
         );
+
+        // Also return overtime/undertime summary for the create form JS
+        $hourlyRate = Employee::find($request->user_id)->salary_rate / 8;
+
+        $otHours = OvertimeUndertime::where('user_id', $request->user_id)
+            ->whereBetween('date', [$periodStart, $periodEnd])
+            ->where('status', 'approved')
+            ->where('type', 'overtime')
+            ->sum('hours');
+
+        $utHours = OvertimeUndertime::where('user_id', $request->user_id)
+            ->whereBetween('date', [$periodStart, $periodEnd])
+            ->where('status', 'approved')
+            ->where('type', 'undertime')
+            ->sum('hours');
+
+        $summary['overtime_hours']       = round($otHours, 2);
+        $summary['overtime_pay']         = round($hourlyRate * $otHours, 2);
+        $summary['undertime_hours']      = round($utHours, 2);
+        $summary['undertime_deduction']  = round($hourlyRate * $utHours, 2);
 
         return response()->json($summary);
     }

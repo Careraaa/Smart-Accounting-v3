@@ -26,4 +26,33 @@ class OvertimeUndertime extends Model
     {
         return $this->belongsTo(Employee::class, 'user_id');
     }
+
+    /* ======================
+     |  SCOPES
+     ====================== */
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    public function scopeOvertime($query)
+    {
+        return $query->where('type', 'overtime');
+    }
+
+    public function scopeUndertime($query)
+    {
+        return $query->where('type', 'undertime');
+    }
+
+    public function scopeForPeriod($query, $start, $end)
+    {
+        return $query->whereBetween('date', [$start, $end]);
+    }
+
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
 }
