@@ -44,21 +44,23 @@ Route::get('/dashboard', function () {
 // ===== PROFILE & ACCOUNT ROUTES =====
 Route::middleware(['auth'])->group(function () {
     // ================ NOTIFICATION ROUTES ================
-    Route::prefix('notifications')->name('notifications.')->group(function () {
-        // Specific routes MUST come before parameterized routes
-        Route::get('/count', [NotificationController::class, 'unreadCount'])->name('count');
-        Route::get('/stats', [NotificationController::class, 'stats'])->name('stats');
-        Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-as-read');
-        Route::delete('/delete-read/all', [NotificationController::class, 'deleteReadNotifications'])->name('delete-read');
-        Route::delete('/delete-all', [NotificationController::class, 'deleteAllNotifications'])->name('delete-all');
-        
-        // Parameterized routes go last
-        Route::get('/',  [NotificationController::class, 'index'])->name('index');
-        Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
-        Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
-        Route::post('/{notification}/unread', [NotificationController::class, 'markAsUnread'])->name('unread');
-        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
-    });
+    Route::prefix('notifications')
+        ->name('notifications.')
+        ->group(function () {
+            // Specific routes MUST come before parameterized routes
+            Route::get('/count', [NotificationController::class, 'unreadCount'])->name('count');
+            Route::get('/stats', [NotificationController::class, 'stats'])->name('stats');
+            Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-as-read');
+            Route::delete('/delete-read/all', [NotificationController::class, 'deleteReadNotifications'])->name('delete-read');
+            Route::delete('/delete-all', [NotificationController::class, 'deleteAllNotifications'])->name('delete-all');
+
+            // Parameterized routes go last
+            Route::get('/', [NotificationController::class, 'index'])->name('index');
+            Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
+            Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
+            Route::post('/{notification}/unread', [NotificationController::class, 'markAsUnread'])->name('unread');
+            Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+        });
 
     Route::get('/profile/details', function () {
         return view('partials.profile.profile-details');
@@ -72,8 +74,8 @@ Route::middleware(['auth'])->group(function () {
         $user = auth()->user();
 
         $validated = $request->validate([
-            'name'            => 'required|string|max:255',
-            'username'        => 'required|string|unique:users,username,' . $user->id,
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|unique:users,username,' . $user->id,
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -155,39 +157,30 @@ Route::middleware(['auth'])->group(function () {
         return view('employee.dashboard');
     })->name('employee.dashboard');
 
-    Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])
-        ->name('attendance.scan');
+    Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])->name('attendance.scan');
 
     // ✅ Single authoritative definition — accessible by ALL roles
-    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])
-        ->name('attendance.lastlog');
+    Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])->name('attendance.lastlog');
 
-    Route::post('/hr/attendance/qr/submit', [AttendanceController::class, 'submit'])
-        ->name('hr.qr.submit');
+    Route::post('/hr/attendance/qr/submit', [AttendanceController::class, 'submit'])->name('hr.qr.submit');
 });
 
 // ===== HR ROUTES =====
 Route::middleware(['auth', 'role:hr'])->group(function () {
-    Route::get('/hr', [HRDashboardController::class, 'index'])
-        ->name('hr.index');
+    Route::get('/hr', [HRDashboardController::class, 'index'])->name('hr.index');
 
     Route::resource('employees', EmployeeController::class);
     Route::resource('attendance', AttendanceController::class);
 
-    Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])
-        ->name('hr.qr');
+    Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])->name('hr.qr');
 
-    Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])
-        ->name('hr.attendance.monitor');
+    Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])->name('hr.attendance.monitor');
 
-    Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])
-        ->name('hr.qr.generate');
+    Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])->name('hr.qr.generate');
 
-    Route::get('/api/attendance/recent', [AttendanceController::class, 'getRecentAttendance'])
-        ->name('api.attendance.recent');
+    Route::get('/api/attendance/recent', [AttendanceController::class, 'getRecentAttendance'])->name('api.attendance.recent');
 
-    Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])
-        ->name('api.qr.token-status');
+    Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])->name('api.qr.token-status');
 
     // ❌ REMOVED duplicate attendance.lastlog — it was overriding the shared route above
     //    and blocking employees with a 403.
@@ -235,9 +228,9 @@ Route::middleware(['auth', 'role:hr'])->group(function () {
     Route::prefix('payroll/receivables')
         ->name('payroll.receivables.')
         ->group(function () {
-            Route::get('/', function () {
-                return view('hr.payroll.receivables.index');
-            })->name('index');
+            Route::get('/', [\App\Http\Controllers\HR\PayrollReceivablesController::class, 'index'])->name('index');
+            Route::post('/{payroll}/mark-paid', [\App\Http\Controllers\HR\PayrollReceivablesController::class, 'markAsPaid'])->name('mark-paid');
+            Route::post('/batch-paid', [\App\Http\Controllers\HR\PayrollReceivablesController::class, 'markBatchPaid'])->name('batch-paid');
         });
 
     Route::post('/payroll/statutory-deductions/compute', [PayrollController::class, 'computeStatutory'])->name('payroll.statutory.compute');

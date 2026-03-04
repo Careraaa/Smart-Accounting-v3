@@ -82,17 +82,4 @@
         </div>
     </div>
 </div>
-
-<style>
-.emp-action-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 30px; height: 30px; border-radius: 6px;
-    background: #f4f5f7; border: none; color: #9898a8;
-    font-size: 13px; cursor: pointer; text-decoration: none;
-    transition: background 0.13s, color 0.13s; padding: 0;
-}
-.emp-action-btn.emp-action-view:hover    { background: #eff6ff; color: #3b82f6; }
-.emp-action-btn.emp-action-approve:hover { background: #f0fdf4; color: #16a34a; }
-.emp-action-btn.emp-action-danger:hover  { background: #fff1f2; color: #e11d48; }
-</style>
 @endsection

@@ -167,9 +167,9 @@
                                         <tr>
                                             <td class="fw-medium fs-12">{{ $trend['date'] }}</td>
                                             <td>
-                                                <span class="badge bg-success">P: {{ $trend['present'] }}</span>
-                                                <span class="badge bg-danger">A: {{ $trend['absent'] }}</span>
-                                                <span class="badge bg-warning">L: {{ $trend['late'] }}</span>
+                                                <span class="emp-badge" style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">P: {{ $trend['present'] }}</span>
+                                                <span class="emp-badge" style="background:#fff1f2; color:#e11d48; border:1px solid #fcd0d0;">A: {{ $trend['absent'] }}</span>
+                                                <span class="emp-badge" style="background:#fffbeb; color:#d97706; border:1px solid #fde68a;">L: {{ $trend['late'] }}</span>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -230,23 +230,23 @@
 
     <!-- Recent Leave Requests Table -->
     <div class="col-md-12">
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Recent Leave Requests</h5>
-                <a href="#" class="btn btn-primary btn-sm">View All</a>
+                <span class="card-title mb-0">Recent Leave Requests</span>
+                <a href="{{ route('leave.index') }}" class="btn btn-primary btn-sm">View All</a>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
+                    <table class="table table-hover w-100 mb-0">
+                        <thead>
                             <tr>
-                                <th>Employee</th>
-                                <th>Leave Type</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Days</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th><div class="sort-link">Employee</div></th>
+                                <th><div class="sort-link">Leave Type</div></th>
+                                <th><div class="sort-link">Start Date</div></th>
+                                <th><div class="sort-link">End Date</div></th>
+                                <th><div class="sort-link">Days</div></th>
+                                <th class="text-center"><div class="sort-link justify-content-center">Status</div></th>
+                                <th class="text-center"><div class="sort-link justify-content-center">Actions</div></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -254,24 +254,35 @@
                                 <tr>
                                     <td><strong>{{ $leave->employee->name ?? 'N/A' }}</strong></td>
                                     <td>{{ ucfirst($leave->leave_type ?? 'N/A') }}</td>
-                                    <td>{{ $leave->start_date?->format('M d, Y') ?? 'N/A' }}</td>
-                                    <td>{{ $leave->end_date?->format('M d, Y') ?? 'N/A' }}</td>
+                                    <td><small class="text-muted">{{ $leave->start_date?->format('M d, Y') ?? 'N/A' }}</small></td>
+                                    <td><small class="text-muted">{{ $leave->end_date?->format('M d, Y') ?? 'N/A' }}</small></td>
                                     <td>{{ $leave->duration_days ?? 'N/A' }}</td>
-                                    <td>
-                                        <span
-                                            class="badge bg-{{ $leave->status === 'approved' ? 'success' : ($leave->status === 'pending' ? 'warning' : 'danger') }}">
+                                    <td class="text-center">
+                                        @php
+                                            $leaveStatusMap = [
+                                                'pending'  => ['bg' => '#fffbeb', 'color' => '#d97706', 'border' => '#fde68a'],
+                                                'approved' => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'border' => '#bbf7d0'],
+                                                'rejected' => ['bg' => '#fff1f2', 'color' => '#e11d48', 'border' => '#fcd0d0'],
+                                            ];
+                                            $ls = $leaveStatusMap[$leave->status] ?? ['bg' => '#f4f5f7', 'color' => '#9898a8', 'border' => '#e8e8ef'];
+                                        @endphp
+                                        <span class="emp-badge"
+                                            style="background:{{ $ls['bg'] }}; color:{{ $ls['color'] }}; border:1px solid {{ $ls['border'] }};">
                                             {{ ucfirst($leave->status) }}
                                         </span>
                                     </td>
-                                    <td>
-                                        <a href="#" class="btn btn-info btn-sm" title="View">
+                                    <td class="text-center">
+                                        <a href="{{ route('leave.show', $leave) }}" class="emp-action-btn emp-action-view" title="View">
                                             <i class="feather-eye"></i>
                                         </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">No leave records found</td>
+                                    <td colspan="7" class="text-center text-muted py-5">
+                                        <i class="feather-file-text d-block mb-2" style="font-size:28px; opacity:.3;"></i>
+                                        No leave records found
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -283,46 +294,56 @@
 
     <!-- Recent Attendance Records Table -->
     <div class="col-md-12">
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Recent Attendance Records</h5>
+                <span class="card-title mb-0">Recent Attendance Records</span>
                 <a href="{{ route('attendance.index') }}" class="btn btn-primary btn-sm">View All</a>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
+                    <table class="table table-hover w-100 mb-0">
+                        <thead>
                             <tr>
-                                <th>Employee</th>
-                                <th>Date</th>
-                                <th>Time In</th>
-                                <th>Time Out</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th><div class="sort-link">Employee</div></th>
+                                <th><div class="sort-link">Date</div></th>
+                                <th><div class="sort-link">Time In</div></th>
+                                <th><div class="sort-link">Time Out</div></th>
+                                <th class="text-center"><div class="sort-link justify-content-center">Status</div></th>
+                                <th class="text-center"><div class="sort-link justify-content-center">Actions</div></th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($recentAttendance as $attendance)
                                 <tr>
                                     <td><strong>{{ $attendance->employee->name ?? 'N/A' }}</strong></td>
-                                    <td>{{ $attendance->date?->format('M d, Y') ?? 'N/A' }}</td>
-                                    <td>{{ $attendance->time_in?->format('H:i A') ?? 'N/A' }}</td>
-                                    <td>{{ $attendance->time_out?->format('H:i A') ?? '--:-- --' }}</td>
-                                    <td>
-                                        <span
-                                            class="badge bg-{{ $attendance->status === 'present' ? 'success' : ($attendance->status === 'late' ? 'warning' : 'danger') }}">
+                                    <td><small class="text-muted">{{ $attendance->date?->format('M d, Y') ?? 'N/A' }}</small></td>
+                                    <td>{{ $attendance->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $attendance->time_in)->format('g:i A') : '—' }}</td>
+                                    <td>{{ $attendance->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $attendance->time_out)->format('g:i A') : '—' }}</td>
+                                    <td class="text-center">
+                                        @php
+                                            $attStatusMap = [
+                                                'present' => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'border' => '#bbf7d0'],
+                                                'late'    => ['bg' => '#fffbeb', 'color' => '#d97706', 'border' => '#fde68a'],
+                                                'absent'  => ['bg' => '#fff1f2', 'color' => '#e11d48', 'border' => '#fcd0d0'],
+                                            ];
+                                            $as = $attStatusMap[$attendance->status] ?? ['bg' => '#f4f5f7', 'color' => '#9898a8', 'border' => '#e8e8ef'];
+                                        @endphp
+                                        <span class="emp-badge"
+                                            style="background:{{ $as['bg'] }}; color:{{ $as['color'] }}; border:1px solid {{ $as['border'] }};">
                                             {{ ucfirst($attendance->status) }}
                                         </span>
                                     </td>
-                                    <td>
-                                        <a href="#" class="btn btn-info btn-sm" title="View">
+                                    <td class="text-center">
+                                        <a href="{{ route('attendance.show', $attendance) }}" class="emp-action-btn emp-action-view" title="View">
                                             <i class="feather-eye"></i>
                                         </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">No attendance records found
+                                    <td colspan="6" class="text-center text-muted py-5">
+                                        <i class="feather-clock d-block mb-2" style="font-size:28px; opacity:.3;"></i>
+                                        No attendance records found
                                     </td>
                                 </tr>
                             @endforelse

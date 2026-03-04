@@ -296,24 +296,4 @@
     </div>
 
 </div>
-
-<style>
-.dash-label   { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#9898a8; }
-.dash-value   { font-size:1.75rem; font-weight:800; color:#1c1c1e; line-height:1; }
-.dash-sub     { font-size:.75rem; color:#9898a8; margin-top:4px; }
-.dash-icon    { width:34px; height:34px; border-radius:8px; background:#f4f5f7; display:flex; align-items:center; justify-content:center; color:#9898a8; font-size:15px; flex-shrink:0; }
-.dash-icon.di-green { background:#f0fdf4; color:#16a34a; }
-.dash-icon.di-red   { background:#fff5f5; color:#c8292a; }
-.dash-icon.di-amber { background:#fffbeb; color:#d97706; }
-.dash-icon.di-blue  { background:#f0f9ff; color:#0284c7; }
-.dash-progress { height:4px; border-radius:4px; background:#f4f5f7; }
-.emp-action-btn {
-    display:inline-flex; align-items:center; justify-content:center;
-    width:30px; height:30px; border-radius:6px;
-    background:#f4f5f7; border:none; color:#9898a8;
-    font-size:13px; cursor:pointer; text-decoration:none;
-    transition:background 0.13s, color 0.13s; padding:0;
-}
-.emp-action-btn.emp-action-view:hover { background:#eff6ff; color:#3b82f6; }
-</style>
 @endsection

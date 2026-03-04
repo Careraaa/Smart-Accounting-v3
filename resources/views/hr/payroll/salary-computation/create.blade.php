@@ -174,67 +174,6 @@
             </div>
         </div>
     </div>
-
-    <style>
-        .prl-hint {
-            font-size: 0.8rem;
-            color: #9898a8;
-        }
-
-        .prl-computed {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #1c1c1e;
-            margin: 0;
-        }
-
-        .prl-section-divider {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: #9898a8;
-            border-bottom: 1px solid #e8e8ef;
-            padding-bottom: 8px;
-            margin-bottom: 14px;
-        }
-
-        .prl-list {
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .prl-list .list-group-item {
-            border-color: #e8e8ef;
-            font-size: 0.845rem;
-            padding: 8px 14px;
-            background: #fafafa;
-        }
-
-        .prl-net-box {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #1c1c1e;
-            border-radius: 10px;
-            padding: 16px 20px;
-        }
-
-        .prl-net-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .prl-net-value {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #fff;
-        }
-    </style>
-
     @push('scripts')
         <script>
             window.statutoryDeductions = @json(\App\Models\StatutoryDeduction::all());

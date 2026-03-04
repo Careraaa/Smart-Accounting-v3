@@ -131,44 +131,13 @@
 </div>
 
 <style>
-.prl-field-label  { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #9898a8; display: block; margin-bottom: 3px; }
-.prl-field-value  { font-size: 0.9rem; color: #1c1c1e; }
-.prl-field-sub    { font-size: 0.78rem; color: #9898a8; }
-.prl-section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #9898a8; }
-.prl-sub-label    { font-size: 0.72rem; font-weight: 600; color: #9898a8; text-transform: uppercase; letter-spacing: 0.8px; }
-.prl-line         { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 0.845rem; color: #4a4a58; }
-.prl-line-key     {}
-.prl-line-val     { font-variant-numeric: tabular-nums; }
-.prl-net-box {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #1c1c1e;
-    border-radius: 10px;
-    padding: 16px 20px;
-}
-.prl-net-label { font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
-.prl-net-value { font-size: 1.4rem; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
-
-/* Action buttons */
 .emp-action-btn {
-    display: inline-flex;
-    align-items: center;
     height: 30px;
     padding: 0 12px;
-    border-radius: 6px;
-    background: #f4f5f7;
-    border: none;
-    color: #9898a8;
     font-size: 0.815rem;
     font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.13s, color 0.13s;
     white-space: nowrap;
+    width: auto;
 }
-.emp-action-btn.emp-action-approve:hover { background: #f0fdf4; color: #16a34a; }
-.emp-action-btn.emp-action-danger:hover  { background: #fff1f2; color: #e11d48; }
-.emp-action-btn.emp-action-back:hover    { background: #f0f9ff; color: #3b82f6; }
 </style>
 @endsection

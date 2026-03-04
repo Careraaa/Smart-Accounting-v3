@@ -255,39 +255,5 @@ window.addEventListener('load', async () => {
     transition: color 0.15s;
 }
 .scan-action-card:hover .scan-action-sub { color: rgba(255,255,255,0.8); }
-
-.att-steps {
-    padding-left: 0;
-    list-style: none;
-    counter-reset: att;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.att-steps li {
-    counter-increment: att;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.845rem;
-    color: #4a4a58;
-    padding: 10px 14px;
-    border-radius: 8px;
-    background: #f4f5f7;
-}
-.att-steps li::before {
-    content: counter(att);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #1c1c1e;
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 700;
-    flex-shrink: 0;
-}
 </style>
 @endsection

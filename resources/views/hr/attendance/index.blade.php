@@ -298,7 +298,8 @@
                 const logs = await response.json();
                 if (logs && logs.length > 0) location.reload();
             } catch {
-                /* silent fail */ }
+                /* silent fail */
+            }
         }
 
         window.addEventListener('load', () => {
@@ -307,23 +308,7 @@
     </script>
 
     <style>
-        .emp-badge {
-            display: inline-block;
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            padding: 3px 10px;
-            border-radius: 20px;
-        }
-
-        .sort-link {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            color: inherit;
-            user-select: none;
-        }
-
+        /* -- QR Monitor Panel ------------------------------------------ */
         .att-qr-card {
             background: #1c1c1e;
             border-radius: 12px;
@@ -432,42 +417,6 @@
             font-size: 0.75rem;
             font-weight: 700;
             flex-shrink: 0;
-        }
-
-        /* --- Pagination --- */
-        .pagination {
-            margin: 0;
-            gap: 2px;
-        }
-
-        .pagination .page-link {
-            padding: 2px 8px;
-            font-size: 0.75rem;
-            border-radius: 4px !important;
-            border: 1px solid #e8e8ef;
-            color: #9898a8;
-            background: #f4f5f7;
-            line-height: 1.6;
-            min-width: 28px;
-            text-align: center;
-        }
-
-        .pagination .page-link:hover {
-            background: #eff6ff;
-            color: #3b82f6;
-            border-color: #bae6fd;
-        }
-
-        .pagination .page-item.active .page-link {
-            background: #1c1c1e;
-            border-color: #1c1c1e;
-            color: #fff;
-        }
-
-        .pagination .page-item.disabled .page-link {
-            background: #f4f5f7;
-            color: #d1d1db;
-            border-color: #e8e8ef;
         }
     </style>
 @endsection

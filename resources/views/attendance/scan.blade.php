@@ -423,16 +423,6 @@ window.addEventListener('beforeunload', function() {
     font-variant-numeric: tabular-nums;
 }
 
-.scan-time-badge {
-    font-size: 0.775rem;
-    font-weight: 600;
-    color: rgba(255,255,255,0.85);
-    background: #1c1c1e;
-    padding: 3px 12px;
-    border-radius: 20px;
-    font-variant-numeric: tabular-nums;
-}
-
 .scan-last-log {
     background: #f4f5f7;
     border-radius: 8px;
@@ -452,41 +442,6 @@ window.addEventListener('beforeunload', function() {
     letter-spacing: 1.4px;
     text-transform: uppercase;
     color: #9898a8;
-}
-
-/* Instructions */
-.att-steps {
-    padding-left: 0;
-    list-style: none;
-    counter-reset: att;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.att-steps li {
-    counter-increment: att;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.875rem;
-    color: #4a4a58;
-    padding: 10px 14px;
-    border-radius: 8px;
-    background: #f4f5f7;
-}
-.att-steps li::before {
-    content: counter(att);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #1c1c1e;
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 700;
-    flex-shrink: 0;
 }
 
 /* iOS note */

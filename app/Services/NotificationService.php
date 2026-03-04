@@ -4,27 +4,22 @@ namespace App\Services;
 
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class NotificationService
 {
-    /**
-     * Send a notification to a user
-     */
-    public function send(User $user, string $type, string $title, string $message, array $data = []): Notification
+    public function send(Model $user, string $type, string $title, string $message, array $data = []): Notification
     {
         return Notification::create([
             'user_id' => $user->id,
-            'type' => $type,
-            'title' => $title,
+            'type'    => $type,
+            'title'   => $title,
             'message' => $message,
-            'data' => $data,
+            'data'    => $data,
         ]);
     }
 
-    /**
-     * Send notification to multiple users
-     */
     public function sendToMultiple(array $userIds, string $type, string $title, string $message, array $data = []): Collection
     {
         $notifications = collect();
@@ -39,32 +34,23 @@ class NotificationService
         return $notifications;
     }
 
-    /**
-     * Send notification to all users with a specific role
-     */
     public function sendToRole(string $role, string $type, string $title, string $message, array $data = []): Collection
     {
-        $users = User::where('role', $role)->get();
+        $users   = User::where('role', $role)->get();
         $userIds = $users->pluck('id')->toArray();
 
         return $this->sendToMultiple($userIds, $type, $title, $message, $data);
     }
 
-    /**
-     * Send notification to a department
-     */
     public function sendToDepartment(string $department, string $type, string $title, string $message, array $data = []): Collection
     {
-        $users = User::where('department', $department)->get();
+        $users   = User::where('department', $department)->get();
         $userIds = $users->pluck('id')->toArray();
 
         return $this->sendToMultiple($userIds, $type, $title, $message, $data);
     }
 
-    /**
-     * Get unread notifications for a user
-     */
-    public function getUnreadNotifications(User $user, int $limit = null): Collection
+    public function getUnreadNotifications(Model $user, int $limit = null): Collection
     {
         $query = $user->notifications()->unread()->recent();
 
@@ -75,10 +61,7 @@ class NotificationService
         return $query->get();
     }
 
-    /**
-     * Get all notifications for a user
-     */
-    public function getAllNotifications(User $user, int $limit = null): Collection
+    public function getAllNotifications(Model $user, int $limit = null): Collection
     {
         $query = $user->notifications()->recent();
 
@@ -89,73 +72,49 @@ class NotificationService
         return $query->get();
     }
 
-    /**
-     * Mark notification as read
-     */
     public function markAsRead(Notification $notification): Notification
     {
         return $notification->markAsRead();
     }
 
-    /**
-     * Mark all notifications as read for a user
-     */
-    public function markAllAsRead(User $user): int
+    public function markAllAsRead(Model $user): int
     {
         return $user->notifications()
             ->unread()
             ->update(['read_at' => now()]);
     }
 
-    /**
-     * Mark notification as unread
-     */
     public function markAsUnread(Notification $notification): Notification
     {
         return $notification->markAsUnread();
     }
 
-    /**
-     * Delete a notification
-     */
     public function delete(Notification $notification): bool
     {
         return $notification->delete();
     }
 
-    /**
-     * Delete all read notifications for a user
-     */
-    public function deleteReadNotifications(User $user): int
+    public function deleteReadNotifications(Model $user): int
     {
         return $user->notifications()->read()->delete();
     }
 
-    /**
-     * Delete all notifications for a user
-     */
-    public function deleteAllNotifications(User $user): int
+    public function deleteAllNotifications(Model $user): int
     {
         return $user->notifications()->delete();
     }
 
-    /**
-     * Get unread count for a user
-     */
-    public function getUnreadCount(User $user): int
+    public function getUnreadCount(Model $user): int
     {
         return $user->notifications()->unread()->count();
     }
 
-    /**
-     * Get notification statistics for a user
-     */
-    public function getStats(User $user): array
+    public function getStats(Model $user): array
     {
         return [
-            'total' => $user->notifications()->count(),
+            'total'  => $user->notifications()->count(),
             'unread' => $user->notifications()->unread()->count(),
-            'read' => $user->notifications()->read()->count(),
+            'read'   => $user->notifications()->read()->count(),
         ];
     }
 }
