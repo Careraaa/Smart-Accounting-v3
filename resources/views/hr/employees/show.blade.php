@@ -212,6 +212,15 @@
         </div>
     </div>
     @endif
-
 </div>
+<style>
+.emp-action-btn {
+    height: 30px;
+    padding: 0 12px;
+    font-size: 0.815rem;
+    font-weight: 500;
+    white-space: nowrap;
+    width: auto;
+}
+</style>
 @endsection

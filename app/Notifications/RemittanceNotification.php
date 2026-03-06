@@ -7,6 +7,29 @@ use App\Services\NotificationService;
 
 class RemittanceNotification
 {
+    /**
+     * Notify accountant that a new remittance has been created
+     */
+    public static function remittanceCreated(DailyRemittance $remittance)
+    {
+        $remittance->load('driver', 'pao', 'vehicle');
+
+        $message = "{$remittance->driver->name} created a new remittance for {$remittance->remittance_date->format('M d, Y')} amounting to ₱" . number_format($remittance->net_remittance, 2) . ".";
+        $data = [
+            'remittance_id'    => $remittance->id,
+            'driver_id'        => $remittance->driver_id,
+            'driver_name'      => $remittance->driver->name,
+            'total_collection' => $remittance->total_collection,
+            'total_expenses'   => $remittance->total_expenses,
+            'net_remittance'   => $remittance->net_remittance,
+            'pao_name'         => $remittance->pao->name,
+            'vehicle_name'     => $remittance->vehicle->plate_number,
+            'remittance_date'  => $remittance->remittance_date->format('M d, Y'),
+            'status'           => $remittance->status,
+        ];
+
+        app(NotificationService::class)->sendToRole('accountant', 'remittance_created', 'New Remittance Created', $message, $data);
+    }
 
     /**
      * Notify remittance clerk that remittance was approved
@@ -15,7 +38,7 @@ class RemittanceNotification
     {
         $message = "Remittance from driver {$remittance->driver->name} for {$remittance->remittance_date->format('M d, Y')} amounting to ₱" . number_format($remittance->net_remittance, 2) . " has been approved.";
         $data = ['remittance_id' => $remittance->id, 'status' => 'approved', 'driver_id' => $remittance->driver_id];
-        
+
         app(NotificationService::class)->sendToRole('remittance_clerk', 'remittance_approved', 'Remittance Approved', $message, $data);
     }
 
@@ -26,7 +49,7 @@ class RemittanceNotification
     {
         $message = "Remittance from driver {$remittance->driver->name} for {$remittance->remittance_date->format('M d, Y')} amounting to ₱" . number_format($remittance->net_remittance, 2) . " has been rejected and requires resubmission.";
         $data = ['remittance_id' => $remittance->id, 'status' => 'rejected', 'driver_id' => $remittance->driver_id];
-        
+
         app(NotificationService::class)->sendToRole('remittance_clerk', 'remittance_rejected', 'Remittance Rejected', $message, $data);
     }
 
@@ -39,18 +62,18 @@ class RemittanceNotification
 
         $message = "{$remittance->driver->name} submitted a remittance for {$remittance->remittance_date->format('M d, Y')} amounting to ₱" . number_format($remittance->net_remittance, 2) . ".";
         $data = [
-            'remittance_id' => $remittance->id,
-            'driver_id' => $remittance->driver_id,
-            'driver_name' => $remittance->driver->name,
+            'remittance_id'    => $remittance->id,
+            'driver_id'        => $remittance->driver_id,
+            'driver_name'      => $remittance->driver->name,
             'total_collection' => $remittance->total_collection,
-            'total_expenses' => $remittance->total_expenses,
-            'net_remittance' => $remittance->net_remittance,
-            'pao_name' => $remittance->pao->name,
-            'vehicle_name' => $remittance->vehicle->name,
-            'remittance_date' => $remittance->remittance_date->format('M d, Y'),
-            'status' => $remittance->status,
+            'total_expenses'   => $remittance->total_expenses,
+            'net_remittance'   => $remittance->net_remittance,
+            'pao_name'         => $remittance->pao->name,
+            'vehicle_name'     => $remittance->vehicle->plate_number,
+            'remittance_date'  => $remittance->remittance_date->format('M d, Y'),
+            'status'           => $remittance->status,
         ];
-        
+
         app(NotificationService::class)->sendToRole('accountant', 'remittance_submitted', 'New Remittance Submitted', $message, $data);
     }
 
@@ -63,18 +86,42 @@ class RemittanceNotification
 
         $message = "{$remittance->driver->name}'s remittance has been updated. Net amount: ₱" . number_format($remittance->net_remittance, 2) . ".";
         $data = [
-            'remittance_id' => $remittance->id,
-            'driver_id' => $remittance->driver_id,
-            'driver_name' => $remittance->driver->name,
+            'remittance_id'    => $remittance->id,
+            'driver_id'        => $remittance->driver_id,
+            'driver_name'      => $remittance->driver->name,
             'total_collection' => $remittance->total_collection,
-            'total_expenses' => $remittance->total_expenses,
-            'net_remittance' => $remittance->net_remittance,
-            'pao_name' => $remittance->pao->name,
-            'vehicle_name' => $remittance->vehicle->name,
-            'remittance_date' => $remittance->remittance_date->format('M d, Y'),
-            'status' => $remittance->status,
+            'total_expenses'   => $remittance->total_expenses,
+            'net_remittance'   => $remittance->net_remittance,
+            'pao_name'         => $remittance->pao->name,
+            'vehicle_name'     => $remittance->vehicle->plate_number,
+            'remittance_date'  => $remittance->remittance_date->format('M d, Y'),
+            'status'           => $remittance->status,
         ];
-        
+
         app(NotificationService::class)->sendToRole('accountant', 'remittance_updated', 'Remittance Updated', $message, $data);
+    }
+
+    /**
+     * Notify accountant that a remittance has been deleted
+     */
+    public static function remittanceDeleted(DailyRemittance $remittance)
+    {
+        $remittance->load('driver', 'pao', 'vehicle');
+
+        $message = "{$remittance->driver->name}'s remittance for {$remittance->remittance_date->format('M d, Y')} amounting to ₱" . number_format($remittance->net_remittance, 2) . " has been deleted.";
+        $data = [
+            'remittance_id'    => $remittance->id,
+            'driver_id'        => $remittance->driver_id,
+            'driver_name'      => $remittance->driver->name,
+            'total_collection' => $remittance->total_collection,
+            'total_expenses'   => $remittance->total_expenses,
+            'net_remittance'   => $remittance->net_remittance,
+            'pao_name'         => $remittance->pao->name,
+            'vehicle_name'     => $remittance->vehicle->plate_number,
+            'remittance_date'  => $remittance->remittance_date->format('M d, Y'),
+            'status'           => $remittance->status,
+        ];
+
+        app(NotificationService::class)->sendToRole('accountant', 'remittance_deleted', 'Remittance Deleted', $message, $data);
     }
 }

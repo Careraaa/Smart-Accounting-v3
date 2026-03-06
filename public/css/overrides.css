@@ -1611,3 +1611,17 @@ hr {
     color: #d97706;
     border: 1px solid #fde68a;
 }
+
+.sortable-header.text-center .sort-link {
+    justify-content: center;
+}
+
+.sortable-header.text-end .sort-link {
+    justify-content: flex-end;
+}
+
+.emp-badge-approved {
+    background: #f0f9ff;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+}

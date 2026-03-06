@@ -106,16 +106,6 @@
         </div>
     </div>
 </div>
-
-<style>
-.prl-section-divider {
-    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.2px; color: #9898a8;
-    border-bottom: 1px solid #e8e8ef;
-    padding-bottom: 8px; margin-bottom: 14px;
-}
-</style>
-
 @push('scripts')
     <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
 @endpush
