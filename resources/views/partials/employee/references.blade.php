@@ -2,10 +2,10 @@
 <div id="referenceList">
     @php
         $references = old('character_references', []);
-        if(empty($references) && isset($employee) && $employee->exists) {
-            $references = $employee->characterReferences->toArray();
+        if (empty($references) && isset($employee) && $employee->exists) {
+            $references = $employee->charRefs->toArray();
         }
-        if(empty($references)) {
+        if (empty($references)) {
             $references = [['name' => '', 'address' => '', 'contact_number' => '']];
         }
     @endphp
@@ -16,23 +16,19 @@
                 <div class="col-md-4">
                     <label class="form-label">Full Name</label>
                     <input type="text" name="character_references[{{ $i }}][name]"
-                        class="form-control"
-                        placeholder="e.g. Jose Reyes"
+                        class="form-control" placeholder="e.g. Jose Reyes"
                         value="{{ $c['name'] ?? '' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Address</label>
                     <input type="text" name="character_references[{{ $i }}][address]"
-                        class="form-control"
-                        placeholder="e.g. Quezon City, Metro Manila"
+                        class="form-control" placeholder="e.g. Quezon City, Metro Manila"
                         value="{{ $c['address'] ?? '' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Contact Number</label>
                     <input type="tel" name="character_references[{{ $i }}][contact_number]"
-                        class="form-control"
-                        placeholder="09XXXXXXXXX"
-                        maxlength="13"
+                        class="form-control" placeholder="09XXXXXXXXX" maxlength="13"
                         oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
                         value="{{ $c['contact_number'] ?? '' }}">
                 </div>
@@ -64,9 +60,7 @@
             <div class="col-md-4">
                 <label class="form-label">Contact Number</label>
                 <input type="tel" name="character_references[__INDEX__][contact_number]"
-                    class="form-control"
-                    placeholder="09XXXXXXXXX"
-                    maxlength="13"
+                    class="form-control" placeholder="09XXXXXXXXX" maxlength="13"
                     oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
             </div>
         </div>

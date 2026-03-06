@@ -2,10 +2,10 @@
 <div id="experienceList">
     @php
         $experiences = old('work_experiences', []);
-        if(empty($experiences) && isset($employee) && $employee->exists) {
+        if (empty($experiences) && isset($employee) && $employee->exists) {
             $experiences = $employee->workExperiences->toArray();
         }
-        if(empty($experiences)) {
+        if (empty($experiences)) {
             $experiences = [['company_name' => '', 'position' => '', 'duration' => '', 'responsibilities' => '']];
         }
     @endphp
@@ -16,22 +16,19 @@
                 <div class="col-md-5">
                     <label class="form-label">Company Name</label>
                     <input type="text" name="work_experiences[{{ $i }}][company_name]"
-                        class="form-control"
-                        placeholder="e.g. ABC Corporation"
+                        class="form-control" placeholder="e.g. ABC Corporation"
                         value="{{ $we['company_name'] ?? '' }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Position</label>
                     <input type="text" name="work_experiences[{{ $i }}][position]"
-                        class="form-control"
-                        placeholder="e.g. Accounting Staff"
+                        class="form-control" placeholder="e.g. Accounting Staff"
                         value="{{ $we['position'] ?? '' }}">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Duration</label>
                     <input type="text" name="work_experiences[{{ $i }}][duration]"
-                        class="form-control"
-                        placeholder="e.g. 2019 - 2022"
+                        class="form-control" placeholder="e.g. 2019 - 2022"
                         value="{{ $we['duration'] ?? '' }}">
                 </div>
                 <div class="col-md-12">

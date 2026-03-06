@@ -2,10 +2,10 @@
 <div id="beneficiaryList">
     @php
         $beneficiaries = old('beneficiaries', []);
-        if(empty($beneficiaries) && isset($employee) && $employee->exists) {
+        if (empty($beneficiaries) && isset($employee) && $employee->exists) {
             $beneficiaries = $employee->beneficiaries->toArray();
         }
-        if(empty($beneficiaries)) {
+        if (empty($beneficiaries)) {
             $beneficiaries = [['name' => '', 'date_of_birth' => '', 'relationship' => '']];
         }
     @endphp
@@ -16,8 +16,7 @@
                 <div class="col-md-5">
                     <label class="form-label">Full Name</label>
                     <input type="text" name="beneficiaries[{{ $i }}][name]"
-                        class="form-control"
-                        placeholder="e.g. Maria Dela Cruz"
+                        class="form-control" placeholder="e.g. Maria Dela Cruz"
                         value="{{ $b['name'] ?? '' }}">
                 </div>
                 <div class="col-md-4">

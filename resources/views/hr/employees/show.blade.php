@@ -1,6 +1,21 @@
 @extends('layouts.layout')
 
 @section('content')
+
+@php
+    $addr = [];
+    if ($employee->address && str_starts_with(trim($employee->address), '{')) {
+        $addr = json_decode($employee->address, true) ?? [];
+    }
+    $addressFormatted = collect([
+        $addr['street']   ?? null,
+        $addr['barangay'] ?? null,
+        $addr['city']     ?? null,
+        $addr['province'] ?? null,
+    ])->filter()->implode(', ');
+    if (!$addressFormatted) $addressFormatted = $employee->address ?? '—';
+@endphp
+
 <div class="col-md-10 offset-md-1">
 
     {{-- Header --}}
@@ -39,11 +54,43 @@
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Email</span><div class="emp-field-value">{{ $employee->email ?? '—' }}</div></div>
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Phone</span><div class="emp-field-value">{{ $employee->phone ?? '—' }}</div></div>
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Civil Status</span><div class="emp-field-value">{{ ucfirst($employee->civil_status ?? '—') }}</div></div>
+                @if($employee->civil_status === 'married')
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Spouse Name</span><div class="emp-field-value">{{ $employee->spouse_name ?? '—' }}</div></div>
+                @endif
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Date of Birth</span><div class="emp-field-value">{{ $employee->date_of_birth?->format('F d, Y') ?? '—' }}</div></div>
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Place of Birth</span><div class="emp-field-value">{{ $employee->place_of_birth ?? '—' }}</div></div>
-                <div class="col-md-6 mb-3"><span class="emp-field-label">Educational Attainment</span><div class="emp-field-value">{{ $employee->educational_attainment ?? '—' }}</div></div>
-                <div class="col-md-6 mb-3"><span class="emp-field-label">Address</span><div class="emp-field-value">{{ $employee->address ?? '—' }}</div></div>
+                <div class="col-md-4 mb-3"><span class="emp-field-label">Educational Attainment</span><div class="emp-field-value">{{ $employee->educational_attainment ?? '—' }}</div></div>
+
+                {{-- Address: split fields if JSON, plain text fallback --}}
+                @if(!empty($addr))
+                    <div class="col-md-6 mb-3"><span class="emp-field-label">Street / House No.</span><div class="emp-field-value">{{ $addr['street'] ?: '—' }}</div></div>
+                    <div class="col-md-6 mb-3"><span class="emp-field-label">Barangay</span><div class="emp-field-value">{{ $addr['barangay'] ?: '—' }}</div></div>
+                    <div class="col-md-6 mb-3"><span class="emp-field-label">City / Municipality</span><div class="emp-field-value">{{ $addr['city'] ?: '—' }}</div></div>
+                    <div class="col-md-6 mb-3"><span class="emp-field-label">Province</span><div class="emp-field-value">{{ $addr['province'] ?: '—' }}</div></div>
+                @else
+                    <div class="col-md-12 mb-3"><span class="emp-field-label">Address</span><div class="emp-field-value">{{ $addressFormatted }}</div></div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Account Information --}}
+    <div class="card mb-3">
+        <div class="card-header"><span class="card-title mb-0">Account Information</span></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3"><span class="emp-field-label">Username</span><div class="emp-field-value">{{ $employee->username ?? '—' }}</div></div>
+                <div class="col-md-4 mb-3"><span class="emp-field-label">Role</span><div class="emp-field-value">{{ ucfirst($employee->role ?? '—') }}</div></div>
+                <div class="col-md-4 mb-3">
+                    <span class="emp-field-label">Account Status</span>
+                    <div class="mt-1">
+                        @if($employee->status === 'active')
+                            <span class="emp-badge emp-badge-active">Active</span>
+                        @else
+                            <span class="emp-badge emp-badge-inactive">Inactive</span>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -55,17 +102,7 @@
             <div class="row">
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Date of Hire</span><div class="emp-field-value">{{ $employee->date_of_hire?->format('F d, Y') ?? '—' }}</div></div>
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Position</span><div class="emp-field-value">{{ $employee->position ?? '—' }}</div></div>
-                <div class="col-md-4 mb-3"><span class="emp-field-label">Department</span><div class="emp-field-value">{{ $employee->department ?? '—' }}</div></div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Status</span>
-                    <div class="mt-1">
-                        @if ($employee->status === 'active')
-                            <span class="emp-badge emp-badge-active">Active</span>
-                        @else
-                            <span class="emp-badge emp-badge-inactive">Inactive</span>
-                        @endif
-                    </div>
-                </div>
+                <div class="col-md-4 mb-3"><span class="emp-field-label">Department</span><div class="emp-field-value">{{ ucfirst($employee->department ?? '—') }}</div></div>
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Salary Rate</span><div class="emp-field-value">₱{{ number_format($employee->salary_rate, 2) }}</div></div>
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Driver's License</span><div class="emp-field-value">{{ $employee->driver_license_number ?? '—' }}</div></div>
                 <div class="col-md-4 mb-3"><span class="emp-field-label">License Validity</span><div class="emp-field-value">{{ $employee->driver_license_validity?->format('F d, Y') ?? '—' }}</div></div>
@@ -82,21 +119,21 @@
                     <span class="emp-field-label">SSS Number</span>
                     <div class="d-flex align-items-center gap-2 mt-1">
                         <span class="emp-field-value">{{ $employee->sss_number ?? '—' }}</span>
-                        @if ($employee->has_sss)<span class="emp-badge emp-badge-active">Enrolled</span>@endif
+                        @if($employee->has_sss)<span class="emp-badge emp-badge-active">Enrolled</span>@endif
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
                     <span class="emp-field-label">TIN Number</span>
                     <div class="d-flex align-items-center gap-2 mt-1">
                         <span class="emp-field-value">{{ $employee->tin_number ?? '—' }}</span>
-                        @if ($employee->has_tin)<span class="emp-badge emp-badge-active">Has TIN</span>@endif
+                        @if($employee->has_tin)<span class="emp-badge emp-badge-active">Has TIN</span>@endif
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
                     <span class="emp-field-label">Pag-IBIG Number</span>
                     <div class="d-flex align-items-center gap-2 mt-1">
                         <span class="emp-field-value">{{ $employee->pagibig_number ?? '—' }}</span>
-                        @if ($employee->has_pagibig)<span class="emp-badge emp-badge-active">Enrolled</span>@endif
+                        @if($employee->has_pagibig)<span class="emp-badge emp-badge-active">Enrolled</span>@endif
                     </div>
                 </div>
             </div>
@@ -104,14 +141,14 @@
     </div>
 
     {{-- Work Experience --}}
-    @if ($employee->workExperiences->count())
+    @if($employee->workExperiences->count())
     <div class="card mb-3">
         <div class="card-header"><span class="card-title mb-0">Work Experience</span></div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
                 <thead><tr><th>Company</th><th>Position</th><th>Duration</th><th>Responsibilities</th></tr></thead>
                 <tbody>
-                    @foreach ($employee->workExperiences as $we)
+                    @foreach($employee->workExperiences as $we)
                         <tr>
                             <td>{{ $we->company_name }}</td>
                             <td>{{ $we->position }}</td>
@@ -126,14 +163,14 @@
     @endif
 
     {{-- Special Skills --}}
-    @if ($employee->specialSkills->count())
+    @if($employee->specialSkills->count())
     <div class="card mb-3">
         <div class="card-header"><span class="card-title mb-0">Special Skills</span></div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
                 <thead><tr><th>Skill</th><th>Proficiency</th></tr></thead>
                 <tbody>
-                    @foreach ($employee->specialSkills as $skill)
+                    @foreach($employee->specialSkills as $skill)
                         <tr><td>{{ $skill->skill_name }}</td><td>{{ ucfirst($skill->proficiency) }}</td></tr>
                     @endforeach
                 </tbody>
@@ -143,14 +180,14 @@
     @endif
 
     {{-- Beneficiaries --}}
-    @if ($employee->beneficiaries->count())
+    @if($employee->beneficiaries->count())
     <div class="card mb-3">
         <div class="card-header"><span class="card-title mb-0">Beneficiaries</span></div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
                 <thead><tr><th>Name</th><th>Relationship</th><th>Date of Birth</th></tr></thead>
                 <tbody>
-                    @foreach ($employee->beneficiaries as $b)
+                    @foreach($employee->beneficiaries as $b)
                         <tr>
                             <td>{{ $b->name }}</td>
                             <td>{{ ucfirst($b->relationship) }}</td>
@@ -164,14 +201,14 @@
     @endif
 
     {{-- Character References --}}
-    @if ($employee->characterReferences->count())
+    @if($employee->charRefs->count())
     <div class="card mb-3">
         <div class="card-header"><span class="card-title mb-0">Character References</span></div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
                 <thead><tr><th>Name</th><th>Address</th><th>Contact Number</th></tr></thead>
                 <tbody>
-                    @foreach ($employee->characterReferences as $ref)
+                    @foreach($employee->charRefs as $ref)
                         <tr><td>{{ $ref->name }}</td><td>{{ $ref->address }}</td><td>{{ $ref->contact_number }}</td></tr>
                     @endforeach
                 </tbody>
@@ -181,23 +218,28 @@
     @endif
 
     {{-- Attachments --}}
-    @if ($employee->attachments && count($employee->attachments))
+    @if($employee->attachments && count($employee->attachments))
     <div class="card mb-3">
         <div class="card-header"><span class="card-title mb-0">Attachments</span></div>
         <div class="card-body">
             <div class="row">
                 @php
                     $attachmentLabels = [
-                        'drivers_license' => "Driver's License", 'valid_id_1' => 'Valid ID 1',
-                        'valid_id_2' => 'Valid ID 2', '2x2_picture' => '2x2 Picture',
-                        '1x1_picture' => '1x1 Picture', 'police_clearance' => 'Police Clearance',
-                        'barangay_clearance' => 'Barangay Clearance', 'house_sketch' => 'House Sketch',
-                        'medical_cert' => 'Medical Certificate', 'drug_test' => 'Drug Test Result',
-                        'x_ray' => 'X-Ray Result',
+                        'drivers_license'    => "Driver's License",
+                        'valid_id_1'         => 'Valid ID 1',
+                        'valid_id_2'         => 'Valid ID 2',
+                        '2x2_picture'        => '2x2 Picture',
+                        '1x1_picture'        => '1x1 Picture',
+                        'police_clearance'   => 'Police Clearance',
+                        'barangay_clearance' => 'Barangay Clearance',
+                        'house_sketch'       => 'House Sketch',
+                        'medical_cert'       => 'Medical Certificate',
+                        'drug_test'          => 'Drug Test Result',
+                        'x_ray'              => 'X-Ray Result',
                     ];
                 @endphp
-                @foreach ($employee->attachments as $key => $path)
-                    @if ($path)
+                @foreach($employee->attachments as $key => $path)
+                    @if($path)
                         <div class="col-md-4 mb-3">
                             <span class="emp-field-label">{{ $attachmentLabels[$key] ?? ucwords(str_replace('_', ' ', $key)) }}</span>
                             <div class="mt-1">
@@ -212,6 +254,7 @@
         </div>
     </div>
     @endif
+
 </div>
 <style>
 .emp-action-btn {

@@ -2,10 +2,10 @@
 <div id="skillList">
     @php
         $skills = old('special_skills', []);
-        if(empty($skills) && isset($employee) && $employee->exists) {
+        if (empty($skills) && isset($employee) && $employee->exists) {
             $skills = $employee->specialSkills->toArray();
         }
-        if(empty($skills)) {
+        if (empty($skills)) {
             $skills = [['skill_name' => '', 'proficiency' => '']];
         }
     @endphp
@@ -16,8 +16,7 @@
                 <div class="col-md-7">
                     <label class="form-label">Skill</label>
                     <input type="text" name="special_skills[{{ $i }}][skill_name]"
-                        class="form-control"
-                        placeholder="e.g. Microsoft Excel, Driving, Welding"
+                        class="form-control" placeholder="e.g. Microsoft Excel, Driving, Welding"
                         value="{{ $skill['skill_name'] ?? '' }}">
                 </div>
                 <div class="col-md-5">

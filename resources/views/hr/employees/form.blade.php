@@ -22,13 +22,13 @@
             @endif
 
             <form action="{{ $isEdit ? route('employees.update', $employee) : route('employees.store') }}"
-                method="POST" enctype="multipart/form-data">
+                method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
                 @if ($isEdit) @method('PUT') @endif
 
                 {{-- Tab nav --}}
                 <ul class="nav nav-tabs mb-4" id="employeeTabs">
-                    @foreach (['Personal Info','Employment','Government Numbers','Work Experience','Special Skills','Beneficiaries','Character References','Attachments'] as $tab)
+                    @foreach (['Personal Info','Employment','Account','Government Numbers','Work Experience','Special Skills','Beneficiaries','Character References','Attachments'] as $tab)
                         <li class="nav-item">
                             <button class="nav-link" type="button">{{ $tab }}</button>
                         </li>
@@ -39,6 +39,7 @@
                 <div class="tab-content" id="employeeTabsContent">
                     <div class="tab-pane">@include('partials.employee.personal')</div>
                     <div class="tab-pane">@include('partials.employee.employment')</div>
+                    <div class="tab-pane">@include('partials.employee.account')</div>
                     <div class="tab-pane">@include('partials.employee.government')</div>
                     <div class="tab-pane">@include('partials.employee.work_experience')</div>
                     <div class="tab-pane">@include('partials.employee.skills')</div>

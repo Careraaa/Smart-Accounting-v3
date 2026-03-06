@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     // -------------------------
-    // Multi-tab form navigation
+    // Tab navigation
     // -------------------------
     const tabs = document.querySelectorAll("#employeeTabs button");
     const tabContents = document.querySelectorAll(".tab-pane");
@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function () {
             tabContents[i].classList.toggle("show", i === index);
             tabContents[i].classList.toggle("active", i === index);
         });
-
         prevBtn.style.display = index === 0 ? "none" : "inline-block";
         nextBtn.style.display =
             index === tabs.length - 1 ? "none" : "inline-block";
@@ -24,87 +23,24 @@ document.addEventListener("DOMContentLoaded", function () {
             index === tabs.length - 1 ? "inline-block" : "none";
     }
 
-    function showFieldError(field, message) {
-        field.classList.add("is-invalid");
-        const existing =
-            field.parentNode.querySelector(".tab-invalid-feedback") ??
-            field
-                .closest(".input-group")
-                ?.querySelector(".tab-invalid-feedback");
-        if (existing) existing.remove();
-
-        const feedback = document.createElement("div");
-        feedback.classList.add("invalid-feedback", "tab-invalid-feedback");
-        feedback.textContent = message;
-
-        const parent = field.closest(".input-group") ?? field.parentNode;
-        parent.appendChild(feedback);
-    }
-
-    function validateCurrentTab() {
-        const currentPane = tabContents[currentTab];
-        const requiredFields = currentPane.querySelectorAll(
-            "input[required], select[required], textarea[required]",
-        );
-
-        let valid = true;
-        let firstInvalid = null;
-
-        requiredFields.forEach((field) => {
-            field.classList.remove("is-invalid");
-            const existing =
-                field.parentNode.querySelector(".tab-invalid-feedback") ??
-                field
-                    .closest(".input-group")
-                    ?.querySelector(".tab-invalid-feedback");
-            if (existing) existing.remove();
-
-            if (!field.value.trim()) {
-                valid = false;
-                showFieldError(field, "This field is required.");
-                if (!firstInvalid) firstInvalid = field;
-            }
-        });
-
-        // Phone format validation
-        const phoneField = currentPane.querySelector('input[name="phone"]');
-        if (phoneField && phoneField.value.trim()) {
-            const phonePattern = /^(09\d{9}|\+639\d{9})$/;
-            if (!phonePattern.test(phoneField.value.trim())) {
-                valid = false;
-                showFieldError(
-                    phoneField,
-                    "Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.",
-                );
-                if (!firstInvalid) firstInvalid = phoneField;
-            }
-        }
-
-        if (firstInvalid) {
-            firstInvalid.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-            });
-            firstInvalid.focus();
-        }
-
-        return valid;
-    }
-
     if (tabs.length && prevBtn && nextBtn && submitBtn) {
+        // Free navigation — no validation on Next/Prev/tab click
         prevBtn.addEventListener("click", function () {
-            if (currentTab > 0) currentTab--;
-            showTab(currentTab);
+            if (currentTab > 0) {
+                currentTab--;
+                showTab(currentTab);
+            }
         });
 
         nextBtn.addEventListener("click", function () {
-            if (!validateCurrentTab()) return;
-            if (currentTab < tabs.length - 1) currentTab++;
-            showTab(currentTab);
+            if (currentTab < tabs.length - 1) {
+                currentTab++;
+                showTab(currentTab);
+            }
         });
+
         tabs.forEach((tab, i) => {
             tab.addEventListener("click", function () {
-                if (i > currentTab && !validateCurrentTab()) return;
                 currentTab = i;
                 showTab(currentTab);
             });
@@ -113,58 +49,239 @@ document.addEventListener("DOMContentLoaded", function () {
         showTab(currentTab);
     }
 
-    // Clear error on input/change
+    // -------------------------
+    // Validation helpers
+    // -------------------------
+    function showFieldError(field, message) {
+        field.classList.add("is-invalid");
+        const parent = field.closest(".input-group") ?? field.parentNode;
+        const existing = parent.querySelector(".tab-invalid-feedback");
+        if (existing) existing.remove();
+        const feedback = document.createElement("div");
+        feedback.classList.add("invalid-feedback", "tab-invalid-feedback");
+        feedback.textContent = message;
+        parent.appendChild(feedback);
+    }
+
+    function clearFieldError(field) {
+        field.classList.remove("is-invalid");
+        const parent = field.closest(".input-group") ?? field.parentNode;
+        const existing = parent.querySelector(".tab-invalid-feedback");
+        if (existing) existing.remove();
+    }
+
+    // Returns index of first tab with errors, or -1 if all valid
+    function validateAllAndFindFirstError() {
+        let firstErrorTab = -1;
+        let firstErrorField = null;
+
+        tabContents.forEach((pane, paneIndex) => {
+            const requiredFields = pane.querySelectorAll(
+                "input[required], select[required], textarea[required]",
+            );
+
+            requiredFields.forEach((field) => {
+                clearFieldError(field);
+
+                let error = null;
+
+                if (!field.value.trim()) {
+                    error = "This field is required.";
+                } else if (field.name === "phone") {
+                    const phonePattern = /^(09\d{9}|\+639\d{9})$/;
+                    if (!phonePattern.test(field.value.trim())) {
+                        error =
+                            "Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.";
+                    }
+                } else if (field.type === "number") {
+                    const val = parseFloat(field.value);
+                    const min = field.hasAttribute("min")
+                        ? parseFloat(field.min)
+                        : null;
+                    if (isNaN(val)) {
+                        error = "Please enter a valid number.";
+                    } else if (min !== null && val < min) {
+                        error = `Value must be ${min} or greater.`;
+                    }
+                }
+
+                if (error) {
+                    showFieldError(field, error);
+                    if (firstErrorTab === -1) {
+                        firstErrorTab = paneIndex;
+                        firstErrorField = field;
+                    }
+                }
+            });
+        });
+
+        return { firstErrorTab, firstErrorField };
+    }
+
+    // Intercept form submit
+    const form = document
+        .querySelector("#employeeTabsContent")
+        ?.closest("form");
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            assembleAddress();
+
+            const { firstErrorTab, firstErrorField } =
+                validateAllAndFindFirstError();
+
+            if (firstErrorTab !== -1) {
+                e.preventDefault();
+
+                // Jump to the tab with the first error
+                currentTab = firstErrorTab;
+                showTab(currentTab);
+
+                // Scroll and focus the offending field
+                setTimeout(() => {
+                    firstErrorField.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                    });
+                    firstErrorField.focus();
+                }, 80);
+            }
+        });
+    }
+
+    // Clear error styling as user corrects the field
     document.addEventListener("input", function (e) {
-        if (e.target.classList.contains("is-invalid")) {
-            e.target.classList.remove("is-invalid");
-            const feedback =
-                e.target.parentNode.querySelector(".tab-invalid-feedback") ??
-                e.target
-                    .closest(".input-group")
-                    ?.querySelector(".tab-invalid-feedback");
-            if (feedback) feedback.remove();
-        }
+        if (e.target.classList.contains("is-invalid"))
+            clearFieldError(e.target);
+    });
+    document.addEventListener("change", function (e) {
+        if (e.target.classList.contains("is-invalid"))
+            clearFieldError(e.target);
     });
 
-    document.addEventListener("change", function (e) {
-        if (e.target.classList.contains("is-invalid")) {
-            e.target.classList.remove("is-invalid");
-            const feedback =
-                e.target.parentNode.querySelector(".tab-invalid-feedback") ??
-                e.target
-                    .closest(".input-group")
-                    ?.querySelector(".tab-invalid-feedback");
-            if (feedback) feedback.remove();
-        }
-    });
+    // -------------------------
+    // Username preview (create only)
+    // -------------------------
+    const firstNameField = document.getElementById("first_name");
+    const lastNameField = document.getElementById("last_name");
+    const usernamePreview = document.getElementById("usernamePreview");
+
+    function updateUsernamePreview() {
+        if (!usernamePreview) return;
+        const first = (firstNameField?.value ?? "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "");
+        const last = (lastNameField?.value ?? "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "");
+        if (first && last) usernamePreview.value = `${first}.${last}`;
+        else if (first) usernamePreview.value = first;
+        else usernamePreview.value = "";
+    }
+
+    if (firstNameField)
+        firstNameField.addEventListener("input", updateUsernamePreview);
+    if (lastNameField)
+        lastNameField.addEventListener("input", updateUsernamePreview);
+    updateUsernamePreview();
+
+    // -------------------------
+    // Spouse field — only when married
+    // -------------------------
+    const civilStatusSelect = document.getElementById("civil_status");
+    const spouseField = document.getElementById("spouse_name");
+
+    function toggleSpouseField() {
+        if (!civilStatusSelect || !spouseField) return;
+        const isMarried = civilStatusSelect.value === "married";
+        spouseField.disabled = !isMarried;
+        spouseField.classList.toggle("bg-light", !isMarried);
+        if (!isMarried) spouseField.value = "";
+    }
+
+    if (civilStatusSelect) {
+        civilStatusSelect.addEventListener("change", toggleSpouseField);
+        toggleSpouseField();
+    }
+
+    // -------------------------
+    // Address assembly
+    // -------------------------
+    function assembleAddress() {
+        const combined = document.getElementById("address_combined");
+        if (!combined) return;
+        combined.value = JSON.stringify({
+            street:
+                document.getElementById("address_street")?.value.trim() ?? "",
+            barangay:
+                document.getElementById("address_barangay")?.value.trim() ?? "",
+            city: document.getElementById("address_city")?.value.trim() ?? "",
+            province:
+                document.getElementById("address_province")?.value.trim() ?? "",
+        });
+    }
 
     // -------------------------
     // Government number toggles
     // -------------------------
     document.querySelectorAll(".gov-toggle").forEach((checkbox) => {
-        const targetId = checkbox.dataset.target;
-        const input = document.getElementById(targetId);
-
+        const input = document.getElementById(checkbox.dataset.target);
         if (!input) return;
 
-        // Set initial visual state
-        toggleGovInput(checkbox, input);
+        function toggle() {
+            input.disabled = !checkbox.checked;
+            input.classList.toggle("bg-light", !checkbox.checked);
+            if (!checkbox.checked) input.value = "";
+        }
 
-        checkbox.addEventListener("change", function () {
-            toggleGovInput(this, input);
-        });
+        toggle();
+        checkbox.addEventListener("change", toggle);
     });
 
-    function toggleGovInput(checkbox, input) {
-        if (checkbox.checked) {
-            input.disabled = false;
-            input.classList.remove("bg-light");
-        } else {
-            input.disabled = true;
-            input.value = "";
-            input.classList.add("bg-light");
-        }
+    // -------------------------
+    // Government number auto-dash formatters
+    // -------------------------
+
+    // SSS: XX-XXXXXXX-X
+    function formatSSS(raw) {
+        const d = raw.replace(/\D/g, "").slice(0, 10);
+        if (d.length <= 2) return d;
+        if (d.length <= 9) return d.slice(0, 2) + "-" + d.slice(2);
+        return d.slice(0, 2) + "-" + d.slice(2, 9) + "-" + d.slice(9);
     }
+
+    // TIN: XXX-XXX-XXX
+    function formatTIN(raw) {
+        const d = raw.replace(/\D/g, "").slice(0, 9);
+        if (d.length <= 3) return d;
+        if (d.length <= 6) return d.slice(0, 3) + "-" + d.slice(3);
+        return d.slice(0, 3) + "-" + d.slice(3, 6) + "-" + d.slice(6);
+    }
+
+    // Pag-IBIG: XXXX-XXXX-XXXX
+    function formatPagibig(raw) {
+        const d = raw.replace(/\D/g, "").slice(0, 12);
+        if (d.length <= 4) return d;
+        if (d.length <= 8) return d.slice(0, 4) + "-" + d.slice(4);
+        return d.slice(0, 4) + "-" + d.slice(4, 8) + "-" + d.slice(8);
+    }
+
+    function attachFormatter(id, formatterFn) {
+        const input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener("input", function () {
+            const pos = this.selectionStart;
+            const before = this.value.length;
+            this.value = formatterFn(this.value);
+            const diff = this.value.length - before;
+            this.setSelectionRange(pos + diff, pos + diff);
+        });
+    }
+
+    attachFormatter("sss_number", formatSSS);
+    attachFormatter("tin_number", formatTIN);
+    attachFormatter("pagibig_number", formatPagibig);
 
     // -------------------------
     // Work Experience
@@ -174,24 +291,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const experienceTemplate = document.getElementById("experienceTemplate");
 
     if (addExperienceBtn && experienceList && experienceTemplate) {
-        let experienceIndex =
-            experienceList.querySelectorAll(".experience-row").length;
-
-        addExperienceBtn.addEventListener("click", function () {
-            const html = experienceTemplate.innerHTML.replaceAll(
+        let idx = experienceList.querySelectorAll(".experience-row").length;
+        addExperienceBtn.addEventListener("click", () => {
+            const w = document.createElement("div");
+            w.innerHTML = experienceTemplate.innerHTML.replaceAll(
                 "__INDEX__",
-                experienceIndex,
+                idx++,
             );
-            const wrapper = document.createElement("div");
-            wrapper.innerHTML = html;
-            experienceList.appendChild(wrapper.firstElementChild);
-            experienceIndex++;
+            experienceList.appendChild(w.firstElementChild);
         });
-
-        experienceList.addEventListener("click", function (e) {
-            if (e.target.classList.contains("remove-experience")) {
+        experienceList.addEventListener("click", (e) => {
+            if (e.target.classList.contains("remove-experience"))
                 e.target.closest(".experience-row").remove();
-            }
         });
     }
 
@@ -203,23 +314,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const skillTemplate = document.getElementById("skillTemplate");
 
     if (addSkillBtn && skillList && skillTemplate) {
-        let skillIndex = skillList.querySelectorAll(".skill-row").length;
-
-        addSkillBtn.addEventListener("click", function () {
-            const html = skillTemplate.innerHTML.replaceAll(
+        let idx = skillList.querySelectorAll(".skill-row").length;
+        addSkillBtn.addEventListener("click", () => {
+            const w = document.createElement("div");
+            w.innerHTML = skillTemplate.innerHTML.replaceAll(
                 "__INDEX__",
-                skillIndex,
+                idx++,
             );
-            const wrapper = document.createElement("div");
-            wrapper.innerHTML = html;
-            skillList.appendChild(wrapper.firstElementChild);
-            skillIndex++;
+            skillList.appendChild(w.firstElementChild);
         });
-
-        skillList.addEventListener("click", function (e) {
-            if (e.target.classList.contains("remove-skill")) {
+        skillList.addEventListener("click", (e) => {
+            if (e.target.classList.contains("remove-skill"))
                 e.target.closest(".skill-row").remove();
-            }
         });
     }
 
@@ -231,24 +337,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const beneficiaryTemplate = document.getElementById("beneficiaryTemplate");
 
     if (addBeneficiaryBtn && beneficiaryList && beneficiaryTemplate) {
-        let beneficiaryIndex =
-            beneficiaryList.querySelectorAll(".beneficiary-row").length;
-
-        addBeneficiaryBtn.addEventListener("click", function () {
-            const html = beneficiaryTemplate.innerHTML.replaceAll(
+        let idx = beneficiaryList.querySelectorAll(".beneficiary-row").length;
+        addBeneficiaryBtn.addEventListener("click", () => {
+            const w = document.createElement("div");
+            w.innerHTML = beneficiaryTemplate.innerHTML.replaceAll(
                 "__INDEX__",
-                beneficiaryIndex,
+                idx++,
             );
-            const wrapper = document.createElement("div");
-            wrapper.innerHTML = html;
-            beneficiaryList.appendChild(wrapper.firstElementChild);
-            beneficiaryIndex++;
+            beneficiaryList.appendChild(w.firstElementChild);
         });
-
-        beneficiaryList.addEventListener("click", function (e) {
-            if (e.target.classList.contains("remove-beneficiary")) {
+        beneficiaryList.addEventListener("click", (e) => {
+            if (e.target.classList.contains("remove-beneficiary"))
                 e.target.closest(".beneficiary-row").remove();
-            }
         });
     }
 
@@ -260,24 +360,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const referenceTemplate = document.getElementById("referenceTemplate");
 
     if (addReferenceBtn && referenceList && referenceTemplate) {
-        let referenceIndex =
-            referenceList.querySelectorAll(".reference-row").length;
-
-        addReferenceBtn.addEventListener("click", function () {
-            const html = referenceTemplate.innerHTML.replaceAll(
+        let idx = referenceList.querySelectorAll(".reference-row").length;
+        addReferenceBtn.addEventListener("click", () => {
+            const w = document.createElement("div");
+            w.innerHTML = referenceTemplate.innerHTML.replaceAll(
                 "__INDEX__",
-                referenceIndex,
+                idx++,
             );
-            const wrapper = document.createElement("div");
-            wrapper.innerHTML = html;
-            referenceList.appendChild(wrapper.firstElementChild);
-            referenceIndex++;
+            referenceList.appendChild(w.firstElementChild);
         });
-
-        referenceList.addEventListener("click", function (e) {
-            if (e.target.classList.contains("remove-reference")) {
+        referenceList.addEventListener("click", (e) => {
+            if (e.target.classList.contains("remove-reference"))
                 e.target.closest(".reference-row").remove();
-            }
         });
     }
 });
