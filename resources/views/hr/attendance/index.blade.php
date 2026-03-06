@@ -48,7 +48,7 @@
                             </div>
                         </div>
                         <div class="att-token" id="token-display">——</div>
-                        <div class="att-timer" id="qr-timer">60s · refreshing soon</div>
+                        <div class="att-timer" id="qr-timer">Generating…</div>
                     </div>
                 </div>
 
@@ -65,24 +65,12 @@
                     <table class="table table-hover w-100 mb-0">
                         <thead>
                             <tr>
-                                <th>
-                                    <div class="sort-link">Employee</div>
-                                </th>
-                                <th>
-                                    <div class="sort-link">Date</div>
-                                </th>
-                                <th>
-                                    <div class="sort-link">Time In</div>
-                                </th>
-                                <th>
-                                    <div class="sort-link">Time Out</div>
-                                </th>
-                                <th class="text-center">
-                                    <div class="sort-link justify-content-center">Status</div>
-                                </th>
-                                <th class="text-center">
-                                    <div class="sort-link justify-content-center">Entry Type</div>
-                                </th>
+                                <th><div class="sort-link">Employee</div></th>
+                                <th><div class="sort-link">Date</div></th>
+                                <th><div class="sort-link">Time In</div></th>
+                                <th><div class="sort-link">Time Out</div></th>
+                                <th class="text-center"><div class="sort-link justify-content-center">Status</div></th>
+                                <th class="text-center"><div class="sort-link justify-content-center">Entry Type</div></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -112,31 +100,18 @@
                                     <td class="text-center">
                                         @php
                                             $statusStyles = [
-                                                'present' => [
-                                                    'bg' => '#f0fdf4',
-                                                    'color' => '#16a34a',
-                                                    'border' => '#bbf7d0',
-                                                ],
-                                                'late' => [
-                                                    'bg' => '#fffbeb',
-                                                    'color' => '#d97706',
-                                                    'border' => '#fde68a',
-                                                ],
-                                                'absent' => [
-                                                    'bg' => '#fff1f2',
-                                                    'color' => '#e11d48',
-                                                    'border' => '#fcd0d0',
-                                                ],
+                                                'present'     => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'border' => '#bbf7d0'],
+                                                'late'        => ['bg' => '#fffbeb', 'color' => '#d97706', 'border' => '#fde68a'],
+                                                'absent'      => ['bg' => '#fff1f2', 'color' => '#e11d48', 'border' => '#fcd0d0'],
+                                                'early_leave' => ['bg' => '#f5f3ff', 'color' => '#7c3aed', 'border' => '#ddd6fe'],
                                             ];
                                             $s = $statusStyles[$attendance->status] ?? [
-                                                'bg' => '#f4f5f7',
-                                                'color' => '#9898a8',
-                                                'border' => '#e8e8ef',
+                                                'bg' => '#f4f5f7', 'color' => '#9898a8', 'border' => '#e8e8ef',
                                             ];
                                         @endphp
                                         <span class="emp-badge"
                                             style="background:{{ $s['bg'] }}; color:{{ $s['color'] }}; border:1px solid {{ $s['border'] }};">
-                                            {{ ucfirst($attendance->status) }}
+                                            {{ ucfirst(str_replace('_', ' ', $attendance->status)) }}
                                         </span>
                                     </td>
                                     <td class="text-center">
@@ -148,8 +123,7 @@
                                         @else
                                             <span class="emp-badge"
                                                 style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">
-                                                <i class="feather-check-circle me-1" style="font-size:0.7rem;"></i>QR
-                                                Scanned
+                                                <i class="feather-check-circle me-1" style="font-size:0.7rem;"></i>QR Scanned
                                             </span>
                                         @endif
                                     </td>
@@ -168,8 +142,6 @@
 
                 @if ($attendances->hasPages())
                     <div class="d-flex justify-content-between align-items-center px-3 py-2">
-
-                        {{-- Showing Text (LEFT) --}}
                         <div class="small text-muted">
                             Showing
                             <strong>{{ $attendances->firstItem() }}</strong>
@@ -179,12 +151,9 @@
                             <strong>{{ $attendances->total() }}</strong>
                             entries
                         </div>
-
-                        {{-- Pagination Arrows (RIGHT) --}}
                         <div>
                             {{ $attendances->links('pagination::bootstrap-5') }}
                         </div>
-
                     </div>
                 @endif
 
@@ -194,15 +163,18 @@
 
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
-        let qrActive = false;
+        let qrActive           = false;
         let tokenCheckInterval = null;
-        let qrRefreshInterval = null;
-        let qrCountdown = 60;
+        let qrRefreshInterval  = null;
+        let qrCountdown        = 60;
+        let reloadPending      = false; // guard: only reload once per scan
 
+        // ── Toggle panel visibility ──────────────────────────────────────
         function toggleQRMonitor() {
             qrActive = !qrActive;
             const section = document.getElementById('qr-monitor-section');
-            const label = document.getElementById('qr-btn-label');
+            const label   = document.getElementById('qr-btn-label');
+
             if (qrActive) {
                 section.style.display = 'block';
                 label.textContent = 'Hide QR Monitor';
@@ -210,46 +182,62 @@
             } else {
                 section.style.display = 'none';
                 label.textContent = 'Show QR Monitor';
-                clearInterval(tokenCheckInterval);
-                clearInterval(qrRefreshInterval);
+                stopAll();
             }
         }
 
-        function updateQRTimer() {
-            if (qrCountdown > 0) qrCountdown--;
-            document.getElementById('qr-timer').textContent = `${qrCountdown}s · refreshing soon`;
+        function stopAll() {
+            clearInterval(tokenCheckInterval);
+            clearInterval(qrRefreshInterval);
+            tokenCheckInterval = null;
+            qrRefreshInterval  = null;
         }
 
+        // ── Generate & render a fresh QR token ───────────────────────────
         function loadQR() {
+            reloadPending = false;
+            document.getElementById('qr-timer').textContent = 'Generating…';
+
             fetch("{{ route('hr.qr.generate') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(r => r.json())
-                .then(data => {
-                    const qrDiv = document.getElementById('qrcode');
-                    qrDiv.innerHTML = '';
-                    new QRCode(qrDiv, {
-                        text: data.token,
-                        width: 200,
-                        height: 200,
-                        colorDark: '#1c1c1e',
-                        colorLight: '#ffffff',
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                    document.getElementById('token-display').textContent = data.token;
-                    qrCountdown = 60;
-                    startTokenStatusCheck();
-                    startQRRefresh();
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const qrDiv = document.getElementById('qrcode');
+                qrDiv.innerHTML = '';
+
+                new QRCode(qrDiv, {
+                    text: data.token,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#1c1c1e',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
                 });
+
+                document.getElementById('token-display').textContent = data.token;
+                qrCountdown = 60;
+
+                stopAll();
+                startQRRefresh();
+                startTokenStatusCheck();
+            })
+            .catch(() => {
+                document.getElementById('qr-timer').textContent = 'Error generating QR — retrying…';
+                setTimeout(loadQR, 4000);
+            });
         }
 
+        // ── Countdown timer that auto-refreshes QR every 60 s ───────────
         function startQRRefresh() {
-            if (qrRefreshInterval) clearInterval(qrRefreshInterval);
             qrRefreshInterval = setInterval(() => {
-                updateQRTimer();
+                if (reloadPending) return; // don't refresh mid-reload
+
+                qrCountdown--;
+                document.getElementById('qr-timer').textContent =
+                    `${qrCountdown}s · refreshing soon`;
+
                 if (qrCountdown <= 0) {
                     clearInterval(qrRefreshInterval);
                     loadQR();
@@ -257,54 +245,46 @@
             }, 1000);
         }
 
-        function checkTokenStatus() {
-            fetch("{{ route('api.qr.token-status') }}")
-                .then(r => r.json())
-                .then(data => {
-                    if (data.used) {
-                        triggerSuccess();
-                        stopTokenStatusCheck();
-                        loadQR();
-                        loadRecentScans();
-                    }
-                });
-        }
-
+        // ── Poll every 2 s to see whether the current token was scanned ──
         function startTokenStatusCheck() {
-            if (tokenCheckInterval) clearInterval(tokenCheckInterval);
             tokenCheckInterval = setInterval(checkTokenStatus, 2000);
         }
 
         function stopTokenStatusCheck() {
             clearInterval(tokenCheckInterval);
+            tokenCheckInterval = null;
         }
 
-        function triggerSuccess() {
+        function checkTokenStatus() {
+            if (reloadPending) return;
+
+            fetch("{{ route('api.qr.token-status') }}")
+                .then(r => r.json())
+                .then(data => {
+                    if (data.used) {
+                        reloadPending = true;   // prevent double-trigger
+                        stopAll();
+                        triggerSuccessThenReload();
+                    }
+                })
+                .catch(() => { /* silent – network hiccup, keep polling */ });
+        }
+
+        // ── Show green overlay for ~3 s, then reload to refresh table ────
+        function triggerSuccessThenReload() {
             const overlay = document.getElementById('scan-success');
             const wrapper = document.getElementById('qr-wrapper');
+
             wrapper.classList.add('success-active');
             overlay.classList.remove('d-none');
+
+            // Update timer label so the HR user knows what's happening
+            document.getElementById('qr-timer').textContent = 'Reloading…';
+
             setTimeout(() => {
-                overlay.classList.add('d-none');
-                wrapper.classList.remove('success-active');
-            }, 3200);
+                location.reload();
+            }, 3000);
         }
-
-        async function loadRecentScans() {
-            try {
-                const response = await fetch("{{ route('api.attendance.recent') }}", {
-                    credentials: 'include'
-                });
-                const logs = await response.json();
-                if (logs && logs.length > 0) location.reload();
-            } catch {
-                /* silent fail */
-            }
-        }
-
-        window.addEventListener('load', () => {
-            setInterval(loadRecentScans, 30000);
-        });
     </script>
 
     <style>

@@ -9,7 +9,6 @@ use App\Models\AttendanceToken;
 use App\Models\Employee;
 use App\Notifications\AttendanceNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class AttendanceController extends Controller
 {
@@ -72,11 +71,12 @@ class AttendanceController extends Controller
             return response()->json(['message' => 'User not authenticated'], 401);
         }
 
+        // Determine whether this scan is a time_in or time_out
         $last = AttendanceLog::where('user_id', $user->id)
             ->latest('logged_at')
             ->first();
 
-        $type = $last && $last->type === 'time_in' ? 'time_out' : 'time_in';
+        $type = ($last && $last->type === 'time_in') ? 'time_out' : 'time_in';
 
         AttendanceLog::create([
             'user_id'   => $user->id,
@@ -84,39 +84,50 @@ class AttendanceController extends Controller
             'logged_at' => now(),
         ]);
 
-        if ($user->employee) {
-            $today       = today();
-            $currentTime = now()->format('H:i:s');
+        // ── FIX: was using 'employee_id' which is NOT a column on the
+        //         attendance table. The model fillable + seeder both use
+        //         'user_id', so we write directly with the auth user's id. ──
+        $today       = today();
+        $currentTime = now()->format('H:i:s');
 
-            if ($type === 'time_in') {
-                Attendance::updateOrCreate(
-                    ['employee_id' => $user->employee->id, 'date' => $today],
-                    ['time_in' => $currentTime, 'status' => 'present']
-                );
-            } else {
-                $attendance = Attendance::where('employee_id', $user->employee->id)
-                    ->where('date', $today)
-                    ->first();
+        if ($type === 'time_in') {
+            Attendance::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'date'    => $today,
+                ],
+                [
+                    'time_in'   => $currentTime,
+                    'status'    => 'present',
+                    'is_manual' => false,
+                ]
+            );
+        } else {
+            $attendance = Attendance::where('user_id', $user->id)
+                ->where('date', $today)
+                ->first();
 
-                if ($attendance) {
-                    $attendance->update(['time_out' => $currentTime]);
-                }
+            if ($attendance) {
+                $attendance->update(['time_out' => $currentTime]);
             }
         }
 
         $token->update(['used' => true]);
 
-        $employeeName = $user->employee ? $user->employee->name : $user->name;
-
-        // Send notification for attendance recorded
-        if ($user->employee) {
-            AttendanceNotification::attendanceRecorded($user, $type, today());
+        // Notification — guard against missing employee relationship
+        try {
+            if ($user->employee) {
+                AttendanceNotification::attendanceRecorded($user, $type, $today);
+            }
+        } catch (\Throwable $e) {
+            // Non-critical — don't let a notification failure break the scan
+            logger()->warning('AttendanceNotification failed: ' . $e->getMessage());
         }
 
         return response()->json([
             'message'       => ucfirst(str_replace('_', ' ', $type)) . ' recorded',
             'type'          => $type,
-            'employee_name' => $employeeName,
+            'employee_name' => $user->name,
         ]);
     }
 
@@ -139,7 +150,6 @@ class AttendanceController extends Controller
         $userId = auth()->id();
         $today  = now()->toDateString();
 
-        // Fetch every log entry for today in chronological order
         $logs = AttendanceLog::where('user_id', $userId)
             ->whereDate('logged_at', $today)
             ->orderBy('logged_at')
@@ -167,7 +177,7 @@ class AttendanceController extends Controller
 
     public function getRecentAttendance()
     {
-        $recentLogs = AttendanceLog::with(['user.employee'])
+        $recentLogs = AttendanceLog::with('user')
             ->latest('logged_at')
             ->limit(20)
             ->get()
@@ -176,13 +186,11 @@ class AttendanceController extends Controller
 
                 return [
                     'id'            => $log->id,
-                    'employee_name' => $log->user->employee
-                        ? $log->user->employee->name
-                        : $log->user->name,
-                    'type'         => $log->type,
-                    'time'         => $localTime->format('g:i A'),
-                    'date'         => $localTime->format('M d, Y'),
-                    'badge_color'  => $log->type === 'time_in' ? 'success' : 'warning',
+                    'employee_name' => $log->user->name ?? 'Unknown',
+                    'type'          => $log->type,
+                    'time'          => $localTime->format('g:i A'),
+                    'date'          => $localTime->format('M d, Y'),
+                    'badge_color'   => $log->type === 'time_in' ? 'success' : 'warning',
                 ];
             });
 
@@ -218,39 +226,44 @@ class AttendanceController extends Controller
 
     public function store(Request $request)
     {
+        // ── FIX: create blade sends 'user_id' but validation was checking
+        //         'employee_id' — they must match, and the column is user_id. ──
         $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'date'        => 'required|date',
-            'time_in'     => 'nullable|date_format:H:i',
-            'time_out'    => 'nullable|date_format:H:i',
-            'status'      => 'required|in:present,absent,late,early_leave',
+            'user_id'  => 'required|exists:users,id',
+            'date'     => 'required|date',
+            'time_in'  => 'nullable|date_format:H:i',
+            'time_out' => 'nullable|date_format:H:i',
+            'status'   => 'required|in:present,absent,late,early_leave',
         ]);
-
-        $employee = Employee::find($request->employee_id);
-        $attendanceDate = \Carbon\Carbon::parse($request->date);
-
-        $employee = Employee::find($request->employee_id);
-        $attendanceDate = \Carbon\Carbon::parse($request->date);
 
         Attendance::updateOrCreate(
             [
-                'employee_id' => $request->employee_id,
-                'date'        => $request->date,
+                'user_id' => $request->user_id,
+                'date'    => $request->date,
             ],
             [
-                'time_in'   => $request->time_in,
-                'time_out'  => $request->time_out,
+                'time_in'   => $request->time_in   ? $request->time_in  . ':00' : null,
+                'time_out'  => $request->time_out  ? $request->time_out . ':00' : null,
                 'status'    => $request->status,
                 'is_manual' => true,
             ]
         );
 
-        // Send notification for manual attendance entry
-        if ($employee) {
-            AttendanceNotification::attendanceRecorded($employee, 'manual_entry', $attendanceDate);
+        // Notification — find user for the notification
+        try {
+            $user = \App\Models\User::find($request->user_id);
+            if ($user) {
+                AttendanceNotification::attendanceRecorded(
+                    $user,
+                    'manual_entry',
+                    \Carbon\Carbon::parse($request->date)
+                );
+            }
+        } catch (\Throwable $e) {
+            logger()->warning('AttendanceNotification failed: ' . $e->getMessage());
         }
 
         return redirect()->route('attendance.index')
-            ->with('success', 'Attendance record saved successfully');
+            ->with('success', 'Attendance record saved successfully.');
     }
 }
