@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->string('role')->default('employee');
             $table->string('profile_picture')->nullable();
             $table->rememberToken();
-            
+
             // Employee Information
             $table->string('first_name')->nullable();
             $table->string('middle_name')->nullable();
@@ -48,7 +48,7 @@ return new class extends Migration {
             $table->boolean('has_pagibig')->default(false);
             $table->string('signature_path')->nullable();
             $table->json('attachments')->nullable();
-            
+
             $table->timestamps();
         });
 
@@ -179,10 +179,19 @@ return new class extends Migration {
         Schema::create('employee_attachments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('attachment_type');
-            $table->string('file_path')->nullable();
-            $table->boolean('provided')->default(false);
+            $table->string('attachment_key'); // e.g. 'drivers_license'
+            $table->string('label'); // e.g. "Driver's License"
+            $table->string('file_path');
+            $table->string('original_name');
+            $table->string('mime_type')->nullable();
+            $table->unsignedBigInteger('file_size')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->text('rejection_reason')->nullable();
+            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('reviewed_at')->nullable();
+            $table->enum('uploaded_by_role', ['hr', 'employee'])->default('hr');
             $table->timestamps();
+            $table->index(['user_id', 'attachment_key']);
         });
 
         // -------------------------
@@ -322,6 +331,10 @@ return new class extends Migration {
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
             $table->string('status')->default('active');
+            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('approved_at')->nullable();
+            $table->text('rejection_reason')->nullable();
+            $table->unsignedInteger('months_paid')->default(0);
             $table->text('notes')->nullable();
             $table->timestamps();
         });
@@ -333,6 +346,10 @@ return new class extends Migration {
             $table->date('request_date')->nullable();
             $table->date('approval_date')->nullable();
             $table->string('status')->default('pending');
+            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('approved_at')->nullable();
+            $table->text('rejection_reason')->nullable();
+            $table->foreignId('deducted_payroll_id')->nullable()->constrained('payrolls')->nullOnDelete();
             $table->text('notes')->nullable();
             $table->timestamps();
         });

@@ -61,7 +61,6 @@
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Place of Birth</span><div class="emp-field-value">{{ $employee->place_of_birth ?? '—' }}</div></div>
                 <div class="col-md-4 mb-3"><span class="emp-field-label">Educational Attainment</span><div class="emp-field-value">{{ $employee->educational_attainment ?? '—' }}</div></div>
 
-                {{-- Address: split fields if JSON, plain text fallback --}}
                 @if(!empty($addr))
                     <div class="col-md-6 mb-3"><span class="emp-field-label">Street / House No.</span><div class="emp-field-value">{{ $addr['street'] ?: '—' }}</div></div>
                     <div class="col-md-6 mb-3"><span class="emp-field-label">Barangay</span><div class="emp-field-value">{{ $addr['barangay'] ?: '—' }}</div></div>
@@ -218,44 +217,121 @@
     @endif
 
     {{-- Attachments --}}
-    @if($employee->attachments && count($employee->attachments))
+    @php
+        use App\Models\EmployeeAttachment;
+        $attachmentTypes  = EmployeeAttachment::attachmentTypes();
+        $attachmentsByKey = $employee->employeeAttachments
+            ->groupBy('attachment_key')
+            ->map(fn($g) => $g->first());
+
+        $approvedCount = $attachmentsByKey->where('status', 'approved')->count();
+        $pendingCount  = $attachmentsByKey->where('status', 'pending')->count();
+        $rejectedCount = $attachmentsByKey->where('status', 'rejected')->count();
+        $missingCount  = count($attachmentTypes) - $attachmentsByKey->count();
+    @endphp
+
     <div class="card mb-3">
-        <div class="card-header"><span class="card-title mb-0">Attachments</span></div>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="card-title mb-0">Attachments</span>
+            <a href="{{ route('employees.attachments.index', $employee) }}"
+               class="emp-action-btn emp-action-edit"
+               style="width:auto;padding:0 12px;font-size:.8rem;gap:4px;">
+                <i class="feather-folder"></i> Manage
+            </a>
+        </div>
         <div class="card-body">
-            <div class="row">
-                @php
-                    $attachmentLabels = [
-                        'drivers_license'    => "Driver's License",
-                        'valid_id_1'         => 'Valid ID 1',
-                        'valid_id_2'         => 'Valid ID 2',
-                        '2x2_picture'        => '2x2 Picture',
-                        '1x1_picture'        => '1x1 Picture',
-                        'police_clearance'   => 'Police Clearance',
-                        'barangay_clearance' => 'Barangay Clearance',
-                        'house_sketch'       => 'House Sketch',
-                        'medical_cert'       => 'Medical Certificate',
-                        'drug_test'          => 'Drug Test Result',
-                        'x_ray'              => 'X-Ray Result',
-                    ];
-                @endphp
-                @foreach($employee->attachments as $key => $path)
-                    @if($path)
-                        <div class="col-md-4 mb-3">
-                            <span class="emp-field-label">{{ $attachmentLabels[$key] ?? ucwords(str_replace('_', ' ', $key)) }}</span>
-                            <div class="mt-1">
-                                <a href="{{ Storage::url($path) }}" target="_blank" class="emp-action-btn emp-action-view" style="width:auto; padding:5px 12px; border-radius:6px;">
-                                    <i class="feather-file me-1"></i> View File
-                                </a>
+
+            {{-- Status summary --}}
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="emp-badge emp-badge-active">{{ $approvedCount }} Approved</span>
+                @if($pendingCount)
+                    <span class="emp-badge emp-badge-pending">{{ $pendingCount }} Pending</span>
+                @endif
+                @if($rejectedCount)
+                    <span class="emp-badge emp-badge-inactive">{{ $rejectedCount }} Rejected</span>
+                @endif
+                @if($missingCount)
+                    <span class="emp-badge" style="background:#f4f5f7;color:#9898a8;border:1px solid #e8e8ef;">
+                        {{ $missingCount }} Missing
+                    </span>
+                @endif
+            </div>
+
+            {{-- Document grid --}}
+            <div class="row g-2">
+                @foreach($attachmentTypes as $key => $label)
+                    @php
+                        $att = $attachmentsByKey->get($key);
+                        $cardBorder = match($att?->status) {
+                            'approved' => '2px solid #16a34a',
+                            'pending'  => '2px solid #d97706',
+                            'rejected' => '2px solid #c8292a',
+                            default    => '1px dashed #d4d4de',
+                        };
+                        $cardBg = $att ? '#fff' : '#f4f5f7';
+                    @endphp
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="card text-center mb-0"
+                             style="border:{{ $cardBorder }}!important;
+                                    background:{{ $cardBg }}!important;
+                                    box-shadow:none!important;
+                                    min-height:90px;
+                                    padding:8px 6px;">
+
+                            @if($att)
+                                @if(in_array($att->mime_type, ['image/jpeg','image/png','image/gif','image/webp']))
+                                    <a href="{{ $att->url }}" target="_blank">
+                                        <img src="{{ $att->url }}"
+                                             style="width:100%;height:50px;object-fit:cover;border-radius:4px;"
+                                             alt="{{ $label }}">
+                                    </a>
+                                @else
+                                    <a href="{{ $att->url }}" target="_blank" class="text-decoration-none">
+                                        <i class="feather-file-text mt-1"
+                                           style="font-size:1.5rem;color:#9898a8;display:block;"></i>
+                                    </a>
+                                @endif
+                            @else
+                                <i class="feather-upload-cloud mt-1"
+                                   style="font-size:1.5rem;color:#adb5bd;display:block;"></i>
+                            @endif
+
+                            <div class="text-truncate px-1 mt-1 fw-medium"
+                                 title="{{ $label }}"
+                                 style="font-size:.7rem;color:#4a4a58;">
+                                {{ $label }}
                             </div>
+
+                            @if($att)
+                                @php
+                                    $badgeClass = match($att->status) {
+                                        'approved' => 'emp-badge-active',
+                                        'pending'  => 'emp-badge-pending',
+                                        'rejected' => 'emp-badge-inactive',
+                                        default    => '',
+                                    };
+                                @endphp
+                                <span class="emp-badge {{ $badgeClass }} mt-1"
+                                      style="font-size:.6rem;padding:2px 7px;">
+                                    {{ ucfirst($att->status) }}
+                                </span>
+                            @else
+                                <span class="emp-badge mt-1"
+                                      style="font-size:.6rem;padding:2px 7px;background:#f4f5f7;color:#9898a8;border:1px solid #e8e8ef;">
+                                    Missing
+                                </span>
+                            @endif
+
                         </div>
-                    @endif
+                    </div>
                 @endforeach
             </div>
+
         </div>
     </div>
-    @endif
 
 </div>
+
 <style>
 .emp-action-btn {
     height: 30px;

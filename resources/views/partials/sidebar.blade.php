@@ -8,7 +8,6 @@
                 <span class="kt-logo-full">Knights Transport</span>
                 <span class="kt-logo-mini">KT</span>
             </a>
-            </a>
         </div>
 
         {{-- ── Scrollable Nav Body ── --}}
@@ -264,6 +263,34 @@
                     </li>
                 @endif
 
+                {{-- ── Employee ── --}}
+                @if (auth()->user()->role === 'employee')
+                    <li class="nxl-item nxl-caption"><label>My Finances</label></li>
+
+                    <li class="nxl-item {{ request()->routeIs('employee.cash-advances.*') ? 'active' : '' }}">
+                        <a href="{{ route('employee.cash-advances.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-credit-card"></i></span>
+                            <span class="nxl-mtext">Cash Advances</span>
+                        </a>
+                    </li>
+
+                    <li class="nxl-item {{ request()->routeIs('employee.salary-loans.*') ? 'active' : '' }}">
+                        <a href="{{ route('employee.salary-loans.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-briefcase"></i></span>
+                            <span class="nxl-mtext">Salary Loans</span>
+                        </a>
+                    </li>
+
+                    <li class="nxl-item nxl-caption"><label>My Profile</label></li>
+
+                    <li class="nxl-item {{ request()->routeIs('employee.attachments.*') ? 'active' : '' }}">
+                        <a href="{{ route('employee.attachments.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-folder"></i></span>
+                            <span class="nxl-mtext">My Documents</span>
+                        </a>
+                    </li>
+                @endif
+
                 {{-- ── Accountant ── --}}
                 @if (auth()->user()->role === 'accountant')
                     <li class="nxl-item nxl-caption"><label>Approvals &amp; Reports</label></li>
@@ -278,6 +305,13 @@
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll-approval.index') }}">Payroll Release Approval</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('remittance-approval.index') }}">Remittance Approval</a></li>
                         </ul>
+                    </li>
+
+                    <li class="nxl-item {{ request()->routeIs('payroll.receivables.*') ? 'active' : '' }}">
+                        <a href="{{ route('payroll.receivables.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-inbox"></i></span>
+                            <span class="nxl-mtext">Receivables &amp; Loans</span>
+                        </a>
                     </li>
 
                     <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.*') ? 'active' : '' }}">

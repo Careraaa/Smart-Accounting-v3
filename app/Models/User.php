@@ -2,21 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         // Authentication fields
         'name',
@@ -50,36 +43,27 @@ class User extends Authenticatable
         'tin_number',
         'pagibig_number',
         'signature_path',
-        'attachments',
+        'attachments', // legacy JSON column — kept for backwards compat, new uploads use employee_attachments table
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
-            'date_of_birth' => 'date',
-            'date_of_hire' => 'date',
+            'password'                => 'hashed',
+            'date_of_birth'           => 'date',
+            'date_of_hire'            => 'date',
             'driver_license_validity' => 'date',
-            'attachments' => 'array',
+            'attachments'             => 'array',
         ];
     }
 
-    // Relationships
+    // ── Relationships ──────────────────────────────────────────────────
+
     public function attendanceLogs()
     {
         return $this->hasMany(AttendanceLog::class);
@@ -148,5 +132,25 @@ class User extends Authenticatable
     public function notifications()
     {
         return $this->hasMany(Notification::class, 'user_id');
+    }
+
+    // ── Attachment relationship (new employee_attachments table) ───────
+
+    public function employeeAttachments()
+    {
+        return $this->hasMany(EmployeeAttachment::class, 'user_id')
+                    ->orderBy('attachment_key')
+                    ->orderByDesc('created_at');
+    }
+
+    /**
+     * Returns the latest attachment record per key, keyed by attachment_key.
+     * Usage: $user->latestAttachments->get('drivers_license')
+     */
+    public function getLatestAttachmentsAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->employeeAttachments
+            ->groupBy('attachment_key')
+            ->map(fn($group) => $group->first());
     }
 }

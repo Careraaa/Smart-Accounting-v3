@@ -7,7 +7,7 @@
                 <span class="card-title mb-0">Create Payroll</span>
             </div>
             <div class="card-body">
-                <form action="{{ route('payroll.store') }}" method="POST">
+                <form action="{{ route('payroll.salary-computation.store') }}" method="POST">
                     @csrf
 
                     {{-- Employee --}}

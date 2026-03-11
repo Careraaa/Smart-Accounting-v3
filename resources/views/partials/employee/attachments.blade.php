@@ -1,46 +1,76 @@
-<h5 class="mb-4">Attachments</h5>
-<p class="text-muted mb-4">Upload required documents. Accepted formats: JPG, PNG, PDF. Max 5MB each.</p>
+<h5 class="mb-1">Attachments</h5>
+<p class="text-muted mb-4" style="font-size:.85rem;">
+    Accepted: JPG, PNG, PDF · Max 5MB each.
+    Files uploaded here are <strong>auto-approved</strong>.
+    Employees can upload missing docs from their portal, which require HR review.
+</p>
 
-<div class="row">
-    @php
-        $attachmentTypes = [
-            'drivers_license'     => "Driver's License",
-            'valid_id_1'          => 'Valid ID 1',
-            'valid_id_2'          => 'Valid ID 2',
-            '2x2_picture'         => '2x2 Picture',
-            '1x1_picture'         => '1x1 Picture',
-            'police_clearance'    => 'Police Clearance',
-            'barangay_clearance'  => 'Barangay Clearance',
-            'house_sketch'        => 'House Sketch',
-            'medical_cert'        => 'Medical Certificate',
-            'drug_test'           => 'Drug Test Result',
-            'x_ray'               => 'X-Ray Result',
-        ];
+@php
+    use App\Models\EmployeeAttachment;
+    $attachmentTypes = EmployeeAttachment::attachmentTypes();
+    $existingByKey   = collect();
 
-        $existingAttachments = ($employee->exists && $employee->attachments)
-            ? $employee->attachments
-            : [];
-    @endphp
+    if ($employee->exists) {
+        $existingByKey = EmployeeAttachment::where('user_id', $employee->id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy('attachment_key')
+            ->map(fn($g) => $g->first());
+    }
+@endphp
 
+<div class="row g-3">
     @foreach($attachmentTypes as $key => $label)
-        <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h6 class="card-title mb-3">{{ $label }}</h6>
-                    <input type="file"
-                        name="attachments_files[{{ $key }}]"
-                        class="form-control form-control-sm"
-                        accept=".jpg,.jpeg,.png,.pdf">
-                    @if(isset($existingAttachments[$key]))
-                        <div class="mt-2">
-                            <small class="text-muted">
-                                <i class="bi bi-paperclip"></i> Current file:
-                                <a href="{{ Storage::url($existingAttachments[$key]) }}" target="_blank">
-                                    {{ basename($existingAttachments[$key]) }}
-                                </a>
-                            </small>
+        @php
+            $existing = $existingByKey->get($key);
+            $statusBadge = match($existing?->status) {
+                'approved' => '<span class="badge bg-success ms-1">Approved</span>',
+                'pending'  => '<span class="badge bg-warning text-dark ms-1">Pending</span>',
+                'rejected' => '<span class="badge bg-danger ms-1">Rejected</span>',
+                default    => '',
+            };
+        @endphp
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100 {{ $existing ? 'border-success' : '' }}"
+                 style="{{ $existing ? 'border-width:2px!important;' : '' }}">
+                <div class="card-body pb-2">
+
+                    <div class="d-flex align-items-center mb-2">
+                        <h6 class="card-title mb-0 me-1">{{ $label }}</h6>
+                        {!! $statusBadge !!}
+                    </div>
+
+                    @if($existing)
+                        <div class="mb-2">
+                            @if($existing->is_image)
+                                <img src="{{ $existing->url }}" alt="{{ $label }}"
+                                     class="img-fluid rounded"
+                                     style="max-height:80px;object-fit:cover;">
+                            @else
+                                <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                                    <i class="feather-file text-muted"></i>
+                                    <a href="{{ $existing->url }}" target="_blank"
+                                       class="small text-truncate">{{ $existing->original_name }}</a>
+                                </div>
+                            @endif
+                            <div class="text-muted mt-1" style="font-size:.7rem;">
+                                {{ $existing->created_at->diffForHumans() }} · {{ $existing->file_size_human }}
+                            </div>
                         </div>
                     @endif
+
+                    <input type="file"
+                           name="attachments_files[{{ $key }}]"
+                           class="form-control form-control-sm"
+                           accept=".jpg,.jpeg,.png,.pdf">
+
+                    @if($existing)
+                        <div class="text-muted mt-1" style="font-size:.7rem;">
+                            <i class="feather-info" style="font-size:.7rem;"></i>
+                            Selecting a file will replace the current one.
+                        </div>
+                    @endif
+
                 </div>
             </div>
         </div>

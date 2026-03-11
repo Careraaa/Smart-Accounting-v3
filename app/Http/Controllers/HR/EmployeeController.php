@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\EmployeeAttachment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -99,7 +100,14 @@ class EmployeeController extends Controller
 
     public function show(User $employee)
     {
-        $employee->load(['workExperiences', 'specialSkills', 'beneficiaries', 'charRefs']);
+        $employee->load([
+            'workExperiences',
+            'specialSkills',
+            'beneficiaries',
+            'charRefs',
+            'employeeAttachments',
+        ]);
+
         return view('hr.employees.show', compact('employee'));
     }
 
@@ -167,6 +175,13 @@ class EmployeeController extends Controller
 
     public function destroy(User $employee)
     {
+        // Delete files from the new employee_attachments table
+        foreach ($employee->employeeAttachments as $attachment) {
+            Storage::disk('public')->delete($attachment->file_path);
+        }
+        $employee->employeeAttachments()->delete();
+
+        // Also clean up any legacy JSON attachments
         if ($employee->attachments) {
             foreach ($employee->attachments as $path) {
                 if ($path) Storage::disk('public')->delete($path);
@@ -182,18 +197,14 @@ class EmployeeController extends Controller
         return redirect()->route('employees.index')->with('success', 'Employee deleted successfully.');
     }
 
-    // -------------------------
-    // Private helpers
-    // -------------------------
+    // ── Private helpers ────────────────────────────────────────────────
 
     private function assembleAddress(Request $request): string
     {
-        // JS sends address as hidden JSON field; use it if present
         if ($request->filled('address') && str_starts_with(trim($request->input('address')), '{')) {
             return $request->input('address');
         }
 
-        // Fallback: build from individual fields
         return json_encode([
             'street'   => $request->input('address_street',   ''),
             'barangay' => $request->input('address_barangay', ''),
@@ -202,23 +213,25 @@ class EmployeeController extends Controller
         ]);
     }
 
-    private function handleAttachments(Request $request, User $employee)
+    private function handleAttachments(Request $request, User $employee): void
     {
-        $attachments = $employee->attachments ?? [];
-
-        if ($request->hasFile('attachments_files')) {
-            foreach ($request->file('attachments_files') as $key => $file) {
-                if (isset($attachments[$key])) {
-                    Storage::disk('public')->delete($attachments[$key]);
-                }
-                $attachments[$key] = $file->store('employees/attachments/' . $employee->id, 'public');
-            }
+        if (! $request->hasFile('attachments_files')) {
+            return;
         }
 
-        $employee->update(['attachments' => $attachments]);
+        $validKeys = EmployeeAttachment::attachmentTypes();
+
+        foreach ($request->file('attachments_files') as $key => $file) {
+            if (! array_key_exists($key, $validKeys)) {
+                continue;
+            }
+
+            // HR uploads are auto-approved; store via the shared helper
+            EmployeeAttachmentController::saveAttachment($file, $employee, $key, 'hr');
+        }
     }
 
-    private function handleRelations(Request $request, User $employee)
+    private function handleRelations(Request $request, User $employee): void
     {
         if ($request->work_experiences) {
             foreach ($request->work_experiences as $we) {
@@ -242,7 +255,7 @@ class EmployeeController extends Controller
         }
     }
 
-    private function normalizePhone($phone)
+    private function normalizePhone($phone): string
     {
         $phone = preg_replace('/[^0-9+]/', '', $phone);
         if (str_starts_with($phone, '+63')) {

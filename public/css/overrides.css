@@ -1625,3 +1625,11 @@ hr {
     color: #0284c7;
     border: 1px solid #bae6fd;
 }
+
+/* Fix modal backdrop blue tint */
+.modal-backdrop {
+    background-color: #1c1c1e !important;
+}
+.modal-backdrop.show {
+    opacity: 0.45 !important;
+}

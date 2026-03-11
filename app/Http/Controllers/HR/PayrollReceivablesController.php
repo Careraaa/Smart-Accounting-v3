@@ -4,96 +4,78 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payroll;
+use App\Models\CashAdvance;
+use App\Models\SalaryLoan;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class PayrollReceivablesController extends Controller
 {
     public function index(Request $request)
     {
-        $status = $request->get('status', 'approved');
-        $search = $request->get('search');
-        $periodFilter = $request->get('period');
+        $tab = $request->get('tab', 'payroll');
 
-        $query = Payroll::with(['employee', 'allowances', 'deductions', 'approvedBy'])->whereIn('status', ['approved', 'paid']);
+        $payrolls     = collect();
+        $cashAdvances = collect();
+        $salaryLoans  = collect();
 
-        // Filter by status tab
-        if ($status === 'paid') {
-            $query->where('status', 'paid');
-        } elseif ($status === 'approved') {
-            $query->where('status', 'approved');
+        if ($tab === 'payroll') {
+            $payrolls = Payroll::with('user')
+                ->whereIn('status', ['approved', 'paid'])
+                ->orderBy('payroll_period_start', 'desc')
+                ->paginate(15)
+                ->withQueryString();
         }
 
-        // Search by employee name
-        if ($search) {
-            $query->whereHas('employee', function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")->orWhere('last_name', 'like', "%{$search}%");
-            });
+        if ($tab === 'cash_advances') {
+            $cashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(15)
+                ->withQueryString();
         }
 
-        // Filter by period
-        if ($periodFilter) {
-            $query->where(function ($q) use ($periodFilter) {
-                $q->whereYear('payroll_period_start', Carbon::parse($periodFilter)->year)->whereMonth('payroll_period_start', Carbon::parse($periodFilter)->month);
-            });
+        if ($tab === 'salary_loans') {
+            $salaryLoans = SalaryLoan::with('user')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15)
+                ->withQueryString();
         }
 
-        $payrolls = $query->orderBy('payroll_period_start', 'desc')->paginate(15);
-
-        // Summary stats
-        $totalReceivable = Payroll::where('status', 'approved')
-            ->with(['allowances', 'deductions'])
-            ->get()
-            ->sum(fn($p) => $p->net_pay);
-
-        $approvedCount = Payroll::where('status', 'approved')->count();
-        $paidCount = Payroll::where('status', 'paid')->count();
-        $paidThisMonth = Payroll::where('status', 'paid')->whereMonth('payment_date', now()->month)->whereYear('payment_date', now()->year)->count();
-
-        return view('hr.payroll.receivables.index', compact('payrolls', 'totalReceivable', 'approvedCount', 'paidCount', 'paidThisMonth', 'status', 'search', 'periodFilter'));
+        return view('hr.payroll.receivables.index', compact(
+            'tab', 'payrolls', 'cashAdvances', 'salaryLoans'
+        ));
     }
 
     public function markAsPaid(Request $request, Payroll $payroll)
     {
         $request->validate([
             'payment_date' => 'required|date',
-            'payment_method' => 'required|string|in:cash,bank_transfer,check',
         ]);
 
-        if ($payroll->status !== 'approved') {
-            return redirect()
-                ->back()
-                ->withErrors(['error' => 'Only approved payrolls can be marked as paid.']);
-        }
-
         $payroll->update([
-            'status' => 'paid',
+            'status'       => 'paid',
             'payment_date' => $request->payment_date,
         ]);
 
-        return redirect()
-            ->route('payroll.receivables.index')
-            ->with('success', "Payroll for {$payroll->employee->first_name} {$payroll->employee->last_name} marked as paid.");
+        return redirect()->route('payroll.receivables.index', ['tab' => 'payroll'])
+            ->with('success', 'Payroll marked as paid.');
     }
 
     public function markBatchPaid(Request $request)
     {
         $request->validate([
-            'payroll_ids' => 'required|array',
-            'payroll_ids.*' => 'exists:payrolls,id',
-            'payment_date' => 'required|date',
-            'payment_method' => 'required|string|in:cash,bank_transfer,check',
+            'payroll_ids'   => 'required|array',
+            'payroll_ids.*' => 'integer|exists:payrolls,id',
+            'payment_date'  => 'required|date',
         ]);
 
-        $count = Payroll::whereIn('id', $request->payroll_ids)
+        Payroll::whereIn('id', $request->payroll_ids)
             ->where('status', 'approved')
             ->update([
-                'status' => 'paid',
+                'status'       => 'paid',
                 'payment_date' => $request->payment_date,
             ]);
 
-        return redirect()
-            ->route('payroll.receivables.index')
-            ->with('success', "{$count} payroll(s) marked as paid.");
+        return redirect()->route('payroll.receivables.index', ['tab' => 'payroll'])
+            ->with('success', 'Selected payrolls marked as paid.');
     }
 }

@@ -17,6 +17,7 @@ class Payroll extends Model
         'payroll_period_end',
         'status',
         'payment_date',
+        'payment_method',
         'approved_by',
         'total_allowances',
         'total_deductions',
@@ -35,14 +36,20 @@ class Payroll extends Model
      |  RELATIONSHIPS
      ====================== */
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Alias so existing code using ->employee still works
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function approvedBy()
     {
-        return $this->belongsTo(Employee::class, 'approved_by');
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function deductions()
@@ -57,13 +64,10 @@ class Payroll extends Model
 
     public function attendances()
     {
-        return $this->employee->attendances()
+        return $this->user->attendances()
             ->whereBetween('date', [$this->payroll_period_start, $this->payroll_period_end]);
     }
 
-    /**
-     * All overtime/undertime records for this payroll's employee and period
-     */
     public function overtimeUndertimes()
     {
         return OvertimeUndertime::where('user_id', $this->user_id)
@@ -77,12 +81,9 @@ class Payroll extends Model
 
     public function getPerDayRateAttribute()
     {
-        return $this->employee->salary_rate ?? 0;
+        return $this->user->salary_rate ?? 0;
     }
 
-    /**
-     * Hourly rate derived from daily rate (assume 8-hour workday)
-     */
     public function getHourlyRateAttribute()
     {
         return $this->per_day_rate / 8;
@@ -96,9 +97,6 @@ class Payroll extends Model
         return $this->calculateBasicSalaryFromAttendance();
     }
 
-    /**
-     * Total overtime pay: flat hourly rate × OT hours (approved only)
-     */
     public function getOvertimePayAttribute()
     {
         $totalOTHours = OvertimeUndertime::where('user_id', $this->user_id)
@@ -110,9 +108,6 @@ class Payroll extends Model
         return round($this->hourly_rate * $totalOTHours, 2);
     }
 
-    /**
-     * Total undertime deduction: flat hourly rate × undertime hours (approved only)
-     */
     public function getUndertimeDeductionAttribute()
     {
         $totalUTHours = OvertimeUndertime::where('user_id', $this->user_id)
@@ -124,17 +119,11 @@ class Payroll extends Model
         return round($this->hourly_rate * $totalUTHours, 2);
     }
 
-    /**
-     * Gross Pay = Basic Salary + Allowances + Overtime Pay
-     */
     public function getGrossPayAttribute()
     {
         return $this->basic_salary + $this->total_allowances + $this->overtime_pay;
     }
 
-    /**
-     * Net Pay = Gross Pay - Total Deductions (which already includes undertime)
-     */
     public function getNetPayAttribute()
     {
         return $this->gross_pay - $this->total_deductions;
@@ -158,7 +147,7 @@ class Payroll extends Model
     {
         $attendanceService = new AttendanceService();
         return $attendanceService->calculateBasicSalary(
-            $this->employee,
+            $this->user,
             $this->payroll_period_start,
             $this->payroll_period_end
         );
@@ -186,16 +175,10 @@ class Payroll extends Model
 
     public function recalculateFromAttendance()
     {
-        $attendanceService = new AttendanceService();
-
-        $daysWorked  = $this->getDaysWorked();
-        $hoursWorked = $this->getHoursWorked();
-        $basicSalary = $this->calculateBasicSalaryFromAttendance();
-
         $this->update([
-            'days_worked'  => $daysWorked,
-            'hours_worked' => $hoursWorked,
-            'basic_salary' => $basicSalary,
+            'days_worked'  => $this->getDaysWorked(),
+            'hours_worked' => $this->getHoursWorked(),
+            'basic_salary' => $this->calculateBasicSalaryFromAttendance(),
         ]);
 
         return true;
@@ -218,9 +201,6 @@ class Payroll extends Model
             ->toArray();
     }
 
-    /**
-     * Get overtime/undertime records for this payroll period as a collection
-     */
     public function getOvertimeUndertimeBreakdown()
     {
         return OvertimeUndertime::where('user_id', $this->user_id)

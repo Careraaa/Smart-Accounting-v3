@@ -1,12 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // --- Payroll inputs ---
     const employeeSelect = document.getElementById("user_id");
     const basicSalaryDisplay = document.getElementById("basic_salary_display");
     const basicSalaryInput = document.getElementById("basic_salary_input");
     const netSalaryDisplay = document.getElementById("net_salary_display");
     const statutoryDisplay = document.getElementById("statutory_display");
 
-    // Attendance fields
     const daysWorkedDisplay = document.getElementById("days_worked_display");
     const hoursWorkedDisplay = document.getElementById("hours_worked_display");
     const presentDaysDisplay = document.getElementById("present_days_display");
@@ -14,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const periodStartInput = document.getElementById("payroll_period_start");
     const periodEndInput = document.getElementById("payroll_period_end");
 
-    // OT/UT fields
     const otHoursDisplay = document.getElementById("ot_hours_display");
     const otPayDisplay = document.getElementById("ot_pay_display");
     const utHoursDisplay = document.getElementById("ut_hours_display");
@@ -34,13 +31,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let allowances = window.initialAllowances || [];
     let deductions = window.initialDeductions || [];
 
-    // Tracks auto-injected OT/UT items so we can replace them on recalc
     let autoOvertimePay = 0;
     let autoUndertimeDeduct = 0;
     let autoOTHours = 0;
     let autoUTHours = 0;
 
-    // --- Fetch attendance + OT/UT data from API ---
+    // ── Fetch attendance + OT/UT + cash advances + loans ──────────────
     async function calculateFromAttendance() {
         const employeeId = employeeSelect.value;
         const periodStart = periodStartInput.value;
@@ -49,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!employeeId || !periodStart || !periodEnd) {
             resetAttendanceFields();
             resetOTUTFields();
+            syncAutoDeductions([], []);
             updateSalary();
             return;
         }
@@ -59,23 +56,20 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
             if (!response.ok) {
-                console.error(
-                    "API response not OK, falling back to manual calculation",
-                );
                 calculateAttendanceManual(employeeId, periodStart, periodEnd);
                 return;
             }
 
             const data = await response.json();
 
-            // --- Attendance fields ---
+            // Attendance
             daysWorkedDisplay.innerText = data.present_days || 0;
             hoursWorkedDisplay.innerText = parseFloat(
                 data.total_hours_worked || 0,
             ).toFixed(2);
             presentDaysDisplay.innerText = data.present_days || 0;
 
-            // --- Basic salary ---
+            // Basic salary
             const selectedOption =
                 employeeSelect.options[employeeSelect.selectedIndex];
             const salaryRate = parseFloat(
@@ -87,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
             basicSalaryInput.value = basicSalary.toFixed(2);
             basicSalaryHint.innerText = `(${data.present_days} days worked)`;
 
-            // --- OT/UT fields ---
+            // OT/UT
             autoOTHours = parseFloat(data.overtime_hours || 0);
             autoOvertimePay = parseFloat(data.overtime_pay || 0);
             autoUTHours = parseFloat(data.undertime_hours || 0);
@@ -102,25 +96,34 @@ document.addEventListener("DOMContentLoaded", function () {
             if (utDeductionDisplay)
                 utDeductionDisplay.innerText = `₱${autoUndertimeDeduct.toFixed(2)}`;
 
-            // Inject OT/UT into allowances/deductions arrays (replacing previous auto entries)
-            syncAutoOTUT();
+            // Cash advances + loans from API
+            const cashAdvances = data.cash_advances || [];
+            const salaryLoans = data.salary_loans || [];
 
-            // Recompute statutory with updated basic salary
+            // ── FIX: sync auto deductions FIRST (OT/UT/CA/Loans) ──────────
+            syncAutoDeductions(cashAdvances, salaryLoans);
+
+            // ── FIX: then compute statutory WITHOUT wiping auto entries ────
             const hasSSS = selectedOption?.dataset.hasSss === "1";
             const hasPagibig = selectedOption?.dataset.hasPagibig === "1";
             computeStatutoryDeductions(basicSalary, hasSSS, hasPagibig);
 
-            updateSalary();
+            // updateSalary is called inside computeStatutoryDeductions already
         } catch (error) {
             console.error("Error fetching attendance:", error);
             calculateAttendanceManual(employeeId, periodStart, periodEnd);
         }
     }
 
-    // --- Inject/replace OT as allowance and UT as deduction automatically ---
-    function syncAutoOTUT() {
-        // Remove previous auto OT allowance
+    // ── Sync OT/UT + cash advance + loan into deductions/allowances ───
+    function syncAutoDeductions(cashAdvances, salaryLoans) {
+        // Remove all auto entries but keep manual and statutory entries
         allowances = allowances.filter((a) => !a.auto_ot);
+        deductions = deductions.filter(
+            (d) => !d.auto_ut && !d.auto_ca && !d.auto_loan,
+        );
+
+        // OT → allowance
         if (autoOvertimePay > 0) {
             allowances.push({
                 name: `Overtime Pay (${autoOTHours.toFixed(2)} hrs)`,
@@ -129,8 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // Remove previous auto UT deduction
-        deductions = deductions.filter((d) => !d.auto_ut);
+        // UT → deduction
         if (autoUndertimeDeduct > 0) {
             deductions.push({
                 name: `Undertime Deduction (${autoUTHours.toFixed(2)} hrs)`,
@@ -140,11 +142,37 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
+        // Cash advances → deduction (one per approved advance)
+        cashAdvances.forEach((ca) => {
+            deductions.push({
+                name: `Cash Advance${ca.request_date ? " (requested " + ca.request_date + ")" : ""}`,
+                amount: ca.amount,
+                auto_ca: true,
+                statutory: false,
+            });
+        });
+
+        // Salary loans → deduction (monthly instalment)
+        salaryLoans.forEach((loan) => {
+            const instalment = Math.min(
+                loan.monthly_deduction,
+                loan.remaining_balance,
+            );
+            deductions.push({
+                name: `Salary Loan (₱${loan.remaining_balance.toFixed(2)} remaining)`,
+                amount: instalment,
+                auto_loan: true,
+                statutory: false,
+            });
+        });
+
+        // ── FIX: render lists here so CA/Loans are visible immediately ──
         renderList(allowances, allowanceList, "allowance");
         renderList(deductions, deductionList, "deduction");
+        updateSalary();
     }
 
-    // --- Fallback: manual calculation without API ---
+    // ── Fallback: manual calculation ──────────────────────────────────
     function calculateAttendanceManual(employeeId, periodStart, periodEnd) {
         const start = new Date(periodStart);
         const end = new Date(periodEnd);
@@ -164,14 +192,12 @@ document.addEventListener("DOMContentLoaded", function () {
         basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
         basicSalaryInput.value = basicSalary.toFixed(2);
 
-        // OT/UT cannot be fetched in fallback — reset to zero
         resetOTUTFields();
-        syncAutoOTUT();
-
+        syncAutoDeductions([], []);
         updateSalary();
     }
 
-    // --- Reset helpers ---
+    // ── Reset helpers ─────────────────────────────────────────────────
     function resetAttendanceFields() {
         daysWorkedDisplay.innerText = "0";
         hoursWorkedDisplay.innerText = "0.00";
@@ -187,14 +213,13 @@ document.addEventListener("DOMContentLoaded", function () {
         autoOvertimePay = 0;
         autoUTHours = 0;
         autoUndertimeDeduct = 0;
-
         if (otHoursDisplay) otHoursDisplay.innerText = "0.00";
         if (otPayDisplay) otPayDisplay.innerText = "₱0.00";
         if (utHoursDisplay) utHoursDisplay.innerText = "0.00";
         if (utDeductionDisplay) utDeductionDisplay.innerText = "₱0.00";
     }
 
-    // --- Net salary update ---
+    // ── Net salary ────────────────────────────────────────────────────
     function updateSalary() {
         const basicSalary = parseFloat(basicSalaryInput.value || 0);
         const totalAllowances = allowances.reduce(
@@ -215,9 +240,9 @@ document.addEventListener("DOMContentLoaded", function () {
         netSalaryDisplay.innerText = `₱${netSalary.toFixed(2)}`;
     }
 
-    // --- Statutory deductions ---
+    // ── Statutory deductions ──────────────────────────────────────────
+    // ── FIX: only wipe statutory entries, NOT auto_ca / auto_loan ────
     function computeStatutoryDeductions(basicSalary, hasSSS, hasPagibig) {
-        // Remove old statutory entries but keep auto OT/UT and manual entries
         deductions = deductions.filter((d) => !d.statutory);
 
         const monthlySalary = basicSalary * 2;
@@ -274,7 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
         updateSalary();
     }
 
-    // --- Render list ---
+    // ── Render list ───────────────────────────────────────────────────
     function renderList(list, container, type) {
         container.innerHTML = "";
         const hiddenContainer = document.getElementById(
@@ -283,20 +308,34 @@ document.addEventListener("DOMContentLoaded", function () {
         hiddenContainer.innerHTML = "";
 
         list.forEach((item, index) => {
-            const isLocked = item.statutory || item.auto_ot || item.auto_ut;
+            const isLocked =
+                item.statutory ||
+                item.auto_ot ||
+                item.auto_ut ||
+                item.auto_ca ||
+                item.auto_loan;
+
             const badge = item.statutory
                 ? `<span class="badge bg-secondary ms-2">Statutory</span>`
                 : item.auto_ot
                   ? `<span class="badge ms-2" style="background:#dcfce7;color:#16a34a;">Auto • OT</span>`
                   : item.auto_ut
                     ? `<span class="badge ms-2" style="background:#fff1f2;color:#e11d48;">Auto • UT</span>`
-                    : "";
+                    : item.auto_ca
+                      ? `<span class="badge ms-2" style="background:#fef3c7;color:#d97706;">Auto • Cash Advance</span>`
+                      : item.auto_loan
+                        ? `<span class="badge ms-2" style="background:#ede9fe;color:#7c3aed;">Auto • Loan</span>`
+                        : "";
 
             const amountColor = item.auto_ot
                 ? "color:#16a34a;"
                 : item.auto_ut
                   ? "color:#e11d48;"
-                  : "";
+                  : item.auto_ca
+                    ? "color:#d97706;"
+                    : item.auto_loan
+                      ? "color:#7c3aed;"
+                      : "";
 
             container.innerHTML += `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -320,7 +359,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // --- Add / Remove ---
+    // ── Add / Remove ──────────────────────────────────────────────────
     window.addAllowance = function () {
         const name = document.getElementById("allowance_name").value.trim();
         const amount = parseFloat(
@@ -330,7 +369,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         allowances.push({ name, amount });
         renderList(allowances, allowanceList, "allowance");
-
         document.getElementById("allowance_name").value = "";
         document.getElementById("allowance_amount").value = "";
         updateSalary();
@@ -345,7 +383,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         deductions.push({ name, amount, statutory: false });
         renderList(deductions, deductionList, "deduction");
-
         document.getElementById("deduction_name").value = "";
         document.getElementById("deduction_amount").value = "";
         updateSalary();
@@ -362,20 +399,12 @@ document.addEventListener("DOMContentLoaded", function () {
         updateSalary();
     };
 
-    // --- Event listeners ---
-    employeeSelect.addEventListener("change", function () {
-        calculateFromAttendance();
-    });
+    // ── Event listeners ───────────────────────────────────────────────
+    employeeSelect.addEventListener("change", calculateFromAttendance);
+    periodStartInput.addEventListener("change", calculateFromAttendance);
+    periodEndInput.addEventListener("change", calculateFromAttendance);
 
-    periodStartInput.addEventListener("change", function () {
-        calculateFromAttendance();
-    });
-
-    periodEndInput.addEventListener("change", function () {
-        calculateFromAttendance();
-    });
-
-    // --- Initialize ---
+    // ── Init ──────────────────────────────────────────────────────────
     renderList(allowances, allowanceList, "allowance");
     renderList(deductions, deductionList, "deduction");
     updateSalary();
