@@ -41,10 +41,9 @@
                     <label class="form-check-label" for="remember"
                         style="font-size:0.815rem; color:#9898a8;">Remember me</label>
                 </div>
-                @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="link-muted"
-                        style="font-size:0.815rem;">Forgot password?</a>
-                @endif
+                <small style="font-size:0.815rem; color:#9898a8; margin-top:5px; display:block;">
+                    Forgot your password? Contact HR for assistance.
+                </small>
             </div>
 
             <button type="submit" class="btn-auth">Sign In</button>

@@ -26,6 +26,6 @@
     </form>
 
     <div class="auth-footer-text">
-        Need to reset? <a href="{{ route('password.request') }}">Reset Password</a>
+        Need to reset? Contact HR for password assistance.
     </div>
 @endsection
