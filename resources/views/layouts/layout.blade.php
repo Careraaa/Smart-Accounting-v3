@@ -53,48 +53,66 @@
     <script src="{{ asset('js/template/dashboard-init.min.js') }}"></script>
     <script src="{{ asset('js/template/theme-customizer-init.min.js') }}"></script>
 
-    {{-- Mobile Menu Handler --}}
+    {{-- Mobile Sidebar Handler --}}
     <script>
-        const mobileCollapse = document.getElementById('mobile-collapse');
-        const navigation = document.querySelector('.nxl-navigation');
-        const body = document.body;
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('mobile-collapse');
+            const nav = document.querySelector('.nxl-navigation');
+            const closeBtn = document.querySelector('.kt-mob-close');
 
-        if (mobileCollapse && navigation) {
-            mobileCollapse.addEventListener('click', function(e) {
+            if (!toggle || !nav) return;
+
+            // Open/close on hamburger click
+            toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                navigation.classList.toggle('active');
-                body.classList.toggle('sidebar-open');
+                nav.classList.toggle('active');
+                document.body.classList.toggle('sidebar-open', nav.classList.contains('active'));
             });
 
-            const navLinks = navigation.querySelectorAll('a.nxl-link');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    const parent = this.closest('.nxl-hasmenu');
-                    if (parent && this.getAttribute('href') === 'javascript:void(0);') return;
-                    if (window.innerWidth < 1200) {
-                        navigation.classList.remove('active');
-                        body.classList.remove('sidebar-open');
-                    }
+            // Close on close button click
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    nav.classList.remove('active', 'mob-navigation-active');
+                    document.body.classList.remove('sidebar-open');
                 });
-            });
+            }
 
-            document.addEventListener('click', function(e) {
-                if (window.innerWidth < 1200 && body.classList.contains('sidebar-open')) {
-                    if (!navigation.contains(e.target) && !mobileCollapse.contains(e.target)) {
-                        navigation.classList.remove('active');
-                        body.classList.remove('sidebar-open');
-                    }
+            // Close on backdrop click (outside nav/toggle)
+            document.addEventListener('click', function (e) {
+                if (window.innerWidth >= 1199) return;
+                if (!nav.classList.contains('active') && !nav.classList.contains('mob-navigation-active')) return;
+
+                const isClickOnNav = nav.contains(e.target);
+                const isClickOnToggle = toggle.contains(e.target);
+
+                if (!isClickOnNav && !isClickOnToggle) {
+                    nav.classList.remove('active', 'mob-navigation-active'); // critical fix
+                    document.body.classList.remove('sidebar-open');
+                }
+            }, true);
+
+            // Close on nav link click (except submenu toggles)
+            nav.addEventListener('click', function (e) {
+                const link = e.target.closest('a.nxl-link');
+                if (!link) return;
+                if (link.getAttribute('href') === 'javascript:void(0);') return;
+
+                if (window.innerWidth < 1200) {
+                    nav.classList.remove('active', 'mob-navigation-active');
+                    document.body.classList.remove('sidebar-open');
                 }
             });
 
-            window.addEventListener('resize', function() {
+            // Reset on resize
+            window.addEventListener('resize', function () {
                 if (window.innerWidth >= 1200) {
-                    navigation.classList.remove('active');
-                    body.classList.remove('sidebar-open');
+                    nav.classList.remove('active', 'mob-navigation-active');
+                    document.body.classList.remove('sidebar-open');
                 }
             });
-        }
+        });
     </script>
 
     {{-- Page-specific scripts --}}
