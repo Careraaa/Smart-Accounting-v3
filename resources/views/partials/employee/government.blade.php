@@ -1,10 +1,13 @@
 <h5 class="mb-4">Government Numbers</h5>
 
+@php $readOnly = $readOnly ?? false; @endphp
+
 <div class="row">
     <div class="col-md-4 mb-3">
         <div class="form-check mb-2">
             <input type="checkbox" name="has_sss" id="has_sss" class="form-check-input gov-toggle" data-target="sss_number"
-                {{ old('has_sss', $employee->has_sss ?? false) ? 'checked' : '' }}>
+                {{ old('has_sss', $employee->has_sss ?? false) ? 'checked' : '' }}
+                {{ $readOnly ? 'disabled' : '' }}>
             <label class="form-check-label fw-semibold" for="has_sss">Enrolled in SSS</label>
         </div>
         {{-- Format: XX-XXXXXXX-X (12 chars) --}}
@@ -12,12 +15,14 @@
             class="form-control" placeholder="XX-XXXXXXX-X"
             maxlength="12" inputmode="numeric"
             value="{{ old('sss_number', $employee->sss_number ?? '') }}"
-            {{ old('has_sss', $employee->has_sss ?? false) ? '' : 'disabled' }}>
+            {{ old('has_sss', $employee->has_sss ?? false) ? '' : 'disabled' }}
+            {{ $readOnly ? 'readonly' : '' }}>
     </div>
     <div class="col-md-4 mb-3">
         <div class="form-check mb-2">
             <input type="checkbox" name="has_tin" id="has_tin" class="form-check-input gov-toggle"
-                data-target="tin_number" {{ old('has_tin', $employee->has_tin ?? false) ? 'checked' : '' }}>
+                data-target="tin_number" {{ old('has_tin', $employee->has_tin ?? false) ? 'checked' : '' }}
+                {{ $readOnly ? 'disabled' : '' }}>
             <label class="form-check-label fw-semibold" for="has_tin">Has TIN</label>
         </div>
         {{-- Format: XXX-XXX-XXX (11 chars) --}}
@@ -25,12 +30,14 @@
             class="form-control" placeholder="XXX-XXX-XXX"
             maxlength="11" inputmode="numeric"
             value="{{ old('tin_number', $employee->tin_number ?? '') }}"
-            {{ old('has_tin', $employee->has_tin ?? false) ? '' : 'disabled' }}>
+            {{ old('has_tin', $employee->has_tin ?? false) ? '' : 'disabled' }}
+            {{ $readOnly ? 'readonly' : '' }}>
     </div>
     <div class="col-md-4 mb-3">
         <div class="form-check mb-2">
             <input type="checkbox" name="has_pagibig" id="has_pagibig" class="form-check-input gov-toggle"
-                data-target="pagibig_number" {{ old('has_pagibig', $employee->has_pagibig ?? false) ? 'checked' : '' }}>
+                data-target="pagibig_number" {{ old('has_pagibig', $employee->has_pagibig ?? false) ? 'checked' : '' }}
+                {{ $readOnly ? 'disabled' : '' }}>
             <label class="form-check-label fw-semibold" for="has_pagibig">Enrolled in Pag-IBIG</label>
         </div>
         {{-- Format: XXXX-XXXX-XXXX (14 chars) --}}
@@ -38,6 +45,14 @@
             class="form-control" placeholder="XXXX-XXXX-XXXX"
             maxlength="14" inputmode="numeric"
             value="{{ old('pagibig_number', $employee->pagibig_number ?? '') }}"
-            {{ old('has_pagibig', $employee->has_pagibig ?? false) ? '' : 'disabled' }}>
+            {{ old('has_pagibig', $employee->has_pagibig ?? false) ? '' : 'disabled' }}
+            {{ $readOnly ? 'readonly' : '' }}>
     </div>
 </div>
+
+@if($readOnly)
+    <div class="alert alert-info mt-3 mb-0">
+        <i class="feather-info me-2"></i>
+        <strong>Note:</strong> Government ID numbers can only be modified by HR.
+    </div>
+@endif

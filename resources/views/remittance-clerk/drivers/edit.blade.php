@@ -37,6 +37,18 @@
                         @error('contact_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="col-md-6 mb-4">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select name="gender" id="gender" class="form-select">
+                            <option value="">-- Select --</option>
+                            <option value="male" {{ old('gender', $driver->gender) === 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ old('gender', $driver->gender) === 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="prefer_not_to_say" {{ old('gender', $driver->gender) === 'prefer_not_to_say' ? 'selected' : '' }}>Prefer not to say</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
                         <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                         <input type="email" name="email" id="email"
                             class="form-control @error('email') is-invalid @enderror"

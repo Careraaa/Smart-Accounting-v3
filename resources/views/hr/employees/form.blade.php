@@ -38,7 +38,8 @@
                 {{-- Tab content --}}
                 <div class="tab-content" id="employeeTabsContent">
                     <div class="tab-pane">@include('partials.employee.personal')</div>
-                    <div class="tab-pane">@include('partials.employee.employment')</div>
+                    <div class="tab-pane">@include('partials.employee.employment_hr')
+@include('partials.employee.employment')</div>
                     <div class="tab-pane">@include('partials.employee.account')</div>
                     <div class="tab-pane">@include('partials.employee.government')</div>
                     <div class="tab-pane">@include('partials.employee.work_experience')</div>

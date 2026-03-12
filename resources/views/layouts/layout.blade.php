@@ -33,6 +33,13 @@
             @include('partials.page-header')
 
             <div class="main-content">
+                @if (session('info'))
+                    <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                        {{ session('info') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+                
                 <div class="row">
                     @yield('content')
                 </div>

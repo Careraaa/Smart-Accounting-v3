@@ -187,6 +187,47 @@ document.addEventListener("DOMContentLoaded", function () {
     updateUsernamePreview();
 
     // -------------------------
+    // Random password generation (create only)
+    // -------------------------
+    const passwordDisplay = document.getElementById("defaultPassword");
+    const passwordHidden = document.getElementById("hiddenPassword");
+
+    function generateRandomPassword(length = 12) {
+        const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lowercase = "abcdefghijklmnopqrstuvwxyz";
+        const numbers = "0123456789";
+        const allChars = uppercase + lowercase + numbers;
+        
+        let password = "";
+        // Ensure at least one uppercase, one lowercase, one number
+        password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+        password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+        password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+        
+        // Fill the rest with random characters
+        for (let i = password.length; i < length; i++) {
+            password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+        }
+        
+        // Shuffle the password
+        return password.split('').sort(() => Math.random() - 0.5).join('');
+    }
+
+    function updatePasswordDisplay() {
+        if (!passwordDisplay) return;
+        const randomPassword = generateRandomPassword(12);
+        passwordDisplay.value = randomPassword;
+        if (passwordHidden) {
+            passwordHidden.value = randomPassword;
+        }
+    }
+
+    // Generate password on page load if elements exist (create mode only)
+    if (passwordDisplay) {
+        updatePasswordDisplay();
+    }
+
+    // -------------------------
     // Spouse field — only when married
     // -------------------------
     const civilStatusSelect = document.getElementById("civil_status");

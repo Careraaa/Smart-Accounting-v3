@@ -59,6 +59,7 @@ class EmployeeController extends Controller
                 'tin_number'              => 'nullable|string|max:50',
                 'pagibig_number'          => 'nullable|string|max:50',
                 'signature_path'          => 'nullable|string',
+                'generated_password'      => 'nullable|string',
                 'attachments_files.*'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             ],
             [
@@ -87,7 +88,10 @@ class EmployeeController extends Controller
         }
         $validated['username'] = $username;
         $validated['name']     = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
-        $validated['password'] = Hash::make('password123');
+        
+        // Use generated password from form, or generate one if not provided
+        $plainPassword = $validated['generated_password'] ?? $this->generateRandomPassword();
+        $validated['password'] = Hash::make($plainPassword);
 
         $employee = User::create($validated);
 
@@ -95,7 +99,7 @@ class EmployeeController extends Controller
         $this->handleRelations($request, $employee);
 
         return redirect()->route('employees.index')
-            ->with('success', "Employee created. Username: {$username} | Default password: password123");
+            ->with('success', "Employee created. Username: {$username} | Default password: {$plainPassword}");
     }
 
     public function show(User $employee)
@@ -253,6 +257,30 @@ class EmployeeController extends Controller
                 if (!empty($c['name'])) $employee->charRefs()->create($c);
             }
         }
+    }
+
+    private function generateRandomPassword(int $length = 12): string
+    {
+        $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        $numbers = '0123456789';
+        $allChars = $uppercase . $lowercase . $numbers;
+
+        $password = '';
+        // Ensure at least one uppercase, one lowercase, one number
+        $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
+        $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
+        $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+
+        // Fill the rest with random characters
+        for ($i = strlen($password); $i < $length; $i++) {
+            $password .= $allChars[random_int(0, strlen($allChars) - 1)];
+        }
+
+        // Shuffle the password
+        $passwordArray = str_split($password);
+        shuffle($passwordArray);
+        return implode('', $passwordArray);
     }
 
     private function normalizePhone($phone): string

@@ -28,6 +28,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Flash notification if user hasn't changed their generated password yet
+        if (!auth()->user()->password_changed) {
+            session()->flash('info', 'Please consider changing your password for security. You can do this from your account settings.');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

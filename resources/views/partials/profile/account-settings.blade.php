@@ -9,21 +9,39 @@
                     <h5 class="card-title">Account Settings</h5>
                 </div>
                 <div class="card-body">
+                    @if ($errors->any())
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Error!</strong> Please fix the following errors:
+                            <ul class="mb-0 mt-2">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if (session('success'))
+                        <div class="alert alert-success" role="alert">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
                     <form action="{{ route('settings.update-password') }}" method="POST">
                         @csrf
                         <div class="form-group mb-3">
                             <label for="current_password" class="form-label">Current Password *</label>
-                            <input type="password" class="form-control @error('current_password') is-invalid @enderror" name="current_password" required>
-                            @error('current_password')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                            <input type="password" class="form-control @error('current_password') is-invalid @enderror" id="current_password" name="current_password" required>
+                            @error('current_password')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                         </div>
                         <div class="form-group mb-3">
                             <label for="password" class="form-label">New Password *</label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" required>
-                            @error('password')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                            <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" required>
+                            @error('password')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                         </div>
                         <div class="form-group mb-3">
                             <label for="password_confirmation" class="form-label">Confirm Password *</label>
-                            <input type="password" class="form-control" name="password_confirmation" required>
+                            <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror" id="password_confirmation" name="password_confirmation" required>
+                            @error('password_confirmation')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                         </div>
                         <div class="form-group mb-3">
                             <button type="submit" class="btn btn-primary">Update Password</button>

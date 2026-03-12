@@ -1,8 +1,10 @@
 <h5 class="mb-4">Account Information</h5>
 <p class="text-muted mb-4" style="font-size:0.845rem;">
     This is the login account for the employee. The username is auto-generated from their name.
-    The default password is <strong>password123</strong> — the employee can change this after logging in.
+    The default password is a random secure combination that the employee must change after logging in.
 </p>
+
+@php $readOnly = $readOnly ?? false; @endphp
 
 @if(!$isEdit)
 {{-- CREATE: show username preview --}}
@@ -20,7 +22,8 @@
         <label class="form-label">Default Password</label>
         <div class="input-group">
             <span class="input-group-text"><i class="feather-lock" style="font-size:14px;"></i></span>
-            <input type="text" class="form-control bg-light" value="password123" readonly>
+            <input type="text" id="defaultPassword" class="form-control bg-light" readonly>
+            <input type="hidden" id="hiddenPassword" name="generated_password">
         </div>
         <div class="form-text">Employee must change this after first login.</div>
     </div>
@@ -51,8 +54,15 @@
     </div>
 </div>
 
+@if(!$readOnly)
 <div class="alert alert-info mt-2" style="font-size:0.845rem;">
     <i class="feather-info me-1"></i>
-    Password reset requests will be available in a future update. For now, employees can change their own password from their profile.
+    If you forget your password, please contact HR for assistance.
 </div>
+@else
+<div class="alert alert-info mt-2" style="font-size:0.845rem;">
+    <i class="feather-info me-1"></i>
+    Your username and role cannot be changed. To change your password, use the "Change Password" button in your profile.
+</div>
+@endif
 @endif

@@ -15,6 +15,7 @@ class User extends Authenticatable
         'name',
         'username',
         'password',
+        'password_changed',
         'role',
         'profile_picture',
         // Employee information fields
