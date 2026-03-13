@@ -7,13 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Smart Accounting System">
     <title>@yield('title', 'Smart Accounting')</title>
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights.ico') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/vendors.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/theme.min.css') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
 
+
+    <!-- Your custom inline styles (high specificity – Vite will override where it can) -->
     <style>
-        /* -- Layout ---------------------------------------------------- */
         body { margin: 0; background: #111; }
 
         .auth-wrap {
@@ -22,7 +20,6 @@
             grid-template-columns: 1fr 1fr;
         }
 
-        /* Left — dark brand panel */
         .auth-brand-panel {
             background: #1c1c1e;
             display: flex;
@@ -33,7 +30,6 @@
             position: relative;
             overflow: hidden;
         }
-        /* Subtle red glow in corner */
         .auth-brand-panel::before {
             content: '';
             position: absolute;
@@ -56,17 +52,17 @@
         }
 
         .auth-brand-logo {
-    width: 110px;
-    height: 110px;
-    background: #fff;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    margin-bottom: 28px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1);
-}
+            width: 110px;
+            height: 110px;
+            background: #fff;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            margin-bottom: 28px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1);
+        }
         .auth-brand-logo img {
             width: 100%;
             height: 100%;
@@ -103,7 +99,6 @@
             letter-spacing: 0.3px;
         }
 
-        /* Right — form panel */
         .auth-form-panel {
             background: #fff;
             display: flex;
@@ -118,7 +113,6 @@
             max-width: 380px;
         }
 
-        /* Page title area */
         .auth-page-title {
             font-size: 1.35rem;
             font-weight: 800;
@@ -132,7 +126,6 @@
             margin-bottom: 28px;
         }
 
-        /* Form elements */
         .auth-form-inner .form-label {
             font-size: 0.815rem !important;
             font-weight: 600 !important;
@@ -158,7 +151,6 @@
         }
         .auth-form-inner .form-control::placeholder { color: #c0c0cc !important; }
 
-        /* Submit button */
         .btn-auth {
             background: #1c1c1e;
             border: none;
@@ -175,7 +167,6 @@
         .btn-auth:hover  { background: #c8292a; color: #fff; }
         .btn-auth:focus  { outline: none; box-shadow: 0 0 0 3px rgba(200,41,42,0.2); }
 
-        /* Override template's btn-primary inside auth */
         .auth-form-inner .btn-primary,
         .auth-form-inner .btn-lg.btn-primary {
             background: #1c1c1e !important;
@@ -192,7 +183,6 @@
             border-color: #c8292a !important;
         }
 
-        /* Links */
         .auth-form-inner a {
             color: #c8292a !important;
             text-decoration: none;
@@ -205,7 +195,6 @@
         }
         .auth-form-inner .link-muted:hover { color: #4a4a58 !important; }
 
-        /* Divider */
         .auth-divider {
             width: 32px;
             height: 2px;
@@ -214,13 +203,11 @@
             margin: 12px 0 0;
         }
 
-        /* Checkbox */
         .auth-form-inner .form-check-input:checked {
             background-color: #1c1c1e !important;
             border-color: #1c1c1e !important;
         }
 
-        /* Alerts */
         .auth-form-inner .alert-danger {
             background: #fff5f5 !important;
             border-color: #fcd0d0 !important;
@@ -236,7 +223,6 @@
             font-size: 0.845rem !important;
         }
 
-        /* Bottom text */
         .auth-footer-text {
             margin-top: 24px;
             font-size: 0.82rem;
@@ -244,7 +230,6 @@
             text-align: center;
         }
 
-        /* -- Mobile: stack vertically ---------------------------------- */
         @media (max-width: 767px) {
             .auth-wrap { grid-template-columns: 1fr; }
             .auth-brand-panel {
@@ -257,6 +242,10 @@
             .auth-form-panel { padding: 40px 24px; }
         }
     </style>
+
+    <!-- Vite assets LAST – this allows Vite to override inline styles where needed -->
+    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+    @stack('styles')
 </head>
 
 <body>
@@ -300,8 +289,6 @@
 
     </div>
 
-    <script src="{{ asset('vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('js/common-init.min.js') }}"></script>
     @yield('scripts')
 </body>
 

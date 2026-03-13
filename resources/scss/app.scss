@@ -1,0 +1,10 @@
+// resources/scss/app.scss
+
+// Bootstrap (compile from SCSS)
+@import "bootstrap/bootstrap";
+
+// Theme SCSS
+@import "./theme";
+
+// Overrides
+@import "../css/overrides";

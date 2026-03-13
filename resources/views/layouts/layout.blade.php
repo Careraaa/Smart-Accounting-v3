@@ -2,24 +2,23 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="" />
-    <meta name="keyword" content="" />
-    <meta name="author" content="flexilecode" />
-    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keyword" content="">
+    <meta name="author" content="flexilecode">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>Smart Accounting v3</title>
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}" />
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
 
-    {{-- Template CSS --}}
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/vendors.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('vendors/css/daterangepicker.min.css') }}" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/theme.min.css') }}" />
+    <!-- Template CSS -->
+    <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendors/css/daterangepicker.min.css') }}">
 
-    {{-- App CSS --}}
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/overrides.css') }}">
+    <!-- Vite compiled assets (CSS & JS) – placed last so it overrides previous styles -->
+    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
 
     @stack('styles')
 </head>
@@ -56,9 +55,6 @@
     <script src="{{ asset('vendors/js/circle-progress.min.js') }}"></script>
 
     {{-- Template Init JS --}}
-    <script src="{{ asset('js/template/common-init.min.js') }}"></script>
-    <script src="{{ asset('js/template/dashboard-init.min.js') }}"></script>
-    <script src="{{ asset('js/template/theme-customizer-init.min.js') }}"></script>
 
     {{-- Mobile Sidebar Handler --}}
     <script>
