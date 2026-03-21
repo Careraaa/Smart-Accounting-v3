@@ -49,9 +49,23 @@
                         </a>
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance Records</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.index') }}">Leave Management</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('overtime.index') }}">Overtime / Undertime</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance Adjustment</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nxl-item nxl-hasmenu{{ request()->routeIs('leave.*', 'leave-type.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-calendar"></i></span>
+                            <span class="nxl-mtext">Leave Management</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave-type.index') }}">Leave Types</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.pending') }}">Pending Leaves</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.approved') }}">Approved Leaves</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.rejected') }}">Rejected Leaves</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.index') }}">All Leaves</a></li>
                         </ul>
                     </li>
 
@@ -142,6 +156,7 @@
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.payroll-summary') }}">Payroll Summary</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.deduction-summary') }}">Deduction Summary</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.government-contribution') }}">Government Contribution</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.payroll') }}">Payroll Reports</a></li>
                         </ul>
                     </li>
                 @endif
@@ -210,6 +225,21 @@
                         </a>
                     </li>
 
+                    <li class="nxl-item nxl-hasmenu{{ request()->routeIs('leave.*', 'leave-type.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-calendar"></i></span>
+                            <span class="nxl-mtext">Leave Management</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave-type.index') }}">Leave Types</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.pending') }}">Pending Leaves</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.approved') }}">Approved Leaves</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.rejected') }}">Rejected Leaves</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.index') }}">Completed Leaves</a></li>
+                        </ul>
+                    </li>
+
                     <li class="nxl-item nxl-hasmenu {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-clock"></i></span>
@@ -218,7 +248,6 @@
                         </a>
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">QR Time IN / OUT Records</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.index') }}">Leave Management</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('overtime.index') }}">Overtime / Undertime</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance Adjustment</a></li>
                         </ul>
@@ -281,6 +310,15 @@
                         </a>
                     </li>
 
+                    <li class="nxl-item nxl-caption"><label>Time Off</label></li>
+
+                    <li class="nxl-item {{ request()->routeIs('employee.leaves.*') ? 'active' : '' }}">
+                        <a href="{{ route('employee.leaves.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-calendar"></i></span>
+                            <span class="nxl-mtext">My Leaves</span>
+                        </a>
+                    </li>
+
                     <li class="nxl-item nxl-caption"><label>My Profile</label></li>
 
                     <li class="nxl-item {{ request()->routeIs('employee.profile.*') ? 'active' : '' }}">
@@ -329,6 +367,8 @@
                         </a>
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance') }}">Remittance Reports</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.payroll-approval') }}">Payroll Approval Reports</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.payroll') }}">Payroll Reports</a></li>
                         </ul>
                     </li>
                 @endif
@@ -338,8 +378,9 @@
 
         {{-- ── User Footer (hidden via CSS) ── --}}
         <div class="kt-sidebar-user">
-            <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('images/avatar/avatar.png') }}"
-                alt="avatar" class="kt-sidebar-user-avatar">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white kt-sidebar-user-avatar" style="width: 45px; height: 45px; font-size: 20px; font-weight: normal; min-width: 45px;">
+                {{ auth()->user()->getFirstLetter() }}
+            </div>
             <div class="kt-sidebar-user-info">
                 <div class="kt-sidebar-user-name">{{ auth()->user()->name }}</div>
                 <div class="kt-sidebar-user-role">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</div>

@@ -56,6 +56,72 @@
 
     {{-- Template Init JS --}}
 
+    {{-- Desktop/Mobile Menu Handler --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const miniBtn = document.getElementById('menu-mini-button');
+            const expendBtn = document.getElementById('menu-expend-button');
+            const htmlElement = document.documentElement;
+            const storageKey = 'nexel-classic-dashboard-menu-mini-theme';
+
+            // Initialize menu state from localStorage
+            const savedState = localStorage.getItem(storageKey);
+            if (savedState === 'menu-mini-theme') {
+                htmlElement.classList.add('minimenu');
+                if (miniBtn) miniBtn.style.display = 'none';
+                if (expendBtn) expendBtn.style.display = 'flex';
+            } else if (savedState === 'menu-expend-theme') {
+                htmlElement.classList.remove('minimenu');
+                if (miniBtn) miniBtn.style.display = 'flex';
+                if (expendBtn) expendBtn.style.display = 'none';
+            }
+
+            // Mini button click handler
+            if (miniBtn) {
+                miniBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    miniBtn.style.display = 'none';
+                    if (expendBtn) expendBtn.style.display = 'flex';
+                    htmlElement.classList.add('minimenu');
+                    localStorage.setItem(storageKey, 'menu-mini-theme');
+                });
+            }
+
+            // Expend button click handler
+            if (expendBtn) {
+                expendBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (miniBtn) miniBtn.style.display = 'flex';
+                    expendBtn.style.display = 'none';
+                    htmlElement.classList.remove('minimenu');
+                    localStorage.setItem(storageKey, 'menu-expend-theme');
+                });
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', function () {
+                const width = window.innerWidth;
+                // Desktop: 1024px <= width <= 1600px: show mini by default
+                // Laptop: width > 1600px: show full by default
+                if (1024 <= width && width <= 1600) {
+                    if (!htmlElement.classList.contains('minimenu')) {
+                        htmlElement.classList.add('minimenu');
+                        if (miniBtn) miniBtn.style.display = 'none';
+                        if (expendBtn) expendBtn.style.display = 'flex';
+                    }
+                } else if (width > 1600) {
+                    if (htmlElement.classList.contains('minimenu')) {
+                        htmlElement.classList.remove('minimenu');
+                        if (miniBtn) miniBtn.style.display = 'flex';
+                        if (expendBtn) expendBtn.style.display = 'none';
+                    }
+                }
+            });
+        });
+    </script>
+
     {{-- Mobile Sidebar Handler --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {

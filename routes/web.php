@@ -18,6 +18,7 @@ use App\Http\Controllers\HR\PayrollController;
 use App\Http\Controllers\HR\PayrollReceivablesController;
 use App\Http\Controllers\HR\StatutoryDeductionController;
 use App\Http\Controllers\HR\LeaveController;
+use App\Http\Controllers\HR\LeaveTypeController;
 use App\Http\Controllers\HR\OvertimeUndertimeController;
 use App\Http\Controllers\Accountant\PayrollApprovalController;
 use App\Http\Controllers\Accountant\ReportController;
@@ -25,6 +26,8 @@ use App\Http\Controllers\Accountant\RemittanceApprovalController;
 use App\Http\Controllers\Employee\CashAdvanceController as EmployeeCashAdvanceController;
 use App\Http\Controllers\Employee\SalaryLoanController as EmployeeSalaryLoanController;
 use App\Http\Controllers\Employee\AttachmentController as EmployeeSelfAttachmentController;
+use App\Http\Controllers\Employee\ProfileController as EmployeeProfileController;
+use App\Http\Controllers\Employee\LeaveController as EmployeeLeaveController;
 use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
@@ -67,16 +70,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/update', function (\Illuminate\Http\Request $request) {
         $user = auth()->user();
         $validated = $request->validate([
-            'name'            => 'required|string|max:255',
-            'username'        => 'required|string|unique:users,username,' . $user->id,
-            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'name'     => 'required|string|max:255',
+            'username' => 'required|string|unique:users,username,' . $user->id,
         ]);
-        if ($request->hasFile('profile_picture')) {
-            if ($user->profile_picture) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
-            }
-            $validated['profile_picture'] = $request->file('profile_picture')->store('profiles', 'public');
-        }
         $user->update($validated);
         return redirect()->route('profile.details')->with('success', 'Profile updated successfully.');
     })->name('profile.update');
@@ -110,6 +106,13 @@ Route::middleware(['auth', 'role:remittance_clerk,superadmin'])->group(function 
 Route::middleware(['auth', 'role:employee'])->group(function () {
     Route::get('/employee', fn() => view('employee.dashboard'))->name('employee.index');
 
+    // Profile Routes
+    Route::get('/my/profile', [EmployeeProfileController::class, 'show'])->name('employee.profile.show');
+    Route::get('/my/profile/edit', [EmployeeProfileController::class, 'edit'])->name('employee.profile.edit');
+    Route::patch('/my/profile', [EmployeeProfileController::class, 'update'])->name('employee.profile.update');
+    Route::get('/my/profile/password', [EmployeeProfileController::class, 'editPassword'])->name('employee.profile.password');
+    Route::patch('/my/profile/password', [EmployeeProfileController::class, 'updatePassword'])->name('employee.profile.password.update');
+
     // Cash Advances
     Route::get('/my/cash-advances', [EmployeeCashAdvanceController::class, 'index'])->name('employee.cash-advances.index');
     Route::post('/my/cash-advances', [EmployeeCashAdvanceController::class, 'store'])->name('employee.cash-advances.store');
@@ -121,6 +124,15 @@ Route::middleware(['auth', 'role:employee'])->group(function () {
     // Attachments (employee uploads their own missing/rejected docs)
     Route::get('/my/attachments', [EmployeeSelfAttachmentController::class, 'index'])->name('employee.attachments.index');
     Route::post('/my/attachments', [EmployeeSelfAttachmentController::class, 'store'])->name('employee.attachments.store');
+
+    // Leave Management
+    Route::get('/my/leaves', [EmployeeLeaveController::class, 'index'])->name('employee.leaves.index');
+    Route::get('/my/leaves/create', [EmployeeLeaveController::class, 'create'])->name('employee.leaves.create');
+    Route::post('/my/leaves', [EmployeeLeaveController::class, 'store'])->name('employee.leaves.store');
+    Route::get('/my/leaves/{leave}', [EmployeeLeaveController::class, 'show'])->name('employee.leaves.show');
+    Route::get('/my/leaves/{leave}/edit', [EmployeeLeaveController::class, 'edit'])->name('employee.leaves.edit');
+    Route::patch('/my/leaves/{leave}', [EmployeeLeaveController::class, 'update'])->name('employee.leaves.update');
+    Route::delete('/my/leaves/{leave}', [EmployeeLeaveController::class, 'destroy'])->name('employee.leaves.destroy');
 });
 
 // ===== SHARED ATTENDANCE ROUTES (all authenticated users) =====
@@ -152,9 +164,16 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant'])->group(function () 
     Route::get('/api/attendance/recent', [AttendanceController::class, 'getRecentAttendance'])->name('api.attendance.recent');
     Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])->name('api.qr.token-status');
 
+    // Define specific leave routes before resource routes to prevent conflicts
+    Route::get('/leave/pending', [LeaveController::class, 'index'])->name('leave.pending')->defaults('status', 'pending');
+    Route::get('/leave/approved', [LeaveController::class, 'index'])->name('leave.approved')->defaults('status', 'approved');
+    Route::get('/leave/rejected', [LeaveController::class, 'index'])->name('leave.rejected')->defaults('status', 'rejected');
+
     Route::resource('leave', LeaveController::class);
     Route::post('/leave/{leave}/approve', [LeaveController::class, 'approve'])->name('leave.approve');
     Route::post('/leave/{leave}/reject', [LeaveController::class, 'reject'])->name('leave.reject');
+
+    Route::resource('leave-type', LeaveTypeController::class);
 
     Route::resource('overtime', OvertimeUndertimeController::class);
     Route::post('/overtime/{overtime}/approve', [OvertimeUndertimeController::class, 'approve'])->name('overtime.approve');

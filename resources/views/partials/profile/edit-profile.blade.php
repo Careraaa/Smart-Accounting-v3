@@ -9,21 +9,18 @@
                     <h5 class="card-title">Edit Profile</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('profile.update') }}" method="POST">
                         @csrf
                         @method('PUT')
                         
-                        <!-- Profile Picture -->
+                        <!-- Profile Avatar (First Letter) -->
                         <div class="mb-4 text-center">
                             <div class="mb-3">
-                                <img id="profilePreview" src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('images/avatar/avatar.png') }}" alt="profile-picture" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white" style="width: 150px; height: 150px; font-size: 60px; font-weight: normal;">
+                                    {{ auth()->user()->getFirstLetter() }}
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="profile_picture" class="form-label">Profile Picture</label>
-                                <input type="file" class="form-control @error('profile_picture') is-invalid @enderror" id="profile_picture" name="profile_picture" accept="image/*" onchange="previewImage(this)">
-                                @error('profile_picture')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                                <small class="form-text text-muted">Allowed formats: JPG, PNG. Max size: 2MB</small>
-                            </div>
+                            <small class="form-text text-muted d-block">Profile Avatar (First Letter of Name)</small>
                         </div>
 
                         <hr>
@@ -33,6 +30,13 @@
                             <label for="name" class="form-label">Full Name *</label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', auth()->user()->name) }}" required>
                             @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+
+                        <!-- Username -->
+                        <div class="form-group mb-3">
+                            <label for="username" class="form-label">Username *</label>
+                            <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ old('username', auth()->user()->username) }}" required>
+                            @error('username')<span class="invalid-feedback">{{ $message }}</span>@enderror
                         </div>
 
                         <!-- Email -->
@@ -54,17 +58,4 @@
             </div>
         </div>
     </div>
-</div>
-
-<script>
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('profilePreview').src = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-</script>
-@endsection
+</div>@endsection

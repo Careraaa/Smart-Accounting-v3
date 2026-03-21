@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\Leave;
 use App\Models\Employee;
+use App\Models\LeaveType;
 use App\Notifications\LeaveNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,13 +25,21 @@ class LeaveController extends Controller
         }
 
         // Filter by status
-        if ($request->status && $request->status !== 'all') {
-            $query->where('status', $request->status);
+        $status = $request->status ?? 'all';
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
         }
 
         // Filter by leave type
         if ($request->leave_type && $request->leave_type !== 'all') {
             $query->where('leave_type', $request->leave_type);
+        }
+
+        // Filter by department
+        if ($request->department) {
+            $query->whereHas('employee', function ($q) use ($request) {
+                $q->where('department', $request->department);
+            });
         }
 
         // Sort options
@@ -40,7 +49,7 @@ class LeaveController extends Controller
 
         $leaves = $query->paginate(10);
 
-        // Statistics
+        // Statistics - Overall
         $totalLeaves = Leave::count();
         $pendingLeaves = Leave::where('status', 'pending')->count();
         $approvedLeaves = Leave::where('status', 'approved')->count();
@@ -52,7 +61,54 @@ class LeaveController extends Controller
             ->groupBy('leave_type')
             ->get();
 
-        return view('hr.leave.index', compact(
+        // Get unique departments
+        $departments = Employee::whereNotNull('department')
+            ->distinct()
+            ->pluck('department')
+            ->filter()
+            ->all();
+
+        // Calculate statistics based on current status view
+        $thisWeekStart = now()->startOfWeek();
+        $thisWeekEnd = now()->endOfWeek();
+        $thisMonthStart = now()->startOfMonth();
+        $thisMonthEnd = now()->endOfMonth();
+
+        if ($status === 'pending') {
+            $thisWeekLeaves = Leave::where('status', 'pending')
+                ->whereBetween('created_at', [$thisWeekStart, $thisWeekEnd])
+                ->count();
+            $thisMonthLeaves = Leave::where('status', 'pending')
+                ->whereBetween('created_at', [$thisMonthStart, $thisMonthEnd])
+                ->count();
+        } elseif ($status === 'approved') {
+            $thisWeekLeaves = Leave::where('status', 'approved')
+                ->whereBetween('updated_at', [$thisWeekStart, $thisWeekEnd])
+                ->count();
+            $thisMonthLeaves = Leave::where('status', 'approved')
+                ->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])
+                ->count();
+        } elseif ($status === 'rejected') {
+            $thisWeekLeaves = Leave::where('status', 'rejected')
+                ->whereBetween('updated_at', [$thisWeekStart, $thisWeekEnd])
+                ->count();
+            $thisMonthLeaves = Leave::where('status', 'rejected')
+                ->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])
+                ->count();
+        } else {
+            $thisWeekLeaves = Leave::whereBetween('created_at', [$thisWeekStart, $thisWeekEnd])->count();
+            $thisMonthLeaves = Leave::whereBetween('created_at', [$thisMonthStart, $thisMonthEnd])->count();
+        }
+
+        // Determine which view to render
+        $view = match($status) {
+            'pending' => 'hr.leave.pending',
+            'approved' => 'hr.leave.approved',
+            'rejected' => 'hr.leave.rejected',
+            default => 'hr.leave.index',
+        };
+
+        return view($view, compact(
             'leaves',
             'totalLeaves',
             'pendingLeaves',
@@ -60,14 +116,18 @@ class LeaveController extends Controller
             'rejectedLeaves',
             'leaveTypeStats',
             'sortBy',
-            'sortOrder'
+            'sortOrder',
+            'status',
+            'thisWeekLeaves',
+            'thisMonthLeaves',
+            'departments'
         ));
     }
 
     public function create()
     {
         $employees = Employee::where('status', 'active')->where('role', '!=', 'superadmin')->get();
-        $leaveTypes = ['Sick Leave', 'Vacation', 'Personal Leave', 'Maternity Leave', 'Paternity Leave', 'Other'];
+        $leaveTypes = LeaveType::where('status', 'active')->pluck('name');
 
         return view('hr.leave.create', compact('employees', 'leaveTypes'));
     }
@@ -142,7 +202,7 @@ class LeaveController extends Controller
     {
         $leave->update([
             'status' => 'approved',
-            'approved_by' => auth()->user()->employee->id ?? null,
+            'approved_by' => auth()->id() ?? null,
         ]);
         $leave->load('employee');
 
@@ -160,7 +220,7 @@ class LeaveController extends Controller
 
         $leave->update([
             'status' => 'rejected',
-            'approved_by' => auth()->user()->employee->id ?? null,
+            'approved_by' => auth()->id() ?? null,
         ]);
         $leave->load('employee');
 

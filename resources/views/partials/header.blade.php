@@ -95,10 +95,9 @@
             <div class="dropdown">
                 <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside"
                     class="kt-user-trigger d-flex align-items-center gap-2 text-decoration-none">
-                    <img src="{{ auth()->user()->profile_picture
-                        ? asset('storage/' . auth()->user()->profile_picture)
-                        : asset('images/avatar/avatar.png') }}"
-                        alt="user" class="kt-user-avatar" />
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white kt-user-avatar" style="width: 40px; height: 40px; font-size: 18px; font-weight: normal; min-width: 40px;">
+                        {{ auth()->user()->getFirstLetter() }}
+                    </div>
                     <div class="d-none d-md-block text-start lh-sm">
                         <div class="kt-user-name">{{ auth()->user()->name }}</div>
                         <div class="kt-user-email">{{ auth()->user()->email }}</div>
@@ -108,10 +107,9 @@
 
                 <div class="dropdown-menu dropdown-menu-end kt-user-dropdown">
                     <div class="kt-user-dropdown-header">
-                        <img src="{{ auth()->user()->profile_picture
-                            ? asset('storage/' . auth()->user()->profile_picture)
-                            : asset('images/avatar/avatar.png') }}"
-                            alt="user" class="kt-user-dropdown-avatar" />
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white kt-user-dropdown-avatar" style="width: 50px; height: 50px; font-size: 24px; font-weight: normal; min-width: 50px;">
+                            {{ auth()->user()->getFirstLetter() }}
+                        </div>
                         <div class="flex-grow-1 overflow-hidden">
                             <div class="kt-user-dropdown-name">{{ auth()->user()->name }}</div>
                             <div class="kt-user-dropdown-email text-truncate">{{ auth()->user()->email }}</div>

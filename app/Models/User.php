@@ -154,4 +154,16 @@ class User extends Authenticatable
             ->groupBy('attachment_key')
             ->map(fn($group) => $group->first());
     }
+
+    // ── Avatar Methods ─────────────────────────────────────────────────
+    
+    /**
+     * Get the initials from first name and last name
+     */
+    public function getFirstLetter(): string
+    {
+        $firstInitial = $this->first_name ? strtoupper(substr($this->first_name, 0, 1)) : '';
+        $lastInitial = $this->last_name ? strtoupper(substr($this->last_name, 0, 1)) : '';
+        return $firstInitial . $lastInitial;
+    }
 }

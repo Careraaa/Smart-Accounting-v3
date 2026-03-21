@@ -11,7 +11,9 @@
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-3 text-center mb-4">
-                            <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('images/avatar/avatar.png') }}" alt="user-image" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white" style="width: 150px; height: 150px; font-size: 60px; font-weight: normal;">
+                                {{ auth()->user()->getFirstLetter() }}
+                            </div>
                         </div>
                     </div>
                     <div class="row">

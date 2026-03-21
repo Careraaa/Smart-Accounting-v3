@@ -17,6 +17,7 @@ class Leave extends Model
         'reason',
         'status',
         'approved_by',
+        'rejection_reason',
     ];
 
     protected $casts = [
@@ -31,6 +32,6 @@ class Leave extends Model
 
     public function approvedBy()
     {
-        return $this->belongsTo(Employee::class, 'approved_by');
+        return $this->belongsTo(User::class, 'approved_by');
     }
 }

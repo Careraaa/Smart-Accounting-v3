@@ -143,12 +143,12 @@ class Notification extends Model
             case 'leave_updated':
             case 'leave_deleted':
                 if ($data['leave_id'] ?? null) {
-                    return route('leaves.show', ['leave' => $data['leave_id']]);
+                    return route('leave.show', ['leave' => $data['leave_id']]);
                 }
-                return route('leaves.index');
+                return route('leave.index');
 
             case 'leave_pending_approval':
-                return route('leaves.pending'); // or leaves.index with filter
+                return route('leave.pending'); // or leave.index with filter
 
             // Attendance related notifications
             case 'attendance_issue':

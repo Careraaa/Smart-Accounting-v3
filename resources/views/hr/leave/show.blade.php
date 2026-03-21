@@ -96,9 +96,39 @@
             <div class="row mt-4">
                 <div class="col-md-12">
                     <hr>
-                    <p class="text-muted mb-2">
-                        <strong>Approved by:</strong> {{ $leave->approvedBy->first_name ?? 'N/A' }} {{ $leave->approvedBy->last_name ?? '' }}
-                    </p>
+                    @if($leave->status === 'approved')
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Approved By</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white" style="width: 40px; height: 40px; font-size: 14px; font-weight: normal; min-width: 40px;">
+                                {{ substr($leave->approvedBy->first_name ?? 'U', 0, 1) }}{{ substr($leave->approvedBy->last_name ?? '', 0, 1) }}
+                            </div>
+                            <div>
+                                <p class="mb-0"><strong>{{ $leave->approvedBy->first_name ?? '' }} {{ $leave->approvedBy->last_name ?? '' }}</strong></p>
+                                <small class="text-muted">{{ strtoupper(str_replace('_', ' ', $leave->approvedBy->role)) }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    @elseif($leave->status === 'rejected')
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Rejected By</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger text-white" style="width: 40px; height: 40px; font-size: 14px; font-weight: normal; min-width: 40px;">
+                                {{ substr($leave->approvedBy->first_name ?? 'U', 0, 1) }}{{ substr($leave->approvedBy->last_name ?? '', 0, 1) }}
+                            </div>
+                            <div>
+                                <p class="mb-0"><strong>{{ $leave->approvedBy->first_name ?? '' }} {{ $leave->approvedBy->last_name ?? '' }}</strong></p>
+                                <small class="text-muted">{{ strtoupper(str_replace('_', ' ', $leave->approvedBy->role)) }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    @if($leave->rejection_reason)
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Rejection Reason</label>
+                        <p class="text-danger mb-0">{{ $leave->rejection_reason }}</p>
+                    </div>
+                    @endif
+                    @endif
                 </div>
             </div>
             @endif
