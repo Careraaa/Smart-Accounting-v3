@@ -79,7 +79,7 @@ class OvertimeUndertimeController extends Controller
 
     public function create()
     {
-        $employees = Employee::where('status', 'active')->where('role', '!=', 'superadmin')->get();
+        $employees = Employee::where('status', 'active')->whereNotIn('role', ['superadmin', 'qr_admin'])->get();
         $types = ['overtime', 'undertime'];
 
         return view('hr.overtime.create', compact('employees', 'types'));
@@ -114,7 +114,7 @@ class OvertimeUndertimeController extends Controller
 
     public function edit(OvertimeUndertime $overtime)
     {
-        $employees = Employee::where('status', 'active')->where('role', '!=', 'superadmin')->get();
+        $employees = Employee::where('status', 'active')->whereNotIn('role', ['superadmin', 'qr_admin'])->get();
         $types = ['overtime', 'undertime'];
 
         return view('hr.overtime.edit', compact('overtime', 'employees', 'types'));

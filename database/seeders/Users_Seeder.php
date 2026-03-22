@@ -58,6 +58,43 @@ class Users_Seeder extends Seeder
             ],
             [
                 'id'                      => 2,
+                'name'                    => 'QR Attendance Admin',
+                'username'                => 'qr_admin',
+                'password'                => '$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',
+                'role'                    => 'qr_admin',
+                'profile_picture'         => null,
+                'remember_token'          => 'QRAdminTkn01',
+                'first_name'              => 'QR',
+                'middle_name'             => null,
+                'last_name'               => 'Admin',
+                'email'                   => 'qr.admin@example.com',
+                'phone'                   => '09131234567',
+                'address'                 => null,
+                'civil_status'            => null,
+                'spouse_name'             => null,
+                'date_of_birth'           => null,
+                'place_of_birth'          => null,
+                'educational_attainment'  => null,
+                'driver_license_number'   => null,
+                'driver_license_validity' => null,
+                'date_of_hire'            => null,
+                'position'                => null,
+                'department'              => null,
+                'status'                  => 'active',
+                'salary_rate'             => 0,
+                'has_sss'                 => 0,
+                'sss_number'              => null,
+                'has_tin'                 => 0,
+                'tin_number'              => null,
+                'has_pagibig'             => 0,
+                'pagibig_number'          => null,
+                'signature_path'          => null,
+                'attachments'             => null,
+                'created_at'              => '2026-02-06 12:11:12',
+                'updated_at'              => '2026-02-06 12:11:12',
+            ],
+            [
+                'id'                      => 3,
                 'name'                    => 'HR Manager',
                 'username'                => 'hrmanager',
                 'password'                => '$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',
@@ -99,7 +136,7 @@ class Users_Seeder extends Seeder
                 'updated_at'              => '2026-02-06 12:11:11',
             ],
             [
-                'id'                      => 3,
+                'id'                      => 4,
                 'name'                    => 'Remittance Clerk',
                 'username'                => 'remittance_clerk',
                 'password'                => '$2y$12$/La9Q6JGZkIbM1G5Ah.dwOAqcGhBJbU94pUeyauuq0jgZx4Hj/tr6',
@@ -141,7 +178,7 @@ class Users_Seeder extends Seeder
                 'updated_at'              => '2026-02-06 12:11:11',
             ],
             [
-                'id'                      => 4,
+                'id'                      => 5,
                 'name'                    => 'Accountant',
                 'username'                => 'accountant',
                 'password'                => '$2y$12$eM2JIPsh.y4LVUlUv.xv6.VC.156R3pPLUAphTEKeFXINlqGIA5nm',
@@ -187,7 +224,7 @@ class Users_Seeder extends Seeder
             // EMPLOYEES (role: employee)
             // -------------------------------------------------------
             [
-                'id'                      => 5,
+                'id'                      => 6,
                 'name'                    => 'John Doe',
                 'username'                => 'john.doe',
                 'password'                => '$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',
@@ -229,7 +266,7 @@ class Users_Seeder extends Seeder
                 'updated_at'              => '2026-02-06 12:11:12',
             ],
             [
-                'id'                      => 6,
+                'id'                      => 7,
                 'name'                    => 'Angela Fernandez',
                 'username'                => 'angela.fernandez',
                 'password'                => '$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',
@@ -272,7 +309,7 @@ class Users_Seeder extends Seeder
             ],
             [
                 // The overachiever who replies to emails at 11pm
-                'id'                      => 7,
+                'id'                      => 8,
                 'name'                    => 'Juan Trabaho',
                 'username'                => 'juan.trabaho',
                 'password'                => '$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',
@@ -315,7 +352,7 @@ class Users_Seeder extends Seeder
             ],
             [
                 // Always "on the way" but arrives 15 mins late
-                'id'                      => 8,
+                'id'                      => 9,
                 'name'                    => 'Maria Halos',
                 'username'                => 'maria.halos',
                 'password'                => '$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',
@@ -358,7 +395,7 @@ class Users_Seeder extends Seeder
             ],
             [
                 // The guy who takes a 45-minute "quick break"
-                'id'                      => 9,
+                'id'                      => 10,
                 'name'                    => 'Carlo Pahinga',
                 'username'                => 'carlo.pahinga',
                 'password'                => '$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',

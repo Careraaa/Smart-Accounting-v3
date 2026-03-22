@@ -172,7 +172,9 @@ class AttendanceController extends Controller
 
     public function showMonitorDisplay()
     {
-        return view('hr.attendance.monitor');
+        // The QR monitor is part of the attendance index view
+        // Redirect to the attendance list which includes the QR monitor panel
+        return redirect()->route('attendance.index');
     }
 
     public function getRecentAttendance()

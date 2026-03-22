@@ -12,8 +12,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Exclude superadmin from employee counts
-        $totalEmployees = Employee::where('role', '!=', 'superadmin')->count();
+        // Exclude superadmin and qr_admin from employee counts
+        $totalEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->count();
 
         // Load payrolls with relationships to compute dynamically
         $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])->get();

@@ -102,9 +102,9 @@ class PayrollController extends Controller
 
         $employee = User::find($validated['user_id']);
 
-        if ($employee->role === 'superadmin') {
+        if (in_array($employee->role, ['superadmin', 'qr_admin'])) {
             return redirect()->route('payroll.salary-computation.create')
-                ->withErrors(['user_id' => 'Cannot create payroll for superadmin accounts.']);
+                ->withErrors(['user_id' => 'Cannot create payroll for system admin accounts.']);
         }
 
         $periodStart = Carbon::parse($validated['payroll_period_start']);
@@ -233,9 +233,9 @@ class PayrollController extends Controller
 
         $employee = User::find($validated['user_id']);
 
-        if ($employee->role === 'superadmin') {
+        if (in_array($employee->role, ['superadmin', 'qr_admin'])) {
             return redirect()->route('payroll.salary-computation.edit', $payroll)
-                ->withErrors(['user_id' => 'Cannot assign payroll to superadmin accounts.']);
+                ->withErrors(['user_id' => 'Cannot assign payroll to system admin accounts.']);
         }
 
         $periodStart = Carbon::parse($validated['payroll_period_start']);

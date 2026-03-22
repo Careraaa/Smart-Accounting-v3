@@ -29,6 +29,7 @@ use App\Http\Controllers\Employee\AttachmentController as EmployeeSelfAttachment
 use App\Http\Controllers\Employee\ProfileController as EmployeeProfileController;
 use App\Http\Controllers\Employee\LeaveController as EmployeeLeaveController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 Route::get('/', function () {
     return view('auth/login');
@@ -43,6 +44,8 @@ Route::get('/dashboard', function () {
         return redirect()->route('accountant.index');
     } elseif (auth()->user()->role === 'hr') {
         return redirect()->route('hr.index');
+    } elseif (auth()->user()->role === 'qr_admin') {
+        return redirect()->route('admin.dashboard');
     } elseif (auth()->user()->role === 'employee') {
         return redirect()->route('employee.index');
     }
@@ -143,8 +146,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/hr/attendance/qr/submit', [AttendanceController::class, 'submit'])->name('hr.qr.submit');
 });
 
-// ===== HR ROUTES (also accessible by superadmin and accountant) =====
-Route::middleware(['auth', 'role:hr,superadmin,accountant'])->group(function () {
+// ===== HR ROUTES (also accessible by superadmin, accountant, and qr_admin) =====
+Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(function () {
     Route::get('/hr', [HRDashboardController::class, 'index'])->name('hr.index');
     Route::resource('employees', EmployeeController::class);
 
@@ -162,6 +165,7 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant'])->group(function () 
     Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])->name('hr.attendance.monitor');
     Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])->name('hr.qr.generate');
     Route::get('/api/attendance/recent', [AttendanceController::class, 'getRecentAttendance'])->name('api.attendance.recent');
+    Route::get('/api/attendance/table-rows', [AttendanceController::class, 'getAttendanceTableRows'])->name('api.attendance.table-rows');
     Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])->name('api.qr.token-status');
 
     // Define specific leave routes before resource routes to prevent conflicts
@@ -249,6 +253,12 @@ Route::middleware(['auth', 'role:accountant'])->group(function () {
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');
     Route::get('/reports/payroll-approval', fn() => view('accountant.reports.payroll-approval'))->name('reports.payroll-approval');
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
+});
+
+
+// ===== QR ATTENDANCE ADMIN ROUTES =====
+Route::middleware(['auth', 'role:qr_admin'])->group(function () {
+    Route::get('/admin/qr-monitor', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 });
 
 require __DIR__ . '/auth.php';
