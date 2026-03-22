@@ -94,6 +94,7 @@ html.minimenu .m-header .b-brand .logo-mini {
     border: none !important;
     border-radius: 0 !important;
     box-shadow: 3px 0 20px rgba(200, 41, 42, 0.15) !important;
+    width: 250px !important;
 }
 
 /* Keep the inner scroll area red too */
@@ -345,6 +346,7 @@ html.minimenu .nxl-navigation:hover .navbar-content {
     border-bottom: 1px solid var(--kt-border) !important;
     box-shadow: var(--kt-shadow-xs) !important;
     height: var(--kt-header-h) !important;
+    transition: all 0.3s ease !important;
 }
 .nxl-header .header-wrapper {
     height: 100%;
@@ -1058,7 +1060,6 @@ html.minimenu .nxl-navigation:hover .navbar-content {
         position: fixed !important;
         left: 0 !important;
         top: 0 !important;
-        width: 280px !important;
         height: 100vh !important;
         transform: translateX(-100%) !important;
         transition: transform 0.3s ease !important;
@@ -1143,14 +1144,14 @@ html.minimenu .nxl-navigation:hover .navbar-content {
     }
 
     html:not(.minimenu) .nxl-container {
-        margin-left: 268px !important;
+        margin-left: 250px !important;
     }
     html.minimenu .nxl-container {
         margin-left: 64px !important;
     }
     html:not(.minimenu) .nxl-header {
-        left: 268px !important;
-        width: calc(100% - 268px) !important;
+        left: 250px !important;
+        width: calc(100% - 250px) !important;
     }
     html.minimenu .nxl-header {
         left: 64px !important;

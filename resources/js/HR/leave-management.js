@@ -39,7 +39,6 @@ function initializeLeaveDurationCalculator() {
     const endDateInput = document.getElementById('end_date');
 
     if (startDateInput && endDateInput) {
-        // Function to update duration
         function updateDuration() {
             const startDate = new Date(startDateInput.value);
             const endDate = new Date(endDateInput.value);
@@ -47,11 +46,7 @@ function initializeLeaveDurationCalculator() {
             if (startDate && endDate && endDate >= startDate) {
                 const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
                 const durationDisplay = document.getElementById('durationDays');
-                if (durationDisplay) {
-                    durationDisplay.textContent = daysCount;
-                }
-                
-                // Add visual feedback
+                if (durationDisplay) durationDisplay.textContent = daysCount;
                 endDateInput.classList.remove('is-invalid');
             } else if (endDate < startDate) {
                 endDateInput.classList.add('is-invalid');
@@ -61,12 +56,10 @@ function initializeLeaveDurationCalculator() {
         startDateInput.addEventListener('change', updateDuration);
         endDateInput.addEventListener('change', updateDuration);
 
-        // Set minimum date for end_date to be start_date
         startDateInput.addEventListener('change', function () {
             endDateInput.min = this.value;
         });
 
-        // Initial calculation
         updateDuration();
     }
 }
@@ -78,15 +71,40 @@ if (document.readyState === 'loading') {
     initializeLeaveDurationCalculator();
 }
 
-// Handle approval modals
-function handleLeaveApproval(leaveId) {
-    const approveButton = document.querySelector(`button[data-leave-id="${leaveId}"][data-action="approve"]`);
-    if (approveButton) {
-        approveButton.addEventListener('click', function () {
-            if (confirm('Are you sure you want to approve this leave request?')) {
-                // Submit approval form
-                document.querySelector(`form[data-leave-id="${leaveId}"][data-action="approve"]`).submit();
+// Initialize leave approval and rejection buttons
+function initializeLeaveApprovalButtons() {
+    // Handle approve buttons
+    document.querySelectorAll('.approve-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            const leaveId = this.dataset.leaveId;
+            const employeeName = this.dataset.employeeName;
+            
+            if (confirm(`Are you sure you want to approve the leave request from ${employeeName}?`)) {
+                document.getElementById(`approve-form-${leaveId}`).submit();
             }
         });
-    }
+    });
+    
+    // Handle reject buttons
+    document.querySelectorAll('.reject-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            
+            const leaveId = this.dataset.leaveId;
+            const employeeName = this.dataset.employeeName;
+            
+            if (confirm(`Are you sure you want to reject the leave request from ${employeeName}?`)) {
+                document.getElementById(`reject-form-${leaveId}`).submit();
+            }
+        });
+    });
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeLeaveApprovalButtons);
+} else {
+    initializeLeaveApprovalButtons();
 }

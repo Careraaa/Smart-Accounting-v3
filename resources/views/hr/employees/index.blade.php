@@ -20,7 +20,6 @@
                                     'last_name' => 'Last Name',
                                     'position' => 'Position',
                                     'department' => 'Department',
-                                    'salary_rate' => 'Salary Rate'
                                 ];
                             @endphp
                             
@@ -49,7 +48,6 @@
                                 <td>{{ $employee->last_name }}</td>
                                 <td>{{ $employee->position }}</td>
                                 <td>{{ $employee->department }}</td>
-                                <td>₱{{ number_format($employee->salary_rate, 2) }}</td>
                                 <td class="text-center">
                                     @if ($employee->status === 'active')
                                         <span class="emp-badge emp-badge-active">Active</span>
