@@ -97,6 +97,8 @@
                     <span class="prl-hint">Total: ₱<span id="deduction_total_display">0.00</span></span>
                 </div>
 
+                <input type="hidden" id="basic_salary_input" name="basic_salary" value="0">
+
                 {{-- Net Salary --}}
                 <div class="prl-net-box mb-4">
                     <span class="prl-net-label">Net Salary</span>
@@ -112,12 +114,10 @@
         </div>
     </div>
 </div>
-@push('scripts')
+@push('head_scripts')
     <script>
         window.initialAllowances = @json($payroll->allowances->map(fn($a) => ['name' => $a->allowance_type ?? $a->name, 'amount' => floatval($a->amount)]));
         window.initialDeductions = @json($payroll->deductions->map(fn($d) => ['name' => $d->deduction_type, 'amount' => floatval($d->amount)]));
     </script>
-    <script src="{{ asset('js/Payroll/edit-payroll.js') }}"></script>
-    <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
 @endpush
 @endsection

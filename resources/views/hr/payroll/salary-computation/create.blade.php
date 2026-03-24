@@ -28,9 +28,6 @@
                         @error('user_id')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
-                        <div id="statutory_display" class="prl-hint mt-1">
-                            Statutory deductions (SSS / Pag-IBIG) will appear here.
-                        </div>
                     </div>
 
                     {{-- Period --}}
@@ -117,8 +114,7 @@
                     <div class="mb-4">
                         <div class="row g-2 mb-2">
                             <div class="col-md-6">
-                                <input type="text" id="allowance_name" class="form-control"
-                                    placeholder="Allowance name">
+                                <input type="text" id="allowance_name" class="form-control" placeholder="Allowance name">
                             </div>
                             <div class="col-md-4">
                                 <input type="number" min="0" step="0.1" id="allowance_amount"
@@ -159,6 +155,8 @@
                         <span class="prl-hint">Total: ₱<span id="deduction_total_display">0.00</span></span>
                     </div>
 
+                    <div id="statutory_display" class="mb-2"></div>
+
                     {{-- Net Salary --}}
                     <div class="prl-net-box mb-4">
                         <span class="prl-net-label">Net Salary</span>
@@ -174,13 +172,34 @@
             </div>
         </div>
     </div>
-    @push('scripts')
+    @push('head_scripts')
+        <meta name="page-id" content="payroll-create">
         <script>
             window.statutoryDeductions = @json(\App\Models\StatutoryDeduction::all());
             window.initialAllowances = @json(old('allowances', []));
             window.initialDeductions = @json(old('deductions', []));
+
+            @php
+                $today = now();
+                $defaultStart = $today->day <= 15 ? $today->startOfMonth()->format('Y-m-d') : $today->copy()->day(16)->format('Y-m-d');
+                $defaultEnd = $today->day <= 15 ? $today->copy()->day(15)->format('Y-m-d') : $today->endOfMonth()->format('Y-m-d');
+
+                $periodStart = old('payroll_period_start', $defaultStart);
+                $periodEnd = old('payroll_period_end', $defaultEnd);
+
+                // ← ADD THIS BLOCK
+                $otUtRecords = \App\Models\OvertimeUndertime::approved()->forPeriod($periodStart, $periodEnd)->get()->groupBy('user_id');
+
+                $otUt = [];
+                foreach ($otUtRecords as $userId => $records) {
+                    $otUt[$userId] = [
+                        'overtime' => $records->where('type', 'overtime')->sum('hours'),
+                        'undertime' => $records->where('type', 'undertime')->sum('hours'),
+                    ];
+                }
+            @endphp
+
+            window.initialOtUt = @json($otUt);
         </script>
-        <script src="{{ asset('js/Payroll/create-payroll.js') }}"></script>
-        <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
     @endpush
 @endsection

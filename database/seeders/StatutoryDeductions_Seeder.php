@@ -44,7 +44,7 @@ class StatutoryDeductions_Seeder extends Seeder
 
             // Salaries above 20,000 – apply MPF up to 35,000
             ['min_salary' => 19750, 'max_salary' => 20000, 'ee' => 1000, 'er' => 2000, 'note' => 'MPF applies above ₱20,000'],
-            ['min_salary' => 20000, 'max_salary' => 35000, 'ee' => null, 'er' => null, 'note' => 'MPF applies above ₱20,000'],
+            ['min_salary' => 20000, 'max_salary' => 999999999, 'ee' => 1000, 'er' => 2000, 'note' => 'Max SSS contribution'],
         ];
 
         foreach ($sssContributions as $row) {

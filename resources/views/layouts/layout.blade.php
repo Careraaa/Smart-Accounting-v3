@@ -16,6 +16,7 @@
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">
     <link rel="stylesheet" href="{{ asset('vendors/css/daterangepicker.min.css') }}">
+    @stack('head_scripts')
 
     <!-- Vite compiled assets (CSS & JS) – placed last so it overrides previous styles -->
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
@@ -185,7 +186,6 @@
     </script>
 
     {{-- Page-specific scripts --}}
-    @stack('scripts')
     @yield('scripts')
 </body>
 
