@@ -179,27 +179,7 @@
             window.initialAllowances = @json(old('allowances', []));
             window.initialDeductions = @json(old('deductions', []));
 
-            @php
-                $today = now();
-                $defaultStart = $today->day <= 15 ? $today->startOfMonth()->format('Y-m-d') : $today->copy()->day(16)->format('Y-m-d');
-                $defaultEnd = $today->day <= 15 ? $today->copy()->day(15)->format('Y-m-d') : $today->endOfMonth()->format('Y-m-d');
-
-                $periodStart = old('payroll_period_start', $defaultStart);
-                $periodEnd = old('payroll_period_end', $defaultEnd);
-
-                // ← ADD THIS BLOCK
-                $otUtRecords = \App\Models\OvertimeUndertime::approved()->forPeriod($periodStart, $periodEnd)->get()->groupBy('user_id');
-
-                $otUt = [];
-                foreach ($otUtRecords as $userId => $records) {
-                    $otUt[$userId] = [
-                        'overtime' => $records->where('type', 'overtime')->sum('hours'),
-                        'undertime' => $records->where('type', 'undertime')->sum('hours'),
-                    ];
-                }
-            @endphp
-
-            window.initialOtUt = @json($otUt);
+            window.otUtUrl = "{{ route('payroll.ot-ut') }}";
         </script>
     @endpush
 @endsection

@@ -48,7 +48,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let autoUTHours = 0;
 
     // ── Single entry point for all recalculation ──────────────────────
-    function recalculateAll() {
+    // ── Single entry point for all recalculation ──────────────────────
+    async function recalculateAll() {
         const employeeId = employeeSelect.value;
         const periodStart = periodStartInput.value;
         const periodEnd = periodEndInput.value;
@@ -72,7 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const hasSSS = selectedOption?.dataset.hasSss === "1";
         const hasPagibig = selectedOption?.dataset.hasPagibig === "1";
 
-        // 1. Calculate attendance
         const start = new Date(periodStart);
         const end = new Date(periodEnd);
         if (isNaN(start) || isNaN(end) || end < start) return;
@@ -87,11 +87,18 @@ document.addEventListener("DOMContentLoaded", function () {
         basicSalaryDisplay.innerText = `₱${basicSalary.toFixed(2)}`;
         basicSalaryInput.value = basicSalary.toFixed(2);
 
-        // 2. OT/UT from initialOtUt
-        const otUt = (window.initialOtUt || {})[employeeId.toString()] || {
-            overtime: 0,
-            undertime: 0,
-        };
+        // ── Fetch live OT/UT ──────────────────────────────────────────────
+        let otUt = { overtime: 0, undertime: 0 };
+        try {
+            const res = await fetch(
+                `${window.otUtUrl}?user_id=${employeeId}&start=${periodStart}&end=${periodEnd}`,
+                { headers: { "X-Requested-With": "XMLHttpRequest" } },
+            );
+            if (res.ok) otUt = await res.json();
+        } catch (e) {
+            console.error("OT/UT fetch failed", e);
+        }
+
         autoOTHours = otUt.overtime;
         autoOvertimePay = autoOTHours * (salaryRate / 8);
         autoUTHours = otUt.undertime;
@@ -102,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
         utHoursDisplay.innerText = autoUTHours.toFixed(2);
         utDeductionDisplay.innerText = `₱${autoUndertimeDeduct.toFixed(2)}`;
 
-        // 3. Rebuild auto allowances/deductions (OT/UT only, no CA/loans here)
+        // ── Rebuild auto items ────────────────────────────────────────────
         allowances = allowances.filter((a) => !a.auto_ot);
         deductions = deductions.filter(
             (d) => !d.auto_ut && !d.auto_ca && !d.auto_loan && !d.statutory,
@@ -124,12 +131,8 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // 4. Statutory deductions — compute monthly salary from daily rate
+        // ── Statutory deductions ──────────────────────────────────────────
         const monthlySalary = Math.round(salaryRate * 22);
-        console.log("DEBUG SSS:");
-        console.log("Daily Rate:", salaryRate);
-        console.log("Monthly Salary (used):", monthlySalary);
-        console.log("Days Worked:", daysInPeriod);
 
         if (hasSSS && Array.isArray(window.statutoryDeductions)) {
             const sss = window.statutoryDeductions.find((d) => {
@@ -168,7 +171,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        // 5. Render everything once
         renderList(allowances, allowanceList, "allowance");
         renderList(deductions, deductionList, "deduction");
         updateSalary();

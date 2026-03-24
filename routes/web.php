@@ -232,6 +232,7 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
 
     Route::post('/payroll/statutory-deductions/compute', [PayrollController::class, 'computeStatutory'])->name('payroll.statutory.compute');
     Route::get('/api/attendance/summary', [PayrollController::class, 'getAttendanceSummary'])->name('api.attendance.summary');
+    Route::get('/api/payroll/ot-ut', [PayrollController::class, 'getOtUt'])->name('payroll.ot-ut');
 
     Route::prefix('payroll/generate-payslip')
         ->name('payroll.generate-payslip.')
