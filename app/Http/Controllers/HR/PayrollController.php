@@ -343,7 +343,7 @@ class PayrollController extends Controller
     public function generatePayslip(Payroll $payroll)
     {
         $payroll->load('user', 'allowances', 'deductions');
-        return view('hr.payroll.payslip', compact('payroll'));
+        return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
     }
 
     public function generatePayrollBatch(Request $request)
