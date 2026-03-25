@@ -25,7 +25,13 @@ class DriverController extends Controller
         }
         
         $drivers = Driver::orderBy($sortBy, $sortOrder)->get();
-        return view('remittance-clerk.drivers.index', compact('drivers', 'sortBy', 'sortOrder'));
+        
+        // Calculate statistics
+        $totalDrivers = Driver::count();
+        $activeDrivers = Driver::where('status', 'active')->count();
+        $inactiveDrivers = Driver::where('status', 'inactive')->count();
+        
+        return view('remittance-clerk.drivers.index', compact('drivers', 'sortBy', 'sortOrder', 'totalDrivers', 'activeDrivers', 'inactiveDrivers'));
     }
 
     public function create()
@@ -42,6 +48,7 @@ class DriverController extends Controller
             'email' => 'required|email|unique:drivers',
             'address' => 'nullable|string',
             'date_of_hire' => 'required|date',
+            'status' => 'required|in:active,inactive',
         ]);
 
         Driver::create($validated);
@@ -68,6 +75,7 @@ class DriverController extends Controller
             'email' => 'required|email|unique:drivers,email,' . $driver->id,
             'address' => 'nullable|string',
             'date_of_hire' => 'required|date',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $driver->update($validated);

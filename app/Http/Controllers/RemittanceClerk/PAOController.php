@@ -25,7 +25,13 @@ class PAOController extends Controller
         }
         
         $paos = PAO::orderBy($sortBy, $sortOrder)->get();
-        return view('remittance-clerk.paos.index', compact('paos', 'sortBy', 'sortOrder'));
+        
+        // Calculate statistics
+        $totalPAOs = PAO::count();
+        $activePAOs = PAO::where('status', 'active')->count();
+        $inactivePAOs = PAO::where('status', 'inactive')->count();
+        
+        return view('remittance-clerk.paos.index', compact('paos', 'sortBy', 'sortOrder', 'totalPAOs', 'activePAOs', 'inactivePAOs'));
     }
 
     public function create()
@@ -41,6 +47,7 @@ class PAOController extends Controller
             'email' => 'required|email|unique:paos',
             'address' => 'nullable|string',
             'date_of_hire' => 'required|date',
+            'status' => 'required|in:active,inactive',
         ]);
 
         PAO::create($validated);
@@ -66,6 +73,7 @@ class PAOController extends Controller
             'email' => 'required|email|unique:paos,email,' . $pao->id,
             'address' => 'nullable|string',
             'date_of_hire' => 'required|date',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $pao->update($validated);

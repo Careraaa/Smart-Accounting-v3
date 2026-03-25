@@ -9,7 +9,47 @@
                 <i class="feather-plus me-1"></i> Add PAO
             </a>
         </div>
-        <div class="card-body p-0">
+        <div class="card-body">
+            {{-- Statistics Cards --}}
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card card-statistic">
+                        <div class="card-body">
+                            <div class="stat-label">Total PAOs</div>
+                            <h3 class="mb-1" style="color: #0369a1;">{{ $totalPAOs }}</h3>
+                            <small class="text-muted">All PAOs</small>
+                        </div>
+                        <div class="card-icon" style="color: #0ea5e9; opacity: 0.2;">
+                            <i class="feather-users" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-statistic">
+                        <div class="card-body">
+                            <div class="stat-label">Active PAOs</div>
+                            <h3 class="mb-1" style="color: #16a34a;">{{ $activePAOs }}</h3>
+                            <small class="text-muted">Currently active</small>
+                        </div>
+                        <div class="card-icon" style="color: #22c55e; opacity: 0.2;">
+                            <i class="feather-check-circle" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-statistic">
+                        <div class="card-body">
+                            <div class="stat-label">Inactive PAOs</div>
+                            <h3 class="mb-1" style="color: #dc2626;">{{ $inactivePAOs }}</h3>
+                            <small class="text-muted">Currently inactive</small>
+                        </div>
+                        <div class="card-icon" style="color: #ef4444; opacity: 0.2;">
+                            <i class="feather-x-circle" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table class="table table-hover w-100 mb-0">
                     <thead>

@@ -44,6 +44,29 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label for="boundary" class="form-label">Boundary</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" name="boundary" id="boundary" step="0.01" min="0"
+                                class="form-control @error('boundary') is-invalid @enderror"
+                                value="{{ old('boundary') }}" placeholder="0.00">
+                            @error('boundary')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                        <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
+                            <option value="">-- Select Status --</option>
+                            <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="under_maintenance" {{ old('status') === 'under_maintenance' ? 'selected' : '' }}>Under Maintenance</option>
+                        </select>
+                        @error('status')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    </div>
+                </div>
+
                 <div class="d-flex gap-2 pt-3 border-top">
                     <button type="submit" class="btn btn-primary btn-sm">Create Vehicle</button>
                     <a href="{{ route('vehicles.index') }}" class="btn btn-secondary btn-sm">Cancel</a>

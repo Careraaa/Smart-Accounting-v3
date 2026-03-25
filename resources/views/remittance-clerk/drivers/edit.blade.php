@@ -55,6 +55,15 @@
                             value="{{ old('email', $driver->email) }}" required>
                         @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
+                    <div class="col-md-6 mb-4">
+                        <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                        <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
+                            <option value="">-- Select Status --</option>
+                            <option value="active" {{ old('status', $driver->status) === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ old('status', $driver->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                        @error('status')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    </div>
                 </div>
 
                 <div class="mb-4">
