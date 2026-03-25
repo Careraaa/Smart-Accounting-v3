@@ -508,7 +508,7 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <a href="{{ route('payroll.generate-payslip.index') }}" class="btn btn-ghost">← Back</a>
+        <a href="{{ route('payroll.salary-computation.show', $payroll) }}" class="btn btn-ghost">← Back to Payroll</a>
         <button class="btn btn-primary" onclick="window.print()">Print Payslip</button>
     </div>
 

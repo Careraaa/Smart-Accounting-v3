@@ -600,6 +600,14 @@ class PayrollController extends Controller
         return view('hr.payroll.salary-computation.show', compact('payroll', 'overtimeUndertimeBreakdown'));
     }
 
+    public function generatePayslip(Payroll $payroll)
+    {
+        $payroll->load(['user', 'allowances', 'deductions', 'approvedBy']);
+
+        // This matches your actual folder structure
+        return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
+    }
+
     public function edit(Payroll $payroll)
     {
         $employees = User::where('role', 'employee')->where('status', 'active')->get();

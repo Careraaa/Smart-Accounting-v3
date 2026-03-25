@@ -657,20 +657,28 @@
 
 @push('head_scripts')
     <meta name="page-id" content="payroll-edit">
+
     <script>
-        {{-- Seed existing allowances/deductions for the unified JS bootstrap --}}
-        window.initialAllowances = @json($payroll->allowances->filter(fn($a) => !str_starts_with($a->allowance_type, 'Overtime Pay'))->map(fn($a) => ['name' => $a->allowance_type, 'amount' => floatval($a->amount)]));
-
-        window.initialDeductions = @json(
-            $payroll->deductions->filter(fn($d) => !str_starts_with($d->deduction_type, 'Undertime Deduction') &&
-                        $d->deduction_type !== 'Cash Advance' &&
-                        $d->deduction_type !== 'Salary Loan')->map(fn($d) => ['name' => $d->deduction_type, 'amount' => floatval($d->amount)]));
-
         window._prl = {
             statutory: @json(\App\Models\StatutoryDeduction::all()),
             otUtUrl: "{{ route('payroll.ot-ut') }}",
+
+            // Real saved values from the payroll record
             savedBasicSalary: {{ $payroll->basic_salary ?? 0 }},
-            savedDaysWorked: {{ $payroll->days_worked ?? 15 }},
+            savedDaysWorked:  {{ $payroll->days_worked ?? 0 }},
+            savedHoursWorked: {{ $payroll->hours_worked ?? 0 }},
+
+            // Seed manual allowances & deductions (exclude auto OT/UT)
+            initAllowances: @json(
+                $payroll->allowances
+                    ->filter(fn($a) => !str_starts_with($a->allowance_type, 'Overtime Pay'))
+                    ->map(fn($a) => ['name' => $a->allowance_type, 'amount' => (float)$a->amount])
+            ),
+            initDeductions: @json(
+                $payroll->deductions
+                    ->filter(fn($d) => !str_starts_with($d->deduction_type, 'Undertime Deduction'))
+                    ->map(fn($d) => ['name' => $d->deduction_type, 'amount' => (float)$d->amount])
+            )
         };
     </script>
 @endpush
