@@ -41,7 +41,6 @@ class Payroll extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Alias so existing code using ->employee still works
     public function employee()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -97,36 +96,50 @@ class Payroll extends Model
         return $this->calculateBasicSalaryFromAttendance();
     }
 
-    public function getOvertimePayAttribute()
-    {
-        $totalOTHours = OvertimeUndertime::where('user_id', $this->user_id)
-            ->whereBetween('date', [$this->payroll_period_start, $this->payroll_period_end])
-            ->where('status', 'approved')
-            ->where('type', 'overtime')
-            ->sum('hours');
-
-        return round($this->hourly_rate * $totalOTHours, 2);
-    }
-
-    public function getUndertimeDeductionAttribute()
-    {
-        $totalUTHours = OvertimeUndertime::where('user_id', $this->user_id)
-            ->whereBetween('date', [$this->payroll_period_start, $this->payroll_period_end])
-            ->where('status', 'approved')
-            ->where('type', 'undertime')
-            ->sum('hours');
-
-        return round($this->hourly_rate * $totalUTHours, 2);
-    }
-
+    /**
+     * Gross Pay = Basic Salary + total_allowances
+     *
+     * total_allowances already contains OT pay (stored by the controller).
+     * We do NOT add overtime_pay here — that would double-count it.
+     */
     public function getGrossPayAttribute()
     {
-        return $this->basic_salary + $this->total_allowances + $this->overtime_pay;
+        return $this->basic_salary + $this->total_allowances;
     }
 
+    /**
+     * Net Pay = Gross Pay − total_deductions
+     *
+     * total_deductions contains: manual deductions + undertime + cash advances
+     * + salary loan instalments (all stored/incremented by the controller).
+     * SSS and Pag-IBIG are government contributions shown separately on the
+     * payslip and are NOT included in total_deductions.
+     */
     public function getNetPayAttribute()
     {
         return $this->gross_pay - $this->total_deductions;
+    }
+
+    /**
+     * Kept for backward compatibility — returns the OT pay stored as a
+     * line item, so nothing re-queries or recomputes from scratch.
+     */
+    public function getOvertimePayAttribute()
+    {
+        return $this->allowances()
+            ->where('allowance_type', 'like', 'Overtime Pay%')
+            ->sum('amount');
+    }
+
+    /**
+     * Kept for backward compatibility — returns the UT deduction stored as
+     * a line item.
+     */
+    public function getUndertimeDeductionAttribute()
+    {
+        return $this->deductions()
+            ->where('deduction_type', 'like', 'Undertime Deduction%')
+            ->sum('amount');
     }
 
     public function getAttendanceSummaryAttribute()

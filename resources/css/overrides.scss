@@ -1634,3 +1634,85 @@ hr {
 .modal-backdrop.show {
     opacity: 0.45 !important;
 }
+
+/* ================================================================
+   Payroll Create — list row styles
+   REPLACES the old "#allowance_list li" block at the bottom
+================================================================ */
+
+/* Remove any Bootstrap list-group interference on payroll lists */
+#allowance_list,
+#deduction_list {
+    padding: 0 !important;
+    margin: 0 0 6px 0 !important;
+    list-style: none !important;
+    border: 1px solid #e8e8ef !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+/* The item row — flex, no wrap, no min-height override */
+.prl-item-row {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 12px !important;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid #e8e8ef !important;
+    background: #fafafa !important;
+    min-height: 0 !important;
+}
+.prl-item-row:last-child {
+    border-bottom: none !important;
+}
+
+/* Name — takes all available space */
+.prl-item-name {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    font-size: 0.845rem !important;
+    color: #1c1c1e !important;
+    word-break: break-word !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    border: none !important;
+}
+
+/* Amount — never shrinks, never wraps */
+.prl-item-amount {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 0.845rem !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums !important;
+    color: #1c1c1e !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    border: none !important;
+}
+
+/* Remove button — fixed circle, never pushed down */
+.prl-item-remove {
+    flex-shrink: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: #dc3545 !important;
+    color: #fff !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+}
+.prl-item-remove:hover {
+    background: #b02a37 !important;
+}

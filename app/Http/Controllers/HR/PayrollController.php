@@ -86,16 +86,21 @@ class PayrollController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'payroll_period_start' => 'required|date',
-            'payroll_period_end' => 'required|date',
+            'payroll_period_end' => 'required|date|after_or_equal:payroll_period_start',
+
+            // Fields sent by the create form / JS
+            'basic_salary' => 'required|numeric|min:0',
             'total_allowances' => 'nullable|numeric|min:0',
             'total_deductions' => 'nullable|numeric|min:0',
-            'allowances.*.name' => 'nullable|string',
+
+            // Manual line items (optional)
+            'allowances.*.name' => 'nullable|string|max:255',
             'allowances.*.amount' => 'nullable|numeric|min:0',
-            'deductions.*.name' => 'nullable|string',
+            'deductions.*.name' => 'nullable|string|max:255',
             'deductions.*.amount' => 'nullable|numeric|min:0',
         ]);
 
-        $employee = User::find($validated['user_id']);
+        $employee = User::findOrFail($validated['user_id']);
 
         if (in_array($employee->role, ['superadmin', 'qr_admin'])) {
             return redirect()
@@ -105,65 +110,101 @@ class PayrollController extends Controller
 
         $periodStart = Carbon::parse($validated['payroll_period_start']);
         $periodEnd = Carbon::parse($validated['payroll_period_end']);
-        $hourlyRate = $employee->salary_rate / 8;
 
-        // --- Attendance ---
+        $dailyRate = (float) $employee->salary_rate;
+        $hourlyRate = $dailyRate / 8;
+
+        // Use the basic_salary sent from JS (semi-monthly) — this fixes the mismatch
+        $basicSalary = (float) $validated['basic_salary'];
+
+        // Still fetch real attendance for records
         $daysWorked = $this->attendanceService->countWorkDaysInPeriod($validated['user_id'], $periodStart, $periodEnd);
         $hoursWorked = $this->attendanceService->calculateTotalHoursWorked($validated['user_id'], $periodStart, $periodEnd);
-        $basicSalary = $this->attendanceService->calculateBasicSalary($employee, $periodStart, $periodEnd);
 
-        // --- Overtime ---
+        // === OT & UT ===
         $approvedOvertimes = OvertimeUndertime::where('user_id', $validated['user_id'])
             ->whereBetween('date', [$periodStart, $periodEnd])
             ->where('status', 'approved')
             ->where('type', 'overtime')
             ->get();
+
         $totalOTHours = $approvedOvertimes->sum('hours');
         $overtimePay = round($hourlyRate * $totalOTHours, 2);
 
-        // --- Undertime ---
         $approvedUndertimes = OvertimeUndertime::where('user_id', $validated['user_id'])
             ->whereBetween('date', [$periodStart, $periodEnd])
             ->where('status', 'approved')
             ->where('type', 'undertime')
             ->get();
+
         $totalUTHours = $approvedUndertimes->sum('hours');
         $undertimeDeduction = round($hourlyRate * $totalUTHours, 2);
 
         if ($totalUTHours > 0) {
             $undertimeDates = $approvedUndertimes->pluck('date')->map(fn($d) => Carbon::parse($d)->format('Y-m-d'));
+
             Attendance::where('user_id', $validated['user_id'])
                 ->whereIn('date', $undertimeDates)
                 ->update(['status' => 'late']);
         }
 
-        // --- Manual deductions/allowances ---
-        $manualDeductions = collect($request->deductions ?? [])->filter(fn($d) => !empty($d['name']) && floatval($d['amount']) > 0);
-        $totalManualDeductions = $manualDeductions->sum(fn($d) => floatval($d['amount']));
-        $totalAllowances = floatval($validated['total_allowances'] ?? 0);
-        $totalDeductions = $totalManualDeductions + $undertimeDeduction;
+        // === Statutory (full monthly → halved for semi-monthly) ===
+        $monthlySalary = $dailyRate * 22;
 
-        // --- Create payroll ---
+        $sss = 0;
+        $pagibig = 0;
+        $statutory = StatutoryDeduction::all();
+
+        if ($employee->has_sss) {
+            $row = $statutory->first(fn($d) => $d->name === 'SSS' && $monthlySalary >= ($d->min_salary ?? 0) && $monthlySalary <= ($d->max_salary ?? INF));
+
+            $fullSss = $row ? floatval($row->employee_share ?? 0) : 0;
+            $sss = round($fullSss / 2, 2);
+        }
+
+        if ($employee->has_pagibig) {
+            $row = $statutory->first(fn($d) => $d->name === 'Pag-IBIG' && $monthlySalary >= ($d->min_salary ?? 0) && $monthlySalary <= ($d->max_salary ?? INF));
+
+            $fullPagibig = $row ? min($monthlySalary * (floatval($row->employee_share) / 100), 100) : 0;
+            $pagibig = round($fullPagibig / 2, 2);
+        }
+
+        // === Manual items from form ===
+        $manualAllowances = collect($request->allowances ?? [])->filter(fn($a) => !empty($a['name']) && floatval($a['amount']) > 0);
+
+        $totalManualAllowances = $manualAllowances->sum(fn($a) => floatval($a['amount']));
+
+        $manualDeductions = collect($request->deductions ?? [])->filter(fn($d) => !empty($d['name']) && floatval($d['amount']) > 0);
+
+        $totalManualDeductions = $manualDeductions->sum(fn($d) => floatval($d['amount']));
+
+        // === Final consistent calculation ===
+        $grossPay = $basicSalary + $overtimePay;
+        $totalDeductions = $totalManualDeductions + $undertimeDeduction + $sss + $pagibig;
+        $netSalary = $grossPay + $totalManualAllowances - $totalDeductions;
+
+        // === Create record ===
         $payroll = Payroll::create([
             'user_id' => $validated['user_id'],
             'payroll_period_start' => $periodStart,
             'payroll_period_end' => $periodEnd,
-            'total_allowances' => $totalAllowances + $overtimePay,
-            'total_deductions' => $totalDeductions,
-            'basic_salary' => $basicSalary,
+            'basic_salary' => round($basicSalary, 2),
             'days_worked' => $daysWorked,
             'hours_worked' => $hoursWorked,
+            'total_allowances' => round($totalManualAllowances + $overtimePay, 2),
+            'total_deductions' => round($totalDeductions, 2),
+            'sss' => $sss,
+            'pagibig' => $pagibig,
+            'net_pay' => round($netSalary, 2),
             'status' => 'pending',
         ]);
 
-        // --- Allowance line items ---
-        foreach ($request->allowances ?? [] as $allowance) {
-            if (!empty($allowance['name']) && floatval($allowance['amount']) > 0) {
-                $payroll->allowances()->create([
-                    'allowance_type' => $allowance['name'],
-                    'amount' => $allowance['amount'],
-                ]);
-            }
+        // Allowances
+        foreach ($manualAllowances as $a) {
+            $payroll->allowances()->create([
+                'allowance_type' => $a['name'],
+                'amount' => $a['amount'],
+            ]);
         }
         if ($overtimePay > 0) {
             $payroll->allowances()->create([
@@ -172,14 +213,12 @@ class PayrollController extends Controller
             ]);
         }
 
-        // --- Manual deduction line items ---
-        foreach ($request->deductions ?? [] as $deduction) {
-            if (!empty($deduction['name']) && floatval($deduction['amount']) > 0) {
-                $payroll->deductions()->create([
-                    'deduction_type' => $deduction['name'],
-                    'amount' => $deduction['amount'],
-                ]);
-            }
+        // Deductions
+        foreach ($manualDeductions as $d) {
+            $payroll->deductions()->create([
+                'deduction_type' => $d['name'],
+                'amount' => $d['amount'],
+            ]);
         }
         if ($undertimeDeduction > 0) {
             $payroll->deductions()->create([
@@ -189,7 +228,6 @@ class PayrollController extends Controller
             ]);
         }
 
-        // --- Auto-deduct cash advances & salary loans ---
         $this->applyReceivableDeductions($payroll, $validated['user_id']);
 
         PayrollNotification::payrollCreated($payroll);
@@ -221,15 +259,20 @@ class PayrollController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'payroll_period_start' => 'required|date',
-            'payroll_period_end' => 'required|date',
+            'payroll_period_end' => 'required|date|after_or_equal:payroll_period_start',
             'recalculate_from_attendance' => 'nullable|boolean',
-            'allowances.*.name' => 'nullable|string',
+
+            'basic_salary' => 'required|numeric|min:0', // added
+            'total_allowances' => 'nullable|numeric|min:0',
+            'total_deductions' => 'nullable|numeric|min:0',
+
+            'allowances.*.name' => 'nullable|string|max:255',
             'allowances.*.amount' => 'nullable|numeric|min:0',
-            'deductions.*.name' => 'nullable|string',
+            'deductions.*.name' => 'nullable|string|max:255',
             'deductions.*.amount' => 'nullable|numeric|min:0',
         ]);
 
-        $employee = User::find($validated['user_id']);
+        $employee = User::findOrFail($validated['user_id']);
 
         if (in_array($employee->role, ['superadmin', 'qr_admin'])) {
             return redirect()
@@ -239,13 +282,19 @@ class PayrollController extends Controller
 
         $periodStart = Carbon::parse($validated['payroll_period_start']);
         $periodEnd = Carbon::parse($validated['payroll_period_end']);
-        $hourlyRate = $employee->salary_rate / 8;
 
+        $dailyRate = (float) $employee->salary_rate;
+        $hourlyRate = $dailyRate / 8;
+
+        $basicSalary = (float) $validated['basic_salary']; // use form value
+
+        // OT / UT
         $approvedOvertimes = OvertimeUndertime::where('user_id', $validated['user_id'])
             ->whereBetween('date', [$periodStart, $periodEnd])
             ->where('status', 'approved')
             ->where('type', 'overtime')
             ->get();
+
         $totalOTHours = $approvedOvertimes->sum('hours');
         $overtimePay = round($hourlyRate * $totalOTHours, 2);
 
@@ -254,44 +303,77 @@ class PayrollController extends Controller
             ->where('status', 'approved')
             ->where('type', 'undertime')
             ->get();
+
         $totalUTHours = $approvedUndertimes->sum('hours');
         $undertimeDeduction = round($hourlyRate * $totalUTHours, 2);
 
         if ($totalUTHours > 0) {
             $undertimeDates = $approvedUndertimes->pluck('date')->map(fn($d) => Carbon::parse($d)->format('Y-m-d'));
+
             Attendance::where('user_id', $validated['user_id'])
                 ->whereIn('date', $undertimeDates)
                 ->update(['status' => 'late']);
         }
 
-        $manualDeductions = collect($request->deductions ?? [])->filter(fn($d) => !empty($d['name']) && floatval($d['amount']) > 0);
-        $totalManualDeductions = $manualDeductions->sum(fn($d) => floatval($d['amount']));
+        // Manual items
         $manualAllowances = collect($request->allowances ?? [])->filter(fn($a) => !empty($a['name']) && floatval($a['amount']) > 0);
+
         $totalManualAllowances = $manualAllowances->sum(fn($a) => floatval($a['amount']));
+
+        $manualDeductions = collect($request->deductions ?? [])->filter(fn($d) => !empty($d['name']) && floatval($d['amount']) > 0);
+
+        $totalManualDeductions = $manualDeductions->sum(fn($d) => floatval($d['amount']));
+
+        // Statutory (same as store)
+        $monthlySalary = $dailyRate * 22;
+        $sss = 0;
+        $pagibig = 0;
+        $statutory = StatutoryDeduction::all();
+
+        if ($employee->has_sss) {
+            $row = $statutory->first(fn($d) => $d->name === 'SSS' && $monthlySalary >= ($d->min_salary ?? 0) && $monthlySalary <= ($d->max_salary ?? INF));
+            $fullSss = $row ? floatval($row->employee_share ?? 0) : 0;
+            $sss = round($fullSss / 2, 2);
+        }
+
+        if ($employee->has_pagibig) {
+            $row = $statutory->first(fn($d) => $d->name === 'Pag-IBIG' && $monthlySalary >= ($d->min_salary ?? 0) && $monthlySalary <= ($d->max_salary ?? INF));
+            $fullPagibig = $row ? min($monthlySalary * (floatval($row->employee_share) / 100), 100) : 0;
+            $pagibig = round($fullPagibig / 2, 2);
+        }
+
+        // Final calculation
+        $grossPay = $basicSalary + $overtimePay;
+        $totalDeductions = $totalManualDeductions + $undertimeDeduction + $sss + $pagibig;
+        $netSalary = $grossPay + $totalManualAllowances - $totalDeductions;
 
         $updateData = [
             'user_id' => $validated['user_id'],
             'payroll_period_start' => $periodStart,
             'payroll_period_end' => $periodEnd,
-            'total_allowances' => $totalManualAllowances + $overtimePay,
-            'total_deductions' => $totalManualDeductions + $undertimeDeduction,
+            'basic_salary' => round($basicSalary, 2),
+            'total_allowances' => round($totalManualAllowances + $overtimePay, 2),
+            'total_deductions' => round($totalDeductions, 2),
+            'sss' => $sss,
+            'pagibig' => $pagibig,
+            'net_pay' => round($netSalary, 2),
             'status' => 'pending',
         ];
 
         if ($request->boolean('recalculate_from_attendance')) {
-            $updateData['basic_salary'] = $this->attendanceService->calculateBasicSalary($employee, $periodStart, $periodEnd);
             $updateData['days_worked'] = $this->attendanceService->countWorkDaysInPeriod($validated['user_id'], $periodStart, $periodEnd);
             $updateData['hours_worked'] = $this->attendanceService->calculateTotalHoursWorked($validated['user_id'], $periodStart, $periodEnd);
         }
 
         $payroll->update($updateData);
 
-        // Rebuild allowances
+        // Rebuild line items
         $payroll->allowances()->delete();
-        foreach ($request->allowances ?? [] as $allowance) {
-            if (!empty($allowance['name']) && floatval($allowance['amount']) > 0) {
-                $payroll->allowances()->create(['allowance_type' => $allowance['name'], 'amount' => $allowance['amount']]);
-            }
+        foreach ($manualAllowances as $allowance) {
+            $payroll->allowances()->create([
+                'allowance_type' => $allowance['name'],
+                'amount' => $allowance['amount'],
+            ]);
         }
         if ($overtimePay > 0) {
             $payroll->allowances()->create([
@@ -300,12 +382,12 @@ class PayrollController extends Controller
             ]);
         }
 
-        // Rebuild deductions
         $payroll->deductions()->delete();
-        foreach ($request->deductions ?? [] as $deduction) {
-            if (!empty($deduction['name']) && floatval($deduction['amount']) > 0) {
-                $payroll->deductions()->create(['deduction_type' => $deduction['name'], 'amount' => $deduction['amount']]);
-            }
+        foreach ($manualDeductions as $deduction) {
+            $payroll->deductions()->create([
+                'deduction_type' => $deduction['name'],
+                'amount' => $deduction['amount'],
+            ]);
         }
         if ($undertimeDeduction > 0) {
             $payroll->deductions()->create([
@@ -427,9 +509,7 @@ class PayrollController extends Controller
                 ]);
             }
 
-            // --- Auto-deduct cash advances & salary loans ---
             $this->applyReceivableDeductions($payroll, $employee->id);
-
             $createdCount++;
         }
 
@@ -452,34 +532,36 @@ class PayrollController extends Controller
     public function computeStatutory(Request $request)
     {
         $request->validate([
-            'basic_salary' => 'required|numeric|min:0',
+            'basic_salary' => 'required|numeric|min:0', // this is now the semi-monthly basic
             'has_sss' => 'required|boolean',
             'has_pagibig' => 'required|boolean',
         ]);
 
-        $semiMonthlySalary = $request->basic_salary;
-        $monthlySalary = $semiMonthlySalary * 2;
+        $semiMonthly = $request->basic_salary;
+        $monthly = $semiMonthly * 2;
+
         $results = [];
 
         if ($request->has_sss) {
-            $sss = StatutoryDeduction::where('name', 'SSS')->where('min_salary', '<=', $monthlySalary)->where('max_salary', '>=', $monthlySalary)->first();
+            $sss = StatutoryDeduction::where('name', 'SSS')->where('min_salary', '<=', $monthly)->where('max_salary', '>=', $monthly)->first();
+
             if ($sss) {
-                $amount = $sss->employee_share ?? $monthlySalary * ($sss->percentage_employee / 100);
-                $results[] = ['name' => 'SSS', 'amount' => round($amount / 2, 2)];
+                $full = $sss->employee_share ?? $monthly * ($sss->percentage_employee / 100);
+                $results[] = ['name' => 'SSS', 'amount' => round($full / 2, 2)];
             }
         }
 
         if ($request->has_pagibig) {
-            $pagibig = StatutoryDeduction::where('name', 'Pag-IBIG')->where('min_salary', '<=', $monthlySalary)->where('max_salary', '>=', $monthlySalary)->first();
+            $pagibig = StatutoryDeduction::where('name', 'Pag-IBIG')->where('min_salary', '<=', $monthly)->where('max_salary', '>=', $monthly)->first();
+
             if ($pagibig) {
-                $amount = $pagibig->employee_share ?? $monthlySalary * ($pagibig->percentage_employee / 100);
-                $results[] = ['name' => 'Pag-IBIG', 'amount' => round($amount / 2, 2)];
+                $full = $pagibig->employee_share ?? min($monthly * ($pagibig->percentage_employee / 100), 100);
+                $results[] = ['name' => 'Pag-IBIG', 'amount' => round($full / 2, 2)];
             }
         }
 
         return response()->json($results);
     }
-
     public function getOtUt(Request $request)
     {
         $request->validate([
@@ -514,7 +596,6 @@ class PayrollController extends Controller
         $summary = $this->attendanceService->getAttendanceSummary($request->user_id, $periodStart, $periodEnd);
         $hourlyRate = $employee->salary_rate / 8;
 
-        // --- Overtime / Undertime ---
         $otHours = OvertimeUndertime::where('user_id', $request->user_id)
             ->whereBetween('date', [$periodStart, $periodEnd])
             ->where('status', 'approved')
@@ -532,7 +613,6 @@ class PayrollController extends Controller
         $summary['undertime_hours'] = round($utHours, 2);
         $summary['undertime_deduction'] = round($hourlyRate * $utHours, 2);
 
-        // --- Cash Advances (approved, not yet deducted) ---
         $cashAdvances = CashAdvance::where('user_id', $request->user_id)
             ->where('status', 'approved')
             ->whereNull('deducted_payroll_id')
@@ -548,7 +628,6 @@ class PayrollController extends Controller
             )
             ->values();
 
-        // --- Salary Loans (active, has remaining balance) ---
         $loans = SalaryLoan::where('user_id', $request->user_id)
             ->where('status', 'active')
             ->where('remaining_balance', '>', 0)
@@ -569,13 +648,11 @@ class PayrollController extends Controller
 
     // =========================================================
     // AUTO-DEDUCT: Cash Advances & Salary Loans
-    // Called after every payroll is created/batch-generated.
     // =========================================================
     private function applyReceivableDeductions(Payroll $payroll, int $userId): void
     {
         $deductionTotal = 0;
 
-        // --- 1. Cash Advances: deduct full approved amount, one per payroll ---
         $cashAdvances = CashAdvance::where('user_id', $userId)->where('status', 'approved')->whereNull('deducted_payroll_id')->get();
 
         foreach ($cashAdvances as $advance) {
@@ -584,31 +661,25 @@ class PayrollController extends Controller
                 'amount' => $advance->amount,
                 'description' => 'Cash advance auto-deducted from payroll.',
             ]);
-
             $advance->update([
                 'status' => 'deducted',
                 'deducted_payroll_id' => $payroll->id,
             ]);
-
             $deductionTotal += $advance->amount;
         }
 
-        // --- 2. Salary Loans: deduct one monthly instalment per payroll ---
         $loans = SalaryLoan::where('user_id', $userId)->where('status', 'active')->get();
 
         foreach ($loans as $loan) {
-            $amount = $loan->deductInstalment(); // updates loan balance/status internally
-
+            $amount = $loan->deductInstalment();
             $payroll->deductions()->create([
                 'deduction_type' => 'Salary Loan',
                 'amount' => $amount,
                 'description' => 'Loan instalment auto-deducted. Remaining balance: ₱' . number_format($loan->remaining_balance, 2),
             ]);
-
             $deductionTotal += $amount;
         }
 
-        // --- 3. Update payroll total_deductions to reflect the new items ---
         if ($deductionTotal > 0) {
             $payroll->increment('total_deductions', $deductionTotal);
         }
