@@ -27,7 +27,13 @@ class RouteController extends Controller
         
         $routes = Route::all();
         $vehicles = Vehicle::orderBy($sortBy, $sortOrder)->get();
-        return view('remittance-clerk.management.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder'));
+        
+        // Calculate statistics
+        $totalVehicles = Vehicle::count();
+        $activeVehicles = Vehicle::where('status', 'active')->count();
+        $underMaintenanceVehicles = Vehicle::where('status', 'under_maintenance')->count();
+        
+        return view('remittance-clerk.management.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder', 'totalVehicles', 'activeVehicles', 'underMaintenanceVehicles'));
     }
 
     public function create()

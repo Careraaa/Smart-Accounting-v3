@@ -54,11 +54,22 @@
                             value="{{ old('email') }}" required>
                         @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
+                    <div class="col-md-6 mb-4">
+                        <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                        <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
+                            <option value="">-- Select Status --</option>
+                            <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                        @error('status')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    </div>
                 </div>
-                    <input type="date" name="date_of_hire" id="date_of_hire"
-                        class="form-control @error('date_of_hire') is-invalid @enderror"
-                        value="{{ old('date_of_hire') }}" required>
-                    @error('date_of_hire')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        <label for="date_of_hire" class="form-label">Date of Hire <span class="text-danger">*</span></label>
+                        <input type="date" name="date_of_hire" id="date_of_hire"
+                            class="form-control @error('date_of_hire') is-invalid @enderror"
+                            value="{{ old('date_of_hire') }}" required>
+                        @error('date_of_hire')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    </div>
                 </div>
 
                 <div class="mb-4">

@@ -14,8 +14,7 @@ class Route extends Model
         'route_code',
         'origin',
         'destination',
-        'distance',
-        'fare_amount',
+        'boundary',
         'status',
     ];
 

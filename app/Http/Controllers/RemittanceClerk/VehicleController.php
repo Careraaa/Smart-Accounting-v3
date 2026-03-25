@@ -27,7 +27,13 @@ class VehicleController extends Controller
         
         $routes = Route::all();
         $vehicles = Vehicle::orderBy($sortBy, $sortOrder)->get();
-        return view('remittance-clerk.management.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder'));
+        
+        // Calculate statistics
+        $totalVehicles = Vehicle::count();
+        $activeVehicles = Vehicle::where('status', 'active')->count();
+        $underMaintenanceVehicles = Vehicle::where('status', 'under_maintenance')->count();
+        
+        return view('remittance-clerk.management.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder', 'totalVehicles', 'activeVehicles', 'underMaintenanceVehicles'));
     }
 
     public function create()
@@ -42,10 +48,8 @@ class VehicleController extends Controller
             'origin' => 'required|string',
             'destination' => 'required|string',
             'operator' => 'required|string',
-            'vehicle_type' => 'nullable|string',
-            'make' => 'nullable|string',
-            'model' => 'nullable|string',
-            'year' => 'nullable|integer',
+            'boundary' => 'required|numeric|min:0',
+            'status' => 'required|in:active,under_maintenance',
         ]);
 
         // Find or create route with the given origin and destination
@@ -59,14 +63,16 @@ class VehicleController extends Controller
             ],
         );
 
+        // Update boundary if provided
+        if (!is_null($validated['boundary'])) {
+            $route->update(['boundary' => $validated['boundary']]);
+        }
+
         $vehicleData = [
             'plate_number' => $validated['plate_number'],
             'operator' => $validated['operator'],
             'route_id' => $route->id,
-            'vehicle_type' => $validated['vehicle_type'] ?? null,
-            'make' => $validated['make'] ?? null,
-            'model' => $validated['model'] ?? null,
-            'year' => $validated['year'] ?? null,
+            'status' => $validated['status'],
         ];
 
         Vehicle::create($vehicleData);
@@ -91,10 +97,8 @@ class VehicleController extends Controller
             'origin' => 'required|string',
             'destination' => 'required|string',
             'operator' => 'required|string',
-            'vehicle_type' => 'nullable|string',
-            'make' => 'nullable|string',
-            'model' => 'nullable|string',
-            'year' => 'nullable|integer',
+            'boundary' => 'required|numeric|min:0',
+            'status' => 'required|in:active,under_maintenance',
         ]);
 
         // Find or create route with the given origin and destination
@@ -108,14 +112,16 @@ class VehicleController extends Controller
             ],
         );
 
+        // Update boundary if provided
+        if (!is_null($validated['boundary'])) {
+            $route->update(['boundary' => $validated['boundary']]);
+        }
+
         $vehicleData = [
             'plate_number' => $validated['plate_number'],
             'operator' => $validated['operator'],
             'route_id' => $route->id,
-            'vehicle_type' => $validated['vehicle_type'] ?? null,
-            'make' => $validated['make'] ?? null,
-            'model' => $validated['model'] ?? null,
-            'year' => $validated['year'] ?? null,
+            'status' => $validated['status'],
         ];
 
         $vehicle->update($vehicleData);
