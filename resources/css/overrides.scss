@@ -1716,3 +1716,88 @@ hr {
 .prl-item-remove:hover {
     background: #b02a37 !important;
 }
+
+/* ================================================================
+   Payroll Create / Show Consistency + Gray Create Button
+================================================================ */
+
+/* Make Show page use the same centered narrow layout as Create */
+.payroll-show-wrapper {
+    max-width: 760px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+}
+
+/* Make the main card on Show look identical to Create's .prl-card */
+.payroll-show-wrapper .card {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+}
+
+.payroll-show-wrapper .card-header {
+    background: #fff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 20px 22px !important;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.payroll-show-wrapper .card-body {
+    padding: 20px 22px !important;
+}
+
+/* Gray "Create Payroll" button on the Create page */
+.prl-btn-submit {
+    background: #6b7280 !important; /* neutral gray */
+    border-color: #6b7280 !important;
+}
+
+.prl-btn-submit:hover {
+    background: #4b5563 !important;
+}
+
+/* Make Show page typography & spacing match Create */
+.prl-field-label,
+.prl-section-label,
+.prl-sub-label {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: #9ca3af !important;
+    margin-bottom: 6px !important;
+}
+
+.prl-field-value,
+.prl-line-key,
+.prl-line-val {
+    font-size: 0.875rem !important;
+    color: #111827 !important;
+}
+
+.prl-net-box {
+    background: #1c1c1e !important;
+    border-radius: 12px !important;
+    padding: 18px 22px !important;
+    margin-top: 20px !important;
+}
+
+/* Improve action buttons on Show to feel more consistent */
+.payroll-show-wrapper .emp-action-btn {
+    height: 38px;
+    padding: 0 16px;
+    font-size: 0.815rem;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Small cleanup for the status badge on Show */
+.payroll-show-wrapper .card-body .row .mt-1 span[style*="border-radius:20px"] {
+    font-size: 0.7rem !important;
+    padding: 3px 10px !important;
+}

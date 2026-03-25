@@ -242,7 +242,7 @@
 
 /* ── Net box ──────────────────────────────────────────────────────────────── */
 .prl-net {
-    background: #111827;
+    background: #1c1c1e;
     border-radius: 12px;
     padding: 18px 22px;
     display: flex;
