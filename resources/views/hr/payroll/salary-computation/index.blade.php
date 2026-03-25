@@ -9,7 +9,7 @@
                 <a href="{{ route('payroll.salary-computation.batch-generate') }}" class="btn btn-success btn-sm">
                     <i class="feather-zap me-1"></i> Generate Batch
                 </a>
-                <a href="{{ route('payroll.create') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('payroll.salary-computation.create') }}" class="btn btn-primary btn-sm">
                     <i class="feather-plus me-1"></i> Create Payroll
                 </a>
             </div>
@@ -31,7 +31,7 @@
                             
                             @foreach($headers as $column => $label)
                                 <th class="sortable-header @if($column === 'status') text-center @endif" data-column="{{ $column }}">
-                                    <a href="{{ route('payroll.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
+                                    <a href="{{ route('payroll.salary-computation.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
                                        class="sort-link">
                                         {{ $label }}
                                         @if($sortBy === $column)
@@ -75,13 +75,13 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
-                                        <a href="{{ route('payroll.show', $payroll) }}" class="emp-action-btn emp-action-view" title="View">
+                                        <a href="{{ route('payroll.salary-computation.show', $payroll) }}" class="emp-action-btn emp-action-view" title="View">
                                             <i class="feather-eye"></i>
                                         </a>
-                                        <a href="{{ route('payroll.edit', $payroll) }}" class="emp-action-btn emp-action-edit" title="Edit">
+                                        <a href="{{ route('payroll.salary-computation.edit', $payroll) }}" class="emp-action-btn emp-action-edit" title="Edit">
                                             <i class="feather-edit-2"></i>
                                         </a>
-                                        <form action="{{ route('payroll.destroy', $payroll) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('payroll.salary-computation.destroy', $payroll) }}" method="POST" class="d-inline">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="emp-action-btn emp-action-danger" title="Delete"
                                                 onclick="return confirm('Delete this payroll?')">

@@ -11,8 +11,9 @@ import "./HR/leave-management.js";
 import "./HR/overtime-management.js";
 
 // Payroll scripts
-import "./Payroll/create-payroll.js";
-import "./Payroll/edit-payroll.js";
+//  import "./Payroll/create-payroll.js";
+//  import "./Payroll/edit-payroll.js";
+import "./Payroll/payroll-form.js";
 
 // Template scripts (init / dashboard / widgets)
 import "./template/bootstrap.min.js";

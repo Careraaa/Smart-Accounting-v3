@@ -16,10 +16,15 @@ class OvertimeUndertime extends Model
         'hours',
         'reason',
         'status',
+        'amount',              // NEW
+        'hourly_rate_used',    // NEW
     ];
 
     protected $casts = [
         'date' => 'date',
+        'hours' => 'decimal:2',
+        'amount' => 'decimal:2',
+        'hourly_rate_used' => 'decimal:2',
     ];
 
     public function employee()
@@ -54,5 +59,19 @@ class OvertimeUndertime extends Model
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
+    }
+
+    /* ======================
+     |  HELPERS (NEW)
+     ====================== */
+
+    public function isOvertime(): bool
+    {
+        return $this->type === 'overtime';
+    }
+
+    public function isUndertime(): bool
+    {
+        return $this->type === 'undertime';
     }
 }

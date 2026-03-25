@@ -248,8 +248,13 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->date('date');
-            $table->string('type');
+            $table->string('type'); 
             $table->decimal('hours', 5, 2);
+
+            
+            $table->decimal('amount', 15, 2)->nullable(); 
+            $table->decimal('hourly_rate_used', 15, 2)->nullable(); 
+
             $table->text('reason')->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();

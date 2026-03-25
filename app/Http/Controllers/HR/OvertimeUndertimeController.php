@@ -15,7 +15,6 @@ class OvertimeUndertimeController extends Controller
     {
         $query = OvertimeUndertime::with('employee');
 
-        // Search by employee name or ID
         if ($request->search) {
             $query->whereHas('employee', function ($q) use ($request) {
                 $q->where('first_name', 'like', '%' . $request->search . '%')
@@ -23,17 +22,14 @@ class OvertimeUndertimeController extends Controller
             });
         }
 
-        // Filter by status
         if ($request->status && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
-        // Filter by type (overtime/undertime)
         if ($request->type && $request->type !== 'all') {
             $query->where('type', $request->type);
         }
 
-        // Filter by date range
         if ($request->start_date) {
             $query->whereDate('date', '>=', $request->start_date);
         }
@@ -41,24 +37,21 @@ class OvertimeUndertimeController extends Controller
             $query->whereDate('date', '<=', $request->end_date);
         }
 
-        // Sort options
         $sortBy = $request->sort_by ?? 'date';
         $sortOrder = $request->sort_order ?? 'desc';
         $query->orderBy($sortBy, $sortOrder);
 
         $overtimeRecords = $query->paginate(10);
 
-        // Statistics
+        // Statistics (kept as-is for now)
         $totalRecords = OvertimeUndertime::count();
         $pendingRecords = OvertimeUndertime::where('status', 'pending')->count();
         $approvedRecords = OvertimeUndertime::where('status', 'approved')->count();
         $rejectedRecords = OvertimeUndertime::where('status', 'rejected')->count();
 
-        // Type statistics (Overtime vs Undertime)
         $overtimeCount = OvertimeUndertime::where('type', 'overtime')->count();
         $undertimeCount = OvertimeUndertime::where('type', 'undertime')->count();
 
-        // Total hours by type
         $totalOvertimeHours = OvertimeUndertime::where('type', 'overtime')->sum('hours');
         $totalUndertimeHours = OvertimeUndertime::where('type', 'undertime')->sum('hours');
 
@@ -85,6 +78,7 @@ class OvertimeUndertimeController extends Controller
         return view('hr.overtime.create', compact('employees', 'types'));
     }
 
+    // ==================== MAIN CHANGE ====================
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -95,20 +89,40 @@ class OvertimeUndertimeController extends Controller
             'reason' => 'required|string',
         ]);
 
-        $overtime = OvertimeUndertime::create($validated);
+        $employee = Employee::findOrFail($validated['user_id']);
+
+        // Calculate hourly rate from daily salary_rate
+        $hourlyRate = $employee->salary_rate / 8;
+
+        // Compute amount
+        $amount = $validated['type'] === 'overtime'
+            ? $validated['hours'] * $hourlyRate
+            : -($validated['hours'] * $hourlyRate);
+
+        $overtime = OvertimeUndertime::create([
+            'user_id'          => $validated['user_id'],
+            'date'             => $validated['date'],
+            'type'             => $validated['type'],
+            'hours'            => $validated['hours'],
+            'reason'           => $validated['reason'],
+            'status'           => 'pending',           // default
+            'amount'           => $amount,
+            'hourly_rate_used' => $hourlyRate,
+        ]);
+
         $overtime->load('employee');
 
-        // Send notifications
+        // Notifications
         OvertimeNotification::submitted($overtime);
         OvertimeNotification::notifyManagersForApproval($overtime);
 
-        return redirect()->route('overtime.index')->with('success', 'Overtime/Undertime record created successfully.');
+        return redirect()->route('overtime.index')
+            ->with('success', 'Overtime/Undertime record created successfully.');
     }
 
     public function show(OvertimeUndertime $overtime)
     {
         $overtime->load('employee');
-
         return view('hr.overtime.show', compact('overtime'));
     }
 
@@ -120,6 +134,7 @@ class OvertimeUndertimeController extends Controller
         return view('hr.overtime.edit', compact('overtime', 'employees', 'types'));
     }
 
+    // ==================== MAIN CHANGE ====================
     public function update(Request $request, OvertimeUndertime $overtime)
     {
         $validated = $request->validate([
@@ -130,35 +145,37 @@ class OvertimeUndertimeController extends Controller
             'reason' => 'required|string',
         ]);
 
-        $overtime->update($validated);
+        $employee = Employee::findOrFail($validated['user_id']);
+
+        $hourlyRate = $employee->salary_rate / 8;
+
+        $amount = $validated['type'] === 'overtime'
+            ? $validated['hours'] * $hourlyRate
+            : -($validated['hours'] * $hourlyRate);
+
+        $overtime->update([
+            'user_id'          => $validated['user_id'],
+            'date'             => $validated['date'],
+            'type'             => $validated['type'],
+            'hours'            => $validated['hours'],
+            'reason'           => $validated['reason'],
+            'amount'           => $amount,
+            'hourly_rate_used' => $hourlyRate,
+        ]);
+
         $overtime->load('employee');
 
-        // Send notification
         OvertimeNotification::updated($overtime);
 
-        return redirect()->route('overtime.show', $overtime->id)->with('success', 'Overtime/Undertime record updated successfully.');
+        return redirect()->route('overtime.show', $overtime->id)
+            ->with('success', 'Overtime/Undertime record updated successfully.');
     }
 
-    public function destroy(OvertimeUndertime $overtime)
-    {
-        $overtime->load('employee');
-
-        // Send notification
-        OvertimeNotification::deleted($overtime);
-
-        $overtime->delete();
-
-        return redirect()->route('overtime.index')->with('success', 'Overtime/Undertime record deleted successfully.');
-    }
-
+    // approve / reject / destroy methods remain the same
     public function approve(Request $request, OvertimeUndertime $overtime)
     {
-        $overtime->update([
-            'status' => 'approved',
-        ]);
+        $overtime->update(['status' => 'approved']);
         $overtime->load('employee');
-
-        // Send notification
         OvertimeNotification::approved($overtime);
 
         return redirect()->back()->with('success', 'Record approved successfully.');
@@ -170,14 +187,19 @@ class OvertimeUndertimeController extends Controller
             'rejection_reason' => 'nullable|string',
         ]);
 
-        $overtime->update([
-            'status' => 'rejected',
-        ]);
+        $overtime->update(['status' => 'rejected']);
         $overtime->load('employee');
-
-        // Send notification
         OvertimeNotification::rejected($overtime);
 
         return redirect()->back()->with('success', 'Record rejected successfully.');
+    }
+
+    public function destroy(OvertimeUndertime $overtime)
+    {
+        $overtime->load('employee');
+        OvertimeNotification::deleted($overtime);
+        $overtime->delete();
+
+        return redirect()->route('overtime.index')->with('success', 'Overtime/Undertime record deleted successfully.');
     }
 }

@@ -5,7 +5,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span class="card-title mb-0">Payroll Details</span>
-            <a href="{{ route('payroll.index') }}" class="emp-action-btn emp-action-back">
+            <a href="{{ route('payroll.salary-computation.index') }}" class="emp-action-btn emp-action-back">
                 <i class="feather-arrow-left me-1"></i> Back
             </a>
         </div>
@@ -191,10 +191,10 @@
 
             {{-- Actions --}}
             <div class="d-flex gap-2 pt-3 border-top">
-                <a href="{{ route('payroll.edit', $payroll) }}" class="emp-action-btn emp-action-edit">
+                <a href="{{ route('payroll.salary-computation.edit', $payroll) }}" class="emp-action-btn emp-action-edit">
                     <i class="feather-edit-2 me-1"></i> Edit
                 </a>
-                <form action="{{ route('payroll.destroy', $payroll) }}" method="POST" class="d-inline">
+                <form action="{{ route('payroll.salary-computation.destroy', $payroll) }}" method="POST" class="d-inline">
                     @csrf @method('DELETE')
                     <button type="submit" class="emp-action-btn emp-action-danger"
                         onclick="return confirm('Delete this payroll?')">

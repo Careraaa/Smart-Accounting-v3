@@ -478,7 +478,7 @@
         {{-- Actions ──────────────────────────────────────────────────── --}}
         <div class="prl-footer">
             <button type="submit" class="prl-btn-submit">Create Payroll</button>
-            <a href="{{ route('payroll.index') }}" class="prl-btn-cancel">Cancel</a>
+            <a href="{{ route('payroll.salary-computation.index') }}" class="prl-btn-cancel">Cancel</a>
         </div>
 
     </div>{{-- /prl-card-body --}}
@@ -492,10 +492,10 @@
     <meta name="page-id" content="payroll-create">
     <script>
         window._prl = {
-            statutory:        @json(\App\Models\StatutoryDeduction::all()),
-            initAllowances:   @json(old('allowances', [])),
-            initDeductions:   @json(old('deductions', [])),
-            otUtUrl:          "{{ route('payroll.ot-ut') }}"
+            statutory:      @json(\App\Models\StatutoryDeduction::all()),
+            initAllowances: @json(old('allowances', [])),
+            initDeductions: @json(old('deductions', [])),
+            otUtUrl:        "{{ route('payroll.ot-ut') }}"   
         };
     </script>
 @endpush

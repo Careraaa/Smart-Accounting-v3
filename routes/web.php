@@ -195,19 +195,22 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
     Route::post('/overtime/{overtime}/approve', [OvertimeUndertimeController::class, 'approve'])->name('overtime.approve');
     Route::post('/overtime/{overtime}/reject', [OvertimeUndertimeController::class, 'reject'])->name('overtime.reject');
 
-    Route::prefix('payroll/salary-computation')
-        ->name('payroll.salary-computation.')
-        ->group(function () {
-            Route::get('/', [PayrollController::class, 'index'])->name('index');
-            Route::get('/create', [PayrollController::class, 'create'])->name('create');
-            Route::post('/', [PayrollController::class, 'store'])->name('store');
-            Route::get('/batch-generate', fn() => view('hr.payroll.salary-computation.batch-generate'))->name('batch-generate');
-            Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
-            Route::get('/{payroll}/edit', [PayrollController::class, 'edit'])->name('edit');
-            Route::put('/{payroll}', [PayrollController::class, 'update'])->name('update');
-            Route::delete('/{payroll}', [PayrollController::class, 'destroy'])->name('destroy');
-            Route::post('/{payroll}/recalculate', [PayrollController::class, 'recalculatePayroll'])->name('recalculate');
-        });
+    // HR Payroll Routes - All under salary-computation prefix
+Route::prefix('payroll/salary-computation')
+    ->name('payroll.salary-computation.')
+    ->group(function () {
+        Route::get('/', [PayrollController::class, 'index'])->name('index');
+        Route::get('/create', [PayrollController::class, 'create'])->name('create');
+        Route::post('/', [PayrollController::class, 'store'])->name('store');
+        
+        // These were missing or conflicting
+        Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
+        Route::get('/{payroll}/edit', [PayrollController::class, 'edit'])->name('edit');
+        Route::put('/{payroll}', [PayrollController::class, 'update'])->name('update');
+        Route::delete('/{payroll}', [PayrollController::class, 'destroy'])->name('destroy');
+        
+        Route::get('/batch-generate', fn() => view('hr.payroll.salary-computation.batch-generate'))->name('batch-generate');
+    });
 
     Route::post('/payroll/generate-batch', [PayrollController::class, 'generatePayrollBatch'])->name('payroll.generate-batch');
 
@@ -267,7 +270,6 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
             })->name('index');
         });
 
-    Route::resource('payroll', PayrollController::class);
     Route::get('payroll/{payroll}/payslip', [PayrollController::class, 'generatePayslip'])->name('payroll.generatePayslip');
 
     Route::get('/reports/payslips', fn() => view('hr.reports.payslips'))->name('reports.payslips');

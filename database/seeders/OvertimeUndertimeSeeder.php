@@ -8,28 +8,28 @@ use Carbon\Carbon;
 
 class OvertimeUndertimeSeeder extends Seeder
 {
-    /*
-     | Mirrors the attendance patterns above.
-     |
-     | Juan  → 3 approved overtime entries (stayed until 19:30)
-     | Maria → 5 approved undertime entries (arrived 45 mins late = 0.75 hrs)
-     | Carlo → 3 approved undertime entries (left 1.5 hrs early)
-     */
-
     public function run(): void
     {
+        // Get test users + their salary_rate from the users table
         $users = DB::table('users')
             ->whereIn('username', ['juan.trabaho', 'maria.halos', 'carlo.pahinga'])
-            ->pluck('id', 'username');
+            ->select('id', 'username', 'salary_rate')
+            ->get()
+            ->keyBy('username');
 
-        $juanId  = $users['juan.trabaho'];
-        $mariaId = $users['maria.halos'];
-        $carloId = $users['carlo.pahinga'];
+        $juan  = $users['juan.trabaho']  ?? null;
+        $maria = $users['maria.halos']   ?? null;
+        $carlo = $users['carlo.pahinga'] ?? null;
+
+        if (!$juan || !$maria || !$carlo) {
+            $this->command->warn('One or more test users (juan.trabaho, maria.halos, carlo.pahinga) not found. Skipping seeder.');
+            return;
+        }
 
         $year  = now()->year;
         $month = now()->month;
 
-        // Rebuild working days list (same logic as AttendanceSeeder)
+        // Generate first 15 working days of the month (skip weekends)
         $workDays = [];
         for ($day = 1; $day <= 15; $day++) {
             $date = Carbon::create($year, $month, $day);
@@ -40,60 +40,79 @@ class OvertimeUndertimeSeeder extends Seeder
 
         $records = [];
 
-        // -----------------------------------------------------------
-        // JUAN — Overtime on days he stayed until 19:30
-        // Standard shift ends 17:00 → 2.5 hrs OT
-        // -----------------------------------------------------------
+        // ====================== JUAN - Overtime ======================
         foreach ([1, 4, 8] as $index) {
             if (!isset($workDays[$index])) continue;
+
+            $dailyRate = $juan->salary_rate ?: 800;   // fallback if salary_rate is 0
+            $hourly    = $dailyRate / 8;
+            $amount    = 2.50 * $hourly;
+
             $records[] = [
-                'user_id'    => $juanId,
-                'date'       => $workDays[$index],
-                'type'       => 'overtime',
-                'hours'      => 2.50,
-                'reason'     => 'Month-end financial report consolidation',
-                'status'     => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'user_id'           => $juan->id,
+                'date'              => $workDays[$index],
+                'type'              => 'overtime',
+                'hours'             => 2.50,
+                'reason'            => 'Month-end financial report consolidation',
+                'status'            => 'approved',
+                'amount'            => round($amount, 2),
+                'hourly_rate_used'  => round($hourly, 2),
+                'created_at'        => now(),
+                'updated_at'        => now(),
             ];
         }
 
-        // -----------------------------------------------------------
-        // MARIA — Undertime on days she arrived 45 mins late
-        // 45 mins = 0.75 hrs undertime
-        // -----------------------------------------------------------
+        // ====================== MARIA - Undertime ======================
         foreach ([0, 2, 5, 7, 9] as $index) {
             if (!isset($workDays[$index])) continue;
+
+            $dailyRate = $maria->salary_rate ?: 800;
+            $hourly    = $dailyRate / 8;
+            $amount    = -(0.75 * $hourly);
+
             $records[] = [
-                'user_id'    => $mariaId,
-                'date'       => $workDays[$index],
-                'type'       => 'undertime',
-                'hours'      => 0.75,
-                'reason'     => 'Heavy traffic along C5 — "Malapit na po talaga"',
-                'status'     => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'user_id'           => $maria->id,
+                'date'              => $workDays[$index],
+                'type'              => 'undertime',
+                'hours'             => 0.75,
+                'reason'            => 'Heavy traffic along C5',
+                'status'            => 'approved',
+                'amount'            => round($amount, 2),
+                'hourly_rate_used'  => round($hourly, 2),
+                'created_at'        => now(),
+                'updated_at'        => now(),
             ];
         }
 
-        // -----------------------------------------------------------
-        // CARLO — Undertime on days he left at 15:30
-        // Standard shift ends 17:00 → 1.5 hrs undertime
-        // -----------------------------------------------------------
+        // ====================== CARLO - Undertime ======================
         foreach ([3, 6, 9] as $index) {
             if (!isset($workDays[$index])) continue;
+
+            $dailyRate = $carlo->salary_rate ?: 800;
+            $hourly    = $dailyRate / 8;
+            $amount    = -(1.50 * $hourly);
+
             $records[] = [
-                'user_id'    => $carloId,
-                'date'       => $workDays[$index],
-                'type'       => 'undertime',
-                'hours'      => 1.50,
-                'reason'     => 'Urgent nap — doctor\'s orders (self-diagnosed)',
-                'status'     => 'approved',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'user_id'           => $carlo->id,
+                'date'              => $workDays[$index],
+                'type'              => 'undertime',
+                'hours'             => 1.50,
+                'reason'            => "Urgent nap — doctor's orders",
+                'status'            => 'approved',
+                'amount'            => round($amount, 2),
+                'hourly_rate_used'  => round($hourly, 2),
+                'created_at'        => now(),
+                'updated_at'        => now(),
             ];
         }
 
+        // Clear any old records for these users first
+        DB::table('overtime_undertimes')
+            ->whereIn('user_id', [$juan->id, $maria->id, $carlo->id])
+            ->delete();
+
         DB::table('overtime_undertimes')->insert($records);
+
+        $this->command->info('✅ Overtime/Undertime seeder completed successfully with proper amounts!');
     }
 }
