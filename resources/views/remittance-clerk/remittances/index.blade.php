@@ -9,7 +9,59 @@
                 <i class="feather-plus me-1"></i> Add Remittance
             </a>
         </div>
-        <div class="card-body p-0">
+        <div class="card-body">
+            {{-- Statistics Cards --}}
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card card-statistic">
+                        <div class="card-body">
+                            <div class="stat-label">Total Remittances</div>
+                            <h3 class="mb-1" style="color: #0369a1;">{{ $totalRemittances }}</h3>
+                            <small class="text-muted">All remittances</small>
+                        </div>
+                        <div class="card-icon" style="color: #0ea5e9; opacity: 0.2;">
+                            <i class="feather-file-text" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-statistic">
+                        <div class="card-body">
+                            <div class="stat-label">Approved</div>
+                            <h3 class="mb-1" style="color: #16a34a;">{{ $approvedRemittances }}</h3>
+                            <small class="text-muted">Approved remittances</small>
+                        </div>
+                        <div class="card-icon" style="color: #22c55e; opacity: 0.2;">
+                            <i class="feather-check-circle" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-statistic">
+                        <div class="card-body">
+                            <div class="stat-label">Pending</div>
+                            <h3 class="mb-1" style="color: #ea580c;">{{ $pendingRemittances }}</h3>
+                            <small class="text-muted">Pending review</small>
+                        </div>
+                        <div class="card-icon" style="color: #f97316; opacity: 0.2;">
+                            <i class="feather-clock" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-statistic">
+                        <div class="card-body">
+                            <div class="stat-label">Rejected</div>
+                            <h3 class="mb-1" style="color: #dc2626;">{{ $rejectedRemittances }}</h3>
+                            <small class="text-muted">Rejected remittances</small>
+                        </div>
+                        <div class="card-icon" style="color: #ef4444; opacity: 0.2;">
+                            <i class="feather-x-circle" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table class="table table-hover w-100 mb-0">
                     <thead>

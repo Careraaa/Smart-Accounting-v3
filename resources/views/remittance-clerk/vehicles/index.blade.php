@@ -74,9 +74,7 @@
                                 </th>
                             @endforeach
                             
-                            <th class="sortable-header"><div class="sort-link">Origin</div></th>
-                            <th class="sortable-header"><div class="sort-link">Destination</div></th>
-                            <th class="sortable-header"><div class="sort-link">Boundary</div></th>
+                            <th class="sortable-header"><div class="sort-link">Route Name</div></th>
                             <th class="sortable-header"><div class="sort-link">Operator</div></th>
                             <th class="sortable-header text-center"><div class="sort-link justify-content-center">Status</div></th>
                             <th class="sortable-header text-center"><div class="sort-link justify-content-center">Actions</div></th>
@@ -86,17 +84,7 @@
                         @forelse($vehicles as $vehicle)
                             <tr>
                                 <td class="align-middle"><strong>{{ $vehicle->plate_number }}</strong></td>
-                                <td class="text-muted align-middle">{{ $vehicle->route->origin ?? 'N/A' }}</td>
-                                <td class="text-muted align-middle">{{ $vehicle->route->destination ?? 'N/A' }}</td>
-                                <td class="align-middle">
-                                    @if($vehicle->route && $vehicle->route->boundary)
-                                        <span style="background-color: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 4px; font-weight: 500;">
-                                            ₱{{ number_format($vehicle->route->boundary, 2) }}
-                                        </span>
-                                    @else
-                                        <span class="text-muted">—</span>
-                                    @endif
-                                </td>
+                                <td class="align-middle">{{ $vehicle->route->route_name ?? 'N/A' }}</td>
                                 <td class="align-middle">{{ $vehicle->operator }}</td>
                                 <td class="text-center align-middle">
                                     @php $status = strtolower($vehicle->status ?? 'active'); @endphp
@@ -131,7 +119,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-5">
+                                <td colspan="5" class="text-center text-muted py-5">
                                     <i class="feather-truck d-block mb-2" style="font-size:28px; opacity:.3;"></i>
                                     No vehicles found
                                 </td>

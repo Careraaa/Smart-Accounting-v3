@@ -33,42 +33,64 @@ class RouteController extends Controller
         $activeVehicles = Vehicle::where('status', 'active')->count();
         $underMaintenanceVehicles = Vehicle::where('status', 'under_maintenance')->count();
         
-        return view('remittance-clerk.management.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder', 'totalVehicles', 'activeVehicles', 'underMaintenanceVehicles'));
+        return view('remittance-clerk.routes.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder', 'totalVehicles', 'activeVehicles', 'underMaintenanceVehicles'));
     }
 
     public function create()
     {
-        // Routes are now managed through vehicles, redirect to vehicle creation
-        return redirect()->route('vehicles.create')->with('info', 'Create a vehicle to add a new route.');
+        return view('remittance-clerk.routes.create');
     }
 
     public function store(Request $request)
     {
-        // Routes are now managed through vehicles, redirect back
-        return redirect()->route('routes.index')->with('info', 'Routes are managed through vehicle creation.');
+        $validated = $request->validate([
+            'origin' => 'required|string',
+            'destination' => 'required|string',
+            'boundary' => 'required|numeric|min:0',
+        ]);
+
+        // Auto-generate route name from origin and destination
+        $validated['route_name'] = $validated['origin'] . ' - ' . $validated['destination'];
+
+        Route::create($validated);
+
+        return redirect()->route('routes.index')->with('success', 'Route created successfully.');
     }
 
     public function show(Route $route)
     {
-        // Routes are now managed through vehicles
-        return redirect()->route('routes.index')->with('info', 'Routes are managed through vehicles.');
+        return view('remittance-clerk.routes.show', compact('route'));
     }
 
     public function edit(Route $route)
     {
-        // Routes are now managed through vehicles, redirect to vehicle management
-        return redirect()->route('routes.index')->with('info', 'Routes are managed through vehicle editing.');
+        return view('remittance-clerk.routes.edit', compact('route'));
     }
 
     public function update(Request $request, Route $route)
     {
-        // Routes are now managed through vehicles
-        return redirect()->route('routes.index')->with('info', 'Routes are updated through vehicle management.');
+        $validated = $request->validate([
+            'origin' => 'required|string',
+            'destination' => 'required|string',
+            'boundary' => 'required|numeric|min:0',
+        ]);
+
+        // Auto-generate route name from origin and destination
+        $validated['route_name'] = $validated['origin'] . ' - ' . $validated['destination'];
+
+        $route->update($validated);
+
+        return redirect()->route('routes.index')->with('success', 'Route updated successfully.');
     }
 
     public function destroy(Route $route)
     {
-        // Routes are now managed through vehicles
-        return redirect()->route('routes.index')->with('info', 'Route management is handled through vehicles.');
+        // Check if route has vehicles before deleting
+        if ($route->vehicles()->count() > 0) {
+            return redirect()->route('routes.index')->with('warning', 'Cannot delete route with assigned vehicles.');
+        }
+
+        $route->delete();
+        return redirect()->route('routes.index')->with('success', 'Route deleted successfully.');
     }
 }

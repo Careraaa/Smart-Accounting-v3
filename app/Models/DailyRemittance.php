@@ -17,12 +17,24 @@ class DailyRemittance extends Model
         'remittance_date',
         'total_collection',
         'total_expenses',
+        'boundary',
         'net_remittance',
+        'is_short_remittance',
+        'short_amount',
+        'driver_share',
+        'pao_share',
+        'driver_amount_paid',
+        'driver_status',
+        'pao_amount_paid',
+        'pao_status',
+        'resolution_notes',
+        'resolved_at',
         'status',
     ];
 
     protected $casts = [
         'remittance_date' => 'date',
+        'resolved_at' => 'datetime',
     ];
 
     public function driver()

@@ -30,33 +30,30 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-4">
-                        <label for="origin" class="form-label">Origin <span class="text-danger">*</span></label>
-                        <input type="text" name="origin" id="origin"
-                            class="form-control @error('origin') is-invalid @enderror"
-                            value="{{ old('origin', $vehicle->route->origin ?? '') }}" placeholder="e.g., Marikina" required>
-                        @error('origin')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        <label for="route_id" class="form-label">Route <span class="text-danger">*</span></label>
+                        <select name="route_id" id="route_id"
+                            class="form-select @error('route_id') is-invalid @enderror" required>
+                            <option value="">-- Select Route --</option>
+                            @foreach($routes as $route)
+                                <option value="{{ $route->id }}" data-boundary="{{ $route->boundary }}"
+                                    {{ old('route_id', $vehicle->route_id) == $route->id ? 'selected' : '' }}>
+                                    {{ $route->route_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('route_id')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                     </div>
                     <div class="col-md-6 mb-4">
-                        <label for="destination" class="form-label">Destination <span class="text-danger">*</span></label>
-                        <input type="text" name="destination" id="destination"
-                            class="form-control @error('destination') is-invalid @enderror"
-                            value="{{ old('destination', $vehicle->route->destination ?? '') }}" placeholder="e.g., Cubao" required>
-                        @error('destination')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        <label for="boundary_display" class="form-label">Boundary Rate</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="text" id="boundary_display"
+                                class="form-control" placeholder="0.00" readonly>
+                        </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="boundary" class="form-label">Boundary</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="number" name="boundary" id="boundary" step="0.01" min="0"
-                                class="form-control @error('boundary') is-invalid @enderror"
-                                value="{{ old('boundary', $vehicle->route->boundary ?? '') }}" placeholder="0.00">
-                            @error('boundary')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                        </div>
-                    </div>
-
                     <div class="col-md-6 mb-4">
                         <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
                         <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
@@ -79,5 +76,28 @@
 
 @push('scripts')
     <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const routeSelect = document.getElementById('route_id');
+            const boundaryDisplay = document.getElementById('boundary_display');
+
+            // Update boundary when route is selected
+            routeSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const boundary = selectedOption.getAttribute('data-boundary');
+                
+                if (boundary && boundary !== '' && boundary !== 'null') {
+                    boundaryDisplay.value = parseFloat(boundary).toFixed(2);
+                } else {
+                    boundaryDisplay.value = '0.00';
+                }
+            });
+
+            // Trigger change event on page load if a route is already selected
+            if (routeSelect.value) {
+                routeSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
 @endpush
 @endsection

@@ -142,7 +142,7 @@
                         </div>
                     </div>
                     <div class="dash-sub mt-2">
-                        <a href="{{ route('management.index') }}" style="font-size:.8rem; color:#c8292a; font-weight:600; text-decoration:none;">Manage →</a>
+                        <a href="{{ route('vehicles.index') }}" style="font-size:.8rem; color:#c8292a; font-weight:600; text-decoration:none;">Manage →</a>
                     </div>
                 </div>
             </div>

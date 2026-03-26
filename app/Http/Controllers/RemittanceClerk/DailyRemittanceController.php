@@ -31,7 +31,14 @@ class DailyRemittanceController extends Controller
         
         $remittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
             ->orderBy($sortBy, $sortOrder)->get();
-        return view('remittance-clerk.remittances.index', compact('remittances', 'sortBy', 'sortOrder'));
+        
+        // Calculate statistics
+        $totalRemittances = DailyRemittance::count();
+        $approvedRemittances = DailyRemittance::where('status', 'approved')->count();
+        $pendingRemittances = DailyRemittance::where('status', 'pending')->count();
+        $rejectedRemittances = DailyRemittance::where('status', 'rejected')->count();
+        
+        return view('remittance-clerk.remittances.index', compact('remittances', 'sortBy', 'sortOrder', 'totalRemittances', 'approvedRemittances', 'pendingRemittances', 'rejectedRemittances'));
     }
 
     public function create()
@@ -51,12 +58,36 @@ class DailyRemittanceController extends Controller
             'remittance_date' => 'required|date',
             'total_collection' => 'required|numeric',
             'total_expenses' => 'required|numeric',
+            'net_remittance' => 'required|numeric',
+            'is_short_remittance' => 'nullable|boolean',
+            'short_amount' => 'nullable|numeric',
+            'driver_share' => 'nullable|numeric',
+            'pao_share' => 'nullable|numeric',
         ]);
 
         // Get the vehicle and its associated route
         $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
         $validated['route_id'] = $vehicle->route_id;
-        $validated['net_remittance'] = $validated['total_collection'] - $validated['total_expenses'];
+        $boundary = $vehicle->route->boundary ?? 0;
+        $validated['boundary'] = $boundary;
+
+        // Calculate net remittance: total_collection - total_expenses - boundary
+        $net_remittance = $validated['total_collection'] - $validated['total_expenses'] - $boundary;
+        $validated['net_remittance'] = $net_remittance;
+
+        // Check if it's a short remittance
+        if ($net_remittance < 0) {
+            $validated['is_short_remittance'] = true;
+            $validated['short_amount'] = abs($net_remittance);
+            $validated['driver_share'] = abs($net_remittance) / 2;
+            $validated['pao_share'] = abs($net_remittance) / 2;
+        } else {
+            $validated['is_short_remittance'] = false;
+            $validated['short_amount'] = null;
+            $validated['driver_share'] = null;
+            $validated['pao_share'] = null;
+        }
+
         $validated['status'] = 'pending'; // Set default status to pending
         
         $remittance = DailyRemittance::create($validated);
@@ -90,12 +121,35 @@ class DailyRemittanceController extends Controller
             'remittance_date' => 'required|date',
             'total_collection' => 'required|numeric',
             'total_expenses' => 'required|numeric',
+            'net_remittance' => 'required|numeric',
+            'is_short_remittance' => 'nullable|boolean',
+            'short_amount' => 'nullable|numeric',
+            'driver_share' => 'nullable|numeric',
+            'pao_share' => 'nullable|numeric',
         ]);
 
         // Get the vehicle and its associated route
         $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
         $validated['route_id'] = $vehicle->route_id;
-        $validated['net_remittance'] = $validated['total_collection'] - $validated['total_expenses'];
+        $boundary = $vehicle->route->boundary ?? 0;
+        $validated['boundary'] = $boundary;
+
+        // Calculate net remittance: total_collection - total_expenses - boundary
+        $net_remittance = $validated['total_collection'] - $validated['total_expenses'] - $boundary;
+        $validated['net_remittance'] = $net_remittance;
+
+        // Check if it's a short remittance
+        if ($net_remittance < 0) {
+            $validated['is_short_remittance'] = true;
+            $validated['short_amount'] = abs($net_remittance);
+            $validated['driver_share'] = abs($net_remittance) / 2;
+            $validated['pao_share'] = abs($net_remittance) / 2;
+        } else {
+            $validated['is_short_remittance'] = false;
+            $validated['short_amount'] = null;
+            $validated['driver_share'] = null;
+            $validated['pao_share'] = null;
+        }
         
         // If remittance is approved or rejected, reset status to pending when changes are made
         if (in_array($remittance->status, ['approved', 'rejected'])) {

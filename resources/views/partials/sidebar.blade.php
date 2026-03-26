@@ -109,12 +109,15 @@
                                 <a class="nxl-link" href="{{ route('paos.index') }}">List of PAO / Conductors</a>
                             </li>
                             <li class="nxl-item {{ request()->routeIs('routes.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('routes.index') }}">Routes &amp; Vehicles</a>
+                                <a class="nxl-link" href="{{ route('routes.index') }}">Routes</a>
+                            </li>
+                            <li class="nxl-item {{ request()->routeIs('vehicles.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('vehicles.index') }}">Vehicles</a>
                             </li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('remittances.*') ? 'active' : '' }}">
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'active' : '' }}">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-activity"></i></span>
                             <span class="nxl-mtext">Daily Remittance</span>
@@ -123,6 +126,9 @@
                         <ul class="nxl-submenu">
                             <li class="nxl-item">
                                 <a class="nxl-link" href="{{ route('remittances.index') }}">Record Remittance</a>
+                            </li>
+                            <li class="nxl-item">
+                                <a class="nxl-link" href="{{ route('short-remittances.index') }}">Short Remittances</a>
                             </li>
                         </ul>
                     </li>
@@ -179,12 +185,15 @@
                                 <a class="nxl-link" href="{{ route('paos.index') }}">List of PAO / Conductors</a>
                             </li>
                             <li class="nxl-item {{ request()->routeIs('routes.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('routes.index') }}">Manage Routes &amp; Vehicles</a>
+                                <a class="nxl-link" href="{{ route('routes.index') }}">Manage Routes</a>
+                            </li>
+                            <li class="nxl-item {{ request()->routeIs('vehicles.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('vehicles.index') }}">Manage Vehicles</a>
                             </li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('remittances.*') ? 'active' : '' }}">
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'active' : '' }}">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-activity"></i></span>
                             <span class="nxl-mtext">Daily Remittance</span>
@@ -193,6 +202,9 @@
                         <ul class="nxl-submenu">
                             <li class="nxl-item">
                                 <a class="nxl-link" href="{{ route('remittances.index') }}">Record Remittance</a>
+                            </li>
+                            <li class="nxl-item">
+                                <a class="nxl-link" href="{{ route('short-remittances.index') }}">Short Remittances</a>
                             </li>
                         </ul>
                     </li>

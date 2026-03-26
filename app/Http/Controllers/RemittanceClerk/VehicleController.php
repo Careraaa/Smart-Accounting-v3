@@ -33,100 +33,66 @@ class VehicleController extends Controller
         $activeVehicles = Vehicle::where('status', 'active')->count();
         $underMaintenanceVehicles = Vehicle::where('status', 'under_maintenance')->count();
         
-        return view('remittance-clerk.management.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder', 'totalVehicles', 'activeVehicles', 'underMaintenanceVehicles'));
+        return view('remittance-clerk.vehicles.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder', 'totalVehicles', 'activeVehicles', 'underMaintenanceVehicles'));
     }
 
     public function create()
     {
-        return view('remittance-clerk.management.vehicles-create');
+        $routes = Route::all();
+        return view('remittance-clerk.vehicles.create', compact('routes'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles',
-            'origin' => 'required|string',
-            'destination' => 'required|string',
+            'route_id' => 'required|exists:routes,id',
             'operator' => 'required|string',
-            'boundary' => 'required|numeric|min:0',
             'status' => 'required|in:active,under_maintenance',
         ]);
-
-        // Find or create route with the given origin and destination
-        $route = Route::firstOrCreate(
-            [
-                'origin' => $validated['origin'],
-                'destination' => $validated['destination'],
-            ],
-            [
-                'route_name' => $validated['origin'] . ' - ' . $validated['destination'],
-            ],
-        );
-
-        // Update boundary if provided
-        if (!is_null($validated['boundary'])) {
-            $route->update(['boundary' => $validated['boundary']]);
-        }
 
         $vehicleData = [
             'plate_number' => $validated['plate_number'],
             'operator' => $validated['operator'],
-            'route_id' => $route->id,
+            'route_id' => $validated['route_id'],
             'status' => $validated['status'],
         ];
 
         Vehicle::create($vehicleData);
 
-        return redirect()->route('routes.index')->with('success', 'Vehicle created successfully.');
+        return redirect()->route('vehicles.index')->with('success', 'Vehicle created successfully.');
     }
 
     public function show(Vehicle $vehicle)
     {
-        return view('remittance-clerk.management.vehicles-show', compact('vehicle'));
+        return view('remittance-clerk.vehicles.show', compact('vehicle'));
     }
 
     public function edit(Vehicle $vehicle)
     {
-        return view('remittance-clerk.management.vehicles-edit', compact('vehicle'));
+        $routes = Route::all();
+        return view('remittance-clerk.vehicles.edit', compact('vehicle', 'routes'));
     }
 
     public function update(Request $request, Vehicle $vehicle)
     {
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles,plate_number,' . $vehicle->id,
-            'origin' => 'required|string',
-            'destination' => 'required|string',
+            'route_id' => 'required|exists:routes,id',
             'operator' => 'required|string',
-            'boundary' => 'required|numeric|min:0',
             'status' => 'required|in:active,under_maintenance',
         ]);
-
-        // Find or create route with the given origin and destination
-        $route = Route::firstOrCreate(
-            [
-                'origin' => $validated['origin'],
-                'destination' => $validated['destination'],
-            ],
-            [
-                'route_name' => $validated['origin'] . ' - ' . $validated['destination'],
-            ],
-        );
-
-        // Update boundary if provided
-        if (!is_null($validated['boundary'])) {
-            $route->update(['boundary' => $validated['boundary']]);
-        }
 
         $vehicleData = [
             'plate_number' => $validated['plate_number'],
             'operator' => $validated['operator'],
-            'route_id' => $route->id,
+            'route_id' => $validated['route_id'],
             'status' => $validated['status'],
         ];
 
         $vehicle->update($vehicleData);
 
-        return redirect()->route('routes.index')->with('success', 'Vehicle updated successfully.');
+        return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
     }
 
     public function destroy(Vehicle $vehicle)

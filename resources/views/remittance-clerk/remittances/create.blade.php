@@ -53,7 +53,7 @@
                             class="form-control @error('vehicle_id') is-invalid @enderror" required>
                             <option value="">— Select Vehicle —</option>
                             @foreach ($vehicles as $vehicle)
-                                <option value="{{ $vehicle->id }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>
+                                <option value="{{ $vehicle->id }}" data-boundary="{{ $vehicle->route->boundary ?? 0 }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>
                                     {{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})
                                 </option>
                             @endforeach
@@ -80,11 +80,49 @@
                         @error('total_expenses')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="col-md-4 mb-4">
+                        <label for="boundary_display" class="form-label">Boundary Rate</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="text" id="boundary_display"
+                                class="form-control" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
                         <label for="net_remittance" class="form-label">Net Remittance <span class="text-danger">*</span></label>
                         <input type="number" name="net_remittance" id="net_remittance" min="0" step="1"
                             class="form-control @error('net_remittance') is-invalid @enderror"
                             value="{{ old('net_remittance') }}" required>
                         @error('net_remittance')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    </div>
+                </div>
+
+                <div class="row" id="short-remittance-section" style="display: none;">
+                    <div class="col-md-3 mb-4">
+                        <label for="short_amount_display" class="form-label">Short Amount</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="text" id="short_amount_display"
+                                class="form-control" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <label for="driver_share_display" class="form-label">Driver Share</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="text" id="driver_share_display"
+                                class="form-control" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <label for="pao_share_display" class="form-label">PAO Share</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="text" id="pao_share_display"
+                                class="form-control" placeholder="0.00" readonly>
+                        </div>
                     </div>
                 </div>
 
@@ -98,5 +136,103 @@
 </div>
 @push('scripts')
     <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const vehicleSelect = document.getElementById('vehicle_id');
+            const boundaryDisplay = document.getElementById('boundary_display');
+            const netRemittanceInput = document.getElementById('net_remittance');
+            const shortRemittanceSection = document.getElementById('short-remittance-section');
+            const shortAmountDisplay = document.getElementById('short_amount_display');
+            const driverShareDisplay = document.getElementById('driver_share_display');
+            const paoShareDisplay = document.getElementById('pao_share_display');
+
+            function updateShortRemittance() {
+                const netRemittance = parseFloat(netRemittanceInput.value) || 0;
+
+                // Check if it's a short remittance (negative net remittance)
+                if (netRemittance < 0) {
+                    shortRemittanceSection.style.display = 'flex';
+                    shortRemittanceSection.classList.add('row');
+                    
+                    const shortAmount = Math.abs(netRemittance);
+                    const share = shortAmount / 2;
+
+                    shortAmountDisplay.value = shortAmount.toFixed(2);
+                    driverShareDisplay.value = share.toFixed(2);
+                    paoShareDisplay.value = share.toFixed(2);
+
+                    // Store values in hidden inputs for form submission
+                    if (!document.getElementById('is_short_hidden')) {
+                        const form = netRemittanceInput.closest('form');
+                        const shortInput = document.createElement('input');
+                        shortInput.type = 'hidden';
+                        shortInput.id = 'is_short_hidden';
+                        shortInput.name = 'is_short_remittance';
+                        shortInput.value = '1';
+                        form.appendChild(shortInput);
+
+                        const shortAmountInput = document.createElement('input');
+                        shortAmountInput.type = 'hidden';
+                        shortAmountInput.id = 'short_amount_hidden';
+                        shortAmountInput.name = 'short_amount';
+                        shortAmountInput.value = shortAmount.toFixed(2);
+                        form.appendChild(shortAmountInput);
+
+                        const driverShareInput = document.createElement('input');
+                        driverShareInput.type = 'hidden';
+                        driverShareInput.id = 'driver_share_hidden';
+                        driverShareInput.name = 'driver_share';
+                        driverShareInput.value = share.toFixed(2);
+                        form.appendChild(driverShareInput);
+
+                        const paoShareInput = document.createElement('input');
+                        paoShareInput.type = 'hidden';
+                        paoShareInput.id = 'pao_share_hidden';
+                        paoShareInput.name = 'pao_share';
+                        paoShareInput.value = share.toFixed(2);
+                        form.appendChild(paoShareInput);
+                    } else {
+                        document.getElementById('is_short_hidden').value = '1';
+                        document.getElementById('short_amount_hidden').value = shortAmount.toFixed(2);
+                        document.getElementById('driver_share_hidden').value = share.toFixed(2);
+                        document.getElementById('pao_share_hidden').value = share.toFixed(2);
+                    }
+                } else {
+                    shortRemittanceSection.style.display = 'none';
+                    
+                    // Remove hidden inputs
+                    const isShortInput = document.getElementById('is_short_hidden');
+                    const shortAmountInput = document.getElementById('short_amount_hidden');
+                    const driverShareInput = document.getElementById('driver_share_hidden');
+                    const paoShareInput = document.getElementById('pao_share_hidden');
+                    
+                    if (isShortInput) isShortInput.remove();
+                    if (shortAmountInput) shortAmountInput.remove();
+                    if (driverShareInput) driverShareInput.remove();
+                    if (paoShareInput) paoShareInput.remove();
+                }
+            }
+
+            // Update boundary when vehicle is selected
+            vehicleSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const boundary = selectedOption.getAttribute('data-boundary');
+                
+                if (boundary && boundary !== '' && boundary !== 'null' && boundary !== '0') {
+                    boundaryDisplay.value = parseFloat(boundary).toFixed(2);
+                } else {
+                    boundaryDisplay.value = '0.00';
+                }
+            });
+
+            // Update short remittance display when net remittance changes
+            netRemittanceInput.addEventListener('input', updateShortRemittance);
+
+            // Trigger change event on page load if a vehicle is already selected
+            if (vehicleSelect.value) {
+                vehicleSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
 @endpush
 @endsection

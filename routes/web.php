@@ -6,6 +6,7 @@ use App\Http\Controllers\RemittanceClerk\PAOController;
 use App\Http\Controllers\RemittanceClerk\RouteController;
 use App\Http\Controllers\RemittanceClerk\VehicleController;
 use App\Http\Controllers\RemittanceClerk\DailyRemittanceController;
+use App\Http\Controllers\RemittanceClerk\ShortRemittanceController;
 use App\Http\Controllers\RemittanceClerk\DashboardController as RemittanceClerkDashboardController;
 use App\Http\Controllers\Accountant\DashboardController as AccountantDashboardController;
 use App\Http\Controllers\Accountant\CashAdvanceController as AccountantCashAdvanceController;
@@ -91,12 +92,13 @@ Route::middleware(['auth'])->group(function () {
 // ===== REMITTANCE CLERK ROUTES =====
 Route::middleware(['auth', 'role:remittance_clerk,superadmin'])->group(function () {
     Route::get('/remittance-clerk', [RemittanceClerkDashboardController::class, 'index'])->name('remittance-clerk.index');
-    Route::get('/management', fn() => redirect()->route('routes.index'))->name('management.index');
+    Route::get('/management', fn() => redirect()->route('vehicles.index'))->name('management.index');
     Route::resource('drivers', DriverController::class);
     Route::resource('paos', PAOController::class);
     Route::resource('routes', RouteController::class);
     Route::resource('vehicles', VehicleController::class);
     Route::resource('remittances', DailyRemittanceController::class);
+    Route::resource('short-remittances', ShortRemittanceController::class)->only(['index', 'show', 'edit', 'update']);
     Route::get('/remittance/assigned-driver', fn() => view('remittance-clerk.remittances.assigned-driver'))->name('remittance.assigned-driver');
     Route::get('/remittance/vehicle-plate', fn() => view('remittance-clerk.remittances.vehicle-plate'))->name('remittance.vehicle-plate');
     Route::get('/remittance/fare-collection', fn() => view('remittance-clerk.remittances.fare-collection'))->name('remittance.fare-collection');
