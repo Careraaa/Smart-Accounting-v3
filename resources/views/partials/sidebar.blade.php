@@ -204,25 +204,16 @@
                                 <a class="nxl-link" href="{{ route('remittances.index') }}">Record Remittance</a>
                             </li>
                             <li class="nxl-item">
-                                <a class="nxl-link" href="{{ route('short-remittances.index') }}">Short Remittances</a>
+                                <a class="nxl-link" href="{{ route('short-remittances.index') }}">Short Remittance</a>
                             </li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.remittance*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                        <a href="{{ route('reports.remittance-report') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-file-text"></i></span>
                             <span class="nxl-mtext">Remittance Report</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item">
-                                <a class="nxl-link" href="{{ route('reports.remittance-details') }}">Remittance Details</a>
-                            </li>
-                            <li class="nxl-item">
-                                <a class="nxl-link" href="{{ route('reports.remittance-summary') }}">Remittance Summary</a>
-                            </li>
-                        </ul>
                     </li>
                 @endif
 

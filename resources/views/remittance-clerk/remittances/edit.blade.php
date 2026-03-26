@@ -75,22 +75,14 @@
                 <div class="prl-section-divider">Financials</div>
 
                 <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <label for="boundary_display" class="form-label">Boundary Rate</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="text" id="boundary_display"
-                                class="form-control" value="{{ number_format($remittance->boundary ?? $remittance->vehicle->route->boundary ?? 0, 2) }}" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-6 mb-4">
                         <label for="total_collection" class="form-label">Total Collection <span class="text-danger">*</span></label>
                         <input type="number" name="total_collection" id="total_collection" min="0" step="0.1"
                             class="form-control @error('total_collection') is-invalid @enderror"
                             value="{{ old('total_collection', $remittance->total_collection) }}" required>
                         @error('total_collection')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-6 mb-4">
                         <label for="total_expenses" class="form-label">Total Expenses <span class="text-danger">*</span></label>
                         <input type="number" name="total_expenses" id="total_expenses" min="0" step="0.1"
                             class="form-control @error('total_expenses') is-invalid @enderror"
@@ -101,67 +93,19 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-4">
+                        <label for="boundary_display" class="form-label">Boundary Rate</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="text" id="boundary_display"
+                                class="form-control" value="{{ number_format($remittance->boundary ?? $remittance->vehicle->route->boundary ?? 0, 2) }}" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
                         <label for="net_remittance" class="form-label">Net Remittance <span class="text-danger">*</span></label>
                         <input type="number" name="net_remittance" id="net_remittance" min="0" step="0.1"
                             class="form-control @error('net_remittance') is-invalid @enderror"
                             value="{{ old('net_remittance', $remittance->net_remittance) }}" required>
                         @error('net_remittance')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                </div>
-
-                @if($remittance->is_short_remittance)
-                <div class="row">
-                    <div class="col-md-3 mb-4">
-                        <label for="short_amount_display" class="form-label">Short Amount</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="text" id="short_amount_display"
-                                class="form-control" value="{{ number_format($remittance->short_amount, 2) }}" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <label for="driver_share_display" class="form-label">Driver Share</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="text" id="driver_share_display"
-                                class="form-control" value="{{ number_format($remittance->driver_share, 2) }}" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <label for="pao_share_display" class="form-label">PAO Share</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="text" id="pao_share_display"
-                                class="form-control" value="{{ number_format($remittance->pao_share, 2) }}" readonly>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                <div class="row" id="short-remittance-section" style="display: none;">
-                    <div class="col-md-3 mb-4">
-                        <label for="short_amount_display_calc" class="form-label">Short Amount</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="text" id="short_amount_display_calc"
-                                class="form-control" placeholder="0.00" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <label for="driver_share_display_calc" class="form-label">Driver Share</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="text" id="driver_share_display_calc"
-                                class="form-control" placeholder="0.00" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-4">
-                        <label for="pao_share_display_calc" class="form-label">PAO Share</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="text" id="pao_share_display_calc"
-                                class="form-control" placeholder="0.00" readonly>
-                        </div>
                     </div>
                 </div>
 

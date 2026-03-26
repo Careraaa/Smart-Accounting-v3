@@ -65,21 +65,24 @@
                 <div class="prl-section-divider">Financials</div>
 
                 <div class="row">
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-6 mb-4">
                         <label for="total_collection" class="form-label">Total Collection <span class="text-danger">*</span></label>
                         <input type="number" name="total_collection" id="total_collection" min="0" step="0.1"
                             class="form-control @error('total_collection') is-invalid @enderror"
                             value="{{ old('total_collection') }}" required>
                         @error('total_collection')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-6 mb-4">
                         <label for="total_expenses" class="form-label">Total Expenses <span class="text-danger">*</span></label>
                         <input type="number" name="total_expenses" id="total_expenses" min="0" step="1"
                             class="form-control @error('total_expenses') is-invalid @enderror"
                             value="{{ old('total_expenses') }}" required>
                         @error('total_expenses')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
-                    <div class="col-md-4 mb-4">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
                         <label for="boundary_display" class="form-label">Boundary Rate</label>
                         <div class="input-group">
                             <span class="input-group-text">₱</span>
@@ -87,9 +90,6 @@
                                 class="form-control" placeholder="0.00" readonly>
                         </div>
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-6 mb-4">
                         <label for="net_remittance" class="form-label">Net Remittance <span class="text-danger">*</span></label>
                         <input type="number" name="net_remittance" id="net_remittance" min="0" step="1"

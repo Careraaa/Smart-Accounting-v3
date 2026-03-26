@@ -26,16 +26,24 @@ class ShortRemittanceController extends Controller
         }
 
         // Query short remittances only
-        $query = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
-            ->where('is_short_remittance', true);
+        $allShortRemittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
+            ->where('is_short_remittance', true)
+            ->orderBy($sortBy, $sortOrder)
+            ->get();
 
-        // Filter by resolution status if specified
-        if ($status !== 'all') {
-            // In your actual implementation, you may want to add a 'short_status' field
-            // For now, we'll show all short remittances
-        }
-
-        $shortRemittances = $query->orderBy($sortBy, $sortOrder)->get();
+        // Separate into pending/partial and fully paid
+        $pendingRemittances = $allShortRemittances->filter(function ($remittance) {
+            // If both are paid, it's fully paid
+            if ($remittance->driver_status === 'paid' && $remittance->pao_status === 'paid') {
+                return false;
+            }
+            return true;
+        });
+        
+        $fullyPaidRemittances = $allShortRemittances->filter(function ($remittance) {
+            // Both must be paid to be fully paid
+            return $remittance->driver_status === 'paid' && $remittance->pao_status === 'paid';
+        });
 
         // Calculate statistics
         $totalShortRemittances = DailyRemittance::where('is_short_remittance', true)->count();
@@ -44,7 +52,8 @@ class ShortRemittanceController extends Controller
         $totalPaoShares = DailyRemittance::where('is_short_remittance', true)->sum('pao_share');
 
         return view('remittance-clerk.short-remittances.index', compact(
-            'shortRemittances',
+            'pendingRemittances',
+            'fullyPaidRemittances',
             'sortBy',
             'sortOrder',
             'status',

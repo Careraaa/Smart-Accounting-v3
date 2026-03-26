@@ -2,9 +2,10 @@
 
 @section('content')
 <div class="col-md-12">
-    <div class="card">
+    {{-- Pending Remittances Section --}}
+    <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Daily Remittances</span>
+            <span class="card-title mb-0">Pending Remittances</span>
             <a href="{{ route('remittances.create') }}" class="btn btn-primary btn-sm">
                 <i class="feather-plus me-1"></i> Add Remittance
             </a>
@@ -28,7 +29,7 @@
                     <div class="card card-statistic">
                         <div class="card-body">
                             <div class="stat-label">Approved</div>
-                            <h3 class="mb-1" style="color: #16a34a;">{{ $approvedRemittances }}</h3>
+                            <h3 class="mb-1" style="color: #16a34a;">{{ $approvedCount }}</h3>
                             <small class="text-muted">Approved remittances</small>
                         </div>
                         <div class="card-icon" style="color: #22c55e; opacity: 0.2;">
@@ -40,7 +41,7 @@
                     <div class="card card-statistic">
                         <div class="card-body">
                             <div class="stat-label">Pending</div>
-                            <h3 class="mb-1" style="color: #ea580c;">{{ $pendingRemittances }}</h3>
+                            <h3 class="mb-1" style="color: #ea580c;">{{ $pendingCount }}</h3>
                             <small class="text-muted">Pending review</small>
                         </div>
                         <div class="card-icon" style="color: #f97316; opacity: 0.2;">
@@ -69,13 +70,11 @@
                             @php
                                 $headers = [
                                     'remittance_date' => 'Date',
-                                    'net_remittance' => 'Net Remittance',
-                                    'status' => 'Status'
                                 ];
                             @endphp
                             
                             @foreach($headers as $column => $label)
-                                <th class="sortable-header @if($column === 'net_remittance') text-end @elseif($column === 'status') text-center @endif" data-column="{{ $column }}">
+                                <th class="sortable-header @if($column === 'net_remittance') text-end @elseif($column === 'status') @endif" data-column="{{ $column }}">
                                     <a href="{{ route('remittances.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
                                        class="sort-link">
                                         {{ $label }}
@@ -90,27 +89,29 @@
                             
                             <th class="sortable-header"><div class="sort-link">Route</div></th>
                             <th class="sortable-header"><div class="sort-link">Vehicle</div></th>
-                            <th class="sortable-header text-center"><div class="sort-link justify-content-center">Actions</div></th>
+                            <th class="sortable-header"><div class="sort-link">Net Remittance</div></th>
+                            <th class="sortable-header"><div class="sort-link">Status</div></th>
+                            <th class="sortable-header"><div class="sort-link">Actions</div></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($remittances as $remittance)
+                        @forelse($pendingRemittances as $remittance)
                             <tr>
                                 <td class="text-muted">{{ $remittance->remittance_date?->format('M d, Y') }}</td>
-                                <td class="text-end">₱{{ number_format($remittance->net_remittance, 2) }}</td>
-                                <td class="text-center">
-                                    @if ($remittance->status === 'approved')
-                                        <span class="emp-badge emp-badge-approved">Approved</span>
-                                    @elseif ($remittance->status === 'pending')
-                                        <span class="emp-badge emp-badge-pending">Pending</span>
-                                    @else
-                                        <span class="emp-badge emp-badge-inactive">Rejected</span>
-                                    @endif
-                                </td>
                                 <td><strong>{{ $remittance->route->route_name }}</strong></td>
                                 <td>{{ $remittance->vehicle->plate_number }}</td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-1">
+                                <td>
+                                    @if ($remittance->is_short_remittance)
+                                        <strong style="color: #dc2626;">₱{{ number_format($remittance->net_remittance, 2) }}</strong>
+                                    @else
+                                        <strong style="color: #16a34a;">₱{{ number_format($remittance->net_remittance, 2) }}</strong>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="emp-badge emp-badge-pending">Pending</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
                                         <a href="{{ route('remittances.show', $remittance) }}"
                                             class="emp-action-btn emp-action-view" title="View">
                                             <i class="feather-eye"></i>
@@ -134,7 +135,87 @@
                             <tr>
                                 <td colspan="8" class="text-center text-muted py-5">
                                     <i class="feather-file-text d-block mb-2" style="font-size:28px; opacity:.3;"></i>
-                                    No remittances found
+                                    No pending remittances found
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- Approved Remittances Section --}}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="card-title mb-0">Approved Remittances</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover w-100 mb-0">
+                    <thead>
+                        <tr>
+                            @php
+                                $headers = [
+                                    'remittance_date' => 'Date',
+                                ];
+                            @endphp
+                            
+                            @foreach($headers as $column => $label)
+                                <th class="sortable-header @if($column === 'net_remittance') @endif" data-column="{{ $column }}">
+                                    <a href="{{ route('remittances.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
+                                       class="sort-link">
+                                        {{ $label }}
+                                        @if($sortBy === $column)
+                                            <i class="feather-arrow-{{ $sortOrder === 'asc' ? 'up' : 'down' }} ms-1" style="font-size: 0.875rem;"></i>
+                                        @else
+                                            <i class="feather-arrow-up-down ms-1" style="font-size: 0.875rem; opacity: 0.3;"></i>
+                                        @endif
+                                    </a>
+                                </th>
+                            @endforeach
+                            
+                            <th><div class="sort-link">Route</div></th>
+                            <th class="sortable-header"><div class="sort-link">Vehicle</div></th>
+                            <th class="sortable-header"><div class="sort-link">Net Remittance</div></th>
+                            <th class="sortable-header"><div class="sort-link">Status</div></th>
+                            <th class="sortable-header"><div class="sort-link">Actions</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($approvedRemittances as $remittance)
+                            <tr>
+                                <td class="text-muted">{{ $remittance->remittance_date?->format('M d, Y') }}</td>
+                                <td><strong>{{ $remittance->route->route_name }}</strong></td>
+                                <td>{{ $remittance->vehicle->plate_number }}</td>
+                                <td>
+                                    @if ($remittance->is_short_remittance)
+                                        <strong style="color: #dc2626;">₱{{ number_format($remittance->net_remittance, 2) }}</strong>
+                                    @else
+                                        <strong style="color: #16a34a;">₱{{ number_format($remittance->net_remittance, 2) }}</strong>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="emp-badge emp-badge-approved">Approved</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('remittances.show', $remittance) }}"
+                                            class="emp-action-btn emp-action-view" title="View">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                        <a href="{{ route('remittances.edit', $remittance) }}"
+                                            class="emp-action-btn emp-action-edit" title="Edit">
+                                            <i class="feather-edit-2"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-5">
+                                    <i class="feather-file-text d-block mb-2" style="font-size:28px; opacity:.3;"></i>
+                                    No approved remittances found
                                 </td>
                             </tr>
                         @endforelse

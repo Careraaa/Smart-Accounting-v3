@@ -4,10 +4,15 @@
 <div class="col-md-12">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">PAO / Conductors</span>
-            <a href="{{ route('paos.create') }}" class="btn btn-primary btn-sm">
-                <i class="feather-plus me-1"></i> Add PAO
-            </a>
+            <span class="card-title mb-0">Passenger Assistant Officer / Conductor</span>
+            <div class="d-flex gap-2">
+                <a href="{{ route('paos.create') }}" class="btn btn-primary btn-sm">
+                    <i class="feather-plus me-1"></i> Add PAO
+                </a>
+                <a href="{{ route('reports.print.pao-report') }}" class="btn btn-sm btn-primary" target="_blank">
+                    <i class="feather-printer me-1"></i> Print
+                </a>
+            </div>
         </div>
         <div class="card-body">
             {{-- Statistics Cards --}}

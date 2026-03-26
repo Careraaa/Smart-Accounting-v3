@@ -5,9 +5,14 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span class="card-title mb-0">Drivers</span>
-            <a href="{{ route('drivers.create') }}" class="btn btn-primary btn-sm">
-                <i class="feather-plus me-1"></i> Add Driver
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('drivers.create') }}" class="btn btn-primary btn-sm">
+                    <i class="feather-plus me-1"></i> Add Driver
+                </a>
+                <a href="{{ route('reports.print.driver-report') }}" class="btn btn-sm btn-primary" target="_blank">
+                    <i class="feather-printer me-1"></i> Print
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <div class="row mb-4">
