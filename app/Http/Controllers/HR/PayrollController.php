@@ -189,4 +189,27 @@ class PayrollController extends Controller
 
         return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll deleted successfully.');
     }
+
+    // ====================== BATCH GENERATE ======================
+    public function generateBatch(Request $request)
+    {
+        $validated = $request->validate([
+            'period_start' => 'required|date',
+            'period_end' => 'required|date|after_or_equal:period_start',
+            'employees' => 'array',
+            'employees.*' => 'exists:users,id',
+        ]);
+
+        $periodStart = Carbon::parse($validated['period_start']);
+        $periodEnd = Carbon::parse($validated['period_end']);
+
+        // If none selected, get all active employees
+        $employees = empty($validated['employees']) ? User::where('role', 'employee')->where('status', 'active')->get() : User::whereIn('id', $validated['employees'])->get();
+
+        $count = app(\App\Services\PayrollService::class)->generateBatch($employees, $periodStart, $periodEnd);
+
+        return redirect()
+            ->route('payroll.salary-computation.index')
+            ->with('success', "Batch payroll generated for {$count} employees.");
+    }
 }

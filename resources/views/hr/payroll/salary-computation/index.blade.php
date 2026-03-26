@@ -6,12 +6,19 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="card-title mb-0">Payrolls</span>
                 <div class="d-flex gap-2">
-                    <a href="{{ route('payroll.salary-computation.batch-generate') }}" class="btn btn-success btn-sm">
-                        <i class="feather-zap me-1"></i> Generate Batch
+
+                    {{-- Batch Generate --}}
+                    <a href="{{ route('payroll.salary-computation.batch-generate') }}" class="prl-btn-batch">
+                        <i class="feather-layers me-1"></i>
+                        Batch Generate
                     </a>
-                    <a href="{{ route('payroll.salary-computation.create') }}" class="btn btn-primary btn-sm">
-                        <i class="feather-plus me-1"></i> Create Payroll
+
+                    {{-- Create Payroll --}}
+                    <a href="{{ route('payroll.salary-computation.create') }}" class="prl-btn-create">
+                        <i class="feather-plus me-1"></i>
+                        Create Payroll
                     </a>
+
                 </div>
             </div>
             <div class="card-body p-0">

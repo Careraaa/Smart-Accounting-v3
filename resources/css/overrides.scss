@@ -1467,6 +1467,57 @@ hr {
     font-variant-numeric: tabular-nums;
 }
 
+/* Shared button base */
+.prl-btn-create,
+.prl-btn-batch {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 34px;
+    line-height: 1;
+    transition: all 0.15s ease;
+}
+
+.prl-btn-create {
+    background: #111827;
+    border: 1px solid #1f2937 !important; /* force visibility */
+    color: #fff !important; /* white text */
+}
+
+.prl-btn-create:hover {
+    background: #000 !important;
+    border-color: #000 !important;
+    color: #fff !important;
+}
+
+/* Batch Button */
+.prl-btn-batch {
+    background: #fff;
+    border: 1px solid var(--kt-border-med);
+    color: var(--kt-body);
+}
+
+.prl-btn-batch:hover {
+    background: #fff5f5;
+    border-color: var(--kt-red);
+    color: var(--kt-red);
+}
+
+.prl-btn-batch i {
+    color: var(--kt-muted);
+    transition: color 0.15s ease;
+}
+
+.prl-btn-batch:hover i {
+    color: var(--kt-red);
+}
+
 /* -- Dashboard stat card components --------------------------- */
 .dash-label {
     font-size: 0.7rem;
