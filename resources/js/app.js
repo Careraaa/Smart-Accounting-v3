@@ -9,6 +9,7 @@ import "./employee/employee-form.js";
 // HR scripts
 import "./HR/leave-management.js";
 import "./HR/overtime-management.js";
+import "./HR/attendance-table.js";
 
 // Payroll scripts
 //  import "./Payroll/create-payroll.js";

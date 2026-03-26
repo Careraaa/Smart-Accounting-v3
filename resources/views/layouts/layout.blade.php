@@ -39,7 +39,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 @endif
-                
+
                 <div class="row">
                     @yield('content')
                 </div>
@@ -59,7 +59,7 @@
 
     {{-- Desktop/Mobile Menu Handler --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const miniBtn = document.getElementById('menu-mini-button');
             const expendBtn = document.getElementById('menu-expend-button');
             const htmlElement = document.documentElement;
@@ -79,7 +79,7 @@
 
             // Mini button click handler
             if (miniBtn) {
-                miniBtn.addEventListener('click', function (e) {
+                miniBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     miniBtn.style.display = 'none';
@@ -91,7 +91,7 @@
 
             // Expend button click handler
             if (expendBtn) {
-                expendBtn.addEventListener('click', function (e) {
+                expendBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     if (miniBtn) miniBtn.style.display = 'flex';
@@ -102,7 +102,7 @@
             }
 
             // Handle window resize
-            window.addEventListener('resize', function () {
+            window.addEventListener('resize', function() {
                 const width = window.innerWidth;
                 // Desktop: 1024px <= width <= 1600px: show mini by default
                 // Laptop: width > 1600px: show full by default
@@ -125,7 +125,7 @@
 
     {{-- Mobile Sidebar Handler --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const toggle = document.getElementById('mobile-collapse');
             const nav = document.querySelector('.nxl-navigation');
             const closeBtn = document.querySelector('.kt-mob-close');
@@ -133,7 +133,7 @@
             if (!toggle || !nav) return;
 
             // Open/close on hamburger click
-            toggle.addEventListener('click', function (e) {
+            toggle.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 nav.classList.toggle('active');
@@ -142,7 +142,7 @@
 
             // Close on close button click
             if (closeBtn) {
-                closeBtn.addEventListener('click', function (e) {
+                closeBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     nav.classList.remove('active', 'mob-navigation-active');
                     document.body.classList.remove('sidebar-open');
@@ -150,9 +150,10 @@
             }
 
             // Close on backdrop click (outside nav/toggle)
-            document.addEventListener('click', function (e) {
+            document.addEventListener('click', function(e) {
                 if (window.innerWidth >= 1199) return;
-                if (!nav.classList.contains('active') && !nav.classList.contains('mob-navigation-active')) return;
+                if (!nav.classList.contains('active') && !nav.classList.contains('mob-navigation-active'))
+                    return;
 
                 const isClickOnNav = nav.contains(e.target);
                 const isClickOnToggle = toggle.contains(e.target);
@@ -164,7 +165,7 @@
             }, true);
 
             // Close on nav link click (except submenu toggles)
-            nav.addEventListener('click', function (e) {
+            nav.addEventListener('click', function(e) {
                 const link = e.target.closest('a.nxl-link');
                 if (!link) return;
                 if (link.getAttribute('href') === 'javascript:void(0);') return;
@@ -176,7 +177,7 @@
             });
 
             // Reset on resize
-            window.addEventListener('resize', function () {
+            window.addEventListener('resize', function() {
                 if (window.innerWidth >= 1200) {
                     nav.classList.remove('active', 'mob-navigation-active');
                     document.body.classList.remove('sidebar-open');
@@ -184,6 +185,12 @@
             });
         });
     </script>
+
+    <script>
+        window.attendanceRowsUrl = "{{ route('api.attendance.table-rows') }}";
+        window.notificationsCountUrl = "{{ route('notifications.count') }}";
+    </script>
+
 
     {{-- Page-specific scripts --}}
     @yield('scripts')

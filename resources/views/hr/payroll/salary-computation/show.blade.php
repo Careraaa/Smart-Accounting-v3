@@ -10,6 +10,7 @@
                     <i class="feather-arrow-left"></i> Back
                 </a>
             </div>
+
             <div class="card-body">
 
                 {{-- Employee & Period --}}
@@ -17,10 +18,11 @@
                     <div class="col-md-6">
                         <span class="prl-field-label">Employee</span>
                         <div class="prl-field-value fw-bold">
-                            {{ optional($payroll->employee)->first_name }}
-                            {{ optional($payroll->employee)->last_name ?? 'N/A' }}
+                            {{ optional($payroll->user)->first_name }}
+                            {{ optional($payroll->user)->last_name ?? 'N/A' }}
                         </div>
-                        <div class="prl-field-sub">{{ optional($payroll->employee)->position ?? '' }}</div>
+                        <div class="prl-field-sub">{{ optional($payroll->user)->position ?? '' }}</div>
+
                     </div>
                     <div class="col-md-6">
                         <span class="prl-field-label">Payroll Period</span>
@@ -55,10 +57,10 @@
                 <hr>
 
                 {{-- Earnings & Deductions --}}
-                {{-- EARNINGS --}}
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <div class="prl-section-label mb-3">Earnings</div>
+                <div class="row">
+                    {{-- EARNINGS --}}
+                    <div class="col-md-6 mb-4">
+                        <div class="prl-section-label mb-3">Earnings</div>
                         <div class="prl-line">
                             <span class="prl-line-key text-muted">Per Day Rate</span>
                             <span class="prl-line-val text-muted">₱{{ number_format($payroll->per_day_rate, 2) }}</span>
@@ -111,7 +113,7 @@
 
                     {{-- DEDUCTIONS --}}
                     <div class="col-md-6 mb-4">
-                    <div class="prl-section-label mb-3">Deductions</div>
+                        <div class="prl-section-label mb-3">Deductions</div>
                         @php
                             $undertimeDeductions = $payroll->deductions->filter(
                                 fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'),
@@ -171,7 +173,7 @@
                                     <th>Amount</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody <tbody>
                                 @foreach ($overtimeUndertimeBreakdown as $record)
                                     @php
                                         $hourlyRate = $payroll->hourly_rate;
@@ -183,8 +185,8 @@
                                         <td>
                                             <span
                                                 style="font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:20px;
-                                        background:{{ $isOT ? '#f0fdf4' : '#fff1f2' }};
-                                        color:{{ $isOT ? '#16a34a' : '#e11d48' }};">
+                                            background:{{ $isOT ? '#f0fdf4' : '#fff1f2' }};
+                                            color:{{ $isOT ? '#16a34a' : '#e11d48' }};">
                                                 {{ ucfirst($record->type) }}
                                             </span>
                                         </td>
@@ -202,9 +204,9 @@
 
                 {{-- Net Pay --}}
                 <div class="prl-net-box mb-4">
-                <span class="prl-net-label">Net Pay</span>
-                <span class="prl-net-value">₱{{ number_format($payroll->net_pay, 2) }}</span>
-            </div>
+                    <span class="prl-net-label">Net Pay</span>
+                    <span class="prl-net-value">₱{{ number_format($payroll->net_pay, 2) }}</span>
+                </div>
 
                 {{-- Actions --}}
                 <div class="d-flex gap-2 pt-3 border-top">
@@ -228,6 +230,7 @@
             </div>
         </div>
     </div>
+
     <style>
         .emp-action-btn {
             height: 30px;

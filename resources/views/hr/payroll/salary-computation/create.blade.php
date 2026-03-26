@@ -1,3 +1,4 @@
+//test
 @extends('layouts.layout')
 
 @push('styles')
@@ -371,9 +372,10 @@
                 <span class="prl-chip-lbl">Hours Worked</span>
                 <span class="prl-chip-val" id="prl_hours_worked">0.00</span>
             </div>
+            {{-- ✅ Label corrected: "Worked Days" (not "Present Days" which conflated two counts) --}}
             <div class="prl-chip">
-                <span class="prl-chip-lbl">Present Days</span>
-                <span class="prl-chip-val" id="prl_present_days">0</span>
+                <span class="prl-chip-lbl">Worked Days</span>
+                <span class="prl-chip-val" id="prl_worked_days">0</span>
             </div>
         </div>
 
@@ -385,6 +387,11 @@
                 <span class="prl-brow-lbl">Basic Salary <span class="prl-badge">rate × days</span></span>
                 <span class="prl-brow-val" id="prl_basic_display">₱0.00</span>
             </div>
+            {{--
+                ✅ basic_salary hidden input is present so validation doesn't
+                   fail, but PayrollController IGNORES this value and recomputes
+                   it server-side via AttendanceService::calculateBasicSalary().
+            --}}
             <input type="hidden" name="basic_salary" id="prl_basic_input" value="0">
 
             <div class="prl-brow" id="prl_ot_row" style="display:none;">
@@ -405,20 +412,20 @@
 
             <div class="prl-brow" id="prl_sss_row" style="display:none;">
                 <span class="prl-brow-lbl c-red">
-                    − SSS Contribution <span class="prl-badge">statutory</span>
+                    − SSS Contribution <span class="prl-badge">statutory · ½ of monthly</span>
                 </span>
                 <span class="prl-brow-val c-red" id="prl_sss_val">₱0.00</span>
             </div>
 
             <div class="prl-brow" id="prl_pagibig_row" style="display:none;">
                 <span class="prl-brow-lbl c-red">
-                    − Pag-IBIG Contribution <span class="prl-badge">statutory</span>
+                    − Pag-IBIG Contribution <span class="prl-badge">statutory · ½ of monthly</span>
                 </span>
                 <span class="prl-brow-val c-red" id="prl_pagibig_val">₱0.00</span>
             </div>
 
             <div class="prl-brow" id="prl_loading_row" style="display:none;">
-                <span class="prl-loading-hint">Checking overtime &amp; undertime records…</span>
+                <span class="prl-loading-hint">Computing from attendance records…</span>
                 <span></span>
             </div>
 
@@ -446,7 +453,6 @@
         <div class="prl-sub p-green" id="prl_allow_subtotal" style="display:none;">
             Total allowances: ₱<span id="prl_allow_total">0.00</span>
         </div>
-        <input type="hidden" name="total_allowances" id="prl_total_allowances" value="0">
         <div id="prl_allow_hidden"></div>
 
         {{-- ⑤ Deductions ─────────────────────────────────────────────── --}}
@@ -466,7 +472,6 @@
         <div class="prl-sub p-red" id="prl_deduct_subtotal" style="display:none;">
             Total deductions: ₱<span id="prl_deduct_total">0.00</span>
         </div>
-        <input type="hidden" name="total_deductions" id="prl_total_deductions" value="0">
         <div id="prl_deduct_hidden"></div>
 
         {{-- ⑥ Net Salary ──────────────────────────────────────────────── --}}
@@ -492,10 +497,11 @@
     <meta name="page-id" content="payroll-create">
     <script>
         window._prl = {
-            statutory:      @json(\App\Models\StatutoryDeduction::all()),
+            // ✅ previewUrl — JS POSTs here and displays what the backend returns.
+            //    No client-side money math.
+            previewUrl:    "{{ route('payroll.preview') }}",
             initAllowances: @json(old('allowances', [])),
             initDeductions: @json(old('deductions', [])),
-            otUtUrl:        "{{ route('payroll.ot-ut') }}"   
         };
     </script>
 @endpush

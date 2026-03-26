@@ -24,6 +24,8 @@ class Payroll extends Model
         'days_worked',
         'hours_worked',
         'basic_salary',
+        'sss',
+        'pagibig',
     ];
 
     protected $casts = [
@@ -37,11 +39,6 @@ class Payroll extends Model
      ====================== */
 
     public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    public function employee()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -61,26 +58,14 @@ class Payroll extends Model
         return $this->hasMany(PayrollAllowance::class);
     }
 
-    public function attendances()
-    {
-        return $this->user->attendances()
-            ->whereBetween('date', [$this->payroll_period_start, $this->payroll_period_end]);
-    }
-
-    public function overtimeUndertimes()
-    {
-        return OvertimeUndertime::where('user_id', $this->user_id)
-            ->whereBetween('date', [$this->payroll_period_start, $this->payroll_period_end])
-            ->where('status', 'approved');
-    }
-
     /* ======================
      |  COMPUTED ATTRIBUTES
      ====================== */
 
     public function getPerDayRateAttribute()
     {
-        return $this->user->salary_rate ?? 0;
+        // Monthly ÷ 22 working days
+        return ($this->user->salary_rate ?? 0) / 22;
     }
 
     public function getHourlyRateAttribute()
@@ -88,42 +73,18 @@ class Payroll extends Model
         return $this->per_day_rate / 8;
     }
 
-    public function getBasicSalaryAttribute()
-    {
-        if ($this->attributes['basic_salary'] ?? null) {
-            return $this->attributes['basic_salary'];
-        }
-        return $this->calculateBasicSalaryFromAttendance();
-    }
-
-    /**
-     * Gross Pay = Basic Salary + total_allowances
-     *
-     * total_allowances already contains OT pay (stored by the controller).
-     * We do NOT add overtime_pay here — that would double-count it.
-     */
     public function getGrossPayAttribute()
     {
+        // Gross = Basic + OT allowances
         return $this->basic_salary + $this->total_allowances;
     }
 
-    /**
-     * Net Pay = Gross Pay − total_deductions
-     *
-     * total_deductions contains: manual deductions + undertime + cash advances
-     * + salary loan instalments (all stored/incremented by the controller).
-     * SSS and Pag-IBIG are government contributions shown separately on the
-     * payslip and are NOT included in total_deductions.
-     */
     public function getNetPayAttribute()
     {
+        // Net = Gross − deductions (including statutory if stored)
         return $this->gross_pay - $this->total_deductions;
     }
 
-    /**
-     * Kept for backward compatibility — returns the OT pay stored as a
-     * line item, so nothing re-queries or recomputes from scratch.
-     */
     public function getOvertimePayAttribute()
     {
         return $this->allowances()
@@ -131,10 +92,6 @@ class Payroll extends Model
             ->sum('amount');
     }
 
-    /**
-     * Kept for backward compatibility — returns the UT deduction stored as
-     * a line item.
-     */
     public function getUndertimeDeductionAttribute()
     {
         return $this->deductions()
@@ -156,50 +113,10 @@ class Payroll extends Model
      |  METHODS
      ====================== */
 
-    public function calculateBasicSalaryFromAttendance()
-    {
-        $attendanceService = new AttendanceService();
-        return $attendanceService->calculateBasicSalary(
-            $this->user,
-            $this->payroll_period_start,
-            $this->payroll_period_end
-        );
-    }
-
-    public function getDaysWorked()
-    {
-        $attendanceService = new AttendanceService();
-        return $attendanceService->countWorkDaysInPeriod(
-            $this->user_id,
-            $this->payroll_period_start,
-            $this->payroll_period_end
-        );
-    }
-
-    public function getHoursWorked()
-    {
-        $attendanceService = new AttendanceService();
-        return $attendanceService->calculateTotalHoursWorked(
-            $this->user_id,
-            $this->payroll_period_start,
-            $this->payroll_period_end
-        );
-    }
-
-    public function recalculateFromAttendance()
-    {
-        $this->update([
-            'days_worked'  => $this->getDaysWorked(),
-            'hours_worked' => $this->getHoursWorked(),
-            'basic_salary' => $this->calculateBasicSalaryFromAttendance(),
-        ]);
-
-        return true;
-    }
-
     public function getAttendanceBreakdown()
     {
-        return $this->attendances()
+        return $this->user->attendances()
+            ->whereBetween('date', [$this->payroll_period_start, $this->payroll_period_end])
             ->orderBy('date')
             ->get()
             ->map(function ($attendance) {

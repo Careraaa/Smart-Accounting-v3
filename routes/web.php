@@ -231,6 +231,8 @@ Route::prefix('payroll/salary-computation')
 
     Route::post('/payroll/generate-batch', [PayrollController::class, 'generatePayrollBatch'])->name('payroll.generate-batch');
 
+    Route::post('/payroll/preview', [PayrollController::class, 'preview'])->name('payroll.preview');
+
     Route::prefix('payroll/statutory-deductions')
         ->name('payroll.statutory-deductions.')
         ->group(function () {
