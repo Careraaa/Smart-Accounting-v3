@@ -75,27 +75,29 @@ class PayrollController extends Controller
             'user_id' => 'required|exists:users,id',
             'period_start' => 'required|date',
             'period_end' => 'required|date|after_or_equal:period_start',
+            'allowances' => 'array',
+            'allowances.*.name' => 'string',
+            'allowances.*.amount' => 'numeric',
+            'deductions' => 'array',
+            'deductions.*.name' => 'string',
+            'deductions.*.amount' => 'numeric',
         ]);
 
         $employee = User::findOrFail($request->user_id);
         $periodStart = Carbon::parse($request->period_start);
         $periodEnd = Carbon::parse($request->period_end);
 
-        // ✅ SINGLE SOURCE OF TRUTH
-        $values = app(\App\Services\PayrollService::class)->computePayroll($employee, $periodStart, $periodEnd);
+        $values = app(\App\Services\PayrollService::class)->computePayroll($employee, $periodStart, $periodEnd, $request->allowances ?? [], $request->deductions ?? []);
 
         return response()->json([
             'days_worked' => $values['daysWorked'],
             'hours_worked' => round($values['hoursWorked'], 2),
             'basic_salary' => round($values['basicSalary'], 2),
             'daily_rate' => round($values['dailyRate'], 2),
-
             'overtime_pay' => round($values['otPay'], 2),
             'undertime_deduction' => round($values['utDeduction'], 2),
-
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
-
             'gross_pay' => round($values['grossPay'], 2),
             'total_deductions' => round($values['totalDeductions'], 2),
             'net_pay' => round($values['netPay'], 2),
@@ -109,20 +111,21 @@ class PayrollController extends Controller
             'user_id' => 'required|exists:users,id',
             'payroll_period_start' => 'required|date',
             'payroll_period_end' => 'required|date|after_or_equal:payroll_period_start',
+            'allowances' => 'array',
+            'allowances.*.name' => 'string',
+            'allowances.*.amount' => 'numeric',
+            'deductions' => 'array',
+            'deductions.*.name' => 'string',
+            'deductions.*.amount' => 'numeric',
         ]);
 
         $employee = User::findOrFail($validated['user_id']);
         $periodStart = Carbon::parse($validated['payroll_period_start']);
         $periodEnd = Carbon::parse($validated['payroll_period_end']);
 
-        if (in_array($employee->role, ['superadmin', 'qr_admin'])) {
-            return back()->withErrors(['user_id' => 'Invalid employee']);
-        }
-
-        $payroll = app(\App\Services\PayrollService::class)->generatePayrollForEmployee($employee, $periodStart, $periodEnd);
+        $payroll = app(\App\Services\PayrollService::class)->generatePayrollForEmployee($employee, $periodStart, $periodEnd, $validated['allowances'] ?? [], $validated['deductions'] ?? []);
 
         \App\Services\PayrollDeductionService::applyLoanDeductions($payroll);
-
         PayrollNotification::payrollCreated($payroll);
 
         return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll created successfully.');
@@ -135,13 +138,19 @@ class PayrollController extends Controller
             'user_id' => 'required|exists:users,id',
             'payroll_period_start' => 'required|date',
             'payroll_period_end' => 'required|date|after_or_equal:payroll_period_start',
+            'allowances' => 'array',
+            'allowances.*.name' => 'string',
+            'allowances.*.amount' => 'numeric',
+            'deductions' => 'array',
+            'deductions.*.name' => 'string',
+            'deductions.*.amount' => 'numeric',
         ]);
 
         $employee = User::findOrFail($validated['user_id']);
         $periodStart = Carbon::parse($validated['payroll_period_start']);
         $periodEnd = Carbon::parse($validated['payroll_period_end']);
 
-        $payroll = app(\App\Services\PayrollService::class)->updatePayroll($payroll, $employee, $periodStart, $periodEnd);
+        $payroll = app(\App\Services\PayrollService::class)->updatePayroll($payroll, $employee, $periodStart, $periodEnd, $validated['allowances'] ?? [], $validated['deductions'] ?? []);
 
         \App\Services\PayrollDeductionService::applyLoanDeductions($payroll);
 

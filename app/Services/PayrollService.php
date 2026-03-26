@@ -22,9 +22,9 @@ class PayrollService
     /**
      * Generate payroll for a single employee in a cutoff period.
      */
-    public function generatePayrollForEmployee(User $employee, Carbon $start, Carbon $end): Payroll
+    public function generatePayrollForEmployee(User $employee, Carbon $start, Carbon $end, array $manualAllowances = [], array $manualDeductions = []): Payroll
     {
-        $values = $this->computePayroll($employee, $start, $end);
+        $values = $this->computePayroll($employee, $start, $end, $manualAllowances, $manualDeductions);
 
         $payroll = Payroll::create([
             'user_id' => $employee->id,
@@ -33,7 +33,7 @@ class PayrollService
             'basic_salary' => round($values['basicSalary'], 2),
             'days_worked' => $values['daysWorked'],
             'hours_worked' => round($values['hoursWorked'], 2),
-            'total_allowances' => round($values['otPay'], 2),
+            'total_allowances' => round($values['otPay'] + collect($manualAllowances)->sum('amount'), 2),
             'total_deductions' => round($values['totalDeductions'], 2),
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
@@ -41,12 +41,23 @@ class PayrollService
             'status' => 'pending',
         ]);
 
+        // Save OT allowance
         if ($values['otPay'] > 0) {
             $payroll->allowances()->create([
                 'allowance_type' => 'Overtime Pay',
                 'amount' => round($values['otPay'], 2),
             ]);
         }
+
+        // Save manual allowances
+        foreach ($manualAllowances as $allow) {
+            $payroll->allowances()->create([
+                'allowance_type' => $allow['name'],
+                'amount' => round($allow['amount'], 2),
+            ]);
+        }
+
+        // Save UT deduction
         if ($values['utDeduction'] > 0) {
             $payroll->deductions()->create([
                 'deduction_type' => 'Undertime Deduction',
@@ -54,11 +65,18 @@ class PayrollService
             ]);
         }
 
+        // Save manual deductions
+        foreach ($manualDeductions as $deduct) {
+            $payroll->deductions()->create([
+                'deduction_type' => $deduct['name'],
+                'amount' => round($deduct['amount'], 2),
+            ]);
+        }
+
         return $payroll;
     }
 
-    public function computePayroll(User $employee, Carbon $start, Carbon $end): array
-
+    public function computePayroll(User $employee, Carbon $start, Carbon $end, array $manualAllowances = [], array $manualDeductions = []): array
     {
         $daysWorked = $this->attendanceService->countWorkDaysInPeriod($employee->id, $start, $end);
         $hoursWorked = $this->attendanceService->calculateTotalHoursWorked($employee->id, $start, $end);
@@ -68,14 +86,21 @@ class PayrollService
         $hourlyRate = $dailyRate / 8;
         $basicSalary = $dailyRate * $daysWorked;
 
+        // Attendance-based OT/UT
         $otPay = OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('amount');
         $utDeduction = OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->undertime()->sum('amount');
 
+        // Statutory
         $sss = $employee->has_sss ? $this->computeSSS($monthlySalary) : 0;
         $pagibig = $employee->has_pagibig ? $this->computePagibig($monthlySalary) : 0;
 
-        $grossPay = $basicSalary + $otPay;
-        $totalDeductions = $utDeduction + $sss + $pagibig;
+        // ✅ Manual allowances/deductions
+        $manualAllowTotal = collect($manualAllowances)->sum(fn($a) => (float) ($a['amount'] ?? 0));
+        $manualDeductTotal = collect($manualDeductions)->sum(fn($d) => (float) ($d['amount'] ?? 0));
+
+        // Totals
+        $grossPay = $basicSalary + $otPay + $manualAllowTotal;
+        $totalDeductions = $utDeduction + $sss + $pagibig + $manualDeductTotal;
         $netPay = $grossPay - $totalDeductions;
 
         return compact('daysWorked', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otPay', 'utDeduction', 'sss', 'pagibig', 'grossPay', 'totalDeductions', 'netPay');
@@ -112,9 +137,9 @@ class PayrollService
         return min($monthlySalary * 0.02, 100); // 2% capped at 100 PHP
     }
 
-    public function updatePayroll(Payroll $payroll, User $employee, Carbon $start, Carbon $end): Payroll
+    public function updatePayroll(Payroll $payroll, User $employee, Carbon $start, Carbon $end, array $manualAllowances = [], array $manualDeductions = []): Payroll
     {
-        // Attendance-based computation
+        // 1. Attendance-based computation
         $daysWorked = $this->attendanceService->countWorkDaysInPeriod($employee->id, $start, $end);
         $hoursWorked = $this->attendanceService->calculateTotalHoursWorked($employee->id, $start, $end);
 
@@ -123,23 +148,27 @@ class PayrollService
         $hourlyRate = $dailyRate / 8;
         $basicSalary = $dailyRate * $daysWorked;
 
-        // OT/UT
+        // 2. OT/UT
         $otPay = OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('amount');
 
         $utDeduction = OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->undertime()->sum('amount');
 
-        // Statutory deductions
+        // 3. Statutory deductions
         $sss = $employee->has_sss ? $this->computeSSS($monthlySalary) : 0;
         $pagibig = $employee->has_pagibig ? $this->computePagibig($monthlySalary) : 0;
 
-        // Totals
-        $totalAllowances = $otPay;
-        $totalDeductions = $utDeduction + $sss + $pagibig;
+        // 4. Manual totals
+        $manualAllowTotal = collect($manualAllowances)->sum(fn($a) => (float) ($a['amount'] ?? 0));
+        $manualDeductTotal = collect($manualDeductions)->sum(fn($d) => (float) ($d['amount'] ?? 0));
+
+        // 5. Totals
+        $totalAllowances = $otPay + $manualAllowTotal;
+        $totalDeductions = $utDeduction + $sss + $pagibig + $manualDeductTotal;
 
         $grossPay = $basicSalary + $totalAllowances;
         $netPay = $grossPay - $totalDeductions;
 
-        // ✅ Update payroll snapshot
+        // 6. Update payroll snapshot
         $payroll->update([
             'user_id' => $employee->id,
             'payroll_period_start' => $start,
@@ -155,12 +184,18 @@ class PayrollService
             'status' => 'pending',
         ]);
 
-        // ✅ Rebuild line items
+        // 7. ✅ Rebuild line items (this is where your block goes)
         $payroll->allowances()->delete();
         if ($otPay > 0) {
             $payroll->allowances()->create([
                 'allowance_type' => 'Overtime Pay',
                 'amount' => round($otPay, 2),
+            ]);
+        }
+        foreach ($manualAllowances as $allow) {
+            $payroll->allowances()->create([
+                'allowance_type' => $allow['name'],
+                'amount' => round($allow['amount'], 2),
             ]);
         }
 
@@ -170,6 +205,12 @@ class PayrollService
                 'deduction_type' => 'Undertime Deduction',
                 'amount' => round($utDeduction, 2),
                 'description' => 'Auto-computed from attendance records.',
+            ]);
+        }
+        foreach ($manualDeductions as $deduct) {
+            $payroll->deductions()->create([
+                'deduction_type' => $deduct['name'],
+                'amount' => round($deduct['amount'], 2),
             ]);
         }
 

@@ -12,7 +12,7 @@ class PayrollNotification
      */
     public static function payrollProcessed(Payroll $payroll)
     {
-        app(NotificationService::class)->send($payroll->employee, 'payroll_processed', 'Payroll Processed', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} has been processed.", [
+        app(NotificationService::class)->send($payroll->user, 'payroll_processed', 'Payroll Processed', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} has been processed.", [
             'payroll_id' => $payroll->id,
             'period_start' => $payroll->payroll_period_start,
             'period_end' => $payroll->payroll_period_end,
@@ -24,7 +24,7 @@ class PayrollNotification
      */
     public static function payrollReleased(Payroll $payroll)
     {
-        app(NotificationService::class)->send($payroll->employee, 'payroll_released', 'Payroll Released', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} is now available.", [
+        app(NotificationService::class)->send($payroll->user, 'payroll_released', 'Payroll Released', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} is now available.", [
             'payroll_id' => $payroll->id,
             'period_start' => $payroll->payroll_period_start,
             'period_end' => $payroll->payroll_period_end,
@@ -79,7 +79,7 @@ class PayrollNotification
      */
     public static function payrollUpdated(Payroll $payroll)
     {
-        app(NotificationService::class)->send($payroll->employee, 'payroll_updated', 'Payroll Updated', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} has been updated.", [
+        app(NotificationService::class)->send($payroll->user, 'payroll_updated', 'Payroll Updated', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} has been updated.", [
             'payroll_id' => $payroll->id,
             'period_start' => $payroll->payroll_period_start,
             'period_end' => $payroll->payroll_period_end,
@@ -91,7 +91,7 @@ class PayrollNotification
      */
     public static function payrollDeleted(Payroll $payroll)
     {
-        app(NotificationService::class)->send($payroll->employee, 'payroll_deleted', 'Payroll Deleted', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} has been deleted.", [
+        app(NotificationService::class)->send($payroll->user, 'payroll_deleted', 'Payroll Deleted', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} has been deleted.", [
             'payroll_id' => $payroll->id,
             'period_start' => $payroll->payroll_period_start,
             'period_end' => $payroll->payroll_period_end,
@@ -103,7 +103,7 @@ class PayrollNotification
      */
     public static function payrollRecalculated(Payroll $payroll)
     {
-        app(NotificationService::class)->send($payroll->employee, 'payroll_recalculated', 'Payroll Recalculated', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} has been recalculated based on attendance records.", [
+        app(NotificationService::class)->send($payroll->user, 'payroll_recalculated', 'Payroll Recalculated', "Your payroll for {$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')} has been recalculated based on attendance records.", [
             'payroll_id' => $payroll->id,
             'period_start' => $payroll->payroll_period_start,
             'period_end' => $payroll->payroll_period_end,
