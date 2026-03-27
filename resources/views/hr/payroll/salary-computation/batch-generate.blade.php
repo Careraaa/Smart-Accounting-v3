@@ -187,7 +187,7 @@
 
                     <div class="prl-employee-box">
                         @php
-                            $activeEmployees = \App\Models\Employee::where('role', '!=', 'superadmin')
+                            $activeEmployees = \App\Models\Employee::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
                                 ->where('status', 'active')
                                 ->orderBy('first_name')
                                 ->get();

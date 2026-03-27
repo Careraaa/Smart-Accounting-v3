@@ -1,165 +1,140 @@
 @extends('layouts.layout')
 
 @section('content')
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Leave Request Details</span>
-            <div class="d-flex gap-2">
-                <a href="{{ route('leave.edit', $leave) }}" class="btn btn-primary btn-sm">
-                    <i class="feather-edit-2 me-1"></i> Edit
+<div class="row">
+    {{-- Left Column: Details --}}
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="card-title mb-0">Leave Request Details</span>
+                <a href="{{ route('leave.pending') }}" class="btn btn-sm btn-secondary">
+                    <i class="feather-x me-1"></i> Close
                 </a>
-                <a href="{{ route('leave.index') }}" class="btn btn-secondary btn-sm">
-                    <i class="feather-arrow-left me-1"></i> Back
-                </a>
+            </div>
+            <div class="card-body">
+                {{-- Leave Details Section --}}
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h6 class="text-muted mb-3">
+                            <i class="feather-file-text me-2" style="color: #0369a1;"></i> Leave Details
+                        </h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Employee Name</label>
+                            <input type="text" class="form-control" value="{{ $leave->employee->first_name }} {{ $leave->employee->last_name }}" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Department</label>
+                            <input type="text" class="form-control" value="{{ $leave->employee->department ?? 'N/A' }}" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="form-group">
+                            <label class="form-label">Leave Type</label>
+                            <input type="text" class="form-control" value="{{ $leave->leave_type }}" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="form-group">
+                            <label class="form-label">Number of Days</label>
+                            <input type="text" class="form-control" value="{{ $leave->start_date->diffInDays($leave->end_date) + 1 }} day(s)" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="form-group">
+                            <label class="form-label">Start Date</label>
+                            <input type="text" class="form-control" value="{{ $leave->start_date->format('F d, Y') }}" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <div class="form-group">
+                            <label class="form-label">End Date</label>
+                            <input type="text" class="form-control" value="{{ $leave->end_date->format('F d, Y') }}" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <div class="form-group">
+                            <label class="form-label">Reason/Remarks</label>
+                            <textarea class="form-control" rows="4" disabled>{{ $leave->reason }}</textarea>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Employee</label>
-                        <p class="text-muted mb-0">
-                            {{ $leave->employee->first_name ?? 'N/A' }} {{ $leave->employee->last_name ?? '' }}
-                        </p>
-                    </div>
+    </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Leave Type</label>
-                        <p class="text-muted mb-0">{{ $leave->leave_type }}</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Start Date</label>
-                        <p class="text-muted mb-0">{{ $leave->start_date->format('F d, Y') }}</p>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">End Date</label>
-                        <p class="text-muted mb-0">{{ $leave->end_date->format('F d, Y') }}</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Duration</label>
-                        <p class="text-muted mb-0">{{ $leave->start_date->diffInDays($leave->end_date) + 1 }} day(s)</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Status</label>
-                        <p class="mb-0">
-                            @php
-                                $statusMap = [
-                                    'pending'  => ['bg' => '#fffbeb', 'color' => '#d97706'],
-                                    'approved' => ['bg' => '#f0fdf4', 'color' => '#16a34a'],
-                                    'rejected' => ['bg' => '#fff1f2', 'color' => '#e11d48'],
-                                ];
-                                $st = $statusMap[$leave->status] ?? ['bg' => '#f4f5f7', 'color' => '#9898a8'];
-                            @endphp
-                            <span style="display:inline-block; background:{{ $st['bg'] }}; color:{{ $st['color'] }}; font-size:0.75rem; font-weight:700; padding:4px 12px; border-radius:20px; letter-spacing:0.4px; text-transform:uppercase;">
-                                {{ ucfirst($leave->status) }}
-                            </span>
-                        </p>
-                    </div>
-                </div>
+    {{-- Right Column: Action Sidebar --}}
+    <div class="col-md-3">
+        {{-- Status Alert --}}
+        @if($leave->status === 'approved')
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <h6 class="mb-2"><i class="feather-check-circle me-2"></i> <strong>Approved</strong></h6>
+                <p class="mb-1"><small>By: <strong>{{ $leave->approvedBy->first_name ?? 'Admin' }}</strong></small></p>
+                <p class="mb-0"><small>Date: <strong>{{ $leave->updated_at->format('M d, Y') }}</strong></small></p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Reason</label>
-                        <p class="text-muted mb-0">{{ $leave->reason }}</p>
-                    </div>
-                </div>
+        @elseif($leave->status === 'rejected')
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <h6 class="mb-2"><i class="feather-alert-circle me-2"></i> <strong>Rejected</strong></h6>
+                <p class="mb-1"><small>By: <strong>{{ $leave->approvedBy->first_name ?? 'Admin' }}</strong></small></p>
+                <p class="mb-1"><small>Date: <strong>{{ $leave->updated_at->format('M d, Y') }}</strong></small></p>
+                @if($leave->rejection_reason)
+                <hr class="my-2">
+                <p class="mb-0"><small><strong>Reason:</strong> {{ $leave->rejection_reason }}</small></p>
+                @endif
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+        @endif
 
-            @if($leave->status === 'pending')
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="d-flex gap-2">
-                        <form action="{{ route('leave.approve', $leave) }}" method="POST" class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-success btn-sm">
-                                <i class="feather-check me-1"></i> Approve
-                            </button>
-                        </form>
-                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                            <i class="feather-x me-1"></i> Reject
+        {{-- Action Cards --}}
+        @if($leave->status === 'pending')
+            {{-- Approve Card --}}
+            <div class="card border-success mb-3">
+                <div class="card-body">
+                    <h6 class="card-title text-success mb-3">
+                        <i class="feather-check me-2"></i> Approve
+                    </h6>
+                    <p class="card-text small text-muted mb-3">Approve this leave request.</p>
+                    <form action="{{ route('leave.approve', $leave) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-success btn-sm w-100">
+                            <i class="feather-check me-2"></i> Approve
                         </button>
-                    </div>
+                    </form>
                 </div>
             </div>
-            @endif
 
-            @if($leave->approved_by)
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <hr>
-                    @if($leave->status === 'approved')
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Approved By</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white" style="width: 40px; height: 40px; font-size: 14px; font-weight: normal; min-width: 40px;">
-                                {{ substr($leave->approvedBy->first_name ?? 'U', 0, 1) }}{{ substr($leave->approvedBy->last_name ?? '', 0, 1) }}
-                            </div>
-                            <div>
-                                <p class="mb-0"><strong>{{ $leave->approvedBy->first_name ?? '' }} {{ $leave->approvedBy->last_name ?? '' }}</strong></p>
-                                <small class="text-muted">{{ strtoupper(str_replace('_', ' ', $leave->approvedBy->role)) }}</small>
-                            </div>
+            {{-- Reject Card --}}
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h6 class="card-title text-danger mb-3">
+                        <i class="feather-x me-2"></i> Reject
+                    </h6>
+                    <form action="{{ route('leave.reject', $leave) }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="rejection_reason" class="form-label small">Rejection Reason <span class="text-danger">*</span></label>
+                            <textarea class="form-control form-control-sm @error('rejection_reason') is-invalid @enderror" 
+                                id="rejection_reason" 
+                                name="rejection_reason" 
+                                rows="3" 
+                                placeholder="Enter reason..."
+                                required></textarea>
+                            @error('rejection_reason')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                            @enderror
                         </div>
-                    </div>
-                    @elseif($leave->status === 'rejected')
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Rejected By</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger text-white" style="width: 40px; height: 40px; font-size: 14px; font-weight: normal; min-width: 40px;">
-                                {{ substr($leave->approvedBy->first_name ?? 'U', 0, 1) }}{{ substr($leave->approvedBy->last_name ?? '', 0, 1) }}
-                            </div>
-                            <div>
-                                <p class="mb-0"><strong>{{ $leave->approvedBy->first_name ?? '' }} {{ $leave->approvedBy->last_name ?? '' }}</strong></p>
-                                <small class="text-muted">{{ strtoupper(str_replace('_', ' ', $leave->approvedBy->role)) }}</small>
-                            </div>
-                        </div>
-                    </div>
-                    @if($leave->rejection_reason)
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Rejection Reason</label>
-                        <p class="text-danger mb-0">{{ $leave->rejection_reason }}</p>
-                    </div>
-                    @endif
-                    @endif
+                        <button type="submit" class="btn btn-danger btn-sm w-100">
+                            <i class="feather-x me-2"></i> Reject
+                        </button>
+                    </form>
                 </div>
             </div>
-            @endif
-        </div>
+        @endif
     </div>
 </div>
 
-@if($leave->status === 'pending')
-<!-- Reject Modal -->
-<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form action="{{ route('leave.reject', $leave) }}" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="rejectModalLabel">Reject Leave Request</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="rejection_reason" class="form-label">Reason for Rejection (Optional)</label>
-                        <textarea name="rejection_reason" id="rejection_reason" class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Reject</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-@endif
 @endsection

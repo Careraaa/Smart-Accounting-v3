@@ -50,7 +50,6 @@
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance Records</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('overtime.index') }}">Overtime / Undertime</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance Adjustment</a></li>
                         </ul>
                     </li>
 
@@ -65,7 +64,6 @@
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.pending') }}">Pending Leaves</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.approved') }}">Approved Leaves</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.rejected') }}">Rejected Leaves</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.index') }}">All Leaves</a></li>
                         </ul>
                     </li>
 
@@ -239,7 +237,6 @@
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.pending') }}">Pending Leaves</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.approved') }}">Approved Leaves</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.rejected') }}">Rejected Leaves</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.index') }}">Completed Leaves</a></li>
                         </ul>
                     </li>
 
@@ -252,7 +249,6 @@
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">QR Time IN / OUT Records</a></li>
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('overtime.index') }}">Overtime / Undertime</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">Attendance Adjustment</a></li>
                         </ul>
                     </li>
 

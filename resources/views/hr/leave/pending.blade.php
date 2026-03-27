@@ -52,7 +52,7 @@
             </div>
 
             {{-- Filters --}}
-            <form method="GET" action="{{ route('leave.index') }}" class="d-flex gap-2 flex-wrap mb-3">
+            <form method="GET" action="{{ route('leave.pending') }}" class="d-flex gap-2 flex-wrap mb-3">
                 <input type="hidden" name="status" value="pending">
                 
                 <select name="department" class="form-control form-control-sm" style="flex: 1; min-width: 150px;">
@@ -139,35 +139,9 @@
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-center gap-1">
-                                        <a href="{{ route('leave.show', $leave) }}"
-                                            class="emp-action-btn emp-action-view" title="View">
-                                            <i class="feather-eye"></i>
+                                        <a href="{{ route('leave.show', $leave) }}" class="emp-action-btn emp-action-view">
+                                            <i class="feather-edit-2"></i>
                                         </a>
-                                        <form action="{{ route('leave.approve', $leave) }}" method="POST" class="d-inline" id="approve-form-{{ $leave->id }}">
-                                            @csrf
-                                            <button type="button" class="emp-action-btn emp-action-edit approve-btn" title="Approve" 
-                                                data-leave-id="{{ $leave->id }}"
-                                                data-employee-name="{{ $leave->employee->first_name }} {{ $leave->employee->last_name }}"
-                                                data-leave-type="{{ $leave->leave_type }}"
-                                                data-start-date="{{ $leave->start_date->format('M d, Y') }}"
-                                                data-end-date="{{ $leave->end_date->format('M d, Y') }}"
-                                                data-days="{{ $leave->start_date->diffInDays($leave->end_date) + 1 }}">
-                                                <i class="feather-check"></i>
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('leave.reject', $leave) }}" method="POST" class="d-inline" id="reject-form-{{ $leave->id }}">
-                                            @csrf
-                                            <input type="hidden" name="rejection_reason" id="rejection-reason-{{ $leave->id }}" value="">
-                                            <button type="button" class="emp-action-btn emp-action-danger reject-btn" title="Reject"
-                                                data-leave-id="{{ $leave->id }}"
-                                                data-employee-name="{{ $leave->employee->first_name }} {{ $leave->employee->last_name }}"
-                                                data-leave-type="{{ $leave->leave_type }}"
-                                                data-start-date="{{ $leave->start_date->format('M d, Y') }}"
-                                                data-end-date="{{ $leave->end_date->format('M d, Y') }}"
-                                                data-days="{{ $leave->start_date->diffInDays($leave->end_date) + 1 }}">
-                                                <i class="feather-x"></i>
-                                            </button>
-                                        </form>
                                     </div>
                                 </td>
                             </tr>

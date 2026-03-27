@@ -42,8 +42,10 @@ class PayrollController extends Controller
             ->orderBy($sortBy, $sortOrder)
             ->get();
 
-        $totalEmployees = User::where('role', 'employee')->count();
-        $activeEmployees = User::where('role', 'employee')->where('status', 'active')->count();
+        // Include all payroll-eligible roles: employee, hr, remittance_clerk, accountant
+        // Exclude: superadmin, qr_admin
+        $totalEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])->count();
+        $activeEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])->where('status', 'active')->count();
         $inactiveEmployees = $totalEmployees - $activeEmployees;
 
         $presentToday = Attendance::whereDate('date', now())->where('status', 'present')->count();
@@ -64,7 +66,7 @@ class PayrollController extends Controller
     // ====================== CREATE ======================
     public function create()
     {
-        $employees = User::where('role', 'employee')->where('status', 'active')->get();
+        $employees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])->where('status', 'active')->get();
         return view('hr.payroll.salary-computation.create', compact('employees'));
     }
 
@@ -176,7 +178,7 @@ class PayrollController extends Controller
     // ====================== EDIT ======================
     public function edit(Payroll $payroll)
     {
-        $employees = User::where('role', 'employee')->where('status', 'active')->get();
+        $employees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])->where('status', 'active')->get();
         $payroll->load(['user', 'allowances', 'deductions']);
 
         return view('hr.payroll.salary-computation.edit', compact('payroll', 'employees'));
@@ -203,13 +205,22 @@ class PayrollController extends Controller
         $periodStart = Carbon::parse($validated['period_start']);
         $periodEnd = Carbon::parse($validated['period_end']);
 
-        // If none selected, get all active employees
-        $employees = empty($validated['employees']) ? User::where('role', 'employee')->where('status', 'active')->get() : User::whereIn('id', $validated['employees'])->get();
+        // If none selected, get all active employees (including hr, remittance_clerk, accountant)
+        // Exclude: superadmin, qr_admin
+        $employees = empty($validated['employees']) ? User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])->where('status', 'active')->get() : User::whereIn('id', $validated['employees'])->get();
 
         $count = app(\App\Services\PayrollService::class)->generateBatch($employees, $periodStart, $periodEnd);
 
         return redirect()
             ->route('payroll.salary-computation.index')
             ->with('success', "Batch payroll generated for {$count} employees.");
+    }
+
+    // ====================== GENERATE PAYSLIP ======================
+    public function generatePayslip(Payroll $payroll)
+    {
+        $payroll->load(['user', 'allowances', 'deductions']);
+
+        return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
     }
 }

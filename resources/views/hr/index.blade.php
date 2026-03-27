@@ -233,7 +233,7 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span class="card-title mb-0">Recent Leave Requests</span>
-                <a href="{{ route('leave.index') }}" class="btn btn-primary btn-sm">View All</a>
+                <a href="{{ route('leave.pending') }}" class="btn btn-primary btn-sm">View All</a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">

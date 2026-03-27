@@ -25,8 +25,8 @@ class LeaveController extends Controller
         }
 
         // Filter by status
-        $status = $request->status ?? 'all';
-        if ($status && $status !== 'all') {
+        $status = $request->status ?? 'pending';
+        if ($status) {
             $query->where('status', $status);
         }
 
@@ -55,10 +55,9 @@ class LeaveController extends Controller
         $approvedLeaves = Leave::where('status', 'approved')->count();
         $rejectedLeaves = Leave::where('status', 'rejected')->count();
 
-        // Leave types count
-        $leaveTypeStats = DB::table('leaves')
-            ->select('leave_type', DB::raw('count(*) as count'))
-            ->groupBy('leave_type')
+        // Leave types - fetch from leave_types table
+        $leaveTypeStats = LeaveType::where('status', 'active')
+            ->select('name as leave_type')
             ->get();
 
         // Get unique departments
@@ -105,7 +104,6 @@ class LeaveController extends Controller
             'pending' => 'hr.leave.pending',
             'approved' => 'hr.leave.approved',
             'rejected' => 'hr.leave.rejected',
-            default => 'hr.leave.index',
         };
 
         return view($view, compact(
@@ -149,7 +147,7 @@ class LeaveController extends Controller
         LeaveNotification::leaveSubmitted($leave);
         LeaveNotification::notifyManagersOfNewRequest($leave);
 
-        return redirect()->route('leave.index')->with('success', 'Leave request created successfully.');
+        return redirect()->route('leave.pending')->with('success', 'Leave request created successfully.');
     }
 
     public function show(Leave $leave)
@@ -195,7 +193,7 @@ class LeaveController extends Controller
 
         $leave->delete();
 
-        return redirect()->route('leave.index')->with('success', 'Leave request deleted successfully.');
+        return redirect()->route('leave.pending')->with('success', 'Leave request deleted successfully.');
     }
 
     public function approve(Request $request, Leave $leave)
@@ -209,24 +207,25 @@ class LeaveController extends Controller
         // Send notification
         LeaveNotification::leaveApproved($leave);
 
-        return redirect()->back()->with('success', 'Leave request approved successfully.');
+        return redirect()->route('leave.pending')->with('success', 'Leave request approved successfully.');
     }
 
     public function reject(Request $request, Leave $leave)
     {
         $request->validate([
-            'rejection_reason' => 'nullable|string',
+            'rejection_reason' => 'required|string|max:500',
         ]);
 
         $leave->update([
             'status' => 'rejected',
             'approved_by' => auth()->id() ?? null,
+            'rejection_reason' => $request->rejection_reason,
         ]);
         $leave->load('employee');
 
         // Send notification
         LeaveNotification::leaveRejected($leave);
 
-        return redirect()->back()->with('success', 'Leave request rejected successfully.');
+        return redirect()->route('leave.pending')->with('success', 'Leave request rejected successfully.');
     }
 }

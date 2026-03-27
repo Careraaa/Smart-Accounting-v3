@@ -34,14 +34,15 @@
     </div>
 
     <div class="col-md-6">
-        <label for="gender" class="form-label">Gender</label>
-        <select name="gender" id="gender" class="form-select"
-            {{ $readOnly ? 'disabled' : '' }}>
+        <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
+        <select name="gender" id="gender" class="form-control @error('gender') is-invalid @enderror"
+            {{ $readOnly ? 'disabled' : 'required' }}>
             <option value="">-- Select --</option>
             <option value="male"              {{ old('gender', $employee->gender ?? '') == 'male'              ? 'selected' : '' }}>Male</option>
             <option value="female"            {{ old('gender', $employee->gender ?? '') == 'female'            ? 'selected' : '' }}>Female</option>
             <option value="prefer_not_to_say" {{ old('gender', $employee->gender ?? '') == 'prefer_not_to_say' ? 'selected' : '' }}>Prefer not to say</option>
         </select>
+        @error('gender') <span class="invalid-feedback">{{ $message }}</span> @enderror
     </div>
 </div>
 
@@ -64,7 +65,7 @@
         <label for="phone" class="form-label">Phone <span class="text-danger">*</span></label>
         <input type="tel" name="phone" id="phone"
             class="form-control @error('phone') is-invalid @enderror"
-            placeholder="09XXXXXXXXX or +639XXXXXXXXX"
+            placeholder="09XXXXXXXXX"
             maxlength="13"
             pattern="(09\d{9}|\+639\d{9})"
             oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
@@ -80,16 +81,17 @@
 <h5 class="mb-3">Personal Details</h5>
 <div class="row g-3">
     <div class="col-md-4">
-        <label for="civil_status" class="form-label">Civil Status</label>
-        <select name="civil_status" id="civil_status" class="form-select"
+        <label for="civil_status" class="form-label">Civil Status <span class="text-danger">*</span></label>
+        <select name="civil_status" id="civil_status" class="form-select @error('civil_status') is-invalid @enderror"
             onchange="document.getElementById('spouse_field').style.display = this.value === 'married' ? 'block' : 'none'"
-            {{ $readOnly ? 'disabled' : '' }}>
+            {{ $readOnly ? 'disabled' : 'required' }}>
             <option value="">-- Select --</option>
             <option value="single"    {{ old('civil_status', $employee->civil_status ?? '') == 'single'    ? 'selected' : '' }}>Single</option>
             <option value="married"   {{ old('civil_status', $employee->civil_status ?? '') == 'married'   ? 'selected' : '' }}>Married</option>
             <option value="widowed"   {{ old('civil_status', $employee->civil_status ?? '') == 'widowed'   ? 'selected' : '' }}>Widowed</option>
             <option value="separated" {{ old('civil_status', $employee->civil_status ?? '') == 'separated' ? 'selected' : '' }}>Separated</option>
         </select>
+        @error('civil_status') <span class="invalid-feedback">{{ $message }}</span> @enderror
     </div>
 
     <div class="col-md-4" id="spouse_field" style="display: none;">
@@ -102,11 +104,12 @@
     </div>
 
     <div class="col-md-4">
-        <label for="date_of_birth" class="form-label">Date of Birth</label>
+        <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
         <input type="date" name="date_of_birth" id="date_of_birth"
-            class="form-control"
+            class="form-control @error('date_of_birth') is-invalid @enderror"
             value="{{ old('date_of_birth', isset($employee->date_of_birth) ? $employee->date_of_birth?->format('Y-m-d') : '') }}"
-            {{ $readOnly ? 'readonly' : '' }}>
+            {{ $readOnly ? 'readonly' : 'required' }}>
+        @error('date_of_birth') <span class="invalid-feedback">{{ $message }}</span> @enderror
     </div>
 </div>
 
@@ -116,18 +119,19 @@
 <h5 class="mb-3">Birth & Education</h5>
 <div class="row g-3">
     <div class="col-md-6">
-        <label for="place_of_birth" class="form-label">Place of Birth</label>
+        <label for="place_of_birth" class="form-label">Place of Birth <span class="text-danger">*</span></label>
         <input type="text" name="place_of_birth" id="place_of_birth"
-            class="form-control"
+            class="form-control @error('place_of_birth') is-invalid @enderror"
             placeholder="e.g. Manila, Metro Manila"
             value="{{ old('place_of_birth', $employee->place_of_birth ?? '') }}"
-            {{ $readOnly ? 'readonly' : '' }}>
+            {{ $readOnly ? 'readonly' : 'required' }}>
+        @error('place_of_birth') <span class="invalid-feedback">{{ $message }}</span> @enderror
     </div>
 
     <div class="col-md-6">
-        <label for="educational_attainment" class="form-label">Educational Attainment</label>
-        <select name="educational_attainment" id="educational_attainment" class="form-select"
-            {{ $readOnly ? 'disabled' : '' }}>
+        <label for="educational_attainment" class="form-label">Educational Attainment <span class="text-danger">*</span></label>
+        <select name="educational_attainment" id="educational_attainment" class="form-select @error('educational_attainment') is-invalid @enderror"
+            {{ $readOnly ? 'disabled' : 'required' }}>
             <option value="">-- Select --</option>
             <option value="Elementary"               {{ old('educational_attainment', $employee->educational_attainment ?? '') == 'Elementary' ? 'selected' : '' }}>Elementary</option>
             <option value="High School"              {{ old('educational_attainment', $employee->educational_attainment ?? '') == 'High School' ? 'selected' : '' }}>High School</option>
@@ -135,6 +139,7 @@
             <option value="Vocational / TESDA"       {{ old('educational_attainment', $employee->educational_attainment ?? '') == 'Vocational / TESDA' ? 'selected' : '' }}>Vocational / TESDA</option>
             <option value="College (Bachelor's)"     {{ old('educational_attainment', $employee->educational_attainment ?? '') == "College (Bachelor's)" ? 'selected' : '' }}>College (Bachelor's)</option>
         </select>
+        @error('educational_attainment') <span class="invalid-feedback">{{ $message }}</span> @enderror
     </div>
 </div>
 

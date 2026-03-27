@@ -52,7 +52,7 @@
             </div>
 
             {{-- Filters --}}
-            <form method="GET" action="{{ route('leave.index') }}" class="d-flex gap-2 flex-wrap mb-3">
+            <form method="GET" action="{{ route('leave.pending') }}" class="d-flex gap-2 flex-wrap mb-3">
                 <input type="hidden" name="status" value="rejected">
                 
                 <select name="department" class="form-control form-control-sm" style="flex: 1; min-width: 150px;">

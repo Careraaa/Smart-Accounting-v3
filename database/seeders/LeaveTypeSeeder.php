@@ -31,14 +31,6 @@ class LeaveTypeSeeder extends Seeder
                 'status' => 'active',
             ],
             [
-                'name' => 'Special Leave Privilege',
-                'abbreviation' => 'SPL',
-                'days_allowed' => 3,
-                'carry_over' => false,
-                'description' => 'Special privilege leave for government employees',
-                'status' => 'active',
-            ],
-            [
                 'name' => 'Maternity Leave',
                 'abbreviation' => 'ML',
                 'days_allowed' => 105,
@@ -63,19 +55,11 @@ class LeaveTypeSeeder extends Seeder
                 'status' => 'active',
             ],
             [
-                'name' => 'VAWC Leave',
-                'abbreviation' => 'VAWC',
-                'days_allowed' => 10,
+                'name' => 'Bereavement Leave',
+                'abbreviation' => 'BL',
+                'days_allowed' => 5,
                 'carry_over' => false,
-                'description' => 'Violence Against Women and Children leave',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Solo Parent Leave',
-                'abbreviation' => 'SPL',
-                'days_allowed' => 7,
-                'carry_over' => false,
-                'description' => 'Leave for solo parents as per Solo Parents Welfare Act',
+                'description' => 'Leave for the death of an immediate family member',
                 'status' => 'active',
             ],
         ];

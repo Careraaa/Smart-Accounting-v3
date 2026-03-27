@@ -5,8 +5,11 @@
 
 <div class="col-md-10 offset-md-1">
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <span class="card-title mb-0">{{ $isEdit ? 'Edit Employee' : 'Add New Employee' }}</span>
+            <a href="{{ route('employees.index') }}" class="btn btn-sm btn-secondary">
+                <i class="feather-arrow-left me-1"></i> Back
+            </a>
         </div>
         <div class="card-body">
 

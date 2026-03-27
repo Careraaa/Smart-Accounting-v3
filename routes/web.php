@@ -271,7 +271,7 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
 
                 $payrolls = $query->paginate(15)->withQueryString();
 
-                $employees = \App\Models\User::where('role', 'employee')
+                $employees = \App\Models\User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
                     ->where('status', 'active')
                     ->orderBy('first_name')
                     ->get(['id', 'name', 'first_name', 'last_name', 'position']);

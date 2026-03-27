@@ -84,7 +84,7 @@
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">Create Leave Request</button>
-                    <a href="{{ route('leave.index') }}" class="btn btn-secondary">Cancel</a>
+                    <a href="{{ route('leave.pending') }}" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>

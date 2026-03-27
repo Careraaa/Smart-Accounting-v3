@@ -145,10 +145,10 @@ class Notification extends Model
                 if ($data['leave_id'] ?? null) {
                     return route('leave.show', ['leave' => $data['leave_id']]);
                 }
-                return route('leave.index');
+                return route('leave.pending');
 
             case 'leave_pending_approval':
-                return route('leave.pending'); // or leave.index with filter
+                return route('leave.pending');
 
             // Attendance related notifications
             case 'attendance_issue':
