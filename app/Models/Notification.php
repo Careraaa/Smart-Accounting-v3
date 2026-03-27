@@ -124,7 +124,7 @@ class Notification extends Model
                     return route('payroll-approval.index');
                 }
                 if ($data['payroll_id'] ?? null) {
-                    return route('payroll.show', ['payroll' => $data['payroll_id']]);
+                    return route('payroll.salary-computation.show', ['payroll' => $data['payroll_id']]);
                 }
                 return route('payroll.index');
 

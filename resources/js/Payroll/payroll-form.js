@@ -1,4 +1,8 @@
-// payroll-form.js — unified create + edit (detects page via meta[name="page-id"])
+// payroll-form.js
+// ✅ SINGLE SOURCE OF TRUTH: ALL payroll math happens on the backend.
+//    JS only:  (1) collects form inputs
+//              (2) calls /payroll/preview to get server-computed values
+//              (3) renders what the server returned — NO client-side money math.
 document.addEventListener("DOMContentLoaded", function () {
     const pageMeta = document.querySelector('meta[name="page-id"]');
     const pageId = pageMeta?.content;
@@ -7,33 +11,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!isCreate && !isEdit) return;
 
-    // ── Single source of truth ────────────────────────────────────────────────
+    // ── State (display-only — never submitted as money) ───────────────────
     const S = {
+        // Attendance
+        daysWorked: 0,
+        hoursWorked: 0,
+        presentDays: 0,
+        lateDays: 0,
+        absentDays: 0,
+        // Salary
         basicSalary: 0,
-        salaryRate: 0,
-        days: 0,
+        dailyRate: 0,
+        // OT / UT
         otHours: 0,
         utHours: 0,
         otPay: 0,
         utDeduct: 0,
+        // Statutory
         sss: 0,
         pagibig: 0,
+        // Computed totals (from server — fully resolved, including manual items)
+        adjustedGross: 0,
+        netPay: 0,
+        // Line items (HR-entered; these ARE submitted to the server)
         allowances: [], // { name, amount }
         deductions: [], // { name, amount }
     };
 
     let fetchId = 0;
     let isBootstrapping = true;
-    let isInitialLoad = true;
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────
     const g = (id) => document.getElementById(id);
     const fmt = (n) => `₱${(+n || 0).toFixed(2)}`;
     const sum = (arr) =>
         arr.reduce((t, x) => t + (parseFloat(x.amount) || 0), 0);
 
-    // ── Element map — all IDs use the prl_* convention (edit blade is updated
-    //    to match; create blade already uses these IDs) ─────────────────────
+    // ── Element map ───────────────────────────────────────────────────────
     const EL = {
         employeeSelect: g("prl_user_id"),
         periodStart: g("prl_period_start"),
@@ -41,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         daysWorked: g("prl_days_worked"),
         hoursWorked: g("prl_hours_worked"),
-        presentDays: g("prl_present_days"),
+        workedDays: g("prl_worked_days"),
 
         basicDisplay: g("prl_basic_display"),
         basicInput: g("prl_basic_input"),
@@ -71,7 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
         allowSubtotal: g("prl_allow_subtotal"),
         allowTotal: g("prl_allow_total"),
         allowHiddenWrap: g("prl_allow_hidden"),
-        totalAllowances: g("prl_total_allowances"),
 
         deductName: g("prl_deduct_name"),
         deductAmount: g("prl_deduct_amount"),
@@ -80,7 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
         deductSubtotal: g("prl_deduct_subtotal"),
         deductTotal: g("prl_deduct_total"),
         deductHiddenWrap: g("prl_deduct_hidden"),
-        totalDeductions: g("prl_total_deductions"),
     };
 
     // Guard — abort if any critical element is missing
@@ -96,108 +108,74 @@ document.addEventListener("DOMContentLoaded", function () {
     for (const k of critical) {
         if (!EL[k]) {
             console.error(
-                `[payroll-form] Missing element for key "${k}" (id: prl_${k}) — aborting.`,
+                `[payroll-form] Missing element for key "${k}" — aborting.`,
             );
             return;
         }
     }
 
-    // ── Statutory ─────────────────────────────────────────────────────────────
-    function computeStatutory() {
-        S.sss = S.pagibig = 0;
-        const opt = EL.employeeSelect.options[EL.employeeSelect.selectedIndex];
-        if (!opt?.value) return;
-
-        const monthly = S.salaryRate * 22;
-        const cfg = window._prl?.statutory || [];
-
-        if (opt.dataset.hasSss === "1") {
-            const row = cfg.find(
-                (d) =>
-                    d.name === "SSS" &&
-                    monthly >= (parseFloat(d.min_salary) || 0) &&
-                    monthly <= (parseFloat(d.max_salary) || Infinity) + 0.01,
-            );
-            const fullSss = parseFloat(row?.employee_share ?? 0) || 0;
-            S.sss = Math.round((fullSss / 2) * 100) / 100;
-        }
-
-        if (opt.dataset.hasPagibig === "1") {
-            const row = cfg.find(
-                (d) =>
-                    d.name === "Pag-IBIG" &&
-                    monthly >= (parseFloat(d.min_salary) || 0) &&
-                    monthly <= (parseFloat(d.max_salary) || Infinity),
-            );
-            const fullPagibig = row
-                ? Math.min(
-                      monthly * (parseFloat(row.employee_share || 0) / 100),
-                      100,
-                  )
-                : 0;
-            S.pagibig = Math.round((fullPagibig / 2) * 100) / 100;
-        }
-    }
-
-    // ── Render — only function that writes to the DOM ─────────────────────────
+    // ── Render — only function that writes to the DOM ─────────────────────
+    // ✅ All displayed values come from S, which is populated entirely by the
+    //    server's preview response. JS performs NO monetary calculations here.
     function render() {
         const totalAllow = sum(S.allowances);
         const totalDeduct = sum(S.deductions);
 
         // Attendance chips
-        EL.daysWorked.textContent = S.days;
-        EL.hoursWorked.textContent = (S.days * 8).toFixed(2);
-        EL.presentDays.textContent = S.days;
+        if (EL.daysWorked) EL.daysWorked.textContent = S.daysWorked;
+        if (EL.hoursWorked)
+            EL.hoursWorked.textContent = S.hoursWorked.toFixed(2);
+        if (EL.workedDays) EL.workedDays.textContent = S.daysWorked;
 
-        // Basic
-        EL.basicDisplay.textContent = fmt(S.basicSalary);
-        EL.basicInput.value = S.basicSalary.toFixed(2);
+        // Basic salary (server-computed, hidden input is reference only)
+        if (EL.basicDisplay) EL.basicDisplay.textContent = fmt(S.basicSalary);
+        if (EL.basicInput) EL.basicInput.value = S.basicSalary.toFixed(2);
 
         // OT
-        EL.otRow.style.display = S.otPay > 0 ? "flex" : "none";
+        if (EL.otRow) EL.otRow.style.display = S.otPay > 0 ? "flex" : "none";
         if (S.otPay > 0) {
-            EL.otHrs.textContent = `${S.otHours.toFixed(2)} hrs`;
-            EL.otPay.textContent = fmt(S.otPay);
+            if (EL.otHrs) EL.otHrs.textContent = `${S.otHours.toFixed(2)} hrs`;
+            if (EL.otPay) EL.otPay.textContent = fmt(S.otPay);
         }
 
         // UT
-        EL.utRow.style.display = S.utDeduct > 0 ? "flex" : "none";
+        if (EL.utRow) EL.utRow.style.display = S.utDeduct > 0 ? "flex" : "none";
         if (S.utDeduct > 0) {
-            EL.utHrs.textContent = `${S.utHours.toFixed(2)} hrs`;
-            EL.utDeduct.textContent = fmt(S.utDeduct);
+            if (EL.utHrs) EL.utHrs.textContent = `${S.utHours.toFixed(2)} hrs`;
+            if (EL.utDeduct) EL.utDeduct.textContent = fmt(S.utDeduct);
         }
 
         // SSS
-        EL.sssRow.style.display = S.sss > 0 ? "flex" : "none";
-        if (S.sss > 0) EL.sssVal.textContent = fmt(S.sss);
+        if (EL.sssRow) EL.sssRow.style.display = S.sss > 0 ? "flex" : "none";
+        if (S.sss > 0 && EL.sssVal) EL.sssVal.textContent = fmt(S.sss);
 
         // Pag-IBIG
-        EL.pagibigRow.style.display = S.pagibig > 0 ? "flex" : "none";
-        if (S.pagibig > 0) EL.pagibigVal.textContent = fmt(S.pagibig);
+        if (EL.pagibigRow)
+            EL.pagibigRow.style.display = S.pagibig > 0 ? "flex" : "none";
+        if (S.pagibig > 0 && EL.pagibigVal)
+            EL.pagibigVal.textContent = fmt(S.pagibig);
 
-        // Adjusted gross & net
-        const adj = S.basicSalary + S.otPay - S.utDeduct - S.sss - S.pagibig;
-        EL.adjusted.textContent = fmt(adj);
-        EL.netSalary.textContent = fmt(adj + totalAllow - totalDeduct);
+        // Adjusted gross
+        if (EL.adjusted) EL.adjusted.textContent = fmt(S.adjustedGross);
 
-        // Hidden POST totals — mirror exactly what the controller expects:
-        // total_allowances = manual allowances + OT pay
-        // total_deductions = manual deductions + UT deduction + SSS + Pag-IBIG
-        EL.totalAllowances.value = (totalAllow + S.otPay).toFixed(2);
-        EL.totalDeductions.value = (
-            totalDeduct +
-            S.utDeduct +
-            S.sss +
-            S.pagibig
-        ).toFixed(2);
+        // ✅ FIX #5: net_pay from the server already includes manual allowances
+        //    and deductions (we sent them in the preview request). Display it
+        //    directly — do NOT add totalAllow or subtract totalDeduct again.
+        if (EL.netSalary) EL.netSalary.textContent = fmt(S.netPay);
 
-        // Subtotals
-        EL.allowTotal.textContent = totalAllow.toFixed(2);
-        EL.deductTotal.textContent = totalDeduct.toFixed(2);
-        EL.allowSubtotal.style.display = S.allowances.length ? "flex" : "none";
-        EL.deductSubtotal.style.display = S.deductions.length ? "flex" : "none";
+        // Subtotals (display only — not added to net pay client-side)
+        if (EL.allowTotal) EL.allowTotal.textContent = totalAllow.toFixed(2);
+        if (EL.deductTotal) EL.deductTotal.textContent = totalDeduct.toFixed(2);
+        if (EL.allowSubtotal)
+            EL.allowSubtotal.style.display = S.allowances.length
+                ? "flex"
+                : "none";
+        if (EL.deductSubtotal)
+            EL.deductSubtotal.style.display = S.deductions.length
+                ? "flex"
+                : "none";
 
-        // Pills + hidden inputs
+        // Pills + hidden POST inputs
         renderPills(
             "allow",
             S.allowances,
@@ -216,7 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
-    // ── Pill renderer ─────────────────────────────────────────────────────────
+    // ── Pill renderer ─────────────────────────────────────────────────────
     function renderPills(
         colorKey,
         list,
@@ -237,7 +215,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const colorClass = colorKey === "allow" ? "p-green" : "p-red";
 
         list.forEach((item, i) => {
-            // Pill element
             const pill = document.createElement("span");
             pill.className = `prl-pill ${colorClass}`;
 
@@ -258,13 +235,14 @@ document.addEventListener("DOMContentLoaded", function () {
             rmBtn.innerHTML = "&times;";
             rmBtn.addEventListener("click", () => {
                 list.splice(i, 1);
-                render();
+                // Re-fetch so the server recomputes net pay without this item
+                fetchPreview();
             });
 
             pill.append(textEl, dot, amtEl, rmBtn);
             pillArea.appendChild(pill);
 
-            // Hidden POST inputs
+            // Hidden POST inputs — submitted to the server on form save
             const ni = document.createElement("input");
             ni.type = "hidden";
             ni.name = `${inputPrefix}[${i}][name]`;
@@ -279,99 +257,107 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ── Full recalc (async — fires OT/UT fetch) ───────────────────────────────
-    // ── Full recalc (async — now fetches pre-computed amounts) ─────────────────
-    async function recalculateAll(savedBasicSalary = null) {
+    // ── fetchPreview — POSTs to backend, populates S, then renders ────────
+    // ✅ Backend computes everything including manual allowances/deductions.
+    //    JS displays what the server returned — no math performed here.
+    async function fetchPreview() {
         const empId = EL.employeeSelect.value;
         const start = EL.periodStart.value;
         const end = EL.periodEnd.value;
 
         if (!empId || !start || !end) {
             Object.assign(S, {
+                daysWorked: 0,
+                hoursWorked: 0,
+                presentDays: 0,
+                lateDays: 0,
+                absentDays: 0,
                 basicSalary: 0,
-                salaryRate: 0,
-                days: 0,
+                dailyRate: 0,
                 otHours: 0,
                 utHours: 0,
                 otPay: 0,
                 utDeduct: 0,
                 sss: 0,
                 pagibig: 0,
+                adjustedGross: 0,
+                netPay: 0,
             });
             if (EL.loadingRow) EL.loadingRow.style.display = "none";
             render();
             return;
         }
 
-        const opt = EL.employeeSelect.options[EL.employeeSelect.selectedIndex];
-        S.salaryRate = parseFloat(opt?.dataset.salaryRate || 0);
-        S.days = 15;
-
-        if (savedBasicSalary !== null) {
-            S.basicSalary = savedBasicSalary;
-            S.days = window._prl?.savedDaysWorked ?? 15;
-        } else {
-            S.days = 15;
-            S.basicSalary = (S.salaryRate * 22) / 2;
-        }
-
-        computeStatutory();
         if (EL.loadingRow) EL.loadingRow.style.display = "flex";
-        render();
-
-        if (EL.loadingRow) EL.loadingRow.style.display = "flex";
-        render();
 
         const myId = ++fetchId;
 
+        // ✅ Manual allowances/deductions are sent to the server so it can
+        //    include them in the net_pay it returns.
+        const body = new URLSearchParams({
+            user_id: empId,
+            period_start: start,
+            period_end: end,
+        });
+        S.allowances.forEach((a, i) => {
+            body.append(`allowances[${i}][name]`, a.name);
+            body.append(`allowances[${i}][amount]`, a.amount);
+        });
+        S.deductions.forEach((d, i) => {
+            body.append(`deductions[${i}][name]`, d.name);
+            body.append(`deductions[${i}][amount]`, d.amount);
+        });
+
         try {
-            if (!window._prl?.otUtUrl) {
-                throw new Error("otUtUrl is missing in window._prl");
-            }
+            const previewUrl = window._prl?.previewUrl;
+            if (!previewUrl)
+                throw new Error("previewUrl missing from window._prl");
 
-            // Build URL safely (handles both full URL and relative path)
-            let baseUrl = window._prl.otUtUrl;
-            if (!baseUrl.startsWith("http")) {
-                baseUrl =
-                    window.location.origin +
-                    (baseUrl.startsWith("/") ? "" : "/") +
-                    baseUrl;
-            }
-
-            const url = `${baseUrl}?user_id=${empId}&start=${start}&end=${end}`;
-            console.log("[payroll-form] Fetching OT/UT →", url);
-
-            const res = await fetch(url, { cache: "no-store" });
-            if (!res.ok)
-                throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-
-            const data = await res.json();
-            if (myId !== fetchId) return; // stale
-
-            // Trust the backend (this is the key part)
-            S.otHours = parseFloat(data.overtime || 0);
-            S.utHours = parseFloat(data.undertime || 0);
-            const totalAmount = parseFloat(data.ot_ut_amount || 0);
-            S.otPay = totalAmount > 0 ? totalAmount : 0;
-            S.utDeduct = totalAmount < 0 ? Math.abs(totalAmount) : 0;
-
-            console.log("[payroll-form] OT/UT loaded successfully:", {
-                otHours: S.otHours,
-                utHours: S.utHours,
-                otPay: S.otPay,
-                utDeduct: S.utDeduct,
+            const res = await fetch(previewUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-TOKEN":
+                        document.querySelector('meta[name="csrf-token"]')
+                            ?.content ?? "",
+                    "X-Requested-With": "XMLHttpRequest",
+                },
+                body: body.toString(),
+                cache: "no-store",
             });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (myId !== fetchId) return; // stale — a newer fetch supersedes this
+
+            // ✅ Populate S entirely from server response — zero client math
+            S.daysWorked = data.days_worked ?? 0;
+            S.hoursWorked = data.hours_worked ?? 0;
+            S.presentDays = data.present_days ?? 0;
+            S.lateDays = data.late_days ?? 0;
+            S.absentDays = data.absent_days ?? 0;
+            S.basicSalary = data.basic_salary ?? 0;
+            S.dailyRate = data.daily_rate ?? 0;
+            S.otHours = data.overtime_hours ?? 0;
+            S.utHours = data.undertime_hours ?? 0;
+            S.otPay = data.overtime_pay ?? 0;
+            S.utDeduct = data.undertime_deduction ?? 0;
+            S.sss = data.sss ?? 0;
+            S.pagibig = data.pagibig ?? 0;
+            S.adjustedGross = data.adjusted_gross ?? 0;
+            // ✅ net_pay is fully computed by the server (includes manual items)
+            S.netPay = data.net_pay ?? 0;
         } catch (err) {
             if (myId !== fetchId) return;
-            console.error("[payroll-form] OT/UT fetch failed:", err.message);
-            S.otHours = S.utHours = S.otPay = S.utDeduct = 0;
+            console.error("[payroll-form] Preview fetch failed:", err.message);
+            // ✅ No fallback math — show zeros. Do not fabricate numbers.
         }
 
         if (EL.loadingRow) EL.loadingRow.style.display = "none";
         render();
     }
 
-    // ── Add allowance / deduction ─────────────────────────────────────────────
+    // ── Add allowance / deduction ─────────────────────────────────────────
     function addAllowance() {
         const name = EL.allowName.value.trim();
         const amount = parseFloat(EL.allowAmount.value);
@@ -386,7 +372,8 @@ document.addEventListener("DOMContentLoaded", function () {
         S.allowances.push({ name, amount });
         EL.allowName.value = EL.allowAmount.value = "";
         EL.allowName.focus();
-        render();
+        // Re-fetch so server recomputes net_pay with the new allowance included
+        fetchPreview();
     }
 
     function addDeduction() {
@@ -403,10 +390,11 @@ document.addEventListener("DOMContentLoaded", function () {
         S.deductions.push({ name, amount });
         EL.deductName.value = EL.deductAmount.value = "";
         EL.deductName.focus();
-        render();
+        // Re-fetch so server recomputes net_pay with the new deduction included
+        fetchPreview();
     }
 
-    // ── Wire up buttons & keyboard ────────────────────────────────────────────
+    // ── Wire up buttons & keyboard ────────────────────────────────────────
     g("prl_allow_btn").addEventListener("click", addAllowance);
     g("prl_deduct_btn").addEventListener("click", addDeduction);
 
@@ -423,21 +411,19 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // ── Change listeners ──────────────────────────────────────────────────────
+    // ── Change listeners ──────────────────────────────────────────────────
     function handleChange() {
-        if (isEdit && isBootstrapping) return; // ✅ block during page load
-        recalculateAll();
+        if (isBootstrapping) return;
+        fetchPreview();
     }
 
     EL.employeeSelect.addEventListener("change", handleChange);
     EL.periodStart.addEventListener("change", handleChange);
     EL.periodEnd.addEventListener("change", handleChange);
 
-    // ── Bootstrap — seed allowances/deductions + handle create vs edit ────────
-    const rawAllowances =
-        window.initialAllowances ?? window._prl?.initAllowances ?? [];
-    const rawDeductions =
-        window.initialDeductions ?? window._prl?.initDeductions ?? [];
+    // ── Bootstrap — seed manual line items then kick off first fetch ──────
+    const rawAllowances = window._prl?.initAllowances ?? [];
+    const rawDeductions = window._prl?.initDeductions ?? [];
 
     S.allowances = rawAllowances
         .map((a) => ({
@@ -453,23 +439,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }))
         .filter((d) => d.name && d.amount > 0);
 
-    // Kick off the correct flow
-    const savedBasic =
-        isEdit && window._prl?.savedBasicSalary != null
-            ? parseFloat(window._prl.savedBasicSalary)
-            : null;
+    // Initial render with zeros while waiting for the first server response
+    render();
 
-    if (isCreate) {
-        recalculateAll(); // Create: full fetch
-    } else if (isEdit) {
-        S.basicSalary = savedBasic || 0;
-        render(); // Show saved basic immediately
-
-        // Still fetch current OT/UT for the saved period
-        setTimeout(() => {
-            recalculateAll(savedBasic);
-        }, 100);
-    }
+    // Kick off the first server fetch
+    fetchPreview();
 
     setTimeout(() => {
         isBootstrapping = false;

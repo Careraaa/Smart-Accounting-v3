@@ -13,7 +13,6 @@ return new class extends Migration {
 
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            // User Authentication
             $table->string('name');
             $table->string('username')->unique();
             $table->string('password');
@@ -21,7 +20,6 @@ return new class extends Migration {
             $table->string('profile_picture')->nullable();
             $table->rememberToken();
 
-            // Employee Information
             $table->string('first_name')->nullable();
             $table->string('middle_name')->nullable();
             $table->string('last_name')->nullable();
@@ -248,13 +246,10 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->date('date');
-            $table->string('type'); 
+            $table->string('type');
             $table->decimal('hours', 5, 2);
-
-            
-            $table->decimal('amount', 15, 2)->nullable(); 
-            $table->decimal('hourly_rate_used', 15, 2)->nullable(); 
-
+            $table->decimal('amount', 15, 2)->nullable();
+            $table->decimal('hourly_rate_used', 15, 2)->nullable();
             $table->text('reason')->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
@@ -286,8 +281,19 @@ return new class extends Migration {
             $table->date('payment_date')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+
+            // Snapshot columns
+            $table->unsignedInteger('present_days')->default(0);
+            $table->unsignedInteger('late_days')->default(0);
+            $table->unsignedInteger('absent_days')->default(0);
+            $table->decimal('daily_rate_snapshot', 10, 2)->default(0);
+
+            // statutory contributions
+            $table->decimal('sss', 10, 2)->default(0);
+            $table->decimal('pagibig', 10, 2)->default(0);
         });
 
+        // Continue with the rest of your tables (allowances, deductions, etc.)
         Schema::create('allowances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -359,14 +365,13 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // NOTIFICATIONS TABLE
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('type'); // e.g., 'leave_approved', 'overtime_submitted', 'payroll_processed'
+            $table->string('type');
             $table->string('title');
             $table->text('message');
-            $table->json('data')->nullable(); // Additional data like related IDs
+            $table->json('data')->nullable();
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
 
@@ -377,7 +382,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        // Drop in reverse order to respect foreign keys
+        // Drop in reverse order
         Schema::dropIfExists('notifications');
         Schema::dropIfExists('cash_advances');
         Schema::dropIfExists('salary_loans');

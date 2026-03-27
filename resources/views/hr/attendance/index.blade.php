@@ -23,12 +23,24 @@
                     <table class="table table-hover w-100 mb-0">
                         <thead>
                             <tr>
-                                <th><div class="sort-link">Employee</div></th>
-                                <th><div class="sort-link">Date</div></th>
-                                <th><div class="sort-link">Time In</div></th>
-                                <th><div class="sort-link">Time Out</div></th>
-                                <th class="text-center"><div class="sort-link justify-content-center">Status</div></th>
-                                <th class="text-center"><div class="sort-link justify-content-center">Entry Type</div></th>
+                                <th>
+                                    <div class="sort-link">Employee</div>
+                                </th>
+                                <th>
+                                    <div class="sort-link">Date</div>
+                                </th>
+                                <th>
+                                    <div class="sort-link">Time In</div>
+                                </th>
+                                <th>
+                                    <div class="sort-link">Time Out</div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="sort-link justify-content-center">Status</div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="sort-link justify-content-center">Entry Type</div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="attendance-tbody">
@@ -58,13 +70,31 @@
                                     <td class="text-center">
                                         @php
                                             $statusStyles = [
-                                                'present'     => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'border' => '#bbf7d0'],
-                                                'late'        => ['bg' => '#fffbeb', 'color' => '#d97706', 'border' => '#fde68a'],
-                                                'absent'      => ['bg' => '#fff1f2', 'color' => '#e11d48', 'border' => '#fcd0d0'],
-                                                'early_leave' => ['bg' => '#f5f3ff', 'color' => '#7c3aed', 'border' => '#ddd6fe'],
+                                                'present' => [
+                                                    'bg' => '#f0fdf4',
+                                                    'color' => '#16a34a',
+                                                    'border' => '#bbf7d0',
+                                                ],
+                                                'late' => [
+                                                    'bg' => '#fffbeb',
+                                                    'color' => '#d97706',
+                                                    'border' => '#fde68a',
+                                                ],
+                                                'absent' => [
+                                                    'bg' => '#fff1f2',
+                                                    'color' => '#e11d48',
+                                                    'border' => '#fcd0d0',
+                                                ],
+                                                'early_leave' => [
+                                                    'bg' => '#f5f3ff',
+                                                    'color' => '#7c3aed',
+                                                    'border' => '#ddd6fe',
+                                                ],
                                             ];
                                             $s = $statusStyles[$attendance->status] ?? [
-                                                'bg' => '#f4f5f7', 'color' => '#9898a8', 'border' => '#e8e8ef',
+                                                'bg' => '#f4f5f7',
+                                                'color' => '#9898a8',
+                                                'border' => '#e8e8ef',
                                             ];
                                         @endphp
                                         <span class="emp-badge"
@@ -81,7 +111,8 @@
                                         @else
                                             <span class="emp-badge"
                                                 style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">
-                                                <i class="feather-check-circle me-1" style="font-size:0.7rem;"></i>QR Scanned
+                                                <i class="feather-check-circle me-1" style="font-size:0.7rem;"></i>QR
+                                                Scanned
                                             </span>
                                         @endif
                                     </td>
@@ -119,45 +150,80 @@
         </div>
     </div>
 
-    @if (auth()->user()->role === 'hr')
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
-        // ── Refresh attendance table dynamically without full page reload ────
-        function refreshAttendanceTable() {
-            fetch("{{ route('api.attendance.table-rows') }}")
-                .then(r => r.json())
-                .then(data => {
-                    if (data.rows && data.rows.length > 0) {
-                        updateTableRows(data.rows);
+        window.attendanceRowsUrl = "{{ route('api.attendance.table-rows') }}";
+        window.notificationsCountUrl = "{{ route('notifications.count') }}";
+    </script>
+
+
+    @if (auth()->user()->role === 'hr')
+        <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+        <script>
+            // ── Refresh attendance table dynamically without full page reload ────
+            function refreshAttendanceTable() {
+                fetch(window.attendanceRowsUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.rows && data.rows.length > 0) {
+                            updateTableRows(data.rows);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to refresh attendance table:', err.message);
+                        const tbody = document.getElementById('attendance-tbody');
+                        if (tbody) {
+                            tbody.innerHTML =
+                                `<tr><td colspan="6" class="text-center text-muted">Error loading attendance data</td></tr>`;
+                        }
+                    });
+            }
+
+
+            // ── Update table rows with fresh data ────
+            function updateTableRows(rows) {
+                const tbody = document.getElementById('attendance-tbody');
+                if (!tbody) return;
+
+                const statusStyles = {
+                    'present': {
+                        bg: '#f0fdf4',
+                        color: '#16a34a',
+                        border: '#bbf7d0'
+                    },
+                    'late': {
+                        bg: '#fffbeb',
+                        color: '#d97706',
+                        border: '#fde68a'
+                    },
+                    'absent': {
+                        bg: '#fff1f2',
+                        color: '#e11d48',
+                        border: '#fcd0d0'
+                    },
+                    'early_leave': {
+                        bg: '#f5f3ff',
+                        color: '#7c3aed',
+                        border: '#ddd6fe'
                     }
-                })
-                .catch(() => {
-                    console.error('Failed to refresh attendance table');
-                    // Fallback to full reload on error
-                    location.reload();
-                });
-        }
+                };
 
-        // ── Update table rows with fresh data ────
-        function updateTableRows(rows) {
-            const tbody = document.getElementById('attendance-tbody');
-            if (!tbody) return;
+                let html = '';
+                rows.forEach(att => {
+                    const statusStyle = statusStyles[att.status] || {
+                        bg: '#f4f5f7',
+                        color: '#9898a8',
+                        border: '#e8e8ef'
+                    };
+                    const entryType = att.is_manual ?
+                        '<span class="emp-badge" style="background:#f0f9ff; color:#0284c7; border:1px solid #bae6fd;"><i class="feather-edit-2 me-1" style="font-size:0.7rem;"></i>Manual</span>' :
+                        '<span class="emp-badge" style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;"><i class="feather-check-circle me-1" style="font-size:0.7rem;"></i>QR Scanned</span>';
 
-            const statusStyles = {
-                'present': { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0' },
-                'late': { bg: '#fffbeb', color: '#d97706', border: '#fde68a' },
-                'absent': { bg: '#fff1f2', color: '#e11d48', border: '#fcd0d0' },
-                'early_leave': { bg: '#f5f3ff', color: '#7c3aed', border: '#ddd6fe' }
-            };
-
-            let html = '';
-            rows.forEach(att => {
-                const statusStyle = statusStyles[att.status] || { bg: '#f4f5f7', color: '#9898a8', border: '#e8e8ef' };
-                const entryType = att.is_manual
-                    ? '<span class="emp-badge" style="background:#f0f9ff; color:#0284c7; border:1px solid #bae6fd;"><i class="feather-edit-2 me-1" style="font-size:0.7rem;"></i>Manual</span>'
-                    : '<span class="emp-badge" style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;"><i class="feather-check-circle me-1" style="font-size:0.7rem;"></i>QR Scanned</span>';
-
-                html += `
+                    html += `
                     <tr>
                         <td><strong>${att.employee}</strong></td>
                         <td><small class="text-muted">${att.date}</small></td>
@@ -171,10 +237,40 @@
                         <td class="text-center">${entryType}</td>
                     </tr>
                 `;
-            });
+                });
 
-            tbody.innerHTML = html;
-        }
-    </script>
+                tbody.innerHTML = html;
+            }
+
+            function pollNotifications() {
+                fetch(window.notificationsCountUrl)
+                    .then(r => {
+                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                        return r.json();
+                    })
+                    .then(data => {
+                        const unread = data.unread_count;
+
+                        // Update the dot badge next to the bell
+                        const notifCount = document.getElementById('notif-count');
+                        if (notifCount) {
+                            notifCount.textContent = unread > 99 ? '99+' : unread;
+                            notifCount.style.display = unread > 0 ? 'inline-block' : 'none';
+                        }
+
+                        // Update the dropdown badge
+                        const notifBadge = document.getElementById('notif-badge');
+                        if (notifBadge) {
+                            notifBadge.textContent = unread > 0 ? `${unread} New` : '0 New';
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error in notification polling:", err.message);
+                    });
+            }
+
+            setInterval(pollNotifications, 30000);
+            pollNotifications();
+        </script>
     @endif
 @endsection

@@ -2,6 +2,7 @@
 
 @push('styles')
     <style>
+        /* ── (styles identical to create.blade.php — extract to shared partial if desired) ── */
         .prl-wrap {
             max-width: 760px;
             margin: 0 auto;
@@ -523,15 +524,17 @@
                     <div class="prl-chips mb-4">
                         <div class="prl-chip">
                             <span class="prl-chip-lbl">Days Worked</span>
-                            <span class="prl-chip-val" id="prl_days_worked">0</span>
+                            <span class="prl-chip-val" id="prl_days_worked">{{ $payroll->days_worked ?? 0 }}</span>
                         </div>
                         <div class="prl-chip">
                             <span class="prl-chip-lbl">Hours Worked</span>
-                            <span class="prl-chip-val" id="prl_hours_worked">0.00</span>
+                            <span class="prl-chip-val"
+                                id="prl_hours_worked">{{ number_format($payroll->hours_worked ?? 0, 2) }}</span>
                         </div>
+                        {{-- ✅ "Worked Days" — distinct from absent/late counts --}}
                         <div class="prl-chip">
-                            <span class="prl-chip-lbl">Present Days</span>
-                            <span class="prl-chip-val" id="prl_present_days">0</span>
+                            <span class="prl-chip-lbl">Worked Days</span>
+                            <span class="prl-chip-val" id="prl_worked_days">{{ $payroll->days_worked ?? 0 }}</span>
                         </div>
                     </div>
 
@@ -541,43 +544,59 @@
 
                         <div class="prl-brow">
                             <span class="prl-brow-lbl">Basic Salary <span class="prl-badge">rate × days</span></span>
-                            <span class="prl-brow-val" id="prl_basic_display">₱0.00</span>
+                            <span class="prl-brow-val"
+                                id="prl_basic_display">₱{{ number_format($payroll->basic_salary ?? 0, 2) }}</span>
                         </div>
+                        {{--
+                            ✅ basic_salary is shown for reference; PayrollController
+                               recomputes it from AttendanceService on every update.
+                        --}}
                         <input type="hidden" name="basic_salary" id="prl_basic_input"
                             value="{{ old('basic_salary', $payroll->basic_salary ?? 0) }}">
 
-                        <div class="prl-brow" id="prl_ot_row" style="display:none;">
+                        <div class="prl-brow" id="prl_ot_row"
+                            style="{{ $payroll->allowances->where('allowance_type', 'Overtime Pay')->sum('amount') > 0 ? '' : 'display:none;' }}">
                             <span class="prl-brow-lbl c-green">
                                 + Overtime Pay
-                                <span class="prl-badge" id="prl_ot_hrs"></span>
+                                <span class="prl-badge" id="prl_ot_hrs">
+                                    {{ $payroll->hours_worked }} hrs
+                                </span>
                             </span>
-                            <span class="prl-brow-val c-green" id="prl_ot_pay">₱0.00</span>
+                            <span class="prl-brow-val c-green" id="prl_ot_pay">
+                                ₱{{ number_format($payroll->allowances->where('allowance_type', 'Overtime Pay')->sum('amount'), 2) }}
+                            </span>
                         </div>
 
-                        <div class="prl-brow" id="prl_ut_row" style="display:none;">
+                        <div class="prl-brow" id="prl_ut_row"
+                            style="{{ $payroll->deductions->where('deduction_type', 'Undertime Deduction')->sum('amount') > 0 ? '' : 'display:none;' }}">
                             <span class="prl-brow-lbl c-red">
                                 − Undertime Deduction
-                                <span class="prl-badge" id="prl_ut_hrs"></span>
+                                <span class="prl-badge" id="prl_ut_hrs">
+                                    {{ $payroll->hours_worked }} hrs
+                                </span>
                             </span>
-                            <span class="prl-brow-val c-red" id="prl_ut_deduct">₱0.00</span>
+                            <span class="prl-brow-val c-red" id="prl_ut_deduct">
+                                ₱{{ number_format($payroll->deductions->where('deduction_type', 'Undertime Deduction')->sum('amount'), 2) }}
+                            </span>
                         </div>
+
 
                         <div class="prl-brow" id="prl_sss_row" style="display:none;">
                             <span class="prl-brow-lbl c-red">
-                                − SSS Contribution <span class="prl-badge">statutory</span>
+                                − SSS Contribution <span class="prl-badge">statutory · ½ of monthly</span>
                             </span>
                             <span class="prl-brow-val c-red" id="prl_sss_val">₱0.00</span>
                         </div>
 
                         <div class="prl-brow" id="prl_pagibig_row" style="display:none;">
                             <span class="prl-brow-lbl c-red">
-                                − Pag-IBIG Contribution <span class="prl-badge">statutory</span>
+                                − Pag-IBIG Contribution <span class="prl-badge">statutory · ½ of monthly</span>
                             </span>
                             <span class="prl-brow-val c-red" id="prl_pagibig_val">₱0.00</span>
                         </div>
 
                         <div class="prl-brow" id="prl_loading_row" style="display:none;">
-                            <span class="prl-loading-hint">Checking overtime &amp; undertime records…</span>
+                            <span class="prl-loading-hint">Computing from attendance records…</span>
                             <span></span>
                         </div>
 
@@ -609,7 +628,6 @@
                     <div class="prl-sub p-green" id="prl_allow_subtotal" style="display:none;">
                         Total allowances: ₱<span id="prl_allow_total">0.00</span>
                     </div>
-                    <input type="hidden" name="total_allowances" id="prl_total_allowances" value="0">
                     <div id="prl_allow_hidden"></div>
 
                     {{-- ⑤ Deductions ─────────────────────────────────────────────── --}}
@@ -633,13 +651,13 @@
                     <div class="prl-sub p-red" id="prl_deduct_subtotal" style="display:none;">
                         Total deductions: ₱<span id="prl_deduct_total">0.00</span>
                     </div>
-                    <input type="hidden" name="total_deductions" id="prl_total_deductions" value="0">
                     <div id="prl_deduct_hidden"></div>
 
                     {{-- ⑥ Net Salary ──────────────────────────────────────────────── --}}
                     <div class="prl-net">
                         <span class="prl-net-lbl">Net Salary</span>
-                        <span class="prl-net-val" id="prl_net_salary">₱0.00</span>
+                        <span class="prl-net-val"
+                            id="prl_net_salary">₱{{ number_format($payroll->net_pay ?? 0, 2) }}</span>
                     </div>
 
                     {{-- Actions ──────────────────────────────────────────────────── --}}
@@ -658,27 +676,27 @@
 @push('head_scripts')
     <meta name="page-id" content="payroll-edit">
 
-    <script>
-        window._prl = {
-            statutory: @json(\App\Models\StatutoryDeduction::all()),
-            otUtUrl: "{{ route('payroll.ot-ut') }}",
+    @push('head_scripts')
+        <meta name="page-id" content="payroll-edit">
 
-            // Real saved values from the payroll record
-            savedBasicSalary: {{ $payroll->basic_salary ?? 0 }},
-            savedDaysWorked:  {{ $payroll->days_worked ?? 0 }},
-            savedHoursWorked: {{ $payroll->hours_worked ?? 0 }},
+        <script>
+            window._prl = {
+                previewUrl: "{{ route('payroll.preview') }}",
 
-            // Seed manual allowances & deductions (exclude auto OT/UT)
-            initAllowances: @json(
-                $payroll->allowances
-                    ->filter(fn($a) => !str_starts_with($a->allowance_type, 'Overtime Pay'))
-                    ->map(fn($a) => ['name' => $a->allowance_type, 'amount' => (float)$a->amount])
-            ),
-            initDeductions: @json(
-                $payroll->deductions
-                    ->filter(fn($d) => !str_starts_with($d->deduction_type, 'Undertime Deduction'))
-                    ->map(fn($d) => ['name' => $d->deduction_type, 'amount' => (float)$d->amount])
-            )
-        };
-    </script>
+                initAllowances: @json(
+                    $payroll->allowances->reject(fn($a) => $a->allowance_type === 'Overtime Pay')->map(
+                            fn($a) => [
+                                'name' => $a->allowance_type,
+                                'amount' => (float) $a->amount,
+                            ])->values()),
+                initDeductions: @json(
+                    $payroll->deductions->reject(fn($d) => $d->deduction_type === 'Undertime Deduction')->map(
+                            fn($d) => [
+                                'name' => $d->deduction_type,
+                                'amount' => (float) $d->amount,
+                            ])->values()),
+            };
+        </script>
+    @endpush
+
 @endpush

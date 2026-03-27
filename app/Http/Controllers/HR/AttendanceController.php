@@ -14,9 +14,7 @@ class AttendanceController extends Controller
 {
     public function index()
     {
-        $attendances = Attendance::with('employee')
-            ->orderBy('date', 'desc')
-            ->paginate(10);
+        $attendances = Attendance::with('employee')->orderBy('date', 'desc')->paginate(10);
 
         return view('hr.attendance.index', compact('attendances'));
     }
@@ -32,9 +30,9 @@ class AttendanceController extends Controller
         }
 
         AttendanceToken::create([
-            'token'      => $token,
+            'token' => $token,
             'expires_at' => now()->addSeconds(60),
-            'user_id'    => auth()->id(),
+            'user_id' => auth()->id(),
         ]);
 
         cache()->put('current_qr_token', $token, 65);
@@ -56,10 +54,7 @@ class AttendanceController extends Controller
     {
         $request->validate(['token' => 'required']);
 
-        $token = AttendanceToken::where('token', $request->token)
-            ->where('used', false)
-            ->where('expires_at', '>=', now())
-            ->first();
+        $token = AttendanceToken::where('token', $request->token)->where('used', false)->where('expires_at', '>=', now())->first();
 
         if (!$token) {
             return response()->json(['message' => 'Invalid or expired QR'], 403);
@@ -72,40 +67,36 @@ class AttendanceController extends Controller
         }
 
         // Determine whether this scan is a time_in or time_out
-        $last = AttendanceLog::where('user_id', $user->id)
-            ->latest('logged_at')
-            ->first();
+        $last = AttendanceLog::where('user_id', $user->id)->latest('logged_at')->first();
 
-        $type = ($last && $last->type === 'time_in') ? 'time_out' : 'time_in';
+        $type = $last && $last->type === 'time_in' ? 'time_out' : 'time_in';
 
         AttendanceLog::create([
-            'user_id'   => $user->id,
-            'type'      => $type,
+            'user_id' => $user->id,
+            'type' => $type,
             'logged_at' => now(),
         ]);
 
         // ── FIX: was using 'employee_id' which is NOT a column on the
         //         attendance table. The model fillable + seeder both use
         //         'user_id', so we write directly with the auth user's id. ──
-        $today       = today();
+        $today = today();
         $currentTime = now()->format('H:i:s');
 
         if ($type === 'time_in') {
             Attendance::updateOrCreate(
                 [
                     'user_id' => $user->id,
-                    'date'    => $today,
+                    'date' => $today,
                 ],
                 [
-                    'time_in'   => $currentTime,
-                    'status'    => 'present',
+                    'time_in' => $currentTime,
+                    'status' => 'present',
                     'is_manual' => false,
-                ]
+                ],
             );
         } else {
-            $attendance = Attendance::where('user_id', $user->id)
-                ->where('date', $today)
-                ->first();
+            $attendance = Attendance::where('user_id', $user->id)->where('date', $today)->first();
 
             if ($attendance) {
                 $attendance->update(['time_out' => $currentTime]);
@@ -125,8 +116,8 @@ class AttendanceController extends Controller
         }
 
         return response()->json([
-            'message'       => ucfirst(str_replace('_', ' ', $type)) . ' recorded',
-            'type'          => $type,
+            'message' => ucfirst(str_replace('_', ' ', $type)) . ' recorded',
+            'type' => $type,
             'employee_name' => $user->name,
         ]);
     }
@@ -148,18 +139,14 @@ class AttendanceController extends Controller
     public function getLastLog()
     {
         $userId = auth()->id();
-        $today  = now()->toDateString();
+        $today = now()->toDateString();
 
-        $logs = AttendanceLog::where('user_id', $userId)
-            ->whereDate('logged_at', $today)
-            ->orderBy('logged_at')
-            ->get()
-            ->map(fn ($log) => [
+        $logs = AttendanceLog::where('user_id', $userId)->whereDate('logged_at', $today)->orderBy('logged_at')->get()->map(
+            fn($log) => [
                 'type' => $log->type,
-                'time' => $log->logged_at
-                    ->setTimezone(config('app.timezone'))
-                    ->format('g:i A'),
-            ]);
+                'time' => $log->logged_at->setTimezone(config('app.timezone'))->format('g:i A'),
+            ],
+        );
 
         $last = $logs->last();
 
@@ -187,12 +174,12 @@ class AttendanceController extends Controller
                 $localTime = $log->logged_at->setTimezone(config('app.timezone'));
 
                 return [
-                    'id'            => $log->id,
+                    'id' => $log->id,
                     'employee_name' => $log->user->name ?? 'Unknown',
-                    'type'          => $log->type,
-                    'time'          => $localTime->format('g:i A'),
-                    'date'          => $localTime->format('M d, Y'),
-                    'badge_color'   => $log->type === 'time_in' ? 'success' : 'warning',
+                    'type' => $log->type,
+                    'time' => $localTime->format('g:i A'),
+                    'date' => $localTime->format('M d, Y'),
+                    'badge_color' => $log->type === 'time_in' ? 'success' : 'warning',
                 ];
             });
 
@@ -215,8 +202,8 @@ class AttendanceController extends Controller
 
         return response()->json([
             'status' => 'active',
-            'used'   => (bool) $token->used,
-            'token'  => $token->token,
+            'used' => (bool) $token->used,
+            'token' => $token->token,
         ]);
     }
 
@@ -231,41 +218,56 @@ class AttendanceController extends Controller
         // ── FIX: create blade sends 'user_id' but validation was checking
         //         'employee_id' — they must match, and the column is user_id. ──
         $request->validate([
-            'user_id'  => 'required|exists:users,id',
-            'date'     => 'required|date',
-            'time_in'  => 'nullable|date_format:H:i',
+            'user_id' => 'required|exists:users,id',
+            'date' => 'required|date',
+            'time_in' => 'nullable|date_format:H:i',
             'time_out' => 'nullable|date_format:H:i',
-            'status'   => 'required|in:present,absent,late,early_leave',
+            'status' => 'required|in:present,absent,late,early_leave',
         ]);
 
         Attendance::updateOrCreate(
             [
                 'user_id' => $request->user_id,
-                'date'    => $request->date,
+                'date' => $request->date,
             ],
             [
-                'time_in'   => $request->time_in   ? $request->time_in  . ':00' : null,
-                'time_out'  => $request->time_out  ? $request->time_out . ':00' : null,
-                'status'    => $request->status,
+                'time_in' => $request->time_in ? $request->time_in . ':00' : null,
+                'time_out' => $request->time_out ? $request->time_out . ':00' : null,
+                'status' => $request->status,
                 'is_manual' => true,
-            ]
+            ],
         );
 
         // Notification — find user for the notification
         try {
             $user = \App\Models\User::find($request->user_id);
             if ($user) {
-                AttendanceNotification::attendanceRecorded(
-                    $user,
-                    'manual_entry',
-                    \Carbon\Carbon::parse($request->date)
-                );
+                AttendanceNotification::attendanceRecorded($user, 'manual_entry', \Carbon\Carbon::parse($request->date));
             }
         } catch (\Throwable $e) {
             logger()->warning('AttendanceNotification failed: ' . $e->getMessage());
         }
 
-        return redirect()->route('attendance.index')
-            ->with('success', 'Attendance record saved successfully.');
+        return redirect()->route('attendance.index')->with('success', 'Attendance record saved successfully.');
+    }
+
+    public function getAttendanceTableRows()
+    {
+        $attendances = Attendance::with('employee')
+            ->orderBy('date', 'desc')
+            ->take(50)
+            ->get()
+            ->map(function ($att) {
+                return [
+                    'employee' => $att->employee ? $att->employee->first_name . ' ' . $att->employee->last_name : 'Unknown',
+                    'date' => $att->date ? \Carbon\Carbon::parse($att->date)->format('M d, Y') : '—',
+                    'time_in' => $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:i A') : '—',
+                    'time_out' => $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:i A') : '—',
+                    'status' => $att->status ?? 'unknown',
+                    'is_manual' => (bool) $att->is_manual,
+                ];
+            });
+
+        return response()->json(['rows' => $attendances]);
     }
 }

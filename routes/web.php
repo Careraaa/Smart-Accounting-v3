@@ -104,7 +104,7 @@ Route::middleware(['auth', 'role:remittance_clerk,superadmin'])->group(function 
     Route::get('/remittance/vehicle-plate', fn() => view('remittance-clerk.remittances.vehicle-plate'))->name('remittance.vehicle-plate');
     Route::get('/remittance/fare-collection', fn() => view('remittance-clerk.remittances.fare-collection'))->name('remittance.fare-collection');
     Route::get('/remittance/trip-expenses', fn() => view('remittance-clerk.remittances.trip-expenses'))->name('remittance.trip-expenses');
-    
+
     // Report Routes
     Route::get('/reports', [RemittanceClerkReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/remittance-report', [RemittanceClerkReportController::class, 'remittanceReport'])->name('reports.remittance-report');
@@ -203,23 +203,26 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
     Route::post('/overtime/{overtime}/reject', [OvertimeUndertimeController::class, 'reject'])->name('overtime.reject');
 
     // HR Payroll Routes - All under salary-computation prefix
-Route::prefix('payroll/salary-computation')
-    ->name('payroll.salary-computation.')
-    ->group(function () {
-        Route::get('/', [PayrollController::class, 'index'])->name('index');
-        Route::get('/create', [PayrollController::class, 'create'])->name('create');
-        Route::post('/', [PayrollController::class, 'store'])->name('store');
-        
-        // These were missing or conflicting
-        Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
-        Route::get('/{payroll}/edit', [PayrollController::class, 'edit'])->name('edit');
-        Route::put('/{payroll}', [PayrollController::class, 'update'])->name('update');
-        Route::delete('/{payroll}', [PayrollController::class, 'destroy'])->name('destroy');
-        
-        Route::get('/batch-generate', fn() => view('hr.payroll.salary-computation.batch-generate'))->name('batch-generate');
-    });
+    Route::prefix('payroll/salary-computation')
+        ->name('payroll.salary-computation.')
+        ->group(function () {
+            Route::get('/', [PayrollController::class, 'index'])->name('index');
 
-    Route::post('/payroll/generate-batch', [PayrollController::class, 'generatePayrollBatch'])->name('payroll.generate-batch');
+            Route::get('/create', [PayrollController::class, 'create'])->name('create');
+
+            Route::get('/batch-generate', fn() => view('hr.payroll.salary-computation.batch-generate'))->name('batch-generate');
+
+            Route::post('/', [PayrollController::class, 'store'])->name('store');
+
+            Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
+            Route::get('/{payroll}/edit', [PayrollController::class, 'edit'])->name('edit');
+            Route::put('/{payroll}', [PayrollController::class, 'update'])->name('update');
+            Route::delete('/{payroll}', [PayrollController::class, 'destroy'])->name('destroy');
+        });
+
+    Route::post('/payroll/generate-batch', [PayrollController::class, 'generateBatch'])->name('payroll.generate-batch');
+
+    Route::post('/payroll/preview', [PayrollController::class, 'preview'])->name('payroll.preview');
 
     Route::prefix('payroll/statutory-deductions')
         ->name('payroll.statutory-deductions.')
