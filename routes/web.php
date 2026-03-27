@@ -23,6 +23,7 @@ use App\Http\Controllers\HR\StatutoryDeductionController;
 use App\Http\Controllers\HR\LeaveController;
 use App\Http\Controllers\HR\LeaveTypeController;
 use App\Http\Controllers\HR\OvertimeUndertimeController;
+use App\Http\Controllers\HR\HrReportController; // <-- NEW
 use App\Http\Controllers\Accountant\PayrollApprovalController;
 use App\Http\Controllers\Accountant\ReportController;
 use App\Http\Controllers\Accountant\RemittanceApprovalController;
@@ -281,7 +282,7 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
                     ->orderBy('first_name')
                     ->get(['id', 'name', 'first_name', 'last_name', 'position']);
 
-                return view('hr.payroll.generate-payslip.index', compact('payrolls', 'employees')); // ← added employees
+                return view('hr.payroll.generate-payslip.index', compact('payrolls', 'employees'));
             })->name('index');
         });
 
@@ -299,6 +300,11 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
     Route::get('/reports/payroll-summary', fn() => view('hr.reports.payroll-summary'))->name('reports.payroll-summary');
     Route::get('/reports/deduction-summary', fn() => view('hr.reports.deduction-summary'))->name('reports.deduction-summary');
     Route::get('/reports/government-contribution', fn() => view('hr.reports.government-contribution'))->name('reports.government-contribution');
+
+    // ===== HR PRINT ROUTES =====
+    Route::get('/hr/reports/print/employee-report', [HrReportController::class, 'printEmployeeReport'])->name('hr.reports.print.employee-report');
+    Route::get('/hr/reports/print/approved-leaves-report', [HrReportController::class, 'printApprovedLeavesReport'])->name('hr.reports.print.approved-leaves-report');
+    Route::get('/hr/reports/print/payroll-history-report', [HrReportController::class, 'printPayrollHistoryReport'])->name('hr.reports.print.payroll-history-report');
 });
 
 // ===== PAYROLL REPORTS (all authenticated users) =====

@@ -9,9 +9,11 @@
                         <span class="card-title mb-0">Payroll History</span>
                         <p class="text-muted small mt-1 mb-0">View all payroll batch releases and historical data</p>
                     </div>
-                    <a href="{{ route('reports.print.pao-report') }}" class="btn btn-sm btn-primary" target="_blank">
-                        <i class="feather-printer me-1"></i> Export to PDF
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('hr.reports.print.payroll-history-report') }}" class="btn btn-sm btn-primary" target="_blank">
+                            <i class="feather-printer me-1"></i> Print
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body">
 
