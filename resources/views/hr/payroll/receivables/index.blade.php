@@ -3,19 +3,6 @@
 @section('title', 'Payroll Receivables')
 
 @section('content')
-<div class="kt-page-header mb-3">
-    <div class="kt-page-header-left">
-        <div>
-            <h4 class="kt-page-title">Payroll Receivables</h4>
-            <div class="kt-breadcrumb">
-                <span class="kt-breadcrumb-item">Payroll</span>
-                <span class="kt-breadcrumb-sep">›</span>
-                <span class="kt-breadcrumb-item active">Receivables</span>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="main-content">
 
     @if (session('success'))
@@ -35,12 +22,6 @@
     {{-- ── Tabs ── --}}
     <ul class="nav nav-tabs mb-3" id="receivableTabs">
         <li class="nav-item">
-            <a class="nav-link {{ $tab === 'payroll' ? 'active' : '' }}"
-               href="{{ route('payroll.receivables.index') }}?tab=payroll">
-                <i class="feather-dollar-sign me-1"></i> Payroll
-            </a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link {{ $tab === 'cash_advances' ? 'active' : '' }}"
                href="{{ route('payroll.receivables.index') }}?tab=cash_advances">
                 <i class="feather-credit-card me-1"></i> Cash Advances
@@ -54,113 +35,7 @@
         </li>
     </ul>
 
-    {{-- ══════════════════════════════════════════════════════════
-         TAB 1 — PAYROLL
-    ══════════════════════════════════════════════════════════ --}}
-    @if ($tab === 'payroll')
-    <div class="card">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <span class="card-title">Approved &amp; Paid Payrolls</span>
-            @if (in_array(auth()->user()->role, ['hr', 'superadmin']))
-            <form id="batchForm" method="POST" action="{{ route('payroll.receivables.batch-paid') }}">
-                @csrf
-                <div class="d-flex gap-2 align-items-center">
-                    <input type="date" name="payment_date" class="form-control form-control-sm" style="width:160px;" value="{{ date('Y-m-d') }}" required>
-                    <button type="submit" class="btn btn-sm btn-primary" id="batchPayBtn" disabled>
-                        <i class="feather-check me-1"></i> Mark Paid
-                    </button>
-                </div>
-            </form>
-            @endif
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table mb-0">
-                    <thead>
-                        <tr>
-                            @if (in_array(auth()->user()->role, ['hr', 'superadmin']))
-                            <th style="width:36px;">
-                                <input type="checkbox" class="form-check-input" id="checkAll">
-                            </th>
-                            @endif
-                            <th>Employee</th>
-                            <th>Period</th>
-                            <th>Basic Salary</th>
-                            <th>Deductions</th>
-                            <th>Net Pay</th>
-                            <th>Status</th>
-                            <th>Payment Date</th>
-                            @if (in_array(auth()->user()->role, ['hr', 'superadmin']))
-                            <th>Action</th>
-                            @endif
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($payrolls as $payroll)
-                        <tr>
-                            @if (in_array(auth()->user()->role, ['hr', 'superadmin']))
-                            <td>
-                                @if ($payroll->status === 'approved')
-                                <input type="checkbox" class="form-check-input payroll-check"
-                                       name="payroll_ids[]" value="{{ $payroll->id }}"
-                                       form="batchForm">
-                                @endif
-                            </td>
-                            @endif
-                            <td>
-                                <div class="fw-semibold" style="font-size:.845rem;">{{ $payroll->user->name ?? '—' }}</div>
-                                <div class="text-muted" style="font-size:.75rem;">{{ $payroll->user->position ?? '' }}</div>
-                            </td>
-                            <td style="font-size:.845rem;">
-                                {{ \Carbon\Carbon::parse($payroll->payroll_period_start)->format('M d') }}
-                                – {{ \Carbon\Carbon::parse($payroll->payroll_period_end)->format('M d, Y') }}
-                            </td>
-                            <td style="font-size:.845rem;">₱{{ number_format($payroll->basic_salary, 2) }}</td>
-                            <td style="font-size:.845rem;">₱{{ number_format($payroll->total_deductions, 2) }}</td>
-                            <td class="fw-bold" style="font-size:.9rem;">
-                                ₱{{ number_format($payroll->basic_salary - $payroll->total_deductions + $payroll->total_allowances, 2) }}
-                            </td>
-                            <td>
-                                @if ($payroll->status === 'paid')
-                                    <span class="emp-badge emp-badge-active">Paid</span>
-                                @else
-                                    <span class="emp-badge emp-badge-pending">Approved</span>
-                                @endif
-                            </td>
-                            <td style="font-size:.845rem;">
-                                {{ $payroll->payment_date ? \Carbon\Carbon::parse($payroll->payment_date)->format('M d, Y') : '—' }}
-                            </td>
-                            @if (in_array(auth()->user()->role, ['hr', 'superadmin']))
-                            <td>
-                                @if ($payroll->status === 'approved')
-                                <button class="emp-action-btn emp-action-pay"
-                                        title="Mark as Paid"
-                                        type="button"
-                                        onclick="openPayModal({{ $payroll->id }})">
-                                    <i class="feather-check-circle"></i>
-                                </button>
-                                @endif
-                            </td>
-                            @endif
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="{{ in_array(auth()->user()->role, ['hr', 'superadmin']) ? 9 : 7 }}" class="text-center text-muted py-4">
-                                No payroll records found.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        @if ($payrolls->hasPages())
-        <div class="card-footer d-flex justify-content-end">
-            {{ $payrolls->links() }}
-        </div>
-        @endif
-    </div>
-    @endif
+
 
     {{-- ══════════════════════════════════════════════════════════
          TAB 2 — CASH ADVANCES

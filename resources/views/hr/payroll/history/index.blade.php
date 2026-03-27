@@ -4,58 +4,39 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="card-title mb-0">Payroll Batch Approval</span>
-                        <p class="text-muted small mt-1 mb-0">Review and approve payroll batches</p>
+                        <span class="card-title mb-0">Payroll History</span>
+                        <p class="text-muted small mt-1 mb-0">View all payroll batch releases and historical data</p>
                     </div>
+                    <a href="{{ route('reports.print.pao-report') }}" class="btn btn-sm btn-primary" target="_blank">
+                        <i class="feather-printer me-1"></i> Export to PDF
+                    </a>
                 </div>
                 <div class="card-body">
 
                     {{-- Statistics Cards --}}
                     <div class="row mb-4">
-                        @php
-                            $totalPending = 0;
-                            $totalEmployees = 0;
-                            $totalAmount = 0;
-                            foreach ($batchData as $batch) {
-                                $totalPending++;
-                                $totalEmployees += $batch['count'];
-                                $totalAmount += $batch['total_net'];
-                            }
-                        @endphp
                         <div class="col-md-3">
                             <div class="card card-statistic">
                                 <div class="card-body">
-                                    <div class="stat-label">Pending Batches</div>
-                                    <h3 class="mb-1" style="color: #8B3A62;">{{ $totalPending }}</h3>
-                                    <small class="text-muted">Awaiting approval</small>
+                                    <div class="stat-label">Total Batches</div>
+                                    <h3 class="mb-1" style="color: #8B3A62;">{{ $totalBatches }}</h3>
+                                    <small class="text-muted">This year</small>
                                 </div>
                                 <div class="card-icon" style="color: #8B3A62; opacity: 0.2;">
-                                    <i class="feather-inbox" style="font-size: 2.5rem;"></i>
+                                    <i class="feather-layers" style="font-size: 2.5rem;"></i>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="card card-statistic">
                                 <div class="card-body">
-                                    <div class="stat-label">Total Employees</div>
-                                    <h3 class="mb-1" style="color: #B8860B;">{{ $totalEmployees }}</h3>
-                                    <small class="text-muted">In pending batches</small>
+                                    <div class="stat-label">Total Amount</div>
+                                    <h3 class="mb-1" style="color: #B8860B;">₱{{ number_format($totalPayroll, 1) }}M</h3>
+                                    <small class="text-muted">All-time payroll total</small>
                                 </div>
                                 <div class="card-icon" style="color: #B8860B; opacity: 0.2;">
-                                    <i class="feather-users" style="font-size: 2.5rem;"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card card-statistic">
-                                <div class="card-body">
-                                    <div class="stat-label">Total Gross</div>
-                                    <h3 class="mb-1" style="color: #55A969;">₱{{ number_format($totalAmount > 0 ? $totalAmount * 1.1 / 1000000 : 0, 1) }}M</h3>
-                                    <small class="text-muted">Total payroll</small>
-                                </div>
-                                <div class="card-icon" style="color: #55A969; opacity: 0.2;">
                                     <i class="feather-dollar-sign" style="font-size: 2.5rem;"></i>
                                 </div>
                             </div>
@@ -63,37 +44,60 @@
                         <div class="col-md-3">
                             <div class="card card-statistic">
                                 <div class="card-body">
-                                    <div class="stat-label">Total Net Amount</div>
-                                    <h3 class="mb-1" style="color: #16a34a;">₱{{ number_format($totalAmount > 0 ? $totalAmount / 1000000 : 0, 1) }}M</h3>
-                                    <small class="text-muted">Combined net pay</small>
+                                    <div class="stat-label">Avg Per Batch</div>
+                                    <h3 class="mb-1" style="color: #8B3A62;">₱{{ number_format($totalBatches > 0 ? $totalPayroll / $totalBatches : 0, 0) }}K</h3>
+                                    <small class="text-muted">Average amount</small>
                                 </div>
-                                <div class="card-icon" style="color: #16a34a; opacity: 0.2;">
+                                <div class="card-icon" style="color: #8B3A62; opacity: 0.2;">
                                     <i class="feather-trending-up" style="font-size: 2.5rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card card-statistic">
+                                <div class="card-body">
+                                    <div class="stat-label">Active Staff</div>
+                                    <h3 class="mb-1" style="color: #B8860B;">{{ $totalPaid }}</h3>
+                                    <small class="text-muted">Paid employees</small>
+                                </div>
+                                <div class="card-icon" style="color: #B8860B; opacity: 0.2;">
+                                    <i class="feather-users" style="font-size: 2.5rem;"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Alert Messages --}}
-                    @if ($message = Session::get('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="feather-check-circle me-2"></i>
-                            {{ $message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    {{-- Filters --}}
+                    <div class="row mb-4" style="align-items: flex-end;">
+                        <div class="col-md-9">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label for="filterMonth" class="form-label small">Month</label>
+                                    <select name="filter_month" id="filterMonth" class="form-select form-select-sm" onchange="applyFilters()">
+                                        <option value="">All Months</option>
+                                        @for ($i = 1; $i <= 12; $i++)
+                                            <option value="{{ $i }}" {{ $filterMonth == $i ? 'selected' : '' }}>
+                                                {{ \Carbon\Carbon::createFromDate(null, $i)->format('F') }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="filterYear" class="form-label small">Year</label>
+                                    <select name="filter_year" id="filterYear" class="form-select form-select-sm" onchange="applyFilters()">
+                                        <option value="">All Years</option>
+                                        @for ($i = 2020; $i <= now()->year; $i++)
+                                            <option value="{{ $i }}" {{ $filterYear == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                    @endif
+                    </div>
 
-                    @if ($message = Session::get('error'))
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <i class="feather-alert-circle me-2"></i>
-                            {{ $message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-
-                    {{-- Payroll Batch Approval --}}
-                    <h5 class="mb-2">Pending Batches</h5>
-                    <p class="text-muted small mb-4">Click to review and approve payroll batches</p>
+                    {{-- Payroll Batch History --}}
+                    <h5 class="mb-2">Payroll Batch History</h5>
+                    <p class="text-muted small mb-4">View all payroll batch releases</p>
 
                     <div class="row">
                         @forelse($batchData as $batch)
@@ -113,7 +117,7 @@
                                 }
                             @endphp
                             <div class="col-12 mb-3">
-                                <a href="{{ route('payroll-approval.batch') }}?start={{ $startDate->format('Y-m-d') }}&end={{ $endDate->format('Y-m-d') }}&status=pending" style="text-decoration: none;">
+                                <a href="{{ route('payroll.history.batch', ['start' => $startDate->format('Y-m-d'), 'end' => $endDate->format('Y-m-d')]) }}" style="text-decoration: none;">
                                     <div class="card" style="background-color: {{ $bgColor }}; border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease;">
                                         <div class="card-body p-4">
                                             <div style="display: flex; align-items: center; gap: 20px;">
@@ -130,7 +134,7 @@
                                                         {{ $startDate->format('F Y') }} - Batch {{ $isFirst ? '1' : '2' }}
                                                     </h6>
                                                     <small style="color: {{ $iconColor }}; opacity: 0.8;">
-                                                        Period: {{ $startDate->format('M d') }} - {{ $endDate->format('M d, Y') }}
+                                                        Released on {{ $endDate->format('F d, Y') }}
                                                     </small>
                                                 </div>
 
@@ -142,44 +146,53 @@
                                                     </div>
                                                     <div style="text-align: center;">
                                                         <small style="color: {{ $iconColor }}; opacity: 0.8; display: block; font-size: 0.8rem;">Gross Amount</small>
-                                                        <strong style="color: {{ $iconColor }}; font-size: 0.95rem; display: block;">₱{{ number_format($batch['total_gross'], 2) }}</strong>
+                                                        <strong style="color: {{ $iconColor }}; font-size: 0.95rem; display: block;">₱{{ number_format($batch['total_amount'] * 1.1, 2) }}</strong>
                                                     </div>
                                                     <div style="text-align: center;">
                                                         <small style="color: {{ $iconColor }}; opacity: 0.8; display: block; font-size: 0.8rem;">Deductions</small>
-                                                        <strong style="color: {{ $iconColor }}; font-size: 0.95rem; display: block;">₱{{ number_format(abs($batch['total_gross'] - $batch['total_net']), 2) }}</strong>
+                                                        <strong style="color: {{ $iconColor }}; font-size: 0.95rem; display: block;">₱{{ number_format($batch['total_amount'] * 0.15, 2) }}</strong>
                                                     </div>
                                                     <div style="text-align: center;">
                                                         <small style="color: {{ $iconColor }}; opacity: 0.8; display: block; font-size: 0.8rem;">Net Pay</small>
-                                                        <strong style="color: {{ $iconColor }}; font-size: 0.95rem; display: block;">₱{{ number_format($batch['total_net'], 2) }}</strong>
+                                                        <strong style="color: {{ $iconColor }}; font-size: 0.95rem; display: block;">₱{{ number_format($batch['total_amount'], 2) }}</strong>
                                                     </div>
                                                 </div>
-                                            </div>
                                         </div>
                                     </div>
+                                </div>
                                 </a>
                             </div>
                         @empty
                             <div class="col-12">
                                 <div class="alert alert-info" role="alert">
-                                    <i class="feather-check-circle me-2"></i> No payroll batches pending approval.
+                                    <i class="feather-info"></i> No payroll batches found for the selected period.
                                 </div>
                             </div>
                         @endforelse
                     </div>
 
-                    {{-- Info --}}
-                    @if(count($batchData) > 0)
+                    {{-- Pagination Info --}}
+                    @if($batchData)
                         <div class="mt-4 text-center text-muted small">
-                            Showing {{ count($batchData) }} batch(es) pending approval
+                            Showing {{ count($batchData) }} batch(es)
                         </div>
                     @endif
-
-
 
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        function applyFilters() {
+            const month = document.getElementById('filterMonth').value;
+            const year = document.getElementById('filterYear').value;
+            const params = new URLSearchParams();
+            if (month) params.append('filter_month', month);
+            if (year) params.append('filter_year', year);
+            window.location.href = '{{ route("payroll.history.index") }}' + (params.toString() ? '?' + params.toString() : '');
+        }
+    </script>
 
     <style>
         .card-statistic {

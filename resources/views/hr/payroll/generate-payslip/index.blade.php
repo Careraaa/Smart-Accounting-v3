@@ -31,22 +31,6 @@
                         </datalist>
                     </div>
 
-                    {{-- Period Start --}}
-                    <input type="date" name="period_start" class="form-control form-control-sm"
-                        value="{{ request('period_start') }}" style="max-width:160px;">
-
-                    {{-- Period End --}}
-                    <input type="date" name="period_end" class="form-control form-control-sm"
-                        value="{{ request('period_end') }}" style="max-width:160px;">
-
-                    {{-- Status --}}
-                    <select name="status" class="form-control form-control-sm" style="max-width:130px;">
-                        <option value="">All Statuses</option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
-                        <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
-                    </select>
-
                     <button type="submit" class="btn btn-sm btn-outline-secondary">
                         <i class="feather-filter me-1"></i> Filter
                     </button>

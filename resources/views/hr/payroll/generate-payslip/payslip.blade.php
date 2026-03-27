@@ -508,7 +508,7 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <a href="{{ route('payroll.salary-computation.show', $payroll) }}" class="btn btn-ghost">← Back to Payroll</a>
+        <a href="{{ route('payroll.salary-computation.show', $payroll) }}" class="btn btn-ghost">← Back</a>
         <button class="btn btn-primary" onclick="window.print()">Print Payslip</button>
     </div>
 
@@ -539,20 +539,12 @@
                 <div class="emp-val">{{ $payroll->user->name ?? 'N/A' }}</div>
             </div>
             <div class="emp-col">
-                <div class="emp-label">Employee ID</div>
-                <div class="emp-val mono">#{{ str_pad($payroll->user_id, 5, '0', STR_PAD_LEFT) }}</div>
-            </div>
-            <div class="emp-col">
                 <div class="emp-label">Position</div>
                 <div class="emp-val">{{ $payroll->user->position ?? '—' }}</div>
             </div>
             <div class="emp-col">
                 <div class="emp-label">Department</div>
                 <div class="emp-val">{{ $payroll->user->department ?? '—' }}</div>
-            </div>
-            <div class="emp-col">
-                <div class="emp-label">Status</div>
-                <div class="emp-val" style="text-transform: capitalize;">{{ $payroll->status }}</div>
             </div>
         </div>
 
@@ -726,14 +718,14 @@
                 <div class="sig-col">
                     <div class="sig-space"></div>
                     <div class="sig-line">
-                        <div class="sig-name">{{ $payroll->approvedBy?->name ?? '&nbsp;' }}</div>
+                        <div class="sig-name">{{ $payroll->approvedBy?->name ?? 'John Doe' }}</div>
                         <div class="sig-role">Approved By</div>
                     </div>
                 </div>
                 <div class="sig-col">
                     <div class="sig-space"></div>
                     <div class="sig-line">
-                        <div class="sig-name">&nbsp;</div>
+                        <div class="sig-name">Kyle Sy</div>
                         <div class="sig-role">HR Officer</div>
                     </div>
                 </div>

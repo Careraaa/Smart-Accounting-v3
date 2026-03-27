@@ -17,6 +17,7 @@ use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\EmployeeAttachmentController;
 use App\Http\Controllers\HR\AttendanceController;
 use App\Http\Controllers\HR\PayrollController;
+use App\Http\Controllers\HR\PayrollHistoryController;
 use App\Http\Controllers\HR\PayrollReceivablesController;
 use App\Http\Controllers\HR\StatutoryDeductionController;
 use App\Http\Controllers\HR\LeaveController;
@@ -224,6 +225,10 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
 
     Route::post('/payroll/preview', [PayrollController::class, 'preview'])->name('payroll.preview');
 
+    Route::post('/payroll/release-payroll', [PayrollController::class, 'releasePayroll'])->name('payroll.release-payroll');
+
+    Route::post('/payroll/export-pdf', [PayrollController::class, 'exportPdf'])->name('payroll.export-pdf');
+
     Route::prefix('payroll/statutory-deductions')
         ->name('payroll.statutory-deductions.')
         ->group(function () {
@@ -282,6 +287,14 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
 
     Route::get('payroll/{payroll}/payslip', [PayrollController::class, 'generatePayslip'])->name('payroll.generatePayslip');
 
+    Route::prefix('payroll/history')
+        ->name('payroll.history.')
+        ->group(function () {
+            Route::get('/', [PayrollHistoryController::class, 'index'])->name('index');
+            Route::get('/batch', [PayrollHistoryController::class, 'batch'])->name('batch');
+            Route::get('/{payroll}', [PayrollHistoryController::class, 'show'])->name('show');
+        });
+
     Route::get('/reports/payslips', fn() => view('hr.reports.payslips'))->name('reports.payslips');
     Route::get('/reports/payroll-summary', fn() => view('hr.reports.payroll-summary'))->name('reports.payroll-summary');
     Route::get('/reports/deduction-summary', fn() => view('hr.reports.deduction-summary'))->name('reports.deduction-summary');
@@ -296,6 +309,11 @@ Route::middleware(['auth'])->group(function () {
 // ===== ACCOUNTANT ROUTES =====
 Route::middleware(['auth', 'role:accountant'])->group(function () {
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
+
+    // Batch approval routes (must come before resource route)
+    Route::get('payroll-approval/batch', [PayrollApprovalController::class, 'showBatch'])->name('payroll-approval.batch');
+    Route::post('payroll-approval/batch/approve', [PayrollApprovalController::class, 'approveBatch'])->name('payroll-approval.approve-batch');
+    Route::post('payroll-approval/batch/reject', [PayrollApprovalController::class, 'rejectBatch'])->name('payroll-approval.reject-batch');
 
     Route::resource('payroll-approval', PayrollApprovalController::class, ['only' => ['index', 'show']]);
     Route::post('payroll-approval/{payroll}/approve', [PayrollApprovalController::class, 'approve'])->name('payroll-approval.approve');
