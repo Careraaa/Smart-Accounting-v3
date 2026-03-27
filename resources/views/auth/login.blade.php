@@ -41,20 +41,10 @@
                     <label class="form-check-label" for="remember"
                         style="font-size:0.815rem; color:#9898a8;">Remember me</label>
                 </div>
-                <small style="font-size:0.815rem; color:#9898a8; margin-top:5px; display:block;">
-                    Forgot your password? Contact HR for assistance.
-                </small>
             </div>
 
             <button type="submit" class="btn-auth">Sign In</button>
         </form>
-
-        @if (Route::has('register'))
-            <div class="auth-footer-text">
-                Don't have an account?
-                <a href="{{ route('register') }}" class="ms-1">Create one</a>
-            </div>
-        @endif
 
     @else
 
