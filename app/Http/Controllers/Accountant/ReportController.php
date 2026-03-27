@@ -17,8 +17,35 @@ class ReportController extends Controller
 
     public function payrollReports()
     {
-        $payrolls = Payroll::with('employee')->where('status', 'paid')->get();
-        return view('accountant.reports.payroll', compact('payrolls'));
+        // Return summary of approved payroll batches for the payroll reports page
+        $approvedBatches = Payroll::where('status', 'approved')
+            ->select('payroll_period_start', 'payroll_period_end')
+            ->distinct()
+            ->orderBy('payroll_period_start', 'desc')
+            ->get();
+
+        $batchData = [];
+        foreach ($approvedBatches as $batch) {
+            $payrolls = Payroll::with('user')
+                ->whereDate('payroll_period_start', $batch->payroll_period_start)
+                ->whereDate('payroll_period_end', $batch->payroll_period_end)
+                ->where('status', 'approved')
+                ->get();
+
+            $totalGross = $payrolls->sum('gross_pay');
+            $totalNet = $payrolls->sum('net_pay');
+
+            $batchData[] = [
+                'period_start' => $batch->payroll_period_start,
+                'period_end' => $batch->payroll_period_end,
+                'count' => $payrolls->count(),
+                'total_gross' => $totalGross,
+                'total_net' => $totalNet,
+                'total_deductions' => $totalGross - $totalNet,
+            ];
+        }
+
+        return view('accountant.reports.payroll', compact('batchData'));
     }
 
     public function payslips()

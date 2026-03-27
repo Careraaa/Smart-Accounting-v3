@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
         $this->call([OvertimeUndertimeSeeder::class]);
         $this->call([AllowanceDeductionSeeder::class]);
         $this->call([LeaveTypeSeeder::class]);
+        $this->call([PayrollCutoffScheduleSeeder::class]);
     }
 }

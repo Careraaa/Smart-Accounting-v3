@@ -210,10 +210,6 @@
 
                 {{-- Actions --}}
                 <div class="d-flex gap-2 pt-3 border-top">
-                    <a href="{{ route('payroll.salary-computation.edit', $payroll) }}"
-                        class="emp-action-btn emp-action-edit">
-                        <i class="feather-edit-2 me-1"></i> Edit
-                    </a>
                     <form action="{{ route('payroll.salary-computation.destroy', $payroll) }}" method="POST"
                         class="d-inline">
                         @csrf @method('DELETE')

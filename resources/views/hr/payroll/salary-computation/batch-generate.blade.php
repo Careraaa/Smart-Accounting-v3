@@ -161,22 +161,41 @@
                     {{-- Header --}}
                     <p class="prl-eyebrow">Batch Payroll Generator</p>
 
-                    {{-- Period --}}
-                    <div class="prl-grid prl-col-2 mb-3">
-                        <div>
-                            <label class="prl-lbl">Period Start *</label>
-                            <input type="date" name="period_start"
-                                class="prl-ctrl @error('period_start') is-invalid @enderror"
-                                value="{{ old('period_start') }}" required>
-                        </div>
-
-                        <div>
-                            <label class="prl-lbl">Period End *</label>
-                            <input type="date" name="period_end"
-                                class="prl-ctrl @error('period_end') is-invalid @enderror" value="{{ old('period_end') }}"
-                                required>
-                        </div>
+                    {{-- Automatically Determined Cutoff --}}
+                    @php
+                        $today = \Carbon\Carbon::now();
+                        $dayOfMonth = $today->day;
+                        
+                        // Determine which batch based on current date
+                        // Batch 1: 1st-27th of month (cutoff on 5th)
+                        // Batch 2: 28th-31st of month (cutoff on 28th)
+                        $selectedSchedule = \App\Models\PayrollCutoffSchedule::where('is_active', true)
+                            ->where('cutoff_day', $dayOfMonth <= 27 ? 5 : 28)
+                            ->first();
+                        
+                        $monthName = $today->format('F');
+                        
+                        // Calculate periods based on batch
+                        if ($selectedSchedule && $selectedSchedule->cutoff_day == 5) {
+                            // Batch 1: 1st to 15th
+                            $periodStart = $today->copy()->startOfMonth();
+                            $periodEnd = $today->copy()->setDay(15);
+                        } else {
+                            // Batch 2: 16th to end of month
+                            $periodStart = $today->copy()->setDay(16);
+                            $periodEnd = $today->copy()->endOfMonth();
+                        }
+                    @endphp
+                    
+                    <div class="prl-note mb-3">
+                        <strong>Active Batch:</strong> {{ $monthName }} - {{ $selectedSchedule->label ?? 'N/A' }}
+                        <br><small>{{ $periodStart ? 'Period: ' . $periodStart->format('M d') . ' - ' . $periodEnd->format('M d, Y') : 'No active batch' }}</small>
                     </div>
+
+                    {{-- Hidden Cutoff and Period Fields --}}
+                    <input type="hidden" name="cutoff_schedule_id" value="{{ $selectedSchedule->id ?? '' }}">
+                    <input type="hidden" name="period_start" value="{{ $periodStart->format('Y-m-d') }}">
+                    <input type="hidden" name="period_end" value="{{ $periodEnd->format('Y-m-d') }}">
 
                     {{-- Employees --}}
                     <p class="prl-eyebrow">Employees</p>

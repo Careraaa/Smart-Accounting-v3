@@ -12,8 +12,6 @@
                     <thead>
                         <tr>
                             <th>Date</th>
-                            <th>Driver</th>
-                            <th>PAO</th>
                             <th>Route</th>
                             <th>Collection</th>
                             <th>Expenses</th>
@@ -23,9 +21,7 @@
                     <tbody>
                         @forelse($remittances as $remittance)
                             <tr>
-                                <td class="text-muted" style="font-size:.82rem;">{{ $remittance->remittance_date }}</td>
-                                <td><strong>{{ $remittance->driver->name }}</strong></td>
-                                <td>{{ $remittance->pao->name }}</td>
+                                <td class="text-muted" style="font-size:.82rem;">{{ $remittance->remittance_date?->format('M d, Y') }}</td>
                                 <td>{{ $remittance->route->route_name }}</td>
                                 <td>₱{{ number_format($remittance->total_collection, 2) }}</td>
                                 <td class="text-muted">₱{{ number_format($remittance->total_expenses, 2) }}</td>

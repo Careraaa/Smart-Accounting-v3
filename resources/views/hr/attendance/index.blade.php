@@ -3,20 +3,16 @@
 @section('content')
     <div class="col-md-12">
 
-        {{-- Quick Actions --}}
-        <div class="d-flex gap-2 mb-4 justify-content-end">
-            {{-- Manual Log  --}}
-            @if (auth()->user()->role === 'hr')
-                <a href="{{ route('attendance.create') }}" class="btn btn-primary btn-sm">
-                    <i class="feather-plus me-1"></i> Manual Log
-                </a>
-            @endif
-        </div>
 
         {{-- Attendance Records Table --}}
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="card-title mb-0">Attendance Records</span>
+                <div>
+                    <span class="card-title mb-0">Attendance Records</span>
+                </div>
+                <a href="{{ route('attendance.create') }}" class="btn btn-primary btn-sm">
+                    <i class="feather-plus me-1"></i> Manual Log
+                </a>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">

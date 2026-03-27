@@ -4,6 +4,7 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payroll;
+use App\Models\PayrollCutoffSchedule;
 use App\Models\User;
 use App\Models\CashAdvance;
 use App\Models\SalaryLoan;
@@ -60,7 +61,47 @@ class PayrollController extends Controller
 
         $attendanceRate = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
 
-        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'sortBy', 'sortOrder'));
+        // Payroll Management Data
+        $cutoffSchedules = PayrollCutoffSchedule::where('is_active', true)
+            ->orderBy('cutoff_day')
+            ->get();
+
+        $cutoffInfo = PayrollCutoffSchedule::getCurrentCutoffPeriod();
+        $nextCutoffDate = PayrollCutoffSchedule::getNextCutoffDate();
+
+        $pendingPayrolls = Payroll::with(['user'])
+            ->where('status', '!=', 'paid')
+            ->where('status', '!=', 'rejected')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalPayroll = $pendingPayrolls->sum('net_pay');
+        $payrollCount = $pendingPayrolls->count();
+        $paidCount = Payroll::where('status', 'paid')->count();
+
+        return view('hr.payroll.salary-computation.index', compact(
+            'payrolls',
+            'totalEmployees',
+            'activeEmployees',
+            'inactiveEmployees',
+            'presentToday',
+            'absentToday',
+            'lateToday',
+            'onLeaveEmployees',
+            'pendingLeaves',
+            'approvedLeaves',
+            'totalLeaves',
+            'attendanceRate',
+            'sortBy',
+            'sortOrder',
+            'cutoffSchedules',
+            'cutoffInfo',
+            'nextCutoffDate',
+            'pendingPayrolls',
+            'totalPayroll',
+            'payrollCount',
+            'paidCount'
+        ));
     }
 
     // ====================== CREATE ======================
@@ -214,6 +255,37 @@ class PayrollController extends Controller
         return redirect()
             ->route('payroll.salary-computation.index')
             ->with('success', "Batch payroll generated for {$count} employees.");
+    }
+
+    // ====================== RELEASE PAYROLL ======================
+    public function releasePayroll(Request $request)
+    {
+        $payrolls = Payroll::where('status', 'pending')
+            ->orWhere('status', 'draft')
+            ->get();
+
+        $count = 0;
+        foreach ($payrolls as $payroll) {
+            $payroll->update(['status' => 'submitted']);
+            $count++;
+        }
+
+        return redirect()
+            ->route('payroll.salary-computation.index')
+            ->with('success', "Released {$count} payroll(s) for processing.");
+    }
+
+    // ====================== EXPORT PDF ======================
+    public function exportPdf(Request $request)
+    {
+        $payrolls = Payroll::with(['user', 'allowances', 'deductions'])
+            ->where('status', '!=', 'rejected')
+            ->get();
+
+        // TODO: Implement PDF export with Barryvdh/DomPDF
+        return redirect()
+            ->route('payroll.salary-computation.index')
+            ->with('info', 'PDF export functionality to be implemented');
     }
 
     // ====================== GENERATE PAYSLIP ======================

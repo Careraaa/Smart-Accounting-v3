@@ -12,19 +12,11 @@ class PayrollReceivablesController extends Controller
 {
     public function index(Request $request)
     {
-        $tab = $request->get('tab', 'payroll');
+        $tab = $request->get('tab', 'cash_advances');
 
-        $payrolls     = collect();
         $cashAdvances = collect();
         $salaryLoans  = collect();
 
-        if ($tab === 'payroll') {
-            $payrolls = Payroll::with('user')
-                ->whereIn('status', ['approved', 'paid'])
-                ->orderBy('payroll_period_start', 'desc')
-                ->paginate(15)
-                ->withQueryString();
-        }
 
         if ($tab === 'cash_advances') {
             $cashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
@@ -41,41 +33,7 @@ class PayrollReceivablesController extends Controller
         }
 
         return view('hr.payroll.receivables.index', compact(
-            'tab', 'payrolls', 'cashAdvances', 'salaryLoans'
+            'tab', 'cashAdvances', 'salaryLoans'
         ));
-    }
-
-    public function markAsPaid(Request $request, Payroll $payroll)
-    {
-        $request->validate([
-            'payment_date' => 'required|date',
-        ]);
-
-        $payroll->update([
-            'status'       => 'paid',
-            'payment_date' => $request->payment_date,
-        ]);
-
-        return redirect()->route('payroll.receivables.index', ['tab' => 'payroll'])
-            ->with('success', 'Payroll marked as paid.');
-    }
-
-    public function markBatchPaid(Request $request)
-    {
-        $request->validate([
-            'payroll_ids'   => 'required|array',
-            'payroll_ids.*' => 'integer|exists:payrolls,id',
-            'payment_date'  => 'required|date',
-        ]);
-
-        Payroll::whereIn('id', $request->payroll_ids)
-            ->where('status', 'approved')
-            ->update([
-                'status'       => 'paid',
-                'payment_date' => $request->payment_date,
-            ]);
-
-        return redirect()->route('payroll.receivables.index', ['tab' => 'payroll'])
-            ->with('success', 'Selected payrolls marked as paid.');
     }
 }
