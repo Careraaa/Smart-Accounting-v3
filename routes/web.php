@@ -337,6 +337,9 @@ Route::middleware(['auth', 'role:accountant'])->group(function () {
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');
     Route::get('/reports/payroll-approval', fn() => view('accountant.reports.payroll-approval'))->name('reports.payroll-approval');
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
+
+    Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
+    Route::get('/reports/print/payroll-report', [ReportController::class, 'printPayrollReport'])->name('reports.print.payroll-report');
 });
 
 // ===== QR ATTENDANCE ADMIN ROUTES =====
