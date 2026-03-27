@@ -293,7 +293,7 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <a href="{{ route('reports.remittance-report') }}" class="btn btn-ghost">← Back to Report</a>
+        <a href="{{ route('reports.remittance-report') }}" class="btn btn-ghost">← Back</a>
         <button class="btn btn-primary" onclick="window.print()">Print Report</button>
     </div>
 
@@ -322,62 +322,24 @@
             </div>
         </div>
 
-        {{-- Statistics --}}
-        <div class="stats-grid">
-            <div class="stat-card primary">
-                <div class="stat-label">Total Collection</div>
-                <div class="stat-value">₱{{ number_format($totalCollection, 2) }}</div>
-            </div>
-            <div class="stat-card warning">
-                <div class="stat-label">Total Expenses</div>
-                <div class="stat-value">₱{{ number_format($totalExpenses, 2) }}</div>
-            </div>
-            <div class="stat-card success">
-                <div class="stat-label">Net Remittance</div>
-                <div class="stat-value">₱{{ number_format($totalNetRemittance, 2) }}</div>
-            </div>
-            <div class="stat-card danger">
-                <div class="stat-label">Short Remittances</div>
-                <div class="stat-value">{{ $shortRemittances }}</div>
-            </div>
-        </div>
-
         {{-- Table --}}
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Driver</th>
-                        <th>PAO</th>
                         <th class="text-right">Collection</th>
                         <th class="text-right">Expenses</th>
                         <th class="text-right">Net Remittance</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($remittances as $remittance)
+                    @forelse ($groupedRemittances as $remittance)
                         <tr>
-                            <td>{{ $remittance->remittance_date->format('M d, Y') }}</td>
-                            <td>{{ $remittance->driver->name ?? 'N/A' }}</td>
-                            <td>{{ $remittance->pao->name ?? 'N/A' }}</td>
-                            <td class="text-right">₱{{ number_format($remittance->total_collection, 2) }}</td>
-                            <td class="text-right">₱{{ number_format($remittance->total_expenses, 2) }}</td>
-                            <td class="text-right">
-                                <span
-                                    class="{{ $remittance->is_short_remittance ? 'short' : 'normal' }}">
-                                    ₱{{ number_format($remittance->net_remittance, 2) }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                @if ($remittance->status === 'pending')
-                                    <span class="badge badge-pending">Pending</span>
-                                @elseif ($remittance->status === 'approved')
-                                    <span class="badge badge-approved">Approved</span>
-                                @else
-                                    <span class="badge badge-rejected">Rejected</span>
-                                @endif
-                            </td>
+                            <td>{{ $remittance['remittance_date']->format('M d, Y') }}</td>
+                            <td class="text-right">₱{{ number_format($remittance['total_collection'], 2) }}</td>
+                            <td class="text-right">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
+                            <td class="text-right">₱{{ number_format($remittance['net_remittance'], 2) }}</td>
                         </tr>
                     @empty
                         <tr>

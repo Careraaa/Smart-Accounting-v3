@@ -35,7 +35,6 @@
                         <div class="form-group">
                             <label for="driver_name" class="form-label">Driver Name</label>
                             <input type="text" class="form-control" id="driver_name" value="{{ $shortRemittance->driver->name ?? 'N/A' }}" disabled>
-                            <small class="text-muted">Employee ID: {{ $shortRemittance->driver->employee_id ?? 'N/A' }}</small>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -44,7 +43,7 @@
                             <input type="text" class="form-control" id="driver_liability" value="₱{{ number_format($shortRemittance->driver_share, 2) }}" disabled>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4 mt-3">
                         <div class="form-group">
                             <label for="driver_amount_paid" class="form-label">Amount Paid <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -56,7 +55,6 @@
                                     id="driver_amount_paid"
                                     name="driver_amount_paid"
                                     value="{{ old('driver_amount_paid', $shortRemittance->driver_amount_paid ?? 0) }}"
-                                    placeholder="0.00"
                                     min="0"
                                     max="{{ $shortRemittance->driver_share }}"
                                 >
@@ -66,7 +64,7 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4 mt-3">
                         <div class="form-group">
                             <label for="driver_remaining" class="form-label">Remaining Balance</label>
                             <div class="input-group">
@@ -81,7 +79,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4 mt-3">
                         <div class="form-group">
                             <label for="driver_status" class="form-label">Status</label>
                             <select class="form-select @error('driver_status') is-invalid @enderror" id="driver_status" name="driver_status">
@@ -110,7 +108,6 @@
                         <div class="form-group">
                             <label for="pao_name" class="form-label">PAO Name</label>
                             <input type="text" class="form-control" id="pao_name" value="{{ $shortRemittance->pao->name ?? 'N/A' }}" disabled>
-                            <small class="text-muted">Employee ID: {{ $shortRemittance->pao->employee_id ?? 'N/A' }}</small>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -119,7 +116,7 @@
                             <input type="text" class="form-control" id="pao_liability" value="₱{{ number_format($shortRemittance->pao_share, 2) }}" disabled>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4 mt-3">
                         <div class="form-group">
                             <label for="pao_amount_paid" class="form-label">Amount Paid <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -141,7 +138,7 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4 mt-3">
                         <div class="form-group">
                             <label for="pao_remaining" class="form-label">Remaining Balance</label>
                             <div class="input-group">
@@ -156,7 +153,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-4 mt-3">
                         <div class="form-group">
                             <label for="pao_status" class="form-label">Status</label>
                             <select class="form-select @error('pao_status') is-invalid @enderror" id="pao_status" name="pao_status">
@@ -194,13 +191,13 @@
                 </div>
 
                 {{-- Form Buttons --}}
-                <div class="text-end mt-4">
-                    <a href="{{ route('short-remittances.index') }}" class="btn btn-secondary">
-                        <i class="feather-x me-1"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary">
+                <div class="d-flex gap-2 pt-3 border-top">
+                    <button type="submit" class="btn btn-primary btn-sm">
                         <i class="feather-save me-1"></i> Save Resolution
                     </button>
+                    <a href="{{ route('short-remittances.index') }}" class="btn btn-secondary btn-sm">
+                        <i class="feather-x me-1"></i> Cancel
+                    </a>
                 </div>
             </form>
         </div>

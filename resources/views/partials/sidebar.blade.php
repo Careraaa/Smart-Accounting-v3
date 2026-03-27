@@ -210,7 +210,7 @@
                     </li>
 
                     <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.*') ? 'active' : '' }}">
-                        <a href="{{ route('reports.remittance-report') }}" class="nxl-link">
+                        <a href="{{ route('reports.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-file-text"></i></span>
                             <span class="nxl-mtext">Remittance Report</span>
                         </a>

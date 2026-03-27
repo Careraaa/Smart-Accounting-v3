@@ -45,7 +45,8 @@ class PAOController extends Controller
             'name' => 'required|string',
             'contact_number' => 'required',
             'email' => 'required|email|unique:paos',
-            'address' => 'nullable|string',
+            'gender' => 'required|string',
+            'address' => 'required|string',
             'date_of_hire' => 'required|date',
             'status' => 'required|in:active,inactive',
         ]);
@@ -71,7 +72,8 @@ class PAOController extends Controller
             'name' => 'required|string',
             'contact_number' => 'required',
             'email' => 'required|email|unique:paos,email,' . $pao->id,
-            'address' => 'nullable|string',
+            'gender' => 'required|string',
+            'address' => 'required|string',
             'date_of_hire' => 'required|date',
             'status' => 'required|in:active,inactive',
         ]);

@@ -46,7 +46,8 @@ class DriverController extends Controller
             'license_number' => 'required|unique:drivers',
             'contact_number' => 'required',
             'email' => 'required|email|unique:drivers',
-            'address' => 'nullable|string',
+            'gender' => 'required|string',
+            'address' => 'required|string',
             'date_of_hire' => 'required|date',
             'status' => 'required|in:active,inactive',
         ]);
@@ -73,7 +74,8 @@ class DriverController extends Controller
             'license_number' => 'required|unique:drivers,license_number,' . $driver->id,
             'contact_number' => 'required',
             'email' => 'required|email|unique:drivers,email,' . $driver->id,
-            'address' => 'nullable|string',
+            'gender' => 'required|string',
+            'address' => 'required|string',
             'date_of_hire' => 'required|date',
             'status' => 'required|in:active,inactive',
         ]);

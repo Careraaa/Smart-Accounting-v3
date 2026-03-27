@@ -108,22 +108,12 @@ Route::middleware(['auth', 'role:remittance_clerk,superadmin'])->group(function 
     // Report Routes
     Route::get('/reports', [RemittanceClerkReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/remittance-report', [RemittanceClerkReportController::class, 'remittanceReport'])->name('reports.remittance-report');
-    Route::get('/reports/driver-report', [RemittanceClerkReportController::class, 'driverReport'])->name('reports.driver-report');
-    Route::get('/reports/pao-report', [RemittanceClerkReportController::class, 'paoReport'])->name('reports.pao-report');
-    Route::get('/reports/vehicle-route-report', [RemittanceClerkReportController::class, 'vehicleRouteReport'])->name('reports.vehicle-route-report');
 
     // Print Routes
     Route::get('/reports/print/remittance-report', [RemittanceClerkReportController::class, 'printRemittanceReport'])->name('reports.print.remittance-report');
     Route::get('/reports/print/driver-report', [RemittanceClerkReportController::class, 'printDriverReport'])->name('reports.print.driver-report');
     Route::get('/reports/print/pao-report', [RemittanceClerkReportController::class, 'printPaoReport'])->name('reports.print.pao-report');
     Route::get('/reports/print/vehicle-route-report', [RemittanceClerkReportController::class, 'printVehicleRouteReport'])->name('reports.print.vehicle-route-report');
-    
-    Route::get('/reports/remittance-details', function () {
-        return view('remittance-clerk.reports.remittance-details', ['remittances' => \App\Models\DailyRemittance::all()]);
-    })->name('reports.remittance-details');
-    Route::get('/reports/remittance-summary', function () {
-        return view('remittance-clerk.reports.remittance-summary', ['remittances' => \App\Models\DailyRemittance::all()]);
-    })->name('reports.remittance-summary');
 });
 
 // ===== EMPLOYEE ROUTES =====

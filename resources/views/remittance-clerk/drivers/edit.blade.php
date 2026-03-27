@@ -37,8 +37,8 @@
                         @error('contact_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="col-md-6 mb-4">
-                        <label for="gender" class="form-label">Gender</label>
-                        <select name="gender" id="gender" class="form-select">
+                        <label for="gender" class="form-label">Gender <span class="text-danger">*</span></label>
+                        <select name="gender" id="gender" class="form-select" required>
                             <option value="">-- Select --</option>
                             <option value="male" {{ old('gender', $driver->gender) === 'male' ? 'selected' : '' }}>Male</option>
                             <option value="female" {{ old('gender', $driver->gender) === 'female' ? 'selected' : '' }}>Female</option>
@@ -75,8 +75,8 @@
                 </div>
 
                 <div class="mb-4">
-                    <label for="address" class="form-label">Address</label>
-                    <textarea name="address" id="address" class="form-control" rows="3">{{ old('address', $driver->address) }}</textarea>
+                    <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
+                    <textarea name="address" id="address" class="form-control" rows="3" required>{{ old('address', $driver->address) }}</textarea>
                 </div>
 
                 <div class="d-flex gap-2 pt-3 border-top">

@@ -97,42 +97,41 @@
                     <thead>
                         <tr>
                             <th>Date</th>
-                            <th>Driver</th>
-                            <th>PAO</th>
-                            <th>Collection</th>
-                            <th>Expenses</th>
+                            <th class="text-end">Collection</th>
+                            <th class="text-end">Expenses</th>
                             <th class="text-end">Net Remittance</th>
-                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($remittances as $remittance)
+                        @php
+                            $groupedRemittances = $remittances->groupBy(function($item) {
+                                return $item->remittance_date->format('Y-m-d');
+                            })->map(function($group) {
+                                return [
+                                    'remittance_date' => $group->first()->remittance_date,
+                                    'total_collection' => $group->sum('total_collection'),
+                                    'total_expenses' => $group->sum('total_expenses'),
+                                    'net_remittance' => $group->sum('net_remittance'),
+                                    'is_short_remittance' => $group->where('is_short_remittance', true)->count() > 0,
+                                ];
+                            })->sortBy('remittance_date')->values();
+                        @endphp
+                        @forelse($groupedRemittances as $remittance)
                             <tr>
-                                <td>{{ $remittance->remittance_date?->format('M d, Y') }}</td>
-                                <td><strong>{{ $remittance->driver->name ?? 'N/A' }}</strong></td>
-                                <td><strong>{{ $remittance->pao->name ?? 'N/A' }}</strong></td>
-                                <td>₱{{ number_format($remittance->total_collection, 2) }}</td>
-                                <td>₱{{ number_format($remittance->total_expenses, 2) }}</td>
+                                <td>{{ $remittance['remittance_date']->format('M d, Y') }}</td>
+                                <td class="text-end">₱{{ number_format($remittance['total_collection'], 2) }}</td>
+                                <td class="text-end">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
                                 <td class="text-end">
-                                    @if ($remittance->is_short_remittance)
-                                        <strong style="color: #dc2626;">₱{{ number_format($remittance->net_remittance, 2) }}</strong>
+                                    @if ($remittance['is_short_remittance'])
+                                        <strong style="color: #dc2626;">₱{{ number_format($remittance['net_remittance'], 2) }}</strong>
                                     @else
-                                        <strong style="color: #16a34a;">₱{{ number_format($remittance->net_remittance, 2) }}</strong>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if ($remittance->status === 'approved')
-                                        <span class="emp-badge emp-badge-approved">Approved</span>
-                                    @elseif ($remittance->status === 'pending')
-                                        <span class="emp-badge emp-badge-pending">Pending</span>
-                                    @else
-                                        <span class="emp-badge emp-badge-inactive">Rejected</span>
+                                        <strong style="color: #16a34a;">₱{{ number_format($remittance['net_remittance'], 2) }}</strong>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-5">
+                                <td colspan="4" class="text-center text-muted py-5">
                                     <i class="feather-file-text d-block mb-2" style="font-size:28px; opacity:.3;"></i>
                                     No remittances found for this period
                                 </td>
