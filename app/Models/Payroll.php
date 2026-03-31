@@ -11,27 +11,12 @@ class Payroll extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'payroll_period_start',
-        'payroll_period_end',
-        'status',
-        'payment_date',
-        'payment_method',
-        'approved_by',
-        'total_allowances',
-        'total_deductions',
-        'days_worked',
-        'hours_worked',
-        'basic_salary',
-        'sss',
-        'pagibig',
-    ];
+    protected $fillable = ['user_id', 'batch_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'payment_method', 'approved_by', 'total_allowances', 'total_deductions', 'days_worked', 'hours_worked', 'basic_salary', 'sss', 'pagibig'];
 
     protected $casts = [
         'payroll_period_start' => 'date',
-        'payroll_period_end'   => 'date',
-        'payment_date'         => 'date',
+        'payroll_period_end' => 'date',
+        'payment_date' => 'date',
     ];
 
     /* ======================
@@ -69,8 +54,7 @@ class Payroll extends Model
 
     public function getPerDayRateAttribute()
     {
-        // Monthly ÷ 22 working days
-        return ($this->user->salary_rate ?? 0) / 22;
+        return $this->user->salary_rate ?? 0;
     }
 
     public function getHourlyRateAttribute()
@@ -92,26 +76,18 @@ class Payroll extends Model
 
     public function getOvertimePayAttribute()
     {
-        return $this->allowances()
-            ->where('allowance_type', 'like', 'Overtime Pay%')
-            ->sum('amount');
+        return $this->allowances()->where('allowance_type', 'like', 'Overtime Pay%')->sum('amount');
     }
 
     public function getUndertimeDeductionAttribute()
     {
-        return $this->deductions()
-            ->where('deduction_type', 'like', 'Undertime Deduction%')
-            ->sum('amount');
+        return $this->deductions()->where('deduction_type', 'like', 'Undertime Deduction%')->sum('amount');
     }
 
     public function getAttendanceSummaryAttribute()
     {
         $attendanceService = new AttendanceService();
-        return $attendanceService->getAttendanceSummary(
-            $this->user_id,
-            $this->payroll_period_start,
-            $this->payroll_period_end
-        );
+        return $attendanceService->getAttendanceSummary($this->user_id, $this->payroll_period_start, $this->payroll_period_end);
     }
 
     /* ======================
@@ -120,17 +96,18 @@ class Payroll extends Model
 
     public function getAttendanceBreakdown()
     {
-        return $this->user->attendances()
+        return $this->user
+            ->attendances()
             ->whereBetween('date', [$this->payroll_period_start, $this->payroll_period_end])
             ->orderBy('date')
             ->get()
             ->map(function ($attendance) {
                 return [
-                    'date'     => $attendance->date->format('Y-m-d'),
-                    'status'   => $attendance->status,
-                    'time_in'  => $attendance->time_in,
+                    'date' => $attendance->date->format('Y-m-d'),
+                    'status' => $attendance->status,
+                    'time_in' => $attendance->time_in,
                     'time_out' => $attendance->time_out,
-                    'hours'    => $this->calculateHoursForDay($attendance),
+                    'hours' => $this->calculateHoursForDay($attendance),
                 ];
             })
             ->toArray();
@@ -148,7 +125,7 @@ class Payroll extends Model
     private function calculateHoursForDay($attendance)
     {
         if ($attendance->time_in && $attendance->time_out) {
-            $timeIn  = Carbon::parse($attendance->time_in);
+            $timeIn = Carbon::parse($attendance->time_in);
             $timeOut = Carbon::parse($attendance->time_out);
             return round($timeOut->diffInMinutes($timeIn) / 60, 2);
         }

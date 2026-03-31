@@ -10,16 +10,19 @@ use App\Models\PayrollDeduction;
 class PayrollDeductionService
 {
     /**
-     * Call this immediately after every Payroll::create().
-     * Finds all pending deductions for the employee and
-     * creates PayrollDeduction rows, then marks them applied.
+     * Apply pending cash advance and salary loan deductions to a payroll.
+     * Updates both total_deductions and net_pay on the payroll record.
+     *
+     * Call this ONCE per payroll, after generatePayrollForEmployee() or
+     * updatePayroll(). Never call it from inside those methods — the
+     * controller is responsible so it only runs once.
      */
     public static function applyLoanDeductions(Payroll $payroll): void
     {
-        $userId = $payroll->user_id;
+        $userId       = $payroll->user_id;
         $totalDeducted = 0;
 
-        // ── Cash Advances ────────────────────────────────────────
+        // ── Cash Advances ─────────────────────────────────────────
         $advances = CashAdvance::where('user_id', $userId)
             ->where('status', 'approved')
             ->whereNull('deducted_payroll_id')
@@ -41,7 +44,7 @@ class PayrollDeductionService
             $totalDeducted += $advance->amount;
         }
 
-        // ── Salary Loans ─────────────────────────────────────────
+        // ── Salary Loans ──────────────────────────────────────────
         $loans = SalaryLoan::where('user_id', $userId)
             ->where('status', 'active')
             ->where('remaining_balance', '>', 0)
@@ -62,9 +65,16 @@ class PayrollDeductionService
             $totalDeducted += $instalment;
         }
 
-        // ── Update payroll total deductions ──────────────────────
+        // ── BUG FIX: update both total_deductions AND net_pay ─────
         if ($totalDeducted > 0) {
             $payroll->increment('total_deductions', $totalDeducted);
+
+            // Recompute net_pay from the fresh totals rather than doing math
+            // on potentially stale in-memory values.
+            $payroll->refresh();
+            $payroll->update([
+                'net_pay' => round($payroll->gross_pay - $payroll->total_deductions, 2),
+            ]);
         }
     }
 }

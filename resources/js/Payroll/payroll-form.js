@@ -8,8 +8,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const pageId = pageMeta?.content;
     const isCreate = pageId === "payroll-create";
     const isEdit = pageId === "payroll-edit";
+    const isBatchEdit = pageId === "payroll-batch-edit";
 
-    if (!isCreate && !isEdit) return;
+    if (!isCreate && !isEdit && !isBatchEdit) return;
 
     // ── State (display-only — never submitted as money) ───────────────────
     const S = {
@@ -395,8 +396,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ── Wire up buttons & keyboard ────────────────────────────────────────
-    g("prl_allow_btn").addEventListener("click", addAllowance);
-    g("prl_deduct_btn").addEventListener("click", addDeduction);
+    const allowBtn = g("prl_allow_btn");
+    const deductBtn = g("prl_deduct_btn");
+
+    if (allowBtn) allowBtn.addEventListener("click", addAllowance);
+    if (deductBtn) deductBtn.addEventListener("click", addDeduction);
 
     EL.allowAmount.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {

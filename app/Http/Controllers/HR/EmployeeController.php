@@ -13,16 +13,18 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $sortBy    = $request->get('sort_by', 'first_name');
+        $sortBy = $request->get('sort_by', 'first_name');
         $sortOrder = $request->get('sort_order', 'asc');
 
         $allowedColumns = ['first_name', 'last_name', 'position', 'department', 'salary_rate', 'status'];
-        if (!in_array($sortBy, $allowedColumns)) $sortBy = 'first_name';
-        if (!in_array($sortOrder, ['asc', 'desc'])) $sortOrder = 'asc';
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'first_name';
+        }
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
 
-        $employees = User::where('role', 'employee')
-            ->orderBy($sortBy, $sortOrder)
-            ->get();
+        $employees = User::where('role', 'employee')->orderBy($sortBy, $sortOrder)->get();
 
         return view('hr.employees.index', compact('employees', 'sortBy', 'sortOrder'));
     }
@@ -37,63 +39,60 @@ class EmployeeController extends Controller
     {
         $validated = $request->validate(
             [
-                'first_name'              => 'required|string|max:100',
-                'middle_name'             => 'nullable|string|max:100',
-                'last_name'               => 'required|string|max:100',
-                'gender'                  => 'required|string|in:male,female,prefer_not_to_say',
-                'email'                   => 'nullable|email|unique:users,email',
-                'phone'                   => ['required', 'regex:/^(09\d{9}|\+639\d{9})$/'],
-                'address_street'          => 'required|string|max:150',
-                'address_barangay'        => 'required|string|max:100',
-                'address_city'            => 'required|string|max:100',
-                'address_province'        => 'required|string|max:100',
-                'address'                 => 'nullable|string',
-                'civil_status'            => 'required|string|max:50',
-                'spouse_name'             => 'nullable|string|max:150',
-                'date_of_birth'           => 'required|date',
-                'place_of_birth'          => 'required|string|max:150',
-                'educational_attainment'  => 'required|string|max:150',
-                'driver_license_number'   => 'nullable|string|max:50',
+                'first_name' => 'required|string|max:100',
+                'middle_name' => 'nullable|string|max:100',
+                'last_name' => 'required|string|max:100',
+                'gender' => 'required|string|in:male,female,prefer_not_to_say',
+                'email' => 'nullable|email|unique:users,email',
+                'phone' => ['required', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+                'address_street' => 'required|string|max:150',
+                'address_barangay' => 'required|string|max:100',
+                'address_city' => 'required|string|max:100',
+                'address_province' => 'required|string|max:100',
+                'address' => 'nullable|string',
+                'civil_status' => 'required|string|max:50',
+                'spouse_name' => 'nullable|string|max:150',
+                'date_of_birth' => 'required|date',
+                'place_of_birth' => 'required|string|max:150',
+                'educational_attainment' => 'required|string|max:150',
+                'driver_license_number' => 'nullable|string|max:50',
                 'driver_license_validity' => 'nullable|date',
-                'date_of_hire'            => 'required|date',
-                'position'                => 'required|string|max:150',
-                'department'              => 'required|string|max:150',
-                'status'                  => 'required|string|in:active,inactive',
-                'salary_rate'             => 'required|numeric|min:0',
-                'sss_number'              => 'nullable|string|max:50',
-                'tin_number'              => 'nullable|string|max:50',
-                'pagibig_number'          => 'nullable|string|max:50',
-                'signature_path'          => 'nullable|string',
-                'generated_password'      => 'nullable|string',
-                'attachments_files.*'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'date_of_hire' => 'required|date',
+                'position' => 'required|string|max:150',
+                'department' => 'required|string|max:150',
+                'status' => 'required|string|in:active,inactive',
+                'salary_rate' => 'required|numeric|min:0', // DAILY RATE
+                'sss_number' => 'nullable|string|max:50',
+                'tin_number' => 'nullable|string|max:50',
+                'pagibig_number' => 'nullable|string|max:50',
+                'signature_path' => 'nullable|string',
+                'generated_password' => 'nullable|string',
+                'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             ],
             [
-                'phone.regex'               => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
+                'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
                 'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
-                'attachments_files.*.max'   => 'Each attachment must not exceed 5MB.',
+                'attachments_files.*.max' => 'Each attachment must not exceed 5MB.',
             ],
         );
 
-        $validated['phone']       = $this->normalizePhone($validated['phone']);
-        $validated['has_sss']     = $request->has('has_sss');
-        $validated['has_tin']     = $request->has('has_tin');
+        $validated['phone'] = $this->normalizePhone($validated['phone']);
+        $validated['has_sss'] = $request->has('has_sss');
+        $validated['has_tin'] = $request->has('has_tin');
         $validated['has_pagibig'] = $request->has('has_pagibig');
-        $validated['role']        = 'employee';
-        $validated['address']     = $this->assembleAddress($request);
+        $validated['role'] = 'employee';
+        $validated['address'] = $this->assembleAddress($request);
 
         // Auto-generate username
-        $baseUsername = strtolower(
-            preg_replace('/\s+/', '', $validated['first_name']) . '.' .
-            preg_replace('/\s+/', '', $validated['last_name'])
-        );
+        $baseUsername = strtolower(preg_replace('/\s+/', '', $validated['first_name']) . '.' . preg_replace('/\s+/', '', $validated['last_name']));
         $username = $baseUsername;
-        $counter  = 1;
+        $counter = 1;
         while (User::where('username', $username)->exists()) {
             $username = $baseUsername . $counter++;
         }
         $validated['username'] = $username;
-        $validated['name']     = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
-        
+        $validated['name'] = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
+
         // Use generated password from form, or generate one if not provided
         $plainPassword = $validated['generated_password'] ?? $this->generateRandomPassword();
         $validated['password'] = Hash::make($plainPassword);
@@ -103,20 +102,14 @@ class EmployeeController extends Controller
         $this->handleAttachments($request, $employee);
         $this->handleRelations($request, $employee);
 
-        return redirect()->route('employees.index')
+        return redirect()
+            ->route('employees.index')
             ->with('success', "Employee created. Username: {$username} | Default password: {$plainPassword}");
     }
 
     public function show(User $employee)
     {
-        $employee->load([
-            'workExperiences',
-            'specialSkills',
-            'beneficiaries',
-            'charRefs',
-            'employeeAttachments',
-        ]);
-
+        $employee->load(['workExperiences', 'specialSkills', 'beneficiaries', 'charRefs', 'employeeAttachments']);
         return view('hr.employees.show', compact('employee'));
     }
 
@@ -130,48 +123,48 @@ class EmployeeController extends Controller
     {
         $validated = $request->validate(
             [
-                'first_name'              => 'required|string|max:100',
-                'middle_name'             => 'nullable|string|max:100',
-                'last_name'               => 'required|string|max:100',
-                'gender'                  => 'required|string|in:male,female,prefer_not_to_say',
-                'email'                   => 'nullable|email|unique:users,email,' . $employee->id,
-                'phone'                   => ['required', 'regex:/^(09\d{9}|\+639\d{9})$/'],
-                'address_street'          => 'required|string|max:150',
-                'address_barangay'        => 'required|string|max:100',
-                'address_city'            => 'required|string|max:100',
-                'address_province'        => 'required|string|max:100',
-                'address'                 => 'nullable|string',
-                'civil_status'            => 'required|string|max:50',
-                'spouse_name'             => 'nullable|string|max:150',
-                'date_of_birth'           => 'required|date',
-                'place_of_birth'          => 'required|string|max:150',
-                'educational_attainment'  => 'required|string|max:150',
-                'driver_license_number'   => 'nullable|string|max:50',
+                'first_name' => 'required|string|max:100',
+                'middle_name' => 'nullable|string|max:100',
+                'last_name' => 'required|string|max:100',
+                'gender' => 'required|string|in:male,female,prefer_not_to_say',
+                'email' => 'nullable|email|unique:users,email,' . $employee->id,
+                'phone' => ['required', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+                'address_street' => 'required|string|max:150',
+                'address_barangay' => 'required|string|max:100',
+                'address_city' => 'required|string|max:100',
+                'address_province' => 'required|string|max:100',
+                'address' => 'nullable|string',
+                'civil_status' => 'required|string|max:50',
+                'spouse_name' => 'nullable|string|max:150',
+                'date_of_birth' => 'required|date',
+                'place_of_birth' => 'required|string|max:150',
+                'educational_attainment' => 'required|string|max:150',
+                'driver_license_number' => 'nullable|string|max:50',
                 'driver_license_validity' => 'nullable|date',
-                'date_of_hire'            => 'required|date',
-                'position'                => 'required|string|max:150',
-                'department'              => 'required|string|max:150',
-                'status'                  => 'required|string|in:active,inactive',
-                'salary_rate'             => 'required|numeric|min:0',
-                'sss_number'              => 'nullable|string|max:50',
-                'tin_number'              => 'nullable|string|max:50',
-                'pagibig_number'          => 'nullable|string|max:50',
-                'signature_path'          => 'nullable|string',
-                'attachments_files.*'     => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'date_of_hire' => 'required|date',
+                'position' => 'required|string|max:150',
+                'department' => 'required|string|max:150',
+                'status' => 'required|string|in:active,inactive',
+                'salary_rate' => 'required|numeric|min:0', // DAILY RATE
+                'sss_number' => 'nullable|string|max:50',
+                'tin_number' => 'nullable|string|max:50',
+                'pagibig_number' => 'nullable|string|max:50',
+                'signature_path' => 'nullable|string',
+                'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             ],
             [
-                'phone.regex'               => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
+                'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
                 'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
-                'attachments_files.*.max'   => 'Each attachment must not exceed 5MB.',
+                'attachments_files.*.max' => 'Each attachment must not exceed 5MB.',
             ],
         );
 
-        $validated['phone']       = $this->normalizePhone($validated['phone']);
-        $validated['has_sss']     = $request->has('has_sss');
-        $validated['has_tin']     = $request->has('has_tin');
+        $validated['phone'] = $this->normalizePhone($validated['phone']);
+        $validated['has_sss'] = $request->has('has_sss');
+        $validated['has_tin'] = $request->has('has_tin');
         $validated['has_pagibig'] = $request->has('has_pagibig');
-        $validated['name']        = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
-        $validated['address']     = $this->assembleAddress($request);
+        $validated['name'] = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
+        $validated['address'] = $this->assembleAddress($request);
 
         $employee->update($validated);
 
@@ -198,7 +191,9 @@ class EmployeeController extends Controller
         // Also clean up any legacy JSON attachments
         if ($employee->attachments) {
             foreach ($employee->attachments as $path) {
-                if ($path) Storage::disk('public')->delete($path);
+                if ($path) {
+                    Storage::disk('public')->delete($path);
+                }
             }
         }
 
@@ -220,23 +215,23 @@ class EmployeeController extends Controller
         }
 
         return json_encode([
-            'street'   => $request->input('address_street',   ''),
+            'street' => $request->input('address_street', ''),
             'barangay' => $request->input('address_barangay', ''),
-            'city'     => $request->input('address_city',     ''),
+            'city' => $request->input('address_city', ''),
             'province' => $request->input('address_province', ''),
         ]);
     }
 
     private function handleAttachments(Request $request, User $employee): void
     {
-        if (! $request->hasFile('attachments_files')) {
+        if (!$request->hasFile('attachments_files')) {
             return;
         }
 
         $validKeys = EmployeeAttachment::attachmentTypes();
 
         foreach ($request->file('attachments_files') as $key => $file) {
-            if (! array_key_exists($key, $validKeys)) {
+            if (!array_key_exists($key, $validKeys)) {
                 continue;
             }
 
@@ -249,22 +244,30 @@ class EmployeeController extends Controller
     {
         if ($request->work_experiences) {
             foreach ($request->work_experiences as $we) {
-                if (!empty($we['company_name'])) $employee->workExperiences()->create($we);
+                if (!empty($we['company_name'])) {
+                    $employee->workExperiences()->create($we);
+                }
             }
         }
         if ($request->special_skills) {
             foreach ($request->special_skills as $skill) {
-                if (!empty($skill['skill_name'])) $employee->specialSkills()->create($skill);
+                if (!empty($skill['skill_name'])) {
+                    $employee->specialSkills()->create($skill);
+                }
             }
         }
         if ($request->beneficiaries) {
             foreach ($request->beneficiaries as $b) {
-                if (!empty($b['name'])) $employee->beneficiaries()->create($b);
+                if (!empty($b['name'])) {
+                    $employee->beneficiaries()->create($b);
+                }
             }
         }
         if ($request->character_references) {
             foreach ($request->character_references as $c) {
-                if (!empty($c['name'])) $employee->charRefs()->create($c);
+                if (!empty($c['name'])) {
+                    $employee->charRefs()->create($c);
+                }
             }
         }
     }

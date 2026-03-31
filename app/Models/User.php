@@ -47,19 +47,16 @@ class User extends Authenticatable
         'attachments', // legacy JSON column — kept for backwards compat, new uploads use employee_attachments table
     ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
         return [
-            'password'                => 'hashed',
-            'date_of_birth'           => 'date',
-            'date_of_hire'            => 'date',
+            'password' => 'hashed',
+            'date_of_birth' => 'date',
+            'date_of_hire' => 'date',
             'driver_license_validity' => 'date',
-            'attachments'             => 'array',
+            'attachments' => 'array',
         ];
     }
 
@@ -139,9 +136,7 @@ class User extends Authenticatable
 
     public function employeeAttachments()
     {
-        return $this->hasMany(EmployeeAttachment::class, 'user_id')
-                    ->orderBy('attachment_key')
-                    ->orderByDesc('created_at');
+        return $this->hasMany(EmployeeAttachment::class, 'user_id')->orderBy('attachment_key')->orderByDesc('created_at');
     }
 
     /**
@@ -150,13 +145,11 @@ class User extends Authenticatable
      */
     public function getLatestAttachmentsAttribute(): \Illuminate\Support\Collection
     {
-        return $this->employeeAttachments
-            ->groupBy('attachment_key')
-            ->map(fn($group) => $group->first());
+        return $this->employeeAttachments->groupBy('attachment_key')->map(fn($group) => $group->first());
     }
 
     // ── Avatar Methods ─────────────────────────────────────────────────
-    
+
     /**
      * Get the initials from first name and last name
      */
@@ -165,5 +158,23 @@ class User extends Authenticatable
         $firstInitial = $this->first_name ? strtoupper(substr($this->first_name, 0, 1)) : '';
         $lastInitial = $this->last_name ? strtoupper(substr($this->last_name, 0, 1)) : '';
         return $firstInitial . $lastInitial;
+    }
+
+    // ── Salary Accessors ────────────────────────────────────────────────
+
+    /**
+     * Treat salary_rate as DAILY RATE
+     */
+    public function getDailyRateAttribute(): float
+    {
+        return (float) $this->salary_rate;
+    }
+
+    /**
+     * Compute hourly rate from daily rate (8 hours/day)
+     */
+    public function getHourlyRateAttribute(): float
+    {
+        return $this->daily_rate / 8;
     }
 }
