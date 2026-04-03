@@ -135,6 +135,13 @@
                         @if($employee->has_pagibig)<span class="emp-badge emp-badge-active">Enrolled</span>@endif
                     </div>
                 </div>
+                <div class="col-md-4 mb-3">
+                    <span class="emp-field-label">PhilHealth Number</span>
+                    <div class="d-flex align-items-center gap-2 mt-1">
+                        <span class="emp-field-value">{{ $employee->philhealth_number ?? '—' }}</span>
+                        @if($employee->has_philhealth)<span class="emp-badge emp-badge-active">Enrolled</span>@endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>

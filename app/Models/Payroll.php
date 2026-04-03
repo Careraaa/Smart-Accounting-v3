@@ -11,7 +11,7 @@ class Payroll extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'batch_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'payment_method', 'approved_by', 'total_allowances', 'total_deductions', 'days_worked', 'hours_worked', 'basic_salary', 'sss', 'pagibig'];
+    protected $fillable = ['user_id', 'batch_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'payment_method', 'approved_by', 'total_allowances', 'total_deductions', 'days_worked', 'hours_worked', 'basic_salary', 'sss', 'pagibig', 'philhealth'];
 
     protected $casts = [
         'payroll_period_start' => 'date',

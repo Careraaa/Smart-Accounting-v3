@@ -38,6 +38,7 @@ class PayrollService
             'total_deductions' => round($values['totalDeductions'], 2),
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
+            'philhealth' => round($values['philhealth'], 2),
             'status' => 'draft',
         ]);
 
@@ -45,6 +46,7 @@ class PayrollService
         if ($values['otPay'] > 0) {
             $payroll->allowances()->create([
                 'allowance_type' => 'Overtime Pay',
+                'hours' => round($values['otHours'], 2),
                 'amount' => round($values['otPay'], 2),
             ]);
         }
@@ -61,7 +63,6 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => 'SSS',
                 'amount' => round($values['sss'], 2),
-                'description' => 'SSS employee share (semi-monthly)',
             ]);
         }
 
@@ -69,15 +70,21 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => 'Pag-IBIG',
                 'amount' => round($values['pagibig'], 2),
-                'description' => 'Pag-IBIG employee share (semi-monthly)',
+            ]);
+        }
+
+        if ($values['philhealth'] > 0) {
+            $payroll->deductions()->create([
+                'deduction_type' => 'PhilHealth',
+                'amount' => round($values['philhealth'], 2),
             ]);
         }
 
         if ($values['utDeduction'] > 0) {
             $payroll->deductions()->create([
                 'deduction_type' => 'Undertime Deduction',
+                'hours' => round($values['utHours'], 2),
                 'amount' => round($values['utDeduction'], 2),
-                'description' => 'Auto-computed from attendance records.',
             ]);
         }
 
@@ -113,10 +120,12 @@ class PayrollService
         $utHours = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->undertime()->sum('hours');
 
         // ── Statutory (semi-monthly: monthly contribution ÷ 2) ───
-        // SSS uses the official bracket table; Pag-IBIG caps at ₱100/month → ₱50 semi-monthly
+        // SSS uses the official bracket table; Pag-IBIG is percentage-based with ₱200/month cap
         $sss = $employee->has_sss ? $this->getStatutoryDeduction('SSS', $monthlySalary) : 0;
 
         $pagibig = $employee->has_pagibig ? $this->getStatutoryDeduction('Pag-IBIG', $monthlySalary) : 0;
+
+        $philhealth = $employee->has_philhealth ? $this->getStatutoryDeduction('PhilHealth', $monthlySalary) : 0;
 
         // ── Manual line items ────────────────────────────────────
         $manualAllowTotal = collect($manualAllowances)->sum(fn($a) => (float) ($a['amount'] ?? 0));
@@ -124,11 +133,11 @@ class PayrollService
 
         // ── Totals ────────────────────────────────────────────────
         $grossPay = $basicSalary + $otPay + $manualAllowTotal;
-        $totalDeductions = $utDeduction + $sss + $pagibig + $manualDeductTotal;
+        $totalDeductions = $utDeduction + $sss + $pagibig + $philhealth + $manualDeductTotal;
         $adjustedGross = $grossPay;
         $netPay = $grossPay - $totalDeductions;
 
-        return compact('daysWorked', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'utDeduction', 'sss', 'pagibig', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
+        return compact('daysWorked', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
     }
 
     /**
@@ -159,6 +168,7 @@ class PayrollService
             'total_deductions' => round($values['totalDeductions'], 2),
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
+            'philhealth' => round($values['philhealth'], 2),
 
             // ← FIXED: Respect existing status (keep as 'draft' while batch is draft)
             'status' => $extraData['status'] ?? ($payroll->status ?? 'draft'),
@@ -170,6 +180,7 @@ class PayrollService
         if ($values['otPay'] > 0) {
             $payroll->allowances()->create([
                 'allowance_type' => 'Overtime Pay',
+                'hours' => round($values['otHours'], 2),
                 'amount' => round($values['otPay'], 2),
             ]);
         }
@@ -188,7 +199,6 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => 'SSS',
                 'amount' => round($values['sss'], 2),
-                'description' => 'SSS employee share (semi-monthly)',
             ]);
         }
 
@@ -196,15 +206,21 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => 'Pag-IBIG',
                 'amount' => round($values['pagibig'], 2),
-                'description' => 'Pag-IBIG employee share (semi-monthly)',
+            ]);
+        }
+
+        if ($values['philhealth'] > 0) {
+            $payroll->deductions()->create([
+                'deduction_type' => 'PhilHealth',
+                'amount' => round($values['philhealth'], 2),
             ]);
         }
 
         if ($values['utDeduction'] > 0) {
             $payroll->deductions()->create([
                 'deduction_type' => 'Undertime Deduction',
+                'hours' => round($values['utHours'], 2),
                 'amount' => round($values['utDeduction'], 2),
-                'description' => 'Auto-computed from attendance records.',
             ]);
         }
 
@@ -235,7 +251,14 @@ class PayrollService
         }
 
         if ($row->percentage_employee) {
-            return round(($salary * $row->percentage_employee) / 2, 2);
+            $monthlyContribution = $salary * $row->percentage_employee / 100;
+            
+            // Apply cap if it's Pag-IBIG (max ₱200/month)
+            if ($name === 'Pag-IBIG') {
+                $monthlyContribution = min($monthlyContribution, 200.0);
+            }
+            
+            return round($monthlyContribution / 2, 2); // percentage-based: divide by 100, then semi-monthly
         }
 
         return 0;
@@ -348,15 +371,15 @@ class PayrollService
      * Pag-IBIG employee share.
      * - 1% of monthly salary if salary ≤ ₱1,500
      * - 2% of monthly salary if salary > ₱1,500
-     * - Maximum monthly contribution: ₱100
+     * - Maximum monthly contribution: ₱200
      * Returns the SEMI-MONTHLY amount (monthly ÷ 2).
      */
     private function computePagibig(float $monthlySalary): float
     {
         $rate = $monthlySalary <= 1500 ? 0.01 : 0.02;
-        $monthly = min($monthlySalary * $rate, 100.0);
+        $monthly = min($monthlySalary * $rate, 200.0);
 
-        return round($monthly / 2, 2); // semi-monthly → max ₱50
+        return round($monthly / 2, 2); // semi-monthly → max ₱100
     }
 
     // ── Batch helper ──────────────────────────────────────────────────────

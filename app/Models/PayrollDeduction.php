@@ -14,6 +14,7 @@ class PayrollDeduction extends Model
     protected $fillable = [
         'payroll_id',
         'deduction_type',
+        'hours',
         'amount',
         'description',
     ];

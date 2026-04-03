@@ -39,10 +39,12 @@ class User extends Authenticatable
         'salary_rate',
         'has_sss',
         'has_pagibig',
+        'has_philhealth',
         'has_tin',
         'sss_number',
         'tin_number',
         'pagibig_number',
+        'philhealth_number',
         'signature_path',
         'attachments', // legacy JSON column — kept for backwards compat, new uploads use employee_attachments table
     ];

@@ -65,6 +65,7 @@ class EmployeeController extends Controller
                 'sss_number' => 'nullable|string|max:50',
                 'tin_number' => 'nullable|string|max:50',
                 'pagibig_number' => 'nullable|string|max:50',
+                'philhealth_number' => 'nullable|string|max:50',
                 'signature_path' => 'nullable|string',
                 'generated_password' => 'nullable|string',
                 'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -80,6 +81,7 @@ class EmployeeController extends Controller
         $validated['has_sss'] = $request->has('has_sss');
         $validated['has_tin'] = $request->has('has_tin');
         $validated['has_pagibig'] = $request->has('has_pagibig');
+        $validated['has_philhealth'] = $request->has('has_philhealth');
         $validated['role'] = 'employee';
         $validated['address'] = $this->assembleAddress($request);
 
@@ -163,6 +165,7 @@ class EmployeeController extends Controller
         $validated['has_sss'] = $request->has('has_sss');
         $validated['has_tin'] = $request->has('has_tin');
         $validated['has_pagibig'] = $request->has('has_pagibig');
+        $validated['has_philhealth'] = $request->has('has_philhealth');
         $validated['name'] = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
         $validated['address'] = $this->assembleAddress($request);
 

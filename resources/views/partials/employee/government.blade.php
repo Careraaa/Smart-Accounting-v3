@@ -3,7 +3,7 @@
 @php $readOnly = $readOnly ?? false; @endphp
 
 <div class="row">
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="form-check mb-2">
             <input type="checkbox" name="has_sss" id="has_sss" class="form-check-input gov-toggle" data-target="sss_number"
                 {{ old('has_sss', $employee->has_sss ?? false) ? 'checked' : '' }}
@@ -18,7 +18,7 @@
             {{ old('has_sss', $employee->has_sss ?? false) ? '' : 'disabled' }}
             {{ $readOnly ? 'readonly' : '' }}>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="form-check mb-2">
             <input type="checkbox" name="has_tin" id="has_tin" class="form-check-input gov-toggle"
                 data-target="tin_number" {{ old('has_tin', $employee->has_tin ?? false) ? 'checked' : '' }}
@@ -33,7 +33,10 @@
             {{ old('has_tin', $employee->has_tin ?? false) ? '' : 'disabled' }}
             {{ $readOnly ? 'readonly' : '' }}>
     </div>
-    <div class="col-md-4 mb-3">
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
         <div class="form-check mb-2">
             <input type="checkbox" name="has_pagibig" id="has_pagibig" class="form-check-input gov-toggle"
                 data-target="pagibig_number" {{ old('has_pagibig', $employee->has_pagibig ?? false) ? 'checked' : '' }}
@@ -46,6 +49,21 @@
             maxlength="14" inputmode="numeric"
             value="{{ old('pagibig_number', $employee->pagibig_number ?? '') }}"
             {{ old('has_pagibig', $employee->has_pagibig ?? false) ? '' : 'disabled' }}
+            {{ $readOnly ? 'readonly' : '' }}>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="form-check mb-2">
+            <input type="checkbox" name="has_philhealth" id="has_philhealth" class="form-check-input gov-toggle"
+                data-target="philhealth_number" {{ old('has_philhealth', $employee->has_philhealth ?? false) ? 'checked' : '' }}
+                {{ $readOnly ? 'disabled' : '' }}>
+            <label class="form-check-label fw-semibold" for="has_philhealth">Enrolled in PhilHealth</label>
+        </div>
+        {{-- Format: XX-XXXXXXXXX-X (12 chars) --}}
+        <input type="text" name="philhealth_number" id="philhealth_number"
+            class="form-control" placeholder="XX-XXXXXXXXX-X"
+            maxlength="12" inputmode="numeric"
+            value="{{ old('philhealth_number', $employee->philhealth_number ?? '') }}"
+            {{ old('has_philhealth', $employee->has_philhealth ?? false) ? '' : 'disabled' }}
             {{ $readOnly ? 'readonly' : '' }}>
     </div>
 </div>

@@ -59,16 +59,38 @@ class StatutoryDeductions_Seeder extends Seeder
             ]);
         }
 
-        // Pag-IBIG / HDMF contributions (for reference)
-        $pagibigContributions = [['min_salary' => 0, 'max_salary' => 1500, 'ee' => 1, 'er' => 2, 'note' => null], ['min_salary' => 1500.01, 'max_salary' => 999999999, 'ee' => 2, 'er' => 2, 'note' => null]];
+        // Pag-IBIG / HDMF contributions (percentage-based)
+        $pagibigContributions = [['min_salary' => 0, 'max_salary' => 1500, 'ee_percent' => 1, 'er_percent' => 2, 'note' => null], ['min_salary' => 1500.01, 'max_salary' => 999999999, 'ee_percent' => 2, 'er_percent' => 2, 'note' => null]];
 
         foreach ($pagibigContributions as $row) {
             DB::table('statutory_deductions')->insert([
                 'name' => 'Pag-IBIG',
                 'min_salary' => $row['min_salary'],
                 'max_salary' => $row['max_salary'],
-                'employee_share' => $row['ee'],
-                'employer_share' => $row['er'],
+                'percentage_employee' => $row['ee_percent'],
+                'percentage_employer' => $row['er_percent'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // PhilHealth / Medicare contributions (2025)
+        // Premium is divided equally between employee (50%) and employer (50%)
+        $philhealthContributions = [
+            ['min_salary' => 0, 'max_salary' => 10000, 'ee_premium' => 250, 'er_premium' => 250, 'note' => 'Fixed ₱500 premium split 50-50'],
+            ['min_salary' => 10000.01, 'max_salary' => 99999.99, 'ee_percent' => 2.5, 'er_percent' => 2.5, 'note' => '5% of salary split 50-50'],
+            ['min_salary' => 100000, 'max_salary' => 999999999, 'ee_premium' => 2500, 'er_premium' => 2500, 'note' => 'Fixed ₱5,000 premium split 50-50'],
+        ];
+
+        foreach ($philhealthContributions as $row) {
+            DB::table('statutory_deductions')->insert([
+                'name' => 'PhilHealth',
+                'min_salary' => $row['min_salary'],
+                'max_salary' => $row['max_salary'],
+                'employee_share' => $row['ee_premium'] ?? null,
+                'employer_share' => $row['er_premium'] ?? null,
+                'percentage_employee' => $row['ee_percent'] ?? null,
+                'percentage_employer' => $row['er_percent'] ?? null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

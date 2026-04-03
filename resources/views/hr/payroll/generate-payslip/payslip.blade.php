@@ -354,7 +354,7 @@
                 <div><span class="emp-label">Employee :</span> {{ $payroll->user->name ?? 'N/A' }}</div>
                 <div><span class="emp-label">Days of Work :</span> <span style="font-family: var(--font-mono);">{{ abs($payroll->payroll_period_end->diffInDays($payroll->payroll_period_start)) }}</span></div>
                 <div><span class="emp-label">Pay Period :</span> {{ $payroll->payroll_period_start->format('m/d/Y') }} – {{ $payroll->payroll_period_end->format('m/d/Y') }}</div>
-                <div><span class="emp-label">Days Present :</span> <span style="font-family: var(--font-mono);">{{ $payroll->days_present ?? 0 }}</span></div>
+                <div><span class="emp-label">Days Present :</span> <span style="font-family: var(--font-mono);">{{ $payroll->days_worked ?? 0 }}</span></div>
             </div>
 
             <!-- Body - Now fully occupies remaining space -->
@@ -420,25 +420,8 @@
                                         <td class="mono">₱{{ number_format($ded->amount, 2) }}</td>
                                     </tr>
                                 @empty
-                                    @if (!$payroll->sss && !$payroll->pagibig)
-                                        <tr><td class="dim" colspan="3">No deductions this period</td></tr>
-                                    @endif
+                                    <tr><td class="dim" colspan="3">No deductions this period</td></tr>
                                 @endforelse
-
-                                @if ($payroll->sss > 0)
-                                    <tr>
-                                        <td>SSS</td>
-                                        <td class="mono right">—</td>
-                                        <td class="mono">₱{{ number_format($payroll->sss, 2) }}</td>
-                                    </tr>
-                                @endif
-                                @if ($payroll->pagibig > 0)
-                                    <tr>
-                                        <td>Pag-IBIG</td>
-                                        <td class="mono right">—</td>
-                                        <td class="mono">₱{{ number_format($payroll->pagibig, 2) }}</td>
-                                    </tr>
-                                @endif
                             </tbody>
                         </table>
 

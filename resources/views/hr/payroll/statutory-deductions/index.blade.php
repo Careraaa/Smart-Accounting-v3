@@ -12,6 +12,9 @@
                 <a href="https://www.sss.gov.ph/sss-contribution-table/" target="_blank" class="stat-ref-link">
                     <i class="feather-external-link me-1"></i>SSS Table
                 </a>
+                <a href="https://www.philhealth.gov.ph/advisories/2025/PA2025-0002.pdf" target="_blank" class="stat-ref-link">
+                    <i class="feather-external-link me-1"></i>PhilHealth Table
+                </a>
             </div>
         </div>
         <div class="card-body p-0">

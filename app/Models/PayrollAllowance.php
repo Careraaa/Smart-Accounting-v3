@@ -14,6 +14,7 @@ class PayrollAllowance extends Model
     protected $fillable = [
         'payroll_id',
         'allowance_type',
+        'hours',
         'amount',
     ];
 
