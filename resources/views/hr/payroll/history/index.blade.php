@@ -33,7 +33,7 @@
                             <div class="card card-statistic">
                                 <div class="card-body">
                                     <div class="stat-label">Total Amount</div>
-                                    <h3 class="mb-1" style="color: #B8860B;">₱{{ number_format($totalPayroll, 1) }}M</h3>
+                                    <h3 class="mb-1" style="color: #B8860B;">₱{{ number_format($totalPayroll, 1) }}</h3>
                                     <small class="text-muted">All-time payroll total</small>
                                 </div>
                                 <div class="card-icon" style="color: #B8860B; opacity: 0.2;">
@@ -45,7 +45,7 @@
                             <div class="card card-statistic">
                                 <div class="card-body">
                                     <div class="stat-label">Avg Per Batch</div>
-                                    <h3 class="mb-1" style="color: #8B3A62;">₱{{ number_format($totalBatches > 0 ? $totalPayroll / $totalBatches : 0, 0) }}K</h3>
+                                    <h3 class="mb-1" style="color: #8B3A62;">₱{{ number_format($totalBatches > 0 ? $totalPayroll / $totalBatches : 0, 0) }}</h3>
                                     <small class="text-muted">Average amount</small>
                                 </div>
                                 <div class="card-icon" style="color: #8B3A62; opacity: 0.2;">
