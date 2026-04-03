@@ -23,6 +23,7 @@ use App\Http\Controllers\HR\StatutoryDeductionController;
 use App\Http\Controllers\HR\LeaveController;
 use App\Http\Controllers\HR\LeaveTypeController;
 use App\Http\Controllers\HR\OvertimeUndertimeController;
+use App\Http\Controllers\HR\HrReportController; // <-- NEW
 use App\Http\Controllers\Accountant\PayrollApprovalController;
 use App\Http\Controllers\Accountant\ReportController;
 use App\Http\Controllers\Accountant\RemittanceApprovalController;
@@ -211,7 +212,9 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
 
             Route::get('/create', [PayrollController::class, 'create'])->name('create');
 
-            Route::get('/batch-generate', fn() => view('hr.payroll.salary-computation.batch-generate'))->name('batch-generate');
+            Route::get('/payroll/salary-computation/batch-generate', function () {
+                return redirect()->route('payroll.salary-computation.index')->with('info', 'Use the "Generate Payroll Batch" button on the index page.');
+            })->name('payroll.salary-computation.batch-generate');
 
             Route::post('/', [PayrollController::class, 'store'])->name('store');
 
@@ -281,7 +284,7 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
                     ->orderBy('first_name')
                     ->get(['id', 'name', 'first_name', 'last_name', 'position']);
 
-                return view('hr.payroll.generate-payslip.index', compact('payrolls', 'employees')); // ← added employees
+                return view('hr.payroll.generate-payslip.index', compact('payrolls', 'employees'));
             })->name('index');
         });
 
@@ -299,6 +302,23 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
     Route::get('/reports/payroll-summary', fn() => view('hr.reports.payroll-summary'))->name('reports.payroll-summary');
     Route::get('/reports/deduction-summary', fn() => view('hr.reports.deduction-summary'))->name('reports.deduction-summary');
     Route::get('/reports/government-contribution', fn() => view('hr.reports.government-contribution'))->name('reports.government-contribution');
+
+    // ===== HR PRINT ROUTES =====
+    Route::get('/hr/reports/print/employee-report', [HrReportController::class, 'printEmployeeReport'])->name('hr.reports.print.employee-report');
+    Route::get('/hr/reports/print/approved-leaves-report', [HrReportController::class, 'printApprovedLeavesReport'])->name('hr.reports.print.approved-leaves-report');
+    Route::get('/hr/reports/print/payroll-history-report', [HrReportController::class, 'printPayrollHistoryReport'])->name('hr.reports.print.payroll-history-report');
+
+    Route::post('/payroll/batch/generate', [PayrollController::class, 'batchGenerate'])->name('payroll.batch.generate');
+
+    Route::get('/payroll/batch/{batch}/confirm', [PayrollController::class, 'batchConfirm'])->name('payroll.batch.confirm');
+
+    Route::get('/payroll/batch/{batch}/employee/{payroll}/edit', [PayrollController::class, 'batchEditEmployee'])->name('payroll.batch.edit-employee');
+
+    Route::put('/payroll/batch/{batch}/employee/{payroll}', [PayrollController::class, 'batchUpdateEmployee'])->name('payroll.batch.update-employee');
+
+    Route::post('/payroll/batch/{batch}/finalize', [PayrollController::class, 'batchFinalize'])->name('payroll.batch.finalize');
+
+    Route::post('/payroll/batch/{batch}/submit', [PayrollController::class, 'batchSubmit'])->name('payroll.batch.submit');
 });
 
 // ===== PAYROLL REPORTS (all authenticated users) =====
@@ -331,6 +351,9 @@ Route::middleware(['auth', 'role:accountant'])->group(function () {
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');
     Route::get('/reports/payroll-approval', fn() => view('accountant.reports.payroll-approval'))->name('reports.payroll-approval');
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
+
+    Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
+    Route::get('/reports/print/payroll-report', [ReportController::class, 'printPayrollReport'])->name('reports.print.payroll-report');
 });
 
 // ===== QR ATTENDANCE ADMIN ROUTES =====

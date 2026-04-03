@@ -11,17 +11,9 @@ class AttendanceSeeder extends Seeder
     // Employee user IDs only — matches Users_Seeder exactly
     private array $employeeIds = [5, 6, 7, 8, 9];
 
-    // PH public holidays within Dec 1 2025 – Mar 6 2026
-    private array $holidays = [
-        '2025-12-08', // Feast of the Immaculate Conception
-        '2025-12-24', // Christmas Eve
-        '2025-12-25', // Christmas Day
-        '2025-12-30', // Rizal Day
-        '2025-12-31', // New Year's Eve
-        '2026-01-01', // New Year's Day
-        '2026-01-27', // Chinese New Year (observed)
-        '2026-02-25', // EDSA People Power Anniversary
-    ];
+    // PH public holidays within Mar 16 – Mar 31 2026
+    // None fall in this window, but keeping the array for safety
+    private array $holidays = [];
 
     // Per-employee personality — late/absent = % chance; early_out = % chance of leaving at 4 PM
     private array $personalities = [
@@ -38,8 +30,8 @@ class AttendanceSeeder extends Seeder
         DB::table('attendance')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // Dec 1 2025 → Mar 6 2026 (does NOT include today, Mar 7)
-        $period  = CarbonPeriod::create('2025-12-01', '2026-03-06');
+        // Mar 16 2026 → Mar 31 2026 — matches PayrollBatch::resolvePeriod() when today <= 15th
+        $period  = CarbonPeriod::create('2026-03-16', '2026-03-31');
         $records = [];
 
         foreach ($this->employeeIds as $userId) {
@@ -116,6 +108,6 @@ class AttendanceSeeder extends Seeder
             DB::table('attendance')->insert($chunk);
         }
 
-        $this->command->info('AttendanceSeeder: ' . count($records) . ' records inserted (Dec 1, 2025 – Mar 6, 2026).');
+        $this->command->info('AttendanceSeeder: ' . count($records) . ' records inserted (Mar 16–31, 2026).');
     }
 }

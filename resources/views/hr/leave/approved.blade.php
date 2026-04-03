@@ -3,11 +3,14 @@
 @section('content')
 <div class="col-md-12">
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <div>
                 <span class="card-title mb-0">Approved Leaves</span>
                 <p class="text-muted small mt-1 mb-0">Manage approved leave requests</p>
             </div>
+            <a href="{{ route('hr.reports.print.approved-leaves-report') }}" class="btn btn-sm btn-primary" target="_blank">
+                <i class="feather-printer me-1"></i> Print
+            </a>
         </div>
         <div class="card-body">
 

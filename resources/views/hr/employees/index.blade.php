@@ -5,9 +5,14 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span class="card-title mb-0">Employees</span>
-            <a href="{{ route('employees.create') }}" class="btn btn-primary btn-sm">
-                <i class="feather-plus me-1"></i> Add Employee
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('employees.create') }}" class="btn btn-primary btn-sm">
+                    <i class="feather-plus me-1"></i> Add Employee
+                </a>
+                <a href="{{ route('hr.reports.print.employee-report') }}" class="btn btn-sm btn-primary" target="_blank">
+                    <i class="feather-printer me-1"></i> Print
+                </a>
+            </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
