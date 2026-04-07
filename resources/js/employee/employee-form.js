@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (tabs.length && prevBtn && nextBtn && submitBtn) {
-        // Free navigation — no validation on Next/Prev/tab click
         prevBtn.addEventListener("click", function () {
             if (currentTab > 0) {
                 currentTab--;
@@ -43,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
             tab.addEventListener("click", function () {
                 currentTab = i;
                 showTab(currentTab);
+                initGlobalDatepickers();
             });
         });
 
@@ -70,7 +70,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (existing) existing.remove();
     }
 
-    // Returns index of first tab with errors, or -1 if all valid
     function validateAllAndFindFirstError() {
         let firstErrorTab = -1;
         let firstErrorField = null;
@@ -118,12 +117,20 @@ document.addEventListener("DOMContentLoaded", function () {
         return { firstErrorTab, firstErrorField };
     }
 
-    // Intercept form submit
     const form = document
         .querySelector("#employeeTabsContent")
         ?.closest("form");
     if (form) {
         form.addEventListener("submit", function (e) {
+            document
+                .querySelectorAll('.datepicker-wrapper input[type="text"]')
+                .forEach(function (textInput) {
+                    const hiddenInput = textInput
+                        .closest(".datepicker-wrapper")
+                        .querySelector('input[type="date"]');
+                    if (hiddenInput)
+                        hiddenInput.value = displayToNative(textInput.value);
+                });
             assembleAddress();
 
             const { firstErrorTab, firstErrorField } =
@@ -132,11 +139,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (firstErrorTab !== -1) {
                 e.preventDefault();
 
-                // Jump to the tab with the first error
                 currentTab = firstErrorTab;
                 showTab(currentTab);
 
-                // Scroll and focus the offending field
                 setTimeout(() => {
                     firstErrorField.scrollIntoView({
                         behavior: "smooth",
@@ -148,7 +153,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Clear error styling as user corrects the field
     document.addEventListener("input", function (e) {
         if (e.target.classList.contains("is-invalid"))
             clearFieldError(e.target);
@@ -197,20 +201,26 @@ document.addEventListener("DOMContentLoaded", function () {
         const lowercase = "abcdefghijklmnopqrstuvwxyz";
         const numbers = "0123456789";
         const allChars = uppercase + lowercase + numbers;
-        
+
         let password = "";
-        // Ensure at least one uppercase, one lowercase, one number
-        password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
-        password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+        password += uppercase.charAt(
+            Math.floor(Math.random() * uppercase.length),
+        );
+        password += lowercase.charAt(
+            Math.floor(Math.random() * lowercase.length),
+        );
         password += numbers.charAt(Math.floor(Math.random() * numbers.length));
-        
-        // Fill the rest with random characters
+
         for (let i = password.length; i < length; i++) {
-            password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+            password += allChars.charAt(
+                Math.floor(Math.random() * allChars.length),
+            );
         }
-        
-        // Shuffle the password
-        return password.split('').sort(() => Math.random() - 0.5).join('');
+
+        return password
+            .split("")
+            .sort(() => Math.random() - 0.5)
+            .join("");
     }
 
     function updatePasswordDisplay() {
@@ -222,7 +232,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Generate password on page load if elements exist (create mode only)
     if (passwordDisplay) {
         updatePasswordDisplay();
     }
@@ -308,6 +317,17 @@ document.addEventListener("DOMContentLoaded", function () {
         return d.slice(0, 4) + "-" + d.slice(4, 8) + "-" + d.slice(8);
     }
 
+    // PhilHealth: XX-XXXXXXXXX-X  (13 digits total)
+    function formatPhilHealth(raw) {
+        const d = raw.replace(/\D/g, "").slice(0, 12);
+
+        if (d.length <= 2) return d;
+
+        if (d.length <= 11) return d.slice(0, 2) + "-" + d.slice(2);
+
+        return d.slice(0, 2) + "-" + d.slice(2, 11) + "-" + d.slice(11);
+    }
+
     function attachFormatter(id, formatterFn) {
         const input = document.getElementById(id);
         if (!input) return;
@@ -323,96 +343,62 @@ document.addEventListener("DOMContentLoaded", function () {
     attachFormatter("sss_number", formatSSS);
     attachFormatter("tin_number", formatTIN);
     attachFormatter("pagibig_number", formatPagibig);
+    attachFormatter("philhealth_number", formatPhilHealth); // FIX: was missing
 
     // -------------------------
-    // Work Experience
+    // Dynamic list helper
+    // FIX: use '.emp-dynamic-row' — the rows never had '.experience-row',
+    //      '.skill-row', '.beneficiary-row', or '.reference-row' classes,
+    //      so closest() never found them and the remove buttons did nothing.
     // -------------------------
-    const experienceList = document.getElementById("experienceList");
-    const addExperienceBtn = document.getElementById("addExperience");
-    const experienceTemplate = document.getElementById("experienceTemplate");
+    function initDynamicList({ listId, addBtnId, templateId, removeBtnClass }) {
+        const list = document.getElementById(listId);
+        const addBtn = document.getElementById(addBtnId);
+        const template = document.getElementById(templateId);
+        if (!list || !addBtn || !template) return;
 
-    if (addExperienceBtn && experienceList && experienceTemplate) {
-        let idx = experienceList.querySelectorAll(".experience-row").length;
-        addExperienceBtn.addEventListener("click", () => {
-            const w = document.createElement("div");
-            w.innerHTML = experienceTemplate.innerHTML.replaceAll(
+        let idx = list.querySelectorAll(".emp-dynamic-row").length;
+
+        addBtn.addEventListener("click", () => {
+            const wrapper = document.createElement("div");
+            wrapper.innerHTML = template.innerHTML.replaceAll(
                 "__INDEX__",
                 idx++,
             );
-            experienceList.appendChild(w.firstElementChild);
+            list.appendChild(wrapper.firstElementChild);
         });
-        experienceList.addEventListener("click", (e) => {
-            if (e.target.classList.contains("remove-experience"))
-                e.target.closest(".experience-row").remove();
+
+        list.addEventListener("click", (e) => {
+            const btn = e.target.closest("." + removeBtnClass);
+            if (btn) btn.closest(".emp-dynamic-row").remove();
         });
     }
 
-    // -------------------------
-    // Special Skills
-    // -------------------------
-    const skillList = document.getElementById("skillList");
-    const addSkillBtn = document.getElementById("addSkill");
-    const skillTemplate = document.getElementById("skillTemplate");
+    initDynamicList({
+        listId: "experienceList",
+        addBtnId: "addExperience",
+        templateId: "experienceTemplate",
+        removeBtnClass: "remove-experience",
+    });
 
-    if (addSkillBtn && skillList && skillTemplate) {
-        let idx = skillList.querySelectorAll(".skill-row").length;
-        addSkillBtn.addEventListener("click", () => {
-            const w = document.createElement("div");
-            w.innerHTML = skillTemplate.innerHTML.replaceAll(
-                "__INDEX__",
-                idx++,
-            );
-            skillList.appendChild(w.firstElementChild);
-        });
-        skillList.addEventListener("click", (e) => {
-            if (e.target.classList.contains("remove-skill"))
-                e.target.closest(".skill-row").remove();
-        });
-    }
+    initDynamicList({
+        listId: "skillList",
+        addBtnId: "addSkill",
+        templateId: "skillTemplate",
+        removeBtnClass: "remove-skill",
+    });
 
-    // -------------------------
-    // Beneficiaries
-    // -------------------------
-    const beneficiaryList = document.getElementById("beneficiaryList");
-    const addBeneficiaryBtn = document.getElementById("addBeneficiary");
-    const beneficiaryTemplate = document.getElementById("beneficiaryTemplate");
+    initDynamicList({
+        listId: "beneficiaryList",
+        addBtnId: "addBeneficiary",
+        templateId: "beneficiaryTemplate",
+        removeBtnClass: "remove-beneficiary",
+    });
 
-    if (addBeneficiaryBtn && beneficiaryList && beneficiaryTemplate) {
-        let idx = beneficiaryList.querySelectorAll(".beneficiary-row").length;
-        addBeneficiaryBtn.addEventListener("click", () => {
-            const w = document.createElement("div");
-            w.innerHTML = beneficiaryTemplate.innerHTML.replaceAll(
-                "__INDEX__",
-                idx++,
-            );
-            beneficiaryList.appendChild(w.firstElementChild);
-        });
-        beneficiaryList.addEventListener("click", (e) => {
-            if (e.target.classList.contains("remove-beneficiary"))
-                e.target.closest(".beneficiary-row").remove();
-        });
-    }
-
-    // -------------------------
-    // Character References
-    // -------------------------
-    const referenceList = document.getElementById("referenceList");
-    const addReferenceBtn = document.getElementById("addReference");
-    const referenceTemplate = document.getElementById("referenceTemplate");
-
-    if (addReferenceBtn && referenceList && referenceTemplate) {
-        let idx = referenceList.querySelectorAll(".reference-row").length;
-        addReferenceBtn.addEventListener("click", () => {
-            const w = document.createElement("div");
-            w.innerHTML = referenceTemplate.innerHTML.replaceAll(
-                "__INDEX__",
-                idx++,
-            );
-            referenceList.appendChild(w.firstElementChild);
-        });
-        referenceList.addEventListener("click", (e) => {
-            if (e.target.classList.contains("remove-reference"))
-                e.target.closest(".reference-row").remove();
-        });
-    }
+    initDynamicList({
+        listId: "referenceList",
+        addBtnId: "addReference",
+        templateId: "referenceTemplate",
+        removeBtnClass: "remove-reference",
+    });
 });

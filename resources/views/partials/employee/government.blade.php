@@ -65,7 +65,7 @@
         <label class="emp-label">PhilHealth Number</label>
         <input type="text" name="philhealth_number" id="philhealth_number"
             class="emp-input"
-            placeholder="XX-XXXXXXXXX-X" maxlength="12" inputmode="numeric"
+            placeholder="XX-XXXXXXXXX-X" maxlength="14" inputmode="numeric"
             value="{{ old('philhealth_number', $employee->philhealth_number ?? '') }}"
             {{ old('has_philhealth', $employee->has_philhealth ?? false) ? '' : 'disabled' }}
             {{ $readOnly ? 'readonly' : '' }}>
