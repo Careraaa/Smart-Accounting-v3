@@ -162,9 +162,6 @@
                             <li class="nxl-item {{ request()->routeIs('payroll.receivables.*') ? 'active' : '' }}">
                                 <a class="nxl-link" href="{{ route('payroll.receivables.index') }}">Payroll Receivables</a>
                             </li>
-                            <li class="nxl-item {{ request()->routeIs('payroll.history.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.history.index') }}">Payroll History</a>
-                            </li>
                         </ul>
                     </li>
 
@@ -176,7 +173,13 @@
                         </a>
                         <ul class="nxl-submenu">
                             <li class="nxl-item {{ request()->routeIs('payroll.generate-payslip.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.generate-payslip.index') }}">Payslips</a>
+                                <a class="nxl-link" href="{{ route('payroll.generate-payslip.index') }}">Pay Slips</a>
+                            </li>
+                            <li class="nxl-item {{ request()->routeIs('payroll.history.*') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('payroll.history.index') }}">Payroll Summary</a>
+                            </li>
+                            <li class="nxl-item {{ request()->routeIs('reports.government-contribution') ? 'active' : '' }}">
+                                <a class="nxl-link" href="{{ route('reports.government-contribution') }}">Government Contribution Summary</a>
                             </li>
                         </ul>
                     </li>

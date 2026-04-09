@@ -324,7 +324,8 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
     Route::get('/reports/payslips', fn() => view('hr.reports.payslips'))->name('reports.payslips');
     Route::get('/reports/payroll-summary', fn() => view('hr.reports.payroll-summary'))->name('reports.payroll-summary');
     Route::get('/reports/deduction-summary', fn() => view('hr.reports.deduction-summary'))->name('reports.deduction-summary');
-    Route::get('/reports/government-contribution', fn() => view('hr.reports.government-contribution'))->name('reports.government-contribution');
+    Route::get('/reports/government-contribution', [HrReportController::class, 'governmentContributionReport'])->name('reports.government-contribution');
+    Route::get('/reports/government-contribution-print', [HrReportController::class, 'governmentContributionPrint'])->name('reports.government-contribution-print');
 
     // ===== HR PRINT ROUTES =====
     Route::get('/hr/reports/print/employee-report', [HrReportController::class, 'printEmployeeReport'])->name('hr.reports.print.employee-report');

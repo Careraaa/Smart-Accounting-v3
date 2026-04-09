@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payroll History Report – {{ date('M d, Y') }}</title>
+    <title>Payslips Issued – {{ date('M d, Y') }}</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
 
     {{-- Fonts --}}
@@ -281,7 +281,7 @@
                 </div>
             </div>
             <div class="report-title">
-                <h1>PAYROLL HISTORY</h1>
+                <h1>PAYSLIPS ISSUED</h1>
                 <div class="report-period">{{ date('M d, Y') }}</div>
             </div>
         </div>
@@ -289,23 +289,23 @@
         {{-- Summary Strip --}}
         <div class="summary-strip">
             <div class="summary-item">
-                <span class="summary-label">Total Batches</span>
-                <span class="summary-value">{{ $totalBatches }}</span>
+                <span class="summary-label">Total Employees</span>
+                <span class="summary-value">{{ $totalEmployees }}</span>
             </div>
             <div class="summary-divider"></div>
             <div class="summary-item">
-                <span class="summary-label">Total Amount</span>
-                <span class="summary-value" style="color: #B8860B;">₱{{ number_format($totalPayroll, 1) }}M</span>
+                <span class="summary-label">Gross Pay</span>
+                <span class="summary-value">₱{{ number_format($totalGrossPay, 2) }}</span>
             </div>
             <div class="summary-divider"></div>
             <div class="summary-item">
-                <span class="summary-label">Avg Per Batch</span>
-                <span class="summary-value">₱{{ number_format($totalBatches > 0 ? $totalPayroll / $totalBatches : 0, 0) }}K</span>
+                <span class="summary-label">Deductions</span>
+                <span class="summary-value" style="color: #dc2626;">₱{{ number_format($totalDeductions, 2) }}</span>
             </div>
             <div class="summary-divider"></div>
             <div class="summary-item">
-                <span class="summary-label">Active Staff</span>
-                <span class="summary-value">{{ $totalPaid }}</span>
+                <span class="summary-label">Total Net Pay</span>
+                <span class="summary-value" style="color: #16a34a;">₱{{ number_format($totalNetPay, 2) }}</span>
             </div>
         </div>
 
@@ -313,39 +313,29 @@
         <table>
             <thead>
                 <tr>
-                    <th>Batch</th>
-                    <th>Period</th>
-                    <th>Released On</th>
-                    <th class="text-right">Employees</th>
-                    <th class="text-right">Gross Amount</th>
+                    <th>Employee Name</th>
+                    <th>Payroll Period</th>
+                    <th class="text-right">Basic Salary</th>
+                    <th class="text-right">Allowances</th>
+                    <th class="text-right">Gross Pay</th>
                     <th class="text-right">Deductions</th>
                     <th class="text-right">Net Pay</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse ($batchData as $batch)
-                    @php
-                        $startDate = $batch['period_start'];
-                        $endDate = $batch['period_end'];
-                        $isFirst = $startDate->format('d') <= 15;
-                        $batchNum = $isFirst ? 1 : 2;
-                    @endphp
+                @forelse ($payrolls as $payroll)
                     <tr>
-                        <td>
-                            <span class="batch-pill batch-{{ $batchNum }}">
-                                {{ $startDate->format('F Y') }} – Batch {{ $batchNum }}
-                            </span>
-                        </td>
-                        <td>{{ $startDate->format('M d') }} – {{ $endDate->format('M d, Y') }}</td>
-                        <td>{{ $endDate->format('M d, Y') }}</td>
-                        <td class="text-right"><strong>{{ $batch['count'] }}</strong></td>
-                        <td class="text-right mono">₱{{ number_format($batch['total_amount'] * 1.1, 2) }}</td>
-                        <td class="text-right mono" style="color: #dc2626;">₱{{ number_format($batch['total_amount'] * 0.15, 2) }}</td>
-                        <td class="text-right mono"><strong>₱{{ number_format($batch['total_amount'], 2) }}</strong></td>
+                        <td>{{ $payroll->user->first_name ?? '' }} {{ $payroll->user->last_name ?? '' }}</td>
+                        <td>{{ $payroll->payroll_period_start->format('M d') }} – {{ $payroll->payroll_period_end->format('M d, Y') }}</td>
+                        <td class="text-right mono">₱{{ number_format($payroll->basic_salary, 2) }}</td>
+                        <td class="text-right mono">₱{{ number_format($payroll->total_allowances, 2) }}</td>
+                        <td class="text-right mono"><strong>₱{{ number_format($payroll->gross_pay, 2) }}</strong></td>
+                        <td class="text-right mono" style="color: #dc2626;">₱{{ number_format($payroll->total_deductions, 2) }}</td>
+                        <td class="text-right mono"><strong style="color: #16a34a;">₱{{ number_format($payroll->net_pay, 2) }}</strong></td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="padding: 20px; text-align: center;">No payroll batches found.</td>
+                        <td colspan="7" style="padding: 20px; text-align: center;">No payslips found.</td>
                     </tr>
                 @endforelse
             </tbody>
