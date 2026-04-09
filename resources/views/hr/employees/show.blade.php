@@ -252,7 +252,6 @@
     </div>
 
     {{-- Work Experience --}}
-    @if($employee->workExperiences->count())
     <div class="emp-info-card">
         <div class="emp-info-card-header">
             <h2 class="emp-info-card-title"><span class="emp-dot"></span> Work Experience</h2>
@@ -262,23 +261,27 @@
                 <table class="emp-sub-table">
                     <thead><tr><th>Company</th><th>Position</th><th>Duration</th><th>Responsibilities</th></tr></thead>
                     <tbody>
-                        @foreach($employee->workExperiences as $we)
-                        <tr>
-                            <td style="font-weight:600;color:#111827;">{{ $we->company_name }}</td>
-                            <td>{{ $we->position }}</td>
-                            <td><span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:#6b7280;">{{ $we->duration }}</span></td>
-                            <td style="color:#6b7280;font-size:0.8rem;">{{ $we->responsibilities }}</td>
-                        </tr>
-                        @endforeach
+                        @forelse($employee->workExperiences as $we)
+                            <tr>
+                                <td style="font-weight:600;color:#111827;">{{ $we->company_name }}</td>
+                                <td>{{ $we->position }}</td>
+                                <td><span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:#6b7280;">{{ $we->duration }}</span></td>
+                                <td style="color:#6b7280;font-size:0.8rem;">{{ $we->responsibilities }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center text-muted" style="padding:18px;">
+                                    No work experience records yet.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-    @endif
 
     {{-- Special Skills --}}
-    @if($employee->specialSkills->count())
     <div class="emp-info-card">
         <div class="emp-info-card-header">
             <h2 class="emp-info-card-title"><span class="emp-dot"></span> Special Skills</h2>
@@ -288,24 +291,28 @@
                 <table class="emp-sub-table">
                     <thead><tr><th>Skill</th><th>Proficiency</th></tr></thead>
                     <tbody>
-                        @foreach($employee->specialSkills as $skill)
-                        <tr>
-                            <td style="font-weight:600;color:#111827;">{{ $skill->skill_name }}</td>
-                            <td>
-                                @php $profColors = ['beginner'=>['#f0f9ff','#0284c7','#bae6fd'],'intermediate'=>['#fffbeb','#d97706','#fde68a'],'advanced'=>['#f5f3ff','#7c3aed','#ddd6fe'],'expert'=>['#f0fdf4','#16a34a','#bbf7d0']]; $pc = $profColors[strtolower($skill->proficiency)] ?? ['#f3f4f6','#6b7280','#e5e7eb']; @endphp
-                                <span style="background:{{ $pc[0] }};color:{{ $pc[1] }};border:1px solid {{ $pc[2] }};padding:2px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">{{ ucfirst($skill->proficiency) }}</span>
-                            </td>
-                        </tr>
-                        @endforeach
+                        @forelse($employee->specialSkills as $skill)
+                            <tr>
+                                <td style="font-weight:600;color:#111827;">{{ $skill->skill_name }}</td>
+                                <td>
+                                    @php $profColors = ['beginner'=>['#f0f9ff','#0284c7','#bae6fd'],'intermediate'=>['#fffbeb','#d97706','#fde68a'],'advanced'=>['#f5f3ff','#7c3aed','#ddd6fe'],'expert'=>['#f0fdf4','#16a34a','#bbf7d0']]; $pc = $profColors[strtolower($skill->proficiency)] ?? ['#f3f4f6','#6b7280','#e5e7eb']; @endphp
+                                    <span style="background:{{ $pc[0] }};color:{{ $pc[1] }};border:1px solid {{ $pc[2] }};padding:2px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">{{ ucfirst($skill->proficiency) }}</span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="2" class="text-center text-muted" style="padding:18px;">
+                                    No special skills added yet.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-    @endif
 
     {{-- Beneficiaries --}}
-    @if($employee->beneficiaries->count())
     <div class="emp-info-card">
         <div class="emp-info-card-header">
             <h2 class="emp-info-card-title"><span class="emp-dot"></span> Beneficiaries</h2>
@@ -315,22 +322,26 @@
                 <table class="emp-sub-table">
                     <thead><tr><th>Name</th><th>Relationship</th><th>Date of Birth</th></tr></thead>
                     <tbody>
-                        @foreach($employee->beneficiaries as $b)
-                        <tr>
-                            <td style="font-weight:600;color:#111827;">{{ $b->name }}</td>
-                            <td>{{ ucfirst($b->relationship) }}</td>
-                            <td><span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:#6b7280;">{{ $b->date_of_birth ? \Carbon\Carbon::parse($b->date_of_birth)->format('F d, Y') : '—' }}</span></td>
-                        </tr>
-                        @endforeach
+                        @forelse($employee->beneficiaries as $b)
+                            <tr>
+                                <td style="font-weight:600;color:#111827;">{{ $b->name }}</td>
+                                <td>{{ ucfirst($b->relationship) }}</td>
+                                <td><span style="font-family:'DM Mono',monospace;font-size:0.78rem;color:#6b7280;">{{ $b->date_of_birth ? \Carbon\Carbon::parse($b->date_of_birth)->format('F d, Y') : '—' }}</span></td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="text-center text-muted" style="padding:18px;">
+                                    No beneficiaries recorded yet.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-    @endif
 
     {{-- Character References --}}
-    @if($employee->charRefs->count())
     <div class="emp-info-card">
         <div class="emp-info-card-header">
             <h2 class="emp-info-card-title"><span class="emp-dot"></span> Character References</h2>
@@ -340,19 +351,24 @@
                 <table class="emp-sub-table">
                     <thead><tr><th>Name</th><th>Address</th><th>Contact Number</th></tr></thead>
                     <tbody>
-                        @foreach($employee->charRefs as $ref)
-                        <tr>
-                            <td style="font-weight:600;color:#111827;">{{ $ref->name }}</td>
-                            <td style="color:#6b7280;font-size:0.8rem;">{{ $ref->address }}</td>
-                            <td><span style="font-family:'DM Mono',monospace;font-size:0.78rem;">{{ $ref->contact_number }}</span></td>
-                        </tr>
-                        @endforeach
+                        @forelse($employee->charRefs as $ref)
+                            <tr>
+                                <td style="font-weight:600;color:#111827;">{{ $ref->name }}</td>
+                                <td style="color:#6b7280;font-size:0.8rem;">{{ $ref->address }}</td>
+                                <td><span style="font-family:'DM Mono',monospace;font-size:0.78rem;">{{ $ref->contact_number }}</span></td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="text-center text-muted" style="padding:18px;">
+                                    No character references added yet.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-    @endif
 
     {{-- Attachments --}}
     @php

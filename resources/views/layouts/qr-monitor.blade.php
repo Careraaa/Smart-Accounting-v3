@@ -9,7 +9,7 @@
     
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendors/css/daterangepicker.min.css') }}">
+    {{-- daterangepicker assets removed (no longer used) --}}
 
     <!-- Vite compiled assets -->
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
