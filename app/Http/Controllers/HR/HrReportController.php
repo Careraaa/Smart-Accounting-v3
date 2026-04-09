@@ -12,7 +12,7 @@ class HrReportController extends Controller
 {
     public function printEmployeeReport()
     {
-        $employees = Employee::orderBy('last_name')->get();
+        $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy('last_name')->get();
 
         return view('hr.reports.employee-report', compact('employees'));
     }

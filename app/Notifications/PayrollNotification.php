@@ -32,11 +32,11 @@ class PayrollNotification
     }
 
     /**
-     * Notify managers that payroll is ready for review
+     * Notify HR that payroll is ready for review
      */
     public static function notifyManagersPayrollReady($periodStart, $periodEnd)
     {
-        app(NotificationService::class)->sendToRole('manager', 'payroll_ready_review', 'Payroll Ready for Review', "Payroll for {$periodStart->format('M d, Y')} to {$periodEnd->format('M d, Y')} is ready for review and approval.", [
+        app(NotificationService::class)->sendToRole('hr', 'payroll_ready_review', 'Payroll Ready for Review', "Payroll for {$periodStart->format('M d, Y')} to {$periodEnd->format('M d, Y')} is ready for review and approval.", [
             'period_start' => $periodStart,
             'period_end' => $periodEnd,
         ]);

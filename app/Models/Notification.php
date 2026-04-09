@@ -172,7 +172,7 @@ class Notification extends Model
                 return route('overtime.index');
 
             case 'overtime_pending_approval':
-                return route('overtime.pending'); // or overtime.index with filter
+                return route('overtime.pending');
 
             // Remittance related notifications
             case 'remittance_created':

@@ -27,8 +27,10 @@
             <select name="department" id="department"
                 class="emp-select @error('department') is-invalid @enderror" required>
                 <option value="">— Select Department —</option>
-                <option value="admin"     @selected(old('department', $employee->department ?? '') == 'admin')>Admin</option>
-                <option value="operation" @selected(old('department', $employee->department ?? '') == 'operation')>Operation</option>
+                <option value="admin"        @selected(old('department', $employee->department ?? '') == 'admin')>Admin</option>
+                <option value="operation"    @selected(old('department', $employee->department ?? '') == 'operation')>Operation</option>
+                <option value="hr"           @selected(old('department', $employee->department ?? '') == 'hr')>HR</option>
+                <option value="accounting"   @selected(old('department', $employee->department ?? '') == 'accounting')>Accounting</option>
             </select>
             <svg class="emp-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
         </div>

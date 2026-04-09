@@ -268,7 +268,7 @@
             <div class="company-info">
                 <img src="{{ asset('images/knights_logo_icon.png') }}" alt="Logo">
                 <div>
-                    <div class="company-name">Smart Accounting</div>
+                    <div class="company-name">Knights Transport Services Corporation</div>
                     <div class="company-sub">Human Resources</div>
                 </div>
             </div>

@@ -151,6 +151,8 @@
             <option value="">All Departments</option>
             <option value="admin">Admin</option>
             <option value="operation">Operation</option>
+            <option value="hr">HR Department</option>
+            <option value="accounting">Accounting Department</option>
         </select>
     </div>
 
