@@ -80,11 +80,10 @@
                             @endforelse
                         </div>
                     </div>
-                    @if($unread_count > 0)
-                        <div class="kt-notif-footer">
-                            <button class="btn btn-sm btn-link" id="mark-all-read">Mark all as read</button>
-                        </div>
-                    @endif
+                    <div class="kt-notif-footer d-flex align-items-center justify-content-between gap-2">
+                        <a class="btn btn-sm btn-link" href="{{ route('notifications.index') }}">View all</a>
+                        <button class="btn btn-sm btn-link" id="mark-all-read" style="{{ $unread_count > 0 ? '' : 'display:none;' }}">Mark all as read</button>
+                    </div>
                 </div>
             </div>
 
@@ -271,7 +270,7 @@
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    fetch('/notifications/mark-all-as-read', {
+                    fetch(@json(route('notifications.mark-all-as-read')), {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -291,7 +290,7 @@
 
         // Update the notification count
         function updateNotificationCount() {
-            fetch('/notifications/count', {
+            fetch(@json(route('notifications.count')), {
                 headers: {
                     'Accept': 'application/json'
                 }
@@ -328,16 +327,17 @@
 
         // Refresh the entire notification list
         function refreshNotificationList() {
-            fetch('/notifications?read=unread&limit=10', {
+            fetch(@json(route('notifications.index')) + '?read=unread&limit=10', {
                 headers: {
                     'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === 'success' && data.data && data.data.data) {
+                const payload = data && data.status === 'success' ? data.data : null;
+                const notifications = payload && Array.isArray(payload.data) ? payload.data : [];
+                if (data.status === 'success') {
                     const notificationList = document.getElementById('notification-list');
-                    const notifications = data.data.data;
                     
                     if (notifications.length > 0) {
                         // Build HTML for notifications
@@ -457,27 +457,19 @@
 
         // Update mark-all-read button visibility
         function updateMarkAllReadButton() {
-            fetch('/notifications/count', {
+            fetch(@json(route('notifications.count')), {
                 headers: {
                     'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
-                const footer = document.querySelector('.kt-notif-footer');
+                const markBtn = document.getElementById('mark-all-read');
                 
                 if (data.unread_count > 0) {
-                    if (!footer) {
-                        const newFooter = document.createElement('div');
-                        newFooter.className = 'kt-notif-footer text-center p-2 border-top';
-                        newFooter.innerHTML = '<button class="btn btn-sm btn-link" id="mark-all-read">Mark all as read</button>';
-                        document.getElementById('notification-dropdown').appendChild(newFooter);
-                        attachMarkAllAsReadListener();
-                    }
+                    if (markBtn) markBtn.style.display = '';
                 } else {
-                    if (footer) {
-                        footer.remove();
-                    }
+                    if (markBtn) markBtn.style.display = 'none';
                 }
             })
             .catch(error => console.error('Error updating mark-all button:', error));
@@ -487,7 +479,7 @@
         function startNotificationPolling() {
             // Check for new notifications every 5 seconds
             notificationPollingInterval = setInterval(function() {
-                fetch('/notifications/count', {
+                fetch(@json(route('notifications.count')), {
                     headers: {
                         'Accept': 'application/json'
                     }

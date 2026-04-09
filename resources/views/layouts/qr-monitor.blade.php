@@ -458,7 +458,7 @@
 
     {{-- Template Vendors JS --}}
     <script src="{{ asset('vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/daterangepicker.min.js') }}"></script>
+    {{-- daterangepicker was removed; keep layout clean --}}
     <script src="{{ asset('vendors/js/apexcharts.min.js') }}"></script>
 </body>
 </html>

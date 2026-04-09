@@ -51,7 +51,7 @@
 
     {{-- Template Vendors JS (order matters, vendors first) --}}
     <script src="{{ asset('vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/daterangepicker.min.js') }}"></script>
+    {{-- daterangepicker was removed; keep layout clean --}}
     <script src="{{ asset('vendors/js/apexcharts.min.js') }}"></script>
     <script src="{{ asset('vendors/js/circle-progress.min.js') }}"></script>
 

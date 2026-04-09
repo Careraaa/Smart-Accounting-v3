@@ -2,21 +2,31 @@
 
 @section('title', 'My Salary Loans')
 
+@push('styles')
+    @include('employee._ui-styles')
+@endpush
+
 @section('content')
-<div class="kt-page-header mb-3">
-    <div class="kt-page-header-left">
-        <div>
-            <h4 class="kt-page-title">My Salary Loans</h4>
-            <div class="kt-breadcrumb">
-                <span class="kt-breadcrumb-item">My Finances</span>
-                <span class="kt-breadcrumb-sep">›</span>
-                <span class="kt-breadcrumb-item active">Salary Loans</span>
+<div class="container-fluid empui-page empui-wrap">
+    <div class="empui-backdrop"><div class="empui-grid"></div></div>
+    <div class="empui-content">
+
+    <div class="empui-hero">
+        <div class="empui-hero-left">
+            <h1 class="empui-title">My Salary Loans</h1>
+            <p class="empui-sub">Apply for a loan and monitor your repayment progress.</p>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                <span class="empui-chip"><i class="feather-calendar"></i> {{ now()->format('l, F d, Y') }}</span>
+                <span class="empui-chip"><i class="feather-trending-up"></i> My Finances</span>
             </div>
         </div>
+        <div class="empui-hero-right">
+            <a href="{{ route('employee.cash-advances.index') }}" class="empui-btn-sec">
+                <i class="feather-credit-card"></i>
+                Cash Advances
+            </a>
+        </div>
     </div>
-</div>
-
-<div class="main-content">
 
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-3">
@@ -36,11 +46,11 @@
 
         {{-- ── Submit Form ── --}}
         <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <span class="card-title"><i class="feather-plus-circle me-2 text-muted"></i>Apply for Salary Loan</span>
+            <div class="empui-card h-100">
+                <div class="empui-card-head">
+                    <p class="empui-card-title"><span class="empui-dot"></span> Apply for Salary Loan</p>
                 </div>
-                <div class="card-body">
+                <div class="empui-card-body">
                     @php
                         $hasActive = $loans->whereIn('status', ['pending', 'active'])->count() > 0;
                     @endphp
@@ -86,8 +96,8 @@
                                       {{ $hasActive ? 'disabled' : '' }}>{{ old('notes') }}</textarea>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100" {{ $hasActive ? 'disabled' : '' }}>
-                            <i class="feather-send me-2"></i> Submit Application
+                        <button type="submit" class="empui-btn w-100" style="justify-content:center;" {{ $hasActive ? 'disabled' : '' }}>
+                            <i class="feather-send"></i> Submit Application
                         </button>
                     </form>
                 </div>
@@ -96,13 +106,13 @@
 
         {{-- ── Loan History ── --}}
         <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title"><i class="feather-list me-2 text-muted"></i>My Loans</span>
+            <div class="empui-card">
+                <div class="empui-card-head">
+                    <p class="empui-card-title"><span class="empui-dot"></span> My Loans</p>
                 </div>
-                <div class="card-body p-0">
+                <div class="p-0">
                     <div class="table-responsive">
-                        <table class="table mb-0">
+                        <table class="table mb-0 empui-table">
                             <thead>
                                 <tr>
                                     <th>Loan Amount</th>
@@ -175,12 +185,15 @@
                     </div>
                 </div>
                 @if ($loans->hasPages())
-                <div class="card-footer d-flex justify-content-end">
+                <div class="d-flex justify-content-end px-3 py-2">
                     {{ $loans->links() }}
                 </div>
                 @endif
             </div>
         </div>
+
+    </div>
+</div>
 
     </div>
 </div>

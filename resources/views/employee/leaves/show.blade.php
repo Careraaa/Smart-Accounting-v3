@@ -1,101 +1,128 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('employee._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Leave Request Details</span>
-            <div class="d-flex gap-2">
+@php
+    $pill = in_array($leave->status, ['pending','approved','rejected'], true) ? $leave->status : 'neutral';
+@endphp
+
+<div class="container-fluid empui-page empui-wrap">
+    <div class="empui-backdrop"><div class="empui-grid"></div></div>
+    <div class="empui-content">
+
+        <div class="empui-hero">
+            <div class="empui-hero-left">
+                <h1 class="empui-title">Leave Request Details</h1>
+                <p class="empui-sub">{{ $leave->leave_type }} · {{ $leave->start_date->format('M d, Y') }} – {{ $leave->end_date->format('M d, Y') }}</p>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="empui-chip"><i class="feather-clock"></i> Submitted {{ $leave->created_at->diffForHumans() }}</span>
+                    <span class="empui-chip"><i class="feather-flag"></i> Status: {{ ucfirst($leave->status) }}</span>
+                </div>
+            </div>
+            <div class="empui-hero-right">
                 @if($leave->status === 'pending')
-                    <a href="{{ route('employee.leaves.edit', $leave) }}" class="btn btn-primary btn-sm">
-                        <i class="feather-edit-2 me-1"></i> Edit
+                    <a class="empui-btn" href="{{ route('employee.leaves.edit', $leave) }}">
+                        <i class="feather-edit-2"></i>
+                        Edit Request
                     </a>
                 @endif
-                <a href="{{ route('employee.leaves.index') }}" class="btn btn-secondary btn-sm">
-                    <i class="feather-arrow-left me-1"></i> Back
+                <a class="empui-btn-sec" href="{{ route('employee.leaves.index') }}">
+                    <i class="feather-arrow-left"></i>
+                    Back
                 </a>
             </div>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Leave Type</label>
-                        <p class="text-muted mb-0">{{ $leave->leave_type }}</p>
-                    </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Start Date</label>
-                        <p class="text-muted mb-0">{{ $leave->start_date->format('l, F d, Y') }}</p>
+        <div class="row g-3">
+            <div class="col-lg-8">
+                <div class="empui-card">
+                    <div class="empui-card-head">
+                        <p class="empui-card-title"><span class="empui-dot"></span> Summary</p>
+                        <span class="empui-pill {{ $pill }}">{{ ucfirst($leave->status) }}</span>
                     </div>
+                    <div class="empui-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="empui-muted">Leave Type</div>
+                                <div class="fw-bold" style="color:#111827;">{{ $leave->leave_type }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="empui-muted">Submitted On</div>
+                                <div class="fw-bold" style="color:#111827;">{{ $leave->created_at->format('F d, Y \a\t h:i A') }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="empui-muted">Start Date</div>
+                                <div class="fw-bold" style="color:#111827;">{{ $leave->start_date->format('l, F d, Y') }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="empui-muted">End Date</div>
+                                <div class="fw-bold" style="color:#111827;">{{ $leave->end_date->format('l, F d, Y') }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="empui-muted">Duration</div>
+                                <div class="fw-bold" style="color:#111827;">
+                                    {{ $leave->start_date->diffInDays($leave->end_date) + 1 }} day(s)
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Duration</label>
-                        <p class="text-muted mb-0">{{ $leave->start_date->diffInDays($leave->end_date) + 1 }} day(s)</p>
-                    </div>
-                </div>
+                        <hr class="my-4">
 
-                <div class="col-md-6">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">End Date</label>
-                        <p class="text-muted mb-0">{{ $leave->end_date->format('l, F d, Y') }}</p>
-                    </div>
+                        <div class="empui-muted mb-1">Reason</div>
+                        <div style="color:#111827; font-weight:700; line-height:1.7; white-space:pre-wrap;">{{ $leave->reason }}</div>
 
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Status</label>
-                        <p class="mb-0">
-                            @php
-                                $statusMap = [
-                                    'pending'  => ['bg' => '#fffbeb', 'color' => '#d97706'],
-                                    'approved' => ['bg' => '#f0fdf4', 'color' => '#16a34a'],
-                                    'rejected' => ['bg' => '#fff1f2', 'color' => '#e11d48'],
-                                ];
-                                $st = $statusMap[$leave->status] ?? ['bg' => '#f4f5f7', 'color' => '#9898a8'];
-                            @endphp
-                            <span style="display:inline-block; background:{{ $st['bg'] }}; color:{{ $st['color'] }}; font-size:0.75rem; font-weight:700; padding:4px 12px; border-radius:20px; letter-spacing:0.4px; text-transform:uppercase;">
-                                {{ ucfirst($leave->status) }}
-                            </span>
-                        </p>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Submitted On</label>
-                        <p class="text-muted mb-0">{{ $leave->created_at->format('F d, Y \a\t h:i A') }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Reason</label>
-                        <p class="text-muted mb-0" style="line-height:1.6;">{{ $leave->reason }}</p>
+                        @if($leave->status === 'approved' && $leave->approvedBy)
+                            <div class="alert alert-success mt-4 mb-0" role="alert">
+                                <i class="feather-check-circle me-2"></i>
+                                <strong>Approved</strong> by {{ $leave->approvedBy->name }} on {{ $leave->updated_at->format('F d, Y') }}
+                            </div>
+                        @elseif($leave->status === 'rejected' && $leave->approvedBy)
+                            <div class="alert alert-danger mt-4 mb-0" role="alert">
+                                <i class="feather-x-circle me-2"></i>
+                                <strong>Rejected</strong> by {{ $leave->approvedBy->name }} on {{ $leave->updated_at->format('F d, Y') }}
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
 
-            @if($leave->status === 'approved' && $leave->approvedBy)
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <hr>
-                    <div class="alert alert-success" role="alert">
-                        <i class="feather-check-circle me-2"></i>
-                        <strong>Approved</strong> by {{ $leave->approvedBy->name }} on {{ $leave->updated_at->format('F d, Y') }}
+            <div class="col-lg-4">
+                <div class="empui-card">
+                    <div class="empui-card-head">
+                        <p class="empui-card-title"><span class="empui-dot"></span> Actions</p>
+                    </div>
+                    <div class="empui-card-body">
+                        <div class="d-grid gap-2">
+                            @if($leave->status === 'pending')
+                                <a href="{{ route('employee.leaves.edit', $leave) }}" class="empui-btn-sec" style="justify-content:center;">
+                                    <i class="feather-edit-2"></i>
+                                    Edit Request
+                                </a>
+                                <form action="{{ route('employee.leaves.destroy', $leave) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="empui-btn-sec w-100"
+                                        style="justify-content:center;border-color:#fecdd3;color:#e11d48;background:#fff1f2;"
+                                        onclick="return confirm('Cancel this leave request?')">
+                                        <i class="feather-trash-2"></i>
+                                        Cancel Request
+                                    </button>
+                                </form>
+                            @endif
+                            <a href="{{ route('employee.leaves.index') }}" class="empui-btn" style="justify-content:center;">
+                                <i class="feather-list"></i>
+                                View All Requests
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-            @elseif($leave->status === 'rejected' && $leave->approvedBy)
-            <div class="row mt-4">
-                <div class="col-md-12">
-                    <hr>
-                    <div class="alert alert-danger" role="alert">
-                        <i class="feather-x-circle me-2"></i>
-                        <strong>Rejected</strong> by {{ $leave->approvedBy->name }} on {{ $leave->updated_at->format('F d, Y') }}
-                    </div>
-                </div>
-            </div>
-            @endif
         </div>
+
     </div>
 </div>
 @endsection

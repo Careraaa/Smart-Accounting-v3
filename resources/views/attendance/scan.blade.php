@@ -1,19 +1,61 @@
 @extends('layouts.layout')
 
-@section('content')
-<div class="container-fluid">
+@push('styles')
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
+.scn-page{font-family:'Sora',sans-serif;position:relative}
+.scn-backdrop{position:absolute;inset:-40px -20px auto -20px;height:340px;pointer-events:none;z-index:0;background:
+    radial-gradient(220px 220px at 10% 35%, rgba(200,41,42,0.14), transparent 60%),
+    radial-gradient(260px 260px at 85% 10%, rgba(2,132,199,0.12), transparent 60%),
+    radial-gradient(240px 240px at 70% 70%, rgba(22,163,74,0.10), transparent 60%),
+    linear-gradient(to bottom, rgba(17,24,39,0.04), transparent 70%);filter:saturate(110%)}
+.scn-grid{position:absolute;inset:0;background-image:linear-gradient(to right, rgba(17,24,39,0.06) 1px, transparent 1px),linear-gradient(to bottom, rgba(17,24,39,0.06) 1px, transparent 1px);background-size:48px 48px;mask-image:radial-gradient(closest-side at 50% 30%, rgba(0,0,0,0.75), transparent 80%);opacity:.5}
+.scn-content{position:relative;z-index:1}
+.scn-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+.scn-title{font-size:1.35rem;font-weight:900;color:#111827;letter-spacing:-0.02em;margin:0 0 2px}
+.scn-sub{font-size:.78rem;color:#9ca3af;margin:0}
+.scn-clock{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums;font-size:1.05rem;font-weight:800;color:#111827;background:rgba(255,255,255,.85);border:1px solid rgba(229,231,235,.9);border-radius:12px;padding:10px 14px;box-shadow:0 10px 30px rgba(17,24,39,0.06)}
+.scn-hero{background:linear-gradient(135deg,#111827 0%,#0b1220 55%,#111827 100%);border-radius:18px;padding:18px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;overflow:hidden}
+.scn-hero:before{content:'';position:absolute;top:-70px;right:-70px;width:260px;height:260px;border-radius:50%;background:rgba(200,41,42,0.18);pointer-events:none}
+.scn-hero:after{content:'';position:absolute;bottom:-90px;left:-90px;width:260px;height:260px;border-radius:50%;background:rgba(2,132,199,0.14);pointer-events:none}
+.scn-hero-left{position:relative;z-index:1}
+.scn-hero-title{font-size:1.05rem;font-weight:900;color:#fff;margin:0 0 4px;letter-spacing:-0.02em}
+.scn-hero-meta{font-size:.78rem;color:#9ca3af;margin:0}
+.scn-chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.scn-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid rgba(255,255,255,0.14);border-radius:999px;color:#e5e7eb;background:rgba(255,255,255,0.06);font-size:.75rem}
+.scan-time-badge{font-family:'DM Mono',monospace;font-size:.76rem;color:#e5e7eb;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:999px;padding:6px 10px}
+.scn-card{background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border:1px solid rgba(229,231,235,0.9);border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(17,24,39,0.06);height:100%}
+.scn-card-head{padding:14px 18px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.scn-card-title{font-size:.82rem;font-weight:900;color:#111827;margin:0;display:flex;align-items:center;gap:8px}
+.scn-dot{width:8px;height:8px;border-radius:50%;background:#c8292a;display:inline-block}
+.scn-card-body{padding:18px}
+</style>
+@endpush
 
-    {{-- Page Header --}}
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="fw-bold mb-0 text-dark">Scan QR Attendance</h5>
-                    <div class="small text-muted" id="current-date"></div>
-                </div>
-                <div class="scan-clock" id="digital-clock"></div>
+@section('content')
+<div class="container-fluid scn-page">
+    <div class="scn-backdrop"><div class="scn-grid"></div></div>
+    <div class="scn-content">
+
+    <div class="scn-topbar">
+        <div>
+            <h1 class="scn-title">Scan QR Attendance</h1>
+            <p class="scn-sub" id="current-date"></p>
+        </div>
+        <div class="scn-clock" id="digital-clock"></div>
+    </div>
+
+    <div class="scn-hero">
+        <div class="scn-hero-left">
+            <p class="scn-hero-title">Ready when you are</p>
+            <p class="scn-hero-meta">Scan the QR token to log time in / time out instantly.</p>
+            <div class="scn-chiprow">
+                <span class="scn-chip">Auto-detect</span>
+                <span class="scn-chip">Live scanning</span>
+                <span class="scn-chip">Instant confirm</span>
             </div>
         </div>
+        <span class="scan-time-badge" id="current-time"></span>
     </div>
 
     <div class="row g-3 align-items-stretch">
@@ -71,14 +113,11 @@
 
         {{-- Right — Info & Instructions --}}
         <div class="col-12 col-lg-7">
-            <div class="card h-100">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <span class="card-title mb-0">
-                        Welcome, <strong>{{ auth()->user()->name }}</strong>
-                    </span>
-                    <span class="scan-time-badge" id="current-time"></span>
+            <div class="scn-card">
+                <div class="scn-card-head">
+                    <p class="scn-card-title"><span class="scn-dot"></span> Welcome, {{ auth()->user()->name }}</p>
                 </div>
-                <div class="card-body">
+                <div class="scn-card-body">
 
                     {{-- Last log --}}
                     <div id="last-log" style="display:none;" class="mb-4">
@@ -112,7 +151,7 @@
         </div>
 
     </div>
-</div>
+</div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 <script>
