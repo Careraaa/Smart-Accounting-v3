@@ -28,7 +28,7 @@
     @include('partials.sidebar')
     @include('partials.header')
 
-    <main class="nxl-container">
+    <main class="nxl-container" data-global-datepicker="off">
         <div class="nxl-content">
             @include('partials.page-header')
 
