@@ -16,8 +16,10 @@ class OvertimeUndertime extends Model
         'hours',
         'reason',
         'status',
-        'amount',              // NEW
-        'hourly_rate_used',    // NEW
+        'amount',              
+        'hourly_rate_used',    
+        'rejection_reason',
+        'approved_by',
     ];
 
     protected $casts = [
@@ -30,6 +32,11 @@ class OvertimeUndertime extends Model
     public function employee()
     {
         return $this->belongsTo(Employee::class, 'user_id');
+    }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     /* ======================

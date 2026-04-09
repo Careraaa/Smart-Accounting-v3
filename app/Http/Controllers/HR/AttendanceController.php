@@ -89,7 +89,7 @@ class AttendanceController extends Controller
 
         // Notification (safe)
         try {
-            if ($user->employee) {
+            if ($user && $user->salary_rate) {
                 AttendanceNotification::attendanceRecorded($user, $type, $today);
             }
         } catch (\Throwable $e) {

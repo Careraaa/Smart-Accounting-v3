@@ -75,14 +75,14 @@ class OvertimeNotification
     }
 
     /**
-     * Notify managers that overtime/undertime needs approval
+     * Notify HR that overtime/undertime needs approval
      */
     public static function notifyManagersForApproval(OvertimeUndertime $record)
     {
         $typeLabel = $record->type === 'overtime' ? 'Overtime' : 'Undertime';
 
         app(NotificationService::class)->sendToRole(
-            'manager',
+            'hr',
             'overtime_pending_approval',
             "{$typeLabel} Record Pending Approval",
             "{$record->employee->first_name} {$record->employee->last_name} has submitted a {$typeLabel} record for {$record->date->format('M d, Y')} ({$record->hours} hours).",

@@ -88,23 +88,23 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if (auth()->user()->employee)
+                    @if (auth()->user() && auth()->user()->salary_rate)
                         <div class="mb-3 pb-3 border-bottom">
                             <div class="fs-12 fw-medium text-muted mb-1">Full Name</div>
                             <div class="fw-semibold text-dark fs-12">{{ auth()->user()->name }}</div>
                         </div>
                         <div class="mb-3 pb-3 border-bottom">
                             <div class="fs-12 fw-medium text-muted mb-1">Position</div>
-                            <div class="text-dark fs-12">{{ auth()->user()->employee->position }}</div>
+                            <div class="text-dark fs-12">{{ auth()->user()->position }}</div>
                         </div>
                         <div class="mb-3 pb-3 border-bottom">
                             <div class="fs-12 fw-medium text-muted mb-1">Department</div>
-                            <div class="text-dark fs-12">{{ auth()->user()->employee->department ?? 'N/A' }}</div>
+                            <div class="text-dark fs-12">{{ auth()->user()->department ?? 'N/A' }}</div>
                         </div>
                         <div class="mb-3 pb-3 border-bottom">
                             <div class="fs-12 fw-medium text-muted mb-1">Employment Status</div>
                             <div class="mt-1">
-                                @if (auth()->user()->employee->status === 'active')
+                                @if (auth()->user()->status === 'active')
                                     <span class="badge bg-soft-success text-success">Active</span>
                                 @else
                                     <span class="badge bg-soft-danger text-danger">Inactive</span>
@@ -113,7 +113,7 @@
                         </div>
                         <div>
                             <div class="fs-12 fw-medium text-muted mb-1">Date Hired</div>
-                            <div class="text-dark fs-12">{{ auth()->user()->employee->date_of_hire->format('M d, Y') }}</div>
+                            <div class="text-dark fs-12">{{ auth()->user()->date_of_hire ? auth()->user()->date_of_hire->format('M d, Y') : 'N/A' }}</div>
                         </div>
                     @else
                         <p class="text-muted mb-0" style="font-size:.845rem;">No employee profile linked to this account.</p>

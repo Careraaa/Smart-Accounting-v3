@@ -32,6 +32,7 @@ use App\Http\Controllers\Employee\SalaryLoanController as EmployeeSalaryLoanCont
 use App\Http\Controllers\Employee\AttachmentController as EmployeeSelfAttachmentController;
 use App\Http\Controllers\Employee\ProfileController as EmployeeProfileController;
 use App\Http\Controllers\Employee\LeaveController as EmployeeLeaveController;
+use App\Http\Controllers\Employee\OvertimeUndertimeController as EmployeeOvertimeUndertimeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
@@ -149,6 +150,15 @@ Route::middleware(['auth', 'role:employee'])->group(function () {
     Route::get('/my/leaves/{leave}/edit', [EmployeeLeaveController::class, 'edit'])->name('employee.leaves.edit');
     Route::patch('/my/leaves/{leave}', [EmployeeLeaveController::class, 'update'])->name('employee.leaves.update');
     Route::delete('/my/leaves/{leave}', [EmployeeLeaveController::class, 'destroy'])->name('employee.leaves.destroy');
+
+    // Overtime / Undertime Requests
+    Route::get('/my/overtime-undertime', [EmployeeOvertimeUndertimeController::class, 'index'])->name('employee.overtime-undertime.index');
+    Route::get('/my/overtime-undertime/create', [EmployeeOvertimeUndertimeController::class, 'create'])->name('employee.overtime-undertime.create');
+    Route::post('/my/overtime-undertime', [EmployeeOvertimeUndertimeController::class, 'store'])->name('employee.overtime-undertime.store');
+    Route::get('/my/overtime-undertime/{overtimeUndertime}', [EmployeeOvertimeUndertimeController::class, 'show'])->name('employee.overtime-undertime.show');
+    Route::get('/my/overtime-undertime/{overtimeUndertime}/edit', [EmployeeOvertimeUndertimeController::class, 'edit'])->name('employee.overtime-undertime.edit');
+    Route::patch('/my/overtime-undertime/{overtimeUndertime}', [EmployeeOvertimeUndertimeController::class, 'update'])->name('employee.overtime-undertime.update');
+    Route::delete('/my/overtime-undertime/{overtimeUndertime}', [EmployeeOvertimeUndertimeController::class, 'destroy'])->name('employee.overtime-undertime.destroy');
 });
 
 // ===== SHARED ATTENDANCE ROUTES (all authenticated users) =====
@@ -199,6 +209,17 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
     Route::post('/leave/{leave}/reject', [LeaveController::class, 'reject'])->name('leave.reject');
 
     Route::resource('leave-type', LeaveTypeController::class);
+
+    // Define specific overtime routes before resource routes to prevent conflicts
+    Route::get('/overtime/pending', [OvertimeUndertimeController::class, 'index'])
+        ->name('overtime.pending')
+        ->defaults('status', 'pending');
+    Route::get('/overtime/approved', [OvertimeUndertimeController::class, 'index'])
+        ->name('overtime.approved')
+        ->defaults('status', 'approved');
+    Route::get('/overtime/rejected', [OvertimeUndertimeController::class, 'index'])
+        ->name('overtime.rejected')
+        ->defaults('status', 'rejected');
 
     Route::resource('overtime', OvertimeUndertimeController::class);
     Route::post('/overtime/{overtime}/approve', [OvertimeUndertimeController::class, 'approve'])->name('overtime.approve');

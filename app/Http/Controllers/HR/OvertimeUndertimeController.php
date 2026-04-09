@@ -174,7 +174,10 @@ class OvertimeUndertimeController extends Controller
     // approve / reject / destroy methods remain the same
     public function approve(Request $request, OvertimeUndertime $overtime)
     {
-        $overtime->update(['status' => 'approved']);
+        $overtime->update([
+            'status' => 'approved',
+            'approved_by' => auth()->id(),
+        ]);
         $overtime->load('employee');
         OvertimeNotification::approved($overtime);
 
@@ -184,10 +187,14 @@ class OvertimeUndertimeController extends Controller
     public function reject(Request $request, OvertimeUndertime $overtime)
     {
         $request->validate([
-            'rejection_reason' => 'nullable|string',
+            'rejection_reason' => 'required|string|max:1000',
         ]);
 
-        $overtime->update(['status' => 'rejected']);
+        $overtime->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+            'approved_by' => auth()->id(),
+        ]);
         $overtime->load('employee');
         OvertimeNotification::rejected($overtime);
 
