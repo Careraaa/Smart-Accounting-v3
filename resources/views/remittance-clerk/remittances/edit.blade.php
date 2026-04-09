@@ -118,7 +118,6 @@
     </div>
 </div>
 @push('scripts')
-    <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const vehicleSelect = document.getElementById('vehicle_id');

@@ -32,7 +32,7 @@ class EmployeeController extends Controller
     public function create()
     {
         $employee = new User();
-        return view('hr.employees.form', compact('employee'));
+        return view('hr.employees.create', compact('employee'));
     }
 
     public function store(Request $request)
@@ -118,7 +118,7 @@ class EmployeeController extends Controller
     public function edit(User $employee)
     {
         $employee->load(['workExperiences', 'specialSkills', 'beneficiaries', 'charRefs']);
-        return view('hr.employees.form', compact('employee'));
+        return view('hr.employees.edit', compact('employee'));
     }
 
     public function update(Request $request, User $employee)

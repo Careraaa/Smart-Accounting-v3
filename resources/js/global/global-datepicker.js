@@ -37,6 +37,10 @@ function displayToNative(display) {
 
 function initGlobalDatepickers() {
     document.querySelectorAll('input[type="date"]').forEach((original) => {
+        // Allow specific pages/sections to opt out and use the native date input.
+        // (Employee create/edit uses native picker due to layout positioning issues.)
+        if (original.closest('[data-global-datepicker="off"]')) return;
+
         // If already initialized but wrapper is missing, allow re-init
         if (original.dataset.datepickerInitialized === "true") {
             if (original.closest(".datepicker-wrapper")) {
@@ -264,11 +268,13 @@ function initGlobalDatepickers() {
 
             original.disabled = false;
             original.style.cssText = [
-                // Use absolute positioning in the document so adding scroll
-                // offsets is correct and stable across browsers.
-                "position:absolute",
-                `top:${rect.bottom + window.scrollY}px`,
-                `left:${rect.left + window.scrollX}px`,
+                // Use fixed positioning and viewport-relative coordinates.
+                // This matches how the native picker is typically anchored in Chrome.
+                // (The previous absolute+scroll approach can still mis-anchor to 0,0
+                // in some layouts / zoom levels.)
+                "position:fixed",
+                `top:${rect.bottom}px`,
+                `left:${rect.left}px`,
                 "opacity:0",
                 "pointer-events:none",
                 "width:" + rect.width + "px",
@@ -354,6 +360,19 @@ function initGlobalDatepickers() {
     });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    initGlobalDatepickers();
-});
+// Expose helpers for pages/scripts that expect globals (tabs, dynamic rows, etc.).
+// When bundled by Vite, top-level functions are module-scoped unless attached to window.
+window.displayToNative = displayToNative;
+window.initGlobalDatepickers = initGlobalDatepickers;
+
+function bootGlobalDatepickers() {
+    try {
+        initGlobalDatepickers();
+    } catch (_) {}
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootGlobalDatepickers);
+} else {
+    bootGlobalDatepickers();
+}

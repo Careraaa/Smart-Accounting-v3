@@ -75,7 +75,6 @@
 </div>
 
 @push('scripts')
-    <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const routeSelect = document.getElementById('route_id');

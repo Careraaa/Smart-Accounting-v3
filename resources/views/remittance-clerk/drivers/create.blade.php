@@ -89,6 +89,5 @@
 </div>
 
 @push('scripts')
-    <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
 @endpush
 @endsection
