@@ -1,6 +1,5 @@
 <script>
     (function() {
-        const totalTabs = {{ count($tabs ?? []) }};
         let current = 0;
 
         const tabs = document.querySelectorAll('.emp-tab-btn');
@@ -10,8 +9,11 @@
         const submit = document.getElementById('empSubmit');
 
         if (!tabs.length || !panes.length || !prev || !next || !submit) return;
+        const totalTabs = Math.min(tabs.length, panes.length);
+        if (totalTabs <= 0) return;
 
         function goTo(idx) {
+            if (idx < 0 || idx >= totalTabs) return;
             tabs[current].classList.remove('active');
             panes[current].classList.remove('active');
             if (idx > current) tabs[current].classList.add('done');
@@ -33,6 +35,9 @@
         next.addEventListener('click', () => {
             if (current < totalTabs - 1) goTo(current + 1);
         });
+
+        // Ensure footer buttons are correct on first render.
+        goTo(0);
     })();
 </script>
 
