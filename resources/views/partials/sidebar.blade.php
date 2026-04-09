@@ -339,37 +339,124 @@
 
                 {{-- ── Accountant ── --}}
                 @if (auth()->user()->role === 'accountant')
-                    <li class="nxl-item nxl-caption"><label>Approvals &amp; Reports</label></li>
+                    <li class="nxl-item nxl-caption"><label>ACCOUNTING</label></li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'active' : '' }}">
+                    {{-- 1. GENERAL LEDGER (CORE MODULE) --}}
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('accountant.gl.*', 'accountant.journal-entries.*') ? 'active' : '' }}">
                         <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-check-circle"></i></span>
-                            <span class="nxl-mtext">Approvals</span>
+                            <span class="nxl-micon"><i class="feather-layers"></i></span>
+                            <span class="nxl-mtext">General Ledger</span>
                             <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
                         <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll-approval.index') }}">Payroll Release Approval</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittance-approval.index') }}">Remittance Approval</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.gl.index') }}">Chart of Accounts</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.journal-entries.index') }}">Journal Entries</a></li>
                         </ul>
                     </li>
 
+                    {{-- 2. CASH MANAGEMENT --}}
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('accountant.cash.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-arrow-down-circle"></i></span>
+                            <span class="nxl-mtext">Cash Management</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.cash.receipts') }}">Cash Receipts</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.cash.receipt.create') }}">Record Receipt</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.cash.dashboard') }}">Daily Cash Summary</a></li>
+                        </ul>
+                    </li>
+
+                    {{-- 3. ACCOUNTS RECEIVABLE (AR) --}}
+                    <li class="nxl-item nxl-hasmenu">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-arrow-up-right"></i></span>
+                            <span class="nxl-mtext">Accounts Receivable</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittance-approval.index') }}">Driver Outstanding Remittance</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance') }}">Collection Monitoring</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.reports.dashboard') }}">Aging Report</a></li>
+                        </ul>
+                    </li>
+
+                    {{-- 4. ACCOUNTS PAYABLE (AP) --}}
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('accountant.suppliers.*', 'accountant.bills.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-arrow-up-left"></i></span>
+                            <span class="nxl-mtext">Accounts Payable</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.suppliers.index') }}">Supplier Management</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.bills.index') }}">Bills / Invoices</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.bills.create') }}">Record Bill</a></li>
+                        </ul>
+                    </li>
+
+                    {{-- 5. EXPENSE MANAGEMENT --}}
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('accountant.expenses.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-trending-down"></i></span>
+                            <span class="nxl-mtext">Expense Management</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.expenses.dashboard') }}">Expense Dashboard</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.expenses.categories.index') }}">Expense Categories</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.expenses.allocations.index') }}">Allocations</a></li>
+                        </ul>
+                    </li>
+
+                    {{-- 6. FINANCIAL REPORTS (VERY IMPORTANT) --}}
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('accountant.reports.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>
+                            <span class="nxl-mtext">Financial Reports</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.reports.income-statement') }}">Income Statement</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.reports.balance-sheet') }}">Balance Sheet</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.reports.cash-flow-statement') }}">Cash Flow Statement</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('accountant.reports.trial-balance') }}">Trial Balance</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nxl-item nxl-caption"><label>APPROVALS & REPORTS</label></li>
+
+                    {{-- PAYROLL RELEASE APPROVAL --}}
+                    <li class="nxl-item {{ request()->routeIs('payroll-approval.*') ? 'active' : '' }}">
+                        <a href="{{ route('payroll-approval.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-check-circle"></i></span>
+                            <span class="nxl-mtext">Payroll Release Approval</span>
+                        </a>
+                    </li>
+
+                    {{-- REMITTANCE APPROVAL --}}
+                    <li class="nxl-item {{ request()->routeIs('remittance-approval.*') ? 'active' : '' }}">
+                        <a href="{{ route('remittance-approval.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-inbox"></i></span>
+                            <span class="nxl-mtext">Remittance Reports</span>
+                        </a>
+                    </li>
+
+                    {{-- PAYROLL REPORTS --}}
+                    <li class="nxl-item {{ request()->routeIs('reports.payroll') ? 'active' : '' }}">
+                        <a href="{{ route('reports.payroll') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-dollar-sign"></i></span>
+                            <span class="nxl-mtext">Payroll Reports</span>
+                        </a>
+                    </li>
+
+                    {{-- RECEIVABLES & LOANS --}}
                     <li class="nxl-item {{ request()->routeIs('payroll.receivables.*') ? 'active' : '' }}">
                         <a href="{{ route('payroll.receivables.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-inbox"></i></span>
-                            <span class="nxl-mtext">Receivables &amp; Loans</span>
+                            <span class="nxl-micon"><i class="feather-trending-up"></i></span>
+                            <span class="nxl-mtext">Receivables & Loans</span>
                         </a>
-                    </li>
-
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-file-text"></i></span>
-                            <span class="nxl-mtext">Reports</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                        </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance') }}">Remittance Reports</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.payroll') }}">Payroll Reports</a></li>
-                        </ul>
                     </li>
                 @endif
 

@@ -19,5 +19,10 @@ class DatabaseSeeder extends Seeder
         $this->call([AllowanceDeductionSeeder::class]);
         $this->call([LeaveTypeSeeder::class]);
         $this->call(RemittanceSeeder::class);
+        // Accounting module seeders (order matters!)
+        $this->call(GLAccountSeeder::class);
+        $this->call(AccountingPeriodSeeder::class);
+        $this->call(ExpenseCategorySeeder::class);
+        $this->call(CostCenterSeeder::class);
     }
 }

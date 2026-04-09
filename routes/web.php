@@ -354,6 +354,136 @@ Route::middleware(['auth', 'role:accountant'])->group(function () {
 
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
     Route::get('/reports/print/payroll-report', [ReportController::class, 'printPayrollReport'])->name('reports.print.payroll-report');
+
+    // ===== NEW AIS ROUTES (General Ledger, Journal Entries, Cash Management, etc) =====
+    
+    // General Ledger Module
+    Route::prefix('ais/gl')
+        ->name('accountant.gl.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Accountant\GeneralLedgerController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Accountant\GeneralLedgerController::class, 'create'])->name('create');
+            Route::get('/trial-balance', [\App\Http\Controllers\Accountant\FinancialReportController::class, 'trialBalance'])->name('trial-balance');
+            Route::post('/', [\App\Http\Controllers\Accountant\GeneralLedgerController::class, 'store'])->name('store');
+            Route::get('/{account}/ledger', [\App\Http\Controllers\Accountant\GeneralLedgerController::class, 'ledger'])->name('ledger');
+            Route::get('/{account}/edit', [\App\Http\Controllers\Accountant\GeneralLedgerController::class, 'edit'])->name('edit');
+            Route::put('/{account}', [\App\Http\Controllers\Accountant\GeneralLedgerController::class, 'update'])->name('update');
+            Route::get('/{account}', [\App\Http\Controllers\Accountant\GeneralLedgerController::class, 'show'])->name('show');
+        });
+
+    // Journal Entry Module
+    Route::prefix('ais/journal-entries')
+        ->name('accountant.journal-entries.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Accountant\JournalEntryController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Accountant\JournalEntryController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Accountant\JournalEntryController::class, 'store'])->name('store');
+            Route::get('/{entry}', [\App\Http\Controllers\Accountant\JournalEntryController::class, 'show'])->name('show');
+            Route::post('/{entry}/submit', [\App\Http\Controllers\Accountant\JournalEntryController::class, 'submitForApproval'])->name('submit');
+            Route::post('/{entry}/approve', [\App\Http\Controllers\Accountant\JournalEntryController::class, 'approve'])->name('approve');
+            Route::post('/{entry}/post', [\App\Http\Controllers\Accountant\JournalEntryController::class, 'post'])->name('post');
+            Route::post('/{entry}/reject', [\App\Http\Controllers\Accountant\JournalEntryController::class, 'reject'])->name('reject');
+            Route::post('/{entry}/reversal', [\App\Http\Controllers\Accountant\JournalEntryController::class, 'reversal'])->name('reversal');
+        });
+
+    // Cash Management Module
+    Route::prefix('ais/cash')
+        ->name('accountant.cash.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Accountant\CashManagementController::class, 'dashboard'])->name('dashboard');
+            Route::get('/receipts', [\App\Http\Controllers\Accountant\CashManagementController::class, 'receipts'])->name('receipts');
+            Route::get('/receipt/create', [\App\Http\Controllers\Accountant\CashManagementController::class, 'createReceipt'])->name('receipt.create');
+            Route::get('/receipt/{receipt}', [\App\Http\Controllers\Accountant\CashManagementController::class, 'showReceipt'])->name('receipt.show');
+            Route::get('/receipt/{receipt}/edit', [\App\Http\Controllers\Accountant\CashManagementController::class, 'editReceipt'])->name('receipt.edit');
+            Route::post('/receipt/store', [\App\Http\Controllers\Accountant\CashManagementController::class, 'storeReceipt'])->name('receipt.store');
+            Route::put('/receipt/{receipt}', [\App\Http\Controllers\Accountant\CashManagementController::class, 'updateReceipt'])->name('receipt.update');
+            Route::post('/deposit', [\App\Http\Controllers\Accountant\CashManagementController::class, 'deposit'])->name('deposit');
+            Route::get('/bank-accounts', [\App\Http\Controllers\Accountant\CashManagementController::class, 'bankAccounts'])->name('bank-accounts');
+            Route::get('/bank-account/create', [\App\Http\Controllers\Accountant\CashManagementController::class, 'createBankAccount'])->name('bank-account.create');
+            Route::post('/bank-account/store', [\App\Http\Controllers\Accountant\CashManagementController::class, 'storeBankAccount'])->name('bank-account.store');
+        });
+
+    // Bank Reconciliation Module
+    Route::prefix('ais/reconciliation')
+        ->name('accountant.reconciliation.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Accountant\BankReconciliationController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Accountant\BankReconciliationController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Accountant\BankReconciliationController::class, 'store'])->name('store');
+            Route::get('/{reconciliation}', [\App\Http\Controllers\Accountant\BankReconciliationController::class, 'show'])->name('show');
+            Route::post('/{reconciliation}/complete', [\App\Http\Controllers\Accountant\BankReconciliationController::class, 'complete'])->name('complete');
+            Route::post('/{reconciliation}/verify', [\App\Http\Controllers\Accountant\BankReconciliationController::class, 'verify'])->name('verify');
+        });
+
+    // Supplier Management Module
+    Route::prefix('ais/suppliers')
+        ->name('accountant.suppliers.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Accountant\SupplierController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Accountant\SupplierController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Accountant\SupplierController::class, 'store'])->name('store');
+            Route::get('/{supplier}', [\App\Http\Controllers\Accountant\SupplierController::class, 'show'])->name('show');
+            Route::get('/{supplier}/edit', [\App\Http\Controllers\Accountant\SupplierController::class, 'edit'])->name('edit');
+            Route::put('/{supplier}', [\App\Http\Controllers\Accountant\SupplierController::class, 'update'])->name('update');
+        });
+
+    // Supplier Bills (Accounts Payable) Module
+    Route::prefix('ais/bills')
+        ->name('accountant.bills.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Accountant\SupplierBillController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Accountant\SupplierBillController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Accountant\SupplierBillController::class, 'store'])->name('store');
+            Route::get('/{bill}', [\App\Http\Controllers\Accountant\SupplierBillController::class, 'show'])->name('show');
+            Route::get('/{bill}/edit', [\App\Http\Controllers\Accountant\SupplierBillController::class, 'edit'])->name('edit');
+            Route::put('/{bill}', [\App\Http\Controllers\Accountant\SupplierBillController::class, 'update'])->name('update');
+            Route::post('/{bill}/post', [\App\Http\Controllers\Accountant\SupplierBillController::class, 'postBill'])->name('post');
+            Route::post('/{bill}/process-payment', [\App\Http\Controllers\Accountant\SupplierBillController::class, 'processPayment'])->name('process-payment');
+        });
+
+    // Expense Management Module
+    Route::prefix('ais/expenses')
+        ->name('accountant.expenses.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Accountant\ExpenseController::class, 'dashboard'])->name('dashboard');
+            
+            // Expense Categories
+            Route::prefix('categories')
+                ->name('categories.')
+                ->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Accountant\ExpenseController::class, 'indexCategories'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Accountant\ExpenseController::class, 'createCategory'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Accountant\ExpenseController::class, 'storeCategory'])->name('store');
+                    Route::get('/{category}', [\App\Http\Controllers\Accountant\ExpenseController::class, 'showCategory'])->name('show');
+                    Route::get('/{category}/edit', [\App\Http\Controllers\Accountant\ExpenseController::class, 'editCategory'])->name('edit');
+                    Route::put('/{category}', [\App\Http\Controllers\Accountant\ExpenseController::class, 'updateCategory'])->name('update');
+                    Route::delete('/{category}', [\App\Http\Controllers\Accountant\ExpenseController::class, 'destroyCategory'])->name('destroy');
+                });
+            
+            // Expense Allocations
+            Route::prefix('allocations')
+                ->name('allocations.')
+                ->group(function () {
+                    Route::get('/', [\App\Http\Controllers\Accountant\ExpenseController::class, 'indexAllocations'])->name('index');
+                    Route::get('/create', [\App\Http\Controllers\Accountant\ExpenseController::class, 'createAllocation'])->name('create');
+                    Route::post('/', [\App\Http\Controllers\Accountant\ExpenseController::class, 'storeAllocation'])->name('store');
+                    Route::get('/{allocation}', [\App\Http\Controllers\Accountant\ExpenseController::class, 'showAllocation'])->name('show');
+                    Route::get('/{allocation}/edit', [\App\Http\Controllers\Accountant\ExpenseController::class, 'editAllocation'])->name('edit');
+                    Route::put('/{allocation}', [\App\Http\Controllers\Accountant\ExpenseController::class, 'updateAllocation'])->name('update');
+                    Route::delete('/{allocation}', [\App\Http\Controllers\Accountant\ExpenseController::class, 'destroyAllocation'])->name('destroy');
+                });
+        });
+
+    // Financial Reports Module
+    Route::prefix('ais/reports')
+        ->name('accountant.reports.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Accountant\FinancialReportController::class, 'dashboard'])->name('dashboard');
+            Route::get('/income-statement', [\App\Http\Controllers\Accountant\FinancialReportController::class, 'incomeStatement'])->name('income-statement');
+            Route::get('/balance-sheet', [\App\Http\Controllers\Accountant\FinancialReportController::class, 'balanceSheet'])->name('balance-sheet');
+            Route::get('/trial-balance', [\App\Http\Controllers\Accountant\FinancialReportController::class, 'trialBalance'])->name('trial-balance');
+            Route::get('/cash-flow-statement', [\App\Http\Controllers\Accountant\FinancialReportController::class, 'cashFlowStatement'])->name('cash-flow-statement');
+        });
 });
 
 // ===== QR ATTENDANCE ADMIN ROUTES =====
