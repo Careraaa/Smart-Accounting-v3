@@ -93,7 +93,7 @@
 @endpush
 
 @section('content')
-<div class="att-page">
+<div class="att-page" data-global-datepicker="off">
 
     {{-- Flash --}}
     @if(session('error'))

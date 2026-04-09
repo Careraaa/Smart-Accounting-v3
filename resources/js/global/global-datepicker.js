@@ -36,6 +36,12 @@ function displayToNative(display) {
 }
 
 function initGlobalDatepickers() {
+    // If the browser can't programmatically open the native picker, don't
+    // replace date inputs at all — keep the native <input type="date"> UX.
+    // (Otherwise the "calendar" button would appear to do nothing.)
+    if (typeof HTMLInputElement === "undefined") return;
+    if (typeof HTMLInputElement.prototype?.showPicker !== "function") return;
+
     document.querySelectorAll('input[type="date"]').forEach((original) => {
         // Allow specific pages/sections to opt out and use the native date input.
         // (Employee create/edit uses native picker due to layout positioning issues.)
@@ -375,4 +381,62 @@ if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bootGlobalDatepickers);
 } else {
     bootGlobalDatepickers();
+}
+
+// Auto-init for dynamically added date inputs (modals, AJAX partials, etc.).
+// Installed once to avoid duplicate observers when bundlers reload modules.
+if (!window.__globalDatepickerAutoInitInstalled) {
+    window.__globalDatepickerAutoInitInstalled = true;
+
+    let scheduled = false;
+    function scheduleInit() {
+        if (scheduled) return;
+        scheduled = true;
+        setTimeout(function () {
+            scheduled = false;
+            bootGlobalDatepickers();
+        }, 50);
+    }
+
+    // Any new input[type=date] inserted into the DOM should be initialized.
+    const mo = new MutationObserver(function (mutations) {
+        for (const m of mutations) {
+            for (const node of m.addedNodes) {
+                if (!(node instanceof Element)) continue;
+                if (node.matches?.('input[type="date"]')) {
+                    scheduleInit();
+                    return;
+                }
+                if (node.querySelector?.('input[type="date"]')) {
+                    scheduleInit();
+                    return;
+                }
+            }
+        }
+    });
+
+    if (document.body) {
+        mo.observe(document.body, { childList: true, subtree: true });
+    } else {
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                mo.observe(document.body, { childList: true, subtree: true });
+            },
+            { once: true },
+        );
+    }
+
+    // Fallback: if a date input receives focus before we initialized it,
+    // initialize immediately (helps with very fast modal openings).
+    document.addEventListener(
+        "focusin",
+        function (e) {
+            const el = e.target;
+            if (!(el instanceof HTMLInputElement)) return;
+            if (el.type !== "date") return;
+            scheduleInit();
+        },
+        true,
+    );
 }
