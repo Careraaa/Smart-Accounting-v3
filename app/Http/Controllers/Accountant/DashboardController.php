@@ -46,7 +46,7 @@ class DashboardController extends Controller
         // Recent payroll records
         $recentPayroll = $payrolls->sortByDesc('created_at')->take(10);
 
-        // Monthly payroll trend (last 6 months)
+        // Monthly payroll trend (last 6 months) — net pay per calendar month of created_at
         $monthlyPayrollTrend = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
@@ -57,9 +57,33 @@ class DashboardController extends Controller
 
             $monthlyPayrollTrend[] = [
                 'month' => $month->format('M'),
-                'total' => $total,
+                'label' => $month->format("M 'y"),
+                'total' => (float) $total,
             ];
         }
+
+        $statusOrder = ['pending', 'submitted', 'processing', 'finalized', 'approved', 'paid', 'rejected'];
+        $payrollStatusChartLabels = [];
+        $payrollStatusChartSeries = [];
+        foreach ($statusOrder as $st) {
+            $n = $payrolls->where('status', $st)->count();
+            if ($n > 0) {
+                $payrollStatusChartLabels[] = ucfirst($st);
+                $payrollStatusChartSeries[] = $n;
+            }
+        }
+
+        $pipelineBar = [
+            'labels' => ['Awaiting action', 'Approved', 'Paid', 'Rejected'],
+            'values' => [
+                $payrolls->whereIn('status', ['pending', 'submitted'])->count(),
+                $payrolls->where('status', 'approved')->count(),
+                $payrolls->where('status', 'paid')->count(),
+                $payrolls->where('status', 'rejected')->count(),
+            ],
+        ];
+
+        $recentPayroll = $recentPayroll->values();
 
         return view('accountant.index', compact(
             'totalEmployees',
@@ -76,7 +100,10 @@ class DashboardController extends Controller
             'deductionPercentage',
             'allowancePercentage',
             'recentPayroll',
-            'monthlyPayrollTrend'
+            'monthlyPayrollTrend',
+            'payrollStatusChartLabels',
+            'payrollStatusChartSeries',
+            'pipelineBar'
         ));
     }
 }

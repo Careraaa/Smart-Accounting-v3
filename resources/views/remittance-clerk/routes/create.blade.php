@@ -1,12 +1,31 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-8 offset-md-2">
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title mb-0">Create Route</span>
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Create Route</h5>
+                <p class="remui-subtitle mb-0">Set origin, destination, and boundary rate for daily remittance.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('routes.index') }}" class="emp-action-btn emp-action-back">
+                    <i class="feather-arrow-left"></i><span>Back</span>
+                </a>
+            </div>
         </div>
-        <div class="card-body">
+
+        <div class="card remui-card">
+            <div class="card-header">
+                <span class="card-title mb-0">Route Details</span>
+            </div>
+            <div class="card-body">
             <form action="{{ route('routes.store') }}" method="POST">
                 @csrf
 
@@ -45,6 +64,7 @@
                     <a href="{{ route('routes.index') }}" class="btn btn-secondary btn-sm">Cancel</a>
                 </div>
             </form>
+            </div>
         </div>
     </div>
 </div>

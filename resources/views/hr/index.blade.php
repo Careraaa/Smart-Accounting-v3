@@ -3,406 +3,423 @@
 @push('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.hrd-page{font-family:'Sora',sans-serif;position:relative}
+.hrd{font-family:'Sora',sans-serif;--hrd-border:#e8e8ef;--hrd-muted:#9ca3af;--hrd-ink:#111827;--hrd-red:#c8292a;position:relative}
+/* Match employee dashboard: soft backdrop + grid */
 .hrd-backdrop{position:absolute;inset:-40px -20px auto -20px;height:340px;pointer-events:none;z-index:0;background:
     radial-gradient(220px 220px at 10% 35%, rgba(200,41,42,0.14), transparent 60%),
     radial-gradient(260px 260px at 85% 10%, rgba(2,132,199,0.12), transparent 60%),
     radial-gradient(240px 240px at 70% 70%, rgba(22,163,74,0.10), transparent 60%),
     linear-gradient(to bottom, rgba(17,24,39,0.04), transparent 70%);filter:saturate(110%)}
 .hrd-grid{position:absolute;inset:0;background-image:linear-gradient(to right, rgba(17,24,39,0.06) 1px, transparent 1px),linear-gradient(to bottom, rgba(17,24,39,0.06) 1px, transparent 1px);background-size:48px 48px;mask-image:radial-gradient(closest-side at 50% 30%, rgba(0,0,0,0.75), transparent 80%);opacity:.5}
-.hrd-content{position:relative;z-index:1}
+.hrd-inner{position:relative;z-index:1}
 
-.hrd-hero{background:linear-gradient(135deg,#111827 0%,#0b1220 55%,#111827 100%);border-radius:18px;padding:22px 24px;margin:0 0 18px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden}
+/* Dark hero bar — same language as employee edb-hero */
+.hrd-hero{background:linear-gradient(135deg,#111827 0%,#0b1220 55%,#111827 100%);border-radius:18px;padding:22px 24px;margin-bottom:22px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden}
 .hrd-hero:before{content:'';position:absolute;top:-70px;right:-70px;width:260px;height:260px;border-radius:50%;background:rgba(200,41,42,0.18);pointer-events:none}
 .hrd-hero:after{content:'';position:absolute;bottom:-90px;left:-90px;width:260px;height:260px;border-radius:50%;background:rgba(2,132,199,0.14);pointer-events:none}
-.hrd-title{font-size:1.25rem;font-weight:900;color:#fff;margin:0 0 6px;letter-spacing:-0.02em}
-.hrd-sub{font-size:.82rem;color:#9ca3af;margin:0}
-.hrd-actions{position:relative;z-index:1;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.hrd-btn{display:inline-flex;align-items:center;gap:10px;padding:11px 18px;background:#c8292a;color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:.86rem;font-weight:900;cursor:pointer;transition:background .15s,box-shadow .15s,transform .15s;text-decoration:none;box-shadow:0 4px 20px rgba(200,41,42,.5);white-space:nowrap}
-.hrd-btn:hover{background:#a81f20;color:#fff;box-shadow:0 10px 34px rgba(200,41,42,.62);transform:translateY(-1px)}
-.hrd-btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;background:rgba(255,255,255,0.06);color:#e5e7eb;border:1px solid rgba(255,255,255,0.14);border-radius:10px;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:800;text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap}
-.hrd-btn-sec:hover{border-color:rgba(255,255,255,0.22);background:rgba(255,255,255,0.10);transform:translateY(-1px)}
+.hrd-hero-left{position:relative;z-index:1;min-width:240px}
+.hrd-hero h1{font-size:1.25rem;font-weight:900;color:#fff;margin:0 0 6px;letter-spacing:-0.02em}
+.hrd-hero p{margin:0;font-size:.82rem;color:#9ca3af;max-width:520px;line-height:1.5}
+.hrd-hero-actions{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .hrd-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid rgba(255,255,255,0.14);border-radius:999px;color:#e5e7eb;background:rgba(255,255,255,0.06);font-size:.75rem}
+.hrd-btn{display:inline-flex;align-items:center;gap:10px;padding:11px 18px;background:#c8292a;color:#fff;border:none;border-radius:12px;font-size:.86rem;font-weight:900;text-decoration:none;cursor:pointer;transition:background .15s,box-shadow .15s,transform .12s;box-shadow:0 4px 20px rgba(200,41,42,.5);white-space:nowrap}
+.hrd-btn:hover{background:#a81f20;color:#fff;box-shadow:0 10px 34px rgba(200,41,42,.62);transform:translateY(-1px)}
+.hrd-btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;background:rgba(255,255,255,0.06);color:#e5e7eb;border:1px solid rgba(255,255,255,0.14);border-radius:10px;font-size:.82rem;font-weight:700;text-decoration:none;transition:background .15s,border-color .15s}
+.hrd-btn-sec:hover{background:rgba(255,255,255,0.10);border-color:rgba(255,255,255,0.22);color:#fff}
 
-/* Make existing cards feel like the new system without rewriting all markup */
-.card{border-radius:16px!important}
-.card.stretch.stretch-full,.card.card-body{border-radius:16px!important}
-.card-header{border-top-left-radius:16px!important;border-top-right-radius:16px!important}
+.hrd-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+@media (max-width:900px){.hrd-kpis{grid-template-columns:1fr}}
+.hrd-kpi{border:1px solid var(--hrd-border);border-radius:14px;padding:16px 18px;background:#fff}
+.hrd-kpi-top{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--hrd-muted);margin-bottom:8px}
+.hrd-kpi-main{font-size:1.2rem;font-weight:800;color:var(--hrd-ink);font-family:'DM Mono',monospace;letter-spacing:-.02em}
+.hrd-kpi-note{font-size:.78rem;color:#6b7280;margin-top:8px;line-height:1.45}
+
+.hrd-charts{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;margin-bottom:14px}
+@media (max-width:1100px){.hrd-charts{grid-template-columns:1fr}}
+.hrd-charts2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px}
+@media (max-width:900px){.hrd-charts2{grid-template-columns:1fr}}
+
+.hrd-panel{border:1px solid var(--hrd-border);border-radius:14px;background:#fff;overflow:hidden}
+.hrd-panel-hd{padding:14px 18px;border-bottom:1px solid #f3f4f6;display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hrd-panel-hd h2{margin:0;font-size:.88rem;font-weight:700;color:var(--hrd-ink);letter-spacing:-.02em}
+.hrd-panel-hd span{font-size:.72rem;color:var(--hrd-muted);font-weight:500}
+.hrd-panel-bd{padding:8px 12px 4px}
+.hrd-chart{min-height:260px}
+
+.hrd-feed{margin:0;padding:0;list-style:none}
+.hrd-feed li{border-top:1px solid #f3f4f6}
+.hrd-feed li:first-child{border-top:none}
+.hrd-feed a{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;text-decoration:none;color:inherit;transition:background .12s}
+.hrd-feed a:hover{background:#fafafa}
+.hrd-av{width:40px;height:40px;border-radius:12px;background:#f4f4f6;color:#6b7280;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #ececec}
+.hrd-feed-body{flex:1;min-width:0}
+.hrd-feed-title{font-size:.84rem;font-weight:700;color:var(--hrd-ink);margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrd-feed-meta{font-size:.74rem;color:#6b7280;margin:0;line-height:1.45}
+.hrd-feed-meta code{font-family:'DM Mono',monospace;font-size:.72rem;background:#f8fafc;padding:1px 6px;border-radius:4px;color:#64748b}
+.hrd-feed-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.hrd-pill{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border-radius:999px;border:1px solid transparent}
+.hrd-pill-pending{background:#fffbeb;border-color:#fde68a;color:#b45309}
+.hrd-pill-approved{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+.hrd-pill-rejected{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
+.hrd-pill-present{background:#f0fdf4;border-color:#bbf7d0;color:#15803d}
+.hrd-pill-late{background:#fffbeb;border-color:#fde68a;color:#b45309}
+.hrd-pill-absent{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
+.hrd-chevron{color:#d1d5db;font-size:18px;margin-top:2px}
+
+.hrd-empty{text-align:center;padding:40px 20px;color:var(--hrd-muted);font-size:.84rem}
+.hrd-empty svg{opacity:.35;margin-bottom:8px}
 </style>
 @endpush
 
 @section('content')
-    <div class="col-md-12 hrd-page">
-        <div class="hrd-backdrop"><div class="hrd-grid"></div></div>
-        <div class="hrd-content">
+@php
+    $initials = function ($name) {
+        $name = trim((string) $name);
+        if ($name === '') return '?';
+        $p = preg_split('/\s+/', $name);
+        $a = strtoupper(substr($p[0] ?? '', 0, 1));
+        $b = strtoupper(substr($p[1] ?? '', 0, 1));
+        return $b !== '' ? $a . $b : $a;
+    };
+@endphp
+<div class="col-md-12 hrd">
+    <div class="hrd-backdrop"><div class="hrd-grid"></div></div>
+    <div class="hrd-inner">
 
-        <div class="hrd-hero">
-            <div style="position:relative;z-index:1;min-width:260px;">
-                <h1 class="hrd-title">HR Dashboard</h1>
-                <p class="hrd-sub">Employees, attendance, leave, and overtime at a glance.</p>
+        <header class="hrd-hero">
+            <div class="hrd-hero-left">
+                <h1>HR dashboard</h1>
+                <p>Workforce, attendance, and leave — charts use live data from your <strong style="color:#e5e7eb;">attendance</strong> and <strong style="color:#e5e7eb;">users</strong> tables.</p>
                 <div class="d-flex flex-wrap gap-2 mt-2">
-                    <span class="hrd-chip"><i class="feather-calendar"></i> {{ now()->format('l, M d, Y') }}</span>
-                    <span class="hrd-chip"><i class="feather-users"></i> {{ $totalEmployees }} employees</span>
-                    <span class="hrd-chip"><i class="feather-clock"></i> {{ number_format($attendanceRate, 1) }}% attendance</span>
+                    <span class="hrd-chip"><i class="feather-calendar"></i> {{ now()->format('l, F d, Y') }}</span>
+                    <span class="hrd-chip"><i class="feather-users"></i> {{ $activeEmployees }} active / {{ $totalEmployees }} total</span>
+                    <span class="hrd-chip"><i class="feather-activity"></i> {{ number_format($attendanceRate, 1) }}% today check-in</span>
                 </div>
             </div>
-            <div class="hrd-actions">
-                <a href="{{ route('employees.index') }}" class="hrd-btn-sec"><i class="feather-user-plus"></i> Employees</a>
-                <a href="{{ route('attendance.create') }}" class="hrd-btn-sec"><i class="feather-edit-3"></i> Manual Log</a>
-                <a href="{{ route('leave.create') }}" class="hrd-btn"><i class="feather-plus"></i> Create Leave</a>
+            <div class="hrd-hero-actions">
+                <a href="{{ route('employees.index') }}" class="hrd-btn-sec"><i class="feather-users"></i> Employees</a>
+                <a href="{{ route('attendance.create') }}" class="hrd-btn-sec"><i class="feather-edit-3"></i> Manual log</a>
+                <a href="{{ route('leave.create') }}" class="hrd-btn"><i class="feather-plus"></i> Create leave</a>
+            </div>
+        </header>
+
+        <div class="hrd-kpis">
+            <div class="hrd-kpi">
+                <div class="hrd-kpi-top">Workforce</div>
+                <div class="hrd-kpi-main">{{ $activeEmployees }} <span style="color:var(--hrd-muted);font-weight:600;font-size:.95rem;">/ {{ $totalEmployees }}</span></div>
+                <div class="hrd-kpi-note">{{ $inactiveEmployees }} inactive · {{ $onLeaveEmployees }} on leave today</div>
+            </div>
+            <div class="hrd-kpi">
+                <div class="hrd-kpi-top">Today</div>
+                <div class="hrd-kpi-main">{{ $presentToday + $lateToday }}<span style="color:var(--hrd-muted);font-weight:600;font-size:.85rem;"> in</span></div>
+                <div class="hrd-kpi-note">Absent {{ $absentToday }} · Late {{ $lateToday }} · {{ number_format($attendanceRate, 1) }}% check-in rate</div>
+            </div>
+            <div class="hrd-kpi">
+                <div class="hrd-kpi-top">Leave (all time)</div>
+                <div class="hrd-kpi-main">{{ $pendingLeaves }}<span style="color:var(--hrd-muted);font-weight:600;font-size:.85rem;"> pending</span></div>
+                <div class="hrd-kpi-note">{{ $approvedLeaves }} approved · {{ $rejectedLeaves }} rejected</div>
             </div>
         </div>
 
-        <!-- Employee & Attendance Statistics Row -->
-        <!-- Employee & Attendance Statistics Row -->
-        <div class="row mb-4">
-            <div class="col-xxl-2 col-lg-4 col-md-6">
-                <div class="card stretch stretch-full">
-                    <div class="card-body">
-                        <div class="fs-12 fw-medium text-muted mb-3">Total Employees</div>
-                        <div class="hstack justify-content-between lh-base">
-                            <h3>{{ $totalEmployees }}</h3>
-                            <div class="hstack gap-2 fs-11 text-primary">
-                                <i class="feather-users fs-12"></i>
-                            </div>
-                        </div>
-                    </div>
+        <div class="hrd-charts">
+            <div class="hrd-panel">
+                <div class="hrd-panel-hd">
+                    <h2>Attendance trend</h2>
+                    <span>Daily counts from <code style="font-family:'DM Mono',monospace;font-size:.68rem;background:#f8fafc;padding:2px 6px;border-radius:4px;">attendances</code> · present / late / absent</span>
+                </div>
+                <div class="hrd-panel-bd">
+                    <div id="hrd-chart-attendance" class="hrd-chart"></div>
                 </div>
             </div>
-            <div class="col-xxl-2 col-lg-4 col-md-6">
-                <div class="card stretch stretch-full">
-                    <div class="card-body">
-                        <div class="fs-12 fw-medium text-muted mb-3">Active Employees</div>
-                        <div class="hstack justify-content-between lh-base">
-                            <h3>{{ $activeEmployees }}</h3>
-                            <div class="hstack gap-2 fs-11 text-success">
-                                <i class="feather-check-circle fs-12"></i>
-                                <span>{{ $totalEmployees > 0 ? number_format(($activeEmployees / $totalEmployees) * 100, 0) : 0 }}%</span>
-                            </div>
-                        </div>
-                    </div>
+            <div class="hrd-panel">
+                <div class="hrd-panel-hd">
+                    <h2>Workforce</h2>
+                    <span>Active vs inactive vs on leave</span>
                 </div>
-            </div>
-            <div class="col-xxl-2 col-lg-4 col-md-6">
-                <div class="card stretch stretch-full">
-                    <div class="card-body">
-                        <div class="fs-12 fw-medium text-muted mb-3">Present Today</div>
-                        <div class="hstack justify-content-between lh-base">
-                            <h3>{{ $presentToday }}</h3>
-                            <div class="hstack gap-2 fs-11 text-success">
-                                <i class="feather-arrow-up-circle fs-12"></i>
-                                <span>{{ number_format($attendanceRate, 1) }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xxl-2 col-lg-4 col-md-6">
-                <div class="card stretch stretch-full">
-                    <div class="card-body">
-                        <div class="fs-12 fw-medium text-muted mb-3">Absent Today</div>
-                        <div class="hstack justify-content-between lh-base">
-                            <h3>{{ $absentToday }}</h3>
-                            <div class="hstack gap-2 fs-11 text-danger">
-                                <i class="feather-x-circle fs-12"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xxl-2 col-lg-4 col-md-6">
-                <div class="card stretch stretch-full">
-                    <div class="card-body">
-                        <div class="fs-12 fw-medium text-muted mb-3">Late Today</div>
-                        <div class="hstack justify-content-between lh-base">
-                            <h3>{{ $lateToday }}</h3>
-                            <div class="hstack gap-2 fs-11 text-warning">
-                                <i class="feather-alert-circle fs-12"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xxl-2 col-lg-4 col-md-6">
-                <div class="card stretch stretch-full">
-                    <div class="card-body">
-                        <div class="fs-12 fw-medium text-muted mb-3">On Leave</div>
-                        <div class="hstack justify-content-between lh-base">
-                            <h3>{{ $onLeaveEmployees }}</h3>
-                            <div class="hstack gap-2 fs-11 text-info">
-                                <i class="feather-calendar fs-12"></i>
-                            </div>
-                        </div>
-                    </div>
+                <div class="hrd-panel-bd">
+                    <div id="hrd-chart-workforce" class="hrd-chart" style="min-height:280px;"></div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Leave & Overtime Status Cards -->
-    <div class="col-md-12">
-        <div class="row mb-4">
-            <div class="col-xxl-3 col-md-6">
-                <div class="card card-body">
-                    <div class="fs-12 text-muted mb-3">Pending Leave Requests</div>
-                    <div class="hstack justify-content-between mt-4">
-                        <div class="text-dark fw-bold fs-5">{{ $pendingLeaves }}</div>
-                        <span class="badge bg-soft-warning text-warning">
-                            <i class="feather-clock fs-10"></i>
-                        </span>
-                    </div>
-                    <div class="progress mt-3 ht-3">
-                        <div class="progress-bar bg-warning" role="progressbar"
-                            style="width: {{ $totalLeaves > 0 ? ($pendingLeaves / $totalLeaves) * 100 : 0 }}%"></div>
-                    </div>
+        <div class="hrd-charts2">
+            <div class="hrd-panel">
+                <div class="hrd-panel-hd">
+                    <h2>Leave mix</h2>
+                    <span>All-time request totals</span>
+                </div>
+                <div class="hrd-panel-bd">
+                    <div id="hrd-chart-leaves" class="hrd-chart"></div>
                 </div>
             </div>
-            <div class="col-xxl-3 col-md-6">
-                <div class="card card-body">
-                    <div class="fs-12 text-muted mb-3">Approved Leaves</div>
-                    <div class="hstack justify-content-between mt-4">
-                        <div class="text-dark fw-bold fs-5">{{ $approvedLeaves }}</div>
-                        <span class="badge bg-soft-success text-success">
-                            <i class="feather-check-circle fs-10"></i>
-                        </span>
-                    </div>
-                    <div class="progress mt-3 ht-3">
-                        <div class="progress-bar bg-success" role="progressbar"
-                            style="width: {{ $totalLeaves > 0 ? ($approvedLeaves / $totalLeaves) * 100 : 0 }}%"></div>
-                    </div>
+            <div class="hrd-panel">
+                <div class="hrd-panel-hd">
+                    <h2>OT / UT</h2>
+                    <span>Total hours in system</span>
                 </div>
-            </div>
-            <div class="col-xxl-3 col-md-6">
-                <div class="card card-body">
-                    <div class="fs-12 text-muted mb-3">Total Overtime Hours</div>
-                    <div class="hstack justify-content-between mt-4">
-                        <div class="text-dark fw-bold fs-5">{{ number_format($totalOvertimeHours, 1) }}</div>
-                        <span class="badge bg-soft-info text-info">
-                            <i class="feather-trending-up fs-10"></i>
-                        </span>
-                    </div>
-                    <div class="mt-3">
-                        <span class="fs-11 text-muted">{{ $totalOvertimeRecords }} records</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xxl-3 col-md-6">
-                <div class="card card-body">
-                    <div class="fs-12 text-muted mb-3">Total Undertime Hours</div>
-                    <div class="hstack justify-content-between mt-4">
-                        <div class="text-dark fw-bold fs-5">{{ number_format($totalUndertimeHours, 1) }}</div>
-                        <span class="badge bg-soft-danger text-danger">
-                            <i class="feather-trending-down fs-10"></i>
-                        </span>
-                    </div>
-                    <div class="mt-3">
-                        <a href="#" class="fs-11 text-primary fw-semibold">View Details →</a>
-                    </div>
+                <div class="hrd-panel-bd">
+                    <div id="hrd-chart-otut" class="hrd-chart"></div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Attendance Trend & Employee Status -->
-    <div class="col-md-12">
-        <div class="row mb-4">
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">7-Day Attendance Trend</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-sm mb-0">
-                                <tbody>
-                                    @foreach ($attendanceTrend as $trend)
-                                        <tr>
-                                            <td class="fw-medium fs-12">{{ $trend['date'] }}</td>
-                                            <td>
-                                                <span class="emp-badge" style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">P: {{ $trend['present'] }}</span>
-                                                <span class="emp-badge" style="background:#fff1f2; color:#e11d48; border:1px solid #fcd0d0;">A: {{ $trend['absent'] }}</span>
-                                                <span class="emp-badge" style="background:#fffbeb; color:#d97706; border:1px solid #fde68a;">L: {{ $trend['late'] }}</span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+        {{-- Recent leave — custom feed (no Bootstrap table) --}}
+        <div class="hrd-panel" style="margin-bottom:14px;">
+            <div class="hrd-panel-hd">
+                <h2>Recent leave requests</h2>
+                <a href="{{ route('leave.pending') }}" style="font-size:.78rem;font-weight:700;color:var(--hrd-red);text-decoration:none;">View all →</a>
             </div>
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Employee Status Summary</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fs-12 fw-medium">Active Employees</span>
-                                <span class="fs-12 fw-bold text-success">{{ $activeEmployees }}</span>
-                            </div>
-                            <div class="progress ht-4">
-                                <div class="progress-bar bg-success" role="progressbar"
-                                    style="width: {{ $totalEmployees > 0 ? ($activeEmployees / $totalEmployees) * 100 : 0 }}%">
+            @if($recentLeaves->isEmpty())
+                <div class="hrd-empty"><i class="feather-inbox" style="font-size:32px;display:block;"></i>No leave requests yet.</div>
+            @else
+                <ul class="hrd-feed">
+                    @foreach($recentLeaves as $leave)
+                        @php
+                            $st = $leave->status ?? '';
+                            $pillClass = match($st) {
+                                'approved' => 'hrd-pill-approved',
+                                'rejected' => 'hrd-pill-rejected',
+                                'pending' => 'hrd-pill-pending',
+                                default => 'hrd-pill-pending',
+                            };
+                        @endphp
+                        <li>
+                            <a href="{{ route('leave.show', $leave) }}">
+                                <div class="hrd-av">{{ $initials($leave->employee->name ?? '') }}</div>
+                                <div class="hrd-feed-body">
+                                    <p class="hrd-feed-title">{{ $leave->employee->name ?? 'Unknown' }}</p>
+                                    <p class="hrd-feed-meta">
+                                        {{ ucfirst($leave->leave_type ?? 'Leave') }}
+                                        · {{ $leave->start_date?->format('M j') ?? '—' }} – {{ $leave->end_date?->format('M j, Y') ?? '—' }}
+                                        @if(isset($leave->duration_days)) · <code>{{ $leave->duration_days }}d</code>@endif
+                                    </p>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fs-12 fw-medium">Inactive Employees</span>
-                                <span class="fs-12 fw-bold text-danger">{{ $inactiveEmployees }}</span>
-                            </div>
-                            <div class="progress ht-4">
-                                <div class="progress-bar bg-danger" role="progressbar"
-                                    style="width: {{ $totalEmployees > 0 ? ($inactiveEmployees / $totalEmployees) * 100 : 0 }}%">
+                                <div class="hrd-feed-right">
+                                    <span class="hrd-pill {{ $pillClass }}">{{ ucfirst($st) }}</span>
+                                    <i class="feather-chevron-right hrd-chevron"></i>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="fs-12 fw-medium">On Leave</span>
-                                <span class="fs-12 fw-bold text-info">{{ $onLeaveEmployees }}</span>
-                            </div>
-                            <div class="progress ht-4">
-                                <div class="progress-bar bg-info" role="progressbar"
-                                    style="width: {{ $totalEmployees > 0 ? ($onLeaveEmployees / $totalEmployees) * 100 : 0 }}%">
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+
+        {{-- Recent attendance — custom feed --}}
+        <div class="hrd-panel" style="margin-bottom:8px;">
+            <div class="hrd-panel-hd">
+                <h2>Recent attendance</h2>
+                <a href="{{ route('attendance.index') }}" style="font-size:.78rem;font-weight:700;color:var(--hrd-red);text-decoration:none;">View all →</a>
+            </div>
+            @if($recentAttendance->isEmpty())
+                <div class="hrd-empty"><i class="feather-clock" style="font-size:32px;display:block;"></i>No attendance rows yet.</div>
+            @else
+                <ul class="hrd-feed">
+                    @foreach($recentAttendance as $att)
+                        @php
+                            $st = $att->status ?? '';
+                            $pillClass = match($st) {
+                                'present' => 'hrd-pill-present',
+                                'late' => 'hrd-pill-late',
+                                'absent' => 'hrd-pill-absent',
+                                default => 'hrd-pill-pending',
+                            };
+                            $tIn = $att->time_in ? \Carbon\Carbon::parse($att->time_in)->format('g:i A') : '—';
+                            $tOut = $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('g:i A') : '—';
+                        @endphp
+                        <li>
+                            <a href="{{ route('attendance.show', $att) }}">
+                                <div class="hrd-av">{{ $initials($att->employee->name ?? '') }}</div>
+                                <div class="hrd-feed-body">
+                                    <p class="hrd-feed-title">{{ $att->employee->name ?? 'Unknown' }}</p>
+                                    <p class="hrd-feed-meta">
+                                        {{ $att->date?->format('D, M j, Y') ?? '—' }}
+                                        · In <code>{{ $tIn }}</code> · Out <code>{{ $tOut }}</code>
+                                    </p>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="mt-4 pt-3 border-top text-center">
-                            <div class="fs-12 text-muted mb-1">Overall Attendance Rate</div>
-                            <div class="fw-bold fs-5 text-primary">{{ number_format($attendanceRate, 1) }}%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                <div class="hrd-feed-right">
+                                    <span class="hrd-pill {{ $pillClass }}">{{ ucfirst($st) }}</span>
+                                    <i class="feather-chevron-right hrd-chevron"></i>
+                                </div>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
-    </div>
 
-    <!-- Recent Leave Requests Table -->
-    <div class="col-md-12">
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="card-title mb-0">Recent Leave Requests</span>
-                <a href="{{ route('leave.pending') }}" class="btn btn-primary btn-sm">View All</a>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover w-100 mb-0">
-                        <thead>
-                            <tr>
-                                <th><div class="sort-link">Employee</div></th>
-                                <th><div class="sort-link">Leave Type</div></th>
-                                <th><div class="sort-link">Start Date</div></th>
-                                <th><div class="sort-link">End Date</div></th>
-                                <th><div class="sort-link">Days</div></th>
-                                <th class="text-center"><div class="sort-link justify-content-center">Status</div></th>
-                                <th class="text-center"><div class="sort-link justify-content-center">Actions</div></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentLeaves as $leave)
-                                <tr>
-                                    <td><strong>{{ $leave->employee->name ?? 'N/A' }}</strong></td>
-                                    <td>{{ ucfirst($leave->leave_type ?? 'N/A') }}</td>
-                                    <td><small class="text-muted">{{ $leave->start_date?->format('M d, Y') ?? 'N/A' }}</small></td>
-                                    <td><small class="text-muted">{{ $leave->end_date?->format('M d, Y') ?? 'N/A' }}</small></td>
-                                    <td>{{ $leave->duration_days ?? 'N/A' }}</td>
-                                    <td class="text-center">
-                                        @php
-                                            $leaveStatusMap = [
-                                                'pending'  => ['bg' => '#fffbeb', 'color' => '#d97706', 'border' => '#fde68a'],
-                                                'approved' => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'border' => '#bbf7d0'],
-                                                'rejected' => ['bg' => '#fff1f2', 'color' => '#e11d48', 'border' => '#fcd0d0'],
-                                            ];
-                                            $ls = $leaveStatusMap[$leave->status] ?? ['bg' => '#f4f5f7', 'color' => '#9898a8', 'border' => '#e8e8ef'];
-                                        @endphp
-                                        <span class="emp-badge"
-                                            style="background:{{ $ls['bg'] }}; color:{{ $ls['color'] }}; border:1px solid {{ $ls['border'] }};">
-                                            {{ ucfirst($leave->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <a href="{{ route('leave.show', $leave) }}" class="emp-action-btn emp-action-view" title="View">
-                                            <i class="feather-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center text-muted py-5">
-                                        <i class="feather-file-text d-block mb-2" style="font-size:28px; opacity:.3;"></i>
-                                        No leave records found
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
     </div>
-
-    <!-- Recent Attendance Records Table -->
-    <div class="col-md-12">
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span class="card-title mb-0">Recent Attendance Records</span>
-                <a href="{{ route('attendance.index') }}" class="btn btn-primary btn-sm">View All</a>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover w-100 mb-0">
-                        <thead>
-                            <tr>
-                                <th><div class="sort-link">Employee</div></th>
-                                <th><div class="sort-link">Date</div></th>
-                                <th><div class="sort-link">Time In</div></th>
-                                <th><div class="sort-link">Time Out</div></th>
-                                <th class="text-center"><div class="sort-link justify-content-center">Status</div></th>
-                                <th class="text-center"><div class="sort-link justify-content-center">Actions</div></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentAttendance as $attendance)
-                                <tr>
-                                    <td><strong>{{ $attendance->employee->name ?? 'N/A' }}</strong></td>
-                                    <td><small class="text-muted">{{ $attendance->date?->format('M d, Y') ?? 'N/A' }}</small></td>
-                                    <td>{{ $attendance->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $attendance->time_in)->format('g:i A') : '—' }}</td>
-                                    <td>{{ $attendance->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $attendance->time_out)->format('g:i A') : '—' }}</td>
-                                    <td class="text-center">
-                                        @php
-                                            $attStatusMap = [
-                                                'present' => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'border' => '#bbf7d0'],
-                                                'late'    => ['bg' => '#fffbeb', 'color' => '#d97706', 'border' => '#fde68a'],
-                                                'absent'  => ['bg' => '#fff1f2', 'color' => '#e11d48', 'border' => '#fcd0d0'],
-                                            ];
-                                            $as = $attStatusMap[$attendance->status] ?? ['bg' => '#f4f5f7', 'color' => '#9898a8', 'border' => '#e8e8ef'];
-                                        @endphp
-                                        <span class="emp-badge"
-                                            style="background:{{ $as['bg'] }}; color:{{ $as['color'] }}; border:1px solid {{ $as['border'] }};">
-                                            {{ ucfirst($attendance->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <a href="{{ route('attendance.show', $attendance) }}" class="emp-action-btn emp-action-view" title="View">
-                                            <i class="feather-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-5">
-                                        <i class="feather-clock d-block mb-2" style="font-size:28px; opacity:.3;"></i>
-                                        No attendance records found
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    if (typeof ApexCharts === 'undefined') return;
+
+    const font = 'Sora, sans-serif';
+    const mono = "'DM Mono', monospace";
+    const red = '#c8292a';
+    const ink = '#111827';
+    const muted = '#94a3b8';
+    const soft = '#cbd5e1';
+
+    // attendanceTrend: daily present, late, absent counts from the database
+    const trend = @json($attendanceTrend);
+    const categories = trend.map(function (t) { return t.label || t.date_iso; });
+
+    new ApexCharts(document.querySelector('#hrd-chart-attendance'), {
+        chart: {
+            type: 'line',
+            height: 280,
+            fontFamily: font,
+            toolbar: { show: false },
+            zoom: { enabled: false },
+            animations: { enabled: true, speed: 400 },
+            parentHeightOffset: 0
+        },
+        series: [
+            { name: 'Present', data: trend.map(function (t) { return t.present; }) },
+            { name: 'Late', data: trend.map(function (t) { return t.late; }) },
+            { name: 'Absent', data: trend.map(function (t) { return t.absent; }) }
+        ],
+        colors: [red, ink, soft],
+        stroke: { width: 2, curve: 'straight' },
+        fill: { opacity: 0 },
+        markers: {
+            size: 3,
+            strokeWidth: 0,
+            hover: { size: 5 }
+        },
+        dataLabels: { enabled: false },
+        xaxis: {
+            categories: categories,
+            labels: { style: { colors: '#64748b', fontSize: '11px' } },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        yaxis: {
+            labels: { style: { colors: '#64748b', fontSize: '11px' } },
+            min: 0,
+            tickAmount: 4,
+            forceNiceScale: true
+        },
+        grid: {
+            borderColor: '#f1f5f9',
+            strokeDashArray: 4,
+            xaxis: { lines: { show: false } },
+            yaxis: { lines: { show: true } },
+            padding: { top: 8, right: 12, bottom: 0, left: 8 }
+        },
+        legend: {
+            show: true,
+            position: 'top',
+            horizontalAlign: 'right',
+            fontSize: '11px',
+            fontWeight: 600,
+            itemMargin: { horizontal: 12 }
+        },
+        tooltip: {
+            theme: 'light',
+            style: { fontSize: '12px' },
+            y: { formatter: function (v) { return v + ' logs'; } }
+        }
+    }).render();
+
+    const wfActive = {{ (int) $activeEmployees }};
+    const wfInactive = {{ (int) $inactiveEmployees }};
+    const wfLeave = {{ (int) $onLeaveEmployees }};
+
+    new ApexCharts(document.querySelector('#hrd-chart-workforce'), {
+        chart: { type: 'donut', height: 280, fontFamily: font },
+        series: [wfActive, wfInactive, wfLeave],
+        labels: ['Active', 'Inactive', 'On leave'],
+        colors: [red, '#e2e8f0', '#64748b'],
+        stroke: { width: 1, colors: ['#fff'] },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '78%',
+                    labels: {
+                        show: true,
+                        name: { fontSize: '11px', color: '#94a3b8' },
+                        value: { fontSize: '18px', fontWeight: 700, color: ink, fontFamily: mono },
+                        total: {
+                            show: true,
+                            label: 'Total',
+                            fontSize: '10px',
+                            color: '#94a3b8',
+                            formatter: function () {
+                                return String(wfActive + wfInactive + wfLeave);
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        dataLabels: { enabled: false },
+        legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, markers: { width: 8, height: 8, radius: 2 } }
+    }).render();
+
+    const lp = {{ (int) $pendingLeaves }};
+    const la = {{ (int) $approvedLeaves }};
+    const lr = {{ (int) $rejectedLeaves }};
+
+    new ApexCharts(document.querySelector('#hrd-chart-leaves'), {
+        chart: { type: 'donut', height: 260, fontFamily: font },
+        series: [lp, la, lr],
+        labels: ['Pending', 'Approved', 'Rejected'],
+        colors: ['#f59e0b', '#22c55e', '#f43f5e'],
+        stroke: { width: 1, colors: ['#fff'] },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '78%',
+                    labels: {
+                        show: true,
+                        total: {
+                            show: true,
+                            label: 'Requests',
+                            fontSize: '10px',
+                            color: '#94a3b8',
+                            formatter: function () { return String(lp + la + lr); }
+                        }
+                    }
+                }
+            }
+        },
+        dataLabels: { enabled: false },
+        legend: { position: 'bottom', fontSize: '11px', fontWeight: 600, markers: { width: 8, height: 8, radius: 2 } }
+    }).render();
+
+    const ot = {{ (float) $totalOvertimeHours }};
+    const ut = {{ (float) $totalUndertimeHours }};
+
+    new ApexCharts(document.querySelector('#hrd-chart-otut'), {
+        chart: { type: 'bar', height: 260, fontFamily: font, toolbar: { show: false } },
+        series: [{ name: 'Hours', data: [ot, ut] }],
+        colors: [red, '#94a3b8'],
+        plotOptions: { bar: { borderRadius: 6, columnWidth: '38%', distributed: true } },
+        xaxis: {
+            categories: ['Overtime', 'Undertime'],
+            labels: { style: { fontSize: '11px', fontWeight: 600, colors: '#64748b' } },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        yaxis: {
+            labels: { style: { colors: '#94a3b8', fontSize: '11px' } },
+            min: 0
+        },
+        dataLabels: {
+            enabled: ot + ut > 0,
+            offsetY: -18,
+            style: { fontSize: '11px', fontWeight: 700, colors: ['#fff'], fontFamily: mono },
+            formatter: function (v) { return v.toFixed(1) + 'h'; }
+        },
+        grid: { show: false },
+        legend: { show: false },
+        tooltip: { y: { formatter: function (v) { return v.toFixed(2) + ' h'; } } }
+    }).render();
+})();
+</script>
+@endpush

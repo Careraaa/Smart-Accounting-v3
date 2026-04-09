@@ -589,6 +589,16 @@
                 <input type="hidden" id="prl_period_start" value="{{ $batch->period_start->format('Y-m-d') }}">
                 <input type="hidden" id="prl_period_end" value="{{ $batch->period_end->format('Y-m-d') }}">
 
+                @php
+                    $systemDeductionItems = $payroll->deductions
+                        ->filter(function ($d) {
+                            $type = (string) ($d->deduction_type ?? $d->name ?? '');
+                            return in_array($type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Cash Advance', 'Salary Loan'])
+                                || str_starts_with($type, 'Undertime Deduction');
+                        })
+                        ->values();
+                @endphp
+
                 {{-- Attendance Summary (read-only) --}}
                 <div class="prl-card">
                     <div class="prl-card-head">
@@ -649,6 +659,34 @@
                                 <span class="prl-brow-val" id="prl_adjusted"
                                     style="font-size:1rem;">₱{{ number_format($payroll->gross_pay ?? 0, 2) }}</span>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- System Deductions (read-only) --}}
+                <div class="prl-card">
+                    <div class="prl-card-head">
+                        <div class="prl-card-head-icon red">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="prl-card-head-title">System Deductions</p>
+                            <p class="prl-card-head-sub">Auto-generated deductions for this payroll (read-only)</p>
+                        </div>
+                    </div>
+                    <div class="prl-card-body">
+                        <div class="prl-breakdown">
+                            @forelse($systemDeductionItems as $item)
+                                <div class="prl-brow">
+                                    <span class="prl-brow-lbl c-red">{{ $item->deduction_type ?? $item->name }}</span>
+                                    <span class="prl-brow-val c-red">₱{{ number_format((float) $item->amount, 2) }}</span>
+                                </div>
+                            @empty
+                                <div class="prl-loading-hint">No system deductions for this period.</div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
@@ -740,12 +778,34 @@
 
 @push('head_scripts')
     <meta name="page-id" content="payroll-batch-edit">
+    @php
+        $manualAllowances = $payroll->allowances
+            ->filter(fn($a) => !str_starts_with((string) ($a->allowance_type ?? $a->name ?? ''), 'Overtime Pay'))
+            ->map(fn($a) => ['name' => $a->allowance_type ?? $a->name, 'amount' => $a->amount])
+            ->values();
+
+        $manualDeductions = $payroll->deductions
+            ->filter(function ($d) {
+                $type = (string) ($d->deduction_type ?? $d->name ?? '');
+                return !in_array($type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                    && !str_starts_with($type, 'Undertime Deduction');
+            })
+            ->map(fn($d) => ['name' => $d->deduction_type ?? $d->name, 'amount' => $d->amount])
+            ->values();
+    @endphp
 
     <script>
         window._prl = {
             previewUrl: "{{ route('payroll.preview') }}",
-            initAllowances: @json($payroll->allowances->map(fn($a) => ['name' => $a->allowance_type ?? $a->name, 'amount' => $a->amount])),
-            initDeductions: @json($payroll->deductions->map(fn($d) => ['name' => $d->deduction_type ?? $d->name, 'amount' => $d->amount])),
+            initAllowances: @json($manualAllowances),
+            initDeductions: @json($manualDeductions),
+            initComputed: {
+                daysWorked: {{ (float) ($payroll->days_worked ?? 0) }},
+                hoursWorked: {{ (float) ($payroll->hours_worked ?? 0) }},
+                basicSalary: {{ (float) ($payroll->basic_salary ?? 0) }},
+                adjustedGross: {{ (float) ($payroll->gross_pay ?? 0) }},
+                netPay: {{ (float) ($payroll->net_pay ?? 0) }},
+            },
             prefillUserId: {{ $payroll->user_id }},
             prefillStart: "{{ $batch->period_start->format('Y-m-d') }}",
             prefillEnd: "{{ $batch->period_end->format('Y-m-d') }}",

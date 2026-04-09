@@ -1,9 +1,23 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-12">
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Short Remittances</h5>
+                <p class="remui-subtitle mb-0">Track shortages and resolve liabilities for driver and PAO.</p>
+            </div>
+        </div>
+
     {{-- Pending Resolution Section --}}
-    <div class="card mb-4">
+    <div class="card remui-card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span class="card-title mb-0">Pending Resolution</span>
         </div>
@@ -61,7 +75,7 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0">
+                <table class="table table-hover w-100 mb-0 remui-table">
                     <thead>
                         <tr>
                             @php
@@ -142,13 +156,13 @@
     </div>
 
     {{-- Fully Resolved Section --}}
-    <div class="card">
+    <div class="card remui-card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span class="card-title mb-0">Fully Paid / Resolved</span>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0">
+                <table class="table table-hover w-100 mb-0 remui-table">
                     <thead>
                         <tr>
                             @php
@@ -212,5 +226,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection

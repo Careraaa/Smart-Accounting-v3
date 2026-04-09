@@ -8,6 +8,7 @@
         <div class="mb-5">
             <h1 class="auth-page-title">Sign In</h1>
             <p class="auth-page-sub">Enter your credentials to access your account.</p>
+            <div class="auth-divider"></div>
         </div>
 
         <form method="POST" action="{{ route('login') }}" class="w-100">
@@ -39,7 +40,7 @@
                 <div class="form-check mb-0">
                     <input type="checkbox" class="form-check-input" id="remember" name="remember">
                     <label class="form-check-label" for="remember"
-                        style="font-size:0.815rem; color:#9898a8;">Remember me</label>
+                        style="font-size:0.815rem; color:#6b7280;">Remember me</label>
                 </div>
             </div>
 

@@ -1,131 +1,126 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('accountant._ui-styles')
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
+        .prl-page { font-family: 'Sora', sans-serif; }
+        .prl-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+        @media (max-width: 1100px) { .prl-stats { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .prl-stats { grid-template-columns: 1fr; } }
+        .prl-stat { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; display: flex; align-items: flex-start; gap: 14px; position: relative; overflow: hidden; }
+        .prl-stat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; border-radius: 0 0 14px 14px; }
+        .prl-stat.s-blue::after { background: #0284c7; }
+        .prl-stat.s-green::after { background: #16a34a; }
+        .prl-stat.s-amber::after { background: #d97706; }
+        .prl-stat.s-red::after { background: #c8292a; }
+        .prl-stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .prl-stat.s-blue .prl-stat-icon { background: #f0f9ff; color: #0284c7; }
+        .prl-stat.s-green .prl-stat-icon { background: #f0fdf4; color: #16a34a; }
+        .prl-stat.s-amber .prl-stat-icon { background: #fffbeb; color: #d97706; }
+        .prl-stat.s-red .prl-stat-icon { background: #fff0f0; color: #c8292a; }
+        .prl-stat-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #9ca3af; margin-bottom: 4px; }
+        .prl-stat-value { font-size: 1.15rem; font-weight: 800; color: #111827; line-height: 1.2; font-variant-numeric: tabular-nums; font-family: 'DM Mono', monospace; }
+        .prl-stat-sub { font-size: 0.73rem; color: #9ca3af; margin-top: 4px; }
+    </style>
+@endpush
+
 @section('content')
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="card-title mb-0">Approve Payroll Batch</span>
-                    <p class="text-muted small mt-1 mb-0">
-                        Period: {{ $startDate->format('F d, Y') }} – {{ $endDate->format('F d, Y') }}
-                    </p>
-                </div>
-                <a href="{{ route('payroll-approval.index') }}" class="btn btn-sm btn-outline-secondary" style="margin-left: auto;">
-                    <i class="feather-arrow-left me-1"></i> Back
-                </a>
+@php
+    $filterLabel = $status === 'pending' ? 'Pending payroll' : ucfirst($status) . ' payroll';
+    $statusTag = $status === 'pending' ? 'Pending' : ucfirst($status);
+    $tagBg = $status === 'pending' ? '#fffbeb' : ($status === 'approved' ? '#f0f9ff' : '#fff1f2');
+    $tagColor = $status === 'pending' ? '#d97706' : ($status === 'approved' ? '#0284c7' : '#e11d48');
+@endphp
+
+<div class="col-12">
+    <div class="remui-page prl-page">
+        <div class="remui-backdrop">
+            <div class="remui-grid"></div>
+        </div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Approve payroll batch</h5>
+                <p class="remui-subtitle mb-0">
+                    {{ $startDate->format('F d, Y') }} – {{ $endDate->format('F d, Y') }}
+                    <span class="badge rounded-pill ms-2" style="background:{{ $tagBg }};color:{{ $tagColor }};font-size:0.65rem;">{{ $statusTag }}</span>
+                </p>
             </div>
-            <div class="card-body">
-                <!-- Alert Messages -->
-                @if ($message = Session::get('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="feather-check-circle me-2"></i>
-                        {{ $message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
+            <a href="{{ route('payroll-approval.index') }}" class="emp-action-btn emp-action-view">
+                <i class="feather-arrow-left"></i><span>Back</span>
+            </a>
+        </div>
 
-                @if ($message = Session::get('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="feather-alert-circle me-2"></i>
-                        {{ $message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
+        @if (session('success'))
+            <div class="acd-flash success"><i class="feather-check-circle"></i> {{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div class="acd-flash error"><i class="feather-alert-circle"></i> {{ session('error') }}</div>
+        @endif
 
-                <!-- Batch Summary Statistics -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card card-statistic">
-                            <div class="card-body">
-                                <div class="stat-label">Total Employees</div>
-                                <h3 class="mb-1" style="color: #0284c7;">{{ $payrolls->count() }}</h3>
-                                <small class="text-muted">In this batch</small>
-                            </div>
-                            <div class="card-icon" style="color: #0284c7; opacity: 0.2;">
-                                <i class="feather-users" style="font-size: 2.5rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-statistic">
-                            <div class="card-body">
-                                <div class="stat-label">Total Gross</div>
-                                <h3 class="mb-1" style="color: #059669;">₱{{ number_format($totalGross, 2) }}</h3>
-                                <small class="text-muted">Total payroll</small>
-                            </div>
-                            <div class="card-icon" style="color: #059669; opacity: 0.2;">
-                                <i class="feather-dollar-sign" style="font-size: 2.5rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-statistic">
-                            <div class="card-body">
-                                <div class="stat-label">Total Deductions</div>
-                                <h3 class="mb-1" style="color: #d97706;">₱{{ number_format(abs($totalGross - $totalNet), 2) }}</h3>
-                                <small class="text-muted">Total deductions</small>
-                            </div>
-                            <div class="card-icon" style="color: #d97706; opacity: 0.2;">
-                                <i class="feather-minus-circle" style="font-size: 2.5rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-statistic">
-                            <div class="card-body">
-                                <div class="stat-label">Total Net</div>
-                                <h3 class="mb-1" style="color: #16a34a;">₱{{ number_format($totalNet, 2) }}</h3>
-                                <small class="text-muted">Net amount</small>
-                            </div>
-                            <div class="card-icon" style="color: #16a34a; opacity: 0.2;">
-                                <i class="feather-check-circle" style="font-size: 2.5rem;"></i>
-                            </div>
-                        </div>
-                    </div>
+        <div class="prl-stats">
+            <div class="prl-stat s-blue">
+                <div class="prl-stat-icon"><i class="feather-users"></i></div>
+                <div>
+                    <div class="prl-stat-label">Employees</div>
+                    <div class="prl-stat-value">{{ $payrolls->count() }}</div>
+                    <div class="prl-stat-sub">In this batch</div>
                 </div>
+            </div>
+            <div class="prl-stat s-green">
+                <div class="prl-stat-icon"><i class="feather-dollar-sign"></i></div>
+                <div>
+                    <div class="prl-stat-label">Total gross</div>
+                    <div class="prl-stat-value">₱{{ number_format($totalGross, 0) }}</div>
+                    <div class="prl-stat-sub">Combined</div>
+                </div>
+            </div>
+            <div class="prl-stat s-amber">
+                <div class="prl-stat-icon"><i class="feather-minus-circle"></i></div>
+                <div>
+                    <div class="prl-stat-label">Total deductions</div>
+                    <div class="prl-stat-value">₱{{ number_format($totalDeductions, 0) }}</div>
+                    <div class="prl-stat-sub">From payroll rows</div>
+                </div>
+            </div>
+            <div class="prl-stat s-red">
+                <div class="prl-stat-icon"><i class="feather-check-circle"></i></div>
+                <div>
+                    <div class="prl-stat-label">Total net</div>
+                    <div class="prl-stat-value">₱{{ number_format($totalNet, 0) }}</div>
+                    <div class="prl-stat-sub">Net pay</div>
+                </div>
+            </div>
+        </div>
 
-                @php
-                    $filterLabel = $status === 'pending' ? 'Pending Payroll' : ucfirst($status) . ' Payroll';
-                    $tablePayrolls = $payrolls;
-                    $statusTag = $status === 'pending' ? 'Pending' : ucfirst($status);
-                    $tagBg = $status === 'pending' ? '#fffbeb' : ($status === 'approved' ? '#f0f9ff' : '#fff1f2');
-                    $tagColor = $status === 'pending' ? '#d97706' : ($status === 'approved' ? '#0284c7' : '#e11d48');
-                @endphp
-
-                <h5 class="mt-4 mb-3">{{ $filterLabel }}</h5>
-                <div class="table-responsive mb-5">
-                    <table class="table table-hover w-100 mb-0">
+        <div class="card remui-card mb-3">
+            <div class="card-header">
+                <span class="card-title mb-0">{{ $filterLabel }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover w-100 mb-0 remui-table">
                         <thead>
-                            <tr style="background: #f8f9fa;">
-                                <th style="color: #6b7280; font-weight: 600;">Employee</th>
-                                <th style="color: #6b7280; font-weight: 600;">Position</th>
-                                <th class="text-right" style="color: #6b7280; font-weight: 600;">Gross Pay</th>
-                                <th class="text-right" style="color: #6b7280; font-weight: 600;">Deductions</th>
-                                <th class="text-right" style="color: #6b7280; font-weight: 600;">Net Pay</th>
-                                <th class="text-center" style="color: #6b7280; font-weight: 600;">Status</th>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Position</th>
+                                <th class="text-end">Gross pay</th>
+                                <th class="text-end">Deductions</th>
+                                <th class="text-end">Net pay</th>
+                                <th class="text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($tablePayrolls as $payroll)
+                            @forelse($payrolls as $payroll)
                                 <tr>
-                                    <td>
-                                        <strong>{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</strong>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">{{ $payroll->user->position ?? 'N/A' }}</small>
-                                    </td>
-                                    <td class="text-right">
-                                        <strong>₱{{ number_format($payroll->gross_pay, 2) }}</strong>
-                                    </td>
-                                    <td class="text-right">
-                                        <span>₱{{ number_format(abs($payroll->gross_pay - $payroll->net_pay), 2) }}</span>
-                                    </td>
-                                    <td class="text-right">
-                                        <strong>₱{{ number_format($payroll->net_pay, 2) }}</strong>
-                                    </td>
+                                    <td><strong>{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</strong></td>
+                                    <td><span class="text-muted" style="font-size:0.82rem;">{{ $payroll->user->position ?? 'N/A' }}</span></td>
+                                    <td class="text-end font-monospace">₱{{ number_format($payroll->gross_pay, 2) }}</td>
+                                    <td class="text-end font-monospace text-muted">₱{{ number_format($payroll->total_deductions ?? abs($payroll->gross_pay - $payroll->net_pay), 2) }}</td>
+                                    <td class="text-end font-monospace fw-bold" style="color:#15803d;">₱{{ number_format($payroll->net_pay, 2) }}</td>
                                     <td class="text-center">
-                                        <span style="display:inline-block; background: {{ $tagBg }}; color: {{ $tagColor }}; font-size:0.7rem; font-weight:700; padding:4px 10px; border-radius:20px; letter-spacing:0.4px; text-transform:uppercase;">
+                                        <span style="display:inline-block;background:{{ $tagBg }};color:{{ $tagColor }};font-size:0.68rem;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;">
                                             {{ $statusTag }}
                                         </span>
                                     </td>
@@ -133,8 +128,8 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="text-center text-muted py-5">
-                                        <i class="feather-inbox d-block mb-2" style="font-size: 28px; opacity: 0.3;"></i>
-                                        No {{ strtolower($statusTag) }} payroll records for this batch
+                                        <i class="feather-inbox d-block mb-2" style="font-size:28px;opacity:.3;"></i>
+                                        No payroll records in this batch
                                     </td>
                                 </tr>
                             @endforelse
@@ -142,43 +137,29 @@
                     </table>
                 </div>
             </div>
-            <div class="card-footer bg-light">
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    @if($status === 'pending')
-                    <form action="{{ route('payroll-approval.reject-batch') }}" method="POST" class="d-inline">
-                        @csrf
-                        <input type="hidden" name="start" value="{{ $startDate->format('Y-m-d') }}">
-                        <input type="hidden" name="end" value="{{ $endDate->format('Y-m-d') }}">
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to REJECT this entire batch?')">
-                            <i class="feather-x-circle me-1"></i> Reject Batch
-                        </button>
-                    </form>
-                    <form action="{{ route('payroll-approval.approve-batch') }}" method="POST" class="d-inline">
-                        @csrf
-                        <input type="hidden" name="start" value="{{ $startDate->format('Y-m-d') }}">
-                        <input type="hidden" name="end" value="{{ $endDate->format('Y-m-d') }}">
-                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Are you sure you want to APPROVE this entire batch?')">
-                            <i class="feather-check-circle me-1"></i> Approve Batch
-                        </button>
-                    </form>
-                    @endif
+            @if ($status === 'pending' && $payrolls->isNotEmpty())
+                <div class="card-footer bg-white border-top" style="padding:16px 18px;">
+                    <div class="d-flex flex-wrap gap-2 justify-content-end">
+                        <form action="{{ route('payroll-approval.reject-batch') }}" method="POST" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="start" value="{{ $startDate->format('Y-m-d') }}">
+                            <input type="hidden" name="end" value="{{ $endDate->format('Y-m-d') }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Reject this entire batch?')">
+                                <i class="feather-x-circle me-1"></i> Reject batch
+                            </button>
+                        </form>
+                        <form action="{{ route('payroll-approval.approve-batch') }}" method="POST" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="start" value="{{ $startDate->format('Y-m-d') }}">
+                            <input type="hidden" name="end" value="{{ $endDate->format('Y-m-d') }}">
+                            <button type="submit" class="btn btn-sm text-white" style="background:#16a34a;border:none;" onclick="return confirm('Approve this entire batch?')">
+                                <i class="feather-check-circle me-1"></i> Approve batch
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 </div>
-
-<style>
-    .table-responsive {
-        border-radius: 0 0 8px 8px;
-    }
-
-    .btn {
-        transition: all 0.2s ease;
-    }
-
-    .btn:hover {
-        transform: translateY(-1px);
-    }
-</style>
 @endsection

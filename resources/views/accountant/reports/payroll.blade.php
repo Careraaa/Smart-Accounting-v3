@@ -1,157 +1,166 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('accountant._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+@php
+    $sumGross = collect($batchData)->sum('total_gross');
+    $sumDed = collect($batchData)->sum('total_deductions');
+    $sumNet = collect($batchData)->sum('total_net');
+@endphp
+
+<div class="col-12">
+    <div class="remui-page acd-page">
+        <div class="remui-backdrop">
+            <div class="remui-grid"></div>
+        </div>
+
+        <div class="remui-hero mb-3">
             <div>
-                <span class="card-title mb-0">Payroll Reports</span>
-                <p class="text-muted small mt-1 mb-0">Approved payroll batches report</p>
+                <h5 class="remui-title">Payroll reports</h5>
+                <p class="remui-subtitle mb-0">Approved payroll batches for the selected period (filters match the print view).</p>
             </div>
-            <a href="{{ route('reports.print.payroll-report') }}" class="btn btn-sm btn-primary" target="_blank">
-                <i class="feather-printer me-1"></i> Print
+            <a href="{{ route('reports.print.payroll-report', request()->query()) }}" class="emp-action-btn emp-action-edit" target="_blank" rel="noopener">
+                <i class="feather-printer"></i><span>Print</span>
             </a>
         </div>
-        <div class="card-body">
 
-            {{-- Filters --}}
-            <div class="row mb-4 pb-3 border-bottom">
-                <div class="col-md-3">
-                    <label class="form-label">Period</label>
-                    <select id="period" class="form-select" onchange="updateReport()">
-                        <option value="weekly"  {{ $period === 'weekly'  ? 'selected' : '' }}>Weekly</option>
-                        <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
-                        <option value="yearly"  {{ $period === 'yearly'  ? 'selected' : '' }}>Yearly</option>
-                    </select>
-                </div>
-                <div class="col-md-3" id="weekSelectWrap" style="display: {{ $period === 'weekly' ? 'block' : 'none' }};">
-                    <label class="form-label">Week Number</label>
-                    <select id="week" class="form-select" onchange="updateReport()">
-                        @for ($i = 1; $i <= 52; $i++)
-                            <option value="{{ $i }}" {{ $week == $i ? 'selected' : '' }}>Week {{ $i }}</option>
-                        @endfor
-                    </select>
-                </div>
-                <div class="col-md-3" id="monthSelectWrap" style="display: {{ $period === 'monthly' ? 'block' : 'none' }};">
-                    <label class="form-label">Month</label>
-                    <select id="month" class="form-select" onchange="updateReport()">
-                        @for ($i = 1; $i <= 12; $i++)
-                            <option value="{{ $i }}" {{ $month == $i ? 'selected' : '' }}>
-                                {{ date('F', mktime(0, 0, 0, $i, 1)) }}
-                            </option>
-                        @endfor
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Year</label>
-                    <select id="year" class="form-select" onchange="updateReport()">
-                        @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
-                            <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>{{ $i }}</option>
-                        @endfor
-                    </select>
-                </div>
+        <form class="acd-filter-bar" method="get" action="{{ route('reports.payroll') }}" id="acct-payroll-report-filters">
+            <div>
+                <label class="form-label">Period</label>
+                <select name="period" class="form-select form-select-sm" id="period" onchange="this.form.submit()">
+                    <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
+                    <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
+                    <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
+                </select>
             </div>
+            <div id="weekSelectWrap" style="display: {{ $period === 'weekly' ? 'block' : 'none' }};">
+                <label class="form-label">Week</label>
+                <select name="week" class="form-select form-select-sm" onchange="this.form.submit()">
+                    @for ($i = 1; $i <= 52; $i++)
+                        <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
+                    @endfor
+                </select>
+            </div>
+            <div id="monthSelectWrap" style="display: {{ $period === 'monthly' ? 'block' : 'none' }};">
+                <label class="form-label">Month</label>
+                <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+                    @for ($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>
+                            {{ date('F', mktime(0, 0, 0, $i, 1)) }}
+                        </option>
+                    @endfor
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Year</label>
+                <select name="year" class="form-select form-select-sm" onchange="this.form.submit()">
+                    @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
+                        <option value="{{ $i }}" {{ (int) $year === $i ? 'selected' : '' }}>{{ $i }}</option>
+                    @endfor
+                </select>
+            </div>
+        </form>
 
-            {{-- Statistics --}}
-            <div class="row mb-4">
-                <div class="col-md-3 mb-3">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <small class="text-muted">Total Batches</small>
-                            <h5 class="mb-0 mt-2" style="color: #8B3A62;">{{ count($batchData) }}</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <small class="text-muted">Total Gross</small>
-                            <h5 class="mb-0 mt-2" style="color: #0369a1;">₱{{ number_format(collect($batchData)->sum('total_gross'), 2) }}</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <small class="text-muted">Total Deductions</small>
-                            <h5 class="mb-0 mt-2" style="color: #ea580c;">₱{{ number_format(collect($batchData)->sum('total_deductions'), 2) }}</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <small class="text-muted">Total Net Pay</small>
-                            <h5 class="mb-0 mt-2" style="color: #16a34a;">₱{{ number_format(collect($batchData)->sum('total_net'), 2) }}</h5>
-                        </div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <span class="dash-label">Batches</span>
+                        <div class="dash-value mt-2">{{ count($batchData) }}</div>
+                        <div class="dash-sub">In range</div>
                     </div>
                 </div>
             </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <span class="dash-label">Total gross</span>
+                        <div class="dash-value mt-2">₱{{ number_format($sumGross, 0) }}</div>
+                        <div class="dash-sub">Summed</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <span class="dash-label">Total deductions</span>
+                        <div class="dash-value mt-2">₱{{ number_format($sumDed, 0) }}</div>
+                        <div class="dash-sub">Summed</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <span class="dash-label">Total net</span>
+                        <div class="dash-value mt-2">₱{{ number_format($sumNet, 0) }}</div>
+                        <div class="dash-sub">Net pay</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            {{-- Table --}}
-            <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0">
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th class="text-end">Employees</th>
-                            <th class="text-end">Gross</th>
-                            <th class="text-end">Deductions</th>
-                            <th class="text-end">Net Pay</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($batchData as $batch)
+        <div class="card remui-card">
+            <div class="card-header">
+                <span class="card-title mb-0">Batch summary</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover w-100 mb-0 remui-table">
+                        <thead>
                             <tr>
-                                <td>
-                                    {{ \Carbon\Carbon::parse($batch['period_start'])->format('M d') }} –
-                                    {{ \Carbon\Carbon::parse($batch['period_end'])->format('M d, Y') }}
-                                </td>
-                                <td class="text-end">{{ $batch['count'] }}</td>
-                                <td class="text-end">₱{{ number_format($batch['total_gross'], 2) }}</td>
-                                <td class="text-end text-muted">₱{{ number_format($batch['total_deductions'], 2) }}</td>
-                                <td class="text-end">
-                                    <strong style="color: #16a34a;">₱{{ number_format($batch['total_net'], 2) }}</strong>
-                                </td>
+                                <th>Period</th>
+                                <th class="text-end">Employees</th>
+                                <th class="text-end">Gross</th>
+                                <th class="text-end">Deductions</th>
+                                <th class="text-end">Net pay</th>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-5">
-                                    <i class="feather-file-text d-block mb-2" style="font-size:28px; opacity:.3;"></i>
-                                    No approved payroll batches found for this period
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @forelse($batchData as $batch)
+                                <tr>
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($batch['period_start'])->format('M d') }}
+                                        –
+                                        {{ \Carbon\Carbon::parse($batch['period_end'])->format('M d, Y') }}
+                                    </td>
+                                    <td class="text-end">{{ $batch['count'] }}</td>
+                                    <td class="text-end font-monospace">₱{{ number_format($batch['total_gross'], 2) }}</td>
+                                    <td class="text-end font-monospace text-muted">₱{{ number_format($batch['total_deductions'], 2) }}</td>
+                                    <td class="text-end font-monospace fw-bold" style="color:#15803d;">₱{{ number_format($batch['total_net'], 2) }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-5">
+                                        <i class="feather-file-text d-block mb-2" style="font-size:28px;opacity:.3;"></i>
+                                        No payroll batches for this filter (controller expects status <code>released</code>).
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
-
         </div>
     </div>
 </div>
 
 <script>
-    const periodSelect = document.getElementById('period');
-
-    function updateReport() {
-        const period = periodSelect.value;
-        const week  = document.getElementById('week').value;
-        const month = document.getElementById('month').value;
-        const year  = document.getElementById('year').value;
-
-        let url = '{{ route("reports.payroll") }}?period=' + period + '&year=' + year;
-        if (period === 'weekly')  url += '&week='  + week;
-        if (period === 'monthly') url += '&month=' + month;
-
-        window.location.href = url;
-    }
-
-    function toggleFilters() {
-        const period = periodSelect.value;
-        document.getElementById('weekSelectWrap').style.display  = period === 'weekly'  ? 'block' : 'none';
-        document.getElementById('monthSelectWrap').style.display = period === 'monthly' ? 'block' : 'none';
-    }
-
-    periodSelect.addEventListener('change', toggleFilters);
+    (function () {
+        var period = document.getElementById('period');
+        if (!period) return;
+        function toggleFilters() {
+            var p = period.value;
+            var w = document.getElementById('weekSelectWrap');
+            var m = document.getElementById('monthSelectWrap');
+            if (w) w.style.display = p === 'weekly' ? 'block' : 'none';
+            if (m) m.style.display = p === 'monthly' ? 'block' : 'none';
+        }
+        period.addEventListener('change', toggleFilters);
+        toggleFilters();
+    })();
 </script>
 @endsection

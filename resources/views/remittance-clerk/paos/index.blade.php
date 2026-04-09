@@ -1,18 +1,32 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Passenger Assistant Officer / Conductor</span>
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">PAOs / Conductors</h5>
+                <p class="remui-subtitle mb-0">Manage Passenger Assistant Officers / Conductors for remittance operations.</p>
+            </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('paos.create') }}" class="btn btn-primary btn-sm">
-                    <i class="feather-plus me-1"></i> Add PAO
+                <a href="{{ route('paos.create') }}" class="emp-action-btn emp-action-edit">
+                    <i class="feather-plus"></i><span>Add PAO</span>
                 </a>
-                <a href="{{ route('reports.print.pao-report') }}" class="btn btn-sm btn-primary" target="_blank">
-                    <i class="feather-printer me-1"></i> Print
+                <a href="{{ route('reports.print.pao-report') }}" class="emp-action-btn emp-action-view" target="_blank">
+                    <i class="feather-printer"></i><span>Print</span>
                 </a>
             </div>
+        </div>
+
+        <div class="card remui-card">
+        <div class="card-header">
+            <span class="card-title mb-0">PAO List</span>
         </div>
         <div class="card-body">
             {{-- Statistics Cards --}}
@@ -56,7 +70,7 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0">
+                <table class="table table-hover w-100 mb-0 remui-table">
                     <thead>
                         <tr>
                             @php
@@ -132,5 +146,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection

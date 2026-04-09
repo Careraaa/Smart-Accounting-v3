@@ -1,15 +1,31 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-9">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Resolve Short Remittance</span>
-            <a href="{{ route('short-remittances.index') }}" class="btn btn-sm btn-secondary">
-                <i class="feather-x me-1"></i> Close
-            </a>
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Resolve Short Remittance</h5>
+                <p class="remui-subtitle mb-0">Record payments and mark driver/PAO liabilities as settled.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('short-remittances.index') }}" class="emp-action-btn emp-action-back">
+                    <i class="feather-x"></i><span>Close</span>
+                </a>
+            </div>
         </div>
-        <div class="card-body">
+
+        <div class="card remui-card">
+            <div class="card-header">
+                <span class="card-title mb-0">Resolution Details</span>
+            </div>
+            <div class="card-body">
             {{-- Remittance Summary --}}
             <div class="alert alert-warning mb-4">
                 <h6 class="mb-2">
@@ -248,6 +264,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 @push('scripts')

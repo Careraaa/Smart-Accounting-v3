@@ -1,12 +1,34 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-8 offset-md-2">
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title mb-0">Edit Vehicle</span>
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Edit Vehicle</h5>
+                <p class="remui-subtitle mb-0">Update vehicle information, assigned route, and status.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('vehicles.show', $vehicle) }}" class="emp-action-btn emp-action-view">
+                    <i class="feather-eye"></i><span>View</span>
+                </a>
+                <a href="{{ route('vehicles.index') }}" class="emp-action-btn emp-action-back">
+                    <i class="feather-arrow-left"></i><span>Back</span>
+                </a>
+            </div>
         </div>
-        <div class="card-body">
+
+        <div class="card remui-card">
+            <div class="card-header">
+                <span class="card-title mb-0">Vehicle Details</span>
+            </div>
+            <div class="card-body">
             <form action="{{ route('vehicles.update', $vehicle) }}" method="POST">
                 @csrf
                 @method('PUT')
@@ -70,6 +92,7 @@
                     <a href="{{ route('vehicles.index') }}" class="btn btn-secondary btn-sm">Cancel</a>
                 </div>
             </form>
+            </div>
         </div>
     </div>
 </div>

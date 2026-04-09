@@ -1,14 +1,28 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title mb-0">Remittance Approval</span>
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"><div class="remui-grid"></div></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Remittance Approval</h5>
+                <p class="remui-subtitle mb-0">Approve or reject remittances submitted by the remittance clerk.</p>
+            </div>
         </div>
-        <div class="card-body p-0">
+
+        <div class="card remui-card">
+            <div class="card-header">
+                <span class="card-title mb-0">Pending for Approval</span>
+            </div>
+            <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0">
+                <table class="table table-hover w-100 mb-0 remui-table">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -71,5 +85,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection

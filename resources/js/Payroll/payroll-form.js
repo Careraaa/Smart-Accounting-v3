@@ -443,11 +443,26 @@ document.addEventListener("DOMContentLoaded", function () {
         }))
         .filter((d) => d.name && d.amount > 0);
 
-    // Initial render with zeros while waiting for the first server response
+    // For batch edit, start from persisted payroll values so this page
+    // matches the net pay shown on the batch confirm table.
+    if (isBatchEdit && window._prl?.initComputed) {
+        const c = window._prl.initComputed;
+        S.daysWorked = Number(c.daysWorked ?? 0);
+        S.hoursWorked = Number(c.hoursWorked ?? 0);
+        S.basicSalary = Number(c.basicSalary ?? 0);
+        S.adjustedGross = Number(c.adjustedGross ?? 0);
+        S.netPay = Number(c.netPay ?? 0);
+    }
+
+    // Initial render from current state
     render();
 
-    // Kick off the first server fetch
-    fetchPreview();
+    // Kick off the first server fetch for create/edit forms.
+    // Batch edit intentionally starts from persisted values to avoid
+    // a first-load mismatch with batch confirm net pay.
+    if (!isBatchEdit) {
+        fetchPreview();
+    }
 
     setTimeout(() => {
         isBootstrapping = false;

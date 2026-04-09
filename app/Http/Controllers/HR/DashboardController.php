@@ -51,7 +51,7 @@ class DashboardController extends Controller
             ->sum('hours') ?? 0;
         $totalOvertimeRecords = OvertimeUndertime::where('type', 'overtime')->count();
         
-        // Attendance trend (last 7 days)
+        // Attendance trend (last 7 calendar days) — counts rows in `attendances` per status per day
         $attendanceTrend = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->startOfDay();
@@ -64,12 +64,13 @@ class DashboardController extends Controller
             $late = Attendance::whereDate('date', $date)
                 ->where('status', 'late')
                 ->count();
-            
+
             $attendanceTrend[] = [
-                'date' => $date->format('m-d'),
+                'date_iso' => $date->toDateString(),
+                'label' => $date->format('D') . ' · ' . $date->format('M j'),
                 'present' => $present,
                 'absent' => $absent,
-                'late' => $late
+                'late' => $late,
             ];
         }
         

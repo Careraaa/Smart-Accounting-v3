@@ -1,18 +1,32 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Drivers</span>
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Drivers</h5>
+                <p class="remui-subtitle mb-0">Manage driver profiles and status for remittance encoding.</p>
+            </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('drivers.create') }}" class="btn btn-primary btn-sm">
-                    <i class="feather-plus me-1"></i> Add Driver
+                <a href="{{ route('drivers.create') }}" class="emp-action-btn emp-action-edit">
+                    <i class="feather-plus"></i><span>Add Driver</span>
                 </a>
-                <a href="{{ route('reports.print.driver-report') }}" class="btn btn-sm btn-primary" target="_blank">
-                    <i class="feather-printer me-1"></i> Print
+                <a href="{{ route('reports.print.driver-report') }}" class="emp-action-btn emp-action-view" target="_blank">
+                    <i class="feather-printer"></i><span>Print</span>
                 </a>
             </div>
+        </div>
+
+        <div class="card remui-card">
+        <div class="card-header">
+            <span class="card-title mb-0">Driver List</span>
         </div>
         <div class="card-body">
             <div class="row mb-4">
@@ -55,7 +69,7 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0">
+                <table class="table table-hover w-100 mb-0 remui-table">
                     <thead>
                         <tr>
                             @php
@@ -131,5 +145,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection

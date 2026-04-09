@@ -1,18 +1,32 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Manage Vehicles</span>
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Manage Vehicles</h5>
+                <p class="remui-subtitle mb-0">Assign routes, track status, and keep fleet records up to date.</p>
+            </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('vehicles.create') }}" class="btn btn-primary btn-sm">
-                    <i class="feather-plus me-1"></i> Add Vehicle
+                <a href="{{ route('vehicles.create') }}" class="emp-action-btn emp-action-edit">
+                    <i class="feather-plus"></i><span>Add Vehicle</span>
                 </a>
-                <a href="{{ route('reports.print.vehicle-route-report') }}" class="btn btn-sm btn-primary" target="_blank">
-                    <i class="feather-printer me-1"></i> Print
+                <a href="{{ route('reports.print.vehicle-route-report') }}" class="emp-action-btn emp-action-view" target="_blank">
+                    <i class="feather-printer"></i><span>Print</span>
                 </a>
             </div>
+        </div>
+
+        <div class="card remui-card">
+        <div class="card-header">
+            <span class="card-title mb-0">Vehicle List</span>
         </div>
         <div class="card-body">
             {{-- Statistics Cards --}}
@@ -56,7 +70,7 @@
             </div>
 
             <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0">
+                <table class="table table-hover w-100 mb-0 remui-table">
                     <thead>
                         <tr>
                             @php
@@ -135,5 +149,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection

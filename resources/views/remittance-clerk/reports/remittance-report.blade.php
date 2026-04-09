@@ -1,20 +1,34 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Remittance Report</span>
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Remittance Report</h5>
+                <p class="remui-subtitle mb-0">Filter weekly/monthly/yearly performance and print summaries.</p>
+            </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('reports.print.remittance-report', ['period' => $period, 'week' => $week, 'month' => $month, 'year' => $year]) }}" class="btn btn-sm btn-primary" target="_blank">
-                    <i class="feather-printer me-1"></i> Print
+                <a href="{{ route('reports.print.remittance-report', ['period' => $period, 'week' => $week, 'month' => $month, 'year' => $year]) }}" class="emp-action-btn emp-action-view" target="_blank">
+                    <i class="feather-printer"></i><span>Print</span>
                 </a>
-                <a href="{{ route('reports.index') }}" class="btn btn-sm btn-secondary">
-                    <i class="feather-arrow-left me-1"></i> Back
+                <a href="{{ route('reports.index') }}" class="emp-action-btn emp-action-back">
+                    <i class="feather-arrow-left"></i><span>Back</span>
                 </a>
             </div>
         </div>
-        <div class="card-body">
+
+        <div class="card remui-card">
+            <div class="card-header">
+                <span class="card-title mb-0">Report</span>
+            </div>
+            <div class="card-body">
             {{-- Filter Section --}}
             <div class="row mb-4 pb-3 border-bottom">
                 <div class="col-md-3">
@@ -139,6 +153,7 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
             </div>
         </div>
     </div>

@@ -1,7 +1,28 @@
 @extends('layouts.layout')
 
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
+
 @section('content')
-<div class="col-md-12">
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">Remittance Dashboard</h5>
+                <p class="remui-subtitle mb-0">Quick snapshot of collections, expenses, and recent remittances.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('remittances.create') }}" class="emp-action-btn emp-action-edit">
+                    <i class="feather-plus"></i><span>New Remittance</span>
+                </a>
+                <a href="{{ route('remittances.index') }}" class="emp-action-btn emp-action-view">
+                    <i class="feather-layers"></i><span>View All</span>
+                </a>
+            </div>
+        </div>
 
     {{-- Top stat cards --}}
     <div class="row g-3 mb-4">
@@ -233,14 +254,14 @@
     </div>
 
     {{-- Recent Remittances Table --}}
-    <div class="card mb-4">
+    <div class="card remui-card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span class="card-title mb-0">Recent Remittances</span>
             <a href="{{ route('remittances.index') }}" class="btn btn-primary btn-sm">View All</a>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0 remui-table">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -295,5 +316,6 @@
         </div>
     </div>
 
+</div>
 </div>
 @endsection

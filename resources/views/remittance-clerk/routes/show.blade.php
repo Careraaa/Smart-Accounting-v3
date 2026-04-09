@@ -1,33 +1,38 @@
 @extends('layouts.layout')
 
-@section('content')
-<div class="col-md-10 offset-md-1">
+@push('styles')
+    @include('remittance-clerk._ui-styles')
+@endpush
 
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h5 class="fw-bold mb-0" style="color:#1c1c1e;">{{ $route->route_name }}</h5>
-            <span class="emp-view-label">{{ $route->origin }} → {{ $route->destination }}</span>
+@section('content')
+<div class="col-12">
+    <div class="remui-page">
+        <div class="remui-backdrop"></div>
+
+        <div class="remui-hero mb-3">
+            <div>
+                <h5 class="remui-title">{{ $route->route_name }}</h5>
+                <p class="remui-subtitle mb-0">{{ $route->origin }} → {{ $route->destination }}</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 justify-content-end">
+                <a href="{{ route('routes.edit', $route) }}" class="emp-action-btn emp-action-edit">
+                    <i class="feather-edit-2"></i><span>Edit</span>
+                </a>
+                <form action="{{ route('routes.destroy', $route) }}" method="POST"
+                    onsubmit="return confirm('Delete this route?')" class="d-inline">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="emp-action-btn emp-action-danger">
+                        <i class="feather-trash-2"></i><span>Delete</span>
+                    </button>
+                </form>
+                <a href="{{ route('routes.index') }}" class="emp-action-btn emp-action-back">
+                    <i class="feather-arrow-left"></i><span>Back</span>
+                </a>
+            </div>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('routes.edit', $route) }}" class="emp-action-btn emp-action-edit">
-                <i class="feather-edit-2 me-1"></i> Edit
-            </a>
-            <form action="{{ route('routes.destroy', $route) }}" method="POST"
-                onsubmit="return confirm('Delete this route?')" class="d-inline">
-                @csrf @method('DELETE')
-                <button type="submit" class="emp-action-btn emp-action-danger">
-                    <i class="feather-trash-2 me-1"></i> Delete
-                </button>
-            </form>
-            <a href="{{ route('routes.index') }}" class="emp-action-btn emp-action-back">
-                <i class="feather-arrow-left me-1"></i> Back
-            </a>
-        </div>
-    </div>
 
     {{-- Route Information --}}
-    <div class="card mb-3">
+    <div class="card remui-card mb-3">
         <div class="card-header"><span class="card-title mb-0">Route Information</span></div>
         <div class="card-body">
             <div class="row">
@@ -71,11 +76,11 @@
 
     {{-- Assigned Vehicles --}}
     @if($route->vehicles->count() > 0)
-        <div class="card">
+        <div class="card remui-card">
             <div class="card-header"><span class="card-title mb-0">Assigned Vehicles</span></div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover w-100 mb-0">
+                    <table class="table table-hover w-100 mb-0 remui-table">
                         <thead>
                             <tr>
                                 <th>Plate Number</th>
@@ -120,16 +125,6 @@
         </div>
     @endif
 
+    </div>
 </div>
-
-<style>
-.emp-action-btn {
-    height: 30px;
-    padding: 0 12px;
-    font-size: 0.815rem;
-    font-weight: 500;
-    white-space: nowrap;
-    width: auto;
-}
-</style>
 @endsection

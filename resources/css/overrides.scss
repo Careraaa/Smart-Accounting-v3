@@ -1050,9 +1050,6 @@ html.minimenu .nxl-navigation:hover .navbar-content {
 .kt-mob-close {
     display: none;
 }
-.kt-mob-open {
-    display: none;
-}
 
 @media (max-width: 1199px) {
     /* Slide off-screen by default */
@@ -1604,58 +1601,6 @@ hr {
     font-size: 0.72rem;
     font-weight: 700;
     flex-shrink: 0;
-}
-
-.dash-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #9898a8;
-}
-.dash-value {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #1c1c1e;
-    line-height: 1;
-}
-.dash-sub {
-    font-size: 0.75rem;
-    color: #9898a8;
-    margin-top: 4px;
-}
-.dash-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: #f4f5f7;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9898a8;
-    font-size: 15px;
-    flex-shrink: 0;
-}
-.dash-icon.di-green {
-    background: #f0fdf4;
-    color: #16a34a;
-}
-.dash-icon.di-red {
-    background: #fff5f5;
-    color: #c8292a;
-}
-.dash-icon.di-amber {
-    background: #fffbeb;
-    color: #d97706;
-}
-.dash-icon.di-blue {
-    background: #f0f9ff;
-    color: #0284c7;
-}
-.dash-progress {
-    height: 4px;
-    border-radius: 4px;
-    background: #f4f5f7;
 }
 
 .emp-badge-pending {
