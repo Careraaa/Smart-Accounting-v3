@@ -42,7 +42,11 @@ document.addEventListener("DOMContentLoaded", function () {
             tab.addEventListener("click", function () {
                 currentTab = i;
                 showTab(currentTab);
-                initGlobalDatepickers();
+                // Re-init datepickers when switching tabs (handles dynamically
+                // shown panes that weren't visible on DOMContentLoaded)
+                if (typeof initGlobalDatepickers === "function") {
+                    initGlobalDatepickers();
+                }
             });
         });
 
@@ -122,15 +126,20 @@ document.addEventListener("DOMContentLoaded", function () {
         ?.closest("form");
     if (form) {
         form.addEventListener("submit", function (e) {
+            // Sync all datepicker text inputs → hidden date inputs before
+            // validation. displayToNative() is now a global function defined
+            // in global-datepicker.js so it is always in scope here.
             document
                 .querySelectorAll('.datepicker-wrapper input[type="text"]')
                 .forEach(function (textInput) {
                     const hiddenInput = textInput
                         .closest(".datepicker-wrapper")
                         .querySelector('input[type="date"]');
-                    if (hiddenInput)
+                    if (hiddenInput && typeof displayToNative === "function") {
                         hiddenInput.value = displayToNative(textInput.value);
+                    }
                 });
+
             assembleAddress();
 
             const { firstErrorTab, firstErrorField } =
@@ -317,14 +326,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return d.slice(0, 4) + "-" + d.slice(4, 8) + "-" + d.slice(8);
     }
 
-    // PhilHealth: XX-XXXXXXXXX-X  (13 digits total)
+    // PhilHealth: XX-XXXXXXXXX-X  (12 digits total)
     function formatPhilHealth(raw) {
         const d = raw.replace(/\D/g, "").slice(0, 12);
-
         if (d.length <= 2) return d;
-
         if (d.length <= 11) return d.slice(0, 2) + "-" + d.slice(2);
-
         return d.slice(0, 2) + "-" + d.slice(2, 11) + "-" + d.slice(11);
     }
 
@@ -343,13 +349,10 @@ document.addEventListener("DOMContentLoaded", function () {
     attachFormatter("sss_number", formatSSS);
     attachFormatter("tin_number", formatTIN);
     attachFormatter("pagibig_number", formatPagibig);
-    attachFormatter("philhealth_number", formatPhilHealth); // FIX: was missing
+    attachFormatter("philhealth_number", formatPhilHealth);
 
     // -------------------------
     // Dynamic list helper
-    // FIX: use '.emp-dynamic-row' — the rows never had '.experience-row',
-    //      '.skill-row', '.beneficiary-row', or '.reference-row' classes,
-    //      so closest() never found them and the remove buttons did nothing.
     // -------------------------
     function initDynamicList({ listId, addBtnId, templateId, removeBtnClass }) {
         const list = document.getElementById(listId);
@@ -366,6 +369,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 idx++,
             );
             list.appendChild(wrapper.firstElementChild);
+
+            // Init any date inputs that appeared inside the new row
+            if (typeof initGlobalDatepickers === "function") {
+                initGlobalDatepickers();
+            }
         });
 
         list.addEventListener("click", (e) => {

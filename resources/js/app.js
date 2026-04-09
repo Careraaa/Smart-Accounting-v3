@@ -21,7 +21,6 @@ import "./Payroll/payroll-form.js";
 import "./template/bootstrap.min.js";
 import "./template/common-init.min.js";
 import "./template/analytics-init.min.js";
-import "./template/apps-calendar-init.min.js";
 import "./template/apps-chat-init.min.js";
 import "./template/apps-email-init.min.js";
 import "./template/apps-notes-init.min.js";

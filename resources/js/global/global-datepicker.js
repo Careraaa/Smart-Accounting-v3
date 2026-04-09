@@ -15,6 +15,26 @@
  *   ArrowLeft/Right → move between segments without changing the value
  *   Tab          → normal browser focus move (no interference)
  */
+
+/**
+ * Global helper — exposed at window scope so employee-form.js and any other
+ * script can call displayToNative() without being inside the closure.
+ *
+ * DD/MM/YYYY (loose)  →  YYYY-MM-DD  or  "" if invalid
+ */
+function displayToNative(display) {
+    const digits = display.replace(/\D/g, "");
+    if (digits.length < 8) return "";
+    const dd = digits.slice(0, 2);
+    const mm = digits.slice(2, 4);
+    const yyyy = digits.slice(4, 8);
+    const d = parseInt(dd, 10),
+        mo = parseInt(mm, 10),
+        y = parseInt(yyyy, 10);
+    if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1900) return "";
+    return `${yyyy}-${mm}-${dd}`;
+}
+
 function initGlobalDatepickers() {
     document.querySelectorAll('input[type="date"]').forEach((original) => {
         // If already initialized but wrapper is missing, allow re-init
@@ -86,19 +106,7 @@ function initGlobalDatepickers() {
             return `${d}/${m}/${y}`;
         }
 
-        /** DD/MM/YYYY (loose)  →  YYYY-MM-DD  or  "" if invalid */
-        function displayToNative(display) {
-            const digits = display.replace(/\D/g, "");
-            if (digits.length < 8) return "";
-            const dd = digits.slice(0, 2);
-            const mm = digits.slice(2, 4);
-            const yyyy = digits.slice(4, 8);
-            const d = parseInt(dd, 10),
-                mo = parseInt(mm, 10),
-                y = parseInt(yyyy, 10);
-            if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1900) return "";
-            return `${yyyy}-${mm}-${dd}`;
-        }
+        // NOTE: displayToNative() is defined globally above — no local copy needed.
 
         function syncHidden() {
             original.value = displayToNative(text.value);
@@ -222,32 +230,62 @@ function initGlobalDatepickers() {
         });
 
         /* ── 6. Calendar icon → native picker ────────────────────── */
+        // UX: clicking the field should also open the picker (not just the icon).
+        text.addEventListener("click", function () {
+            if (text.readOnly || text.disabled) return;
+            iconBtn.click();
+        });
+
         iconBtn.addEventListener("click", function () {
             if (text.readOnly) return;
 
             const wasDisabled = original.disabled;
 
-            // ── FIX: save the current value and clear it before opening.
-            // This is critical for edit mode: if the stored value matches
-            // what the user picks, the browser fires no "change" event.
-            // Clearing first guarantees a "change" fires on any selection.
+            // Save current value; clear it so "change" always fires even when
+            // the user picks the same date that was already stored (edit mode).
             const prevNativeValue = original.value;
             original.value = "";
 
-            // Temporarily expose the hidden input so showPicker() works.
+            // ── POSITION FIX ─────────────────────────────────────────────
+            // Bootstrap templates commonly apply CSS transforms (translateX,
+            // translateZ, will-change etc.) to sidebar/layout wrappers.
+            // Any ancestor with a transform creates a new containing block,
+            // which breaks position:fixed — the browser positions the element
+            // relative to that ancestor instead of the viewport, landing the
+            // native date-picker in the wrong place (usually top-left).
+            //
+            // Solution: temporarily move the hidden input to <body> (which
+            // never has a transform) so position:fixed is always relative to
+            // the true viewport, then put it back inside the wrapper after
+            // the picker closes.
+            const rect = text.getBoundingClientRect();
+            const originalParent = original.parentNode;
+            const originalNextSibling = original.nextSibling;
+
             original.disabled = false;
             original.style.cssText = [
-                "position:fixed",
+                // Use absolute positioning in the document so adding scroll
+                // offsets is correct and stable across browsers.
+                "position:absolute",
+                `top:${rect.bottom + window.scrollY}px`,
+                `left:${rect.left + window.scrollX}px`,
                 "opacity:0",
                 "pointer-events:none",
-                "top:0",
-                "left:0",
-                "width:1px", // FIX: must be non-zero or some browsers skip showPicker
-                "height:1px", // FIX: same as above
+                "width:" + rect.width + "px",
+                "height:1px",
+                "z-index:99999",
             ].join(";");
 
-            // ── FIX: define rehide before it is referenced in the timeout
+            // Teleport to <body> so no ancestor transform can affect it
+            document.body.appendChild(original);
+
             function rehide() {
+                // Move original back to its place in the wrapper
+                if (originalNextSibling) {
+                    originalParent.insertBefore(original, originalNextSibling);
+                } else {
+                    originalParent.appendChild(original);
+                }
                 original.style.cssText = "display:none!important;";
                 original.disabled = wasDisabled;
             }
@@ -259,12 +297,16 @@ function initGlobalDatepickers() {
                 // restore previous state and bail out gracefully.
                 original.value = prevNativeValue;
                 rehide();
+                // Best-effort fallback for browsers without showPicker().
+                try {
+                    original.focus({ preventScroll: true });
+                    original.click();
+                } catch (_) {}
                 return;
             }
 
-            // ── FIX: use a settled flag so the timeout and the change
-            // handler can never both execute (avoids double-rehide / double
-            // value restore that was breaking edit mode).
+            // settled flag prevents both the timeout and the change handler
+            // from executing (avoids double-rehide in edit mode).
             let settled = false;
 
             function onPick() {
@@ -275,12 +317,10 @@ function initGlobalDatepickers() {
                     // User picked a date — update the visible text input.
                     text.value = nativeToDisplay(original.value);
                     resetState();
-                    syncHidden(); // FIX: was missing — keeps hidden input in sync
+                    syncHidden();
                 } else {
                     // Picker closed without a selection — restore previous value.
                     original.value = prevNativeValue;
-                    // text.value is already showing the correct formatted date;
-                    // no visual change needed.
                 }
 
                 rehide();
@@ -288,17 +328,28 @@ function initGlobalDatepickers() {
 
             original.addEventListener("change", onPick, { once: true });
 
-            // Fallback: if the picker is closed without firing "change"
+            // When the picker is dismissed (Esc / click-outside), many browsers
+            // don't fire "change". "blur" is a more reliable close signal.
+            original.addEventListener(
+                "blur",
+                function () {
+                    if (settled) return;
+                    settled = true;
+                    original.value = prevNativeValue;
+                    rehide();
+                },
+                { once: true },
+            );
+
+            // Fallback: if the picker is dismissed without firing "change"
             // (e.g. Escape key, click-outside) restore state after a delay.
-            // FIX: increased to 60 s so slow users aren't bitten; settled
-            // flag ensures this is a true no-op once onPick has already run.
             setTimeout(function () {
                 if (!settled) {
                     settled = true;
                     original.value = prevNativeValue;
                     rehide();
                 }
-            }, 60000);
+            }, 4000);
         });
     });
 }
