@@ -15,7 +15,7 @@
 
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendors/css/daterangepicker.min.css') }}">
+    {{-- daterangepicker assets removed (no longer used) --}}
     @stack('head_scripts')
 
     <!-- Vite compiled assets (CSS & JS) – placed last so it overrides previous styles -->
@@ -51,9 +51,9 @@
 
     {{-- Template Vendors JS (order matters, vendors first) --}}
     <script src="{{ asset('vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/daterangepicker.min.js') }}"></script>
+    {{-- daterangepicker was removed; keep layout clean --}}
     <script src="{{ asset('vendors/js/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/circle-progress.min.js') }}"></script>
+    {{-- circle-progress vendor removed (no longer used) --}}
 
     {{-- Template Init JS --}}
 

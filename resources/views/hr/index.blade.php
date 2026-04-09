@@ -1,7 +1,59 @@
 @extends('layouts.layout')
 
+@push('styles')
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
+.hrd-page{font-family:'Sora',sans-serif;position:relative}
+.hrd-backdrop{position:absolute;inset:-40px -20px auto -20px;height:340px;pointer-events:none;z-index:0;background:
+    radial-gradient(220px 220px at 10% 35%, rgba(200,41,42,0.14), transparent 60%),
+    radial-gradient(260px 260px at 85% 10%, rgba(2,132,199,0.12), transparent 60%),
+    radial-gradient(240px 240px at 70% 70%, rgba(22,163,74,0.10), transparent 60%),
+    linear-gradient(to bottom, rgba(17,24,39,0.04), transparent 70%);filter:saturate(110%)}
+.hrd-grid{position:absolute;inset:0;background-image:linear-gradient(to right, rgba(17,24,39,0.06) 1px, transparent 1px),linear-gradient(to bottom, rgba(17,24,39,0.06) 1px, transparent 1px);background-size:48px 48px;mask-image:radial-gradient(closest-side at 50% 30%, rgba(0,0,0,0.75), transparent 80%);opacity:.5}
+.hrd-content{position:relative;z-index:1}
+
+.hrd-hero{background:linear-gradient(135deg,#111827 0%,#0b1220 55%,#111827 100%);border-radius:18px;padding:22px 24px;margin:0 0 18px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden}
+.hrd-hero:before{content:'';position:absolute;top:-70px;right:-70px;width:260px;height:260px;border-radius:50%;background:rgba(200,41,42,0.18);pointer-events:none}
+.hrd-hero:after{content:'';position:absolute;bottom:-90px;left:-90px;width:260px;height:260px;border-radius:50%;background:rgba(2,132,199,0.14);pointer-events:none}
+.hrd-title{font-size:1.25rem;font-weight:900;color:#fff;margin:0 0 6px;letter-spacing:-0.02em}
+.hrd-sub{font-size:.82rem;color:#9ca3af;margin:0}
+.hrd-actions{position:relative;z-index:1;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hrd-btn{display:inline-flex;align-items:center;gap:10px;padding:11px 18px;background:#c8292a;color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:.86rem;font-weight:900;cursor:pointer;transition:background .15s,box-shadow .15s,transform .15s;text-decoration:none;box-shadow:0 4px 20px rgba(200,41,42,.5);white-space:nowrap}
+.hrd-btn:hover{background:#a81f20;color:#fff;box-shadow:0 10px 34px rgba(200,41,42,.62);transform:translateY(-1px)}
+.hrd-btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;background:rgba(255,255,255,0.06);color:#e5e7eb;border:1px solid rgba(255,255,255,0.14);border-radius:10px;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:800;text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap}
+.hrd-btn-sec:hover{border-color:rgba(255,255,255,0.22);background:rgba(255,255,255,0.10);transform:translateY(-1px)}
+.hrd-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid rgba(255,255,255,0.14);border-radius:999px;color:#e5e7eb;background:rgba(255,255,255,0.06);font-size:.75rem}
+
+/* Make existing cards feel like the new system without rewriting all markup */
+.card{border-radius:16px!important}
+.card.stretch.stretch-full,.card.card-body{border-radius:16px!important}
+.card-header{border-top-left-radius:16px!important;border-top-right-radius:16px!important}
+</style>
+@endpush
+
 @section('content')
-    <div class="col-md-12">
+    <div class="col-md-12 hrd-page">
+        <div class="hrd-backdrop"><div class="hrd-grid"></div></div>
+        <div class="hrd-content">
+
+        <div class="hrd-hero">
+            <div style="position:relative;z-index:1;min-width:260px;">
+                <h1 class="hrd-title">HR Dashboard</h1>
+                <p class="hrd-sub">Employees, attendance, leave, and overtime at a glance.</p>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="hrd-chip"><i class="feather-calendar"></i> {{ now()->format('l, M d, Y') }}</span>
+                    <span class="hrd-chip"><i class="feather-users"></i> {{ $totalEmployees }} employees</span>
+                    <span class="hrd-chip"><i class="feather-clock"></i> {{ number_format($attendanceRate, 1) }}% attendance</span>
+                </div>
+            </div>
+            <div class="hrd-actions">
+                <a href="{{ route('employees.index') }}" class="hrd-btn-sec"><i class="feather-user-plus"></i> Employees</a>
+                <a href="{{ route('attendance.create') }}" class="hrd-btn-sec"><i class="feather-edit-3"></i> Manual Log</a>
+                <a href="{{ route('leave.create') }}" class="hrd-btn"><i class="feather-plus"></i> Create Leave</a>
+            </div>
+        </div>
+
+        <!-- Employee & Attendance Statistics Row -->
         <!-- Employee & Attendance Statistics Row -->
         <div class="row mb-4">
             <div class="col-xxl-2 col-lg-4 col-md-6">

@@ -1,18 +1,41 @@
 @extends('layouts.layout')
 
-@section('content')
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title mb-0">Request New Leave</span>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('employee.leaves.store') }}" method="POST" id="leaveForm">
-                @csrf
+@push('styles')
+    @include('employee._ui-styles')
+@endpush
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
+@section('content')
+<div class="container-fluid empui-page empui-wrap">
+    <div class="empui-backdrop"><div class="empui-grid"></div></div>
+    <div class="empui-content">
+
+        <div class="empui-hero">
+            <div class="empui-hero-left">
+                <h1 class="empui-title">Request New Leave</h1>
+                <p class="empui-sub">Choose dates, provide a short reason, and submit for approval.</p>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="empui-chip"><i class="feather-calendar"></i> {{ now()->format('l, F d, Y') }}</span>
+                    <span class="empui-chip"><i class="feather-info"></i> Tip: double-check end date</span>
+                </div>
+            </div>
+            <div class="empui-hero-right">
+                <a class="empui-btn-sec" href="{{ route('employee.leaves.index') }}">
+                    <i class="feather-arrow-left"></i>
+                    Back to Requests
+                </a>
+            </div>
+        </div>
+
+        <div class="empui-card" style="max-width: 980px; margin: 0 auto;">
+            <div class="empui-card-head">
+                <p class="empui-card-title"><span class="empui-dot"></span> Leave Details</p>
+            </div>
+            <div class="empui-card-body">
+                <form action="{{ route('employee.leaves.store') }}" method="POST" id="leaveForm">
+                    @csrf
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
                             <select name="leave_type" id="leave_type" class="form-control @error('leave_type') is-invalid @enderror" required>
                                 <option value="">Select Leave Type</option>
@@ -26,53 +49,52 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                    </div>
 
-                    <div class="col-md-6">
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                            <input type="date" name="start_date" id="start_date" class="form-control @error('start_date') is-invalid @enderror" 
-                                value="{{ old('start_date') }}" required>
+                            <input type="date" name="start_date" id="start_date" class="form-control @error('start_date') is-invalid @enderror"
+                                   value="{{ old('start_date') }}" required>
                             @error('start_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                    </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                            <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror" 
-                                value="{{ old('end_date') }}" required>
-                            <small class="text-muted d-block mt-1">
-                                Duration: <span id="durationDays">0</span> day(s)
-                            </small>
+                            <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror"
+                                   value="{{ old('end_date') }}" required>
+                            <div class="empui-muted mt-1">
+                                Duration: <span id="durationDays" class="empui-mono fw-bold">0</span> day(s)
+                            </div>
                             @error('end_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                    </div>
 
-                    <div class="col-md-6">
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
-                            <textarea name="reason" id="reason" class="form-control @error('reason') is-invalid @enderror" 
-                                rows="3" required placeholder="Brief reason for your leave request...">{{ old('reason') }}</textarea>
+                            <textarea name="reason" id="reason" class="form-control @error('reason') is-invalid @enderror"
+                                      rows="3" required placeholder="Brief reason for your leave request...">{{ old('reason') }}</textarea>
                             @error('reason')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
-                </div>
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Submit Leave Request</button>
-                    <a href="{{ route('employee.leaves.index') }}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                        <button type="submit" class="empui-btn">
+                            <i class="feather-send"></i>
+                            Submit Leave Request
+                        </button>
+                        <a href="{{ route('employee.leaves.index') }}" class="empui-btn-sec">
+                            <i class="feather-x"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
         </div>
+
     </div>
 </div>
 

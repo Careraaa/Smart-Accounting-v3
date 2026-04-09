@@ -1,0 +1,163 @@
+@extends('layouts.layout')
+
+@push('styles')
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
+.ntf-page{font-family:'Sora',sans-serif}
+.ntf-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.ntf-title{font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px}
+.ntf-sub{font-size:.78rem;color:#9ca3af;margin:0}
+.ntf-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ntf-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ntf-btn:hover{border-color:#c8292a;color:#c8292a;background:#fff5f5}
+.ntf-btn-primary{display:inline-flex;align-items:center;gap:10px;padding:11px 20px;background:#c8292a;color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:.86rem;font-weight:800;cursor:pointer;transition:background .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(200,41,42,.5);white-space:nowrap;text-decoration:none}
+.ntf-btn-primary:hover{background:#a81f20;color:#fff;box-shadow:0 10px 34px rgba(200,41,42,.62)}
+.ntf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+@media(max-width:900px){.ntf-stats{grid-template-columns:1fr}}
+.ntf-stat{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start;position:relative;overflow:hidden}
+.ntf-stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+.ntf-stat.s-blue::after{background:#0284c7}.ntf-stat.s-amber::after{background:#d97706}.ntf-stat.s-green::after{background:#16a34a}
+.ntf-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ntf-stat.s-blue .ntf-ico{background:#f0f9ff;color:#0284c7}
+.ntf-stat.s-amber .ntf-ico{background:#fffbeb;color:#d97706}
+.ntf-stat.s-green .ntf-ico{background:#f0fdf4;color:#16a34a}
+.ntf-lbl{font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#9ca3af;margin-bottom:4px}
+.ntf-val{font-size:1.25rem;font-weight:900;color:#111827;line-height:1;font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums}
+.ntf-subval{font-size:.73rem;color:#9ca3af;margin-top:4px}
+.ntf-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
+.ntf-card-head{padding:14px 18px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ntf-card-title{font-size:.82rem;font-weight:900;color:#111827;margin:0;display:flex;align-items:center;gap:8px}
+.ntf-dot{width:8px;height:8px;border-radius:50%;background:#c8292a;display:inline-block}
+.ntf-card-body{padding:0}
+.ntf-row{display:flex;gap:12px;align-items:flex-start;padding:14px 18px;border-bottom:1px solid #f3f4f6;transition:background .12s}
+.ntf-row:hover{background:#fafafa}
+.ntf-row:last-child{border-bottom:none}
+.ntf-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.ntf-badge.unread{background:#fff0f0;color:#c8292a;border:1px solid #fecaca}
+.ntf-badge.read{background:#f3f4f6;color:#6b7280}
+.ntf-time{font-size:.74rem;color:#9ca3af;font-family:'DM Mono',monospace}
+.ntf-title2{font-size:.9rem;font-weight:900;color:#111827;margin:0 0 4px}
+.ntf-msg{font-size:.85rem;color:#6b7280;margin:0;line-height:1.45}
+.ntf-actions2{margin-left:auto;display:flex;gap:8px;align-items:center}
+.ntf-iconbtn{width:32px;height:32px;border-radius:9px;border:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s;color:#6b7280;background:#f4f5f7}
+.ntf-iconbtn:hover{background:#eff6ff;color:#3b82f6}
+.ntf-iconbtn.danger:hover{background:#fff1f2;color:#e11d48}
+.ntf-empty{padding:56px 24px;text-align:center;color:#9ca3af}
+</style>
+@endpush
+
+@section('content')
+<div class="ntf-page">
+    <div class="ntf-topbar">
+        <div>
+            <h1 class="ntf-title">Notifications</h1>
+            <p class="ntf-sub">All system alerts and updates</p>
+        </div>
+        <div class="ntf-actions">
+            <a href="{{ route('dashboard') }}" class="ntf-btn">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m5-4h-2"/></svg>
+                Dashboard
+            </a>
+            <button type="button" class="ntf-btn-primary" id="ntfMarkAll">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Mark all as read
+            </button>
+        </div>
+    </div>
+
+    <div class="ntf-stats">
+        <div class="ntf-stat s-blue">
+            <div class="ntf-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v18H3V3z"/><path stroke-linecap="round" d="M7 8h10M7 12h10M7 16h6"/></svg></div>
+            <div><div class="ntf-lbl">Total</div><div class="ntf-val">{{ $stats['total'] ?? 0 }}</div><div class="ntf-subval">all notifications</div></div>
+        </div>
+        <div class="ntf-stat s-amber">
+            <div class="ntf-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg></div>
+            <div><div class="ntf-lbl">Unread</div><div class="ntf-val">{{ $stats['unread'] ?? 0 }}</div><div class="ntf-subval">need attention</div></div>
+        </div>
+        <div class="ntf-stat s-green">
+            <div class="ntf-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <div><div class="ntf-lbl">Read</div><div class="ntf-val">{{ $stats['read'] ?? 0 }}</div><div class="ntf-subval">already seen</div></div>
+        </div>
+    </div>
+
+    <div class="ntf-card">
+        <div class="ntf-card-head">
+            <p class="ntf-card-title"><span class="ntf-dot"></span> Inbox</p>
+        </div>
+        <div class="ntf-card-body">
+            @forelse($notifications as $n)
+                <div class="ntf-row" data-notif-id="{{ $n->id }}" data-action-url="{{ $n->getActionUrl() }}">
+                    <div style="display:flex;flex-direction:column;gap:6px;min-width:0;flex:1;">
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            <span class="ntf-badge {{ $n->isUnread() ? 'unread' : 'read' }}">{{ $n->isUnread() ? 'unread' : 'read' }}</span>
+                            <span class="ntf-time">{{ $n->created_at?->diffForHumans() }}</span>
+                        </div>
+                        <p class="ntf-title2">{{ $n->title }}</p>
+                        <p class="ntf-msg">{{ $n->message }}</p>
+                    </div>
+                    <div class="ntf-actions2">
+                        @if($n->isUnread())
+                            <button class="ntf-iconbtn" title="Mark as read" data-action="read">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </button>
+                        @endif
+                        <button class="ntf-iconbtn danger" title="Delete" data-action="delete">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div class="ntf-empty">
+                    <div style="font-weight:900;color:#111827;margin-bottom:6px;">No notifications</div>
+                    You’re all caught up.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    <div style="margin-top:14px;">
+        {{ $notifications->withQueryString()->links() }}
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+(function(){
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+    const markAllBtn = document.getElementById('ntfMarkAll');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function(){
+            fetch(@json(route('notifications.mark-all-as-read')), {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+            }).then(()=> window.location.reload());
+        });
+    }
+
+    document.querySelectorAll('.ntf-row').forEach(row => {
+        row.addEventListener('click', function(e){
+            if (e.target.closest('button')) return;
+            const url = this.dataset.actionUrl;
+            if (url && url !== 'null') window.location.href = url;
+        });
+        row.querySelectorAll('button[data-action]').forEach(btn => {
+            btn.addEventListener('click', function(e){
+                e.preventDefault(); e.stopPropagation();
+                const id = row.dataset.notifId;
+                const action = btn.dataset.action;
+                if (!id) return;
+                if (action === 'read') {
+                    fetch(`/notifications/${id}/read`, { method:'POST', headers:{ 'X-CSRF-TOKEN': csrf, 'Accept':'application/json' } })
+                        .then(()=> window.location.reload());
+                } else if (action === 'delete') {
+                    fetch(`/notifications/${id}`, { method:'DELETE', headers:{ 'X-CSRF-TOKEN': csrf, 'Accept':'application/json' } })
+                        .then(()=> window.location.reload());
+                }
+            });
+        });
+    });
+})();
+</script>
+@endpush
+

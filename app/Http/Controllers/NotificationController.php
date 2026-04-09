@@ -24,6 +24,7 @@ class NotificationController extends Controller
         $user = Auth::user();
         $type = $request->query('type'); // Optional filter by type
         $read = $request->query('read'); // 'read', 'unread', or empty for all
+        $limit = $request->integer('limit'); // optional per-page / limit
 
         $query = $user->notifications();
 
@@ -37,12 +38,27 @@ class NotificationController extends Controller
             $query->read();
         }
 
-        $notifications = $query->recent()->paginate(15);
+        $perPage = $limit && $limit > 0 ? min($limit, 50) : 15;
+        $notifications = $query->recent()->paginate($perPage);
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $notifications,
-            'stats' => $this->notificationService->getStats($user),
+        // If the request expects JSON (dropdown polling, API usage), return JSON.
+        if ($request->wantsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $notifications,
+                'stats' => $this->notificationService->getStats($user),
+            ]);
+        }
+
+        // Otherwise render the Notifications page.
+        $stats = $this->notificationService->getStats($user);
+        return view('notifications.index', [
+            'notifications' => $notifications,
+            'stats' => $stats,
+            'filter' => [
+                'type' => $type,
+                'read' => $read,
+            ],
         ]);
     }
 

@@ -9,7 +9,7 @@
     
     <!-- Template CSS -->
     <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendors/css/daterangepicker.min.css') }}">
+    {{-- daterangepicker assets removed (no longer used) --}}
 
     <!-- Vite compiled assets -->
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
@@ -458,7 +458,7 @@
 
     {{-- Template Vendors JS --}}
     <script src="{{ asset('vendors/js/vendors.min.js') }}"></script>
-    <script src="{{ asset('vendors/js/daterangepicker.min.js') }}"></script>
+    {{-- daterangepicker was removed; keep layout clean --}}
     <script src="{{ asset('vendors/js/apexcharts.min.js') }}"></script>
 </body>
 </html>
