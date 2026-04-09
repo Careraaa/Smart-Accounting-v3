@@ -34,7 +34,9 @@ use App\Http\Controllers\Employee\ProfileController as EmployeeProfileController
 use App\Http\Controllers\Employee\LeaveController as EmployeeLeaveController;
 use App\Http\Controllers\Employee\OvertimeUndertimeController as EmployeeOvertimeUndertimeController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 
 Route::get('/', function () {
     return view('auth/login');
@@ -42,7 +44,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     if (auth()->user()->role === 'superadmin') {
-        return view('superadmin.dashboard');
+        return redirect()->route('superadmin.dashboard');
     } elseif (auth()->user()->role === 'remittance_clerk') {
         return redirect()->route('remittance-clerk.index');
     } elseif (auth()->user()->role === 'accountant') {
@@ -56,11 +58,11 @@ Route::get('/dashboard', function () {
     }
     return view('dashboard');
 })
-    ->middleware(['auth'])
+    ->middleware(['auth', 'check-status'])
     ->name('dashboard');
 
 // ===== PROFILE & ACCOUNT ROUTES =====
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'check-status'])->group(function () {
     Route::prefix('notifications')
         ->name('notifications.')
         ->group(function () {
@@ -90,11 +92,11 @@ Route::middleware(['auth'])->group(function () {
     })->name('profile.update');
 
     Route::get('/settings/account', fn() => view('partials.profile.account-settings'))->name('settings.account');
-    Route::post('/settings/update-password', fn() => redirect()->back()->with('success', 'Password updated successfully.'))->name('settings.update-password');
+    Route::post('/settings/update-password', [ProfileController::class, 'updatePassword'])->name('settings.update-password');
 });
 
 // ===== REMITTANCE CLERK ROUTES =====
-Route::middleware(['auth', 'role:remittance_clerk,superadmin'])->group(function () {
+Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])->group(function () {
     Route::get('/remittance-clerk', [RemittanceClerkDashboardController::class, 'index'])->name('remittance-clerk.index');
     Route::get('/management', fn() => redirect()->route('vehicles.index'))->name('management.index');
     Route::resource('drivers', DriverController::class);
@@ -120,7 +122,7 @@ Route::middleware(['auth', 'role:remittance_clerk,superadmin'])->group(function 
 });
 
 // ===== EMPLOYEE ROUTES =====
-Route::middleware(['auth', 'role:employee'])->group(function () {
+Route::middleware(['auth', 'check-status', 'role:employee'])->group(function () {
     Route::get('/employee', fn() => view('employee.dashboard'))->name('employee.index');
 
     // Profile Routes
@@ -170,7 +172,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ===== HR ROUTES (also accessible by superadmin, accountant, and qr_admin) =====
-Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(function () {
+Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_admin'])->group(function () {
     Route::get('/hr', [HRDashboardController::class, 'index'])->name('hr.index');
     Route::resource('employees', EmployeeController::class);
 
@@ -343,12 +345,12 @@ Route::middleware(['auth', 'role:hr,superadmin,accountant,qr_admin'])->group(fun
 });
 
 // ===== PAYROLL REPORTS (all authenticated users) =====
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'check-status'])->group(function () {
     Route::get('/reports/payroll', fn() => view('reports.payroll'))->name('reports.payroll');
 });
 
 // ===== ACCOUNTANT ROUTES =====
-Route::middleware(['auth', 'role:accountant'])->group(function () {
+Route::middleware(['auth', 'check-status', 'role:accountant'])->group(function () {
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
 
     // Batch approval routes (must come before resource route)
@@ -378,8 +380,33 @@ Route::middleware(['auth', 'role:accountant'])->group(function () {
 });
 
 // ===== QR ATTENDANCE ADMIN ROUTES =====
-Route::middleware(['auth', 'role:qr_admin'])->group(function () {
+Route::middleware(['auth', 'check-status', 'role:qr_admin'])->group(function () {
     Route::get('/admin/qr-monitor', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+});
+
+// ===== SUPERADMIN ROUTES =====
+Route::middleware(['auth', 'check-status', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+    Route::get('dashboard', [SuperAdminDashboardController::class, 'index'])->name('dashboard');
+    Route::resource('accounts', \App\Http\Controllers\SuperAdmin\AccountController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+    Route::get('accounts/{account}/reset-password', [\App\Http\Controllers\SuperAdmin\AccountController::class, 'showResetPassword'])->name('accounts.reset-password');
+    Route::post('accounts/{account}/reset-password', [\App\Http\Controllers\SuperAdmin\AccountController::class, 'performResetPassword'])->name('accounts.perform-reset-password');
+    Route::post('accounts/{account}/toggle-status', [\App\Http\Controllers\SuperAdmin\AccountController::class, 'toggleStatus'])->name('accounts.toggle-status');
+});
+
+// ===== CONFIGURATION ROUTES =====
+Route::middleware(['auth', 'check-status', 'role:superadmin'])->group(function () {
+    Route::get('/configuration', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'index'])->name('configuration.index');
+    Route::put('/configuration/general', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'updateGeneralSettings'])->name('configuration.update-general');
+    Route::put('/configuration/backup', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'updateBackupSettings'])->name('configuration.update-backup');
+    Route::post('/configuration/backup-now', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'backupNow'])->name('configuration.backup-now');
+    Route::get('/configuration/backup-history', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'backupHistory'])->name('configuration.backup-history');
+    Route::get('/configuration/backup/download/{filename}', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'downloadBackup'])->name('configuration.backup-download');
+    Route::delete('/configuration/backup/delete/{filename}', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'deleteBackup'])->name('configuration.backup-delete');
+    Route::get('/configuration/restore', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'showRestoreForm'])->name('configuration.restore-form');
+    Route::post('/configuration/restore', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'restoreDatabase'])->name('configuration.restore');
+    Route::post('/configuration/toggle-maintenance', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'toggleMaintenanceMode'])->name('configuration.toggle-maintenance');
+    Route::post('/configuration/clear-cache', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'clearCache'])->name('configuration.clear-cache');
+    Route::post('/configuration/clear-logs', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'clearLogs'])->name('configuration.clear-logs');
 });
 
 require __DIR__ . '/auth.php';
