@@ -121,11 +121,11 @@ class PayrollService
 
         // ── Statutory (semi-monthly: monthly contribution ÷ 2) ───
         // SSS uses the official bracket table; Pag-IBIG is percentage-based with ₱200/month cap
-        $sss = $employee->has_sss ? $this->getStatutoryDeduction('SSS', $monthlySalary) : 0;
+        $sss = ($employee->has_sss && $daysWorked > 0) ? $this->getStatutoryDeduction('SSS', $monthlySalary) : 0;
 
-        $pagibig = $employee->has_pagibig ? $this->getStatutoryDeduction('Pag-IBIG', $monthlySalary) : 0;
+        $pagibig = ($employee->has_pagibig && $daysWorked > 0) ? $this->getStatutoryDeduction('Pag-IBIG', $monthlySalary) : 0;
 
-        $philhealth = $employee->has_philhealth ? $this->getStatutoryDeduction('PhilHealth', $monthlySalary) : 0;
+        $philhealth = ($employee->has_philhealth && $daysWorked > 0) ? $this->getStatutoryDeduction('PhilHealth', $monthlySalary) : 0;
 
         // ── Manual line items ────────────────────────────────────
         $manualAllowTotal = collect($manualAllowances)->sum(fn($a) => (float) ($a['amount'] ?? 0));

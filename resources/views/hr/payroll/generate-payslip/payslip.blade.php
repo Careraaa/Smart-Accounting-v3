@@ -412,7 +412,7 @@
                                     <tr>
                                         <td>
                                             {{ $ded->deduction_type }}
-                                            @if ($ded->description)
+                                            @if ($ded->description && $ded->deduction_type !== 'Cash Advance')
                                                 <span class="td-sub">{{ $ded->description }}</span>
                                             @endif
                                         </td>

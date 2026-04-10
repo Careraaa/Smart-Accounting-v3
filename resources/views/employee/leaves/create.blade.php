@@ -36,16 +36,16 @@
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
-                            <select name="leave_type" id="leave_type" class="form-control @error('leave_type') is-invalid @enderror" required>
+                            <label for="leave_type_id" class="form-label">Leave Type <span class="text-danger">*</span></label>
+                            <select name="leave_type_id" id="leave_type_id" class="form-control @error('leave_type_id') is-invalid @enderror" required>
                                 <option value="">Select Leave Type</option>
                                 @foreach($leaveTypes as $type)
-                                    <option value="{{ $type }}" {{ old('leave_type') == $type ? 'selected' : '' }}>
-                                        {{ $type }}
+                                    <option value="{{ $type->id }}" {{ old('leave_type_id') == $type->id ? 'selected' : '' }}" data-available="{{ $type->balance->remaining_days }}">
+                                        {{ $type->name }} ({{ $type->balance->remaining_days }}/{{ $type->balance->total_days }} days available)
                                     </option>
                                 @endforeach
                             </select>
-                            @error('leave_type')
+                            @error('leave_type_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -65,6 +65,7 @@
                                    value="{{ old('end_date') }}" required>
                             <div class="empui-muted mt-1">
                                 Duration: <span id="durationDays" class="empui-mono fw-bold">0</span> day(s)
+                                <span id="balanceWarning" class="text-danger ms-2" style="display: none;"></span>
                             </div>
                             @error('end_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -99,9 +100,11 @@
 </div>
 
 <script>
+    const leaveTypeSelect = document.getElementById('leave_type_id');
     const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
     const durationSpan = document.getElementById('durationDays');
+    const balanceWarning = document.getElementById('balanceWarning');
 
     function calculateDuration() {
         if (startDateInput.value && endDateInput.value) {
@@ -110,11 +113,23 @@
             const timeDiff = endDate - startDate;
             const daysDiff = timeDiff / (1000 * 60 * 60 * 24) + 1;
             durationSpan.textContent = daysDiff > 0 ? daysDiff : 0;
+            
+            // Check available balance
+            if (daysDiff > 0 && leaveTypeSelect.value) {
+                const availableDays = parseInt(leaveTypeSelect.options[leaveTypeSelect.selectedIndex].dataset.available);
+                if (daysDiff > availableDays) {
+                    balanceWarning.textContent = `⚠ Insufficient balance (need ${daysDiff}, have ${availableDays})`;
+                    balanceWarning.style.display = 'inline';
+                } else {
+                    balanceWarning.style.display = 'none';
+                }
+            }
         }
     }
 
     startDateInput.addEventListener('change', calculateDuration);
     endDateInput.addEventListener('change', calculateDuration);
+    leaveTypeSelect.addEventListener('change', calculateDuration);
     
     // Calculate on page load
     calculateDuration();

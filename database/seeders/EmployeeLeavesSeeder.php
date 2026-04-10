@@ -31,6 +31,16 @@ class EmployeeLeavesSeeder extends Seeder
             return;
         }
 
+        // Get leave type IDs from database
+        $leaveTypes = DB::table('leave_types')
+            ->whereIn('name', ['Vacation Leave', 'Sick Leave', 'Emergency Leave', 'Bereavement Leave'])
+            ->pluck('id', 'name');
+
+        if ($leaveTypes->isEmpty()) {
+            $this->command?->warn('Leave types not found; skipping EmployeeLeavesSeeder.');
+            return;
+        }
+
         // Clear only the demo employees' seeded leaves (keeps real data safe)
         DB::table('leaves')->whereIn('user_id', $targetIds)->delete();
 
@@ -39,6 +49,7 @@ class EmployeeLeavesSeeder extends Seeder
 
         $rows[] = [
             'user_id' => $employees['juan.trabaho']->id ?? $targetIds[0],
+            'leave_type_id' => $leaveTypes['Vacation Leave'] ?? 1,
             'leave_type' => 'Vacation Leave',
             'start_date' => '2026-03-23',
             'end_date' => '2026-03-25',
@@ -52,6 +63,7 @@ class EmployeeLeavesSeeder extends Seeder
 
         $rows[] = [
             'user_id' => $employees['maria.halos']->id ?? $targetIds[0],
+            'leave_type_id' => $leaveTypes['Sick Leave'] ?? 2,
             'leave_type' => 'Sick Leave',
             'start_date' => '2026-03-18',
             'end_date' => '2026-03-18',
@@ -65,6 +77,7 @@ class EmployeeLeavesSeeder extends Seeder
 
         $rows[] = [
             'user_id' => $employees['carlo.pahinga']->id ?? $targetIds[0],
+            'leave_type_id' => $leaveTypes['Emergency Leave'] ?? 5,
             'leave_type' => 'Emergency Leave',
             'start_date' => '2026-03-28',
             'end_date' => '2026-03-28',
@@ -78,6 +91,7 @@ class EmployeeLeavesSeeder extends Seeder
 
         $rows[] = [
             'user_id' => $employees['john.doe']->id ?? $targetIds[0],
+            'leave_type_id' => $leaveTypes['Bereavement Leave'] ?? 6,
             'leave_type' => 'Bereavement Leave',
             'start_date' => '2026-03-12',
             'end_date' => '2026-03-13',
@@ -92,6 +106,7 @@ class EmployeeLeavesSeeder extends Seeder
         // A couple more assorted requests for variety
         $rows[] = [
             'user_id' => $employees['angela.fernandez']->id ?? $targetIds[0],
+            'leave_type_id' => $leaveTypes['Vacation Leave'] ?? 1,
             'leave_type' => 'Vacation Leave',
             'start_date' => '2026-04-06',
             'end_date' => '2026-04-07',

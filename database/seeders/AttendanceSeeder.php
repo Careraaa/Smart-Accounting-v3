@@ -9,7 +9,7 @@ use Carbon\CarbonPeriod;
 class AttendanceSeeder extends Seeder
 {
     // Employee user IDs only — matches Users_Seeder exactly
-    private array $employeeIds = [5, 6, 7, 8, 9];
+    private array $employeeIds = [6, 7, 8, 9, 10];
 
     // PH public holidays within Mar 16 – Mar 31 2026
     // None fall in this window, but keeping the array for safety
@@ -17,11 +17,11 @@ class AttendanceSeeder extends Seeder
 
     // Per-employee personality — late/absent = % chance; early_out = % chance of leaving at 4 PM
     private array $personalities = [
-        5 => ['late' =>  8, 'absent' =>  5, 'early_out' => 10], // John Doe         – reliable
-        6 => ['late' => 10, 'absent' =>  6, 'early_out' =>  8], // Angela Fernandez  – mostly on time
-        7 => ['late' =>  3, 'absent' =>  2, 'early_out' =>  5], // Juan Trabaho      – the overachiever
-        8 => ['late' => 30, 'absent' =>  8, 'early_out' => 10], // Maria Halos       – always "on the way"
-        9 => ['late' => 12, 'absent' => 10, 'early_out' => 25], // Carlo Pahinga     – 45-min "quick break" guy
+        6 => ['late' =>  8, 'absent' =>  5, 'early_out' => 10], // John Doe         – reliable
+        7 => ['late' => 10, 'absent' =>  6, 'early_out' =>  8], // Angela Fernandez  – mostly on time
+        8 => ['late' =>  3, 'absent' =>  2, 'early_out' =>  5], // Juan Trabaho      – the overachiever
+        9 => ['late' => 30, 'absent' =>  8, 'early_out' => 10], // Maria Halos       – always "on the way"
+        10 => ['late' =>  5, 'absent' =>  2, 'early_out' => 25], // Carlo Pahinga     – 45-min "quick break" guy
     ];
 
     public function run(): void

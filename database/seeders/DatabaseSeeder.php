@@ -19,11 +19,13 @@ class DatabaseSeeder extends Seeder
         $this->call([OvertimeUndertimeSeeder::class]);
         $this->call([AllowanceDeductionSeeder::class]);
         $this->call([LeaveTypeSeeder::class]);
+        $this->call([LeaveBalanceSeeder::class]); // Initialize leave balances after leave types
         $this->call([EmployeeLeavesSeeder::class]);
         $this->call([EmployeeCashAdvancesSeeder::class]);
         $this->call([EmployeeSalaryLoansSeeder::class]);
         $this->call([EmployeeAttachmentsSeeder::class]);
         $this->call([EmployeeRelationsSeeder::class]);
+        $this->call([PayrollCutoffScheduleSeeder::class]);
         $this->call([PayrollSeeder::class]);
         $this->call([NotificationSeeder::class]);
         $this->call(RemittanceSeeder::class);

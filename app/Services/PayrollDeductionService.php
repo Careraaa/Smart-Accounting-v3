@@ -33,7 +33,6 @@ class PayrollDeductionService
                 'payroll_id'     => $payroll->id,
                 'deduction_type' => 'Cash Advance',
                 'amount'         => $advance->amount,
-                'description'    => 'Cash advance deduction (requested ' . $advance->request_date . ')',
             ]);
 
             $advance->update([
