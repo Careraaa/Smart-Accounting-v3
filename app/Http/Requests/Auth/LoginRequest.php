@@ -55,7 +55,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'username' => 'Your account has been disabled. Please contact the administrator.',
+                'username' => 'This account has been deactivated. Please contact the administrator.',
             ]);
         }
 
