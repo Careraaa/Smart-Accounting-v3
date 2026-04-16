@@ -16,7 +16,7 @@
         <div class="empui-hero">
             <div class="empui-hero-left">
                 <h1 class="empui-title">Leave Request Details</h1>
-                <p class="empui-sub">{{ $leave->leave_type }} · {{ $leave->start_date->format('M d, Y') }} – {{ $leave->end_date->format('M d, Y') }}</p>
+                <p class="empui-sub">{{ $leave->leaveType?->name ?? 'N/A' }} · {{ $leave->start_date->format('M d, Y') }} – {{ $leave->end_date->format('M d, Y') }}</p>
                 <div class="d-flex flex-wrap gap-2 mt-2">
                     <span class="empui-chip"><i class="feather-clock"></i> Submitted {{ $leave->created_at->diffForHumans() }}</span>
                     <span class="empui-chip"><i class="feather-flag"></i> Status: {{ ucfirst($leave->status) }}</span>
@@ -47,7 +47,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="empui-muted">Leave Type</div>
-                                <div class="fw-bold" style="color:#111827;">{{ $leave->leave_type }}</div>
+                                <div class="fw-bold" style="color:#111827;">{{ $leave->leaveType?->name ?? 'N/A' }}</div>
                             </div>
                             <div class="col-md-6">
                                 <div class="empui-muted">Submitted On</div>
@@ -64,7 +64,7 @@
                             <div class="col-md-6">
                                 <div class="empui-muted">Duration</div>
                                 <div class="fw-bold" style="color:#111827;">
-                                    {{ $leave->start_date->diffInDays($leave->end_date) + 1 }} day(s)
+                                    {{ $leave->days }} day(s)
                                 </div>
                             </div>
                         </div>

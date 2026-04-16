@@ -61,6 +61,55 @@
             </div>
         </div>
 
+        <!-- Leave Balance Section -->
+        @if($balances->count() > 0)
+            <div class="empui-card">
+                <div class="empui-card-head">
+                    <p class="empui-card-title"><span class="empui-dot"></span> Available Leave Balance ({{ now()->year }})</p>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover empui-table w-100 mb-0">
+                        <thead>
+                            <tr>
+                                <th>Leave Type</th>
+                                <th>Total Days</th>
+                                <th>Used Days</th>
+                                <th>Remaining Days</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($balances as $balance)
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold" style="color:#111827;">{{ $balance->leaveType?->name ?? 'N/A' }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="empui-mono fw-bold">{{ $balance->total_days }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="empui-mono fw-bold">{{ $balance->used_days }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="empui-mono fw-bold" style="color:{{ $balance->remaining_days > 0 ? '#065f46' : '#991b1b' }};">
+                                            {{ $balance->remaining_days }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if($balance->remaining_days > 0)
+                                            <span class="empui-pill approved">Available</span>
+                                        @else
+                                            <span class="empui-pill rejected">Exhausted</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
         <div class="empui-card">
             <div class="empui-card-head">
                 <p class="empui-card-title"><span class="empui-dot"></span> Requests</p>
@@ -86,15 +135,14 @@
                         @forelse($leaves as $leave)
                             <tr>
                                 <td>
-                                    <div class="fw-bold" style="color:#111827;">{{ $leave->leave_type }}</div>
+                                    <div class="fw-bold" style="color:#111827;">{{ $leave->leaveType?->name ?? 'N/A' }}</div>
                                     <div class="empui-muted">Submitted {{ $leave->created_at?->diffForHumans() ?? '—' }}</div>
                                 </td>
                                 <td>
                                     <div class="empui-muted">
                                         {{ $leave->start_date->format('M d, Y') }} – {{ $leave->end_date->format('M d, Y') }}
                                     </div>
-                                    @php $days = $leave->start_date->diffInDays($leave->end_date) + 1; @endphp
-                                    <div class="fw-bold" style="color:#111827;">{{ $days }} day{{ $days != 1 ? 's' : '' }}</div>
+                                    <div class="fw-bold" style="color:#111827;">{{ $leave->days }} day{{ $leave->days != 1 ? 's' : '' }}</div>
                                 </td>
                                 <td>
                                     @php

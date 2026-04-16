@@ -15,7 +15,7 @@
                 <p class="empui-sub">Update your dates/reason while the request is still pending.</p>
                 <div class="d-flex flex-wrap gap-2 mt-2">
                     <span class="empui-chip"><i class="feather-calendar"></i> {{ $leave->start_date->format('M d, Y') }} – {{ $leave->end_date->format('M d, Y') }}</span>
-                    <span class="empui-chip"><i class="feather-tag"></i> {{ $leave->leave_type }}</span>
+                    <span class="empui-chip"><i class="feather-tag"></i> {{ $leave->leaveType?->name ?? 'N/A' }}</span>
                 </div>
             </div>
             <div class="empui-hero-right">
@@ -38,16 +38,16 @@
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="leave_type" class="form-label">Leave Type <span class="text-danger">*</span></label>
-                            <select name="leave_type" id="leave_type" class="form-control @error('leave_type') is-invalid @enderror" required>
+                            <label for="leave_type_id" class="form-label">Leave Type <span class="text-danger">*</span></label>
+                            <select name="leave_type_id" id="leave_type_id" class="form-control @error('leave_type_id') is-invalid @enderror" required>
                                 <option value="">Select Leave Type</option>
-                                @foreach($leaveTypes as $type)
-                                    <option value="{{ $type }}" {{ ($leave->leave_type ?? old('leave_type')) == $type ? 'selected' : '' }}>
-                                        {{ $type }}
+                                @foreach($leaveTypes as $typeId => $typeName)
+                                    <option value="{{ $typeId }}" {{ ($leave->leave_type_id ?? old('leave_type_id')) == $typeId ? 'selected' : '' }}>
+                                        {{ $typeName }}
                                     </option>
                                 @endforeach
                             </select>
-                            @error('leave_type')
+                            @error('leave_type_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

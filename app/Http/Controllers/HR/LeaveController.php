@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Leave;
 use App\Models\Employee;
 use App\Models\LeaveType;
+use App\Models\EmployeeLeaveBalance;
 use App\Notifications\LeaveNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -186,7 +187,7 @@ class LeaveController extends Controller
 
     public function destroy(Leave $leave)
     {
-        $leave->load('employee');
+        $leave->load('employee', 'leaveType');
 
         // Send notification
         LeaveNotification::leaveDeleted($leave);
@@ -202,7 +203,7 @@ class LeaveController extends Controller
             'status' => 'approved',
             'approved_by' => auth()->id() ?? null,
         ]);
-        $leave->load('employee');
+        $leave->load('employee', 'leaveType');
 
         // Send notification
         LeaveNotification::leaveApproved($leave);
