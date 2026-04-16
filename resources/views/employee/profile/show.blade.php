@@ -14,14 +14,6 @@
             <h1 class="pf-topbar-title">My Profile</h1>
             <p class="pf-topbar-sub">View and manage your personal information</p>
         </div>
-        <div class="pf-topbar-actions">
-            <a href="{{ route('employee.profile.edit') }}" class="pf-btn-sec">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 4h2a2 2 0 012 2v2m-6 0h6m2 2v8a2 2 0 01-2 2H7a2 2 0 01-2-2V8a2 2 0 012-2h2" />
-                </svg>
-                Edit Profile
-            </a>
-        </div>
     </div>
 
     @if (session('success'))
@@ -156,49 +148,6 @@
             </div>
         </div>
 
-        <div class="pf-card">
-            <div class="pf-card-head">
-                <p class="pf-card-title"><span class="pf-dot"></span> Quick Actions</p>
-            </div>
-            <div class="pf-card-body">
-                <div class="pf-kv">
-                    <div class="pf-k">Email</div>
-                    <div>
-                        <div class="pf-v pf-mono">{{ $u->email ?? '—' }}</div>
-                        <div class="pf-v-sub">Used for login and notifications</div>
-                    </div>
-
-                    <div class="pf-k">Phone</div>
-                    <div>
-                        <div class="pf-v pf-mono">{{ $u->phone ?? '—' }}</div>
-                        <div class="pf-v-sub">For HR contact and updates</div>
-                    </div>
-
-                    <div class="pf-k">Department</div>
-                    <div>
-                        <div class="pf-v">{{ $dept }}</div>
-                        <div class="pf-v-sub">Payroll grouping</div>
-                    </div>
-                </div>
-
-                <div class="pf-divider"></div>
-
-                <div style="display:flex;flex-direction:column;gap:10px;">
-                    <a href="{{ route('employee.profile.edit') }}" class="pf-btn-primary" style="justify-content:center;">
-                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                        </svg>
-                        Edit Personal Info
-                    </a>
-                    <a href="{{ route('employee.dashboard') }}" class="pf-btn-sec" style="justify-content:center;">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m5-4h-2" />
-                        </svg>
-                        Go to Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
     </div>
 
 </div></div>

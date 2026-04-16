@@ -106,7 +106,7 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="sa-status {{ $statusClass }}">
+                                <span class="sa-status {{ $statusClass }}" data-status-badge>
                                     {{ $statusLabel }}
                                 </span>
                             </td>
@@ -167,6 +167,29 @@
 
 </div>
 
+{{-- Confirmation Modal (custom, replaces browser confirm) --}}
+<div id="saConfirmModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999;">
+    <div id="saConfirmBackdrop" style="position:absolute;inset:0;background:rgba(17,24,39,0.55);"></div>
+    <div role="dialog" aria-modal="true" aria-labelledby="saConfirmTitle"
+         style="position:relative;width:min(520px,92vw);background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;">
+        <div style="padding:16px 18px;border-bottom:1px solid #f3f4f6;display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:36px;height:36px;border-radius:10px;background:#fffbeb;color:#d97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-8.3 14.4A2 2 0 003.7 21h16.6a2 2 0 001.71-2.74l-8.3-14.4a2 2 0 00-3.42 0z"/>
+                </svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <p id="saConfirmTitle" style="margin:0 0 4px;font-size:0.92rem;font-weight:800;color:#111827;letter-spacing:-0.01em;">Confirm action</p>
+                <p id="saConfirmMessage" style="margin:0;font-size:0.82rem;color:#6b7280;line-height:1.45;">Are you sure?</p>
+            </div>
+        </div>
+        <div style="padding:14px 18px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
+            <button type="button" id="saConfirmCancel" class="prl-btn-cancel">Cancel</button>
+            <button type="button" id="saConfirmOk" class="prl-btn-generate" style="box-shadow:none;">Confirm</button>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('accSearch');
@@ -197,53 +220,147 @@ document.addEventListener('DOMContentLoaded', function() {
     statusFilter.addEventListener('change', filterTable);
 });
 
-function resetPassword(userId, userName) {
-    if (!confirm(`Reset password for ${userName}? They will receive a temporary password.`)) {
-        return;
-    }
+// Route templates (avoid hardcoded paths; fixes subfolder / tunnel deployments)
+const SA_TOGGLE_STATUS_URL = @json(route('superadmin.accounts.toggle-status', ['account' => '__ACCOUNT__']));
+const SA_RESET_PASSWORD_URL = @json(route('superadmin.accounts.perform-reset-password', ['account' => '__ACCOUNT__']));
 
-    fetch(`/superadmin/accounts/${userId}/reset-password`, {
+function saUrlFromTemplate(template, accountId) {
+    return String(template).replace('__ACCOUNT__', String(accountId));
+}
+
+function saConfirm({ title = 'Confirm action', message = 'Are you sure?', confirmText = 'Confirm', cancelText = 'Cancel' } = {}) {
+    const modal = document.getElementById('saConfirmModal');
+    const backdrop = document.getElementById('saConfirmBackdrop');
+    const titleEl = document.getElementById('saConfirmTitle');
+    const msgEl = document.getElementById('saConfirmMessage');
+    const btnCancel = document.getElementById('saConfirmCancel');
+    const btnOk = document.getElementById('saConfirmOk');
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+    btnOk.textContent = confirmText;
+    btnCancel.textContent = cancelText;
+
+    modal.style.display = 'flex';
+
+    return new Promise((resolve) => {
+        const cleanup = () => {
+            modal.style.display = 'none';
+            btnCancel.removeEventListener('click', onCancel);
+            btnOk.removeEventListener('click', onOk);
+            backdrop.removeEventListener('click', onCancel);
+            document.removeEventListener('keydown', onKeydown);
+        };
+
+        const onCancel = () => { cleanup(); resolve(false); };
+        const onOk = () => { cleanup(); resolve(true); };
+        const onKeydown = (e) => { if (e.key === 'Escape') onCancel(); };
+
+        btnCancel.addEventListener('click', onCancel);
+        btnOk.addEventListener('click', onOk);
+        backdrop.addEventListener('click', onCancel);
+        document.addEventListener('keydown', onKeydown);
+    });
+}
+
+function resetPassword(userId, userName) {
+    saConfirm({
+        title: 'Reset password?',
+        message: `Reset password for ${userName}? A temporary password will be generated.`,
+        confirmText: 'Reset password',
+        cancelText: 'Cancel',
+    }).then((ok) => {
+        if (!ok) return;
+
+        fetch(saUrlFromTemplate(SA_RESET_PASSWORD_URL, userId), {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
             'Content-Type': 'application/json',
         },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(`Password reset successful!\nNew password: ${data.password}\n\nPlease share this with the user.`);
-            location.reload();
-        } else {
-            alert('Failed to reset password: ' + (data.message || 'Unknown error'));
-        }
-    })
-    .catch(error => {
-        alert('Error: ' + error.message);
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Password reset successful!\nNew password: ${data.password}\n\nPlease share this with the user.`);
+                location.reload();
+            } else {
+                alert('Failed to reset password: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error.message);
+        });
     });
 }
 
 function toggleStatus(userId, checkbox) {
     const newStatus = checkbox.checked ? 'active' : 'inactive';
+    const row = checkbox.closest('tr');
+    const badge = row ? row.querySelector('[data-status-badge]') : null;
 
-    fetch(`/superadmin/accounts/${userId}/toggle-status`, {
+    checkbox.disabled = true;
+
+    fetch(saUrlFromTemplate(SA_TOGGLE_STATUS_URL, userId), {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status: newStatus }),
     })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.success) {
-            alert('Failed to update status: ' + (data.message || 'Unknown error'));
-            checkbox.checked = !checkbox.checked;
+    .then(async (response) => {
+        const contentType = response.headers.get('content-type') || '';
+        const raw = await response.text();
+
+        let data = null;
+        if (contentType.includes('application/json')) {
+            try { data = JSON.parse(raw); } catch (_) { /* fallthrough */ }
         }
+
+        if (!response.ok) {
+            // Common Laravel cases:
+            // - 419: CSRF token mismatch (HTML)
+            // - 302: redirect to login (HTML)
+            // - 422: validation error (JSON when Accept header is set)
+            const msg =
+                (data && (data.message || (data.errors && JSON.stringify(data.errors)))) ||
+                raw?.slice(0, 300) ||
+                `Request failed (${response.status})`;
+            throw new Error(msg);
+        }
+
+        if (!data) {
+            // Successful response should be JSON from toggleStatus()
+            throw new Error('Unexpected server response. Please try again.');
+        }
+
+        if (!data.success) throw new Error(data.message || 'Unknown error');
+
+        // Update row + badge immediately (keeps filters accurate)
+        const effectiveStatus = (data.status === 'active') ? 'active' : 'inactive';
+        if (row) row.setAttribute('data-status', effectiveStatus);
+
+        if (badge) {
+            badge.textContent = effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1);
+            badge.classList.remove('s-active', 's-inactive');
+            badge.classList.add(effectiveStatus === 'active' ? 's-active' : 's-inactive');
+        }
+
+        // Re-apply filters without full reload
+        document.getElementById('accRoleFilter')?.dispatchEvent(new Event('change'));
+        document.getElementById('accStatusFilter')?.dispatchEvent(new Event('change'));
     })
     .catch(error => {
         alert('Error: ' + error.message);
         checkbox.checked = !checkbox.checked;
+    })
+    .finally(() => {
+        checkbox.disabled = false;
     });
 }
 </script>

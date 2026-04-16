@@ -53,9 +53,16 @@
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
-                        <input type="text" name="contact_number" id="contact_number"
+                        <input type="tel" name="contact_number" id="contact_number"
                             class="form-control @error('contact_number') is-invalid @enderror"
-                            value="{{ old('contact_number', $driver->contact_number) }}" required>
+                            value="{{ old('contact_number', $driver->contact_number) }}"
+                            placeholder="09192846375"
+                            inputmode="numeric"
+                            autocomplete="tel"
+                            maxlength="11"
+                            pattern="09\d{9}"
+                            data-digits-only
+                            required>
                         @error('contact_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                     <div class="col-md-6 mb-4">

@@ -87,8 +87,8 @@
 
             new QRCode(qrDiv, {
                 text: data.token,
-                width: 220,
-                height: 220,
+                width: 320,
+                height: 320,
                 colorDark: '#111827',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.H
@@ -178,7 +178,7 @@
 .qrmon-page {
     font-family: 'Sora', sans-serif;
     width: 100%;
-    max-width: 920px;
+    max-width: 1180px;
     margin: 0 auto;
     box-sizing: border-box;
 }
@@ -275,7 +275,7 @@
 }
 
 .qrmon-card-title {
-    font-size: 0.92rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #111827;
     margin: 0 0 2px;
@@ -283,7 +283,7 @@
 }
 
 .qrmon-card-sub {
-    font-size: 0.72rem;
+    font-size: 0.82rem;
     color: #9ca3af;
     margin: 0;
 }
@@ -315,10 +315,10 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 0.835rem;
+    font-size: 1.02rem;
     color: #374151;
     line-height: 1.45;
-    padding: 10px 12px;
+    padding: 12px 14px;
     border-radius: 10px;
     background: #f9fafb;
     border: 1px solid #f3f4f6;
@@ -329,12 +329,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 26px;
-    height: 26px;
+    min-width: 30px;
+    height: 30px;
     border-radius: 8px;
     background: #fff0f0;
     color: #c8292a;
-    font-size: 0.72rem;
+    font-size: 0.82rem;
     font-weight: 700;
     flex-shrink: 0;
 }
@@ -369,8 +369,8 @@
 }
 
 #qrcode {
-    width: 220px;
-    height: 220px;
+    width: 320px;
+    height: 320px;
 }
 
 .qrmon-success-overlay {

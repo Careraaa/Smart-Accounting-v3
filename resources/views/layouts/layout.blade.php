@@ -195,6 +195,40 @@
     {{-- Page-specific scripts --}}
     @yield('scripts')
     @stack('scripts')
+
+    <script>
+        // Global input normalizers (used by multiple forms across the app)
+        (() => {
+            const normalizeDigitsOnly = (el) => {
+                const digits = (el.value || '').replace(/[^\d]/g, '');
+                if (el.value !== digits) el.value = digits;
+            };
+
+            const normalizeDecimalOnly = (el) => {
+                const raw = (el.value || '');
+                let cleaned = raw.replace(/[^\d.]/g, '');
+                const firstDot = cleaned.indexOf('.');
+                if (firstDot !== -1) {
+                    cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+                }
+                if (el.value !== cleaned) el.value = cleaned;
+            };
+
+            document.addEventListener('input', (e) => {
+                const el = e.target;
+                if (!(el instanceof HTMLInputElement)) return;
+                if (el.hasAttribute('data-digits-only')) normalizeDigitsOnly(el);
+                if (el.hasAttribute('data-decimal-only')) normalizeDecimalOnly(el);
+            });
+
+            document.addEventListener('keydown', (e) => {
+                const el = e.target;
+                if (!(el instanceof HTMLInputElement)) return;
+                if (!el.hasAttribute('data-decimal-only')) return;
+                if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') e.preventDefault();
+            });
+        })();
+    </script>
 </body>
 
 </html>

@@ -397,6 +397,11 @@
             {{-- ── Right ── --}}
             <div class="header-right ms-auto d-flex align-items-center gap-1">
 
+                {{-- Fullscreen (monitor display) --}}
+                <button type="button" class="kt-header-btn" id="ktFullscreenBtn" title="Full screen" aria-label="Full screen">
+                    <i class="feather-maximize"></i>
+                </button>
+
                 {{-- Divider --}}
                 <div class="kt-header-divider d-none d-sm-block"></div>
 
@@ -460,5 +465,37 @@
     <script src="{{ asset('vendors/js/vendors.min.js') }}"></script>
     {{-- daterangepicker was removed; keep layout clean --}}
     <script src="{{ asset('vendors/js/apexcharts.min.js') }}"></script>
+
+    <script>
+        (function () {
+            const btn = document.getElementById('ktFullscreenBtn');
+            if (!btn) return;
+
+            const updateIcon = () => {
+                const icon = btn.querySelector('i');
+                if (!icon) return;
+                icon.className = document.fullscreenElement ? 'feather-minimize' : 'feather-maximize';
+                btn.title = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
+                btn.setAttribute('aria-label', btn.title);
+            };
+
+            btn.addEventListener('click', async () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        await document.documentElement.requestFullscreen();
+                    } else {
+                        await document.exitFullscreen();
+                    }
+                } catch (e) {
+                    // no-op (fullscreen can be blocked by browser policy)
+                } finally {
+                    updateIcon();
+                }
+            });
+
+            document.addEventListener('fullscreenchange', updateIcon);
+            updateIcon();
+        })();
+    </script>
 </body>
 </html>

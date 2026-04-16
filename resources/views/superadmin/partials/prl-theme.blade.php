@@ -106,7 +106,20 @@
 .prl-pagination-info strong { color:#374151; }
 
 /* Account role / status (super admin) */
-.sa-role { display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:capitalize;letter-spacing:0.04em;white-space:nowrap; }
+.sa-role {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:3px 10px;
+    min-width: 128px;
+    border-radius:20px;
+    font-size:0.68rem;
+    font-weight:700;
+    text-transform:capitalize;
+    letter-spacing:0.04em;
+    white-space:nowrap;
+    text-align:center;
+}
 .sa-role.r-superadmin { background:#fef3c7;color:#b45309;border:1px solid #fde68a; }
 .sa-role.r-hr { background:#dbeafe;color:#0369a1;border:1px solid #bae6fd; }
 .sa-role.r-accountant { background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe; }

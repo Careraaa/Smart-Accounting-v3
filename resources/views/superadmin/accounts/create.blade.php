@@ -41,24 +41,35 @@
                 <div class="prl-form-row">
                     <div class="prl-field">
                         <label class="prl-lbl">First name <span class="req">*</span></label>
-                        <input type="text" name="first_name" class="prl-ctrl @error('first_name') is-invalid @enderror" value="{{ old('first_name') }}" required>
+                        <input type="text" name="first_name" class="prl-ctrl @error('first_name') is-invalid @enderror" value="{{ old('first_name') }}" placeholder="Juan" required>
                         @error('first_name')<span class="prl-err">{{ $message }}</span>@enderror
                     </div>
                     <div class="prl-field">
                         <label class="prl-lbl">Last name <span class="req">*</span></label>
-                        <input type="text" name="last_name" class="prl-ctrl @error('last_name') is-invalid @enderror" value="{{ old('last_name') }}" required>
+                        <input type="text" name="last_name" class="prl-ctrl @error('last_name') is-invalid @enderror" value="{{ old('last_name') }}" placeholder="Dela Cruz" required>
                         @error('last_name')<span class="prl-err">{{ $message }}</span>@enderror
                     </div>
                 </div>
                 <div class="prl-form-row">
                     <div class="prl-field">
                         <label class="prl-lbl">Email <span class="req">*</span></label>
-                        <input type="email" name="email" class="prl-ctrl @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
+                        <input type="email" name="email" class="prl-ctrl @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="juan.delacruz@example.com" required>
                         @error('email')<span class="prl-err">{{ $message }}</span>@enderror
                     </div>
                     <div class="prl-field">
                         <label class="prl-lbl">Phone</label>
-                        <input type="tel" name="phone" class="prl-ctrl @error('phone') is-invalid @enderror" value="{{ old('phone') }}">
+                        <input
+                            type="tel"
+                            name="phone"
+                            class="prl-ctrl @error('phone') is-invalid @enderror"
+                            value="{{ old('phone') }}"
+                            placeholder="09173458216"
+                            inputmode="numeric"
+                            autocomplete="tel"
+                            maxlength="11"
+                            pattern="09\d{9}"
+                            data-digits-only
+                        >
                         @error('phone')<span class="prl-err">{{ $message }}</span>@enderror
                     </div>
                 </div>
@@ -79,14 +90,13 @@
                 <div class="prl-form-row">
                     <div class="prl-field">
                         <label class="prl-lbl">Username <span class="req">*</span></label>
-                        <input type="text" name="username" class="prl-ctrl @error('username') is-invalid @enderror" value="{{ old('username') }}" required>
+                        <input type="text" name="username" class="prl-ctrl @error('username') is-invalid @enderror" value="{{ old('username') }}" placeholder="juandelacruz" required>
                         @error('username')<span class="prl-err">{{ $message }}</span>@enderror
                     </div>
                     <div class="prl-field">
                         <label class="prl-lbl">Role <span class="req">*</span></label>
                         <select name="role" class="prl-ctrl @error('role') is-invalid @enderror" required>
                             <option value="">— Select —</option>
-                            <option value="superadmin" {{ old('role') === 'superadmin' ? 'selected' : '' }}>Super Admin</option>
                             <option value="hr" {{ old('role') === 'hr' ? 'selected' : '' }}>HR</option>
                             <option value="accountant" {{ old('role') === 'accountant' ? 'selected' : '' }}>Accountant</option>
                             <option value="remittance_clerk" {{ old('role') === 'remittance_clerk' ? 'selected' : '' }}>Remittance Clerk</option>
@@ -124,12 +134,12 @@
                 <div class="prl-form-row">
                     <div class="prl-field">
                         <label class="prl-lbl">Position</label>
-                        <input type="text" name="position" class="prl-ctrl @error('position') is-invalid @enderror" value="{{ old('position') }}">
+                        <input type="text" name="position" class="prl-ctrl @error('position') is-invalid @enderror" value="{{ old('position') }}" placeholder="Accounting Clerk">
                         @error('position')<span class="prl-err">{{ $message }}</span>@enderror
                     </div>
                     <div class="prl-field">
                         <label class="prl-lbl">Department</label>
-                        <input type="text" name="department" class="prl-ctrl @error('department') is-invalid @enderror" value="{{ old('department') }}">
+                        <input type="text" name="department" class="prl-ctrl @error('department') is-invalid @enderror" value="{{ old('department') }}" placeholder="Finance">
                         @error('department')<span class="prl-err">{{ $message }}</span>@enderror
                     </div>
                 </div>
@@ -141,7 +151,17 @@
                     </div>
                     <div class="prl-field">
                         <label class="prl-lbl">Salary rate</label>
-                        <input type="number" name="salary_rate" class="prl-ctrl @error('salary_rate') is-invalid @enderror" value="{{ old('salary_rate') }}" step="0.01" min="0">
+                        <input
+                            type="number"
+                            name="salary_rate"
+                            class="prl-ctrl @error('salary_rate') is-invalid @enderror"
+                            value="{{ old('salary_rate') }}"
+                            placeholder="25000.00"
+                            inputmode="decimal"
+                            step="0.01"
+                            min="0"
+                            data-decimal-only
+                        >
                         @error('salary_rate')<span class="prl-err">{{ $message }}</span>@enderror
                     </div>
                 </div>
@@ -157,3 +177,43 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(() => {
+    const normalizeDigitsOnly = (el) => {
+        const digits = (el.value || '').replace(/[^\d]/g, '');
+        if (el.value !== digits) el.value = digits;
+    };
+
+    const normalizeDecimalOnly = (el) => {
+        const raw = (el.value || '');
+        // keep digits + dot, and allow only a single dot
+        let cleaned = raw.replace(/[^\d.]/g, '');
+        const firstDot = cleaned.indexOf('.');
+        if (firstDot !== -1) {
+            cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
+        }
+        if (el.value !== cleaned) el.value = cleaned;
+    };
+
+    document.addEventListener('input', (e) => {
+        const el = e.target;
+        if (!(el instanceof HTMLInputElement)) return;
+        if (el.hasAttribute('data-digits-only')) normalizeDigitsOnly(el);
+        if (el.hasAttribute('data-decimal-only')) normalizeDecimalOnly(el);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        const el = e.target;
+        if (!(el instanceof HTMLInputElement)) return;
+        if (!el.hasAttribute('data-decimal-only')) return;
+        if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') e.preventDefault();
+    });
+
+    // Normalize any prefilled old() values on load
+    document.querySelectorAll('input[data-digits-only]').forEach(normalizeDigitsOnly);
+    document.querySelectorAll('input[data-decimal-only]').forEach(normalizeDecimalOnly);
+})();
+</script>
+@endpush

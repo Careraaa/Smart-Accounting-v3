@@ -43,7 +43,7 @@ class PAOController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string',
-            'contact_number' => 'required',
+            'contact_number' => ['required', 'regex:/^09\d{9}$/'],
             'email' => 'required|email|unique:paos',
             'gender' => 'required|string',
             'address' => 'required|string',
@@ -70,7 +70,7 @@ class PAOController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string',
-            'contact_number' => 'required',
+            'contact_number' => ['required', 'regex:/^09\d{9}$/'],
             'email' => 'required|email|unique:paos,email,' . $pao->id,
             'gender' => 'required|string',
             'address' => 'required|string',
