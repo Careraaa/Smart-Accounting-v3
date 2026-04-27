@@ -24,7 +24,7 @@ class RemittanceSeeder extends Seeder
                 'contact_number' => '09171234567',
                 'gender' => 'Male',
                 'email' => 'juan@example.com',
-                'address' => 'Quezon City',
+                'address' => '123 Rizal St., Brgy. Commonwealth, Quezon City, Metro Manila',
                 'date_of_hire' => now()->subYears(3),
                 'status' => 'active',
             ]
@@ -37,7 +37,7 @@ class RemittanceSeeder extends Seeder
                 'contact_number' => '09987654321',
                 'gender' => 'Male',
                 'email' => 'pedro@example.com',
-                'address' => 'Manila',
+                'address' => '45 Bonifacio Ave., Brgy. 289, City of Manila, Metro Manila',
                 'date_of_hire' => now()->subYears(2),
                 'status' => 'active',
             ]
@@ -52,7 +52,7 @@ class RemittanceSeeder extends Seeder
                 'name' => 'Maria Lopez',
                 'contact_number' => '09170000000',
                 'gender' => 'Female',
-                'address' => 'Pasig',
+                'address' => '88 C. Raymundo Ave., Brgy. Rosario, Pasig City, Metro Manila',
                 'date_of_hire' => now()->subYears(4),
                 'status' => 'active',
             ]
@@ -64,7 +64,7 @@ class RemittanceSeeder extends Seeder
                 'name' => 'Ana Reyes',
                 'contact_number' => '09171111111',
                 'gender' => 'Female',
-                'address' => 'Makati',
+                'address' => '210 Kalayaan Ave., Brgy. Poblacion, Makati City, Metro Manila',
                 'date_of_hire' => now()->subYears(1),
                 'status' => 'active',
             ]

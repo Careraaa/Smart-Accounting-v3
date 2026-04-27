@@ -229,6 +229,87 @@
             });
         })();
     </script>
+
+    <script>
+        // Force fresh data when returning via browser back/forward cache.
+        (() => {
+            const showRefreshToast = () => {
+                if (document.getElementById('sa-refresh-toast')) return;
+
+                const toast = document.createElement('div');
+                toast.id = 'sa-refresh-toast';
+                toast.innerHTML = `
+                    <span class="sa-refresh-dot" aria-hidden="true"></span>
+                    <span>Refreshing latest data...</span>
+                `;
+
+                Object.assign(toast.style, {
+                    position: 'fixed',
+                    top: '18px',
+                    right: '18px',
+                    zIndex: '99999',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid #fbcaca',
+                    background: 'linear-gradient(135deg, #fff5f5 0%, #ffffff 100%)',
+                    color: '#7f1d1d',
+                    fontSize: '0.8rem',
+                    fontWeight: '700',
+                    letterSpacing: '0.01em',
+                    boxShadow: '0 8px 22px rgba(200, 41, 42, 0.2)',
+                    backdropFilter: 'blur(3px)',
+                    opacity: '0',
+                    transform: 'translateY(-6px)',
+                    transition: 'opacity .2s ease, transform .2s ease',
+                });
+
+                document.body.appendChild(toast);
+                requestAnimationFrame(() => {
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateY(0)';
+                });
+
+                const dot = toast.querySelector('.sa-refresh-dot');
+                if (dot) {
+                    Object.assign(dot.style, {
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '999px',
+                        background: '#c8292a',
+                        boxShadow: '0 0 0 0 rgba(200, 41, 42, 0.4)',
+                        animation: 'saRefreshPulse 1.2s ease-out infinite',
+                        flexShrink: '0',
+                    });
+                }
+
+                if (!document.getElementById('sa-refresh-toast-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'sa-refresh-toast-style';
+                    style.textContent = `
+                        @keyframes saRefreshPulse {
+                            0% { box-shadow: 0 0 0 0 rgba(200, 41, 42, 0.4); }
+                            70% { box-shadow: 0 0 0 8px rgba(200, 41, 42, 0); }
+                            100% { box-shadow: 0 0 0 0 rgba(200, 41, 42, 0); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            };
+
+            window.addEventListener('pageshow', (event) => {
+                const navEntry = performance.getEntriesByType?.('navigation')?.[0];
+                const fromHistory = event.persisted || navEntry?.type === 'back_forward';
+
+                if (fromHistory) {
+                    showRefreshToast();
+                    setTimeout(() => window.location.reload(), 180);
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>

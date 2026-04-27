@@ -179,4 +179,42 @@ class User extends Authenticatable
     {
         return $this->daily_rate / 8;
     }
+
+    // ── Address helpers (address JSON -> form fields) ───────────────────
+
+    private function decodedAddress(): array
+    {
+        $raw = $this->address;
+
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        if (!is_string($raw) || trim($raw) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($raw, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    public function getAddressStreetAttribute(): string
+    {
+        return (string) ($this->decodedAddress()['street'] ?? '');
+    }
+
+    public function getAddressBarangayAttribute(): string
+    {
+        return (string) ($this->decodedAddress()['barangay'] ?? '');
+    }
+
+    public function getAddressCityAttribute(): string
+    {
+        return (string) ($this->decodedAddress()['city'] ?? '');
+    }
+
+    public function getAddressProvinceAttribute(): string
+    {
+        return (string) ($this->decodedAddress()['province'] ?? '');
+    }
 }
