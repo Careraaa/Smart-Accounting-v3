@@ -245,31 +245,31 @@
 
                 Object.assign(toast.style, {
                     position: 'fixed',
-                    top: '18px',
-                    right: '18px',
+                    top: '24px',
+                    left: '50%',
                     zIndex: '99999',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '10px',
-                    padding: '10px 14px',
+                    gap: '8px',
+                    padding: '8px 14px',
                     borderRadius: '10px',
                     border: '1px solid #fbcaca',
                     background: 'linear-gradient(135deg, #fff5f5 0%, #ffffff 100%)',
                     color: '#7f1d1d',
-                    fontSize: '0.8rem',
-                    fontWeight: '700',
+                    fontSize: '.82rem',
+                    fontWeight: '600',
                     letterSpacing: '0.01em',
-                    boxShadow: '0 8px 22px rgba(200, 41, 42, 0.2)',
+                    boxShadow: '0 8px 20px rgba(200, 41, 42, 0.2)',
                     backdropFilter: 'blur(3px)',
                     opacity: '0',
-                    transform: 'translateY(-6px)',
+                    transform: 'translate(-50%, -8px) scale(0.97)',
                     transition: 'opacity .2s ease, transform .2s ease',
                 });
 
                 document.body.appendChild(toast);
                 requestAnimationFrame(() => {
                     toast.style.opacity = '1';
-                    toast.style.transform = 'translateY(0)';
+                    toast.style.transform = 'translate(-50%, 0) scale(1)';
                 });
 
                 const dot = toast.querySelector('.sa-refresh-dot');

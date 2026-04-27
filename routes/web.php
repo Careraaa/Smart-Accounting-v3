@@ -122,7 +122,7 @@ Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])-
 });
 
 // ===== EMPLOYEE ROUTES =====
-Route::middleware(['auth', 'check-status', 'role:employee'])->group(function () {
+Route::middleware(['auth', 'check-status', 'role:employee,superadmin'])->group(function () {
     Route::get('/employee', fn() => view('employee.dashboard'))->name('employee.index');
 
     // Profile Routes
@@ -351,7 +351,7 @@ Route::middleware(['auth', 'check-status'])->group(function () {
 });
 
 // ===== ACCOUNTANT ROUTES =====
-Route::middleware(['auth', 'check-status', 'role:accountant'])->group(function () {
+Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group(function () {
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
 
     // Batch approval routes (must come before resource route)
@@ -381,7 +381,7 @@ Route::middleware(['auth', 'check-status', 'role:accountant'])->group(function (
 });
 
 // ===== QR ATTENDANCE ADMIN ROUTES =====
-Route::middleware(['auth', 'check-status', 'role:qr_admin'])->group(function () {
+Route::middleware(['auth', 'check-status', 'role:qr_admin,superadmin'])->group(function () {
     Route::get('/admin/qr-monitor', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 });
 
