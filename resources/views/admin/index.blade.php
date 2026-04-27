@@ -71,6 +71,36 @@
     let qrRefreshInterval  = null;
     let qrCountdown        = 60;
     let reloadPending      = false;
+    let resizeDebounceTimer = null;
+
+    function getResponsiveQRSize() {
+        const rootStyles = getComputedStyle(document.documentElement);
+        const cssSize = parseFloat(rootStyles.getPropertyValue('--qr-size'));
+
+        if (Number.isFinite(cssSize) && cssSize > 0) {
+            return Math.round(cssSize);
+        }
+
+        return 360;
+    }
+
+    function renderQRCode(token) {
+        if (!token || token === '——') return;
+
+        const qrDiv = document.getElementById('qrcode');
+        qrDiv.innerHTML = '';
+
+        const qrSize = getResponsiveQRSize();
+
+        new QRCode(qrDiv, {
+            text: token,
+            width: qrSize,
+            height: qrSize,
+            colorDark: '#111827',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
 
     function loadQR() {
         reloadPending = false;
@@ -82,18 +112,7 @@
         })
         .then(r => r.json())
         .then(data => {
-            const qrDiv = document.getElementById('qrcode');
-            qrDiv.innerHTML = '';
-
-            new QRCode(qrDiv, {
-                text: data.token,
-                width: 320,
-                height: 320,
-                colorDark: '#111827',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
+            renderQRCode(data.token);
             document.getElementById('token-display').textContent = data.token;
             qrCountdown = 60;
 
@@ -169,11 +188,23 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         loadQR();
+
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeDebounceTimer);
+            resizeDebounceTimer = setTimeout(function () {
+                const token = document.getElementById('token-display').textContent.trim();
+                renderQRCode(token);
+            }, 120);
+        });
     });
 </script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
+
+:root {
+    --qr-size: clamp(260px, 33vw, 460px);
+}
 
 .qrmon-page {
     font-family: 'Sora', sans-serif;
@@ -181,6 +212,9 @@
     max-width: 1180px;
     margin: 0 auto;
     box-sizing: border-box;
+    min-height: calc(100vh - 110px);
+    display: flex;
+    align-items: center;
 }
 
 .qrmon-wrap { padding: 0 4px; }
@@ -214,9 +248,10 @@
 
 .qrmon-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(320px, 1fr) minmax(420px, 560px);
     gap: 16px;
-    align-items: stretch;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (max-width: 900px) {
@@ -247,6 +282,12 @@
 
 .qrmon-card--qr::after {
     background: #c8292a;
+}
+
+.qrmon-card--qr {
+    width: 100%;
+    max-width: 560px;
+    justify-self: center;
 }
 
 .qrmon-card-head {
@@ -369,8 +410,15 @@
 }
 
 #qrcode {
-    width: 320px;
-    height: 320px;
+    width: var(--qr-size);
+    height: var(--qr-size);
+}
+
+#qrcode > img,
+#qrcode > canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
 }
 
 .qrmon-success-overlay {
@@ -410,6 +458,23 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #9ca3af;
+}
+
+@media (max-width: 1200px) {
+    :root {
+        --qr-size: clamp(240px, 44vw, 400px);
+    }
+}
+
+@media (max-width: 900px) {
+    :root {
+        --qr-size: clamp(240px, 68vw, 380px);
+    }
+
+    .qrmon-page {
+        min-height: auto;
+        align-items: stretch;
+    }
 }
 </style>
 @endsection
