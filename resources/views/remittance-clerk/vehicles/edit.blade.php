@@ -43,9 +43,13 @@
                     </div>
                     <div class="col-md-6 mb-4">
                         <label for="operator" class="form-label">Operator <span class="text-danger">*</span></label>
-                        <input type="text" name="operator" id="operator"
-                            class="form-control @error('operator') is-invalid @enderror"
-                            value="{{ old('operator', $vehicle->operator) }}" placeholder="e.g., John Doe" required>
+                        <select name="operator" id="operator"
+                            class="form-select @error('operator') is-invalid @enderror" required>
+                            <option value="">-- Select Operator --</option>
+                            @foreach($operators as $operator)
+                                <option value="{{ $operator }}" @selected(old('operator', $vehicle->operator) === $operator)>{{ $operator }}</option>
+                            @endforeach
+                        </select>
                         @error('operator')<span class="invalid-feedback">{{ $message }}</span>@enderror
                     </div>
                 </div>

@@ -5,7 +5,10 @@ namespace App\Http\Controllers\RemittanceClerk;
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use App\Models\Route;
+use App\Models\Driver;
+use App\Models\PAO;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class VehicleController extends Controller
 {
@@ -39,15 +42,30 @@ class VehicleController extends Controller
     public function create()
     {
         $routes = Route::all();
-        return view('remittance-clerk.vehicles.create', compact('routes'));
+        $operators = Driver::query()
+            ->where('status', 'active')
+            ->pluck('name')
+            ->merge(PAO::query()->where('status', 'active')->pluck('name'))
+            ->unique()
+            ->sort()
+            ->values();
+        return view('remittance-clerk.vehicles.create', compact('routes', 'operators'));
     }
 
     public function store(Request $request)
     {
+        $operatorOptions = Driver::query()
+            ->where('status', 'active')
+            ->pluck('name')
+            ->merge(PAO::query()->where('status', 'active')->pluck('name'))
+            ->unique()
+            ->values()
+            ->all();
+
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles',
             'route_id' => 'required|exists:routes,id',
-            'operator' => 'required|string',
+            'operator' => ['required', 'string', Rule::in($operatorOptions)],
             'status' => 'required|in:active,under_maintenance',
         ]);
 
@@ -71,15 +89,32 @@ class VehicleController extends Controller
     public function edit(Vehicle $vehicle)
     {
         $routes = Route::all();
-        return view('remittance-clerk.vehicles.edit', compact('vehicle', 'routes'));
+        $operators = Driver::query()
+            ->where('status', 'active')
+            ->pluck('name')
+            ->merge(PAO::query()->where('status', 'active')->pluck('name'))
+            ->push($vehicle->operator)
+            ->unique()
+            ->sort()
+            ->values();
+        return view('remittance-clerk.vehicles.edit', compact('vehicle', 'routes', 'operators'));
     }
 
     public function update(Request $request, Vehicle $vehicle)
     {
+        $operatorOptions = Driver::query()
+            ->where('status', 'active')
+            ->pluck('name')
+            ->merge(PAO::query()->where('status', 'active')->pluck('name'))
+            ->push($vehicle->operator)
+            ->unique()
+            ->values()
+            ->all();
+
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles,plate_number,' . $vehicle->id,
             'route_id' => 'required|exists:routes,id',
-            'operator' => 'required|string',
+            'operator' => ['required', 'string', Rule::in($operatorOptions)],
             'status' => 'required|in:active,under_maintenance',
         ]);
 

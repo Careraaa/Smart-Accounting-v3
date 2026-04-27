@@ -41,9 +41,13 @@ class PAOController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'contact_number' => preg_replace('/\D/', '', (string) $request->contact_number),
+        ]);
+
         $validated = $request->validate([
             'name' => 'required|string',
-            'contact_number' => ['required', 'regex:/^09\d{9}$/'],
+            'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
             'email' => 'required|email|unique:paos',
             'gender' => 'required|string',
             'address' => 'required|string',
@@ -68,9 +72,13 @@ class PAOController extends Controller
 
     public function update(Request $request, PAO $pao)
     {
+        $request->merge([
+            'contact_number' => preg_replace('/\D/', '', (string) $request->contact_number),
+        ]);
+
         $validated = $request->validate([
             'name' => 'required|string',
-            'contact_number' => ['required', 'regex:/^09\d{9}$/'],
+            'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
             'email' => 'required|email|unique:paos,email,' . $pao->id,
             'gender' => 'required|string',
             'address' => 'required|string',

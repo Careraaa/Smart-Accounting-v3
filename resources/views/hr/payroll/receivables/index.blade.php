@@ -107,6 +107,9 @@
 /* ── Rejection reason row ── */
 .prl-reason-row td { background:#fffbeb !important;border-left:3px solid #f59e0b; }
 .prl-reason-text { font-size:0.775rem;color:#92400e;display:flex;align-items:center;gap:6px; }
+.prl-bottom-reasons { margin-top:16px;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 16px; }
+.prl-bottom-reasons-title { margin:0 0 8px;font-size:0.78rem;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:0.06em; }
+.prl-bottom-reasons-list { margin:0;padding-left:18px;color:#92400e;font-size:0.8rem;line-height:1.6; }
 
 /* ── Progress bar ── */
 .prl-progress-wrap { display:flex;align-items:center;gap:8px; }
@@ -331,16 +334,6 @@
                         </td>
                         @endif
                     </tr>
-                    @if($advance->rejection_reason)
-                    <tr class="prl-reason-row">
-                        <td colspan="{{ auth()->user()->role === 'accountant' ? 7 : 6 }}">
-                            <div class="prl-reason-text">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                <strong>Rejection reason:</strong>&nbsp;{{ $advance->rejection_reason }}
-                            </div>
-                        </td>
-                    </tr>
-                    @endif
                 @empty
                     <tr><td colspan="{{ auth()->user()->role === 'accountant' ? 7 : 6 }}">
                         <div class="prl-empty">
@@ -363,6 +356,19 @@
         <div class="prl-table-footer">{{ $cashAdvances->links() }}</div>
         @endif
     </div>
+    @php
+        $cashAdvanceRejections = $cashAdvances->getCollection()->filter(fn($item) => !empty($item->rejection_reason));
+    @endphp
+    @if($cashAdvanceRejections->isNotEmpty())
+    <div class="prl-bottom-reasons">
+        <p class="prl-bottom-reasons-title">Rejection Reasons</p>
+        <ul class="prl-bottom-reasons-list">
+            @foreach($cashAdvanceRejections as $advance)
+                <li><strong>{{ $advance->user->name ?? 'Employee' }}:</strong> {{ $advance->rejection_reason }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
     @endif
 
     {{-- ══════════════════════════════════════════
@@ -462,16 +468,6 @@
                         </td>
                         @endif
                     </tr>
-                    @if($loan->rejection_reason)
-                    <tr class="prl-reason-row">
-                        <td colspan="{{ auth()->user()->role === 'accountant' ? 8 : 7 }}">
-                            <div class="prl-reason-text">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                <strong>Rejection reason:</strong>&nbsp;{{ $loan->rejection_reason }}
-                            </div>
-                        </td>
-                    </tr>
-                    @endif
                 @empty
                     <tr><td colspan="{{ auth()->user()->role === 'accountant' ? 8 : 7 }}">
                         <div class="prl-empty">
@@ -494,6 +490,19 @@
         <div class="prl-table-footer">{{ $salaryLoans->links() }}</div>
         @endif
     </div>
+    @php
+        $loanRejections = $salaryLoans->getCollection()->filter(fn($item) => !empty($item->rejection_reason));
+    @endphp
+    @if($loanRejections->isNotEmpty())
+    <div class="prl-bottom-reasons">
+        <p class="prl-bottom-reasons-title">Rejection Reasons</p>
+        <ul class="prl-bottom-reasons-list">
+            @foreach($loanRejections as $loan)
+                <li><strong>{{ $loan->user->name ?? 'Employee' }}:</strong> {{ $loan->rejection_reason }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
     @endif
 
 </div>

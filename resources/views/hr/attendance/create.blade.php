@@ -139,7 +139,7 @@
                         <div class="att-select-wrap">
                             <select name="user_id" id="user_id"
                                 class="att-select @error('user_id') is-invalid @enderror"
-                                required>
+                                >
                                 <option value="">— Select an employee —</option>
                                 @foreach($employees as $employee)
                                     <option value="{{ $employee->id }}" @selected(old('user_id') == $employee->id)>
@@ -150,6 +150,18 @@
                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                         @error('user_id')
+                            <span class="att-invalid-feedback">{{ $message }}</span>
+                        @enderror
+                        <p class="att-card-sub" style="margin-top:8px;">You can also type the employee username below.</p>
+                    </div>
+
+                    <div class="att-field">
+                        <label for="employee_identifier" class="att-label">Employee Username <span style="text-transform:none;letter-spacing:0;color:#9ca3af;">(optional)</span></label>
+                        <input type="text" name="employee_identifier" id="employee_identifier"
+                            class="att-input @error('employee_identifier') is-invalid @enderror"
+                            value="{{ old('employee_identifier') }}"
+                            placeholder="e.g. juan.delacruz">
+                        @error('employee_identifier')
                             <span class="att-invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>

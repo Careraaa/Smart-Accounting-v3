@@ -257,7 +257,7 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <a href="{{ route('employees.index') }}" class="btn btn-ghost">← Back</a>
+        <button type="button" class="btn btn-ghost" onclick="goBackOrClose()">← Back</button>
         <button class="btn btn-primary" onclick="window.print()">Print Report</button>
     </div>
 
@@ -338,5 +338,21 @@
     </div>
 
 </body>
+
+<script>
+    function goBackOrClose() {
+        if (window.opener) {
+            window.close();
+            return;
+        }
+
+        if (window.history.length > 1) {
+            window.history.back();
+            return;
+        }
+
+        window.location.href = "{{ route('employees.index') }}";
+    }
+</script>
 
 </html>

@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceLog;
 use App\Models\AttendanceToken;
 use App\Models\Employee;
+use App\Models\User;
 use App\Notifications\AttendanceNotification;
 use Illuminate\Http\Request;
 
@@ -197,15 +198,36 @@ class AttendanceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'nullable|exists:users,id',
+            'employee_identifier' => 'nullable|string|max:255',
             'date' => 'required|date',
             'time_in' => 'nullable|date_format:H:i',
             'time_out' => 'nullable|date_format:H:i',
             'status' => 'required|in:present,absent,late,early_leave',
         ]);
 
+        $userId = $request->input('user_id');
+        $identifier = trim((string) $request->input('employee_identifier', ''));
+
+        if (!$userId && $identifier !== '') {
+            $typedEmployee = User::query()
+                ->where('username', $identifier)
+                ->orWhereRaw('LOWER(name) = ?', [strtolower($identifier)])
+                ->first();
+
+            if ($typedEmployee) {
+                $userId = $typedEmployee->id;
+            }
+        }
+
+        if (!$userId) {
+            return back()
+                ->withErrors(['user_id' => 'Please select an employee or enter a valid username.'])
+                ->withInput();
+        }
+
         Attendance::updateOrCreate(
-            ['user_id' => $request->user_id, 'date' => $request->date],
+            ['user_id' => $userId, 'date' => $request->date],
             [
                 'time_in' => $request->time_in ? $request->time_in . ':00' : null,
                 'time_out' => $request->time_out ? $request->time_out . ':00' : null,
@@ -215,7 +237,7 @@ class AttendanceController extends Controller
         );
 
         try {
-            $user = \App\Models\User::find($request->user_id);
+            $user = User::find($userId);
             if ($user) {
                 AttendanceNotification::attendanceRecorded($user, 'manual_entry', \Carbon\Carbon::parse($request->date));
             }
