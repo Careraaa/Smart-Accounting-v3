@@ -205,44 +205,39 @@ document.addEventListener("DOMContentLoaded", function () {
     const passwordDisplay = document.getElementById("defaultPassword");
     const passwordHidden = document.getElementById("hiddenPassword");
 
-    function generateRandomPassword(length = 12) {
-        const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const lowercase = "abcdefghijklmnopqrstuvwxyz";
-        const numbers = "0123456789";
-        const allChars = uppercase + lowercase + numbers;
-
-        let password = "";
-        password += uppercase.charAt(
-            Math.floor(Math.random() * uppercase.length),
+    function generateDefaultPassword() {
+        const firstName = (firstNameField?.value ?? "")
+            .replace(/[^a-zA-Z]/g, "")
+            .trim();
+        const baseRaw = firstName || "Employee";
+        const base =
+            baseRaw.charAt(0).toUpperCase() +
+            baseRaw.slice(1, 6).toLowerCase();
+        const suffix = String(Math.floor(Math.random() * 10000)).padStart(
+            4,
+            "0",
         );
-        password += lowercase.charAt(
-            Math.floor(Math.random() * lowercase.length),
-        );
-        password += numbers.charAt(Math.floor(Math.random() * numbers.length));
 
-        for (let i = password.length; i < length; i++) {
-            password += allChars.charAt(
-                Math.floor(Math.random() * allChars.length),
-            );
-        }
-
-        return password
-            .split("")
-            .sort(() => Math.random() - 0.5)
-            .join("");
+        // Example: Juan1234 (easy to type and communicate)
+        return `${base}${suffix}`;
     }
 
     function updatePasswordDisplay() {
         if (!passwordDisplay) return;
-        const randomPassword = generateRandomPassword(12);
-        passwordDisplay.value = randomPassword;
+        const generatedPassword = generateDefaultPassword();
+        passwordDisplay.value = generatedPassword;
         if (passwordHidden) {
-            passwordHidden.value = randomPassword;
+            passwordHidden.value = generatedPassword;
         }
     }
 
     if (passwordDisplay) {
         updatePasswordDisplay();
+    }
+
+    // Regenerate a readable default password when first name changes.
+    if (firstNameField && passwordDisplay) {
+        firstNameField.addEventListener("input", updatePasswordDisplay);
     }
 
     // -------------------------

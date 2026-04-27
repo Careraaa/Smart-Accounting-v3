@@ -1,7 +1,7 @@
 @php $readOnly = $readOnly ?? false; @endphp
 
 <p class="emp-section-title-form">Account Information</p>
-<p class="emp-section-sub">The username is auto-generated from the employee's name. The default password must be changed after first login.</p>
+<p class="emp-section-sub">The username and temporary password are auto-generated for the employee account.</p>
 
 @if(!$isEdit)
 {{-- CREATE: preview --}}
@@ -25,12 +25,11 @@
             <input type="text" id="defaultPassword" class="emp-input" readonly>
             <input type="hidden" id="hiddenPassword" name="generated_password">
         </div>
-        <p class="emp-hint">Employee must change this after first login.</p>
     </div>
 </div>
 <div class="emp-alert warning">
     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-    Make sure to inform the employee of their username and default password after saving.
+    Share the temporary password securely and remind the employee to change it immediately after first login via Account Settings.
 </div>
 
 @else

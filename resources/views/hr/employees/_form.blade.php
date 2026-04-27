@@ -5,6 +5,16 @@
 
 <div class="emp-page" data-global-datepicker="off">
 
+    @if ($isEdit && empty($employee->gender))
+        <div class="emp-alert error">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01" />
+            </svg>
+            This employee has missing required information from older records (Gender). Please complete it before saving.
+        </div>
+    @endif
+
     {{-- Topbar --}}
     <div class="emp-topbar">
         <div>

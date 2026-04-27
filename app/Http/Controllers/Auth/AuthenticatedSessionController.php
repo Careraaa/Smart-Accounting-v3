@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
 
         // Flash notification if user hasn't changed their generated password yet
         if (!auth()->user()->password_changed) {
-            session()->flash('info', 'Please consider changing your password for security. You can do this from your account settings.');
+            session()->flash('info', 'Security reminder: you are using a temporary password. Please change it now in Account Settings.');
         }
 
         return redirect()->intended(route('dashboard', absolute: false));

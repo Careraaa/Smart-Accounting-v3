@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class AccountController extends Controller
 {
@@ -80,7 +79,10 @@ class AccountController extends Controller
 
     public function performResetPassword(User $account)
     {
-        $tempPassword = Str::random(12);
+        $base = preg_replace('/[^a-zA-Z]/', '', $account->first_name ?? '') ?: 'User';
+        $base = ucfirst(strtolower(substr($base, 0, 6)));
+        $suffix = str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+        $tempPassword = $base . $suffix;
         $account->update([
             'password' => Hash::make($tempPassword),
             'password_changed' => false,

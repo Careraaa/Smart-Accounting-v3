@@ -153,6 +153,7 @@
                 <div><span class="emp-field-label">Last Name</span><div class="emp-field-value">{{ $employee->last_name ?? '—' }}</div></div>
                 <div><span class="emp-field-label">Email</span><div class="emp-field-value">{{ $employee->email ?? '—' }}</div></div>
                 <div><span class="emp-field-label">Phone</span><div class="emp-field-value emp-field-mono">{{ $employee->phone ?? '—' }}</div></div>
+                <div><span class="emp-field-label">Gender</span><div class="emp-field-value">{{ $employee->gender ? ucwords(str_replace('_', ' ', $employee->gender)) : '—' }}</div></div>
                 <div><span class="emp-field-label">Civil Status</span><div class="emp-field-value">{{ ucfirst($employee->civil_status ?? '—') }}</div></div>
                 @if($employee->civil_status === 'married')
                 <div><span class="emp-field-label">Spouse Name</span><div class="emp-field-value">{{ $employee->spouse_name ?? '—' }}</div></div>
