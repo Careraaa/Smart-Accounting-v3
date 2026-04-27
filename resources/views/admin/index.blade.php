@@ -203,7 +203,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 
 :root {
-    --qr-size: clamp(260px, 33vw, 460px);
+    --qr-size: 220px;
 }
 
 .qrmon-page {
@@ -214,10 +214,12 @@
     box-sizing: border-box;
     min-height: calc(100vh - 110px);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    padding-top: 0;
+    margin-top: 0;
 }
 
-.qrmon-wrap { padding: 0 4px; }
+.qrmon-wrap { padding: 8px 4px 0; }
 
 .qrmon-top { margin-bottom: 20px; }
 
@@ -462,13 +464,13 @@
 
 @media (max-width: 1200px) {
     :root {
-        --qr-size: clamp(240px, 44vw, 400px);
+        --qr-size: 200px;
     }
 }
 
 @media (max-width: 900px) {
     :root {
-        --qr-size: clamp(240px, 68vw, 380px);
+        --qr-size: 180px;
     }
 
     .qrmon-page {
