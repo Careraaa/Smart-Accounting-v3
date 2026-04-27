@@ -157,7 +157,7 @@
             </div>
             <div>
                 <div class="prl-stat-label">Gross Pay</div>
-                <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalGross,0) }}</div>
+                <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalGross,2) }}</div>
                 <div class="prl-stat-sub">total gross salary</div>
             </div>
         </div>
@@ -167,7 +167,7 @@
             </div>
             <div>
                 <div class="prl-stat-label">Deductions</div>
-                <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalDeductions,0) }}</div>
+                <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalDeductions,2) }}</div>
                 <div class="prl-stat-sub">total deductions</div>
             </div>
         </div>
@@ -177,7 +177,7 @@
             </div>
             <div>
                 <div class="prl-stat-label">Net Pay</div>
-                <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalNetPay,0) }}</div>
+                <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalNetPay,2) }}</div>
                 <div class="prl-stat-sub">amount to release</div>
             </div>
         </div>
@@ -201,7 +201,7 @@
             </div>
             <div class="prl-summary-stat">
                 <div class="prl-summary-stat-label">Release Amount</div>
-                <div class="prl-summary-stat-value">₱{{ number_format($totalNetPay,0) }}</div>
+                <div class="prl-summary-stat-value">₱{{ number_format($totalNetPay,2) }}</div>
             </div>
         </div>
     </div>

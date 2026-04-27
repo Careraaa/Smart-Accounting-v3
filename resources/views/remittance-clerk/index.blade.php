@@ -47,7 +47,7 @@
                         <span class="dash-label">Total Collections</span>
                         <span class="dash-icon di-green"><i class="feather-arrow-up-circle"></i></span>
                     </div>
-                    <div class="dash-value">₱{{ number_format($totalCollections, 0) }}</div>
+                    <div class="dash-value">₱{{ number_format($totalCollections, 2) }}</div>
                     <div class="dash-sub">{{ $collectionGrowth > 0 ? '+' : '' }}{{ number_format($collectionGrowth, 1) }}% this period</div>
                 </div>
             </div>
@@ -60,7 +60,7 @@
                         <span class="dash-label">Total Expenses</span>
                         <span class="dash-icon di-red"><i class="feather-arrow-down-circle"></i></span>
                     </div>
-                    <div class="dash-value">₱{{ number_format($totalExpenses, 0) }}</div>
+                    <div class="dash-value">₱{{ number_format($totalExpenses, 2) }}</div>
                     <div class="dash-sub">+5.2% this period</div>
                 </div>
             </div>
@@ -73,7 +73,7 @@
                         <span class="dash-label">Net Remittance</span>
                         <span class="dash-icon di-green"><i class="feather-trending-up"></i></span>
                     </div>
-                    <div class="dash-value">₱{{ number_format($totalNetRemittance, 0) }}</div>
+                    <div class="dash-value">₱{{ number_format($totalNetRemittance, 2) }}</div>
                     <div class="dash-sub">+18.3% this period</div>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                         <span class="dash-label">Avg. Collection</span>
                         <span class="dash-icon di-blue"><i class="feather-bar-chart-2"></i></span>
                     </div>
-                    <div class="dash-value">₱{{ number_format($averageCollection, 0) }}</div>
+                    <div class="dash-value">₱{{ number_format($averageCollection, 2) }}</div>
                     <div class="dash-sub">+8.7% this period</div>
                 </div>
             </div>
@@ -99,7 +99,7 @@
                         <span class="dash-label">Avg. Expenses</span>
                         <span class="dash-icon di-amber"><i class="feather-alert-circle"></i></span>
                     </div>
-                    <div class="dash-value">₱{{ number_format($averageExpenses, 0) }}</div>
+                    <div class="dash-value">₱{{ number_format($averageExpenses, 2) }}</div>
                     <div class="dash-sub">-3.1% this period</div>
                 </div>
             </div>
@@ -210,11 +210,11 @@
                         <div class="row text-center">
                             <div class="col">
                                 <div class="dash-label">Total Collections</div>
-                                <div style="font-size:.95rem; font-weight:700; color:#16a34a; margin-top:4px;">₱{{ number_format($totalCollections, 0) }}</div>
+                                <div style="font-size:.95rem; font-weight:700; color:#16a34a; margin-top:4px;">₱{{ number_format($totalCollections, 2) }}</div>
                             </div>
                             <div class="col">
                                 <div class="dash-label">Total Expenses</div>
-                                <div style="font-size:.95rem; font-weight:700; color:#e11d48; margin-top:4px;">₱{{ number_format($totalExpenses, 0) }}</div>
+                                <div style="font-size:.95rem; font-weight:700; color:#e11d48; margin-top:4px;">₱{{ number_format($totalExpenses, 2) }}</div>
                             </div>
                         </div>
                     </div>
@@ -241,7 +241,7 @@
                                         </div>
                                     </td>
                                     <td class="text-end pe-4" style="font-size:.82rem; font-weight:700; color:#1c1c1e; width:110px;">
-                                        ₱{{ number_format($group->sum('total_collection'), 0) }}
+                                        ₱{{ number_format($group->sum('total_collection'), 2) }}
                                     </td>
                                 </tr>
                             @endforeach

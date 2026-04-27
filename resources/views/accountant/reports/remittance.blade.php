@@ -35,7 +35,7 @@
                             <span class="dash-label">Total collection</span>
                             <span class="dash-icon di-green"><i class="feather-arrow-up-circle"></i></span>
                         </div>
-                        <div class="dash-value">₱{{ number_format($sumCol, 0) }}</div>
+                        <div class="dash-value">₱{{ number_format($sumCol, 2) }}</div>
                     </div>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                             <span class="dash-label">Total expenses</span>
                             <span class="dash-icon di-red"><i class="feather-arrow-down-circle"></i></span>
                         </div>
-                        <div class="dash-value">₱{{ number_format($sumExp, 0) }}</div>
+                        <div class="dash-value">₱{{ number_format($sumExp, 2) }}</div>
                     </div>
                 </div>
             </div>
@@ -57,7 +57,7 @@
                             <span class="dash-label">Net remittance</span>
                             <span class="dash-icon di-blue"><i class="feather-trending-up"></i></span>
                         </div>
-                        <div class="dash-value">₱{{ number_format($sumNet, 0) }}</div>
+                        <div class="dash-value">₱{{ number_format($sumNet, 2) }}</div>
                     </div>
                 </div>
             </div>

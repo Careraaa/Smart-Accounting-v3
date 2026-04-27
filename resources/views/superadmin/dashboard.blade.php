@@ -65,8 +65,8 @@
                 </div>
                 <div>
                     <div class="prl-stat-label">Net payroll (all)</div>
-                    <div class="prl-stat-value" style="font-size:1.15rem;">₱{{ number_format($totalPayroll, 0) }}</div>
-                    <div class="prl-stat-sub">Allowances ₱{{ number_format($totalAllowances, 0) }} · Deductions ₱{{ number_format($totalDeductions, 0) }}</div>
+                    <div class="prl-stat-value" style="font-size:1.15rem;">₱{{ number_format($totalPayroll, 2) }}</div>
+                    <div class="prl-stat-sub">Allowances ₱{{ number_format($totalAllowances, 2) }} · Deductions ₱{{ number_format($totalDeductions, 2) }}</div>
                 </div>
             </div>
             <div class="prl-stat s-blue">
@@ -168,7 +168,7 @@
                                     </div>
                                     <div class="prl-feed-right">
                                         <span class="prl-mini-pill">{{ ucfirst($pr->status ?? '—') }}</span>
-                                        <div class="prl-mono" style="font-size:0.78rem;color:#111827;margin-top:4px;">₱{{ number_format($pr->net_pay ?? 0, 0) }}</div>
+                                        <div class="prl-mono" style="font-size:0.78rem;color:#111827;margin-top:4px;">₱{{ number_format($pr->net_pay ?? 0, 2) }}</div>
                                     </div>
                                 </a>
                             </li>

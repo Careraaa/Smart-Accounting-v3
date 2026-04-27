@@ -72,7 +72,7 @@
                 <div class="prl-stat-icon"><i class="feather-dollar-sign"></i></div>
                 <div>
                     <div class="prl-stat-label">Total gross</div>
-                    <div class="prl-stat-value">₱{{ number_format($totalGross, 0) }}</div>
+                    <div class="prl-stat-value">₱{{ number_format($totalGross, 2) }}</div>
                     <div class="prl-stat-sub">Combined</div>
                 </div>
             </div>
@@ -80,7 +80,7 @@
                 <div class="prl-stat-icon"><i class="feather-minus-circle"></i></div>
                 <div>
                     <div class="prl-stat-label">Total deductions</div>
-                    <div class="prl-stat-value">₱{{ number_format($totalDeductions, 0) }}</div>
+                    <div class="prl-stat-value">₱{{ number_format($totalDeductions, 2) }}</div>
                     <div class="prl-stat-sub">From payroll rows</div>
                 </div>
             </div>
@@ -88,7 +88,7 @@
                 <div class="prl-stat-icon"><i class="feather-check-circle"></i></div>
                 <div>
                     <div class="prl-stat-label">Total net</div>
-                    <div class="prl-stat-value">₱{{ number_format($totalNet, 0) }}</div>
+                    <div class="prl-stat-value">₱{{ number_format($totalNet, 2) }}</div>
                     <div class="prl-stat-sub">Net pay</div>
                 </div>
             </div>

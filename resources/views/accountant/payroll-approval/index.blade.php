@@ -83,7 +83,7 @@
                 <div class="prl-stat-icon"><i class="feather-dollar-sign"></i></div>
                 <div>
                     <div class="prl-stat-label">Total gross</div>
-                    <div class="prl-stat-value" style="font-size:1.05rem;">₱{{ number_format($totalGrossAll, 0) }}</div>
+                    <div class="prl-stat-value" style="font-size:1.05rem;">₱{{ number_format($totalGrossAll, 2) }}</div>
                     <div class="prl-stat-sub">Combined gross</div>
                 </div>
             </div>
@@ -91,7 +91,7 @@
                 <div class="prl-stat-icon"><i class="feather-trending-up"></i></div>
                 <div>
                     <div class="prl-stat-label">Total net</div>
-                    <div class="prl-stat-value" style="font-size:1.05rem;">₱{{ number_format($totalNetAll, 0) }}</div>
+                    <div class="prl-stat-value" style="font-size:1.05rem;">₱{{ number_format($totalNetAll, 2) }}</div>
                     <div class="prl-stat-sub">Combined net pay</div>
                 </div>
             </div>

@@ -184,7 +184,7 @@
             </div>
             <div>
                 <div class="prl-stat-label">Cash Advances</div>
-                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($totalCA,0) }}</div>
+                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($totalCA,2) }}</div>
                 <div class="prl-stat-sub">{{ $caCount }} total requests</div>
             </div>
         </div>
@@ -204,7 +204,7 @@
             </div>
             <div>
                 <div class="prl-stat-label">Salary Loans</div>
-                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($totalLoans,0) }}</div>
+                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($totalLoans,2) }}</div>
                 <div class="prl-stat-sub">total loan portfolio</div>
             </div>
         </div>

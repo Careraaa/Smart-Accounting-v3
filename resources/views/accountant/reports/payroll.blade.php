@@ -78,7 +78,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <span class="dash-label">Total gross</span>
-                        <div class="dash-value mt-2">₱{{ number_format($sumGross, 0) }}</div>
+                        <div class="dash-value mt-2">₱{{ number_format($sumGross, 2) }}</div>
                         <div class="dash-sub">Summed</div>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <span class="dash-label">Total deductions</span>
-                        <div class="dash-value mt-2">₱{{ number_format($sumDed, 0) }}</div>
+                        <div class="dash-value mt-2">₱{{ number_format($sumDed, 2) }}</div>
                         <div class="dash-sub">Summed</div>
                     </div>
                 </div>
@@ -96,7 +96,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <span class="dash-label">Total net</span>
-                        <div class="dash-value mt-2">₱{{ number_format($sumNet, 0) }}</div>
+                        <div class="dash-value mt-2">₱{{ number_format($sumNet, 2) }}</div>
                         <div class="dash-sub">Net pay</div>
                     </div>
                 </div>

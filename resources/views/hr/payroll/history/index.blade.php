@@ -139,7 +139,7 @@
             </div>
             <div>
                 <div class="prl-stat-label">Total Payroll</div>
-                <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalPayroll,0) }}</div>
+                <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalPayroll,2) }}</div>
                 <div class="prl-stat-sub">all time</div>
             </div>
         </div>

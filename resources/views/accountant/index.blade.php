@@ -65,7 +65,7 @@
                             <span class="dash-label">Total net payroll</span>
                             <span class="dash-icon di-green"><i class="feather-briefcase"></i></span>
                         </div>
-                        <div class="dash-value">₱{{ number_format($totalPayroll, 0) }}</div>
+                        <div class="dash-value">₱{{ number_format($totalPayroll, 2) }}</div>
                         <div class="dash-sub">Sum of net pay (all records)</div>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                             <span class="dash-label">Allowances</span>
                             <span class="dash-icon di-green"><i class="feather-plus-circle"></i></span>
                         </div>
-                        <div class="dash-value">₱{{ number_format($totalAllowances, 0) }}</div>
+                        <div class="dash-value">₱{{ number_format($totalAllowances, 2) }}</div>
                         <div class="dash-sub">{{ number_format($allowancePercentage, 1) }}% of A+D</div>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
                             <span class="dash-label">Deductions</span>
                             <span class="dash-icon di-red"><i class="feather-minus-circle"></i></span>
                         </div>
-                        <div class="dash-value">₱{{ number_format($totalDeductions, 0) }}</div>
+                        <div class="dash-value">₱{{ number_format($totalDeductions, 2) }}</div>
                         <div class="dash-sub">{{ number_format($deductionPercentage, 1) }}% of A+D</div>
                     </div>
                 </div>
@@ -101,7 +101,7 @@
                             <span class="dash-label">Avg. basic</span>
                             <span class="dash-icon di-blue"><i class="feather-trending-up"></i></span>
                         </div>
-                        <div class="dash-value">₱{{ number_format($averageBasicSalary ?? 0, 0) }}</div>
+                        <div class="dash-value">₱{{ number_format($averageBasicSalary ?? 0, 2) }}</div>
                         <div class="dash-sub">Across payroll rows</div>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                             <span class="dash-label">Outstanding loans</span>
                             <span class="dash-icon di-amber"><i class="feather-alert-circle"></i></span>
                         </div>
-                        <div class="dash-value">₱{{ number_format($totalOutstandingLoans, 0) }}</div>
+                        <div class="dash-value">₱{{ number_format($totalOutstandingLoans, 2) }}</div>
                         <div class="dash-sub">{{ $activeSalaryLoans }} active loan(s)</div>
                     </div>
                 </div>

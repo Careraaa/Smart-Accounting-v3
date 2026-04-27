@@ -175,7 +175,7 @@
             </div>
             <div>
                 <div class="sd-stat-label">SSS</div>
-                <div class="sd-stat-value">₱{{ number_format($sssMax ?? 1000, 0) }}</div>
+                <div class="sd-stat-value">₱{{ number_format($sssMax ?? 1000, 2) }}</div>
                 <div class="sd-stat-sub">max ee share · {{ $counts['SSS'] ?? 0 }} brackets</div>
             </div>
         </div>
