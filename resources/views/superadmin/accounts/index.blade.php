@@ -64,7 +64,7 @@
     {{-- Table --}}
     <div class="prl-table-card">
         <div class="prl-table-scroll">
-            <table class="prl-table">
+            <table class="prl-table sa-accounts-table">
                 <thead>
                     <tr>
                         <th>User</th>

@@ -81,6 +81,27 @@
 .prl-table tbody tr:hover { background:#fafafa; }
 .prl-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
 
+/* Superadmin accounts table: centered headers + resilient long content */
+.sa-accounts-table { table-layout:auto; }
+.sa-accounts-table thead th {
+    text-align:center;
+    white-space:normal;
+}
+.sa-accounts-table th:nth-child(1),
+.sa-accounts-table td:nth-child(1) { min-width: 230px; }
+.sa-accounts-table th:nth-child(2),
+.sa-accounts-table td:nth-child(2) { min-width: 260px; }
+.sa-accounts-table th:nth-child(3),
+.sa-accounts-table td:nth-child(3) { min-width: 150px; text-align:center; }
+.sa-accounts-table th:nth-child(4),
+.sa-accounts-table td:nth-child(4) { min-width: 120px; text-align:center; }
+.sa-accounts-table th:nth-child(5),
+.sa-accounts-table td:nth-child(5) { min-width: 170px; text-align:center; }
+.sa-accounts-table th:nth-child(6),
+.sa-accounts-table td:nth-child(6) { min-width: 140px; text-align:center; }
+.sa-accounts-table td { overflow-wrap:anywhere; word-break:break-word; }
+.sa-accounts-table .prl-emp-cell { justify-content:flex-start; }
+
 .prl-emp-cell { display:flex;align-items:center;gap:10px; }
 .prl-emp-avatar { width:32px;height:32px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#6b7280;flex-shrink:0;border:1.5px solid #e5e7eb;text-transform:uppercase; }
 .prl-emp-name { font-weight:600;color:#111827;font-size:0.845rem; }
