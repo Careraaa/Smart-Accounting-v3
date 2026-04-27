@@ -57,7 +57,7 @@
             <span class="emp-input-group-text">₱</span>
             <input type="number" name="salary_rate" id="salary_rate"
                 class="emp-input @error('salary_rate') is-invalid @enderror"
-                placeholder="0.00" step="0.01" min="0"
+                placeholder="0.00" step="0.01" min="0" max="999999.99"
                 value="{{ old('salary_rate', $employee->salary_rate ?? '') }}" required>
         </div>
         @error('salary_rate')<span class="emp-invalid">{{ $message }}</span>@enderror

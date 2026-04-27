@@ -61,7 +61,7 @@ class EmployeeController extends Controller
                 'position' => 'required|string|max:150',
                 'department' => 'required|string|max:150',
                 'status' => 'required|string|in:active,inactive',
-                'salary_rate' => 'required|numeric|min:0', // DAILY RATE
+                'salary_rate' => 'required|numeric|between:0,999999.99', // DAILY RATE
                 'sss_number' => 'nullable|string|max:50',
                 'tin_number' => 'nullable|string|max:50',
                 'pagibig_number' => 'nullable|string|max:50',
@@ -72,6 +72,7 @@ class EmployeeController extends Controller
             ],
             [
                 'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
+                'salary_rate.between' => 'Daily rate must be between 0.00 and 999,999.99.',
                 'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
                 'attachments_files.*.max' => 'Each attachment must not exceed 5MB.',
             ],
@@ -147,7 +148,7 @@ class EmployeeController extends Controller
                 'position' => 'required|string|max:150',
                 'department' => 'required|string|max:150',
                 'status' => 'required|string|in:active,inactive',
-                'salary_rate' => 'required|numeric|min:0', // DAILY RATE
+                'salary_rate' => 'required|numeric|between:0,999999.99', // DAILY RATE
                 'sss_number' => 'nullable|string|max:50',
                 'tin_number' => 'nullable|string|max:50',
                 'pagibig_number' => 'nullable|string|max:50',
@@ -156,6 +157,7 @@ class EmployeeController extends Controller
             ],
             [
                 'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
+                'salary_rate.between' => 'Daily rate must be between 0.00 and 999,999.99.',
                 'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
                 'attachments_files.*.max' => 'Each attachment must not exceed 5MB.',
             ],

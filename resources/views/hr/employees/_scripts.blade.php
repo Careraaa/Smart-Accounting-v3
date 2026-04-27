@@ -36,6 +36,16 @@
             if (current < totalTabs - 1) goTo(current + 1);
         });
 
+        // If validation failed, open the first tab containing an invalid field.
+        const firstInvalidPane = document.querySelector('.emp-tab-pane .is-invalid')?.closest('.emp-tab-pane');
+        if (firstInvalidPane) {
+            const paneIndex = Number(firstInvalidPane.getAttribute('data-pane'));
+            if (!Number.isNaN(paneIndex) && paneIndex >= 0 && paneIndex < totalTabs) {
+                goTo(paneIndex);
+                return;
+            }
+        }
+
         // Ensure footer buttons are correct on first render.
         goTo(0);
     })();
