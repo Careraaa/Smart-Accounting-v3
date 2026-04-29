@@ -4,9 +4,8 @@
         {{-- ── Logo Header ── --}}
         <div class="m-header">
             <a href="{{ route('dashboard') }}" class="b-brand kt-brand-text">
-                <span class="kt-logo-icon"><i class="feather-truck"></i></span>
+                <span class="kt-logo-icon"><img src="{{ asset('images/knights_white-bg.png') }}" alt="Knights Transport Logo"></span>
                 <span class="kt-logo-full">Knights Transport</span>
-                <span class="kt-logo-mini">KT</span>
             </a>
         </div>
 

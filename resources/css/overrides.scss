@@ -58,7 +58,7 @@ html.minimenu .m-header .b-brand .logo-mini {
     gap: 9px;
     text-decoration: none !important;
     color: #fff !important;
-    overflow: hidden;
+    overflow: visible !important;
 }
 .kt-logo-icon {
     display: flex;
@@ -70,7 +70,6 @@ html.minimenu .m-header .b-brand .logo-mini {
     border-radius: 8px;
     flex-shrink: 0;
     font-size: 16px;
-    color: #fff;
 }
 .kt-logo-full {
     font-size: 0.95rem;
