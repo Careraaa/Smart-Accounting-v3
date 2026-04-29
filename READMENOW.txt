@@ -136,3 +136,13 @@ SUMMARY
 - Run `npm install` on any new machine after pulling
 - Always run `npm run build` after editing JS/SCSS
 - Cloudflare tunnel can stay running during builds
+
+--------------------------------------------------------------
+
+EMERGENCY MAINTENANCE UNLOCK (DUMB-DOWN)
+
+- If the site is stuck in maintenance mode and you got logged out:
+  1. Open terminal in project folder
+  2. Run this exact command:
+     php artisan maintenance:unlock
+  3. Refresh the browser

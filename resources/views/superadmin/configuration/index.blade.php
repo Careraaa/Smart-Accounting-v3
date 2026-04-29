@@ -257,16 +257,16 @@
                     @csrf
                     <label class="cfg-toggle-lg">
                         <input type="checkbox" id="maintenance_toggle" onchange="this.form.submit()"
-                               {{ app()->isDownForMaintenance() ? 'checked' : '' }}>
+                               {{ !empty($settings['maintenance_mode']) ? 'checked' : '' }}>
                         <span class="cfg-slider"></span>
                     </label>
                 </form>
             </div>
 
             <div>
-                <div class="prl-cfg-status-pill {{ app()->isDownForMaintenance() ? 'on' : 'off' }}">
+                <div class="prl-cfg-status-pill {{ !empty($settings['maintenance_mode']) ? 'on' : 'off' }}">
                     <span>
-                        {{ app()->isDownForMaintenance() ? 'Maintenance Mode: Active' : 'Maintenance Mode: Inactive' }}
+                        {{ !empty($settings['maintenance_mode']) ? 'Maintenance Mode: Active' : 'Maintenance Mode: Inactive' }}
                     </span>
                 </div>
             </div>
