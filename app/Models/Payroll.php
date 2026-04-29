@@ -48,6 +48,11 @@ class Payroll extends Model
         return $this->hasMany(PayrollAllowance::class);
     }
 
+    public function batch()
+    {
+        return $this->belongsTo(PayrollBatch::class, 'batch_id');
+    }
+
     /* ======================
      |  COMPUTED ATTRIBUTES
      ====================== */

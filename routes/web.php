@@ -364,6 +364,8 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
 
     Route::post('/payroll/batch/generate', [PayrollController::class, 'batchGenerate'])->name('payroll.batch.generate');
 
+    Route::get('/payroll/batch/{batch}', [PayrollController::class, 'batchDetails'])->name('payroll.batch.details');
+    Route::get('/payroll/batch/{batch}/payslips', [PayrollController::class, 'batchPayslips'])->name('payroll.batch.payslips');
     Route::get('/payroll/batch/{batch}/confirm', [PayrollController::class, 'batchConfirm'])->name('payroll.batch.confirm');
     Route::post('/payroll/batch/{batch}/employee', [PayrollController::class, 'batchAddEmployee'])->name('payroll.batch.add-employee');
 

@@ -44,7 +44,7 @@ class PayrollController extends Controller
             $sortOrder = 'desc';
         }
 
-        $payrolls = Payroll::with(['user', 'allowances', 'deductions'])
+        $payrolls = Payroll::with(['user', 'allowances', 'deductions', 'batch'])
             ->orderBy($sortBy, $sortOrder)
             ->get();
         $activeEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
@@ -206,6 +206,20 @@ class PayrollController extends Controller
             ->get(['id', 'first_name', 'last_name', 'position']);
 
         return view('hr.payroll.batch.confirm', compact('batch', 'availableEmployees'));
+    }
+
+    public function batchDetails(PayrollBatch $batch)
+    {
+        $batch->load(['payrolls.user']);
+
+        return view('hr.payroll.batch.details', compact('batch'));
+    }
+
+    public function batchPayslips(PayrollBatch $batch)
+    {
+        $batch->load(['payrolls.user']);
+
+        return view('hr.payroll.batch.payslips', compact('batch'));
     }
 
     public function batchAddEmployee(Request $request, PayrollBatch $batch)

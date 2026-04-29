@@ -234,7 +234,7 @@
                 <div class="prl-table-scroll">
                     <table class="prl-table">
                         <thead><tr>
-                            <th>Employee</th><th>Period</th>
+                            <th>Employee</th><th>Batch</th><th>Period</th>
                             <th class="text-end">Gross</th><th class="text-end">Net</th>
                             <th class="text-end">Actions</th>
                         </tr></thead>
@@ -254,18 +254,33 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td>
+                                    @if($payroll->batch)
+                                        <a href="{{ route('payroll.batch.details', $payroll->batch) }}"
+                                           class="prl-period-tag"
+                                           style="text-decoration:none;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">
+                                            {{ $payroll->batch->display_name }}
+                                        </a>
+                                    @else
+                                        <span style="color:#d1d5db;font-size:0.75rem;">—</span>
+                                    @endif
+                                </td>
                                 <td><span class="prl-period-tag">{{ $payroll->payroll_period_start->format('M d') }} – {{ $payroll->payroll_period_end->format('M d, Y') }}</span></td>
                                 <td class="text-end"><span class="prl-mono">₱{{ number_format($payroll->gross_pay,2) }}</span></td>
                                 <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($payroll->net_pay,2) }}</span></td>
                                 <td>
                                     <div class="prl-actions">
-                                        <a href="{{ route('payroll.salary-computation.show',$payroll) }}" class="prl-action-btn" title="View">
+                                        <a href="{{ route('payroll.salary-computation.show',$payroll) }}" class="prl-action-btn" title="View employee payroll">
                                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         </a>
-                                        <a href="{{ route('payroll.generatePayslip',$payroll) }}" class="prl-action-btn success" title="Payslip">
-                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                        </a>
-                                        <form action="{{ route('payroll.salary-computation.destroy',$payroll) }}" method="POST" data-sa-confirm="Delete this payroll record?" style="display:inline;">
+                                        @if($payroll->batch)
+                                            <a href="{{ route('payroll.batch.payslips', $payroll->batch) }}" class="prl-action-btn success" title="Batch payslips">
+                                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            </a>
+                                        @endif
+                                        <form action="{{ route('payroll.salary-computation.destroy',$payroll) }}" method="POST"
+                                              data-sa-confirm="{{ $payroll->batch ? 'Delete this employee payroll from its batch? This removes the employee from the batch totals.' : 'Delete this payroll record?' }}"
+                                              style="display:inline;">
                                             @csrf @method('DELETE')
                                             <button class="prl-action-btn danger" title="Delete">
                                                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -275,7 +290,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5">
+                            <tr><td colspan="6">
                                 <div class="prl-empty">
                                     <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
                                     <p class="prl-empty-title">No payroll records yet</p>
@@ -303,8 +318,8 @@
             <div class="prl-side-card">
                 <div class="prl-side-head">Last 5 generated batches</div>
                 @forelse($recentBatches as $b)
-                @php $bsc = match($b->status){'finalized'=>'s-finalized','submitted'=>'s-submitted','paid'=>'s-paid',default=>'s-draft'}; @endphp
-                <a href="{{ route('payroll.batch.confirm',$b) }}" class="prl-batch-item">
+                @php $bsc = match($b->status){'approved'=>'s-approved','rejected'=>'s-rejected','submitted'=>'s-submitted','paid'=>'s-paid',default=>'s-draft'}; @endphp
+                <a href="{{ route('payroll.batch.details',$b) }}" class="prl-batch-item">
                     <div>
                         <div class="prl-batch-period">{{ $b->period_start->format('M d') }} – {{ $b->period_end->format('M d, Y') }}</div>
                         <div class="prl-batch-meta">{{ $b->employee_count }} employees · ₱{{ number_format($b->total_net_pay,2) }}</div>

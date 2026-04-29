@@ -67,6 +67,14 @@ class PayrollBatch extends Model
         return $this->belongsTo(User::class, 'paid_by');
     }
 
+    public function getDisplayNameAttribute(): string
+    {
+        $id = str_pad((string) $this->id, 3, '0', STR_PAD_LEFT);
+        $label = $this->period_start ? $this->period_start->format('M Y') : 'Payroll';
+
+        return "Batch #{$id} - {$label} Payroll";
+    }
+
     /* ── Computed ──────────────────────────────────────────────── */
 
     public function getTotalNetPayAttribute(): float
