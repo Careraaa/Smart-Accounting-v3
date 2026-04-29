@@ -31,11 +31,11 @@
             <div class="card h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="dash-label">Total Remittances</span>
+                        <span class="dash-label">Finalized Remittances</span>
                         <span class="dash-icon"><i class="feather-layers"></i></span>
                     </div>
                     <div class="dash-value">{{ $totalRemittances }}</div>
-                    <div class="dash-sub">+12.5% this period</div>
+                    <div class="dash-sub">Approved/completed only</div>
                 </div>
             </div>
         </div>
@@ -126,7 +126,7 @@
         <div class="col-xxl-3 col-md-6">
             <div class="card h-100">
                 <div class="card-body">
-                    <span class="dash-label">Completed Remittances</span>
+                    <span class="dash-label">Approved/Completed</span>
                     <div class="dash-value mt-3">{{ $completedRemittances }}</div>
                     <div class="progress dash-progress mt-3">
                         <div class="progress-bar bg-success" role="progressbar"
@@ -171,7 +171,7 @@
 
     </div>
 
-    {{-- Collections vs Expenses + Recent Remittances trend --}}
+    {{-- Collections vs Expenses + Monthly Collection trend --}}
     <div class="row g-3 mb-4">
 
         <div class="col-lg-6">
@@ -225,26 +225,30 @@
         <div class="col-lg-6">
             <div class="card h-100">
                 <div class="card-header">
-                    <span class="card-title mb-0">Monthly Remittance Trend</span>
+                    <span class="card-title mb-0">Monthly Collection Trend</span>
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-hover mb-0">
                         <tbody>
-                            @foreach($recentRemittances->groupBy(fn($r) => $r->remittance_date?->format('M Y')) as $month => $group)
+                            @forelse($monthlyCollectionTrend as $row)
                                 <tr>
                                     <td class="ps-4" style="font-size:.82rem; font-weight:600; color:#4a4a58; width:100px;">
-                                        {{ $month }}
+                                        {{ $row['month'] }}
                                     </td>
                                     <td>
                                         <div class="progress dash-progress">
-                                            <div class="progress-bar" style="background:#c8292a; width: {{ $totalCollections > 0 ? ($group->sum('total_collection') / $totalCollections) * 100 : 0 }}%"></div>
+                                            <div class="progress-bar" style="background:#c8292a; width: {{ $totalCollections > 0 ? ($row['total_collection'] / $totalCollections) * 100 : 0 }}%"></div>
                                         </div>
                                     </td>
                                     <td class="text-end pe-4" style="font-size:.82rem; font-weight:700; color:#1c1c1e; width:110px;">
-                                        ₱{{ number_format($group->sum('total_collection'), 2) }}
+                                        ₱{{ number_format($row['total_collection'], 2) }}
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">No finalized remittances yet</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

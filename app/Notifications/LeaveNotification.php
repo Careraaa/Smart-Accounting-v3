@@ -3,7 +3,9 @@
 namespace App\Notifications;
 
 use App\Models\Leave;
+use App\Models\User;
 use App\Services\NotificationService;
+use Illuminate\Support\Facades\DB;
 
 class LeaveNotification
 {
@@ -54,19 +56,32 @@ class LeaveNotification
      */
     public static function notifyManagersOfNewRequest(Leave $leave)
     {
-        app(NotificationService::class)->sendToRole(
-            'manager',
+        $notificationService = app(NotificationService::class);
+        $message = "{$leave->employee->first_name} {$leave->employee->last_name} has submitted a {$leave->leave_type} leave request for {$leave->start_date->format('M d, Y')} to {$leave->end_date->format('M d, Y')}.";
+        $data = [
+            'leave_id' => $leave->id,
+            'employee_id' => $leave->employee->id,
+            'employee_name' => "{$leave->employee->first_name} {$leave->employee->last_name}",
+            'leave_type' => $leave->leave_type,
+            'start_date' => $leave->start_date,
+            'end_date' => $leave->end_date,
+        ];
+
+        // Notify all users who can review pending leave requests.
+        $approverRoles = ['hr', 'superadmin', 'accountant', 'qr_admin'];
+        $approverIds = User::query()
+            ->whereIn(DB::raw('LOWER(TRIM(role))'), $approverRoles)
+            ->pluck('id')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $notificationService->sendToMultiple(
+            $approverIds,
             'leave_pending_approval',
             'New Leave Request Pending Approval',
-            "{$leave->employee->first_name} {$leave->employee->last_name} has submitted a {$leave->leave_type} leave request for {$leave->start_date->format('M d, Y')} to {$leave->end_date->format('M d, Y')}.",
-            [
-                'leave_id' => $leave->id,
-                'employee_id' => $leave->employee->id,
-                'employee_name' => "{$leave->employee->first_name} {$leave->employee->last_name}",
-                'leave_type' => $leave->leave_type,
-                'start_date' => $leave->start_date,
-                'end_date' => $leave->end_date,
-            ]
+            $message,
+            $data
         );
     }
 

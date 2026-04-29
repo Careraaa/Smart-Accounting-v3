@@ -90,10 +90,10 @@
             {{-- Divider --}}
             <div class="kt-header-divider d-none d-sm-block"></div>
 
-            {{-- User Dropdown --}}
+            {{-- User Profile Dropdown --}}
             <div class="dropdown">
-                <a href="javascript:void(0);" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside"
-                    class="kt-user-trigger d-flex align-items-center gap-2 text-decoration-none">
+                <a href="javascript:void(0);" class="kt-user-trigger d-flex align-items-center gap-2 text-decoration-none"
+                    data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-display="static">
                     <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white kt-user-avatar" style="width: 40px; height: 40px; font-size: 18px; font-weight: normal; min-width: 40px;">
                         {{ auth()->user()->getFirstLetter() }}
                     </div>
@@ -101,36 +101,20 @@
                         <div class="kt-user-name">{{ auth()->user()->name }}</div>
                         <div class="kt-user-email">{{ auth()->user()->email }}</div>
                     </div>
-                    <i class="feather-chevron-down fs-12 text-muted d-none d-md-block ms-1"></i>
                 </a>
-
-                <div class="dropdown-menu dropdown-menu-end kt-user-dropdown">
-                    <div class="kt-user-dropdown-header">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white kt-user-dropdown-avatar" style="width: 50px; height: 50px; font-size: 24px; font-weight: normal; min-width: 50px;">
-                            {{ auth()->user()->getFirstLetter() }}
-                        </div>
-                        <div class="flex-grow-1 overflow-hidden">
-                            <div class="kt-user-dropdown-name">{{ auth()->user()->name }}</div>
-                            <div class="kt-user-dropdown-email text-truncate">{{ auth()->user()->email }}</div>
-                            <span class="kt-user-dropdown-role">
-                                {{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}
-                            </span>
-                        </div>
-                    </div>
+                <div class="dropdown-menu dropdown-menu-end kt-user-dropdown kt-user-dropdown-under-navbar">
                     <div class="kt-user-dropdown-body">
                         <a href="{{ route('profile.details') }}" class="kt-user-dropdown-item">
-                            <i class="feather-user"></i><span>Profile Details</span>
-                        </a>
-                        <a href="{{ route('settings.account') }}" class="kt-user-dropdown-item">
-                            <i class="feather-settings"></i><span>Account Settings</span>
+                            <i class="feather-user"></i> Profile
                         </a>
                         <div class="kt-user-dropdown-divider"></div>
                         <a href="javascript:void(0);" class="kt-user-dropdown-item kt-logout-item"
                             onclick="document.getElementById('logout-form').submit();">
-                            <i class="feather-log-out"></i><span>Logout</span>
+                            <i class="feather-log-out"></i> Logout
                         </a>
                         <form method="POST" action="{{ route('logout') }}" id="logout-form" style="display:none;">
-                            @csrf</form>
+                            @csrf
+                        </form>
                     </div>
                 </div>
             </div>
@@ -138,6 +122,27 @@
         </div>
     </div>
 </header>
+
+@push('styles')
+    <style>
+        .kt-user-dropdown-under-navbar {
+            position: absolute !important;
+            top: calc(100% + 18px) !important;
+            right: 12px !important;
+            left: auto !important;
+            inset: auto !important;
+            transform: none !important;
+            margin-top: 0 !important;
+        }
+
+        @media (max-width: 767px) {
+            .kt-user-dropdown-under-navbar {
+                right: 12px !important;
+                left: 12px !important;
+            }
+        }
+    </style>
+@endpush
 
 @push('scripts')
     <script>

@@ -1,7 +1,7 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 
-    .pf2-page { font-family: 'Sora', sans-serif; position: relative; }
+    .pf2-page { font-family: 'Sora', sans-serif; position: relative; padding-top: 28px; }
     .pf2-backdrop {
         position: absolute;
         inset: -40px -20px auto -20px;
