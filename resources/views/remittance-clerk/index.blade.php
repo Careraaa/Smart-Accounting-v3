@@ -256,7 +256,7 @@
     {{-- Recent Remittances Table --}}
     <div class="card remui-card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Recent Remittances</span>
+            <span class="card-title mb-0">Recent Approved Remittances</span>
             <a href="{{ route('remittances.index') }}" class="btn btn-primary btn-sm">View All</a>
         </div>
         <div class="card-body p-0">

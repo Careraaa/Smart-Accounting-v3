@@ -46,10 +46,10 @@ class ShortRemittanceController extends Controller
         });
 
         // Calculate statistics
-        $totalShortRemittances = DailyRemittance::where('is_short_remittance', true)->count();
-        $totalShortAmount = DailyRemittance::where('is_short_remittance', true)->sum('short_amount');
-        $totaldriverShares = DailyRemittance::where('is_short_remittance', true)->sum('driver_share');
-        $totalPaoShares = DailyRemittance::where('is_short_remittance', true)->sum('pao_share');
+        $totalShortRemittances = DailyRemittance::where('is_short_remittance', true)->where('status', 'approved')->count();
+        $totalShortAmount = DailyRemittance::where('is_short_remittance', true)->where('status', 'approved')->sum('short_amount');
+        $totaldriverShares = DailyRemittance::where('is_short_remittance', true)->where('status', 'approved')->sum('driver_share');
+        $totalPaoShares = DailyRemittance::where('is_short_remittance', true)->where('status', 'approved')->sum('pao_share');
 
         return view('remittance-clerk.short-remittances.index', compact(
             'pendingRemittances',

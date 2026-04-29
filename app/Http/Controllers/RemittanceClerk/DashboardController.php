@@ -13,10 +13,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalRemittances = DailyRemittance::count();
-        $totalCollections = DailyRemittance::sum('total_collection') ?? 0;
-        $totalExpenses = DailyRemittance::sum('total_expenses') ?? 0;
-        $totalNetRemittance = DailyRemittance::sum('net_remittance') ?? 0;
+        $totalRemittances = DailyRemittance::where('status', 'approved')->count();
+        $totalCollections = DailyRemittance::where('status', 'approved')->sum('total_collection') ?? 0;
+        $totalExpenses = DailyRemittance::where('status', 'approved')->sum('total_expenses') ?? 0;
+        $totalNetRemittance = DailyRemittance::where('status', 'approved')->sum('net_remittance') ?? 0;
         
         $pendingRemittances = DailyRemittance::where('status', 'pending')->count();
         $completedRemittances = DailyRemittance::where('status', 'completed')->count();
@@ -30,11 +30,12 @@ class DashboardController extends Controller
         
         // Calculate growth percentages (simplified - comparing with last 30 days)
         $thirtyDaysAgo = now()->subDays(30);
-        $previousRemittances = DailyRemittance::where('created_at', '<', $thirtyDaysAgo)->sum('total_collection') ?? 0;
+        $previousRemittances = DailyRemittance::where('status', 'approved')->where('created_at', '<', $thirtyDaysAgo)->sum('total_collection') ?? 0;
         $collectionGrowth = $previousRemittances > 0 ? (($totalCollections - $previousRemittances) / $previousRemittances) * 100 : 0;
         
         // Recent remittances
         $recentRemittances = DailyRemittance::with('driver', 'vehicle', 'route')
+            ->where('status', 'approved')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();

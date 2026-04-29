@@ -25,9 +25,6 @@
     <div class="card remui-card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span class="card-title mb-0">Pending Remittances</span>
-            <a href="{{ route('remittances.create') }}" class="emp-action-btn emp-action-edit">
-                <i class="feather-plus"></i><span>Add</span>
-            </a>
         </div>
         <div class="card-body">
             {{-- Statistics Cards --}}
