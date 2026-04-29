@@ -43,7 +43,7 @@ body {
 }
 
 /* -- Hide original logo image, we use text instead ------------- */
-.m-header .b-brand img,
+.m-header .b-brand img:not(.kt-sidebar-logo-img),
 html:not(.minimenu) .m-header .b-brand .logo-full,
 html:not(.minimenu) .m-header .b-brand .logo-mini,
 html.minimenu .m-header .b-brand .logo-full,
