@@ -52,7 +52,7 @@ class PayrollController extends Controller
             ->count();
 
         $pendingPayrolls = Payroll::with('user')
-            ->whereNotIn('status', ['paid', 'rejected'])
+            ->where('status', 'pending')
             ->orderByDesc('created_at')
             ->get();
         $totalPayroll = $pendingPayrolls->sum('net_pay');
