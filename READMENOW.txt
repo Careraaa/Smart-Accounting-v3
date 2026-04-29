@@ -146,3 +146,9 @@ EMERGENCY MAINTENANCE UNLOCK (DUMB-DOWN)
   2. Run this exact command:
      php artisan maintenance:unlock
   3. Refresh the browser
+
+--------------------------------------------------------------
+
+FRESH SEEDED DATABASE
+1. php artisan migrate:fresh
+2. php artisan db:seed --class=Users_Seeder

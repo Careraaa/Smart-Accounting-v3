@@ -125,7 +125,7 @@ class LeaveController extends Controller
 
     public function create()
     {
-        $employees = Employee::where('status', 'active')->where('role', '!=', 'superadmin')->get();
+        $employees = Employee::where('status', 'active')->whereNotIn('role', ['superadmin', 'qr_admin'])->get();
         $leaveTypes = LeaveType::where('status', 'active')->pluck('name');
 
         return view('hr.leave.create', compact('employees', 'leaveTypes'));
@@ -160,7 +160,7 @@ class LeaveController extends Controller
 
     public function edit(Leave $leave)
     {
-        $employees = Employee::where('status', 'active')->where('role', '!=', 'superadmin')->get();
+        $employees = Employee::where('status', 'active')->whereNotIn('role', ['superadmin', 'qr_admin'])->get();
         $leaveTypes = ['Sick Leave', 'Vacation', 'Personal Leave', 'Maternity Leave', 'Paternity Leave', 'Other'];
 
         return view('hr.leave.edit', compact('leave', 'employees', 'leaveTypes'));

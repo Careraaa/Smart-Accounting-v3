@@ -11,7 +11,7 @@ class ReportController extends Controller
 {
     public function remittanceReports()
     {
-        $remittances = DailyRemittance::with('driver', 'pao', 'route')->get();
+        $remittances = DailyRemittance::where('status', 'approved')->with('driver', 'pao', 'route')->get();
         return view('accountant.reports.remittance', compact('remittances'));
     }
 

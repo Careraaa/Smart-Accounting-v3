@@ -80,16 +80,14 @@ class DailyRemittanceController extends Controller
         $boundary = $vehicle->route->boundary ?? 0;
         $validated['boundary'] = $boundary;
 
-        // Calculate net remittance for short remittance detection: total_collection - total_expenses - boundary
-        $calculatedNetRemittance = $validated['total_collection'] - $validated['total_expenses'] - $boundary;
+        // Check if net remittance is less than the boundary
+        $netRemittance = $validated['net_remittance'];
         
-        // Keep the inputted net remittance value for display
-        // But use the calculated value to determine if it's a short remittance
-        if ($calculatedNetRemittance < 0) {
+        if ($netRemittance < $boundary) {
             $validated['is_short_remittance'] = true;
-            $validated['short_amount'] = abs($calculatedNetRemittance);
-            $validated['driver_share'] = abs($calculatedNetRemittance) / 2;
-            $validated['pao_share'] = abs($calculatedNetRemittance) / 2;
+            $validated['short_amount'] = $boundary - $netRemittance;
+            $validated['driver_share'] = ($boundary - $netRemittance) / 2;
+            $validated['pao_share'] = ($boundary - $netRemittance) / 2;
         } else {
             $validated['is_short_remittance'] = false;
             $validated['short_amount'] = null;
@@ -143,16 +141,14 @@ class DailyRemittanceController extends Controller
         $boundary = $vehicle->route->boundary ?? 0;
         $validated['boundary'] = $boundary;
 
-        // Calculate net remittance for short remittance detection: total_collection - total_expenses - boundary
-        $calculatedNetRemittance = $validated['total_collection'] - $validated['total_expenses'] - $boundary;
+        // Check if net remittance is less than the boundary
+        $netRemittance = $validated['net_remittance'];
         
-        // Keep the inputted net remittance value for display
-        // But use the calculated value to determine if it's a short remittance
-        if ($calculatedNetRemittance < 0) {
+        if ($netRemittance < $boundary) {
             $validated['is_short_remittance'] = true;
-            $validated['short_amount'] = abs($calculatedNetRemittance);
-            $validated['driver_share'] = abs($calculatedNetRemittance) / 2;
-            $validated['pao_share'] = abs($calculatedNetRemittance) / 2;
+            $validated['short_amount'] = $boundary - $netRemittance;
+            $validated['driver_share'] = ($boundary - $netRemittance) / 2;
+            $validated['pao_share'] = ($boundary - $netRemittance) / 2;
         } else {
             $validated['is_short_remittance'] = false;
             $validated['short_amount'] = null;

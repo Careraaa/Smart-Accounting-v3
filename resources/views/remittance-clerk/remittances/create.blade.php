@@ -145,9 +145,8 @@
                     </div>
                 </div>
 
-                <div class="d-flex gap-2 pt-3 border-top">
-                    <button type="submit" class="btn btn-primary btn-sm">Create Remittance</button>
-                    <a href="{{ route('remittances.index') }}" class="btn btn-secondary btn-sm">Cancel</a>
+                <div class="d-flex gap-2 pt-3 border-top justify-content-end">
+                    <button type="submit" class="btn btn-primary">Create Remittance</button>
                 </div>
             </form>
         </div>

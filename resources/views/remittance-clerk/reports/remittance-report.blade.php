@@ -18,9 +18,6 @@
                 <a href="{{ route('reports.print.remittance-report', ['period' => $period, 'week' => $week, 'month' => $month, 'year' => $year]) }}" class="emp-action-btn emp-action-view" target="_blank">
                     <i class="feather-printer"></i><span>Print</span>
                 </a>
-                <a href="{{ route('reports.index') }}" class="emp-action-btn emp-action-back">
-                    <i class="feather-arrow-left"></i><span>Back</span>
-                </a>
             </div>
         </div>
 

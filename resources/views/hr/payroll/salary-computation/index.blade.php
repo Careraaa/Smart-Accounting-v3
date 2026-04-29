@@ -161,12 +161,6 @@
             <h1 class="prl-topbar-title">Payroll Management</h1>
             <p class="prl-topbar-sub">Auto-generate, review, and finalize employee payrolls</p>
         </div>
-        <div class="prl-topbar-actions">
-            <a href="{{ route('payroll.salary-computation.create') }}" class="prl-btn-sec">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                Individual Payroll
-            </a>
-        </div>
     </div>
 
     <div class="prl-stats">
