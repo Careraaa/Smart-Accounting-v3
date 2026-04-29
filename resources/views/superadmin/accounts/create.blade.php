@@ -139,7 +139,12 @@
                     </div>
                     <div class="prl-field">
                         <label class="prl-lbl">Department</label>
-                        <input type="text" name="department" class="prl-ctrl @error('department') is-invalid @enderror" value="{{ old('department') }}" placeholder="Finance">
+                        <select name="department" class="prl-ctrl @error('department') is-invalid @enderror">
+                            <option value="">— Select —</option>
+                            @foreach ($departments as $dept)
+                                <option value="{{ $dept }}" {{ old('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
+                            @endforeach
+                        </select>
                         @error('department')<span class="prl-err">{{ $message }}</span>@enderror
                     </div>
                 </div>

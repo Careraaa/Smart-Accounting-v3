@@ -5,7 +5,7 @@
     <div class="qrmon-wrap">
         <header class="qrmon-top">
             <p class="qrmon-eyebrow">Attendance</p>
-            <h1 class="qrmon-title">QR monitor</h1>
+            <h1 class="qrmon-title">QR Monitor</h1>
             <p class="qrmon-sub">Employees scan this code in the mobile app to record attendance.</p>
         </header>
 
@@ -203,7 +203,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 
 :root {
-    --qr-size: 220px;
+    --qr-size: 180px;
 }
 
 .qrmon-page {
@@ -233,7 +233,7 @@
 }
 
 .qrmon-title {
-    font-size: 1.35rem;
+    font-size: 1.10rem;
     font-weight: 800;
     color: #111827;
     letter-spacing: -0.02em;
@@ -242,7 +242,7 @@
 }
 
 .qrmon-sub {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     color: #9ca3af;
     margin: 0;
     line-height: 1.45;
@@ -252,7 +252,7 @@
     display: grid;
     grid-template-columns: minmax(320px, 1fr) minmax(420px, 560px);
     gap: 16px;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
 }
 
@@ -464,13 +464,13 @@
 
 @media (max-width: 1200px) {
     :root {
-        --qr-size: 200px;
+        --qr-size: 160px;
     }
 }
 
 @media (max-width: 900px) {
     :root {
-        --qr-size: 180px;
+        --qr-size: 140px;
     }
 
     .qrmon-page {

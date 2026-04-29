@@ -24,7 +24,7 @@
         <div class="prl-topbar">
             <div>
                 <h1 class="prl-topbar-title">Super Admin</h1>
-                <p class="prl-topbar-sub">System-wide overview — same visual language as payroll &amp; HR tools</p>
+                <p class="prl-topbar-sub">System-wide overview</p>
             </div>
             <div class="prl-topbar-actions">
                 <a href="{{ route('superadmin.accounts.index') }}" class="prl-btn-sec">

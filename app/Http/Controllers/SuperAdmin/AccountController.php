@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,7 +19,13 @@ class AccountController extends Controller
 
     public function create()
     {
-        return view('superadmin.accounts.create');
+        $departments = Employee::whereNotNull('department')
+            ->distinct('department')
+            ->pluck('department')
+            ->sort()
+            ->values();
+
+        return view('superadmin.accounts.create', compact('departments'));
     }
 
     public function store(Request $request)
