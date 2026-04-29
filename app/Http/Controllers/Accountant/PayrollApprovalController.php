@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Accountant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payroll;
+use App\Models\PayrollBatch;
+use App\Notifications\PayrollNotification;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -11,40 +13,28 @@ class PayrollApprovalController extends Controller
 {
     public function index()
     {
-        // Get distinct batch periods with pending or submitted payrolls
-        $batches = Payroll::whereIn('status', ['pending', 'submitted'])
-            ->select('payroll_period_start', 'payroll_period_end')
-            ->distinct()
-            ->orderBy('payroll_period_start', 'desc')
+        $batches = PayrollBatch::with(['payrolls.user'])
+            ->orderByDesc('period_start')
             ->get();
 
-        $batchData = [];
-        foreach ($batches as $batch) {
-            $payrolls = Payroll::with('user')
-                ->where('payroll_period_start', $batch->payroll_period_start)
-                ->where('payroll_period_end', $batch->payroll_period_end)
-                ->whereIn('status', ['pending', 'submitted'])
-                ->get();
+        $batchData = $batches
+            ->filter(fn (PayrollBatch $b) => $b->status === 'submitted')
+            ->map(function (PayrollBatch $b) {
+                $payrolls = $b->payrolls;
 
-            if ($payrolls->count() > 0) {
-                $totalGross = $payrolls->sum(function ($p) {
-                    return $p->gross_pay;
-                });
-                $totalNet = $payrolls->sum(function ($p) {
-                    return $p->net_pay;
-                });
-
-                $batchData[] = [
-                    'period_start' => $batch->payroll_period_start,
-                    'period_end' => $batch->payroll_period_end,
+                return [
+                    'batch_id' => $b->id,
+                    'period_start' => $b->period_start,
+                    'period_end' => $b->period_end,
                     'count' => $payrolls->count(),
-                    'total_gross' => $totalGross,
-                    'total_net' => $totalNet,
-                    'status' => $payrolls->first()->status,
-                    'payrolls' => $payrolls,
+                    'total_gross' => $payrolls->sum(fn ($p) => $p->gross_pay),
+                    'total_net' => $payrolls->sum(fn ($p) => $p->net_pay),
+                    'status' => $b->status,
+                    'batch' => $b,
                 ];
-            }
-        }
+            })
+            ->values()
+            ->all();
 
         return view('accountant.payroll-approval.index', compact('batchData'));
     }
@@ -59,44 +49,28 @@ class PayrollApprovalController extends Controller
     {
         $start = $request->query('start');
         $end = $request->query('end');
-        $status = $request->query('status', 'pending');
 
         $startDate = Carbon::createFromFormat('Y-m-d', $start);
         $endDate = Carbon::createFromFormat('Y-m-d', $end);
 
-        $allowed = ['pending', 'submitted', 'approved', 'rejected'];
-        if (!in_array($status, $allowed)) {
-            $status = 'pending';
-        }
+        $batch = PayrollBatch::with(['payrolls.user', 'payrolls.deductions', 'payrolls.allowances'])
+            ->whereDate('period_start', $startDate)
+            ->whereDate('period_end', $endDate)
+            ->first();
 
-        $query = Payroll::with('user', 'deductions', 'allowances')
-            ->whereDate('payroll_period_start', $startDate)
-            ->whereDate('payroll_period_end', $endDate)
-            ->orderBy('created_at');
-
-        if ($status === 'pending') {
-            $query->whereIn('status', ['pending', 'submitted']);
-        } else {
-            $query->where('status', $status);
-        }
-
-        $payrolls = $query->get();
-
-        if ($payrolls->isEmpty()) {
+        if (!$batch) {
             return redirect()->route('payroll-approval.index')->with('error', 'Batch not found.');
         }
 
-        $totalGross = $payrolls->sum(function ($p) {
-            return $p->gross_pay;
-        });
-        $totalNet = $payrolls->sum(function ($p) {
-            return $p->net_pay;
-        });
-        $totalDeductions = $payrolls->sum(function ($p) {
-            return $p->total_deductions;
-        });
+        $payrolls = $batch->payrolls;
+        $totalGross = $payrolls->sum(fn ($p) => $p->gross_pay);
+        $totalNet = $payrolls->sum(fn ($p) => $p->net_pay);
+        $totalDeductions = $payrolls->sum(fn ($p) => $p->total_deductions);
+
+        $status = $batch->status;
 
         return view('accountant.payroll-approval.batch', compact(
+            'batch',
             'payrolls',
             'startDate',
             'endDate',
@@ -115,57 +89,94 @@ class PayrollApprovalController extends Controller
         $startDate = Carbon::createFromFormat('Y-m-d', $start);
         $endDate = Carbon::createFromFormat('Y-m-d', $end);
 
-        $updated = Payroll::whereDate('payroll_period_start', $startDate)
-            ->whereDate('payroll_period_end', $endDate)
-            ->whereIn('status', ['pending', 'submitted'])
-            ->update(['status' => 'approved']);
+        $batch = PayrollBatch::with('payrolls')
+            ->whereDate('period_start', $startDate)
+            ->whereDate('period_end', $endDate)
+            ->first();
 
-        if ($updated > 0) {
-            return redirect()->route('payroll-approval.batch', ['start' => $start, 'end' => $end])
-                ->with('success', "Batch approved! {$updated} payroll records approved.");
+        if (!$batch) {
+            return redirect()->route('payroll-approval.index')->with('error', 'Batch not found.');
         }
 
+        if ($batch->status !== 'submitted') {
+            return redirect()->route('payroll-approval.batch', ['start' => $start, 'end' => $end])
+                ->with('error', 'This batch is no longer awaiting approval.');
+        }
+
+        $updated = $batch->payrolls()->where('status', 'submitted')->update(['status' => 'approved']);
+
+        $batch->update([
+            'status' => 'approved',
+            'approved_by' => auth()->id(),
+            'approved_at' => now(),
+            'rejected_by' => null,
+            'rejected_at' => null,
+            'rejection_note' => null,
+        ]);
+
+        PayrollNotification::notifyHrPayrollApproved($startDate, $endDate, $updated);
+
         return redirect()->route('payroll-approval.batch', ['start' => $start, 'end' => $end])
-            ->with('error', 'No payrolls to approve in this batch.');
+            ->with('success', "Batch approved! {$updated} payroll record(s) approved.");
     }
 
     public function rejectBatch(Request $request)
     {
+        $validated = $request->validate([
+            'rejection_note' => 'required|string|min:3',
+        ]);
+
         $start = $request->input('start');
         $end = $request->input('end');
 
         $startDate = Carbon::createFromFormat('Y-m-d', $start);
         $endDate = Carbon::createFromFormat('Y-m-d', $end);
 
-        $updated = Payroll::whereDate('payroll_period_start', $startDate)
-            ->whereDate('payroll_period_end', $endDate)
-            ->whereIn('status', ['pending', 'submitted'])
-            ->update(['status' => 'rejected']);
+        $batch = PayrollBatch::with('payrolls')
+            ->whereDate('period_start', $startDate)
+            ->whereDate('period_end', $endDate)
+            ->first();
 
-        if ($updated > 0) {
-            return redirect()->route('payroll-approval.batch', ['start' => $start, 'end' => $end])
-                ->with('success', "Batch rejected! {$updated} payroll records rejected.");
+        if (!$batch) {
+            return redirect()->route('payroll-approval.index')->with('error', 'Batch not found.');
         }
 
+        if ($batch->status !== 'submitted') {
+            return redirect()->route('payroll-approval.batch', ['start' => $start, 'end' => $end])
+                ->with('error', 'This batch is no longer awaiting approval.');
+        }
+
+        $updated = $batch->payrolls()->where('status', 'submitted')->update(['status' => 'rejected']);
+
+        $batch->update([
+            'status' => 'rejected',
+            'rejected_by' => auth()->id(),
+            'rejected_at' => now(),
+            'rejection_note' => $validated['rejection_note'],
+        ]);
+
+        PayrollNotification::notifyHrPayrollRejected($startDate, $endDate, $updated, $validated['rejection_note']);
+
         return redirect()->route('payroll-approval.batch', ['start' => $start, 'end' => $end])
-            ->with('error', 'No payrolls to reject in this batch.');
+            ->with('success', "Batch rejected! {$updated} payroll record(s) rejected.");
     }
 
     public function approve(Payroll $payroll)
     {
-        if ($payroll->status != 'pending') {
+        if (!in_array($payroll->status, ['pending', 'submitted'])) {
             return redirect()->back()->with('error', 'Payroll already processed.');
         }
 
         $payroll->status = 'approved';
         $payroll->save();
+        PayrollNotification::notifyHrPayrollApproved($payroll->payroll_period_start, $payroll->payroll_period_end, 1);
 
         return redirect()->route('payroll-approval.index')->with('success', 'Payroll approved.');
     }
 
     public function reject(Payroll $payroll)
     {
-        if ($payroll->status != 'pending') {
+        if (!in_array($payroll->status, ['pending', 'submitted'])) {
             return redirect()->back()->with('error', 'Payroll already processed.');
         }
 

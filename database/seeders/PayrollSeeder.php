@@ -15,9 +15,18 @@ class PayrollSeeder extends Seeder
 {
     public function run(): void
     {
-        // Match the seeded attendance/OT window (Mar 16–31, 2026)
-        $periodStart = Carbon::parse('2026-03-16')->startOfDay();
-        $periodEnd   = Carbon::parse('2026-03-31')->endOfDay();
+        // Seed a PREVIOUS payroll period (relative to today) so HR can still test generating the current period.
+        // Current period logic is in PayrollBatch::resolvePeriod(); this intentionally picks the cycle before it.
+        $today = Carbon::today();
+        if ($today->day <= 15) {
+            // Current: prev month 16–end; Seed: prev month 1–15
+            $periodStart = $today->copy()->subMonth()->startOfMonth()->startOfDay();
+            $periodEnd   = $today->copy()->subMonth()->setDay(15)->endOfDay();
+        } else {
+            // Current: this month 1–15; Seed: prev month 16–end
+            $periodStart = $today->copy()->subMonth()->setDay(16)->startOfDay();
+            $periodEnd   = $today->copy()->subMonth()->endOfMonth()->endOfDay();
+        }
 
         $generatedBy = User::where('role', 'hr')->orderBy('id')->value('id');
 
@@ -91,7 +100,7 @@ class PayrollSeeder extends Seeder
             $payroll->forceFill([
                 'status' => $status,
                 'approved_by' => $status !== 'draft' ? $generatedBy : null,
-                'payment_date' => $status === 'paid' ? Carbon::parse('2026-04-05') : null,
+                'payment_date' => $status === 'paid' ? $periodEnd->copy()->addDays(5)->startOfDay() : null,
             ])->save();
         }
 

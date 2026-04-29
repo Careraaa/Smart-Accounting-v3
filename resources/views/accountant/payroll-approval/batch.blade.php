@@ -22,15 +22,48 @@
         .prl-stat-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #9ca3af; margin-bottom: 4px; }
         .prl-stat-value { font-size: 1.15rem; font-weight: 800; color: #111827; line-height: 1.2; font-variant-numeric: tabular-nums; font-family: 'DM Mono', monospace; }
         .prl-stat-sub { font-size: 0.73rem; color: #9ca3af; margin-top: 4px; }
+        .prl-batch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 9px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: 'Sora', sans-serif;
+            border: 1px solid transparent;
+            transition: all .15s ease;
+        }
+        .prl-batch-btn-danger {
+            background: #fff;
+            border-color: #fecaca;
+            color: #c8292a;
+        }
+        .prl-batch-btn-danger:hover {
+            background: #fff1f2;
+            border-color: #fda4af;
+            color: #a81f20;
+        }
+        .prl-batch-btn-primary {
+            background: #c8292a;
+            color: #fff;
+            border-color: #c8292a;
+            box-shadow: 0 4px 18px rgba(200, 41, 42, 0.28);
+        }
+        .prl-batch-btn-primary:hover {
+            background: #a81f20;
+            border-color: #a81f20;
+            color: #fff;
+        }
     </style>
 @endpush
 
 @section('content')
 @php
-    $filterLabel = $status === 'pending' ? 'Pending payroll' : ucfirst($status) . ' payroll';
-    $statusTag = $status === 'pending' ? 'Pending' : ucfirst($status);
-    $tagBg = $status === 'pending' ? '#fffbeb' : ($status === 'approved' ? '#f0f9ff' : '#fff1f2');
-    $tagColor = $status === 'pending' ? '#d97706' : ($status === 'approved' ? '#0284c7' : '#e11d48');
+    $filterLabel = $status === 'submitted' ? 'Submitted payroll' : ucfirst($status) . ' payroll';
+    $statusTag = $status === 'submitted' ? 'Submitted' : ucfirst($status);
+    $tagBg = $status === 'submitted' ? '#fffbeb' : ($status === 'approved' ? '#f0f9ff' : '#fff1f2');
+    $tagColor = $status === 'submitted' ? '#d97706' : ($status === 'approved' ? '#0284c7' : '#e11d48');
 @endphp
 
 <div class="col-12">
@@ -46,6 +79,9 @@
                     {{ $startDate->format('F d, Y') }} – {{ $endDate->format('F d, Y') }}
                     <span class="badge rounded-pill ms-2" style="background:{{ $tagBg }};color:{{ $tagColor }};font-size:0.65rem;">{{ $statusTag }}</span>
                 </p>
+                @if(isset($batch) && $batch->status === 'rejected' && $batch->rejection_note)
+                    <div class="text-muted small mt-1"><strong>Rejection note:</strong> {{ $batch->rejection_note }}</div>
+                @endif
             </div>
             <a href="{{ route('payroll-approval.index') }}" class="emp-action-btn emp-action-view">
                 <i class="feather-arrow-left"></i><span>Back</span>
@@ -109,6 +145,7 @@
                                 <th class="text-end">Deductions</th>
                                 <th class="text-end">Net pay</th>
                                 <th class="text-center">Status</th>
+                                <th class="text-end">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -124,10 +161,15 @@
                                             {{ $statusTag }}
                                         </span>
                                     </td>
+                                    <td class="text-end">
+                                        <a href="{{ route('payroll-approval.show', $payroll) }}" class="emp-action-btn emp-action-view" style="padding:6px 10px;">
+                                            <i class="feather-eye"></i>
+                                        </a>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-5">
+                                    <td colspan="7" class="text-center text-muted py-5">
                                         <i class="feather-inbox d-block mb-2" style="font-size:28px;opacity:.3;"></i>
                                         No payroll records in this batch
                                     </td>
@@ -137,22 +179,28 @@
                     </table>
                 </div>
             </div>
-            @if ($status === 'pending' && $payrolls->isNotEmpty())
+            @if ($status === 'submitted' && $payrolls->isNotEmpty())
                 <div class="card-footer bg-white border-top" style="padding:16px 18px;">
                     <div class="d-flex flex-wrap gap-2 justify-content-end">
                         <form action="{{ route('payroll-approval.reject-batch') }}" method="POST" class="d-inline">
                             @csrf
                             <input type="hidden" name="start" value="{{ $startDate->format('Y-m-d') }}">
                             <input type="hidden" name="end" value="{{ $endDate->format('Y-m-d') }}">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Reject this entire batch?')">
+                            <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
+                                <input type="text" name="rejection_note" required minlength="3"
+                                       class="form-control form-control-sm"
+                                       style="max-width:320px;"
+                                       placeholder="Rejection note (required)">
+                                <button type="submit" class="prl-batch-btn prl-batch-btn-danger" data-sa-confirm="Reject this entire batch?">
                                 <i class="feather-x-circle me-1"></i> Reject batch
-                            </button>
+                                </button>
+                            </div>
                         </form>
                         <form action="{{ route('payroll-approval.approve-batch') }}" method="POST" class="d-inline">
                             @csrf
                             <input type="hidden" name="start" value="{{ $startDate->format('Y-m-d') }}">
                             <input type="hidden" name="end" value="{{ $endDate->format('Y-m-d') }}">
-                            <button type="submit" class="btn btn-sm text-white" style="background:#16a34a;border:none;" onclick="return confirm('Approve this entire batch?')">
+                            <button type="submit" class="prl-batch-btn prl-batch-btn-primary" data-sa-confirm="Approve this entire batch?">
                                 <i class="feather-check-circle me-1"></i> Approve batch
                             </button>
                         </form>

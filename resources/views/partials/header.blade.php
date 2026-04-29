@@ -335,8 +335,6 @@
         // Global polling interval ID
         let notificationPollingInterval = null;
         
-        // Get current user role
-        const userRole = '{{ auth()->user()->role }}';
         const notificationReadUrlTemplate = @json(route('notifications.read', ['notification' => '__ID__']));
         const notificationDeleteUrlTemplate = @json(route('notifications.destroy', ['notification' => '__ID__']));
         
@@ -524,7 +522,7 @@
 
         // Refresh the entire notification list
         function refreshNotificationList() {
-            fetch(@json(route('notifications.index')) + '?read=unread&limit=10', {
+            fetch(@json(route('notifications.index')) + '?view=unread&limit=10', {
                 headers: {
                     'Accept': 'application/json'
                 }
@@ -550,11 +548,11 @@
                                 timeText = diffHours + ' hour' + (diffHours > 1 ? 's' : '') + ' ago';
                             }
 
-                            // Generate action URL based on notification type
-                            let actionUrl = getNotificationActionUrl(notification.type, notification.data);
+                            const actionUrl = notification.action_url || '';
                             
                             html += `
                                 <div class="kt-notif-item ${notification.read_at ? '' : 'unread'}" data-notif-id="${notification.id}" data-action-url="${actionUrl}">
+                                    <span class="kt-notif-accent"></span>
                                     <div class="kt-notif-content">
                                         <div class="kt-notif-title">${notification.title}</div>
                                         <p class="kt-notif-message">${notification.message}</p>
@@ -588,66 +586,6 @@
                 updateMarkAllReadButton();
             })
             .catch(error => console.error('Error refreshing notification list:', error));
-        }
-
-        // Generate action URL for a notification based on type and data
-        function getNotificationActionUrl(type, data) {
-            if (!data) return null;
-
-            const isAccountant = userRole === 'accountant';
-
-            switch (type) {
-                // Payroll routes
-                case 'payroll_processed':
-                case 'payroll_released':
-                case 'payroll_created':
-                case 'payroll_updated':
-                case 'payroll_deleted':
-                case 'payroll_recalculated':
-                    if (isAccountant) {
-                        return '/payroll-approval';
-                    }
-                    return data.payroll_id ? `/payroll/${data.payroll_id}` : '/payroll';
-                
-                case 'payroll_generated':
-                case 'payroll_ready_review':
-                    if (isAccountant) {
-                        return '/payroll-approval';
-                    }
-                    return '/payroll';
-
-                // Leave routes
-                case 'leave_submitted':
-                case 'leave_approved':
-                case 'leave_rejected':
-                case 'leave_updated':
-                case 'leave_deleted':
-                    return data.leave_id ? `/leaves/${data.leave_id}` : '/leaves';
-                
-                case 'leave_pending_approval':
-                    return '/leaves?filter=pending';
-
-                // Attendance routes
-                case 'attendance_issue':
-                case 'employee_absent':
-                case 'employee_late':
-                case 'attendance_recorded':
-                    return data.employee_id ? `/employees/${data.employee_id}` : '/employees';
-
-                // Overtime routes
-                case 'overtime_submitted':
-                case 'overtime_approved':
-                case 'overtime_rejected':
-                case 'overtime_updated':
-                case 'overtime_deleted':
-                    return data.record_id ? `/overtime/${data.record_id}` : '/overtime';
-                
-                case 'overtime_pending_approval':
-                    return '/overtime?filter=pending';
-
-                default:
-                    return null;
-            }
         }
 
         // Update mark-all-read button visibility

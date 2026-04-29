@@ -161,22 +161,9 @@
                 <span class="prl-net-val">₱{{ number_format($netPay, 2) }}</span>
             </div>
 
-            @if ($payroll->status === 'pending')
-                <div class="prl-actions d-flex gap-2 flex-wrap">
-                    <form action="{{ route('payroll-approval.approve', $payroll) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="emp-action-btn emp-action-approve" onclick="return confirm('Approve this payroll?')">
-                            <i class="feather-check me-1"></i> Approve
-                        </button>
-                    </form>
-                    <form action="{{ route('payroll-approval.reject', $payroll) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button type="submit" class="emp-action-btn emp-action-danger" onclick="return confirm('Reject this payroll?')">
-                            <i class="feather-x me-1"></i> Reject
-                        </button>
-                    </form>
-                </div>
-            @endif
+            <div class="text-muted small mt-3">
+                Individual payroll approval is disabled. Please use the batch approval screen.
+            </div>
         </div>
     </div>
 </div>

@@ -136,6 +136,12 @@
                 <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                 Back to History
             </a>
+            @if(isset($batch) && $batch && $batch->status === 'rejected')
+                <a href="{{ route('payroll.batch.confirm', $batch) }}" class="prl-btn-sec" style="border-color:#fecaca;color:#c8292a;">
+                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6"/><path stroke-linecap="round" stroke-linejoin="round" d="M20 8a8 8 0 00-14.828-3M4 16a8 8 0 0014.828 3"/></svg>
+                    Resubmit
+                </a>
+            @endif
         </div>
     </div>
 

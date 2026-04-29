@@ -55,6 +55,61 @@ class PayrollNotification
     }
 
     /**
+     * Notify HR that accountant approved payroll batch
+     */
+    public static function notifyHrPayrollApproved($periodStart, $periodEnd, int $employeeCount)
+    {
+        app(NotificationService::class)->sendToRole(
+            'hr',
+            'payroll_approved',
+            'Payroll Batch Approved',
+            "Accountant approved payroll for {$periodStart->format('M d, Y')} to {$periodEnd->format('M d, Y')} ({$employeeCount} employee(s)).",
+            [
+                'period_start' => $periodStart,
+                'period_end' => $periodEnd,
+                'employee_count' => $employeeCount,
+            ]
+        );
+    }
+
+    public static function notifyHrPayrollRejected($periodStart, $periodEnd, int $employeeCount, ?string $note = null)
+    {
+        $noteText = $note ? " Reason: {$note}" : '';
+
+        app(NotificationService::class)->sendToRole(
+            'hr',
+            'payroll_rejected',
+            'Payroll Batch Rejected',
+            "Accountant rejected payroll for {$periodStart->format('M d, Y')} to {$periodEnd->format('M d, Y')} ({$employeeCount} employee(s)).{$noteText}",
+            [
+                'period_start' => $periodStart,
+                'period_end' => $periodEnd,
+                'employee_count' => $employeeCount,
+                'rejection_note' => $note,
+            ]
+        );
+    }
+
+    /**
+     * Notify accountants that a payroll was edited and is ready for approval
+     */
+    public static function notifyAccountantsPayrollNeedsApproval(Payroll $payroll)
+    {
+        app(NotificationService::class)->sendToRole(
+            'accountant',
+            'payroll_updated',
+            'Payroll Updated for Approval',
+            "Payroll for {$payroll->user->first_name} {$payroll->user->last_name} ({$payroll->payroll_period_start->format('M d, Y')} to {$payroll->payroll_period_end->format('M d, Y')}) is pending your approval.",
+            [
+                'payroll_id' => $payroll->id,
+                'period_start' => $payroll->payroll_period_start,
+                'period_end' => $payroll->payroll_period_end,
+                'employee_id' => $payroll->user_id,
+            ]
+        );
+    }
+
+    /**
      * Notify employee that their payroll has been created/updated
      */
     public static function payrollCreated(Payroll $payroll)

@@ -107,9 +107,15 @@ class PayrollHistoryController extends Controller
         $paidCount    = $payrolls->where('status', 'paid')->count();
         $pendingCount = $payrolls->where('status', '!=', 'paid')->count();
 
+        $batch = PayrollBatch::whereDate('period_start', $startDate->toDateString())
+            ->whereDate('period_end', $endDate->toDateString())
+            ->latest('id')
+            ->first();
+
         return view('hr.payroll.history.batch', compact(
             'startDate', 
             'endDate', 
+            'batch',
             'payrolls', 
             'totalGross', 
             'totalDeductions', 

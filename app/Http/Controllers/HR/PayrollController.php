@@ -64,7 +64,9 @@ class PayrollController extends Controller
         $cutoffSchedules = PayrollCutoffSchedule::where('is_active', true)->orderBy('cutoff_day')->get();
         $nextCutoffDate = PayrollCutoffSchedule::getNextCutoffDate();
         $currentPeriod = PayrollBatch::resolvePeriod();
-        $batchAlreadyExists = PayrollBatch::existsForCurrentPeriod();
+        $currentDraftBatch = PayrollBatch::draftForCurrentPeriod();
+        $finalizedCurrentBatch = PayrollBatch::finalizedForCurrentPeriod();
+        $batchAlreadyExists = $finalizedCurrentBatch !== null;
 
         $totalEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])->count();
         $presentToday = Attendance::whereDate('date', now())->where('status', 'present')->count();
@@ -78,7 +80,7 @@ class PayrollController extends Controller
         $attendanceRate = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
         $cutoffInfo = PayrollCutoffSchedule::getCurrentCutoffPeriod();
 
-        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'sortBy', 'sortOrder', 'cutoffSchedules', 'cutoffInfo', 'nextCutoffDate', 'pendingPayrolls', 'totalPayroll', 'payrollCount', 'paidCount', 'recentBatches', 'currentPeriod', 'batchAlreadyExists'));
+        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'sortBy', 'sortOrder', 'cutoffSchedules', 'cutoffInfo', 'nextCutoffDate', 'pendingPayrolls', 'totalPayroll', 'payrollCount', 'paidCount', 'recentBatches', 'currentPeriod', 'batchAlreadyExists', 'currentDraftBatch', 'finalizedCurrentBatch'));
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -168,14 +170,6 @@ class PayrollController extends Controller
     public function batchGenerate(Request $request)
     {
         $period = PayrollBatch::resolvePeriod();
-        $periodStart = Carbon::parse($period['start']);
-        $periodEnd = Carbon::parse($period['end']);
-
-        $existing = PayrollBatch::where('period_start', $period['start'])->where('period_end', $period['end'])->first();
-
-        if ($existing) {
-            return redirect()->route('payroll.batch.confirm', $existing)->with('info', 'A batch for this period already exists. Redirected to existing draft.');
-        }
 
         $batch = PayrollBatch::create([
             'period_start' => $period['start'],
@@ -184,27 +178,9 @@ class PayrollController extends Controller
             'generated_by' => auth()->id(),
         ]);
 
-        $employees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
-            ->where('status', 'active')
-            ->get();
-
-        foreach ($employees as $employee) {
-            $alreadyExists = Payroll::where('user_id', $employee->id)->where('payroll_period_start', $period['start'])->where('payroll_period_end', $period['end'])->exists();
-
-            if ($alreadyExists) {
-                continue;
-            }
-
-            $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
-            $payroll->forceFill(['batch_id' => $batch->id])->save();
-
-            // BUG FIX: single call per payroll
-            PayrollDeductionService::applyLoanDeductions($payroll);
-        }
-
         return redirect()
             ->route('payroll.batch.confirm', $batch)
-            ->with('success', "Batch generated for {$employees->count()} employees. Review and finalize below.");
+            ->with('success', 'Draft batch created. Add employees, review, then finalize.');
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -213,7 +189,77 @@ class PayrollController extends Controller
     public function batchConfirm(PayrollBatch $batch)
     {
         $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
-        return view('hr.payroll.batch.confirm', compact('batch'));
+
+        $periodStart = $batch->period_start->toDateString();
+        $periodEnd = $batch->period_end->toDateString();
+
+        $availableEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+            ->where('status', 'active')
+            ->whereNotIn('id', function ($q) use ($periodStart, $periodEnd) {
+                $q->select('user_id')
+                    ->from('payrolls')
+                    ->whereDate('payroll_period_start', $periodStart)
+                    ->whereDate('payroll_period_end', $periodEnd);
+            })
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get(['id', 'first_name', 'last_name', 'position']);
+
+        return view('hr.payroll.batch.confirm', compact('batch', 'availableEmployees'));
+    }
+
+    public function batchAddEmployee(Request $request, PayrollBatch $batch)
+    {
+        abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $employeeId = (int) $validated['user_id'];
+        $periodStart = Carbon::parse($batch->period_start);
+        $periodEnd = Carbon::parse($batch->period_end);
+
+        $alreadyExists = Payroll::where('user_id', $employeeId)
+            ->whereDate('payroll_period_start', $periodStart)
+            ->whereDate('payroll_period_end', $periodEnd)
+            ->exists();
+
+        if ($alreadyExists) {
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('error', 'Employee already has generated payroll for this period.');
+        }
+
+        $employee = User::findOrFail($employeeId);
+        $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
+        $payroll->forceFill([
+            'batch_id' => $batch->id,
+            'status' => 'draft',
+        ])->save();
+        PayrollDeductionService::applyLoanDeductions($payroll);
+
+        return redirect()
+            ->route('payroll.batch.confirm', $batch)
+            ->with('success', "{$employee->first_name} {$employee->last_name} added to batch.");
+    }
+
+    public function batchRemoveEmployee(PayrollBatch $batch, Payroll $payroll)
+    {
+        abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+        abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
+
+        $payroll->loadMissing('user');
+        $employeeName = trim(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? ''));
+
+        // Remove line items first to avoid orphans if FK cascade isn't set up.
+        $payroll->allowances()->delete();
+        $payroll->deductions()->delete();
+        $payroll->delete();
+
+        return redirect()
+            ->route('payroll.batch.confirm', $batch)
+            ->with('success', ($employeeName ? "{$employeeName} removed from batch." : 'Employee removed from batch.'));
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -250,18 +296,38 @@ class PayrollController extends Controller
         $periodStart = Carbon::parse($batch->period_start);
         $periodEnd = Carbon::parse($batch->period_end);
 
-        // Pass current status so it stays as 'draft'
+        // After HR saves changes for an employee, mark it as prepared for batch submission.
         $extraData = [
-            'status' => $payroll->status, // keep 'draft'
+            'status' => 'prepared',
         ];
 
         $updatedPayroll = $this->payrollService->updatePayroll($payroll, $employee, $periodStart, $periodEnd, $validated['allowances'] ?? [], $validated['deductions'] ?? [], $extraData);
 
         PayrollDeductionService::applyLoanDeductions($updatedPayroll);
-
         return redirect()
             ->route('payroll.batch.confirm', $batch)
-            ->with('success', "{$employee->first_name} {$employee->last_name}'s payroll updated successfully.");
+            ->with('success', "{$employee->first_name} {$employee->last_name}'s payroll saved and marked as prepared.");
+    }
+
+    public function batchMarkPrepared(PayrollBatch $batch, Payroll $payroll)
+    {
+        abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+        abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
+
+        $payroll->loadMissing('user');
+
+        if ($payroll->status === 'prepared') {
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('info', 'Employee is already prepared.');
+        }
+
+        $payroll->update(['status' => 'prepared']);
+
+        $name = trim(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? ''));
+        return redirect()
+            ->route('payroll.batch.confirm', $batch)
+            ->with('success', ($name ? "{$name} marked as prepared." : 'Employee marked as prepared.'));
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -271,14 +337,38 @@ class PayrollController extends Controller
     {
         abort_if(!$batch->isEditable(), 403, 'Batch is already finalized.');
 
-        $batch->payrolls()->update(['status' => 'finalized']);
+        $batch->load(['payrolls.user']);
+
+        if ($batch->payrolls->isEmpty()) {
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('error', 'Cannot finalize an empty batch. Add at least one employee.');
+        }
+
+        $notPrepared = $batch->payrolls
+            ->filter(fn ($p) => $p->status !== 'prepared')
+            ->map(function ($p) {
+                $u = $p->user;
+                return trim(($u->first_name ?? '') . ' ' . ($u->last_name ?? ''));
+            })
+            ->filter()
+            ->values();
+
+        if ($notPrepared->isNotEmpty()) {
+            $names = $notPrepared->implode(', ');
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('error', "Cannot finalize batch. These employees are not prepared yet: {$names}.");
+        }
+
+        $batch->payrolls()->update(['status' => 'submitted']);
         $batch->update([
-            'status' => 'finalized',
+            'status' => 'submitted',
             'finalized_by' => auth()->id(),
             'finalized_at' => now(),
         ]);
 
-        return redirect()->route('payroll.batch.confirm', $batch)->with('success', 'Payroll batch finalized. Records are now locked.');
+        return redirect()->route('payroll.batch.confirm', $batch)->with('success', 'Payroll batch submitted to accounting. Records are now locked.');
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -296,6 +386,25 @@ class PayrollController extends Controller
         }
 
         return redirect()->route('payroll.batch.confirm', $batch)->with('success', 'Payroll batch submitted for approval.');
+    }
+
+    public function batchReopen(PayrollBatch $batch)
+    {
+        abort_if($batch->status !== 'rejected', 403, 'Only rejected batches can be reopened.');
+
+        // Bring payrolls back to prepared so HR can review/edit then resubmit.
+        $batch->payrolls()->update(['status' => 'prepared']);
+
+        $batch->update([
+            'status' => 'draft',
+            'rejected_by' => null,
+            'rejected_at' => null,
+            'rejection_note' => null,
+        ]);
+
+        return redirect()
+            ->route('payroll.batch.confirm', $batch)
+            ->with('success', 'Rejected batch reopened. Review employees and finalize to resubmit.');
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -340,11 +449,13 @@ class PayrollController extends Controller
         $periodEnd = Carbon::parse($validated['payroll_period_end']);
 
         $payroll = $this->payrollService->updatePayroll($payroll, $employee, $periodStart, $periodEnd, $validated['allowances'] ?? [], $validated['deductions'] ?? []);
+        $payroll->update(['status' => 'pending']);
 
         PayrollDeductionService::applyLoanDeductions($payroll);
         PayrollNotification::payrollUpdated($payroll);
+        PayrollNotification::notifyAccountantsPayrollNeedsApproval($payroll);
 
-        return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll updated successfully.');
+        return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll updated, set to pending, and sent to accountant.');
     }
 
     public function destroy(Payroll $payroll)

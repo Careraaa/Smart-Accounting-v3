@@ -102,6 +102,8 @@
 .prl-action-btn { width:30px;height:30px;border-radius:7px;border:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:13px;transition:background 0.13s,color 0.13s;background:#f4f5f7;color:#6b7280;padding:0; }
 .prl-action-btn:hover        { background:#eff6ff;color:#3b82f6; }
 .prl-action-btn.edit:hover   { background:#fffbeb;color:#d97706; }
+.prl-action-btn.prepare:hover { background:#f0fdf4;color:#16a34a; }
+.prl-action-btn.remove:hover { background:#fff1f2;color:#e11d48; }
 .prl-action-btn.locked { cursor:not-allowed;opacity:0.4; }
 
 /* ── Status badges ─────────────────────────────────────────── */
@@ -130,6 +132,10 @@
 @keyframes flashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
 
 .prl-table-scroll { overflow-x:auto; }
+.prl-add-emp-card { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap; }
+.prl-add-emp-card select { min-width:280px;max-width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:.82rem;color:#374151;background:#f9fafb; }
+.prl-add-emp-btn { display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#c8292a;color:#fff;border:0;border-radius:8px;font-size:.8rem;font-weight:700; }
+.prl-add-emp-btn:hover { background:#a81f20; }
 </style>
 @endpush
 
@@ -156,8 +162,8 @@
         <div class="prl-hero-left">
             <div class="prl-hero-eyebrow {{ $batch->status }}">
                 @if($batch->status === 'draft') ● Draft — Review &amp; edit before finalizing
-                @elseif($batch->status === 'finalized') ● Finalized — Ready to submit
                 @elseif($batch->status === 'submitted') ● Submitted — Awaiting approval
+                @elseif($batch->status === 'rejected') ● Rejected — Review note and reopen to edit
                 @else ● {{ ucfirst($batch->status) }}
                 @endif
             </div>
@@ -185,33 +191,26 @@
             @if($batch->status === 'draft')
                 {{-- Finalize --}}
                 <form action="{{ route('payroll.batch.finalize', $batch) }}" method="POST"
-                      onsubmit="return confirm('Finalize this batch? Editing will be locked after this.')">
+                      data-sa-confirm="Finalize and submit this batch to accounting? Editing will be locked after this.">
                     @csrf
                     <button type="submit" class="prl-btn-finalize">
                         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        Finalize Batch
+                        Finalize &amp; Submit
                     </button>
                 </form>
                 <a href="{{ route('payroll.salary-computation.index') }}" class="prl-btn-sec">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     Cancel
                 </a>
-
-            @elseif($batch->status === 'finalized')
-                {{-- Submit --}}
-                <form action="{{ route('payroll.batch.submit', $batch) }}" method="POST"
-                      onsubmit="return confirm('Submit this batch to accounting?')">
+            @elseif($batch->status === 'rejected')
+                <form action="{{ route('payroll.batch.reopen', $batch) }}" method="POST"
+                      data-sa-confirm="Reopen this rejected batch for editing?">
                     @csrf
-                    <button type="submit" class="prl-btn-submit">
-                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                        Submit for Approval
+                    <button type="submit" class="prl-btn-finalize">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6"/><path stroke-linecap="round" stroke-linejoin="round" d="M20 8a8 8 0 00-14.828-3M4 16a8 8 0 0014.828 3"/></svg>
+                        Reopen Batch
                     </button>
                 </form>
-                <span class="prl-btn-locked">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                    Editing Locked
-                </span>
-
             @else
                 <span class="prl-btn-locked">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0110 0v4"/></svg>
@@ -221,12 +220,41 @@
         </div>
     </div>
 
+    @if($batch->status === 'rejected' && $batch->rejection_note)
+        <div class="prl-flash error" style="margin-bottom:16px;">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+            <strong>Rejection note:</strong> {{ $batch->rejection_note }}
+        </div>
+    @endif
+
     {{-- Lock notice when not draft --}}
     @if(!$batch->isEditable())
     <div class="prl-locked-notice">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0110 0v4"/></svg>
         This batch is <strong>{{ $batch->status }}</strong> — individual payrolls can no longer be edited.
         @if($batch->finalizedBy) Finalized by {{ $batch->finalizedBy->name ?? 'system' }} on {{ $batch->finalized_at->format('M d, Y h:i A') }}. @endif
+    </div>
+    @endif
+
+    @if($batch->isEditable())
+    <div class="prl-add-emp-card">
+        <div style="font-size:.78rem;color:#6b7280;font-weight:700;">Add employee to this batch</div>
+        <form action="{{ route('payroll.batch.add-employee', $batch) }}" method="POST" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            @csrf
+            <select name="user_id" required>
+                <option value="">Select employee...</option>
+                @foreach($availableEmployees as $emp)
+                    <option value="{{ $emp->id }}">{{ $emp->first_name }} {{ $emp->last_name }}{{ $emp->position ? ' — '.$emp->position : '' }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="prl-add-emp-btn">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Add Employee
+            </button>
+        </form>
+        @if($availableEmployees->isEmpty())
+            <span style="font-size:.75rem;color:#9ca3af;">All eligible employees already have payroll for this period.</span>
+        @endif
     </div>
     @endif
 
@@ -279,7 +307,14 @@
                 @forelse($batch->payrolls as $i => $payroll)
                     @php
                         $initials = strtoupper(substr($payroll->user->first_name??'U',0,1).substr($payroll->user->last_name??'',0,1));
-                        $sc = match($payroll->status){'finalized'=>'s-finalized','submitted'=>'s-submitted','paid'=>'s-paid',default=>'s-draft'};
+                        $sc = match($payroll->status){
+                            'prepared'  => 's-finalized',
+                            'submitted' => 's-submitted',
+                            'approved'  => 's-paid',
+                            'paid'      => 's-paid',
+                            'rejected'  => 's-draft',
+                            default     => 's-draft'
+                        };
                         $otAllowances = $payroll->total_allowances;
                     @endphp
                     <tr>
@@ -310,7 +345,11 @@
                             @endif
                         </td>
                         <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
-                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ ucfirst($payroll->status) }}</span></td>
+                        <td class="text-center">
+                            <span class="prl-status {{ $sc }}">
+                                {{ $payroll->status === 'prepared' ? 'Prepared' : ucfirst($payroll->status) }}
+                            </span>
+                        </td>
                         <td>
                             <div class="prl-actions">
                                 <a href="{{ route('payroll.salary-computation.show', $payroll) }}"
@@ -318,10 +357,34 @@
                                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
                                 @if($batch->isEditable())
+                                    @if($payroll->status !== 'prepared')
+                                        <form action="{{ route('payroll.batch.prepare-employee', [$batch, $payroll]) }}"
+                                              method="POST"
+                                              style="display:inline;">
+                                            @csrf
+                                            <button type="submit" class="prl-action-btn prepare" title="Mark as prepared">
+                                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    @endif
                                     <a href="{{ route('payroll.batch.edit-employee', [$batch, $payroll]) }}"
                                        class="prl-action-btn edit" title="Edit allowances &amp; deductions">
                                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </a>
+                                    <form action="{{ route('payroll.batch.remove-employee', [$batch, $payroll]) }}"
+                                          method="POST"
+                                          data-sa-confirm="Remove this employee from the batch?"
+                                          style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="prl-action-btn remove" title="Remove employee from batch">
+                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </form>
                                 @else
                                     <span class="prl-action-btn locked" title="Batch is locked">
                                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0110 0v4"/></svg>

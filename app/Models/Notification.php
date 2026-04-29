@@ -146,8 +146,9 @@ class Notification extends Model
     {
         $type = $this->type;
         $data = $this->data ?? [];
-        $user = Auth::user();
-        $isAccountant = $user && $user->role === 'accountant';
+        $authUser = Auth::user();
+        $recipientRole = $this->relationLoaded('user') ? $this->user?->role : $this->user()->value('role');
+        $isAccountant = ($recipientRole === 'accountant') || ($authUser && $authUser->role === 'accountant');
 
         switch ($type) {
             // Payroll related notifications
@@ -164,15 +165,17 @@ class Notification extends Model
                 if ($data['payroll_id'] ?? null) {
                     return route('payroll.salary-computation.show', ['payroll' => $data['payroll_id']]);
                 }
-                return route('payroll.index');
+                return route('payroll.salary-computation.index');
 
             case 'payroll_generated':
             case 'payroll_ready_review':
+            case 'payroll_approved':
+            case 'payroll_rejected':
                 // Route accountants to payroll-approval
                 if ($isAccountant) {
                     return route('payroll-approval.index');
                 }
-                return route('payroll.index');
+                return route('payroll.salary-computation.index');
 
             // Leave related notifications
             case 'leave_submitted':

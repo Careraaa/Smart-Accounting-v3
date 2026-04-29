@@ -185,34 +185,36 @@
     {{-- Generate hero --}}
     <div class="prl-generate-card">
         <div class="prl-generate-left">
-            <div class="prl-generate-eyebrow">{{ $batchAlreadyExists ? 'Batch already generated' : 'Ready to generate' }}</div>
-            <h2 class="prl-generate-title">{{ $batchAlreadyExists ? 'Payroll Draft Exists' : 'Generate Payroll Batch' }}</h2>
+            <div class="prl-generate-eyebrow">
+                @if($batchAlreadyExists)
+                    Batch already generated
+                @elseif($currentDraftBatch)
+                    Draft batch in progress
+                @else
+                    Ready to generate
+                @endif
+            </div>
+            <h2 class="prl-generate-title">
+                @if($batchAlreadyExists)
+                    Payroll Batch Finalized
+                @elseif($currentDraftBatch)
+                    Continue Draft Batch
+                @else
+                    Generate Payroll Batch
+                @endif
+            </h2>
             <div class="prl-generate-period">
                 Period: {{ \Carbon\Carbon::parse($currentPeriod['start'])->format('M d, Y') }} &mdash; {{ \Carbon\Carbon::parse($currentPeriod['end'])->format('M d, Y') }}
             </div>
         </div>
         <div class="prl-generate-right">
-            @if($batchAlreadyExists)
-                @php $existingBatch = \App\Models\PayrollBatch::where('period_start',$currentPeriod['start'])->where('period_end',$currentPeriod['end'])->first(); @endphp
-                <span class="prl-btn-generate disabled">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    Already Generated
-                </span>
-                @if($existingBatch)
-                <span class="prl-already-badge">
-                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    <a href="{{ route('payroll.batch.confirm', $existingBatch) }}">View / Edit Draft →</a>
-                </span>
-                @endif
-            @else
-                <form action="{{ route('payroll.batch.generate') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="prl-btn-generate">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                        Generate Payroll Batch
-                    </button>
-                </form>
-            @endif
+            <form action="{{ route('payroll.batch.generate') }}" method="POST">
+                @csrf
+                <button type="submit" class="prl-btn-generate">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Generate Payroll Batch
+                </button>
+            </form>
         </div>
     </div>
 
@@ -227,16 +229,6 @@
                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
                     <input type="text" class="prl-search-input" id="prlSearch" placeholder="Search employee…">
                 </div>
-                <select class="prl-filter-select" id="prlStatusFilter">
-                    <option value="">All Statuses</option>
-                    <option value="draft">Draft</option>
-                    <option value="pending">Pending</option>
-                    <option value="finalized">Finalized</option>
-                    <option value="submitted">Submitted</option>
-                    <option value="approved">Approved</option>
-                    <option value="paid">Paid</option>
-                    <option value="rejected">Rejected</option>
-                </select>
             </div>
             <div class="prl-table-card">
                 <div class="prl-table-scroll">
@@ -244,19 +236,15 @@
                         <thead><tr>
                             <th>Employee</th><th>Period</th>
                             <th class="text-end">Gross</th><th class="text-end">Net</th>
-                            <th class="text-center">Status</th><th class="text-end">Actions</th>
+                            <th class="text-end">Actions</th>
                         </tr></thead>
                         <tbody id="prlTbody">
                         @forelse($payrolls as $payroll)
                             @php
                                 $initials = strtoupper(substr($payroll->user->first_name??'U',0,1).substr($payroll->user->last_name??'',0,1));
-                                $sc = match($payroll->status){
-                                    'pending'=>'s-pending','finalized'=>'s-finalized','submitted'=>'s-submitted',
-                                    'approved'=>'s-approved','paid'=>'s-paid','rejected'=>'s-rejected',default=>'s-draft'
-                                };
                             @endphp
                             <tr data-name="{{ strtolower(($payroll->user->first_name??'').' '.($payroll->user->last_name??'')) }}"
-                                data-status="{{ $payroll->status }}">
+                                >
                                 <td>
                                     <div class="prl-emp-cell">
                                         <div class="prl-emp-avatar">{{ $initials }}</div>
@@ -269,7 +257,6 @@
                                 <td><span class="prl-period-tag">{{ $payroll->payroll_period_start->format('M d') }} – {{ $payroll->payroll_period_end->format('M d, Y') }}</span></td>
                                 <td class="text-end"><span class="prl-mono">₱{{ number_format($payroll->gross_pay,2) }}</span></td>
                                 <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($payroll->net_pay,2) }}</span></td>
-                                <td class="text-center"><span class="prl-status {{ $sc }}">{{ ucfirst($payroll->status) }}</span></td>
                                 <td>
                                     <div class="prl-actions">
                                         <a href="{{ route('payroll.salary-computation.show',$payroll) }}" class="prl-action-btn" title="View">
@@ -278,7 +265,7 @@
                                         <a href="{{ route('payroll.generatePayslip',$payroll) }}" class="prl-action-btn success" title="Payslip">
                                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         </a>
-                                        <form action="{{ route('payroll.salary-computation.destroy',$payroll) }}" method="POST" onsubmit="return confirm('Delete?')" style="display:inline;">
+                                        <form action="{{ route('payroll.salary-computation.destroy',$payroll) }}" method="POST" data-sa-confirm="Delete this payroll record?" style="display:inline;">
                                             @csrf @method('DELETE')
                                             <button class="prl-action-btn danger" title="Delete">
                                                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -288,7 +275,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6">
+                            <tr><td colspan="5">
                                 <div class="prl-empty">
                                     <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
                                     <p class="prl-empty-title">No payroll records yet</p>
@@ -337,17 +324,17 @@
 @push('scripts')
 <script>
 (function(){
-    const s=document.getElementById('prlSearch'), f=document.getElementById('prlStatusFilter');
+    const s=document.getElementById('prlSearch');
     const tbody=document.getElementById('prlTbody'), nr=document.getElementById('prlNoResults');
     function run(){
-        const q=s.value.toLowerCase().trim(), st=f.value;
+        const q=s.value.toLowerCase().trim();
         const rows=Array.from(tbody.querySelectorAll('tr[data-name]'));
-        const vis=rows.filter(r=>(!q||r.dataset.name.includes(q))&&(!st||r.dataset.status===st));
+        const vis=rows.filter(r=>!q||r.dataset.name.includes(q));
         rows.forEach(r=>r.style.display='none');
         vis.forEach(r=>r.style.display='');
         nr.style.display=vis.length===0&&rows.length>0?'block':'none';
     }
-    s.addEventListener('input',run); f.addEventListener('change',run);
+    s.addEventListener('input',run);
 })();
 </script>
 @endpush

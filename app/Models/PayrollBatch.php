@@ -17,12 +17,22 @@ class PayrollBatch extends Model
         'generated_by',
         'finalized_by',
         'finalized_at',
+        'approved_by',
+        'approved_at',
+        'rejected_by',
+        'rejected_at',
+        'rejection_note',
+        'paid_by',
+        'paid_at',
     ];
 
     protected $casts = [
         'period_start' => 'date',
         'period_end'   => 'date',
         'finalized_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     /* ── Relationships ─────────────────────────────────────────── */
@@ -40,6 +50,21 @@ class PayrollBatch extends Model
     public function finalizedBy()
     {
         return $this->belongsTo(User::class, 'finalized_by');
+    }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function rejectedBy()
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
+    }
+
+    public function paidBy()
+    {
+        return $this->belongsTo(User::class, 'paid_by');
     }
 
     /* ── Computed ──────────────────────────────────────────────── */
@@ -94,6 +119,29 @@ class PayrollBatch extends Model
         $period = self::resolvePeriod();
         return self::where('period_start', $period['start'])
                    ->where('period_end',   $period['end'])
+                   ->where('status', '!=', 'draft')
                    ->exists();
+    }
+
+    public static function draftForCurrentPeriod(): ?self
+    {
+        $period = self::resolvePeriod();
+
+        return self::where('period_start', $period['start'])
+            ->where('period_end', $period['end'])
+            ->where('status', 'draft')
+            ->latest('id')
+            ->first();
+    }
+
+    public static function finalizedForCurrentPeriod(): ?self
+    {
+        $period = self::resolvePeriod();
+
+        return self::where('period_start', $period['start'])
+            ->where('period_end', $period['end'])
+            ->where('status', '!=', 'draft')
+            ->latest('id')
+            ->first();
     }
 }

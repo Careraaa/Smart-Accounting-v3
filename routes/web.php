@@ -365,12 +365,16 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
     Route::post('/payroll/batch/generate', [PayrollController::class, 'batchGenerate'])->name('payroll.batch.generate');
 
     Route::get('/payroll/batch/{batch}/confirm', [PayrollController::class, 'batchConfirm'])->name('payroll.batch.confirm');
+    Route::post('/payroll/batch/{batch}/employee', [PayrollController::class, 'batchAddEmployee'])->name('payroll.batch.add-employee');
 
     Route::get('/payroll/batch/{batch}/employee/{payroll}/edit', [PayrollController::class, 'batchEditEmployee'])->name('payroll.batch.edit-employee');
 
     Route::put('/payroll/batch/{batch}/employee/{payroll}', [PayrollController::class, 'batchUpdateEmployee'])->name('payroll.batch.update-employee');
+    Route::post('/payroll/batch/{batch}/employee/{payroll}/prepare', [PayrollController::class, 'batchMarkPrepared'])->name('payroll.batch.prepare-employee');
+    Route::delete('/payroll/batch/{batch}/employee/{payroll}', [PayrollController::class, 'batchRemoveEmployee'])->name('payroll.batch.remove-employee');
 
     Route::post('/payroll/batch/{batch}/finalize', [PayrollController::class, 'batchFinalize'])->name('payroll.batch.finalize');
+    Route::post('/payroll/batch/{batch}/reopen', [PayrollController::class, 'batchReopen'])->name('payroll.batch.reopen');
 
     Route::post('/payroll/batch/{batch}/submit', [PayrollController::class, 'batchSubmit'])->name('payroll.batch.submit');
 });
@@ -392,6 +396,13 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::resource('payroll-approval', PayrollApprovalController::class, ['only' => ['index', 'show']]);
     Route::post('payroll-approval/{payroll}/approve', [PayrollApprovalController::class, 'approve'])->name('payroll-approval.approve');
     Route::post('payroll-approval/{payroll}/reject', [PayrollApprovalController::class, 'reject'])->name('payroll-approval.reject');
+
+    Route::prefix('payroll-payments')->name('payroll-payments.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Accountant\PayrollPaymentsController::class, 'index'])->name('index');
+        Route::get('/{batch}', [\App\Http\Controllers\Accountant\PayrollPaymentsController::class, 'show'])->name('show');
+        Route::post('/{payroll}/mark-paid', [\App\Http\Controllers\Accountant\PayrollPaymentsController::class, 'markPaid'])->name('mark-paid');
+        Route::post('/{payroll}/mark-unpaid', [\App\Http\Controllers\Accountant\PayrollPaymentsController::class, 'markUnpaid'])->name('mark-unpaid');
+    });
 
     Route::get('/remittance-approval', [RemittanceApprovalController::class, 'index'])->name('remittance-approval.index');
     Route::post('/remittance-approval/{remittance}/approve', [RemittanceApprovalController::class, 'approve'])->name('remittance-approval.approve');

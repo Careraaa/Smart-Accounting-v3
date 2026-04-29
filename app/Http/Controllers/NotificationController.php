@@ -49,6 +49,11 @@ class NotificationController extends Controller
 
         // If the request expects JSON (dropdown polling, API usage), return JSON.
         if ($request->wantsJson()) {
+            $notifications->getCollection()->transform(function ($notification) {
+                $notification->setAttribute('action_url', $notification->getActionUrl());
+                return $notification;
+            });
+
             return response()->json([
                 'status' => 'success',
                 'data' => $notifications,
