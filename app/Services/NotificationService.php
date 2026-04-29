@@ -52,7 +52,7 @@ class NotificationService
 
     public function getUnreadNotifications(Model $user, int $limit = null): Collection
     {
-        $query = $user->notifications()->unread()->recent();
+        $query = $user->notifications()->notDeleted()->unread()->recent();
 
         if ($limit) {
             $query->limit($limit);
@@ -63,7 +63,7 @@ class NotificationService
 
     public function getAllNotifications(Model $user, int $limit = null): Collection
     {
-        $query = $user->notifications()->recent();
+        $query = $user->notifications()->notDeleted()->recent();
 
         if ($limit) {
             $query->limit($limit);
@@ -80,6 +80,7 @@ class NotificationService
     public function markAllAsRead(Model $user): int
     {
         return $user->notifications()
+            ->notDeleted()
             ->unread()
             ->update(['read_at' => now()]);
     }
@@ -91,30 +92,37 @@ class NotificationService
 
     public function delete(Notification $notification): bool
     {
-        return $notification->delete();
+        $notification->markAsDeleted();
+        return true;
     }
 
     public function deleteReadNotifications(Model $user): int
     {
-        return $user->notifications()->read()->delete();
+        return $user->notifications()
+            ->notDeleted()
+            ->read()
+            ->update(['deleted_at' => now()]);
     }
 
     public function deleteAllNotifications(Model $user): int
     {
-        return $user->notifications()->delete();
+        return $user->notifications()
+            ->notDeleted()
+            ->update(['deleted_at' => now()]);
     }
 
     public function getUnreadCount(Model $user): int
     {
-        return $user->notifications()->unread()->count();
+        return $user->notifications()->notDeleted()->unread()->count();
     }
 
     public function getStats(Model $user): array
     {
         return [
-            'total'  => $user->notifications()->count(),
-            'unread' => $user->notifications()->unread()->count(),
-            'read'   => $user->notifications()->read()->count(),
+            'total'   => $user->notifications()->notDeleted()->count(),
+            'unread'  => $user->notifications()->notDeleted()->unread()->count(),
+            'read'    => $user->notifications()->notDeleted()->read()->count(),
+            'deleted' => $user->notifications()->deleted()->count(),
         ];
     }
 }

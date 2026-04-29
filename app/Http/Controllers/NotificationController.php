@@ -22,19 +22,25 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        $view = $request->route('view') ?? $request->query('view', 'all');
         $type = $request->query('type'); // Optional filter by type
-        $read = $request->query('read'); // 'read', 'unread', or empty for all
         $limit = $request->integer('limit'); // optional per-page / limit
 
         $query = $user->notifications();
+
+        if ($view === 'deleted') {
+            $query->deleted();
+        } else {
+            $query->notDeleted();
+        }
 
         if ($type) {
             $query->where('type', $type);
         }
 
-        if ($read === 'unread') {
+        if ($view === 'unread') {
             $query->unread();
-        } elseif ($read === 'read') {
+        } elseif ($view === 'read') {
             $query->read();
         }
 
@@ -57,7 +63,7 @@ class NotificationController extends Controller
             'stats' => $stats,
             'filter' => [
                 'type' => $type,
-                'read' => $read,
+                'view' => $view,
             ],
         ]);
     }

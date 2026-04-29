@@ -299,15 +299,8 @@
                 }
             };
 
-            window.addEventListener('pageshow', (event) => {
-                const navEntry = performance.getEntriesByType?.('navigation')?.[0];
-                const fromHistory = event.persisted || navEntry?.type === 'back_forward';
-
-                if (fromHistory) {
-                    showRefreshToast();
-                    setTimeout(() => window.location.reload(), 180);
-                }
-            });
+            // Disabled forced pageshow reload to prevent unexpected page refresh loops.
+            // If stale back/forward cache handling is needed later, re-introduce with per-page opt-in.
         })();
     </script>
 </body>

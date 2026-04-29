@@ -18,11 +18,13 @@ class Notification extends Model
         'message',
         'data',
         'read_at',
+        'deleted_at',
     ];
 
     protected $casts = [
         'data' => 'array',
         'read_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     /**
@@ -99,6 +101,42 @@ class Notification extends Model
     public function scopeRecent($query)
     {
         return $query->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Scope to get only non-deleted notifications
+     */
+    public function scopeNotDeleted($query)
+    {
+        return $query->whereNull('deleted_at');
+    }
+
+    /**
+     * Scope to get only deleted notifications
+     */
+    public function scopeDeleted($query)
+    {
+        return $query->whereNotNull('deleted_at');
+    }
+
+    /**
+     * Soft-delete notification by setting deleted_at
+     */
+    public function markAsDeleted()
+    {
+        if ($this->deleted_at === null) {
+            $this->update(['deleted_at' => Carbon::now()]);
+        }
+        return $this;
+    }
+
+    /**
+     * Restore soft-deleted notification
+     */
+    public function restoreDeleted()
+    {
+        $this->update(['deleted_at' => null]);
+        return $this;
     }
 
     /**

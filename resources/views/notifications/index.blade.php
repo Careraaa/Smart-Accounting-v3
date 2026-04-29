@@ -3,13 +3,15 @@
 @push('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.ntf-page{font-family:'Sora',sans-serif}
+.ntf-page{font-family:'Sora',sans-serif;padding-top:22px}
 .ntf-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
 .ntf-title{font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px}
 .ntf-sub{font-size:.78rem;color:#9ca3af;margin:0}
 .ntf-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ntf-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .ntf-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap}
 .ntf-btn:hover{border-color:#c8292a;color:#c8292a;background:#fff5f5}
+.ntf-btn.active{border-color:#c8292a;color:#c8292a;background:#fff5f5}
 .ntf-btn-primary{display:inline-flex;align-items:center;gap:10px;padding:11px 20px;background:#c8292a;color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:.86rem;font-weight:800;cursor:pointer;transition:background .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(200,41,42,.5);white-space:nowrap;text-decoration:none}
 .ntf-btn-primary:hover{background:#a81f20;color:#fff;box-shadow:0 10px 34px rgba(200,41,42,.62)}
 .ntf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
@@ -47,6 +49,9 @@
 @endpush
 
 @section('content')
+@php
+    $currentView = $filter['view'] ?? 'all';
+@endphp
 <div class="ntf-page">
     <div class="ntf-topbar">
         <div>
@@ -80,6 +85,15 @@
         </div>
     </div>
 
+    <div class="ntf-filters">
+        <a href="{{ route('notifications.all') }}" class="ntf-btn {{ $currentView === 'all' ? 'active' : '' }}">All</a>
+        <a href="{{ route('notifications.unread-page') }}" class="ntf-btn {{ $currentView === 'unread' ? 'active' : '' }}">Unread</a>
+        <a href="{{ route('notifications.read-page') }}" class="ntf-btn {{ $currentView === 'read' ? 'active' : '' }}">Read</a>
+        <a href="{{ route('notifications.deleted-page') }}" class="ntf-btn {{ $currentView === 'deleted' ? 'active' : '' }}">
+            Deleted ({{ $stats['deleted'] ?? 0 }})
+        </a>
+    </div>
+
     <div class="ntf-card">
         <div class="ntf-card-head">
             <p class="ntf-card-title"><span class="ntf-dot"></span> Inbox</p>
@@ -96,19 +110,21 @@
                         <p class="ntf-msg">{{ $n->message }}</p>
                     </div>
                     <div class="ntf-actions2">
-                        @if($n->isUnread())
+                        @if($n->isUnread() && $currentView !== 'deleted')
                             <button class="ntf-iconbtn" title="Mark as read" data-action="read">
                                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             </button>
                         @endif
-                        <button class="ntf-iconbtn danger" title="Delete" data-action="delete">
-                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
+                        @if($currentView !== 'deleted')
+                            <button class="ntf-iconbtn danger" title="Delete" data-action="delete">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        @endif
                     </div>
                 </div>
             @empty
                 <div class="ntf-empty">
-                    <div style="font-weight:900;color:#111827;margin-bottom:6px;">No notifications</div>
+                    <div style="font-weight:900;color:#111827;margin-bottom:6px;">No {{ $currentView }} notifications</div>
                     You’re all caught up.
                 </div>
             @endforelse

@@ -7,6 +7,7 @@ use App\Models\EmployeeAttachment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class EmployeeAttachmentController extends Controller
 {
@@ -102,11 +103,11 @@ class EmployeeAttachmentController extends Controller
         $types = EmployeeAttachment::attachmentTypes();
         $label = $types[$key] ?? $key;
 
-        // Organised storage path: employees/{id}/attachments/{key}/filename
-        $path = $file->store(
-            "employees/{$employee->id}/attachments/{$key}",
-            'public'
-        );
+        // Organized storage path:
+        // employees/{employee_id}/{attachment_key}/{uploaded_by_role}/filename
+        $directory = "employees/{$employee->id}/{$key}/{$uploadedByRole}";
+        $filename = now()->format('Ymd_His') . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs($directory, $filename, 'public');
 
         return EmployeeAttachment::create([
             'user_id'          => $employee->id,

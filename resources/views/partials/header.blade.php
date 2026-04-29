@@ -39,7 +39,7 @@
             {{-- Notifications --}}
             <div class="dropdown">
                 <a class="kt-header-btn position-relative" id="notification-btn" data-bs-toggle="dropdown" href="#" role="button"
-                    data-bs-auto-close="outside">
+                    data-bs-auto-close="outside" data-bs-display="static">
                     <i class="feather-bell fs-17"></i>
                     @php
                         $unread_count = auth()->user()->notifications()->unread()->count();
@@ -48,9 +48,15 @@
                         <span class="kt-notif-dot" id="notif-count">{{ $unread_count > 99 ? '99+' : $unread_count }}</span>
                     @endif
                 </a>
-                <div class="dropdown-menu dropdown-menu-end kt-notif-dropdown" id="notification-dropdown">
+                <div class="dropdown-menu dropdown-menu-end kt-notif-dropdown kt-notif-dropdown-under-navbar" id="notification-dropdown" style="width:680px !important; min-width:680px !important; max-width:min(96vw,680px) !important;">
                     <div class="kt-notif-header">
-                        <span class="fw-bold">Notifications</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="kt-notif-header-icon"><i class="feather-bell"></i></span>
+                            <div>
+                                <div class="fw-bold">Notifications</div>
+                                <small class="text-muted">Latest updates</small>
+                            </div>
+                        </div>
                         <span class="kt-notif-badge" id="notif-badge">
                             @if($unread_count > 0)
                                 {{ $unread_count }} New
@@ -63,12 +69,13 @@
                         <div id="notification-list">
                             @forelse(auth()->user()->notifications()->unread()->recent()->limit(10)->get() as $notification)
                                 <div class="kt-notif-item {{ $notification->isUnread() ? 'unread' : '' }}" data-notif-id="{{ $notification->id }}" data-action-url="{{ $notification->getActionUrl() }}">
+                                    <span class="kt-notif-accent"></span>
                                     <div class="kt-notif-content">
                                         <div class="kt-notif-title">{{ $notification->title }}</div>
                                         <p class="kt-notif-message">{{ $notification->message }}</p>
                                         <small class="kt-notif-time">{{ $notification->created_at->diffForHumans() }}</small>
                                     </div>
-                                    <button class="kt-notif-delete notif-delete" data-notif-id="{{ $notification->id }}">
+                                    <button type="button" class="kt-notif-delete notif-delete" data-notif-id="{{ $notification->id }}">
                                         <i class="feather-x"></i>
                                     </button>
                                 </div>
@@ -135,10 +142,189 @@
             margin-top: 0 !important;
         }
 
+        .kt-notif-dropdown-under-navbar {
+            position: absolute !important;
+            top: calc(100% + 18px) !important;
+            right: 12px !important;
+            left: auto !important;
+            inset: auto !important;
+            transform: none !important;
+            margin-top: 0 !important;
+            width: 680px !important;
+            min-width: 680px !important;
+            max-width: min(96vw, 680px) !important;
+        }
+
+        /* Replace old template dropdown look with custom popup */
+        .nxl-header #notification-dropdown.kt-notif-dropdown {
+            width: 680px !important;
+            min-width: 680px !important;
+            max-width: min(96vw, 680px) !important;
+            right: 12px !important;
+            left: auto !important;
+            border: 1px solid #f1d0d0 !important;
+            border-radius: 18px !important;
+            box-shadow: 0 20px 45px rgba(17, 24, 39, 0.18), 0 8px 22px rgba(200, 41, 42, 0.14) !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+            background: #fff !important;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-header {
+            padding: 14px 16px !important;
+            border-bottom: 1px solid #f3f4f6 !important;
+            background: linear-gradient(135deg, #fff6f6 0%, #ffffff 72%) !important;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-header-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffe9e9;
+            color: #c8292a;
+            font-size: 14px;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-badge {
+            background: #c8292a !important;
+            color: #fff !important;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.66rem;
+            padding: 4px 10px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-body {
+            max-height: 470px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #ffffff;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-item {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 11px 12px;
+            margin: 0 0 8px;
+            border-radius: 12px;
+            border: 1px solid #f1f5f9;
+            background: #fff;
+            transition: all 0.16s ease;
+            cursor: pointer;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-item:hover {
+            background: #fff7f7;
+            border-color: #f8d3d3;
+            transform: translateY(-1px);
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-item.unread {
+            border-color: #ffd7d7;
+            background: #fffafb;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-accent {
+            width: 4px;
+            align-self: stretch;
+            border-radius: 999px;
+            background: transparent;
+            margin-right: 2px;
+            flex-shrink: 0;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-item.unread .kt-notif-accent {
+            background: #c8292a;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-title {
+            font-size: 0.87rem;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-message {
+            font-size: 0.79rem;
+            line-height: 1.4;
+            color: #6b7280;
+            margin: 0 0 4px;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-time {
+            font-size: 0.72rem;
+            color: #9ca3af;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-delete {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            border: 0;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-delete:hover {
+            background: #ffe4e6;
+            color: #e11d48;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-footer {
+            border-top: 1px solid #f3f4f6;
+            background: #fcfcfd;
+            padding: 10px 14px !important;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-footer .btn-link {
+            text-decoration: none;
+            color: #c8292a;
+            font-weight: 700;
+            font-size: 0.79rem;
+        }
+
+        .nxl-header #notification-dropdown .kt-notif-footer .btn-link:hover {
+            color: #a81f20;
+        }
+
         @media (max-width: 767px) {
+            .kt-notif-dropdown-under-navbar,
             .kt-user-dropdown-under-navbar {
                 right: 12px !important;
                 left: 12px !important;
+            }
+
+            .kt-notif-dropdown-under-navbar {
+                width: auto !important;
+                min-width: auto !important;
+                max-width: none !important;
+            }
+
+            .nxl-header #notification-dropdown.kt-notif-dropdown {
+                width: auto !important;
+                min-width: auto !important;
+                max-width: none !important;
             }
         }
     </style>
@@ -151,14 +337,20 @@
         
         // Get current user role
         const userRole = '{{ auth()->user()->role }}';
+        const notificationReadUrlTemplate = @json(route('notifications.read', ['notification' => '__ID__']));
+        const notificationDeleteUrlTemplate = @json(route('notifications.destroy', ['notification' => '__ID__']));
         
         // Notification functionality
         document.addEventListener('DOMContentLoaded', function() {
+            const isNotificationsPage = window.location.pathname.includes('/notifications');
+
             // Initialize notification system
             initializeNotifications();
             
             // Auto-refresh notifications every 5 seconds
-            startNotificationPolling();
+            if (!isNotificationsPage) {
+                startNotificationPolling();
+            }
             
             // Refresh notifications when dropdown is opened
             const notificationDropdown = document.getElementById('notification-dropdown');
@@ -195,7 +387,7 @@
                     const actionUrl = this.dataset.actionUrl;
 
                     // Mark notification as read
-                    fetch(`/notifications/${notifId}/read`, {
+                    fetch(notificationReadUrlTemplate.replace('__ID__', notifId), {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -244,7 +436,7 @@
                     e.stopPropagation();
                     const notifId = this.dataset.notifId;
                     
-                    fetch(`/notifications/${notifId}`, {
+                    fetch(notificationDeleteUrlTemplate.replace('__ID__', notifId), {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -362,17 +554,15 @@
                             let actionUrl = getNotificationActionUrl(notification.type, notification.data);
                             
                             html += `
-                                <div class="kt-notif-item p-3 border-bottom ${notification.read_at ? '' : 'bg-light'}" data-notif-id="${notification.id}" data-action-url="${actionUrl}" style="cursor: pointer; transition: background-color 0.2s;">
-                                    <div class="d-flex gap-2">
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1 fw-semibold" style="font-size: 0.9rem;">${notification.title}</h6>
-                                            <p class="mb-1 text-muted" style="font-size: 0.85rem; line-height: 1.4;">${notification.message}</p>
-                                            <small class="text-muted">${timeText}</small>
-                                        </div>
-                                        <button class="btn btn-sm btn-ghost-danger notif-delete" data-notif-id="${notification.id}" style="padding: 0.25rem 0.5rem;">
-                                            <i class="feather-x fs-12"></i>
-                                        </button>
+                                <div class="kt-notif-item ${notification.read_at ? '' : 'unread'}" data-notif-id="${notification.id}" data-action-url="${actionUrl}">
+                                    <div class="kt-notif-content">
+                                        <div class="kt-notif-title">${notification.title}</div>
+                                        <p class="kt-notif-message">${notification.message}</p>
+                                        <small class="kt-notif-time">${timeText}</small>
                                     </div>
+                                    <button type="button" class="kt-notif-delete notif-delete" data-notif-id="${notification.id}">
+                                        <i class="feather-x"></i>
+                                    </button>
                                 </div>
                             `;
                         });

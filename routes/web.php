@@ -98,6 +98,10 @@ Route::middleware(['auth', 'check-status'])->group(function () {
             Route::delete('/delete-read/all', [NotificationController::class, 'deleteReadNotifications'])->name('delete-read');
             Route::delete('/delete-all', [NotificationController::class, 'deleteAllNotifications'])->name('delete-all');
             Route::get('/', [NotificationController::class, 'index'])->name('index');
+            Route::get('/all', [NotificationController::class, 'index'])->name('all')->defaults('view', 'all');
+            Route::get('/unread', [NotificationController::class, 'index'])->name('unread-page')->defaults('view', 'unread');
+            Route::get('/read', [NotificationController::class, 'index'])->name('read-page')->defaults('view', 'read');
+            Route::get('/deleted', [NotificationController::class, 'index'])->name('deleted-page')->defaults('view', 'deleted');
             Route::get('/{notification}', [NotificationController::class, 'show'])->name('show');
             Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
             Route::post('/{notification}/unread', [NotificationController::class, 'markAsUnread'])->name('unread');

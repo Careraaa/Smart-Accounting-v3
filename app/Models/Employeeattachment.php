@@ -40,7 +40,13 @@ class EmployeeAttachment extends Model
 
     public function getUrlAttribute(): string
     {
-        return Storage::disk('public')->url($this->file_path);
+        $storageUrl = Storage::disk('public')->url($this->file_path);
+
+        // Normalize to a path and rebuild with the current app host/base path.
+        // This avoids hardcoded localhost links when accessed through tunnels.
+        $path = parse_url($storageUrl, PHP_URL_PATH) ?: $storageUrl;
+
+        return url(ltrim($path, '/'));
     }
 
     public function getFileSizeHumanAttribute(): string
