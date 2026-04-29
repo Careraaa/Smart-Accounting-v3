@@ -37,10 +37,36 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return view('auth/login');
 });
+
+// Emergency maintenance unlock route (works even when logged out).
+// Usage: /emergency/maintenance-off?key=YOUR_UNLOCK_KEY
+Route::get('/emergency/maintenance-off', function (Request $request) {
+    $expectedKey = env('MAINTENANCE_UNLOCK_KEY');
+    $providedKey = (string) $request->query('key', '');
+
+    if (empty($expectedKey) || !hash_equals($expectedKey, $providedKey)) {
+        abort(403, 'Invalid unlock key.');
+    }
+
+    $maintenanceFile = storage_path('maintenance.json');
+    if (file_exists($maintenanceFile)) {
+        unlink($maintenanceFile);
+    }
+
+    // Also disable Laravel native maintenance mode if it was enabled.
+    if (app()->isDownForMaintenance()) {
+        Artisan::call('up');
+    }
+
+    return redirect('/')->with('success', 'Maintenance mode has been disabled.');
+})->name('emergency.maintenance-off')
+    ->withoutMiddleware([\App\Http\Middleware\AllowSuperAdminInMaintenance::class]);
 
 Route::get('/dashboard', function () {
     if (auth()->user()->role === 'superadmin') {
