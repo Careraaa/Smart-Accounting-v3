@@ -336,22 +336,6 @@
                             <span class="nxl-mtext">OT / UT Requests</span>
                         </a>
                     </li>
-
-                    <li class="nxl-item nxl-caption"><label>My Profile</label></li>
-
-                    <li class="nxl-item {{ request()->routeIs('employee.profile.*') ? 'active' : '' }}">
-                        <a href="{{ route('employee.profile.show') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-user"></i></span>
-                            <span class="nxl-mtext">Personal Records</span>
-                        </a>
-                    </li>
-
-                    <li class="nxl-item {{ request()->routeIs('employee.attachments.*') ? 'active' : '' }}">
-                        <a href="{{ route('employee.attachments.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-folder"></i></span>
-                            <span class="nxl-mtext">My Documents</span>
-                        </a>
-                    </li>
                 @endif
 
                 {{-- ── Accountant ── --}}

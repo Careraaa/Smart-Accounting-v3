@@ -123,6 +123,17 @@ Route::middleware(['auth', 'check-status'])->group(function () {
 
     Route::get('/settings/account', fn() => view('partials.profile.account-settings'))->name('settings.account');
     Route::post('/settings/update-password', [ProfileController::class, 'updatePassword'])->name('settings.update-password');
+
+    // Profile Routes (accessible to all authenticated users)
+    Route::get('/my/profile', [EmployeeProfileController::class, 'show'])->name('employee.profile.show');
+    Route::get('/my/profile/edit', [EmployeeProfileController::class, 'edit'])->name('employee.profile.edit');
+    Route::patch('/my/profile', [EmployeeProfileController::class, 'update'])->name('employee.profile.update');
+    Route::get('/my/profile/password', [EmployeeProfileController::class, 'editPassword'])->name('employee.profile.password');
+    Route::patch('/my/profile/password', [EmployeeProfileController::class, 'updatePassword'])->name('employee.profile.password.update');
+
+    // Attachments (accessible to all authenticated users)
+    Route::get('/my/attachments', [EmployeeSelfAttachmentController::class, 'index'])->name('employee.attachments.index');
+    Route::post('/my/attachments', [EmployeeSelfAttachmentController::class, 'store'])->name('employee.attachments.store');
 });
 
 // ===== REMITTANCE CLERK ROUTES =====
@@ -155,13 +166,6 @@ Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])-
 Route::middleware(['auth', 'check-status', 'role:employee,superadmin'])->group(function () {
     Route::get('/employee', fn() => view('employee.dashboard'))->name('employee.index');
 
-    // Profile Routes
-    Route::get('/my/profile', [EmployeeProfileController::class, 'show'])->name('employee.profile.show');
-    Route::get('/my/profile/edit', [EmployeeProfileController::class, 'edit'])->name('employee.profile.edit');
-    Route::patch('/my/profile', [EmployeeProfileController::class, 'update'])->name('employee.profile.update');
-    Route::get('/my/profile/password', [EmployeeProfileController::class, 'editPassword'])->name('employee.profile.password');
-    Route::patch('/my/profile/password', [EmployeeProfileController::class, 'updatePassword'])->name('employee.profile.password.update');
-
     // Cash Advances
     Route::get('/my/cash-advances', [EmployeeCashAdvanceController::class, 'index'])->name('employee.cash-advances.index');
     Route::post('/my/cash-advances', [EmployeeCashAdvanceController::class, 'store'])->name('employee.cash-advances.store');
@@ -169,10 +173,6 @@ Route::middleware(['auth', 'check-status', 'role:employee,superadmin'])->group(f
     // Salary Loans
     Route::get('/my/salary-loans', [EmployeeSalaryLoanController::class, 'index'])->name('employee.salary-loans.index');
     Route::post('/my/salary-loans', [EmployeeSalaryLoanController::class, 'store'])->name('employee.salary-loans.store');
-
-    // Attachments (employee uploads their own missing/rejected docs)
-    Route::get('/my/attachments', [EmployeeSelfAttachmentController::class, 'index'])->name('employee.attachments.index');
-    Route::post('/my/attachments', [EmployeeSelfAttachmentController::class, 'store'])->name('employee.attachments.store');
 
     // Leave Management
     Route::get('/my/leaves', [EmployeeLeaveController::class, 'index'])->name('employee.leaves.index');

@@ -65,10 +65,6 @@
                 <i class="feather-camera"></i>
                 Scan QR Attendance
             </a>
-            <a class="edb-btn-sec" href="{{ route('employee.profile.show') }}">
-                <i class="feather-user"></i>
-                My Profile
-            </a>
         </div>
     </div>
 
@@ -95,26 +91,6 @@
                 <div class="edb-lbl">Today’s logs</div>
                 <div class="edb-val"><span class="edb-mono" id="logs-count">—</span></div>
                 <div class="text-muted" style="font-size:.73rem;margin-top:4px;">entries recorded</div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Welcome Header — plain div, no .card/.card-body so theme JS ignores it --}}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="kt-welcome-banner">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                    <div>
-                        <h4 class="kt-welcome-title">Welcome back, {{ auth()->user()->name }}!</h4>
-                        <p class="kt-welcome-sub">
-                            <i class="feather-calendar me-1"></i>{{ now()->format('l, F d, Y') }}
-                        </p>
-                    </div>
-                    <div class="text-end">
-                        <p class="kt-welcome-sub mb-1">Current Status</p>
-                        <span class="badge bg-warning fs-12 px-3 py-2">See above</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

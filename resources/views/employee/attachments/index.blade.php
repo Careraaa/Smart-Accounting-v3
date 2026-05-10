@@ -19,12 +19,6 @@
                     <span class="empui-chip"><i class="feather-upload"></i> JPG, PNG, PDF</span>
                 </div>
             </div>
-            <div class="empui-hero-right">
-                <a class="empui-btn-sec" href="{{ route('employee.dashboard') }}">
-                    <i class="feather-home"></i>
-                    Dashboard
-                </a>
-            </div>
         </div>
 
         @if(session('success'))

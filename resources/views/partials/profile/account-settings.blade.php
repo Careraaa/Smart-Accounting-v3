@@ -19,11 +19,11 @@
                 <p class="pf2-sub">Password & security preferences</p>
             </div>
             <div class="pf2-actions">
-                <a href="{{ route('profile.details') }}" class="pf2-btn">
+                <a href="{{ url()->previous() }}" class="pf2-btn">
                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to Profile
+                    Back
                 </a>
             </div>
         </div>

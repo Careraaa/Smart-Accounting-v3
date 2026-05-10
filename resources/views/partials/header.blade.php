@@ -112,7 +112,10 @@
                 <div class="dropdown-menu dropdown-menu-end kt-user-dropdown kt-user-dropdown-under-navbar">
                     <div class="kt-user-dropdown-body">
                         <a href="{{ route('profile.details') }}" class="kt-user-dropdown-item">
-                            <i class="feather-user"></i> Profile
+                            <i class="feather-user"></i> My Profile
+                        </a>
+                        <a href="{{ route('employee.attachments.index') }}" class="kt-user-dropdown-item">
+                            <i class="feather-user"></i> My Documents
                         </a>
                         <div class="kt-user-dropdown-divider"></div>
                         <a href="javascript:void(0);" class="kt-user-dropdown-item kt-logout-item"
