@@ -29,7 +29,8 @@
             --gray-rule: #e0e0e0;
             --gray-bg: #f7f7f7;
             --white: #ffffff;
-            --page-w: 1000px;
+            --accent: #1a1a1a;
+            --page-w: 900px;
             --font-body: 'Sora', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
@@ -49,12 +50,7 @@
             max-width: var(--page-w);
             margin: 28px auto 12px;
             display: flex;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        .controls-left {
-            display: flex;
+            justify-content: flex-end;
             gap: 8px;
         }
 
@@ -86,43 +82,6 @@
             background: #fff;
             color: var(--gray-dark);
             border-color: var(--gray-rule);
-        }
-
-        /* Filters */
-        .filters {
-            background: white;
-            max-width: var(--page-w);
-            margin: 0 auto 12px;
-            padding: 16px 20px;
-            border-radius: 4px;
-            box-shadow: 0 1px 8px rgba(0,0,0,.04);
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-        }
-
-        .filter-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--gray-mid);
-            letter-spacing: 0.5px;
-        }
-
-        input[type="date"],
-        select {
-            padding: 6px 8px;
-            border: 1px solid var(--gray-rule);
-            border-radius: 3px;
-            font-family: var(--font-body);
-            font-size: 12px;
         }
 
         /* Page */
@@ -221,18 +180,6 @@
             margin: 0 4px;
         }
 
-        /* Section Title */
-        .section-title {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--black);
-            margin-top: 28px;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--gray-rule);
-        }
-
         /* Table */
         table {
             width: 100%;
@@ -252,42 +199,33 @@
             color: var(--gray-dark);
         }
 
-        th.text-right,
-        td.text-right {
-            text-align: right;
-        }
-
         td {
             padding: 10px;
             border-bottom: 1px solid var(--gray-rule);
-            vertical-align: middle;
         }
 
         tbody tr:hover {
             background: var(--gray-bg);
         }
 
-        .mono {
-            font-family: var(--font-mono);
-        }
-
-        .accent-green {
+        .badge-active {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            background: #dcfce7;
             color: #16a34a;
         }
 
-        .accent-purple {
-            color: #8B3A62;
-        }
-
-        .accent-blue {
-            color: #0369a1;
-        }
-
-        /* Total row */
-        .total-row {
-            border-top: 2px solid var(--gray-dark);
-            font-weight: 700;
-            background: var(--gray-bg);
+        .badge-inactive {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            background: #fee2e2;
+            color: #dc2626;
         }
 
         /* Print */
@@ -297,10 +235,6 @@
             }
 
             .controls {
-                display: none !important;
-            }
-
-            .filters {
                 display: none !important;
             }
 
@@ -323,37 +257,7 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <div class="controls-left">
-            <a href="{{ route('payroll.history.index') }}" class="btn btn-ghost">← Back</a>
-        </div>
         <button class="btn btn-primary" onclick="window.print()">Print Report</button>
-    </div>
-
-    {{-- Filters --}}
-    <div class="filters">
-        <div class="filter-group">
-            <span class="filter-label">Date From</span>
-            <input type="date" id="dateFrom" value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}">
-        </div>
-        <div class="filter-group">
-            <span class="filter-label">Date To</span>
-            <input type="date" id="dateTo" value="{{ request('date_to', now()->format('Y-m-d')) }}">
-        </div>
-        <div class="filter-group">
-            <span class="filter-label">Employee</span>
-            <select id="employeeId">
-                <option value="">All Employees</option>
-                @foreach($employees as $employee)
-                    <option value="{{ $employee->id }}" {{ request('employee_id') == $employee->id ? 'selected' : '' }}>
-                        {{ $employee->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="filter-group" style="flex: 0; gap: 6px; flex-direction: row;">
-            <button class="btn btn-ghost" onclick="updateReport()" style="white-space: nowrap;">Search</button>
-            <button class="btn btn-ghost" onclick="resetFilters()" style="white-space: nowrap;">Reset</button>
-        </div>
     </div>
 
     <div class="page">
@@ -363,39 +267,19 @@
             <div class="company-info">
                 <img src="{{ asset('images/knights_logo_icon.png') }}" alt="Logo">
                 <div>
-                    <div class="company-name">Smart Accounting</div>
-                    <div class="company-sub">Government Contribution Summary</div>
+                    <div class="company-name">Knights Transport Services Corporation</div>
+                    <div class="company-sub">Human Resources</div>
                 </div>
             </div>
             <div class="report-title">
                 <h1>CONTRIBUTION SUMMARY</h1>
                 <div class="report-period">
                     {{ \Carbon\Carbon::parse($dateFrom)->format('M d, Y') }} – {{ \Carbon\Carbon::parse($dateTo)->format('M d, Y') }}
-                    &nbsp;·&nbsp; Generated {{ date('M d, Y') }}
                 </div>
             </div>
         </div>
 
-        {{-- Summary Strip --}}
-        <div class="summary-strip">
-            <div class="summary-item">
-                <span class="summary-label">Total Employee Contributions</span>
-                <span class="summary-value">₱{{ number_format(($summary['employee_sss'] ?? 0) + ($summary['employee_pagibig'] ?? 0) + ($summary['employee_philhealth'] ?? 0), 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Employer Contributions</span>
-                <span class="summary-value" style="color: #8B3A62;">₱{{ number_format(($summary['employer_sss'] ?? 0) + ($summary['employer_pagibig'] ?? 0) + ($summary['employer_philhealth'] ?? 0), 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Contributions</span>
-                <span class="summary-value accent-green">₱{{ number_format(($summary['employee_sss'] ?? 0) + ($summary['employee_pagibig'] ?? 0) + ($summary['employee_philhealth'] ?? 0) + ($summary['employer_sss'] ?? 0) + ($summary['employer_pagibig'] ?? 0) + ($summary['employer_philhealth'] ?? 0), 2) }}</span>
-            </div>
-        </div>
-
         {{-- Summary by Type Table --}}
-        <div class="section-title">Contribution Summary by Type</div>
         <table>
             <thead>
                 <tr>
@@ -433,7 +317,7 @@
             </tbody>
         </table>
 
-        {{-- Detailed Breakdown --}}
+        <!-- {{-- Detailed Breakdown --}}
         <div class="section-title">Detailed Breakdown by Employee</div>
         <table>
             <thead>
@@ -466,13 +350,7 @@
                     </tr>
                 @endforelse
             </tbody>
-        </table>
-
-        {{-- Footer --}}
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--gray-rule); text-align: center; font-size: 10px; color: var(--gray-mid);">
-            <p>Report generated on {{ date('M d, Y \a\t h:i A') }}</p>
-        </div>
-
+        </table> -->
     </div>
 
     <script>

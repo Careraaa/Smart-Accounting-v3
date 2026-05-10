@@ -265,7 +265,6 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <a href="{{ route('payroll.history.index') }}" class="btn btn-ghost">← Back</a>
         <button class="btn btn-primary" onclick="window.print()">Print Report</button>
     </div>
 

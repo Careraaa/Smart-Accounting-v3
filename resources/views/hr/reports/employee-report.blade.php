@@ -257,7 +257,6 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <button type="button" class="btn btn-ghost" onclick="goBackOrClose()">← Back</button>
         <button class="btn btn-primary" onclick="window.print()">Print Report</button>
     </div>
 
@@ -274,25 +273,6 @@
             </div>
             <div class="report-title">
                 <h1>EMPLOYEES</h1>
-                <div class="report-period">{{ date('M d, Y') }}</div>
-            </div>
-        </div>
-
-        {{-- Summary Strip --}}
-        <div class="summary-strip">
-            <div class="summary-item">
-                <span class="summary-label">Total Employees</span>
-                <span class="summary-value">{{ $employees->count() }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Active</span>
-                <span class="summary-value" style="color: #16a34a;">{{ $employees->where('status', 'active')->count() }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Inactive</span>
-                <span class="summary-value" style="color: #dc2626;">{{ $employees->where('status', 'inactive')->count() }}</span>
             </div>
         </div>
 
@@ -300,27 +280,25 @@
         <table>
             <thead>
                 <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Position</th>
-                    <th>Department</th>
-                    <th>Status</th>
+                    <th><strong>First Name</strong></th>
+                    <th><strong>Last Name</strong></th>
+                    <th><strong>Gender</strong></th>
+                    <th><strong>Position</strong></th>
+                    <th><strong>Email</strong></th>
+                    <th><strong>Contact Number</strong></th>
+                    <th><strong>Department</strong></th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($employees as $employee)
                     <tr>
                         <td>{{ $employee->first_name }}</td>
-                        <td><strong>{{ $employee->last_name }}</strong></td>
+                        <td>{{ $employee->last_name }}</td>
+                        <td>{{ $employee->gender ?? 'N/A' }}</td>
                         <td>{{ $employee->position ?? 'N/A' }}</td>
+                        <td>{{ $employee->email ?? 'N/A' }}</td>
+                        <td>{{ $employee->phone ?? 'N/A' }}</td>
                         <td>{{ $employee->department ?? 'N/A' }}</td>
-                        <td>
-                            @if ($employee->status === 'active')
-                                <span class="badge-active">Active</span>
-                            @else
-                                <span class="badge-inactive">Inactive</span>
-                            @endif
-                        </td>
                     </tr>
                 @empty
                     <tr>
@@ -329,12 +307,6 @@
                 @endforelse
             </tbody>
         </table>
-
-        {{-- Footer --}}
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--gray-rule); text-align: center; font-size: 10px; color: var(--gray-mid);">
-            <p>Report generated on {{ date('M d, Y \a\t h:i A') }}</p>
-        </div>
-
     </div>
 
 </body>

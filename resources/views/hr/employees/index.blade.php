@@ -140,7 +140,7 @@
     <div class="emp-filter-bar">
         <div class="emp-search-wrap">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" class="emp-search-input" id="empSearch" placeholder="Search by name, position, department…">
+            <input type="text" class="emp-search-input" id="empSearch" placeholder="Search by name">
         </div>
         <select class="emp-filter-select" id="empStatusFilter">
             <option value="">All Statuses</option>
