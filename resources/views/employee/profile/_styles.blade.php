@@ -71,7 +71,7 @@
 
     .pf-hero {
         background: linear-gradient(135deg, #111827 0%, #0b1220 55%, #111827 100%);
-        border-radius:18px; padding:22px 24px; margin-bottom:18px;
+        border-radius:18px; padding:22px 24px; margin-top:24px; margin-bottom:18px;
         display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
         position:relative; overflow:hidden;
     }
