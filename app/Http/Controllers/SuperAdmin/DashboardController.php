@@ -63,7 +63,7 @@ class DashboardController extends Controller
         // Payroll status breakdown
         $processingPayroll = $payrolls->where('status', 'processing')->count();
         $approvedPayroll = $payrolls->where('status', 'approved')->count();
-        $paidPayroll = $payrolls->where('status', 'paid')->count();
+        $releasedPayroll = $payrolls->whereIn('status', ['released', 'paid'])->count();
         $rejectedPayroll = $payrolls->where('status', 'rejected')->count();
 
         // Average basic salary
@@ -152,7 +152,7 @@ class DashboardController extends Controller
             'totalDeductions',
             'processingPayroll',
             'approvedPayroll',
-            'paidPayroll',
+            'releasedPayroll',
             'rejectedPayroll',
             'averageBasicSalary',
             'deductionPercentage',

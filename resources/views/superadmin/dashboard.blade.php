@@ -75,8 +75,8 @@
                 </div>
                 <div>
                     <div class="prl-stat-label">Payroll pipeline</div>
-                    <div class="prl-stat-value">{{ $paidPayroll }}</div>
-                    <div class="prl-stat-sub">Paid · {{ $approvedPayroll }} approved · {{ $processingPayroll }} processing</div>
+                    <div class="prl-stat-value">{{ $releasedPayroll }}</div>
+                    <div class="prl-stat-sub">Released · {{ $approvedPayroll }} approved · {{ $processingPayroll }} processing</div>
                 </div>
             </div>
         </div>

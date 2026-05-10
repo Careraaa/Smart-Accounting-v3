@@ -52,8 +52,8 @@
 .prl-status::before { content:'';width:5px;height:5px;border-radius:50%; }
 .prl-status.s-approved { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
 .prl-status.s-approved::before { background:#16a34a; }
-.prl-status.s-paid     { background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe; }
-.prl-status.s-paid::before { background:#3b82f6; }
+.prl-status.s-released { background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe; }
+.prl-status.s-released::before { background:#3b82f6; }
 .prl-status.s-pending  { background:#fffbeb;color:#d97706;border:1px solid #fde68a; }
 .prl-status.s-pending::before { background:#d97706; }
 .prl-status.s-default  { background:#f3f4f6;color:#6b7280; }
@@ -129,7 +129,7 @@
                         $initials = strtoupper(substr($payroll->user->first_name ?? ($payroll->user->name ?? 'U'), 0, 1) . substr($payroll->user->last_name ?? '', 0, 1));
                         $sc = match($payroll->status) {
                             'approved' => 's-approved',
-                            'paid'     => 's-paid',
+                            'released', 'paid' => 's-released',
                             'pending'  => 's-pending',
                             default    => 's-default',
                         };
@@ -151,7 +151,7 @@
                         <td class="text-end"><span class="prl-mono c-muted">₱{{ number_format($payroll->basic_salary, 2) }}</span></td>
                         <td class="text-end"><span class="prl-mono c-green">₱{{ number_format($payroll->gross_pay, 2) }}</span></td>
                         <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
-                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ ucfirst($payroll->status) }}</span></td>
+                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ in_array($payroll->status, ['released', 'paid'], true) ? 'Released' : ucfirst($payroll->status) }}</span></td>
                         <td>
                             <div class="prl-actions">
                                 <a href="{{ route('payroll.generatePayslip', $payroll) }}" class="prl-action-btn" title="View Payslip" target="_blank">

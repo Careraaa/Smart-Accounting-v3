@@ -57,7 +57,7 @@ class PayrollController extends Controller
             ->get();
         $totalPayroll = $pendingPayrolls->sum('net_pay');
         $payrollCount = $pendingPayrolls->count();
-        $paidCount = Payroll::where('status', 'paid')->count();
+        $releasedCount = Payroll::whereIn('status', ['released', 'paid'])->count();
 
         $recentBatches = PayrollBatch::with('payrolls')->orderByDesc('created_at')->limit(5)->get();
 
@@ -80,7 +80,7 @@ class PayrollController extends Controller
         $attendanceRate = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
         $cutoffInfo = PayrollCutoffSchedule::getCurrentCutoffPeriod();
 
-        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'sortBy', 'sortOrder', 'cutoffSchedules', 'cutoffInfo', 'nextCutoffDate', 'pendingPayrolls', 'totalPayroll', 'payrollCount', 'paidCount', 'recentBatches', 'currentPeriod', 'batchAlreadyExists', 'currentDraftBatch', 'finalizedCurrentBatch'));
+        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'sortBy', 'sortOrder', 'cutoffSchedules', 'cutoffInfo', 'nextCutoffDate', 'pendingPayrolls', 'totalPayroll', 'payrollCount', 'releasedCount', 'recentBatches', 'currentPeriod', 'batchAlreadyExists', 'currentDraftBatch', 'finalizedCurrentBatch'));
     }
 
     /* ══════════════════════════════════════════════════════════════

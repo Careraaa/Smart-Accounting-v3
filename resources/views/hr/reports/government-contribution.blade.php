@@ -2,6 +2,44 @@
 
 @push('styles')
     @include('accountant._ui-styles')
+    <style>
+        .gc-filter-group {
+            min-width: 170px;
+        }
+        .gc-filter-group .form-select {
+            width: 100%;
+        }
+        .gc-filter-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .gc-reset-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.44rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b7280;
+            background: #fff;
+            text-decoration: none;
+            transition: all 0.14s ease;
+        }
+        .gc-reset-btn:hover {
+            border-color: #c8292a;
+            color: #c8292a;
+            background: #fff5f5;
+        }
+        @media (max-width: 991.98px) {
+            .gc-filter-actions {
+                margin-left: 0;
+            }
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -22,15 +60,15 @@
         </div>
 
         <form class="acd-filter-bar" method="get" action="{{ route('reports.government-contribution') }}" id="gc-report-filters">
-            <div>
+            <div class="gc-filter-group">
                 <label class="form-label">Date From</label>
                 <input type="date" name="date_from" class="form-select form-select-sm" value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" onchange="this.form.submit()">
             </div>
-            <div>
+            <div class="gc-filter-group">
                 <label class="form-label">Date To</label>
                 <input type="date" name="date_to" class="form-select form-select-sm" value="{{ request('date_to', now()->format('Y-m-d')) }}" onchange="this.form.submit()">
             </div>
-            <div>
+            <div class="gc-filter-group">
                 <label class="form-label">Employee</label>
                 <select name="employee_id" class="form-select form-select-sm" onchange="this.form.submit()">
                     <option value="">All Employees</option>
@@ -41,8 +79,8 @@
                     @endforeach
                 </select>
             </div>
-            <div>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('gc-report-filters').reset(); this.form.submit()">Reset</button>
+            <div class="gc-filter-actions">
+                <a href="{{ route('reports.government-contribution') }}" class="gc-reset-btn">Reset</a>
             </div>
         </form>
 

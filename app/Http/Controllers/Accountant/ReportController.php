@@ -17,7 +17,7 @@ class ReportController extends Controller
 
     public function payslips()
     {
-        $payrolls = Payroll::with('employee')->where('status', 'paid')->get();
+        $payrolls = Payroll::with('employee')->whereIn('status', ['released', 'paid'])->get();
         return view('accountant.reports.payslips', compact('payrolls'));
     }
 

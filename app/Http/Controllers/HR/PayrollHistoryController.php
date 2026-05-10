@@ -42,7 +42,7 @@ class PayrollHistoryController extends Controller
                                ->get()
                                ->sum('net_pay') ?? 0;
 
-        $totalPaid = Payroll::where('status', 'paid')->count();
+        $totalReleased = Payroll::whereIn('status', ['released', 'paid'])->count();
 
         $activeEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
             ->where('status', 'active')
@@ -54,7 +54,7 @@ class PayrollHistoryController extends Controller
             'batches',
             'totalBatches',
             'totalPayroll',
-            'totalPaid',
+            'totalReleased',
             'activeEmployees',
             'nextCutoffDate',
             'filterMonth',
@@ -104,8 +104,8 @@ class PayrollHistoryController extends Controller
                  - ($payroll->total_deductions ?? 0);
         });
 
-        $paidCount    = $payrolls->where('status', 'paid')->count();
-        $pendingCount = $payrolls->where('status', '!=', 'paid')->count();
+        $releasedCount = $payrolls->whereIn('status', ['released', 'paid'])->count();
+        $pendingCount = $payrolls->whereNotIn('status', ['released', 'paid'])->count();
 
         $batch = PayrollBatch::whereDate('period_start', $startDate->toDateString())
             ->whereDate('period_end', $endDate->toDateString())
@@ -120,7 +120,7 @@ class PayrollHistoryController extends Controller
             'totalGross', 
             'totalDeductions', 
             'totalNetPay', 
-            'paidCount', 
+            'releasedCount', 
             'pendingCount'
         ));
     }

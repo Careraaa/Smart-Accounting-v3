@@ -73,8 +73,8 @@
 .prl-status.s-submitted::before { background:#8b5cf6; }
 .prl-status.s-approved  { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
 .prl-status.s-approved::before  { background:#16a34a; }
-.prl-status.s-paid      { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
-.prl-status.s-paid::before      { background:#22c55e; }
+.prl-status.s-released  { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
+.prl-status.s-released::before  { background:#22c55e; }
 
 .prl-actions { display:flex;align-items:center;gap:5px;justify-content:flex-end; }
 .prl-action-btn { width:30px;height:30px;border-radius:7px;border:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:13px;transition:background 0.13s,color 0.13s;background:#f4f5f7;color:#6b7280;padding:0; }
@@ -148,8 +148,8 @@
                 <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             </div>
             <div>
-                <div class="prl-stat-label">Paid Employees</div>
-                <div class="prl-stat-value">{{ $totalPaid }}</div>
+                <div class="prl-stat-label">Released Payrolls</div>
+                <div class="prl-stat-value">{{ $totalReleased }}</div>
                 <div class="prl-stat-sub">across all batches</div>
             </div>
         </div>
@@ -207,7 +207,7 @@
                             'finalized' => 's-finalized',
                             'submitted' => 's-submitted',
                             'approved'  => 's-approved',
-                            'paid'      => 's-paid',
+                            'released', 'paid' => 's-released',
                             default     => 's-draft',
                         };
                     @endphp

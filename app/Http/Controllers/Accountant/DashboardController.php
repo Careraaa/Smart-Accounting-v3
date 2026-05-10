@@ -28,7 +28,7 @@ class DashboardController extends Controller
         // Payroll status breakdown
         $processingPayroll = $payrolls->where('status', 'processing')->count();
         $approvedPayroll = $payrolls->where('status', 'approved')->count();
-        $paidPayroll = $payrolls->where('status', 'paid')->count();
+        $releasedPayroll = $payrolls->whereIn('status', ['released', 'paid'])->count();
         $rejectedPayroll = $payrolls->where('status', 'rejected')->count();
 
         // Salary Loan Statistics
@@ -62,7 +62,7 @@ class DashboardController extends Controller
             ];
         }
 
-        $statusOrder = ['pending', 'submitted', 'processing', 'finalized', 'approved', 'paid', 'rejected'];
+        $statusOrder = ['pending', 'submitted', 'processing', 'finalized', 'approved', 'released', 'rejected'];
         $payrollStatusChartLabels = [];
         $payrollStatusChartSeries = [];
         foreach ($statusOrder as $st) {
@@ -74,11 +74,11 @@ class DashboardController extends Controller
         }
 
         $pipelineBar = [
-            'labels' => ['Awaiting action', 'Approved', 'Paid', 'Rejected'],
+            'labels' => ['Awaiting action', 'Approved', 'Released', 'Rejected'],
             'values' => [
                 $payrolls->whereIn('status', ['pending', 'submitted'])->count(),
                 $payrolls->where('status', 'approved')->count(),
-                $payrolls->where('status', 'paid')->count(),
+                $payrolls->whereIn('status', ['released', 'paid'])->count(),
                 $payrolls->where('status', 'rejected')->count(),
             ],
         ];
@@ -92,7 +92,7 @@ class DashboardController extends Controller
             'totalDeductions',
             'processingPayroll',
             'approvedPayroll',
-            'paidPayroll',
+            'releasedPayroll',
             'rejectedPayroll',
             'totalOutstandingLoans',
             'activeSalaryLoans',

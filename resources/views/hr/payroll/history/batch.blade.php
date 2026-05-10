@@ -105,8 +105,8 @@
 .prl-status.s-submitted::before { background:#8b5cf6; }
 .prl-status.s-approved  { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
 .prl-status.s-approved::before  { background:#16a34a; }
-.prl-status.s-paid      { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
-.prl-status.s-paid::before      { background:#22c55e; }
+.prl-status.s-released  { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
+.prl-status.s-released::before  { background:#22c55e; }
 .prl-status.s-rejected  { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }
 .prl-status.s-rejected::before  { background:#ef4444; }
 
@@ -194,12 +194,12 @@
         <div class="prl-summary-left">
             <div class="prl-summary-eyebrow">Batch Summary</div>
             <h2 class="prl-summary-title">{{ $startDate->format('M d') }} – {{ $endDate->format('M d, Y') }}</h2>
-            <div class="prl-summary-period">{{ $payrolls->count() }} records · {{ $paidCount }} paid · {{ $pendingCount }} pending</div>
+            <div class="prl-summary-period">{{ $payrolls->count() }} records · {{ $releasedCount }} released · {{ $pendingCount }} pending</div>
         </div>
         <div class="prl-summary-right">
             <div class="prl-summary-stat">
-                <div class="prl-summary-stat-label">Paid</div>
-                <div class="prl-summary-stat-value">{{ $paidCount }}</div>
+                <div class="prl-summary-stat-label">Released</div>
+                <div class="prl-summary-stat-value">{{ $releasedCount }}</div>
             </div>
             <div class="prl-summary-stat">
                 <div class="prl-summary-stat-label">Pending</div>
@@ -227,7 +227,7 @@
             <option value="draft">Draft</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
-            <option value="paid">Paid</option>
+            <option value="released">Released</option>
             <option value="rejected">Rejected</option>
         </select>
     </div>
@@ -254,7 +254,7 @@
                             'finalized' => 's-finalized',
                             'submitted' => 's-submitted',
                             'approved'  => 's-approved',
-                            'paid'      => 's-paid',
+                            'released', 'paid' => 's-released',
                             'rejected'  => 's-rejected',
                             default     => 's-draft',
                         };
@@ -274,7 +274,7 @@
                         <td class="text-end"><span class="prl-mono c-muted">₱{{ number_format($payroll->gross_pay, 2) }}</span></td>
                         <td class="text-end"><span class="prl-mono c-red">₱{{ number_format($payroll->total_deductions, 2) }}</span></td>
                         <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
-                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ ucfirst($payroll->status) }}</span></td>
+                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ in_array($payroll->status, ['released', 'paid'], true) ? 'Released' : ucfirst($payroll->status) }}</span></td>
                         <td>
                             <div class="prl-actions">
                                 <a href="{{ route('payroll.salary-computation.show', $payroll) }}" class="prl-action-btn" title="View">
@@ -303,7 +303,7 @@
         </div>
         <div class="prl-table-footer">
             <div class="prl-table-footer-note">
-                <strong>{{ $paidCount }}</strong> paid &nbsp;·&nbsp; <strong>{{ $pendingCount }}</strong> pending &nbsp;·&nbsp; <strong>{{ $payrolls->count() }}</strong> total
+                <strong>{{ $releasedCount }}</strong> released &nbsp;·&nbsp; <strong>{{ $pendingCount }}</strong> pending &nbsp;·&nbsp; <strong>{{ $payrolls->count() }}</strong> total
             </div>
         </div>
     </div>

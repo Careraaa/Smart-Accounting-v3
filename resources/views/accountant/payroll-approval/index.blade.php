@@ -49,9 +49,6 @@
                 <a href="{{ route('accountant.index') }}" class="emp-action-btn emp-action-view">
                     <i class="feather-home"></i><span>Dashboard</span>
                 </a>
-                <a href="{{ route('payroll-payments.index') }}" class="emp-action-btn emp-action-view">
-                    <i class="feather-credit-card"></i><span>Payments</span>
-                </a>
                 <a href="{{ route('payroll.salary-computation.index') }}" class="emp-action-btn emp-action-edit">
                     <i class="feather-calculator"></i><span>Salary computation</span>
                 </a>

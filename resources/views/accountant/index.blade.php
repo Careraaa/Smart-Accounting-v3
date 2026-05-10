@@ -18,7 +18,7 @@
     };
     $pillClass = function ($status) {
         return match ($status) {
-            'paid' => 'acd-pill-paid',
+            'released', 'paid' => 'acd-pill-paid',
             'approved' => 'acd-pill-approved',
             'rejected' => 'acd-pill-rejected',
             default => 'acd-pill-pending',
@@ -160,11 +160,11 @@
             <div class="col-xxl-3 col-md-6">
                 <div class="card h-100">
                     <div class="card-body">
-                        <span class="dash-label">Paid</span>
-                        <div class="dash-value mt-3">{{ $paidPayroll }}</div>
+                        <span class="dash-label">Released</span>
+                        <div class="dash-value mt-3">{{ $releasedPayroll }}</div>
                         <div class="progress dash-progress mt-3">
                             <div class="progress-bar bg-success" role="progressbar"
-                                style="width: {{ $totalEmployees > 0 ? min(100, ($paidPayroll / max(1, $totalEmployees)) * 100) : 0 }}%"></div>
+                                style="width: {{ $totalEmployees > 0 ? min(100, ($releasedPayroll / max(1, $totalEmployees)) * 100) : 0 }}%"></div>
                         </div>
                     </div>
                 </div>
@@ -217,7 +217,7 @@
             <div class="acd-panel">
                 <div class="acd-panel-hd">
                     <h2>Pipeline</h2>
-                    <span>Awaiting · approved · paid · rejected</span>
+                    <span>Awaiting · approved · released · rejected</span>
                 </div>
                 <div class="acd-panel-bd">
                     <div id="acd-chart-pipeline" class="acd-chart"></div>
@@ -255,7 +255,7 @@
                                     </p>
                                 </div>
                                 <div class="acd-feed-right">
-                                    <span class="acd-pill {{ $pillClass($st) }}">{{ ucfirst($st) }}</span>
+                                    <span class="acd-pill {{ $pillClass($st) }}">{{ in_array($st, ['released', 'paid'], true) ? 'Released' : ucfirst($st) }}</span>
                                     <i class="feather-chevron-right acd-chevron"></i>
                                 </div>
                             </a>

@@ -399,13 +399,6 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::post('payroll-approval/{payroll}/approve', [PayrollApprovalController::class, 'approve'])->name('payroll-approval.approve');
     Route::post('payroll-approval/{payroll}/reject', [PayrollApprovalController::class, 'reject'])->name('payroll-approval.reject');
 
-    Route::prefix('payroll-payments')->name('payroll-payments.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Accountant\PayrollPaymentsController::class, 'index'])->name('index');
-        Route::get('/{batch}', [\App\Http\Controllers\Accountant\PayrollPaymentsController::class, 'show'])->name('show');
-        Route::post('/{payroll}/mark-paid', [\App\Http\Controllers\Accountant\PayrollPaymentsController::class, 'markPaid'])->name('mark-paid');
-        Route::post('/{payroll}/mark-unpaid', [\App\Http\Controllers\Accountant\PayrollPaymentsController::class, 'markUnpaid'])->name('mark-unpaid');
-    });
-
     Route::get('/remittance-approval', [RemittanceApprovalController::class, 'index'])->name('remittance-approval.index');
     Route::post('/remittance-approval/{remittance}/approve', [RemittanceApprovalController::class, 'approve'])->name('remittance-approval.approve');
     Route::post('/remittance-approval/{remittance}/reject', [RemittanceApprovalController::class, 'reject'])->name('remittance-approval.reject');

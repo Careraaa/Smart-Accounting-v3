@@ -108,8 +108,8 @@
 .prl-status.s-submitted::before { background:#8b5cf6; }
 .prl-status.s-approved  { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
 .prl-status.s-approved::before { background:#16a34a; }
-.prl-status.s-paid      { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
-.prl-status.s-paid::before { background:#22c55e; }
+.prl-status.s-released  { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
+.prl-status.s-released::before { background:#22c55e; }
 .prl-status.s-rejected  { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }
 .prl-status.s-rejected::before { background:#ef4444; }
 
@@ -318,7 +318,7 @@
             <div class="prl-side-card">
                 <div class="prl-side-head">Last 5 generated batches</div>
                 @forelse($recentBatches as $b)
-                @php $bsc = match($b->status){'approved'=>'s-approved','rejected'=>'s-rejected','submitted'=>'s-submitted','paid'=>'s-paid',default=>'s-draft'}; @endphp
+                @php $bsc = match($b->status){'approved'=>'s-approved','rejected'=>'s-rejected','submitted'=>'s-submitted','released','paid'=>'s-released',default=>'s-draft'}; @endphp
                 <a href="{{ route('payroll.batch.details',$b) }}" class="prl-batch-item">
                     <div>
                         <div class="prl-batch-period">{{ $b->period_start->format('M d') }} – {{ $b->period_end->format('M d, Y') }}</div>

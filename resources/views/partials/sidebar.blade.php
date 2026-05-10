@@ -354,13 +354,6 @@
                         </ul>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('payroll-payments.*') ? 'active' : '' }}">
-                        <a href="{{ route('payroll-payments.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-credit-card"></i></span>
-                            <span class="nxl-mtext">Payroll Payments</span>
-                        </a>
-                    </li>
-
                     <li class="nxl-item {{ request()->routeIs('payroll.receivables.*') ? 'active' : '' }}">
                         <a href="{{ route('payroll.receivables.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-inbox"></i></span>
