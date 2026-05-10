@@ -10,72 +10,78 @@
 
 .scn-page {
     font-family: 'Sora', sans-serif;
-    position: relative;
     width: 100%;
     max-width: 1180px;
     margin: 0 auto;
     box-sizing: border-box;
-    min-height: calc(100vh - 110px);
-    display: flex;
-    align-items: flex-start;
-    padding-top: 0;
-    margin-top: 0;
-}
-
-.scn-backdrop {
-    position: absolute;
-    inset: -40px -20px auto -20px;
-    height: 340px;
-    pointer-events: none;
-    z-index: 0;
-    background:
-        radial-gradient(220px 220px at 10% 35%, rgba(200,41,42,0.14), transparent 60%),
-        radial-gradient(260px 260px at 85% 10%, rgba(2,132,199,0.12), transparent 60%),
-        radial-gradient(240px 240px at 70% 70%, rgba(22,163,74,0.10), transparent 60%),
-        linear-gradient(to bottom, rgba(17,24,39,0.04), transparent 70%);
-    filter: saturate(110%);
-}
-
-.scn-grid {
-    position: absolute;
-    inset: 0;
-    background-image: linear-gradient(to right, rgba(17,24,39,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(17,24,39,0.06) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: radial-gradient(closest-side at 50% 30%, rgba(0,0,0,0.75), transparent 80%);
-    opacity: 0.5;
+    min-height: calc(100dvh - 110px);
 }
 
 .scn-wrap {
+    width: 100%;
     padding: 8px 4px 0;
 }
 
 .scn-content {
-    position: relative;
-    z-index: 1;
     width: 100%;
 }
 
 .scn-topbar {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 14px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
+    padding: 18px 20px;
+    border-radius: 16px;
+    background: #111827;
+    border: 1px solid rgba(17,24,39,0.2);
+    box-shadow: 0 14px 38px rgba(15,23,42,0.16);
+    position: relative;
+    overflow: hidden;
+}
+
+.scn-topbar::before {
+    content: '';
+    position: absolute;
+    top: -56px;
+    right: -46px;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: rgba(200,41,42,0.13);
+    pointer-events: none;
+}
+
+.scn-topbar::after {
+    content: '';
+    position: absolute;
+    bottom: -68px;
+    left: 26%;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.045);
+    pointer-events: none;
 }
 
 .scn-eyebrow {
     font-size: 1.35rem;
     font-weight: 800;
     letter-spacing: -0.02em;
-    color: #111827;
+    color: #ffffff;
     margin: 0 0 2px;
+    position: relative;
+    z-index: 1;
 }
 
 .scn-title {
     font-size: 0.78rem;
-    color: #6b7280;
+    color: #9ca3af;
     margin: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .scn-sub {
@@ -90,9 +96,9 @@
     font-variant-numeric: tabular-nums;
     font-size: 0.9rem;
     font-weight: 800;
-    color: #111827;
-    background: rgba(255,255,255,0.85);
-    border: 1px solid rgba(229,231,235,0.9);
+    color: #ffffff;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.16);
     border-radius: 12px;
     padding: 10px 14px;
     box-shadow: 0 10px 30px rgba(17,24,39,0.06);
@@ -100,6 +106,8 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
+    position: relative;
+    z-index: 1;
 }
 
 .scn-clock-container {
@@ -111,7 +119,7 @@
 
 .scn-clock-date {
     font-size: 0.6rem;
-    color: #6b7280;
+    color: #cbd5e1;
     font-weight: 600;
     font-family: 'Sora', sans-serif;
 }
@@ -412,8 +420,12 @@
     }
 
     .scn-page {
-        min-height: auto;
+        min-height: calc(100dvh - 110px);
         align-items: stretch;
+    }
+
+    .scn-topbar {
+        padding: 14px 16px;
     }
 }
 </style>
@@ -421,9 +433,6 @@
 
 @section('content')
 <div class="scn-page">
-    <div class="scn-backdrop">
-        <div class="scn-grid"></div>
-    </div>
     <div class="scn-wrap">
         <div class="scn-content">
 
