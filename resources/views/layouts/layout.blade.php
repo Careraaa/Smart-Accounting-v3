@@ -187,6 +187,72 @@
     </script>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const nav = document.querySelector('.nxl-navigation');
+            if (!nav) return;
+
+            const menuItems = Array.from(nav.querySelectorAll('.nxl-item.nxl-hasmenu'));
+            if (!menuItems.length) return;
+
+            // Prevent visible flicker while the menu state is initialized.
+            nav.classList.add('sidebar-initializing');
+
+            const isExpandedDesktop = () =>
+                window.innerWidth >= 1200 && !document.documentElement.classList.contains('minimenu');
+
+            const getDirectTrigger = (item) => {
+                for (const child of item.children) {
+                    if (child.classList && child.classList.contains('nxl-link')) return child;
+                }
+                return null;
+            };
+
+            const setOpen = (item, open) => {
+                const trigger = getDirectTrigger(item);
+                if (!trigger) return;
+                item.classList.toggle('nxl-trigger', open);
+                trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+            };
+
+            const initializeMenus = () => {
+                const allowOpen = isExpandedDesktop();
+                menuItems.forEach((item) => {
+                    const hasActiveChild = !!item.querySelector('.nxl-submenu .nxl-item.active');
+                    setOpen(item, allowOpen && (item.classList.contains('active') || hasActiveChild));
+                });
+            };
+
+            menuItems.forEach((item) => {
+                const trigger = getDirectTrigger(item);
+                if (!trigger) return;
+
+                trigger.addEventListener('click', function(e) {
+                    const href = (trigger.getAttribute('href') || '').trim().toLowerCase();
+                    const isToggleLink = href === '' || href === '#' || href === 'javascript:void(0);';
+                    if (!isToggleLink) return;
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const next = !item.classList.contains('nxl-trigger');
+
+                    if (isExpandedDesktop()) {
+                        menuItems.forEach((other) => {
+                            if (other !== item) setOpen(other, false);
+                        });
+                    }
+
+                    setOpen(item, next);
+                });
+            });
+
+            initializeMenus();
+            requestAnimationFrame(() => nav.classList.remove('sidebar-initializing'));
+            window.addEventListener('resize', initializeMenus);
+        });
+    </script>
+
+    <script>
         window.attendanceRowsUrl = "{{ route('api.attendance.table-rows') }}";
         window.notificationsCountUrl = "{{ route('notifications.count') }}";
     </script>

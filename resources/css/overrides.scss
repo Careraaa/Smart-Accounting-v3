@@ -201,34 +201,77 @@ html.minimenu .m-header .b-brand .logo-mini {
 .nxl-navigation .nxl-arrow i {
     color: rgba(255, 255, 255, 0.4) !important;
     font-size: 12px !important;
+    transition:
+        transform 0.2s ease,
+        color 0.2s ease !important;
 }
 
 /* Submenu */
 .nxl-navigation .nxl-submenu {
-    background: rgba(0, 0, 0, 0.1) !important;
-    margin: 2px 10px !important;
-    padding: 4px 0 !important;
-    border-radius: var(--kt-radius-xs) !important;
+    display: none;
+    background: linear-gradient(180deg, rgba(11, 18, 32, 0.2), rgba(11, 18, 32, 0.12)) !important;
+    margin: 4px 10px 8px !important;
+    padding: 6px 0 !important;
+    border-radius: 10px !important;
     border-left: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 16px rgba(0, 0, 0, 0.14) !important;
+    overflow: hidden;
+}
+.nxl-navigation .nxl-item.nxl-hasmenu.nxl-trigger > .nxl-submenu {
+    display: block !important;
 }
 .nxl-navigation .nxl-submenu .nxl-link {
-    color: rgba(255, 255, 255, 0.68) !important;
-    font-size: 0.815rem !important;
-    margin: 1px 6px !important;
-    padding: 8px 12px 8px 36px !important;
+    color: rgba(255, 255, 255, 0.76) !important;
+    font-size: 0.79rem !important;
+    margin: 2px 6px !important;
+    padding: 9px 12px 9px 30px !important;
     border-left: none !important;
-    border-radius: var(--kt-radius-xs) !important;
+    border-radius: 8px !important;
     display: block !important;
+    position: relative;
+    transition:
+        background 0.16s ease,
+        color 0.16s ease,
+        transform 0.16s ease !important;
+}
+.nxl-navigation .nxl-submenu .nxl-link::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.42);
+    transform: translateY(-50%);
+    transition: background 0.16s ease, transform 0.16s ease !important;
 }
 .nxl-navigation .nxl-submenu .nxl-link:hover {
     color: #fff !important;
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    transform: translateX(2px);
+}
+.nxl-navigation .nxl-submenu .nxl-link:hover::before {
+    background: rgba(255, 255, 255, 0.88);
+    transform: translateY(-50%) scale(1.2);
 }
 .nxl-navigation .nxl-submenu .nxl-item.active > .nxl-link {
     background: #fff !important;
-    color: var(--kt-red) !important;
+    color: #9f1d1e !important;
     font-weight: 700 !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+}
+.nxl-navigation .nxl-submenu .nxl-item.active > .nxl-link::before {
+    background: var(--kt-red) !important;
+}
+.nxl-navigation .nxl-item.nxl-hasmenu.nxl-trigger > .nxl-link .nxl-arrow i {
+    transform: rotate(90deg);
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+.nxl-navigation.sidebar-initializing .nxl-submenu,
+.nxl-navigation.sidebar-initializing .nxl-arrow i {
+    transition: none !important;
 }
 
 /* Sidebar user footer — hidden */

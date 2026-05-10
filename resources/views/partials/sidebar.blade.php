@@ -236,7 +236,7 @@
                         </a>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu{{ request()->routeIs('leave.*', 'leave-type.*') ? 'active' : '' }}">
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active' : '' }}">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-calendar"></i></span>
                             <span class="nxl-mtext">Leave Management</span>
