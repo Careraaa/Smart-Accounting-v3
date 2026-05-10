@@ -50,11 +50,20 @@
     @else
 
         <div class="text-center py-4">
-            <div style="width:56px; height:56px; background:#f4f5f7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
-                <i class="feather-check" style="color:#c8292a; font-size:24px;"></i>
+            @php
+                $user = Auth::user();
+                $initials = strtoupper(
+                    substr($user->first_name ?? $user->name ?? $user->username, 0, 1) .
+                    substr($user->last_name ?? '', 0, 1)
+                );
+            @endphp
+            <div style="width:56px; height:56px; background:#f4f5f7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:20px; font-weight:700; color:#6b7280; border:2px solid #d1d5db; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                {{ $initials }}
             </div>
             <h5 class="fw-bold mb-1" style="color:#1c1c1e;">Already Signed In</h5>
-            <p style="font-size:0.845rem; color:#9898a8;" class="mb-4">You're already logged in.</p>
+            <p style="font-size:0.845rem; color:#6b7280;" class="mb-3">
+                Welcome, <strong>{{ Auth::user()->name ?? Auth::user()->username }}</strong>
+            </p>
             <a href="{{ route('dashboard') }}" class="btn-auth" style="display:inline-block; padding:10px 32px; width:auto;">
                 Go to Dashboard
             </a>

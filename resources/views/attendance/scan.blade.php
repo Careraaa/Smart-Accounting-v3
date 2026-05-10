@@ -3,155 +3,549 @@
 @push('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.scn-page{font-family:'Sora',sans-serif;position:relative}
-.scn-backdrop{position:absolute;inset:-40px -20px auto -20px;height:340px;pointer-events:none;z-index:0;background:
-    radial-gradient(220px 220px at 10% 35%, rgba(200,41,42,0.14), transparent 60%),
-    radial-gradient(260px 260px at 85% 10%, rgba(2,132,199,0.12), transparent 60%),
-    radial-gradient(240px 240px at 70% 70%, rgba(22,163,74,0.10), transparent 60%),
-    linear-gradient(to bottom, rgba(17,24,39,0.04), transparent 70%);filter:saturate(110%)}
-.scn-grid{position:absolute;inset:0;background-image:linear-gradient(to right, rgba(17,24,39,0.06) 1px, transparent 1px),linear-gradient(to bottom, rgba(17,24,39,0.06) 1px, transparent 1px);background-size:48px 48px;mask-image:radial-gradient(closest-side at 50% 30%, rgba(0,0,0,0.75), transparent 80%);opacity:.5}
-.scn-content{position:relative;z-index:1}
-.scn-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
-.scn-title{font-size:1.35rem;font-weight:900;color:#111827;letter-spacing:-0.02em;margin:0 0 2px}
-.scn-sub{font-size:.78rem;color:#9ca3af;margin:0}
-.scn-clock{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums;font-size:1.05rem;font-weight:800;color:#111827;background:rgba(255,255,255,.85);border:1px solid rgba(229,231,235,.9);border-radius:12px;padding:10px 14px;box-shadow:0 10px 30px rgba(17,24,39,0.06)}
-.scn-hero{background:linear-gradient(135deg,#111827 0%,#0b1220 55%,#111827 100%);border-radius:18px;padding:18px 20px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;overflow:hidden}
-.scn-hero:before{content:'';position:absolute;top:-70px;right:-70px;width:260px;height:260px;border-radius:50%;background:rgba(200,41,42,0.18);pointer-events:none}
-.scn-hero:after{content:'';position:absolute;bottom:-90px;left:-90px;width:260px;height:260px;border-radius:50%;background:rgba(2,132,199,0.14);pointer-events:none}
-.scn-hero-left{position:relative;z-index:1}
-.scn-hero-title{font-size:1.05rem;font-weight:900;color:#fff;margin:0 0 4px;letter-spacing:-0.02em}
-.scn-hero-meta{font-size:.78rem;color:#9ca3af;margin:0}
-.scn-chiprow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.scn-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid rgba(255,255,255,0.14);border-radius:999px;color:#e5e7eb;background:rgba(255,255,255,0.06);font-size:.75rem}
-.scan-time-badge{font-family:'DM Mono',monospace;font-size:.76rem;color:#e5e7eb;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.14);border-radius:999px;padding:6px 10px}
-.scn-card{background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border:1px solid rgba(229,231,235,0.9);border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(17,24,39,0.06);height:100%}
-.scn-card-head{padding:14px 18px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.scn-card-title{font-size:.82rem;font-weight:900;color:#111827;margin:0;display:flex;align-items:center;gap:8px}
-.scn-dot{width:8px;height:8px;border-radius:50%;background:#c8292a;display:inline-block}
-.scn-card-body{padding:18px}
+
+:root {
+    --qr-scan-size: 220px;
+}
+
+.scn-page {
+    font-family: 'Sora', sans-serif;
+    position: relative;
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    min-height: calc(100vh - 110px);
+    display: flex;
+    align-items: flex-start;
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.scn-backdrop {
+    position: absolute;
+    inset: -40px -20px auto -20px;
+    height: 340px;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(220px 220px at 10% 35%, rgba(200,41,42,0.14), transparent 60%),
+        radial-gradient(260px 260px at 85% 10%, rgba(2,132,199,0.12), transparent 60%),
+        radial-gradient(240px 240px at 70% 70%, rgba(22,163,74,0.10), transparent 60%),
+        linear-gradient(to bottom, rgba(17,24,39,0.04), transparent 70%);
+    filter: saturate(110%);
+}
+
+.scn-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(to right, rgba(17,24,39,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(17,24,39,0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(closest-side at 50% 30%, rgba(0,0,0,0.75), transparent 80%);
+    opacity: 0.5;
+}
+
+.scn-wrap {
+    padding: 8px 4px 0;
+}
+
+.scn-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+}
+
+.scn-topbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.scn-eyebrow {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #111827;
+    margin: 0 0 2px;
+}
+
+.scn-title {
+    font-size: 0.78rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.scn-sub {
+    font-size: 0.65rem;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.45;
+}
+
+.scn-clock {
+    font-family: 'DM Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #111827;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(229,231,235,0.9);
+    border-radius: 12px;
+    padding: 10px 14px;
+    box-shadow: 0 10px 30px rgba(17,24,39,0.06);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.scn-clock-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+}
+
+.scn-clock-date {
+    font-size: 0.6rem;
+    color: #6b7280;
+    font-weight: 600;
+    font-family: 'Sora', sans-serif;
+}
+
+.scn-grid-layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(420px, 560px);
+    gap: 16px;
+    align-items: stretch;
+    justify-content: center;
+}
+
+@media (max-width: 900px) {
+    .scn-grid-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.scn-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+}
+
+.scn-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 0 0 14px 14px;
+    background: #e5e7eb;
+}
+
+.scn-card--scanner::after {
+    background: #c8292a;
+}
+
+.scn-card--scanner {
+    width: 100%;
+    max-width: 560px;
+    justify-self: center;
+}
+
+.scn-card-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.scn-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #fff0f0;
+    color: #c8292a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.scn-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 2px;
+    line-height: 1.25;
+}
+
+.scn-card-sub {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.scn-card-body {
+    padding: 18px 20px 22px;
+    flex: 1;
+}
+
+.scn-card-body--center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.scn-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #c8292a;
+    display: inline-block;
+}
+
+.att-steps {
+    padding-left: 0;
+    margin: 0;
+    list-style: none;
+    counter-reset: scn;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.att-steps li {
+    counter-increment: scn;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.45;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+}
+
+.att-steps li::before {
+    content: counter(scn);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: #fff0f0;
+    color: #c8292a;
+    font-size: 0.82rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.att-steps strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.scn-section-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #6b7280;
+}
+
+.scan-ios-note {
+    background: #f4f5f7;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.75rem;
+    color: #374151;
+    line-height: 1.6;
+}
+
+/* Scanner specific styles */
+.scan-panel-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #6b7280;
+    align-self: flex-start;
+    width: 100%;
+}
+
+.scan-start-btn {
+    width: 100%;
+    padding: 11px 0;
+    background: rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #111827;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.scan-start-btn:hover {
+    background: rgba(0,0,0,0.08);
+    border-color: #d1d5db;
+}
+
+.scan-start-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.scan-hint {
+    text-align: center;
+    font-size: 0.65rem;
+    color: #6b7280;
+    margin-top: 6px;
+}
+
+.scan-status {
+    width: 100%;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.scan-status-idle {
+    background: rgba(0,0,0,0.03);
+    color: #374151;
+}
+
+.scan-status-success {
+    background: rgba(22,163,74,0.15);
+    color: #16a34a;
+}
+
+.scan-status-danger {
+    background: rgba(200,41,42,0.15);
+    color: #c8292a;
+}
+
+.scan-divider {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #9ca3af;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.scan-token-input {
+    flex: 1;
+    background: rgba(0,0,0,0.03) !important;
+    border: 1px solid #9ca3af !important;
+    border-radius: 8px !important;
+    color: #111827 !important;
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 2px !important;
+    padding: 9px 14px !important;
+}
+
+.scan-token-input::placeholder {
+    color: #9ca3af !important;
+}
+
+.scan-token-input:focus {
+    background: rgba(0,0,0,0.05) !important;
+    border-color: #bfdbfe !important;
+    box-shadow: 0 0 0 3px rgba(200,41,42,0.08) !important;
+    outline: none !important;
+}
+
+.scan-submit-btn {
+    padding: 9px 16px;
+    background: #c8292a;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.scan-submit-btn:hover {
+    background: #a81f20;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin-icon {
+    animation: spin 1s linear infinite;
+    display: inline-block;
+}
+
+@media (max-width: 1200px) {
+    :root {
+        --qr-scan-size: 180px;
+    }
+}
+
+@media (max-width: 900px) {
+    :root {
+        --qr-scan-size: 160px;
+    }
+
+    .scn-page {
+        min-height: auto;
+        align-items: stretch;
+    }
+}
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid scn-page">
-    <div class="scn-backdrop"><div class="scn-grid"></div></div>
-    <div class="scn-content">
-
-    <div class="scn-topbar">
-        <div>
-            <h1 class="scn-title">Scan QR Attendance</h1>
-            <p class="scn-sub" id="current-date"></p>
-        </div>
-        <div class="scn-clock" id="digital-clock"></div>
+<div class="scn-page">
+    <div class="scn-backdrop">
+        <div class="scn-grid"></div>
     </div>
+    <div class="scn-wrap">
+        <div class="scn-content">
 
-    <div class="scn-hero">
-        <div class="scn-hero-left">
-            <p class="scn-hero-title">Ready when you are</p>
-            <p class="scn-hero-meta">Scan the QR token to log time in / time out instantly.</p>
-            <div class="scn-chiprow">
-                <span class="scn-chip">Auto-detect</span>
-                <span class="scn-chip">Live scanning</span>
-                <span class="scn-chip">Instant confirm</span>
+        <div class="scn-topbar">
+            <div>
+                <p class="scn-eyebrow">Attendance</p>
+                <h1 class="scn-title">Scan QR Code</h1>
+            </div>
+            <div class="scn-clock-container">
+                <div class="scn-clock" id="digital-clock">
+                    <div class="scn-clock-date" id="current-date"></div>
+                    <div id="time-display"></div>
+                </div>
             </div>
         </div>
-        <span class="scan-time-badge" id="current-time"></span>
-    </div>
 
-    <div class="row g-3 align-items-stretch">
+        <div class="scn-grid-layout">
 
-        {{-- Left — Scanner --}}
-        <div class="col-12 col-lg-5">
-            <div class="scan-panel h-100">
-
-                <div class="scan-panel-label">Scan QR Code</div>
-
-                {{-- Camera button --}}
-                <div id="camera-controls" class="w-100">
-                    <button type="button" class="scan-start-btn" id="start-camera-btn">
-                        <i class="fa fa-camera me-2"></i>Start Camera
-                    </button>
-                    <div class="scan-hint">Tap to request camera access</div>
-                </div>
-
-                {{-- Video stream --}}
-                <div id="video-container" style="display:none; position:relative; overflow:hidden; border-radius:12px; background:#000; width:100%; aspect-ratio:4/3;" class="mb-3">
-                    <video id="camera-stream" playsinline autoplay muted webkit-playsinline
-                        style="width:100%; height:100%; object-fit:contain; display:block;"></video>
-                    <canvas id="canvas" style="display:none;"></canvas>
-                    <div id="no-camera-message" class="text-white text-center"
-                        style="display:none; width:100%; height:100%; flex-direction:column; align-items:center; justify-content:center; position:absolute; top:0; left:0; background:#111;">
-                        <i class="fa fa-camera-slash" style="font-size:40px; margin-bottom:10px; opacity:.5;"></i>
-                        <p class="mb-0 small fw-semibold">Camera Unavailable</p>
-                        <p class="small opacity-50">Use manual token entry</p>
+            {{-- Left — Instructions --}}
+            <section class="scn-card" aria-labelledby="scn-steps-title">
+                <div class="scn-card-head">
+                    <div class="scn-card-icon" aria-hidden="true">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 id="scn-steps-title" class="scn-card-title">How to log attendance</h2>
+                        <p class="scn-card-sub">Follow these steps on your device</p>
                     </div>
                 </div>
-
-                {{-- Status --}}
-                <div id="scanner-status" class="scan-status scan-status-idle mb-3">
-                    <i class="fa fa-spinner me-2 spin-icon"></i>
-                    <span id="status-text">Initializing camera…</span>
-                </div>
-
-                {{-- Scan result --}}
-                <div id="scan-result" style="display:none;" class="scan-status mb-3"></div>
-
-                {{-- Manual token --}}
-                <div class="mt-auto w-100">
-                    <div class="scan-divider">or enter token manually</div>
-                    <form id="manual-form" class="d-flex gap-2">
-                        <input type="text" class="scan-token-input" id="manual-token"
-                            placeholder="8-char token" required maxlength="8">
-                        <button class="scan-submit-btn" type="submit">
-                            <i class="fa fa-arrow-right"></i>
-                        </button>
-                    </form>
-                </div>
-
-            </div>
-        </div>
-
-        {{-- Right — Info & Instructions --}}
-        <div class="col-12 col-lg-7">
-            <div class="scn-card">
-                <div class="scn-card-head">
-                    <p class="scn-card-title"><span class="scn-dot"></span> Welcome, {{ auth()->user()->name }}</p>
-                </div>
                 <div class="scn-card-body">
+                    <ol class="att-steps">
+                        <li>Allow <strong>camera access</strong> when prompted</li>
+                        <li>Align your camera with the scanner</li>
+                        <li>Hold steady — detection is automatic</li>
+                        <li>Wait for <strong>"Attendance Recorded"</strong> confirmation</li>
+                    </ol>
 
                     {{-- Last log --}}
-                    <div id="last-log" style="display:none;" class="mb-4">
-                        <div class="scan-last-log">
-                            <span class="scan-last-log-label">Last Log</span>
-                            <div class="d-flex align-items-center gap-2 mt-1">
+                    <div id="last-log" style="display:none;" class="mt-4">
+                        <p class="scn-section-label mb-3">Last Log</p>
+                        <div style="background: #f4f5f7; border-radius: 8px; padding: 12px 16px;">
+                            <div class="d-flex align-items-center gap-2">
                                 <span id="last-log-type" class="badge"></span>
                                 <span class="text-muted small" id="last-log-time"></span>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Instructions --}}
-                    <p class="scan-section-label mb-3">How to log attendance</p>
-                    <ol class="att-steps mb-4">
-                        <li>Open <strong>Smart Accounting</strong> on your phone</li>
-                        <li>Allow camera access when prompted</li>
-                        <li>Align your camera with the scanner on the left</li>
-                        <li>Hold steady — detection is automatic</li>
-                        <li>Wait for the <strong>"Attendance Recorded"</strong> confirmation</li>
-                    </ol>
-
-                    {{-- iPhone note --}}
-                    <div class="scan-ios-note">
-                        <strong>iPhone / iPad:</strong>
+                    {{-- iOS note --}}
+                    <div class="scan-ios-note mt-4">
+                        <strong>iOS:</strong>
                         If camera is blocked, go to <strong>Settings → Privacy → Camera</strong>, enable Safari, then reload.
                     </div>
-
                 </div>
-            </div>
+            </section>
+
+            {{-- Right — Scanner --}}
+            <section class="scn-card scn-card--scanner" aria-label="QR Code Scanner">
+                <div class="scn-card-head">
+                    <div class="scn-card-icon" aria-hidden="true">
+                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="scn-card-title">Start scanning</h2>
+                        <p class="scn-card-sub">Use your device camera</p>
+                    </div>
+                </div>
+                <div class="scn-card-body scn-card-body--center">
+                    <p class="scn-section-label mb-3">Scan QR Code</p>
+
+                    {{-- Camera button --}}
+                    <div id="camera-controls" class="w-100 mb-3">
+                        <button type="button" class="scan-start-btn" id="start-camera-btn">
+                            <i class="fa fa-camera me-2"></i>Start Camera
+                        </button>
+                        <div class="scan-hint">Tap to request camera access</div>
+                    </div>
+
+                    {{-- Video stream --}}
+                    <div id="video-container" style="display:none; position:relative; overflow:hidden; border-radius:12px; background:#000; width:100%; aspect-ratio:4/3; margin-bottom:12px;">
+                        <video id="camera-stream" playsinline autoplay muted webkit-playsinline
+                            style="width:100%; height:100%; object-fit:contain; display:block;"></video>
+                        <canvas id="canvas" style="display:none;"></canvas>
+                        <div id="no-camera-message" class="text-white text-center"
+                            style="display:none; width:100%; height:100%; flex-direction:column; align-items:center; justify-content:center; position:absolute; top:0; left:0; background:#111;">
+                            <i class="fa fa-camera-slash" style="font-size:40px; margin-bottom:10px; opacity:.5;"></i>
+                            <p class="mb-0 small fw-semibold">Camera Unavailable</p>
+                            <p class="small opacity-50">Use manual token entry</p>
+                        </div>
+                    </div>
+
+                    {{-- Status --}}
+                    <div id="scanner-status" class="scan-status scan-status-idle w-100 mb-3">
+                        <i class="fa fa-spinner me-2 spin-icon"></i>
+                        <span id="status-text">Initializing camera…</span>
+                    </div>
+
+                    {{-- Scan result --}}
+                    <div id="scan-result" style="display:none;" class="scan-status w-100 mb-3"></div>
+
+                    {{-- Manual token --}}
+                    <div class="mt-auto w-100">
+                        <div class="scan-divider">or enter token manually</div>
+                        <form id="manual-form" class="d-flex gap-2">
+                            <input type="text" class="scan-token-input" id="manual-token"
+                                placeholder="8-char token" required maxlength="8">
+                            <button class="scan-submit-btn" type="submit">
+                                <i class="fa fa-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
         </div>
 
+        </div>
     </div>
-</div></div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
 <script>
@@ -164,11 +558,10 @@ function isIOS() {
 
 function updateClock() {
     const now = new Date();
-    document.getElementById('digital-clock').textContent =
+    document.getElementById('time-display').textContent =
         now.toLocaleTimeString([], { hour12: true });
     document.getElementById('current-date').textContent =
         now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    document.getElementById('current-time').textContent = now.toLocaleTimeString();
 }
 setInterval(updateClock, 1000);
 updateClock();
@@ -354,147 +747,4 @@ window.addEventListener('beforeunload', function() {
 });
 </script>
 
-<style>
-/* -- Scanner panel --------------------------------------------- */
-.scan-panel {
-    background: #1c1c1e;
-    border-radius: 12px;
-    padding: 28px 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-}
-
-.scan-panel-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 1.8px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
-    align-self: flex-start;
-}
-
-/* Start camera button */
-.scan-start-btn {
-    width: 100%;
-    padding: 11px 0;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-}
-.scan-start-btn:hover   { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.22); }
-.scan-start-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-.scan-hint {
-    text-align: center;
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.3);
-    margin-top: 6px;
-}
-
-/* Status pills */
-.scan-status {
-    width: 100%;
-    padding: 9px 14px;
-    border-radius: 8px;
-    font-size: 0.845rem;
-    display: flex;
-    align-items: center;
-}
-.scan-status-idle    { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.7); }
-.scan-status-success { background: rgba(22,163,74,0.2);   color: #4ade80; }
-.scan-status-danger  { background: rgba(200,41,42,0.25);  color: #f87171; }
-
-/* Divider */
-.scan-divider {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: rgba(255,255,255,0.25);
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-/* Token input row */
-.scan-token-input {
-    flex: 1;
-    background: rgba(255,255,255,0.07) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    border-radius: 8px !important;
-    color: #fff !important;
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 2px !important;
-    padding: 9px 14px !important;
-}
-.scan-token-input::placeholder { color: rgba(255,255,255,0.25) !important; }
-.scan-token-input:focus {
-    background: rgba(255,255,255,0.1) !important;
-    border-color: rgba(255,255,255,0.28) !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-.scan-submit-btn {
-    padding: 9px 16px;
-    background: #c8292a;
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: background 0.15s;
-    flex-shrink: 0;
-}
-.scan-submit-btn:hover { background: #a81f20; }
-
-/* -- Right panel ------------------------------------------------ */
-.scan-clock {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #1c1c1e;
-    font-variant-numeric: tabular-nums;
-}
-
-.scan-last-log {
-    background: #f4f5f7;
-    border-radius: 8px;
-    padding: 12px 16px;
-}
-.scan-last-log-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: #9898a8;
-}
-
-.scan-section-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 1.4px;
-    text-transform: uppercase;
-    color: #9898a8;
-}
-
-/* iOS note */
-.scan-ios-note {
-    background: #f4f5f7;
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 0.815rem;
-    color: #4a4a58;
-    line-height: 1.6;
-}
-
-/* Spin animation */
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.spin-icon { animation: spin 1s linear infinite; display: inline-block; }
-</style>
 @endsection

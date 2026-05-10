@@ -109,9 +109,9 @@
             <h1 class="att-topbar-title">Manual Attendance Log</h1>
             <p class="att-topbar-sub">Record an attendance entry manually for an employee</p>
         </div>
-        <a href="{{ route('attendance.index') }}" class="att-btn-sec">
+        <a href="{{ url()->previous() }}" class="att-btn-sec">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Back to Records
+            Back
         </a>
     </div>
 

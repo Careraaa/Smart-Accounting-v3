@@ -214,12 +214,17 @@
     box-sizing: border-box;
     min-height: calc(100vh - 110px);
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     padding-top: 0;
     margin-top: 0;
 }
 
-.qrmon-wrap { padding: 8px 4px 0; }
+.qrmon-wrap { 
+    padding: 8px 4px 0; 
+    width: 100%;
+}
 
 .qrmon-top { margin-bottom: 20px; }
 
@@ -475,7 +480,7 @@
 
     .qrmon-page {
         min-height: auto;
-        align-items: stretch;
+        align-items: center;
     }
 }
 </style>

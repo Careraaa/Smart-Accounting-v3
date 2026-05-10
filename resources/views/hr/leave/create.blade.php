@@ -72,9 +72,9 @@
             <h1 class="lv-topbar-title">Create Leave Request</h1>
             <p class="lv-topbar-sub">Submit a new leave request for an employee</p>
         </div>
-        <a href="{{ route('leave.pending') }}" class="lv-btn-sec">
+        <a href="{{ url()->previous() }}" class="lv-btn-sec">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Back to Leaves
+            Back
         </a>
     </div>
 

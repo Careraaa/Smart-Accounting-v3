@@ -88,7 +88,7 @@
 
         <header class="hrd-hero">
             <div class="hrd-hero-left">
-                <h1>HR dashboard</h1>
+                <h1>HR Dashboard</h1>
                 <p>Workforce, attendance, and leave — charts use live data from your <strong style="color:#e5e7eb;">attendance</strong> and <strong style="color:#e5e7eb;">users</strong> tables.</p>
                 <div class="d-flex flex-wrap gap-2 mt-2">
                     <span class="hrd-chip"><i class="feather-calendar"></i> {{ now()->format('l, F d, Y') }}</span>
