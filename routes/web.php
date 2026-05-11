@@ -257,33 +257,37 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
     Route::post('/overtime/{overtime}/approve', [OvertimeUndertimeController::class, 'approve'])->name('overtime.approve');
     Route::post('/overtime/{overtime}/reject', [OvertimeUndertimeController::class, 'reject'])->name('overtime.reject');
 
-    // HR Payroll Routes - All under salary-computation prefix
-    Route::prefix('payroll/salary-computation')
-        ->name('payroll.salary-computation.')
-        ->group(function () {
-            Route::get('/', [PayrollController::class, 'index'])->name('index');
+    // HR Payroll Routes — salary computation and batch payroll are HR and superadmin only
+    Route::middleware(['role:hr,superadmin'])->group(function () {
+        Route::prefix('payroll/salary-computation')
+            ->name('payroll.salary-computation.')
+            ->group(function () {
+                Route::get('/', [PayrollController::class, 'index'])->name('index');
+                Route::get('/create', [PayrollController::class, 'create'])->name('create');
+                Route::post('/', [PayrollController::class, 'store'])->name('store');
+                Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
+                Route::get('/{payroll}/edit', [PayrollController::class, 'edit'])->name('edit');
+                Route::put('/{payroll}', [PayrollController::class, 'update'])->name('update');
+                Route::delete('/{payroll}', [PayrollController::class, 'destroy'])->name('destroy');
+            });
 
-            Route::get('/create', [PayrollController::class, 'create'])->name('create');
-
-            Route::get('/payroll/salary-computation/batch-generate', function () {
-                return redirect()->route('payroll.salary-computation.index')->with('info', 'Use the "Generate Payroll Batch" button on the index page.');
-            })->name('payroll.salary-computation.batch-generate');
-
-            Route::post('/', [PayrollController::class, 'store'])->name('store');
-
-            Route::get('/{payroll}', [PayrollController::class, 'show'])->name('show');
-            Route::get('/{payroll}/edit', [PayrollController::class, 'edit'])->name('edit');
-            Route::put('/{payroll}', [PayrollController::class, 'update'])->name('update');
-            Route::delete('/{payroll}', [PayrollController::class, 'destroy'])->name('destroy');
-        });
-
-    Route::post('/payroll/generate-batch', [PayrollController::class, 'generateBatch'])->name('payroll.generate-batch');
-
-    Route::post('/payroll/preview', [PayrollController::class, 'preview'])->name('payroll.preview');
-
-    Route::post('/payroll/release-payroll', [PayrollController::class, 'releasePayroll'])->name('payroll.release-payroll');
-
-    Route::post('/payroll/export-pdf', [PayrollController::class, 'exportPdf'])->name('payroll.export-pdf');
+        Route::post('/payroll/generate-batch', [PayrollController::class, 'generateBatch'])->name('payroll.generate-batch');
+        Route::post('/payroll/preview', [PayrollController::class, 'preview'])->name('payroll.preview');
+        Route::post('/payroll/release-payroll', [PayrollController::class, 'releasePayroll'])->name('payroll.release-payroll');
+        Route::post('/payroll/export-pdf', [PayrollController::class, 'exportPdf'])->name('payroll.export-pdf');
+        Route::post('/payroll/batch/generate', [PayrollController::class, 'batchGenerate'])->name('payroll.batch.generate');
+        Route::get('/payroll/batch/{batch}', [PayrollController::class, 'batchDetails'])->name('payroll.batch.details');
+        Route::get('/payroll/batch/{batch}/payslips', [PayrollController::class, 'batchPayslips'])->name('payroll.batch.payslips');
+        Route::get('/payroll/batch/{batch}/confirm', [PayrollController::class, 'batchConfirm'])->name('payroll.batch.confirm');
+        Route::post('/payroll/batch/{batch}/employee', [PayrollController::class, 'batchAddEmployee'])->name('payroll.batch.add-employee');
+        Route::get('/payroll/batch/{batch}/employee/{payroll}/edit', [PayrollController::class, 'batchEditEmployee'])->name('payroll.batch.edit-employee');
+        Route::put('/payroll/batch/{batch}/employee/{payroll}', [PayrollController::class, 'batchUpdateEmployee'])->name('payroll.batch.update-employee');
+        Route::post('/payroll/batch/{batch}/employee/{payroll}/prepare', [PayrollController::class, 'batchMarkPrepared'])->name('payroll.batch.prepare-employee');
+        Route::delete('/payroll/batch/{batch}/employee/{payroll}', [PayrollController::class, 'batchRemoveEmployee'])->name('payroll.batch.remove-employee');
+        Route::post('/payroll/batch/{batch}/finalize', [PayrollController::class, 'batchFinalize'])->name('payroll.batch.finalize');
+        Route::post('/payroll/batch/{batch}/reopen', [PayrollController::class, 'batchReopen'])->name('payroll.batch.reopen');
+        Route::post('/payroll/batch/{batch}/submit', [PayrollController::class, 'batchSubmit'])->name('payroll.batch.submit');
+    });
 
     Route::prefix('payroll/statutory-deductions')
         ->name('payroll.statutory-deductions.')
@@ -361,24 +365,6 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
     Route::get('/hr/reports/print/employee-report', [HrReportController::class, 'printEmployeeReport'])->name('hr.reports.print.employee-report');
     Route::get('/hr/reports/print/approved-leaves-report', [HrReportController::class, 'printApprovedLeavesReport'])->name('hr.reports.print.approved-leaves-report');
     Route::get('/hr/reports/print/payroll-history-report', [HrReportController::class, 'printPayrollHistoryReport'])->name('hr.reports.print.payroll-history-report');
-
-    Route::post('/payroll/batch/generate', [PayrollController::class, 'batchGenerate'])->name('payroll.batch.generate');
-
-    Route::get('/payroll/batch/{batch}', [PayrollController::class, 'batchDetails'])->name('payroll.batch.details');
-    Route::get('/payroll/batch/{batch}/payslips', [PayrollController::class, 'batchPayslips'])->name('payroll.batch.payslips');
-    Route::get('/payroll/batch/{batch}/confirm', [PayrollController::class, 'batchConfirm'])->name('payroll.batch.confirm');
-    Route::post('/payroll/batch/{batch}/employee', [PayrollController::class, 'batchAddEmployee'])->name('payroll.batch.add-employee');
-
-    Route::get('/payroll/batch/{batch}/employee/{payroll}/edit', [PayrollController::class, 'batchEditEmployee'])->name('payroll.batch.edit-employee');
-
-    Route::put('/payroll/batch/{batch}/employee/{payroll}', [PayrollController::class, 'batchUpdateEmployee'])->name('payroll.batch.update-employee');
-    Route::post('/payroll/batch/{batch}/employee/{payroll}/prepare', [PayrollController::class, 'batchMarkPrepared'])->name('payroll.batch.prepare-employee');
-    Route::delete('/payroll/batch/{batch}/employee/{payroll}', [PayrollController::class, 'batchRemoveEmployee'])->name('payroll.batch.remove-employee');
-
-    Route::post('/payroll/batch/{batch}/finalize', [PayrollController::class, 'batchFinalize'])->name('payroll.batch.finalize');
-    Route::post('/payroll/batch/{batch}/reopen', [PayrollController::class, 'batchReopen'])->name('payroll.batch.reopen');
-
-    Route::post('/payroll/batch/{batch}/submit', [PayrollController::class, 'batchSubmit'])->name('payroll.batch.submit');
 });
 
 // ===== PAYROLL REPORTS (all authenticated users) =====

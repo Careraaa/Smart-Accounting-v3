@@ -183,12 +183,20 @@ class Notification extends Model
             case 'leave_rejected':
             case 'leave_updated':
             case 'leave_deleted':
+                // Accountants should not see leave notifications
+                if ($isAccountant) {
+                    return null;
+                }
                 if ($data['leave_id'] ?? null) {
                     return route('leave.show', ['leave' => $data['leave_id']]);
                 }
                 return route('leave.pending');
 
             case 'leave_pending_approval':
+                // Accountants should not see leave notifications
+                if ($isAccountant) {
+                    return null;
+                }
                 return route('leave.pending');
 
             // Attendance related notifications
@@ -229,6 +237,20 @@ class Notification extends Model
                     return route('remittances.show', ['remittance' => $data['remittance_id']]);
                 }
                 return route('remittances.index');
+
+            // Cash advance related notifications
+            case 'cash_advance_pending':
+            case 'cash_advance_submitted':
+            case 'cash_advance_approved':
+            case 'cash_advance_rejected':
+                return route('payroll.receivables.index', ['tab' => 'cash_advances']);
+
+            // Salary loan related notifications
+            case 'salary_loan_pending':
+            case 'salary_loan_submitted':
+            case 'salary_loan_approved':
+            case 'salary_loan_rejected':
+                return route('payroll.receivables.index', ['tab' => 'salary_loans']);
 
             // Default: no action
             default:

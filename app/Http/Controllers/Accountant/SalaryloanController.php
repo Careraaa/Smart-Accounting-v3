@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Accountant;
 
 use App\Http\Controllers\Controller;
 use App\Models\SalaryLoan;
+use App\Notifications\SalaryLoanNotification;
 use Illuminate\Http\Request;
 
 class SalaryLoanController extends Controller
@@ -23,6 +24,8 @@ class SalaryLoanController extends Controller
 
         $name = $salaryLoan->user->name ?? 'Employee';
 
+        SalaryLoanNotification::approved($salaryLoan);
+
         return redirect()->back()
             ->with('success', "Salary loan for {$name} approved. Monthly deduction of ₱" . number_format($salaryLoan->monthly_deduction, 2) . " will begin on their next payroll.");
     }
@@ -39,11 +42,14 @@ class SalaryLoanController extends Controller
         }
 
         $salaryLoan->update([
-            'status'           => 'rejected',
-            'rejection_reason' => $request->rejection_reason,
-            'approved_by'      => auth()->id(),
-            'approved_at'      => now(),
+            'status'            => 'rejected',
+            'remaining_balance' => 0,
+            'rejection_reason'  => $request->rejection_reason,
+            'approved_by'       => auth()->id(),
+            'approved_at'       => now(),
         ]);
+
+        SalaryLoanNotification::rejected($salaryLoan);
 
         return redirect()->back()
             ->with('success', 'Salary loan request rejected.');

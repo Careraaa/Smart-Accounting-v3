@@ -21,6 +21,17 @@
     <!-- Vite compiled assets (CSS & JS) – placed last so it overrides previous styles -->
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
 
+    <style>
+        /* Override: the vendor CSS blurs the entire page when a Bootstrap modal opens.
+           This breaks our custom modals (reject, batch reject, etc.) — remove the blur. */
+        body.modal-open .nxl-header,
+        body.modal-open .nxl-navigation,
+        body.modal-open .page-header,
+        body.modal-open .nxl-container {
+            filter: none !important;
+        }
+    </style>
+
     @stack('styles')
 </head>
 
@@ -334,7 +345,7 @@
                 const style = document.createElement('style');
                 style.id = 'sa-confirm-style';
                 style.textContent = `
-                    #sa-confirm-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(17,24,39,.55);backdrop-filter:blur(4px);padding:24px;}
+                    #sa-confirm-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(17,24,39,.55);padding:24px;}
                     #sa-confirm-modal{width:min(520px, 100%);background:linear-gradient(180deg,#ffffff 0%,#fbfbfc 100%);border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.28);padding:18px 18px 16px;transform:translateY(6px) scale(.98);opacity:0;transition:opacity .16s ease, transform .16s ease;font-family:'Sora',system-ui,-apple-system,Segoe UI,Roboto,Arial;}
                     #sa-confirm-overlay.show #sa-confirm-modal{transform:translateY(0) scale(1);opacity:1;}
                     .sa-confirm-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}

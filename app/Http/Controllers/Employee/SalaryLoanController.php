@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
 use App\Models\SalaryLoan;
+use App\Notifications\SalaryLoanNotification;
 use Illuminate\Http\Request;
 
 class SalaryLoanController extends Controller
@@ -35,7 +36,7 @@ class SalaryLoanController extends Controller
                 ->withErrors(['error' => 'You already have an active or pending salary loan.']);
         }
 
-        SalaryLoan::create([
+        $salaryLoan = SalaryLoan::create([
             'user_id'           => auth()->id(),
             'loan_amount'       => $request->loan_amount,
             'monthly_deduction' => $request->monthly_deduction,
@@ -44,6 +45,8 @@ class SalaryLoanController extends Controller
             'notes'             => $request->notes,
             'status'            => 'pending',
         ]);
+
+        SalaryLoanNotification::submitted($salaryLoan);
 
         return redirect()->route('employee.salary-loans.index')
             ->with('success', 'Salary loan application submitted successfully.');

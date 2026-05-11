@@ -17,7 +17,6 @@ class PayrollReceivablesController extends Controller
         $cashAdvances = collect();
         $salaryLoans  = collect();
 
-
         if ($tab === 'cash_advances') {
             $cashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
                 ->orderBy('created_at', 'desc')
@@ -32,8 +31,19 @@ class PayrollReceivablesController extends Controller
                 ->withQueryString();
         }
 
+        // Stats are always loaded regardless of active tab,
+        // and only count approved/active records (not pending or rejected).
+        $caApprovedTotal   = CashAdvance::whereIn('status', ['approved', 'deducted'])->sum('amount') ?? 0;
+        $caApprovedCount   = CashAdvance::whereIn('status', ['approved', 'deducted'])->count();
+        $caPendingCount    = CashAdvance::where('status', 'pending')->count();
+
+        $loanApprovedTotal = SalaryLoan::where('status', 'active')->sum('loan_amount') ?? 0;
+        $loanActiveCount   = SalaryLoan::where('status', 'active')->count();
+
         return view('hr.payroll.receivables.index', compact(
-            'tab', 'cashAdvances', 'salaryLoans'
+            'tab', 'cashAdvances', 'salaryLoans',
+            'caApprovedTotal', 'caApprovedCount', 'caPendingCount',
+            'loanApprovedTotal', 'loanActiveCount'
         ));
     }
 }

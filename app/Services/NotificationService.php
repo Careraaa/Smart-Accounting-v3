@@ -9,6 +9,18 @@ use Illuminate\Support\Collection;
 
 class NotificationService
 {
+    /**
+     * Leave notification types that accountants should never see.
+     */
+    private const LEAVE_TYPES = [
+        'leave_submitted',
+        'leave_approved',
+        'leave_rejected',
+        'leave_updated',
+        'leave_deleted',
+        'leave_pending_approval',
+    ];
+
     public function send(Model $user, string $type, string $title, string $message, array $data = []): Notification
     {
         return Notification::create([
@@ -54,6 +66,10 @@ class NotificationService
     {
         $query = $user->notifications()->notDeleted()->unread()->recent();
 
+        if ($user->role === 'accountant') {
+            $query->whereNotIn('type', self::LEAVE_TYPES);
+        }
+
         if ($limit) {
             $query->limit($limit);
         }
@@ -64,6 +80,10 @@ class NotificationService
     public function getAllNotifications(Model $user, int $limit = null): Collection
     {
         $query = $user->notifications()->notDeleted()->recent();
+
+        if ($user->role === 'accountant') {
+            $query->whereNotIn('type', self::LEAVE_TYPES);
+        }
 
         if ($limit) {
             $query->limit($limit);
@@ -113,16 +133,28 @@ class NotificationService
 
     public function getUnreadCount(Model $user): int
     {
-        return $user->notifications()->notDeleted()->unread()->count();
+        $query = $user->notifications()->notDeleted()->unread();
+
+        if ($user->role === 'accountant') {
+            $query->whereNotIn('type', self::LEAVE_TYPES);
+        }
+
+        return $query->count();
     }
 
     public function getStats(Model $user): array
     {
+        $base = $user->notifications();
+
+        if ($user->role === 'accountant') {
+            $base->whereNotIn('type', self::LEAVE_TYPES);
+        }
+
         return [
-            'total'   => $user->notifications()->notDeleted()->count(),
-            'unread'  => $user->notifications()->notDeleted()->unread()->count(),
-            'read'    => $user->notifications()->notDeleted()->read()->count(),
-            'deleted' => $user->notifications()->deleted()->count(),
+            'total'   => (clone $base)->notDeleted()->count(),
+            'unread'  => (clone $base)->notDeleted()->unread()->count(),
+            'read'    => (clone $base)->notDeleted()->read()->count(),
+            'deleted' => (clone $base)->deleted()->count(),
         ];
     }
 }

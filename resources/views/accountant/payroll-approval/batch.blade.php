@@ -182,25 +182,18 @@
             @if ($status === 'submitted' && $payrolls->isNotEmpty())
                 <div class="card-footer bg-white border-top" style="padding:16px 18px;">
                     <div class="d-flex flex-wrap gap-2 justify-content-end">
-                        <form action="{{ route('payroll-approval.reject-batch') }}" method="POST" class="d-inline">
+                        {{-- Reject: opens modal for reason input --}}
+                        <button type="button" class="prl-batch-btn prl-batch-btn-danger"
+                                onclick="openBatchRejectModal('{{ $startDate->format('Y-m-d') }}', '{{ $endDate->format('Y-m-d') }}', {{ $payrolls->count() }})">
+                            <i class="feather-x-circle me-1"></i> Reject batch
+                        </button>
+                        {{-- Approve: data-sa-confirm on the form --}}
+                        <form action="{{ route('payroll-approval.approve-batch') }}" method="POST" class="d-inline"
+                              data-sa-confirm="Approve this entire payroll batch? This will release {{ $payrolls->count() }} payroll record(s) for processing.">
                             @csrf
                             <input type="hidden" name="start" value="{{ $startDate->format('Y-m-d') }}">
                             <input type="hidden" name="end" value="{{ $endDate->format('Y-m-d') }}">
-                            <div class="d-flex flex-wrap gap-2 align-items-center justify-content-end">
-                                <input type="text" name="rejection_note" required minlength="3"
-                                       class="form-control form-control-sm"
-                                       style="max-width:320px;"
-                                       placeholder="Rejection note (required)">
-                                <button type="submit" class="prl-batch-btn prl-batch-btn-danger" data-sa-confirm="Reject this entire batch?">
-                                <i class="feather-x-circle me-1"></i> Reject batch
-                                </button>
-                            </div>
-                        </form>
-                        <form action="{{ route('payroll-approval.approve-batch') }}" method="POST" class="d-inline">
-                            @csrf
-                            <input type="hidden" name="start" value="{{ $startDate->format('Y-m-d') }}">
-                            <input type="hidden" name="end" value="{{ $endDate->format('Y-m-d') }}">
-                            <button type="submit" class="prl-batch-btn prl-batch-btn-primary" data-sa-confirm="Approve this entire batch?">
+                            <button type="submit" class="prl-batch-btn prl-batch-btn-primary">
                                 <i class="feather-check-circle me-1"></i> Approve batch
                             </button>
                         </form>
@@ -211,3 +204,60 @@
     </div>
 </div>
 @endsection
+
+{{-- ── Batch Reject Modal ── --}}
+<div class="modal fade" id="batchRejectModal" tabindex="-1" aria-hidden="true"
+     style="font-family:'Sora',sans-serif;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+        <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+            <form id="batchRejectForm" action="{{ route('payroll-approval.reject-batch') }}" method="POST">
+                @csrf
+                <input type="hidden" id="batchRejectStart" name="start">
+                <input type="hidden" id="batchRejectEnd" name="end">
+                <div class="modal-header" style="border-bottom:1px solid #f3f4f6;padding:18px 22px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:36px;height:36px;border-radius:10px;background:#fff1f2;border:1px solid #fecaca;display:flex;align-items:center;justify-content:center;color:#c8292a;flex-shrink:0;">
+                            <i class="feather-x-circle" style="font-size:16px;"></i>
+                        </div>
+                        <div>
+                            <h6 class="modal-title" style="font-size:0.92rem;font-weight:800;color:#111827;margin:0;">Reject Payroll Batch</h6>
+                            <p id="batchRejectDesc" style="font-size:0.78rem;color:#9ca3af;margin:0;"></p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:20px 22px;">
+                    <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;display:block;margin-bottom:6px;">
+                        Rejection Note <span style="color:#c8292a;">*</span>
+                    </label>
+                    <textarea name="rejection_note" id="batchRejectNote" class="form-control" rows="3" required minlength="3"
+                              placeholder="Explain why this batch is being rejected…"
+                              style="border:1px solid #e5e7eb;border-radius:8px;font-size:0.845rem;font-family:'Sora',sans-serif;color:#111827;padding:9px 12px;resize:vertical;"></textarea>
+                    <p style="font-size:0.75rem;color:#9ca3af;margin:6px 0 0;">HR will be notified and can reopen the batch for corrections.</p>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #f3f4f6;padding:14px 22px;gap:8px;">
+                    <button type="button" data-bs-dismiss="modal"
+                            style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;border:1px solid #e5e7eb;background:#f3f4f6;color:#374151;cursor:pointer;">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;border:none;background:#c8292a;color:#fff;box-shadow:0 2px 8px rgba(200,41,42,0.3);cursor:pointer;">
+                        <i class="feather-x-circle"></i> Reject batch
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function openBatchRejectModal(start, end, count) {
+    document.getElementById('batchRejectStart').value = start;
+    document.getElementById('batchRejectEnd').value   = end;
+    document.getElementById('batchRejectDesc').textContent = count + ' payroll record(s) will be rejected.';
+    document.getElementById('batchRejectNote').value = '';
+    new bootstrap.Modal(document.getElementById('batchRejectModal')).show();
+}
+</script>
+@endpush

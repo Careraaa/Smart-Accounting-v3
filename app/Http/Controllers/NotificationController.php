@@ -34,6 +34,15 @@ class NotificationController extends Controller
             $query->notDeleted();
         }
 
+        // Accountants should never see leave notifications
+        if ($user->role === 'accountant') {
+            $leaveTypes = [
+                'leave_submitted', 'leave_approved', 'leave_rejected',
+                'leave_updated', 'leave_deleted', 'leave_pending_approval',
+            ];
+            $query->whereNotIn('type', $leaveTypes);
+        }
+
         if ($type) {
             $query->where('type', $type);
         }

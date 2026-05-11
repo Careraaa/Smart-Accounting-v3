@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
 use App\Models\CashAdvance;
+use App\Notifications\CashAdvanceNotification;
 use Illuminate\Http\Request;
 
 class CashAdvanceController extends Controller
@@ -34,13 +35,15 @@ class CashAdvanceController extends Controller
                 ->withErrors(['error' => 'You already have a pending cash advance request.']);
         }
 
-        CashAdvance::create([
+        $cashAdvance = CashAdvance::create([
             'user_id'      => auth()->id(),
             'amount'       => $request->amount,
             'request_date' => $request->request_date,
             'notes'        => $request->notes,
             'status'       => 'pending',
         ]);
+
+        CashAdvanceNotification::submitted($cashAdvance);
 
         return redirect()->route('employee.cash-advances.index')
             ->with('success', 'Cash advance request submitted successfully.');

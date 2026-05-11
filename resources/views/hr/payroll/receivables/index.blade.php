@@ -171,15 +171,6 @@
     </div>
 
     {{-- ── Stats ── --}}
-    @php
-        $caItems      = method_exists($cashAdvances, 'getCollection') ? $cashAdvances->getCollection() : collect($cashAdvances->all());
-        $loanItems    = method_exists($salaryLoans,  'getCollection') ? $salaryLoans->getCollection()  : collect($salaryLoans->all());
-        $totalCA      = $caItems->sum('amount');
-        $pendingCA    = $caItems->where('status','pending')->count();
-        $caCount      = method_exists($cashAdvances, 'total') ? $cashAdvances->total() : $caItems->count();
-        $totalLoans   = $loanItems->sum('loan_amount');
-        $activeLoans  = $loanItems->whereIn('status',['active','approved'])->count();
-    @endphp
     <div class="prl-stats">
         <div class="prl-stat s-amber">
             <div class="prl-stat-icon">
@@ -187,8 +178,8 @@
             </div>
             <div>
                 <div class="prl-stat-label">Cash Advances</div>
-                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($totalCA,2) }}</div>
-                <div class="prl-stat-sub">{{ $caCount }} total requests</div>
+                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($caApprovedTotal, 2) }}</div>
+                <div class="prl-stat-sub">{{ $caApprovedCount }} approved</div>
             </div>
         </div>
         <div class="prl-stat s-red">
@@ -197,7 +188,7 @@
             </div>
             <div>
                 <div class="prl-stat-label">Pending Advances</div>
-                <div class="prl-stat-value">{{ $pendingCA }}</div>
+                <div class="prl-stat-value">{{ $caPendingCount }}</div>
                 <div class="prl-stat-sub">awaiting approval</div>
             </div>
         </div>
@@ -207,8 +198,8 @@
             </div>
             <div>
                 <div class="prl-stat-label">Salary Loans</div>
-                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($totalLoans,2) }}</div>
-                <div class="prl-stat-sub">total loan portfolio</div>
+                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($loanApprovedTotal, 2) }}</div>
+                <div class="prl-stat-sub">active loan portfolio</div>
             </div>
         </div>
         <div class="prl-stat s-green">
@@ -217,7 +208,7 @@
             </div>
             <div>
                 <div class="prl-stat-label">Active Loans</div>
-                <div class="prl-stat-value">{{ $activeLoans }}</div>
+                <div class="prl-stat-value">{{ $loanActiveCount }}</div>
                 <div class="prl-stat-sub">currently repaying</div>
             </div>
         </div>
@@ -317,14 +308,15 @@
                         <td>
                             <div class="prl-actions">
                                 @if($advance->status === 'pending')
-                                <form method="POST" action="{{ route('cash-advances.approve', $advance) }}" style="display:inline;">
+                                <form method="POST" action="{{ route('cash-advances.approve', $advance) }}" style="display:inline;"
+                                      data-sa-confirm="Approve cash advance of ₱{{ number_format($advance->amount, 2) }} for {{ $advance->user->name ?? 'this employee' }}?">
                                     @csrf
                                     <button class="prl-action-btn success" title="Approve">
                                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                     </button>
                                 </form>
                                 <button class="prl-action-btn danger" title="Reject" type="button"
-                                        onclick="openRejectModal('ca', {{ $advance->id }})">
+                                        onclick="openRejectModal('ca', {{ $advance->id }}, '{{ addslashes($advance->user->name ?? 'this employee') }}', '{{ number_format($advance->amount, 2) }}')">
                                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                                 @else
@@ -451,14 +443,15 @@
                         <td>
                             <div class="prl-actions">
                                 @if($loan->status === 'pending')
-                                <form method="POST" action="{{ route('salary-loans.approve', $loan) }}" style="display:inline;">
+                                <form method="POST" action="{{ route('salary-loans.approve', $loan) }}" style="display:inline;"
+                                      data-sa-confirm="Approve salary loan of ₱{{ number_format($loan->loan_amount, 2) }} for {{ $loan->user->name ?? 'this employee' }}?">
                                     @csrf
                                     <button class="prl-action-btn success" title="Approve">
                                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                     </button>
                                 </form>
                                 <button class="prl-action-btn danger" title="Reject" type="button"
-                                        onclick="openRejectModal('loan', {{ $loan->id }})">
+                                        onclick="openRejectModal('loan', {{ $loan->id }}, '{{ addslashes($loan->user->name ?? 'this employee') }}', '{{ number_format($loan->loan_amount, 2) }}')">
                                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                                 @else
@@ -515,11 +508,15 @@
             <form id="rejectForm" method="POST">
                 @csrf
                 <div class="modal-header">
-                    <h6 class="modal-title">Reject Request</h6>
+                    <h6 class="modal-title">
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color:#c8292a;margin-right:6px;vertical-align:-2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Reject Request
+                    </h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <label class="form-label">Reason for Rejection</label>
+                    <p id="rejectModalDesc" style="font-size:0.82rem;color:#6b7280;margin:0 0 14px;line-height:1.45;"></p>
+                    <label class="form-label">Reason for Rejection <span style="color:#c8292a;">*</span></label>
                     <textarea name="rejection_reason" class="form-control" rows="3"
                               placeholder="Enter reason…" required></textarea>
                 </div>
@@ -605,12 +602,23 @@
 })();
 
 @if(auth()->user()->role === 'accountant')
-function openRejectModal(type, id) {
+function openRejectModal(type, id, employeeName, amount) {
     const routes = {
         ca:   `/cash-advances/${id}/reject`,
         loan: `/salary-loans/${id}/reject`,
     };
+    const labels = {
+        ca:   'cash advance',
+        loan: 'salary loan',
+    };
     document.getElementById('rejectForm').action = routes[type];
+    const desc = document.getElementById('rejectModalDesc');
+    if (desc) {
+        desc.textContent = `You are about to reject the ${labels[type]} of ₱${amount} for ${employeeName}. Please provide a reason below.`;
+    }
+    // Clear previous reason
+    const textarea = document.querySelector('#rejectForm textarea[name="rejection_reason"]');
+    if (textarea) textarea.value = '';
     new bootstrap.Modal(document.getElementById('rejectModal')).show();
 }
 @endif

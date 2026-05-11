@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Accountant;
 
 use App\Http\Controllers\Controller;
 use App\Models\CashAdvance;
+use App\Notifications\CashAdvanceNotification;
 use Illuminate\Http\Request;
 
 class CashAdvanceController extends Controller
@@ -23,6 +24,8 @@ class CashAdvanceController extends Controller
         ]);
 
         $name = $cashAdvance->user->name ?? 'Employee';
+
+        CashAdvanceNotification::approved($cashAdvance);
 
         return redirect()->back()
             ->with('success', "Cash advance for {$name} approved. It will be deducted on their next payroll.");
@@ -45,6 +48,8 @@ class CashAdvanceController extends Controller
             'approved_by'      => auth()->id(),
             'approved_at'      => now(),
         ]);
+
+        CashAdvanceNotification::rejected($cashAdvance);
 
         return redirect()->back()
             ->with('success', 'Cash advance request rejected.');

@@ -68,7 +68,7 @@ class LeaveNotification
         ];
 
         // Notify all users who can review pending leave requests.
-        $approverRoles = ['hr', 'superadmin', 'accountant', 'qr_admin'];
+        $approverRoles = ['hr', 'superadmin', 'qr_admin'];
         $approverIds = User::query()
             ->whereIn(DB::raw('LOWER(TRIM(role))'), $approverRoles)
             ->pluck('id')

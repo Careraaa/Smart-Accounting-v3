@@ -47,9 +47,6 @@
                 <a href="{{ route('payroll-approval.index') }}" class="emp-action-btn emp-action-edit">
                     <i class="feather-check-square"></i><span>Payroll approval</span>
                 </a>
-                <a href="{{ route('payroll.salary-computation.index') }}" class="emp-action-btn emp-action-view">
-                    <i class="feather-calculator"></i><span>Salary computation</span>
-                </a>
                 <a href="{{ route('reports.payroll') }}" class="emp-action-btn emp-action-view">
                     <i class="feather-file-text"></i><span>Payroll reports</span>
                 </a>
@@ -229,7 +226,7 @@
         <div class="acd-panel mb-2">
             <div class="acd-panel-hd">
                 <h2>Recent payroll records</h2>
-                <a href="{{ route('payroll.salary-computation.index') }}" style="font-size:.78rem;font-weight:700;color:var(--acd-red);text-decoration:none;">Payroll management →</a>
+                <a href="{{ route('payroll-approval.index') }}" style="font-size:.78rem;font-weight:700;color:var(--acd-red);text-decoration:none;">Payroll approval →</a>
             </div>
             @if ($recentPayroll->isEmpty())
                 <div class="acd-empty"><i class="feather-inbox" style="font-size:32px;display:block;opacity:.35;"></i>No payroll records yet.</div>
