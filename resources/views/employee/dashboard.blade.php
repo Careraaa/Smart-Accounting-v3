@@ -3,332 +3,341 @@
 @push('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.edb-page{font-family:'Sora',sans-serif;position:relative}
-.edb-backdrop{position:absolute;inset:-40px -20px auto -20px;height:340px;pointer-events:none;z-index:0;background:
-    radial-gradient(220px 220px at 10% 35%, rgba(200,41,42,0.14), transparent 60%),
-    radial-gradient(260px 260px at 85% 10%, rgba(2,132,199,0.12), transparent 60%),
-    radial-gradient(240px 240px at 70% 70%, rgba(22,163,74,0.10), transparent 60%),
-    linear-gradient(to bottom, rgba(17,24,39,0.04), transparent 70%);filter:saturate(110%)}
-.edb-grid{position:absolute;inset:0;background-image:linear-gradient(to right, rgba(17,24,39,0.06) 1px, transparent 1px),linear-gradient(to bottom, rgba(17,24,39,0.06) 1px, transparent 1px);background-size:48px 48px;mask-image:radial-gradient(closest-side at 50% 30%, rgba(0,0,0,0.75), transparent 80%);opacity:.5}
-.edb-content{position:relative;z-index:1}
+.edb-page { font-family:'Sora',sans-serif; }
 
-.edb-hero{background:linear-gradient(135deg,#111827 0%,#0b1220 55%,#111827 100%);border-radius:18px;padding:22px 24px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden}
-.edb-hero:before{content:'';position:absolute;top:-70px;right:-70px;width:260px;height:260px;border-radius:50%;background:rgba(200,41,42,0.18);pointer-events:none}
-.edb-hero:after{content:'';position:absolute;bottom:-90px;left:-90px;width:260px;height:260px;border-radius:50%;background:rgba(2,132,199,0.14);pointer-events:none}
-.edb-hero-left{position:relative;z-index:1}
-.edb-title{font-size:1.25rem;font-weight:900;color:#fff;margin:0 0 6px;letter-spacing:-0.02em}
-.edb-sub{font-size:.82rem;color:#9ca3af;margin:0}
-.edb-hero-right{position:relative;z-index:1;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.edb-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid rgba(255,255,255,0.14);border-radius:999px;color:#e5e7eb;background:rgba(255,255,255,0.06);font-size:.75rem}
-.edb-btn{display:inline-flex;align-items:center;gap:10px;padding:11px 18px;background:#c8292a;color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:.86rem;font-weight:900;cursor:pointer;transition:background .15s,box-shadow .15s,transform .15s;text-decoration:none;box-shadow:0 4px 20px rgba(200,41,42,.5);white-space:nowrap}
-.edb-btn:hover{background:#a81f20;color:#fff;box-shadow:0 10px 34px rgba(200,41,42,.62);transform:translateY(-1px)}
-.edb-btn-sec{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:800;text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap}
-.edb-btn-sec:hover{border-color:#c8292a;color:#c8292a;background:#fff5f5;transform:translateY(-1px)}
+/* ── Backdrop ───────────────────────────────────────────────── */
+.edb-wrap { position:relative; }
+.edb-backdrop {
+    position:absolute; inset:-40px -20px auto -20px; height:340px; pointer-events:none; z-index:0;
+    background:
+        radial-gradient(220px 220px at 10% 35%, rgba(200,41,42,0.14), transparent 60%),
+        radial-gradient(260px 260px at 85% 10%, rgba(2,132,199,0.12), transparent 60%),
+        radial-gradient(240px 240px at 70% 70%, rgba(22,163,74,0.10), transparent 60%),
+        linear-gradient(to bottom, rgba(17,24,39,0.04), transparent 70%);
+    filter:saturate(110%);
+}
+.edb-grid {
+    position:absolute; inset:0;
+    background-image:
+        linear-gradient(to right, rgba(17,24,39,0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(17,24,39,0.06) 1px, transparent 1px);
+    background-size:48px 48px;
+    mask-image:radial-gradient(closest-side at 50% 30%, rgba(0,0,0,0.75), transparent 80%);
+    opacity:.5;
+}
+.edb-content { position:relative; z-index:1; }
 
-.edb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
-@media(max-width:900px){.edb-stats{grid-template-columns:1fr}}
-.edb-stat{background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border:1px solid rgba(229,231,235,0.9);border-radius:16px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(17,24,39,0.06)}
-.edb-stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
-.edb-stat.s-blue::after{background:#0284c7}.edb-stat.s-amber::after{background:#d97706}.edb-stat.s-green::after{background:#16a34a}
-.edb-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.edb-stat.s-blue .edb-ico{background:#f0f9ff;color:#0284c7}
-.edb-stat.s-amber .edb-ico{background:#fffbeb;color:#d97706}
-.edb-stat.s-green .edb-ico{background:#f0fdf4;color:#16a34a}
-.edb-lbl{font-size:.67rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#9ca3af;margin-bottom:4px}
-.edb-val{font-size:1.05rem;font-weight:900;color:#111827;line-height:1.15}
-.edb-mono{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums}
+/* ── Hero ───────────────────────────────────────────────────── */
+.edb-hero {
+    background:linear-gradient(135deg,#111827 0%,#0b1220 55%,#111827 100%);
+    border-radius:18px; padding:22px 24px; margin-top:24px; margin-bottom:18px;
+    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    position:relative; overflow:hidden;
+}
+.edb-hero::before { content:''; position:absolute; top:-70px; right:-70px; width:260px; height:260px; border-radius:50%; background:rgba(200,41,42,0.18); pointer-events:none; }
+.edb-hero::after  { content:''; position:absolute; bottom:-90px; left:-90px; width:260px; height:260px; border-radius:50%; background:rgba(2,132,199,0.14); pointer-events:none; }
+.edb-hero-left  { position:relative; z-index:1; }
+.edb-hero-right { position:relative; z-index:1; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.edb-title { font-size:1.25rem; font-weight:900; color:#fff; margin:0 0 6px; letter-spacing:-0.02em; }
+.edb-sub   { font-size:.82rem; color:#9ca3af; margin:0; }
+.edb-chip  { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid rgba(255,255,255,0.14); border-radius:999px; color:#e5e7eb; background:rgba(255,255,255,0.06); font-size:.75rem; }
+.edb-btn {
+    display:inline-flex; align-items:center; gap:10px; padding:11px 18px;
+    background:#c8292a; color:#fff; border:none; border-radius:12px;
+    font-family:'Sora',sans-serif; font-size:.86rem; font-weight:900; cursor:pointer;
+    transition:background .15s,box-shadow .15s,transform .15s; text-decoration:none;
+    box-shadow:0 4px 20px rgba(200,41,42,.5); white-space:nowrap;
+}
+.edb-btn:hover { background:#a81f20; color:#fff; box-shadow:0 10px 34px rgba(200,41,42,.62); transform:translateY(-1px); }
 
-/* Keep your existing dashboard styles but make them feel tighter */
-.kt-welcome-banner{background:linear-gradient(135deg,#111827 0%,#0b1220 100%)!important;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.08)}
-.kt-welcome-banner:before{content:'';position:absolute;top:-70px;right:-70px;width:260px;height:260px;border-radius:50%;background:rgba(200,41,42,0.18);pointer-events:none}
-.kt-welcome-title{font-weight:900!important}
-.scan-action-card{border-radius:16px!important}
+/* ── Stat cards ─────────────────────────────────────────────── */
+.edb-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:18px; }
+@media(max-width:700px) { .edb-stats { grid-template-columns:1fr; } }
+
+.edb-stat {
+    background:rgba(255,255,255,0.95); backdrop-filter:blur(6px);
+    border:1px solid rgba(229,231,235,0.9); border-radius:16px;
+    padding:20px 22px; display:flex; gap:14px; align-items:flex-start;
+    position:relative; overflow:hidden;
+    box-shadow:0 10px 30px rgba(17,24,39,0.06);
+    transition:box-shadow .15s, transform .15s;
+}
+.edb-stat:hover { box-shadow:0 14px 36px rgba(17,24,39,0.11); transform:translateY(-2px); }
+.edb-stat::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 14px 14px; }
+.edb-stat.s-amber::after { background:#d97706; }
+.edb-stat.s-green::after { background:#16a34a; }
+
+.edb-ico { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.edb-stat.s-amber .edb-ico { background:#fffbeb; color:#d97706; }
+.edb-stat.s-green .edb-ico { background:#f0fdf4; color:#16a34a; }
+
+.edb-stat-lbl { font-size:.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:#9ca3af; margin-bottom:5px; }
+.edb-stat-val { font-size:1.05rem; font-weight:900; color:#111827; line-height:1.2; font-family:'DM Mono',monospace; font-variant-numeric:tabular-nums; }
+.edb-stat-sub { font-size:.72rem; color:#9ca3af; margin-top:5px; }
+
+/* ── Layout columns ─────────────────────────────────────────── */
+.edb-two-col { display:grid; grid-template-columns:1fr 340px; gap:16px; align-items:start; }
+@media(max-width:960px) { .edb-two-col { grid-template-columns:1fr; } }
+
+/* ── Cards ──────────────────────────────────────────────────── */
+.edb-card { background:rgba(255,255,255,0.95); backdrop-filter:blur(6px); border:1px solid rgba(229,231,235,0.9); border-radius:16px; overflow:hidden; box-shadow:0 10px 30px rgba(17,24,39,0.06); margin-bottom:16px; }
+.edb-card:last-child { margin-bottom:0; }
+.edb-card-head { padding:14px 18px; border-bottom:1px solid #f3f4f6; display:flex; align-items:center; gap:10px; }
+.edb-card-title { font-size:.82rem; font-weight:800; color:#111827; margin:0; display:flex; align-items:center; gap:8px; }
+.edb-card-dot { width:7px; height:7px; border-radius:50%; background:#c8292a; display:inline-block; flex-shrink:0; }
+.edb-card-body { padding:18px; }
+
+/* ── Scan action ────────────────────────────────────────────── */
+.edb-scan-btn {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px; padding:28px 20px; border-radius:14px; text-decoration:none;
+    background:linear-gradient(135deg,#fff5f5,#fff0f0);
+    border:2px dashed rgba(200,41,42,0.35);
+    transition:all .18s; text-align:center;
+}
+.edb-scan-btn:hover { background:linear-gradient(135deg,#c8292a,#a81f20); border-color:transparent; transform:translateY(-2px); box-shadow:0 10px 28px rgba(200,41,42,0.35); }
+.edb-scan-icon { color:#c8292a; transition:color .18s; }
+.edb-scan-btn:hover .edb-scan-icon { color:#fff; }
+.edb-scan-label { font-size:.88rem; font-weight:800; color:#c8292a; transition:color .18s; }
+.edb-scan-btn:hover .edb-scan-label { color:#fff; }
+.edb-scan-sub { font-size:.74rem; color:#9ca3af; transition:color .18s; }
+.edb-scan-btn:hover .edb-scan-sub { color:rgba(255,255,255,0.75); }
+
+/* ── Last log panel ─────────────────────────────────────────── */
+.edb-lastlog-panel { background:#f8f9fb; border-radius:12px; padding:16px 18px; display:flex; flex-direction:column; justify-content:center; height:100%; }
+.edb-lastlog-lbl { font-size:.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:#9ca3af; margin-bottom:8px; }
+.edb-lastlog-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.edb-lastlog-time { font-family:'DM Mono',monospace; font-size:1.1rem; font-weight:700; color:#111827; }
+.edb-lastlog-hint { font-size:.74rem; color:#9ca3af; margin-top:10px; line-height:1.55; }
+
+/* ── Badges ─────────────────────────────────────────────────── */
+.edb-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+.edb-badge.in   { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+.edb-badge.out  { background:#fffbeb; color:#b45309; border:1px solid #fde68a; }
+.edb-badge.none { background:#f3f4f6; color:#6b7280; border:1px solid #e5e7eb; }
+
+/* ── Profile sidebar ────────────────────────────────────────── */
+.edb-kv { display:grid; grid-template-columns:110px 1fr; gap:10px 14px; align-items:center; }
+.edb-k { font-size:.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:#9ca3af; }
+.edb-v { font-size:.845rem; font-weight:700; color:#111827; }
+.edb-divider { height:1px; background:#f3f4f6; margin:12px 0; }
+
+/* ── Tips ───────────────────────────────────────────────────── */
+.edb-tips-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+.edb-tips-item { display:flex; align-items:flex-start; gap:10px; }
+.edb-tips-num { width:22px; height:22px; border-radius:50%; background:#111827; color:#fff; font-size:.68rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.edb-tips-text { font-size:.8rem; color:#374151; line-height:1.55; }
+.edb-tips-text strong { color:#111827; }
+.edb-tips-warn { color:#c8292a; font-weight:700; }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid edb-page">
+<div class="edb-page edb-wrap">
     <div class="edb-backdrop"><div class="edb-grid"></div></div>
     <div class="edb-content">
 
+    {{-- ── Hero ── --}}
     <div class="edb-hero">
         <div class="edb-hero-left">
-            <h1 class="edb-title">Dashboard</h1>
-            <p class="edb-sub">Quick attendance actions, today’s logs, and your profile snapshot.</p>
+            <h1 class="edb-title">Employee Dashboard</h1>
+            <p class="edb-sub">Your attendance overview and quick actions for today.</p>
             <div class="d-flex flex-wrap gap-2 mt-2">
-                <span class="edb-chip"><i class="feather-calendar"></i> {{ now()->format('l, F d, Y') }}</span>
-                <span class="edb-chip"><i class="feather-bell"></i> Stay updated</span>
+                <span class="edb-chip">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    {{ now()->format('l, F d, Y') }}
+                </span>
+                <span class="edb-chip">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+                    {{ now()->format('h:i A') }}
+                </span>
             </div>
         </div>
         <div class="edb-hero-right">
             <a class="edb-btn" href="{{ route('attendance.scan') }}">
-                <i class="feather-camera"></i>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9V5a2 2 0 012-2h4M3 15v4a2 2 0 002 2h4m6-18h4a2 2 0 012 2v4m0 6v4a2 2 0 01-2 2h-4"/></svg>
                 Scan QR Attendance
             </a>
         </div>
     </div>
 
+    {{-- ── Stat cards ── --}}
     <div class="edb-stats">
         <div class="edb-stat s-amber">
-            <div class="edb-ico"><i class="feather-clock"></i></div>
-            <div>
-                <div class="edb-lbl">Current status</div>
-                <div class="edb-val"><span id="current-status" class="edb-mono">Loading…</span></div>
-                <div class="text-muted" style="font-size:.73rem;margin-top:4px;">based on your last log</div>
+            <div class="edb-ico">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+            </div>
+            <div style="flex:1;">
+                <div class="edb-stat-lbl">Current Status</div>
+                <div class="edb-stat-val"><span id="current-status">—</span></div>
+                <div class="edb-stat-sub">Based on your most recent log</div>
             </div>
         </div>
         <div class="edb-stat s-green">
-            <div class="edb-ico"><i class="feather-log-in"></i></div>
-            <div>
-                <div class="edb-lbl">Last log</div>
-                <div class="edb-val edb-mono"><span id="last-log-badge">--</span> <span id="last-log-time">--:--</span></div>
-                <div class="text-muted" style="font-size:.73rem;margin-top:4px;">today</div>
+            <div class="edb-ico">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14"/></svg>
             </div>
-        </div>
-        <div class="edb-stat s-blue">
-            <div class="edb-ico"><i class="feather-list"></i></div>
-            <div>
-                <div class="edb-lbl">Today’s logs</div>
-                <div class="edb-val"><span class="edb-mono" id="logs-count">—</span></div>
-                <div class="text-muted" style="font-size:.73rem;margin-top:4px;">entries recorded</div>
+            <div style="flex:1;">
+                <div class="edb-stat-lbl">Last Log</div>
+                <div class="edb-stat-val">
+                    <span id="last-log-badge-stat">—</span>
+                    <span id="last-log-time-stat" style="font-size:.88rem;color:#6b7280;margin-left:6px;font-family:'DM Mono',monospace;"></span>
+                </div>
+                <div class="edb-stat-sub">Most recent attendance entry today</div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
+    {{-- ── Two-column layout ── --}}
+    <div class="edb-two-col">
 
-        {{-- Left Column --}}
-        <div class="col-lg-8">
-
-            {{-- Attendance Action --}}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="feather-clock me-2"></i>Attendance
-                    </h5>
+        {{-- Left: Attendance card --}}
+        <div>
+            <div class="edb-card">
+                <div class="edb-card-head">
+                    <span class="edb-card-title">
+                        <span class="edb-card-dot"></span>
+                        Attendance
+                    </span>
                 </div>
-                <div class="card-body">
+                <div class="edb-card-body">
                     <div class="row g-3 align-items-stretch">
                         <div class="col-md-6">
-                            <a href="{{ route('attendance.scan') }}"
-                                class="scan-action-card d-flex flex-column align-items-center justify-content-center text-decoration-none p-4 rounded-3 h-100">
-                                <i class="feather-camera scan-action-icon mb-2"></i>
-                                <strong class="scan-action-title">Scan QR Code</strong>
-                                <small class="scan-action-sub mt-1">Log time in / time out</small>
+                            <a href="{{ route('attendance.scan') }}" class="edb-scan-btn h-100">
+                                <svg class="edb-scan-icon" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9V5a2 2 0 012-2h4M3 15v4a2 2 0 002 2h4m6-18h4a2 2 0 012 2v4m0 6v4a2 2 0 01-2 2h-4"/></svg>
+                                <span class="edb-scan-label">Scan QR Code</span>
+                                <span class="edb-scan-sub">Tap to log time in or time out</span>
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <div class="p-4 rounded-3 h-100 d-flex flex-column justify-content-center"
-                                style="background:#f4f5f7;">
-                                <div class="fs-12 fw-medium text-muted mb-2">Last Recorded Log</div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span id="last-log-badge" class="badge bg-secondary">--</span>
-                                    <span id="last-log-time" class="fw-semibold text-dark">--:--</span>
+                            <div class="edb-lastlog-panel h-100">
+                                <div class="edb-lastlog-lbl">Last Recorded Log</div>
+                                <div class="edb-lastlog-row">
+                                    <span id="last-log-badge">—</span>
+                                    <span id="last-log-time" class="edb-lastlog-time"></span>
                                 </div>
-                                <small class="text-muted" style="font-size:.78rem;">Scan the QR code on the attendance monitor to log your attendance.</small>
+                                <div class="edb-lastlog-hint">Use the QR scanner on the attendance monitor to record your time in or time out.</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            {{-- Today's Log --}}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="feather-list me-2"></i>Today's Attendance Log
-                    </h5>
-                </div>
-                <div class="card-body" id="attendance-logs">
-                    <div class="text-center py-3">
-                        <i class="feather-loader d-block mb-2" style="font-size:28px; opacity:.3;"></i>
-                        <p class="text-muted mb-0" style="font-size:.845rem;">Loading attendance logs...</p>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
-        {{-- Right Column --}}
-        <div class="col-lg-4">
+        {{-- Right: Profile + Tips --}}
+        <div>
 
             {{-- My Profile --}}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="feather-user me-2"></i>My Profile
-                    </h5>
+            <div class="edb-card">
+                <div class="edb-card-head">
+                    <span class="edb-card-title">
+                        <span class="edb-card-dot"></span>
+                        My Profile
+                    </span>
                 </div>
-                <div class="card-body">
-                    @if (auth()->user() && auth()->user()->salary_rate)
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="fs-12 fw-medium text-muted mb-1">Full Name</div>
-                            <div class="fw-semibold text-dark fs-12">{{ auth()->user()->name }}</div>
-                        </div>
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="fs-12 fw-medium text-muted mb-1">Position</div>
-                            <div class="text-dark fs-12">{{ auth()->user()->position }}</div>
-                        </div>
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="fs-12 fw-medium text-muted mb-1">Department</div>
-                            <div class="text-dark fs-12">{{ auth()->user()->department ?? 'N/A' }}</div>
-                        </div>
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="fs-12 fw-medium text-muted mb-1">Employment Status</div>
-                            <div class="mt-1">
-                                @if (auth()->user()->status === 'active')
-                                    <span class="badge bg-soft-success text-success">Active</span>
+                <div class="edb-card-body">
+                    @php $u = auth()->user(); @endphp
+                    @if($u && $u->salary_rate)
+                        <div class="edb-kv">
+                            <span class="edb-k">Full Name</span>
+                            <span class="edb-v">{{ $u->first_name }} {{ $u->last_name }}</span>
+                            <span class="edb-k">Position</span>
+                            <span class="edb-v">{{ $u->position ?? '—' }}</span>
+                            <span class="edb-k">Department</span>
+                            <span class="edb-v">{{ $u->department ?? '—' }}</span>
+                            <span class="edb-k">Status</span>
+                            <span class="edb-v">
+                                @if($u->status === 'active')
+                                    <span class="edb-badge in">Active</span>
                                 @else
-                                    <span class="badge bg-soft-danger text-danger">Inactive</span>
+                                    <span class="edb-badge none">Inactive</span>
                                 @endif
-                            </div>
-                        </div>
-                        <div>
-                            <div class="fs-12 fw-medium text-muted mb-1">Date Hired</div>
-                            <div class="text-dark fs-12">{{ auth()->user()->date_of_hire ? auth()->user()->date_of_hire->format('M d, Y') : 'N/A' }}</div>
+                            </span>
+                            <span class="edb-k">Date Hired</span>
+                            <span class="edb-v">{{ $u->date_of_hire ? $u->date_of_hire->format('M d, Y') : '—' }}</span>
                         </div>
                     @else
-                        <p class="text-muted mb-0" style="font-size:.845rem;">No employee profile linked to this account.</p>
+                        <p style="font-size:.82rem;color:#9ca3af;margin:0;">No employee profile is linked to this account.</p>
                     @endif
                 </div>
             </div>
 
-            {{-- Quick Tips --}}
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="feather-info me-2"></i>Quick Tips
-                    </h5>
+            {{-- Attendance Guidelines --}}
+            <div class="edb-card">
+                <div class="edb-card-head">
+                    <span class="edb-card-title">
+                        <span class="edb-card-dot"></span>
+                        Attendance Guidelines
+                    </span>
                 </div>
-                <div class="card-body">
-                    <ol class="att-steps mb-0">
-                        <li>Scan QR code upon arrival for <strong>time in</strong></li>
-                        <li>Scan again before leaving for <strong>time out</strong></li>
-                        <li>Keep your device camera accessible</li>
-                        <li><span class="text-warning fw-semibold">Report</span> any issues to HR immediately</li>
-                    </ol>
+                <div class="edb-card-body">
+                    <ul class="edb-tips-list">
+                        <li class="edb-tips-item">
+                            <span class="edb-tips-num">1</span>
+                            <span class="edb-tips-text">Scan the QR code upon arrival to record your <strong>time in</strong>.</span>
+                        </li>
+                        <li class="edb-tips-item">
+                            <span class="edb-tips-num">2</span>
+                            <span class="edb-tips-text">Scan again before leaving to record your <strong>time out</strong>.</span>
+                        </li>
+                        <li class="edb-tips-item">
+                            <span class="edb-tips-num">3</span>
+                            <span class="edb-tips-text">Ensure your device camera is accessible and the QR code is clearly visible when scanning.</span>
+                        </li>
+                        <li class="edb-tips-item">
+                            <span class="edb-tips-num">4</span>
+                            <span class="edb-tips-text"><span class="edb-tips-warn">Immediately report</span> any attendance discrepancies or scanning issues to the HR department.</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
         </div>
-    </div>
-</div>
+    </div>{{-- end two-col --}}
+
+    </div>{{-- end edb-content --}}
+</div>{{-- end edb-page --}}
 
 <script>
 window.addEventListener('load', async () => {
-    const statusEl = document.getElementById('current-status');
-    const badgeEl  = document.getElementById('last-log-badge');
-    const timeEl   = document.getElementById('last-log-time');
-    const logsEl   = document.getElementById('attendance-logs');
-    const logsCountEl = document.getElementById('logs-count');
+    const statusEl    = document.getElementById('current-status');
+    const badgeEl     = document.getElementById('last-log-badge');
+    const timeEl      = document.getElementById('last-log-time');
+    const badgeStatEl = document.getElementById('last-log-badge-stat');
+    const timeStatEl  = document.getElementById('last-log-time-stat');
+
+    function makeBadge(type) {
+        if (!type) return '<span class="edb-badge none">No log yet</span>';
+        const isIn = type === 'time_in';
+        return `<span class="edb-badge ${isIn ? 'in' : 'out'}">${isIn ? 'Time In' : 'Time Out'}</span>`;
+    }
 
     try {
         const response = await fetch("{{ route('attendance.lastlog') }}", {
             headers: { 'Accept': 'application/json' }
         });
-
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
         const data = await response.json();
 
         if (data && data.type) {
             const isIn = data.type === 'time_in';
-            statusEl.textContent = isIn ? 'TIMED IN' : 'TIMED OUT';
-            statusEl.className   = `badge fs-12 px-3 py-2 bg-${isIn ? 'success' : 'warning'}`;
-            badgeEl.textContent  = data.type.replace('_', ' ').toUpperCase();
-            badgeEl.className    = `badge bg-${isIn ? 'success' : 'warning'}`;
-            timeEl.textContent   = data.time ?? '';
+            statusEl.innerHTML    = isIn ? '<span class="edb-badge in">Timed In</span>' : '<span class="edb-badge out">Timed Out</span>';
+            badgeStatEl.innerHTML = makeBadge(data.type);
+            timeStatEl.textContent = data.time ?? '';
+            badgeEl.innerHTML     = makeBadge(data.type);
+            timeEl.textContent    = data.time ?? '';
         } else {
-            statusEl.textContent = 'NOT LOGGED';
-            statusEl.className   = 'badge fs-12 px-3 py-2 bg-danger';
-            badgeEl.textContent  = 'No log yet';
-            timeEl.textContent   = '';
+            statusEl.innerHTML    = '<span class="edb-badge none">Not Logged</span>';
+            badgeStatEl.innerHTML = makeBadge(null);
+            badgeEl.innerHTML     = makeBadge(null);
         }
-
-        if (data.logs && data.logs.length > 0) {
-            if (logsCountEl) logsCountEl.textContent = data.logs.length;
-            const rows = data.logs.map(log => {
-                const isLogIn   = log.type === 'time_in';
-                const badgeCls  = isLogIn ? 'bg-success' : 'bg-warning';
-                const label     = log.type.replace('_', ' ').toUpperCase();
-                const iconClass = isLogIn ? 'feather-log-in' : 'feather-log-out';
-                const iconColor = isLogIn ? '#16a34a' : '#d97706';
-                return `
-                    <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="${iconClass}" style="font-size:15px;color:${iconColor};"></i>
-                            <span class="badge ${badgeCls}">${label}</span>
-                        </div>
-                        <span class="fw-medium fs-12">${log.time}</span>
-                    </div>`;
-            }).join('');
-            logsEl.innerHTML = `<div>${rows}</div>`;
-        } else {
-            if (logsCountEl) logsCountEl.textContent = 0;
-            logsEl.innerHTML = `
-                <div class="text-center py-4">
-                    <i class="feather-clock d-block mb-2" style="font-size:28px;opacity:.25;"></i>
-                    <p class="text-muted mb-0" style="font-size:.845rem;">No attendance logged yet today.</p>
-                </div>`;
-        }
-
     } catch (err) {
         console.error('Attendance fetch error:', err);
-        statusEl.textContent = 'ERROR';
-        statusEl.className   = 'badge fs-12 px-3 py-2 bg-danger';
-        badgeEl.textContent  = 'Error';
-        timeEl.textContent   = '';
-        logsEl.innerHTML = `
-            <div class="text-center py-4">
-                <i class="feather-alert-circle d-block mb-2 text-danger" style="font-size:28px;"></i>
-                <p class="text-muted mb-0" style="font-size:.845rem;">Could not load attendance data. Please refresh.</p>
-            </div>`;
+        const errBadge = '<span class="edb-badge none">Error</span>';
+        statusEl.innerHTML    = errBadge;
+        badgeStatEl.innerHTML = errBadge;
+        badgeEl.innerHTML     = errBadge;
     }
 });
 </script>
-
-<style>
-/* Welcome banner — plain div, no .card/.card-body, theme JS ignores it */
-.kt-welcome-banner {
-    background: linear-gradient(135deg, #cc3d38 0%, #530a0a 100%);
-    border-radius: 16px;
-    padding: 24px;
-}
-.kt-welcome-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #fff !important;
-    margin-bottom: 4px;
-}
-.kt-welcome-sub {
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.7) !important;
-    margin-bottom: 0;
-}
-
-.scan-action-card {
-    background: #fdf2f2;
-    border: 2px solid #cc3d38;
-    transition: background 0.15s;
-}
-.scan-action-card:hover { background: #cc3d38; }
-.scan-action-icon {
-    font-size: 36px;
-    color: #cc3d38;
-    transition: color 0.15s;
-}
-.scan-action-card:hover .scan-action-icon { color: #fff; }
-.scan-action-title {
-    font-size: 0.875rem;
-    color: #cc3d38;
-    transition: color 0.15s;
-}
-.scan-action-card:hover .scan-action-title { color: #fff; }
-.scan-action-sub {
-    font-size: 0.78rem;
-    color: #6c757d;
-    transition: color 0.15s;
-}
-.scan-action-card:hover .scan-action-sub { color: rgba(255,255,255,0.8); }
-</style>
 @endsection

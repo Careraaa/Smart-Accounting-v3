@@ -42,7 +42,7 @@
             <div class="pf-card-body">
                 <form action="{{ route('employee.profile.update') }}" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf
-                    @method('PUT')
+                    @method('PATCH')
 
                     @include('partials.employee.personal', ['readOnly' => false, 'isEdit' => true])
 

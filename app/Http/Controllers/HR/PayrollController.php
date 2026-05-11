@@ -222,6 +222,51 @@ class PayrollController extends Controller
         return view('hr.payroll.batch.payslips', compact('batch'));
     }
 
+    public function batchAddDepartment(Request $request, PayrollBatch $batch)
+    {
+        abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+
+        $validated = $request->validate([
+            'department' => 'required|in:Admin,Operation',
+        ]);
+
+        $periodStart = Carbon::parse($batch->period_start);
+        $periodEnd   = Carbon::parse($batch->period_end);
+
+        // Get all active employees in the selected department not yet in this batch period
+        $employees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+            ->where('status', 'active')
+            ->where('department', $validated['department'])
+            ->whereNotIn('id', function ($q) use ($periodStart, $periodEnd) {
+                $q->select('user_id')
+                    ->from('payrolls')
+                    ->whereDate('payroll_period_start', $periodStart->toDateString())
+                    ->whereDate('payroll_period_end', $periodEnd->toDateString());
+            })
+            ->get();
+
+        if ($employees->isEmpty()) {
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('info', "All {$validated['department']} employees already have payroll for this period.");
+        }
+
+        $added = 0;
+        foreach ($employees as $employee) {
+            $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
+            $payroll->forceFill([
+                'batch_id' => $batch->id,
+                'status'   => 'draft',
+            ])->save();
+            PayrollDeductionService::applyLoanDeductions($payroll);
+            $added++;
+        }
+
+        return redirect()
+            ->route('payroll.batch.confirm', $batch)
+            ->with('success', "{$added} {$validated['department']} employee" . ($added !== 1 ? 's' : '') . " added to batch.");
+    }
+
     public function batchAddEmployee(Request $request, PayrollBatch $batch)
     {
         abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
@@ -382,7 +427,7 @@ class PayrollController extends Controller
             'finalized_at' => now(),
         ]);
 
-        return redirect()->route('payroll.batch.confirm', $batch)->with('success', 'Payroll batch submitted to accounting. Records are now locked.');
+        return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll batch submitted to accounting. Records are now locked.');
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -399,7 +444,7 @@ class PayrollController extends Controller
             PayrollNotification::payrollCreated($payroll);
         }
 
-        return redirect()->route('payroll.batch.confirm', $batch)->with('success', 'Payroll batch submitted for approval.');
+        return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll batch submitted for approval.');
     }
 
     public function batchReopen(PayrollBatch $batch)

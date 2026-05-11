@@ -45,6 +45,7 @@ class ProfileController extends Controller
             'last_name'               => 'required|string|max:100',
             'email'                   => 'nullable|email|unique:users,email,' . $employee->id,
             'phone'                   => ['required', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+            'gender'                  => 'nullable|string|in:male,female,prefer_not_to_say',
             'civil_status'            => 'nullable|string|max:50',
             'spouse_name'             => 'nullable|string|max:150',
             'date_of_birth'           => 'nullable|date',
@@ -70,8 +71,17 @@ class ProfileController extends Controller
         // Normalize phone number
         $validated['phone'] = $this->normalizePhone($validated['phone']);
 
-        // Assemble address
-        $validated['address'] = $this->assembleAddress($request);
+        // Assemble address as JSON (matches User model's address accessors)
+        $validated['address'] = json_encode([
+            'street'   => $request->input('address_street', ''),
+            'barangay' => $request->input('address_barangay', ''),
+            'city'     => $request->input('address_city', ''),
+            'province' => $request->input('address_province', ''),
+        ]);
+
+        // Remove virtual address sub-fields — they are not real DB columns
+        unset($validated['address_street'], $validated['address_barangay'],
+              $validated['address_city'], $validated['address_province']);
 
         // Update the employee
         $employee->update($validated);

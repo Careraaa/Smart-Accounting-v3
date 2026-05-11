@@ -136,6 +136,18 @@
 .prl-add-emp-card select { min-width:280px;max-width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:.82rem;color:#374151;background:#f9fafb; }
 .prl-add-emp-btn { display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#c8292a;color:#fff;border:0;border-radius:8px;font-size:.8rem;font-weight:700; }
 .prl-add-emp-btn:hover { background:#a81f20; }
+
+/* ── Bulk dept add ──────────────────────────────────────────── */
+.prl-bulk-dept-select {
+    padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:.82rem;
+    color:#374151;background:#f9fafb;min-width:180px;font-family:'Sora',sans-serif;
+}
+.prl-bulk-dept-btn {
+    display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
+    background:#1d4ed8;color:#fff;border:0;border-radius:8px;font-size:.8rem;font-weight:700;
+    cursor:pointer;transition:background 0.15s;
+}
+.prl-bulk-dept-btn:hover { background:#1e40af; }
 </style>
 @endpush
 
@@ -238,7 +250,8 @@
 
     @if($batch->isEditable())
     <div class="prl-add-emp-card">
-        <div style="font-size:.78rem;color:#6b7280;font-weight:700;">Add employee to this batch</div>
+        {{-- Individual add --}}
+        <div style="font-size:.78rem;color:#6b7280;font-weight:700;width:100%;">Add employee to this batch</div>
         <form action="{{ route('payroll.batch.add-employee', $batch) }}" method="POST" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             @csrf
             <select name="user_id" required>
@@ -252,6 +265,25 @@
                 Add Employee
             </button>
         </form>
+
+        {{-- Divider --}}
+        <div style="width:100%;height:1px;background:#f3f4f6;margin:4px 0;"></div>
+
+        {{-- Bulk add by department --}}
+        <div style="font-size:.78rem;color:#6b7280;font-weight:700;width:100%;">Add all employees by department</div>
+        <form action="{{ route('payroll.batch.add-department', $batch) }}" method="POST" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            @csrf
+            <select name="department" required class="prl-bulk-dept-select">
+                <option value="">Select department...</option>
+                <option value="Admin">Admin</option>
+                <option value="Operation">Operation</option>
+            </select>
+            <button type="submit" class="prl-bulk-dept-btn">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Add Department
+            </button>
+        </form>
+
         @if($availableEmployees->isEmpty())
             <span style="font-size:.75rem;color:#9ca3af;">All eligible employees already have payroll for this period.</span>
         @endif

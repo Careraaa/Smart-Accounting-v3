@@ -187,6 +187,13 @@ class Notification extends Model
                 if ($isAccountant) {
                     return null;
                 }
+                // Route employees to their own leave page; HR/superadmin to HR leave page
+                if ($authUser && $authUser->role === 'employee') {
+                    if ($data['leave_id'] ?? null) {
+                        return route('employee.leaves.show', ['leave' => $data['leave_id']]);
+                    }
+                    return route('employee.leaves.index');
+                }
                 if ($data['leave_id'] ?? null) {
                     return route('leave.show', ['leave' => $data['leave_id']]);
                 }
@@ -240,16 +247,29 @@ class Notification extends Model
 
             // Cash advance related notifications
             case 'cash_advance_pending':
+                // Accountants/superadmins see the receivables page
+                return route('payroll.receivables.index', ['tab' => 'cash_advances']);
+
             case 'cash_advance_submitted':
             case 'cash_advance_approved':
             case 'cash_advance_rejected':
+                // Employees go to their own cash advances page
+                if ($authUser && $authUser->role === 'employee') {
+                    return route('employee.cash-advances.index');
+                }
                 return route('payroll.receivables.index', ['tab' => 'cash_advances']);
 
             // Salary loan related notifications
             case 'salary_loan_pending':
+                return route('payroll.receivables.index', ['tab' => 'salary_loans']);
+
             case 'salary_loan_submitted':
             case 'salary_loan_approved':
             case 'salary_loan_rejected':
+                // Employees go to their own salary loans page
+                if ($authUser && $authUser->role === 'employee') {
+                    return route('employee.salary-loans.index');
+                }
                 return route('payroll.receivables.index', ['tab' => 'salary_loans']);
 
             // Default: no action

@@ -280,6 +280,7 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::get('/payroll/batch/{batch}/payslips', [PayrollController::class, 'batchPayslips'])->name('payroll.batch.payslips');
         Route::get('/payroll/batch/{batch}/confirm', [PayrollController::class, 'batchConfirm'])->name('payroll.batch.confirm');
         Route::post('/payroll/batch/{batch}/employee', [PayrollController::class, 'batchAddEmployee'])->name('payroll.batch.add-employee');
+        Route::post('/payroll/batch/{batch}/department', [PayrollController::class, 'batchAddDepartment'])->name('payroll.batch.add-department');
         Route::get('/payroll/batch/{batch}/employee/{payroll}/edit', [PayrollController::class, 'batchEditEmployee'])->name('payroll.batch.edit-employee');
         Route::put('/payroll/batch/{batch}/employee/{payroll}', [PayrollController::class, 'batchUpdateEmployee'])->name('payroll.batch.update-employee');
         Route::post('/payroll/batch/{batch}/employee/{payroll}/prepare', [PayrollController::class, 'batchMarkPrepared'])->name('payroll.batch.prepare-employee');

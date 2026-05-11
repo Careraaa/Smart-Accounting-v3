@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
 class AttendanceSeeder extends Seeder
@@ -11,16 +12,21 @@ class AttendanceSeeder extends Seeder
     // Employee user IDs only — matches Users_Seeder exactly
     private array $employeeIds = [6, 7, 8, 9, 10];
 
-    // PH public holidays within Mar 16 – Mar 31 2026
-    // None fall in this window, but keeping the array for safety
-    private array $holidays = [];
+    // PH public holidays within Apr 1 – May 5 2026
+    private array $holidays = [
+        '2026-04-02', // Maundy Thursday
+        '2026-04-03', // Good Friday
+        '2026-04-04', // Black Saturday (special non-working)
+        '2026-04-09', // Araw ng Kagitingan (Day of Valor)
+        '2026-05-01', // Labor Day
+    ];
 
     // Per-employee personality — late/absent = % chance; early_out = % chance of leaving at 4 PM
     private array $personalities = [
-        6 => ['late' =>  8, 'absent' =>  5, 'early_out' => 10], // John Doe         – reliable
-        7 => ['late' => 10, 'absent' =>  6, 'early_out' =>  8], // Angela Fernandez  – mostly on time
-        8 => ['late' =>  3, 'absent' =>  2, 'early_out' =>  5], // Juan Trabaho      – the overachiever
-        9 => ['late' => 30, 'absent' =>  8, 'early_out' => 10], // Maria Halos       – always "on the way"
+        6  => ['late' =>  8, 'absent' =>  5, 'early_out' => 10], // John Doe          – reliable
+        7  => ['late' => 10, 'absent' =>  6, 'early_out' =>  8], // Angela Fernandez  – mostly on time
+        8  => ['late' =>  3, 'absent' =>  2, 'early_out' =>  5], // Juan Trabaho      – the overachiever
+        9  => ['late' => 30, 'absent' =>  8, 'early_out' => 10], // Maria Halos       – always "on the way"
         10 => ['late' =>  5, 'absent' =>  2, 'early_out' => 25], // Carlo Pahinga     – 45-min "quick break" guy
     ];
 
@@ -30,8 +36,8 @@ class AttendanceSeeder extends Seeder
         DB::table('attendance')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // Mar 16 2026 → Mar 31 2026 — matches PayrollBatch::resolvePeriod() when today <= 15th
-        $period  = CarbonPeriod::create('2026-03-16', '2026-03-31');
+        // Apr 1 2026 → May 5 2026
+        $period  = CarbonPeriod::create('2026-04-01', '2026-05-05');
         $records = [];
 
         foreach ($this->employeeIds as $userId) {
@@ -108,6 +114,6 @@ class AttendanceSeeder extends Seeder
             DB::table('attendance')->insert($chunk);
         }
 
-        $this->command->info('AttendanceSeeder: ' . count($records) . ' records inserted (Mar 16–31, 2026).');
+        $this->command->info('AttendanceSeeder: ' . count($records) . ' records inserted (Apr 1 – May 5, 2026).');
     }
 }
