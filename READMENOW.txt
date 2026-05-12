@@ -149,6 +149,8 @@ EMERGENCY MAINTENANCE UNLOCK (DUMB-DOWN)
 
 --------------------------------------------------------------
 
-FRESH SEEDED DATABASE
+CLIENT TESTING SEEDING DATABASE
 1. php artisan migrate:fresh
 2. php artisan db:seed --class=Users_Seeder
+3. php artisan db:seed --class=StatutoryDeductions_Seeder
+4. php artisan db:seed --class=PayrollCutoffScheduleSeeder
