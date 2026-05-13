@@ -95,8 +95,6 @@
 /* Status */
 .prl-status { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
 .prl-status::before { content:'';width:5px;height:5px;border-radius:50%; }
-.prl-status.s-draft     { background:#f3f4f6;color:#6b7280; }
-.prl-status.s-draft::before     { background:#9ca3af; }
 .prl-status.s-pending   { background:#fffbeb;color:#d97706;border:1px solid #fde68a; }
 .prl-status.s-pending::before   { background:#d97706; }
 .prl-status.s-finalized { background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe; }
@@ -224,7 +222,6 @@
         </div>
         <select class="prl-filter-select" id="batchStatusFilter">
             <option value="">All Statuses</option>
-            <option value="draft">Draft</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
             <option value="released">Released</option>
@@ -256,7 +253,7 @@
                             'approved'  => 's-approved',
                             'released', 'paid' => 's-released',
                             'rejected'  => 's-rejected',
-                            default     => 's-draft',
+                            default     => 's-pending',
                         };
                     @endphp
                     <tr data-name="{{ strtolower(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? '')) }}"

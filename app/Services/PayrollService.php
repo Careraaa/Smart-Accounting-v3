@@ -170,8 +170,8 @@ class PayrollService
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
 
-            // ← Respect caller-provided status; fall back to existing status (never re-introduce 'draft')
-            'status' => $extraData['status'] ?? ($payroll->status === 'draft' ? 'prepared' : ($payroll->status ?? 'prepared')),
+            // Respect caller-provided status; fall back to existing status or 'prepared'
+            'status' => $extraData['status'] ?? ($payroll->status ?? 'prepared'),
         ]);
 
         // ── Rebuild allowances from scratch ────────────────────────────────────

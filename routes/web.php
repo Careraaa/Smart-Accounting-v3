@@ -222,6 +222,7 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         });
 
     Route::resource('attendance', AttendanceController::class);
+    Route::get('/attendance/employee/{employee}/calendar', [AttendanceController::class, 'employeeCalendar'])->name('attendance.employee.calendar');
     Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])->name('hr.qr');
     Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])->name('hr.attendance.monitor');
     Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])->name('hr.qr.generate');
@@ -258,6 +259,7 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         ->defaults('status', 'rejected');
 
     Route::resource('overtime', OvertimeUndertimeController::class);
+    Route::get('/overtime/employee/{employee}/calendar', [OvertimeUndertimeController::class, 'employeeCalendar'])->name('overtime.employee.calendar');
     Route::post('/overtime/{overtime}/approve', [OvertimeUndertimeController::class, 'approve'])->name('overtime.approve');
     Route::post('/overtime/{overtime}/reject', [OvertimeUndertimeController::class, 'reject'])->name('overtime.reject');
 
@@ -291,6 +293,8 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::delete('/payroll/batch/{batch}/employee/{payroll}', [PayrollController::class, 'batchRemoveEmployee'])->name('payroll.batch.remove-employee');
         Route::post('/payroll/batch/{batch}/finalize', [PayrollController::class, 'batchFinalize'])->name('payroll.batch.finalize');
         Route::post('/payroll/batch/{batch}/reopen', [PayrollController::class, 'batchReopen'])->name('payroll.batch.reopen');
+        Route::delete('/payroll/batch/{batch}/cancel', [PayrollController::class, 'batchCancel'])->name('payroll.batch.cancel');
+        Route::post('/payroll/batch/{batch}/prepare-all', [PayrollController::class, 'batchPrepareAll'])->name('payroll.batch.prepare-all');
         Route::post('/payroll/batch/{batch}/submit', [PayrollController::class, 'batchSubmit'])->name('payroll.batch.submit');
     });
 
@@ -382,7 +386,7 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
 
     // Batch approval routes (must come before resource route)
-    Route::get('payroll-approval/batch', [PayrollApprovalController::class, 'showBatch'])->name('payroll-approval.batch');
+    Route::get('payroll-approval/batch/{batch}', [PayrollApprovalController::class, 'showBatch'])->name('payroll-approval.batch');
     Route::post('payroll-approval/batch/approve', [PayrollApprovalController::class, 'approveBatch'])->name('payroll-approval.approve-batch');
     Route::post('payroll-approval/batch/reject', [PayrollApprovalController::class, 'rejectBatch'])->name('payroll-approval.reject-batch');
 

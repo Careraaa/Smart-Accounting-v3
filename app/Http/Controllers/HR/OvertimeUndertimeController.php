@@ -13,60 +13,69 @@ class OvertimeUndertimeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = OvertimeUndertime::with('employee');
+        // All employees (excluding system roles), ordered by department then name
+        $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
+            ->orderBy('department')
+            ->orderBy('last_name')
+            ->get();
 
-        if ($request->search) {
-            $query->whereHas('employee', function ($q) use ($request) {
-                $q->where('first_name', 'like', '%' . $request->search . '%')
-                  ->orWhere('last_name', 'like', '%' . $request->search . '%');
-            });
-        }
+        // Per-employee OT/UT summary for the current month
+        $monthStart = now()->startOfMonth();
+        $monthEnd   = now()->endOfMonth();
 
-        if ($request->status && $request->status !== 'all') {
-            $query->where('status', $request->status);
-        }
+        $monthlySummary = OvertimeUndertime::whereBetween('date', [$monthStart, $monthEnd])
+            ->selectRaw('user_id,
+                SUM(CASE WHEN type = "overtime"  THEN hours ELSE 0 END) as ot_hours,
+                SUM(CASE WHEN type = "undertime" THEN hours ELSE 0 END) as ut_hours,
+                COUNT(*) as total_records')
+            ->groupBy('user_id')
+            ->get()
+            ->keyBy('user_id');
 
-        if ($request->type && $request->type !== 'all') {
-            $query->where('type', $request->type);
-        }
-
-        if ($request->start_date) {
-            $query->whereDate('date', '>=', $request->start_date);
-        }
-        if ($request->end_date) {
-            $query->whereDate('date', '<=', $request->end_date);
-        }
-
-        $sortBy = $request->sort_by ?? 'date';
-        $sortOrder = $request->sort_order ?? 'desc';
-        $query->orderBy($sortBy, $sortOrder);
-
-        $overtimeRecords = $query->paginate(10);
-
-        // Statistics (kept as-is for now)
-        $totalRecords = OvertimeUndertime::count();
-        $pendingRecords = OvertimeUndertime::where('status', 'pending')->count();
-        $approvedRecords = OvertimeUndertime::where('status', 'approved')->count();
-        $rejectedRecords = OvertimeUndertime::where('status', 'rejected')->count();
-
-        $overtimeCount = OvertimeUndertime::where('type', 'overtime')->count();
-        $undertimeCount = OvertimeUndertime::where('type', 'undertime')->count();
-
-        $totalOvertimeHours = OvertimeUndertime::where('type', 'overtime')->sum('hours');
+        // Global stats
+        $totalOvertimeHours  = OvertimeUndertime::where('type', 'overtime')->sum('hours');
         $totalUndertimeHours = OvertimeUndertime::where('type', 'undertime')->sum('hours');
+        $overtimeCount       = OvertimeUndertime::where('type', 'overtime')->count();
+        $undertimeCount      = OvertimeUndertime::where('type', 'undertime')->count();
 
         return view('hr.overtime.index', compact(
-            'overtimeRecords',
-            'totalRecords',
-            'pendingRecords',
-            'approvedRecords',
-            'rejectedRecords',
-            'overtimeCount',
-            'undertimeCount',
+            'employees',
+            'monthlySummary',
             'totalOvertimeHours',
             'totalUndertimeHours',
-            'sortBy',
-            'sortOrder'
+            'overtimeCount',
+            'undertimeCount'
+        ));
+    }
+
+    /**
+     * Per-employee OT/UT calendar for a given month.
+     */
+    public function employeeCalendar(Request $request, $employeeId)
+    {
+        $employee = Employee::findOrFail($employeeId);
+
+        $monthParam = $request->query('month');
+        $month = $monthParam
+            ? \Carbon\Carbon::createFromFormat('Y-m', $monthParam)->startOfMonth()
+            : now()->startOfMonth();
+
+        $records = OvertimeUndertime::where('user_id', $employeeId)
+            ->whereBetween('date', [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()])
+            ->orderBy('date')
+            ->get()
+            ->groupBy(fn($r) => $r->date->format('Y-m-d'));
+
+        $prevMonth = $month->copy()->subMonth()->format('Y-m');
+        $nextMonth = $month->copy()->addMonth()->format('Y-m');
+
+        // Month totals
+        $monthOtHours = $records->flatten()->where('type', 'overtime')->sum('hours');
+        $monthUtHours = $records->flatten()->where('type', 'undertime')->sum('hours');
+
+        return view('hr.overtime.calendar', compact(
+            'employee', 'month', 'records', 'prevMonth', 'nextMonth',
+            'monthOtHours', 'monthUtHours'
         ));
     }
 
@@ -105,19 +114,19 @@ class OvertimeUndertimeController extends Controller
             'type'             => $validated['type'],
             'hours'            => $validated['hours'],
             'reason'           => $validated['reason'],
-            'status'           => 'pending',           // default
+            'status'           => 'approved',
+            'approved_by'      => auth()->id(),
             'amount'           => $amount,
             'hourly_rate_used' => $hourlyRate,
         ]);
 
         $overtime->load('employee');
 
-        // Notifications
+        // Notify the employee their record was logged and approved
         OvertimeNotification::submitted($overtime);
-        OvertimeNotification::notifyManagersForApproval($overtime);
 
         return redirect()->route('overtime.index')
-            ->with('success', 'Overtime/Undertime record created successfully.');
+            ->with('success', 'Overtime/Undertime record created and automatically approved.');
     }
 
     public function show(OvertimeUndertime $overtime)
@@ -159,6 +168,8 @@ class OvertimeUndertimeController extends Controller
             'type'             => $validated['type'],
             'hours'            => $validated['hours'],
             'reason'           => $validated['reason'],
+            'status'           => 'approved',
+            'approved_by'      => auth()->id(),
             'amount'           => $amount,
             'hourly_rate_used' => $hourlyRate,
         ]);
@@ -168,7 +179,7 @@ class OvertimeUndertimeController extends Controller
         OvertimeNotification::updated($overtime);
 
         return redirect()->route('overtime.show', $overtime->id)
-            ->with('success', 'Overtime/Undertime record updated successfully.');
+            ->with('success', 'Overtime/Undertime record updated and approved.');
     }
 
     // approve / reject / destroy methods remain the same
