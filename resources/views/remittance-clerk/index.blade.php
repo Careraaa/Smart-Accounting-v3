@@ -5,6 +5,29 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 .rem-dash { font-family: 'Sora', sans-serif; }
 
+/* ── Knight mascot inside hero ── */
+.rem-hero-knight {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 280px;
+    width: auto;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.12;
+    animation: heroKnightChargeRem 4s ease-in-out infinite;
+    transform-origin: center center;
+}
+@keyframes heroKnightChargeRem {
+    0%   { transform: translate(-50%, -50%) translateY(0)     rotate(0deg);    opacity: 0.12; }
+    30%  { transform: translate(-50%, -50%) translateY(-6px)  rotate(-1.5deg); opacity: 0.16; }
+    60%  { transform: translate(-50%, -50%) translateY(-10px) rotate(-0.8deg); opacity: 0.14; }
+    80%  { transform: translate(-50%, -50%) translateY(-4px)  rotate(-2deg);   opacity: 0.17; }
+    100% { transform: translate(-50%, -50%) translateY(0)     rotate(0deg);    opacity: 0.12; }
+}
+
 /* ── Hero ── */
 .rem-hero {
     background: linear-gradient(135deg, #111827 0%, #0b1220 55%, #111827 100%);
@@ -90,6 +113,7 @@
 
     {{-- Hero --}}
     <div class="rem-hero">
+        <img src="{{ asset('images/landscape-knight.png') }}" alt="" class="rem-hero-knight" aria-hidden="true">
         <div class="rem-hero-left">
             <h1>Remittance Dashboard</h1>
             <p>Collections, expenses, and driver activity — live from finalized remittances.</p>
