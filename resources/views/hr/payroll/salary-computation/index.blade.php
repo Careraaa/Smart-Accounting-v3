@@ -1,26 +1,27 @@
-@extends('layouts.layout')
+﻿@extends('layouts.layout')
 
 @push('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
+*, *::before, *::after { box-sizing: border-box; }
 .prl-page { font-family: 'Sora', sans-serif; }
 
+/* ── Topbar ─────────────────────────────────────────────────── */
 .prl-topbar { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
 .prl-topbar-title { font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px; }
 .prl-topbar-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
-.prl-topbar-actions { display:flex;gap:8px;flex-wrap:wrap;align-items:center; }
 
-.prl-btn-sec {
-    display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;
-    border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;
-    font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;
-}
-.prl-btn-sec:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
+/* ── Flash ──────────────────────────────────────────────────── */
+.prl-flash { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:20px;animation:flashIn 0.3s ease; }
+.prl-flash.success { background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d; }
+.prl-flash.error   { background:#fff0f0;border:1px solid #fecaca;color:#c8292a; }
+.prl-flash.info    { background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8; }
+@keyframes flashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
 
+/* ── Stats ──────────────────────────────────────────────────── */
 .prl-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px; }
 @media (max-width:1100px) { .prl-stats { grid-template-columns:repeat(2,1fr); } }
 @media (max-width:600px)  { .prl-stats { grid-template-columns:1fr; } }
-
 .prl-stat { background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px 20px;display:flex;align-items:flex-start;gap:14px;position:relative;overflow:hidden;transition:box-shadow 0.15s; }
 .prl-stat:hover { box-shadow:0 4px 20px rgba(0,0,0,0.07); }
 .prl-stat::after { content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 14px 14px; }
@@ -37,18 +38,18 @@
 .prl-stat-value { font-size:1.6rem;font-weight:800;color:#111827;line-height:1;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace; }
 .prl-stat-sub   { font-size:0.73rem;color:#9ca3af;margin-top:4px; }
 
-/* Generate hero card */
+/* ── Generate hero ──────────────────────────────────────────── */
 .prl-generate-card {
     background:#111827;border-radius:16px;padding:28px 32px;
     display:flex;align-items:center;justify-content:space-between;gap:24px;
-    margin-bottom:24px;flex-wrap:wrap;position:relative;overflow:hidden;
+    margin-bottom:28px;flex-wrap:wrap;position:relative;overflow:hidden;
 }
 .prl-generate-card::before { content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(200,41,42,0.15);pointer-events:none; }
 .prl-generate-left { position:relative;z-index:1; }
 .prl-generate-eyebrow { font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#c8292a;margin-bottom:6px; }
-.prl-generate-title { font-size:1.15rem;font-weight:800;color:#fff;margin:0 0 6px;letter-spacing:-0.02em; }
+.prl-generate-title  { font-size:1.15rem;font-weight:800;color:#fff;margin:0 0 6px;letter-spacing:-0.02em; }
 .prl-generate-period { font-size:0.82rem;color:#6b7280;font-family:'DM Mono',monospace; }
-.prl-generate-right { position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:8px; }
+.prl-generate-right  { position:relative;z-index:1; }
 
 .prl-btn-generate {
     display:inline-flex;align-items:center;gap:10px;padding:13px 28px;background:#c8292a;color:#fff;
@@ -57,95 +58,102 @@
     box-shadow:0 4px 20px rgba(200,41,42,0.5);white-space:nowrap;text-decoration:none;
 }
 .prl-btn-generate:hover { background:#a81f20;color:#fff;box-shadow:0 8px 28px rgba(200,41,42,0.6); }
-.prl-btn-generate.disabled { background:#374151;box-shadow:none;cursor:not-allowed;pointer-events:none; }
 
-.prl-already-badge { font-size:0.72rem;color:#6b7280;display:flex;align-items:center;gap:5px; }
-.prl-already-badge a { color:#c8292a;text-decoration:none;font-weight:700; }
-.prl-already-badge a:hover { text-decoration:underline; }
-
-.prl-two-col { display:grid;grid-template-columns:1fr 360px;gap:16px;align-items:start; }
-@media (max-width:900px) { .prl-two-col { grid-template-columns:1fr; } }
-
-.prl-section-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px; }
-.prl-section-title { font-size:0.88rem;font-weight:700;color:#111827;margin:0;display:flex;align-items:center;gap:8px; }
-.prl-dot { width:8px;height:8px;border-radius:50%;background:#c8292a;display:inline-block; }
-
-.prl-filter-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
+/* ── Filter bar ─────────────────────────────────────────────── */
+.prl-filter-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
 .prl-search-wrap { position:relative;flex:1;min-width:180px; }
-.prl-search-wrap svg { position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none; }
-.prl-search-input { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px 8px 34px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;transition:border-color 0.15s,background 0.15s; }
+.prl-search-wrap svg { position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none; }
+.prl-search-input { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:7px 12px 7px 32px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;transition:border-color 0.15s; }
 .prl-search-input:focus { border-color:#c8292a;background:#fff;box-shadow:0 0 0 3px rgba(200,41,42,0.08); }
-.prl-filter-select { border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#374151;background:#f9fafb;outline:none;cursor:pointer;transition:border-color 0.15s; }
+.prl-filter-select { border:1px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#374151;background:#f9fafb;outline:none;cursor:pointer; }
 .prl-filter-select:focus { border-color:#c8292a; }
 
+/* ── Batch table ─────────────────────────────────────────────── */
 .prl-table-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
+.prl-table-scroll { overflow-x:auto; }
 .prl-table { width:100%;border-collapse:collapse;font-size:0.835rem; }
 .prl-table thead tr { background:#f8f9fb;border-bottom:1px solid #e5e7eb; }
-.prl-table thead th { padding:11px 16px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#6b7280;white-space:nowrap;font-family:'Sora',sans-serif; }
-.prl-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.1s; }
+.prl-table thead th { padding:11px 16px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#6b7280;white-space:nowrap; }
+.prl-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.12s;cursor:pointer; }
 .prl-table tbody tr:last-child { border-bottom:none; }
-.prl-table tbody tr:hover { background:#fafafa; }
-.prl-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
+.prl-table tbody tr:hover { background:#fdf4f4; }
+.prl-table tbody td { padding:13px 16px;color:#374151;vertical-align:middle; }
 
-.prl-emp-cell { display:flex;align-items:center;gap:10px; }
-.prl-emp-avatar { width:32px;height:32px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#6b7280;flex-shrink:0;border:1.5px solid #e5e7eb;text-transform:uppercase; }
-.prl-emp-name { font-weight:600;color:#111827;font-size:0.845rem; }
-.prl-emp-dept { font-size:0.72rem;color:#9ca3af;margin-top:1px; }
+.prl-batch-name { font-weight:700;color:#111827;font-size:0.845rem;line-height:1.2; }
+.prl-batch-sub  { font-size:0.72rem;color:#9ca3af;margin-top:2px;font-family:'DM Mono',monospace; }
 .prl-mono { font-family:'DM Mono',monospace;font-size:0.82rem;font-variant-numeric:tabular-nums; }
-.prl-mono.c-red  { color:#c8292a;font-weight:500; }
-.prl-mono.c-bold { color:#111827;font-weight:600; }
+.prl-mono.bold { color:#111827;font-weight:700; }
 .prl-period-tag { display:inline-block;font-family:'DM Mono',monospace;font-size:0.72rem;color:#6b7280;background:#f3f4f6;padding:2px 8px;border-radius:4px; }
 
+/* Status badges */
 .prl-status { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
 .prl-status::before { content:'';width:5px;height:5px;border-radius:50%; }
-.prl-status.s-draft     { background:#f3f4f6;color:#6b7280; }
-.prl-status.s-draft::before { background:#9ca3af; }
-.prl-status.s-pending   { background:#fffbeb;color:#d97706;border:1px solid #fde68a; }
-.prl-status.s-pending::before { background:#d97706; }
-.prl-status.s-finalized { background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe; }
-.prl-status.s-finalized::before { background:#3b82f6; }
 .prl-status.s-submitted { background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe; }
 .prl-status.s-submitted::before { background:#8b5cf6; }
 .prl-status.s-approved  { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
 .prl-status.s-approved::before { background:#16a34a; }
-.prl-status.s-released  { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
-.prl-status.s-released::before { background:#22c55e; }
 .prl-status.s-rejected  { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }
 .prl-status.s-rejected::before { background:#ef4444; }
 
-.prl-actions { display:flex;align-items:center;gap:5px;justify-content:flex-end; }
-.prl-action-btn { width:30px;height:30px;border-radius:7px;border:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:13px;transition:background 0.13s,color 0.13s;background:#f4f5f7;color:#6b7280;padding:0; }
-.prl-action-btn:hover         { background:#eff6ff;color:#3b82f6; }
-.prl-action-btn.danger:hover  { background:#fff1f2;color:#e11d48; }
-.prl-action-btn.success:hover { background:#f0fdf4;color:#16a34a; }
+/* Action buttons */
+.prl-actions { display:flex;align-items:center;gap:6px;justify-content:flex-end; }
+.prl-action-btn {
+    display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;
+    font-family:'Sora',sans-serif;font-size:0.72rem;font-weight:700;
+    text-decoration:none;border:none;cursor:pointer;transition:all 0.12s;white-space:nowrap;
+}
+.prl-action-btn.edit    { background:#fffbeb;color:#d97706;border:1px solid #fde68a; }
+.prl-action-btn.edit:hover { background:#d97706;color:#fff;border-color:#d97706; }
+.prl-action-btn.reopen  { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }
+.prl-action-btn.reopen:hover { background:#c8292a;color:#fff;border-color:#c8292a; }
+.prl-action-btn.view    { background:#f3f4f6;color:#374151;border:1px solid #e5e7eb; }
+.prl-action-btn.view:hover { background:#111827;color:#fff;border-color:#111827; }
 
-.prl-side-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
-.prl-side-head { padding:14px 18px;border-bottom:1px solid #f3f4f6;font-size:0.82rem;font-weight:700;color:#111827; }
-.prl-batch-item { display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 18px;border-bottom:1px solid #f3f4f6;transition:background 0.1s;text-decoration:none; }
-.prl-batch-item:last-child { border-bottom:none; }
-.prl-batch-item:hover { background:#fafafa; }
-.prl-batch-period { font-family:'DM Mono',monospace;font-size:0.78rem;color:#111827;font-weight:500; }
-.prl-batch-meta   { font-size:0.72rem;color:#9ca3af;margin-top:2px; }
-.prl-batch-empty  { padding:24px 18px;text-align:center;color:#9ca3af;font-size:0.78rem; }
-
+/* Empty state */
 .prl-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 24px;text-align:center; }
-.prl-empty-icon { width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#d1d5db; }
+.prl-empty-icon  { width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#d1d5db; }
 .prl-empty-title { font-size:0.9rem;font-weight:700;color:#374151;margin:0 0 6px; }
 .prl-empty-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
 
-.prl-flash { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:20px;animation:flashIn 0.3s ease; }
-.prl-flash.success { background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d; }
-.prl-flash.error   { background:#fff0f0;border:1px solid #fecaca;color:#c8292a; }
-.prl-flash.info    { background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8; }
-@keyframes flashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
-
-.prl-table-scroll { overflow-x:auto; }
+/* ── Confirmation modal ─────────────────────────────────────── */
+.prl-modal-overlay {
+    position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+    opacity:0;pointer-events:none;transition:opacity 0.2s;
+}
+.prl-modal-overlay.open { opacity:1;pointer-events:all; }
+.prl-modal {
+    background:#fff;border-radius:18px;padding:32px;max-width:440px;width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,0.2);transform:translateY(12px);transition:transform 0.2s;
+}
+.prl-modal-overlay.open .prl-modal { transform:translateY(0); }
+.prl-modal-icon { width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px; }
+.prl-modal-icon.generate { background:#fff0f0;color:#c8292a; }
+.prl-modal-icon.resubmit { background:#fffbeb;color:#d97706; }
+.prl-modal-title { font-size:1.05rem;font-weight:800;color:#111827;text-align:center;margin:0 0 8px;letter-spacing:-0.01em; }
+.prl-modal-body  { font-size:0.82rem;color:#6b7280;text-align:center;margin:0 0 24px;line-height:1.6; }
+.prl-modal-period { display:inline-block;font-family:'DM Mono',monospace;font-size:0.78rem;background:#f3f4f6;padding:4px 12px;border-radius:6px;color:#374151;margin-bottom:16px; }
+.prl-modal-actions { display:flex;gap:10px; }
+.prl-modal-cancel {
+    flex:1;padding:11px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;
+    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:600;cursor:pointer;transition:all 0.12s;
+}
+.prl-modal-cancel:hover { border-color:#c8292a;color:#c8292a; }
+.prl-modal-confirm {
+    flex:1;padding:11px;border:none;border-radius:10px;
+    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;cursor:pointer;transition:all 0.12s;
+}
+.prl-modal-confirm.generate { background:#c8292a;color:#fff; }
+.prl-modal-confirm.generate:hover { background:#a81f20; }
+.prl-modal-confirm.resubmit { background:#d97706;color:#fff; }
+.prl-modal-confirm.resubmit:hover { background:#b45309; }
 </style>
 @endpush
 
 @section('content')
 <div class="prl-page">
 
+    {{-- Flash messages --}}
     @foreach(['success','error','info'] as $t)
         @if(session($t))
         <div class="prl-flash {{ $t }}">
@@ -156,29 +164,47 @@
         @endif
     @endforeach
 
+    {{-- Topbar --}}
     <div class="prl-topbar">
         <div>
             <h1 class="prl-topbar-title">Payroll Management</h1>
-            <p class="prl-topbar-sub">Auto-generate, review, and finalize employee payrolls</p>
+            <p class="prl-topbar-sub">Generate, review, and submit payroll batches for accounting approval</p>
         </div>
     </div>
 
+    {{-- Stats --}}
     <div class="prl-stats">
-        <div class="prl-stat s-red">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg></div>
-            <div><div class="prl-stat-label">Next Cutoff</div><div class="prl-stat-value" style="font-size:1rem;font-family:'Sora',sans-serif;">{{ $nextCutoffDate ? $nextCutoffDate->format('M d, Y') : 'N/A' }}</div><div class="prl-stat-sub">{{ $nextCutoffDate ? $nextCutoffDate->format('l') : '—' }}</div></div>
+        <div class="prl-stat s-blue">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            <div>
+                <div class="prl-stat-label">Total Batches</div>
+                <div class="prl-stat-value">{{ $batches->count() }}</div>
+                <div class="prl-stat-sub">all time</div>
+            </div>
         </div>
         <div class="prl-stat s-amber">
             <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg></div>
-            <div><div class="prl-stat-label">Pending Records</div><div class="prl-stat-value">{{ $payrollCount }}</div><div class="prl-stat-sub">Status = Pending (check Payroll Records table)</div></div>
+            <div>
+                <div class="prl-stat-label">Pending Approval</div>
+                <div class="prl-stat-value">{{ $submittedCount }}</div>
+                <div class="prl-stat-sub">awaiting accountant</div>
+            </div>
         </div>
         <div class="prl-stat s-green">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-            <div><div class="prl-stat-label">Pending Amount</div><div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($totalPayroll,2) }}</div><div class="prl-stat-sub">Sum of net pay for Pending records only</div></div>
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
+            <div>
+                <div class="prl-stat-label">Approved</div>
+                <div class="prl-stat-value">{{ $approvedCount }}</div>
+                <div class="prl-stat-sub">batches approved</div>
+            </div>
         </div>
-        <div class="prl-stat s-blue">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
-            <div><div class="prl-stat-label">Active Employees</div><div class="prl-stat-value">{{ $activeEmployees }}</div><div class="prl-stat-sub">payroll-eligible</div></div>
+        <div class="prl-stat s-red">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></div>
+            <div>
+                <div class="prl-stat-label">Rejected</div>
+                <div class="prl-stat-value">{{ $rejectedCount }}</div>
+                <div class="prl-stat-sub">need resubmission</div>
+            </div>
         </div>
     </div>
 
@@ -186,170 +212,286 @@
     <div class="prl-generate-card">
         <div class="prl-generate-left">
             <div class="prl-generate-eyebrow">
-                @if($batchAlreadyExists)
-                    Batch already generated
-                @elseif($currentDraftBatch)
-                    Draft batch in progress
-                @else
-                    Ready to generate
-                @endif
+                @if($currentPendingBatch) Batch in progress @else Ready to generate @endif
             </div>
             <h2 class="prl-generate-title">
-                @if($batchAlreadyExists)
-                    Payroll Batch Finalized
-                @elseif($currentDraftBatch)
-                    Continue Draft Batch
-                @else
-                    Generate Payroll Batch
-                @endif
+                @if($currentPendingBatch) Continue Pending Batch @else Generate New Payroll Batch @endif
             </h2>
             <div class="prl-generate-period">
                 Period: {{ \Carbon\Carbon::parse($currentPeriod['start'])->format('M d, Y') }} &mdash; {{ \Carbon\Carbon::parse($currentPeriod['end'])->format('M d, Y') }}
             </div>
         </div>
         <div class="prl-generate-right">
-            <form action="{{ route('payroll.batch.generate') }}" method="POST">
-                @csrf
-                <button type="submit" class="prl-btn-generate">
+            @if($currentPendingBatch)
+                <a href="{{ route('payroll.batch.confirm', $currentPendingBatch) }}" class="prl-btn-generate">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Continue Batch
+                </a>
+            @else
+                <button type="button" class="prl-btn-generate" onclick="openGenerateModal()">
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     Generate Payroll Batch
                 </button>
-            </form>
+            @endif
         </div>
     </div>
 
-    <div class="prl-two-col">
-        {{-- Records table --}}
-        <div>
-            <div class="prl-section-head">
-                <h2 class="prl-section-title"><span class="prl-dot"></span> Payroll Records</h2>
-            </div>
-            <div class="prl-filter-bar">
-                <div class="prl-search-wrap">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-                    <input type="text" class="prl-search-input" id="prlSearch" placeholder="Search employee…">
-                </div>
-            </div>
-            <div class="prl-table-card">
-                <div class="prl-table-scroll">
-                    <table class="prl-table">
-                        <thead><tr>
-                            <th>Employee</th><th>Batch</th><th>Period</th>
-                            <th class="text-end">Gross</th><th class="text-end">Net</th>
-                            <th class="text-end">Actions</th>
-                        </tr></thead>
-                        <tbody id="prlTbody">
-                        @forelse($payrolls as $payroll)
-                            @php
-                                $initials = strtoupper(substr($payroll->user->first_name??'U',0,1).substr($payroll->user->last_name??'',0,1));
-                            @endphp
-                            <tr data-name="{{ strtolower(($payroll->user->first_name??'').' '.($payroll->user->last_name??'')) }}"
-                                >
-                                <td>
-                                    <div class="prl-emp-cell">
-                                        <div class="prl-emp-avatar">{{ $initials }}</div>
-                                        <div>
-                                            <div class="prl-emp-name">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</div>
-                                            <div class="prl-emp-dept">{{ $payroll->user->department ?? 'N/A' }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    @if($payroll->batch)
-                                        <a href="{{ route('payroll.batch.details', $payroll->batch) }}"
-                                           class="prl-period-tag"
-                                           style="text-decoration:none;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">
-                                            {{ $payroll->batch->display_name }}
-                                        </a>
-                                    @else
-                                        <span style="color:#d1d5db;font-size:0.75rem;">—</span>
-                                    @endif
-                                </td>
-                                <td><span class="prl-period-tag">{{ $payroll->payroll_period_start->format('M d') }} – {{ $payroll->payroll_period_end->format('M d, Y') }}</span></td>
-                                <td class="text-end"><span class="prl-mono">₱{{ number_format($payroll->gross_pay,2) }}</span></td>
-                                <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($payroll->net_pay,2) }}</span></td>
-                                <td>
-                                    <div class="prl-actions">
-                                        <a href="{{ route('payroll.salary-computation.show',$payroll) }}" class="prl-action-btn" title="View employee payroll">
-                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        </a>
-                                        @if($payroll->batch)
-                                            <a href="{{ route('payroll.batch.payslips', $payroll->batch) }}" class="prl-action-btn success" title="Batch payslips">
-                                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                            </a>
-                                        @endif
-                                        <form action="{{ route('payroll.salary-computation.destroy',$payroll) }}" method="POST"
-                                              data-sa-confirm="{{ $payroll->batch ? 'Delete this employee payroll from its batch? This removes the employee from the batch totals.' : 'Delete this payroll record?' }}"
-                                              style="display:inline;">
-                                            @csrf @method('DELETE')
-                                            <button class="prl-action-btn danger" title="Delete">
-                                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="6">
-                                <div class="prl-empty">
-                                    <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
-                                    <p class="prl-empty-title">No payroll records yet</p>
-                                    <p class="prl-empty-sub">Generate a batch above to get started.</p>
-                                </div>
-                            </td></tr>
-                        @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                <div id="prlNoResults" style="display:none;">
-                    <div class="prl-empty" style="padding:32px;">
-                        <p class="prl-empty-title">No results found</p>
-                        <p class="prl-empty-sub">Try a different filter.</p>
-                    </div>
-                </div>
-            </div>
+    {{-- Filter bar --}}
+    <div class="prl-filter-bar">
+        <div class="prl-search-wrap">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" class="prl-search-input" id="batchSearch" placeholder="Search batch…">
         </div>
+        <select class="prl-filter-select" id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="submitted">Submitted</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+        </select>
+    </div>
 
-        {{-- Recent batches --}}
-        <div>
-            <div class="prl-section-head">
-                <h2 class="prl-section-title"><span class="prl-dot"></span> Recent Batches</h2>
-            </div>
-            <div class="prl-side-card">
-                <div class="prl-side-head">Last 5 generated batches</div>
-                @forelse($recentBatches as $b)
-                @php $bsc = match($b->status){'approved'=>'s-approved','rejected'=>'s-rejected','submitted'=>'s-submitted','released','paid'=>'s-released',default=>'s-draft'}; @endphp
-                <a href="{{ route('payroll.batch.details',$b) }}" class="prl-batch-item">
-                    <div>
-                        <div class="prl-batch-period">{{ $b->period_start->format('M d') }} – {{ $b->period_end->format('M d, Y') }}</div>
-                        <div class="prl-batch-meta">{{ $b->employee_count }} employees · ₱{{ number_format($b->total_net_pay,2) }}</div>
-                    </div>
-                    <span class="prl-status {{ $bsc }}">{{ ucfirst($b->status) }}</span>
-                </a>
+    {{-- Batch table --}}
+    <div class="prl-table-card">
+        <div class="prl-table-scroll">
+            <table class="prl-table">
+                <thead>
+                    <tr>
+                        <th>Batch</th>
+                        <th>Period</th>
+                        <th class="text-center">Employees</th>
+                        <th class="text-end">Total Net Pay</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="batchTbody">
+                @forelse($batches as $batch)
+                    @php
+                        $sc = match($batch->status) {
+                            'approved'  => 's-approved',
+                            'rejected'  => 's-rejected',
+                            'submitted' => 's-submitted',
+                            default     => 's-pending',
+                        };
+                        $detailsUrl = route('payroll.batch.details', $batch);
+                        $confirmUrl = route('payroll.batch.confirm', $batch);
+                    @endphp
+                    <tr
+                        data-name="{{ strtolower($batch->display_name) }}"
+                        data-status="{{ $batch->status }}"
+                        onclick="window.location='{{ $detailsUrl }}'"
+                    >
+                        <td>
+                            <div class="prl-batch-name">{{ $batch->display_name }}</div>
+                            <div class="prl-batch-sub">
+                                Created {{ $batch->created_at->format('M d, Y') }}
+                                @if($batch->finalized_at) &middot; Submitted {{ $batch->finalized_at->format('M d') }} @endif
+                            </div>
+                        </td>
+                        <td>
+                            <span class="prl-period-tag">
+                                {{ $batch->period_start->format('M d') }} &ndash; {{ $batch->period_end->format('M d, Y') }}
+                            </span>
+                        </td>
+                        <td class="text-center" style="font-family:'DM Mono',monospace;font-weight:700;color:#374151;">
+                            {{ $batch->employee_count }}
+                        </td>
+                        <td class="text-end">
+                            <span class="prl-mono bold">&#8369;{{ number_format($batch->total_net_pay, 2) }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="prl-status {{ $sc }}">{{ ucfirst($batch->status) }}</span>
+                        </td>
+                        <td onclick="event.stopPropagation()">
+                            <div class="prl-actions">
+                                @if($batch->status === 'pending')
+                                    {{-- Pending: edit (go to confirm/build page) --}}
+                                    <a href="{{ $confirmUrl }}" class="prl-action-btn edit">
+                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        Edit &amp; Submit
+                                    </a>
+
+                                @elseif($batch->status === 'submitted')
+                                    {{-- Submitted: can edit (reopen to pending) then resubmit --}}
+                                    <form action="{{ route('payroll.batch.reopen', $batch) }}" method="POST" style="display:inline;" id="reopen-form-{{ $batch->id }}">
+                                        @csrf
+                                    </form>
+                                    <button type="button" class="prl-action-btn edit"
+                                        onclick="openResubmitModal({{ $batch->id }}, '{{ addslashes($batch->display_name) }}', '{{ $batch->period_start->format('M d') }} – {{ $batch->period_end->format('M d, Y') }}')">
+                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        Edit
+                                    </button>
+                                    <a href="{{ $detailsUrl }}" class="prl-action-btn view">
+                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        View
+                                    </a>
+
+                                @elseif($batch->status === 'approved')
+                                    {{-- Approved: view only, no edit --}}
+                                    <a href="{{ $detailsUrl }}" class="prl-action-btn view">
+                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        View
+                                    </a>
+
+                                @elseif($batch->status === 'rejected')
+                                    {{-- Rejected: reopen to edit and resubmit --}}
+                                    <form action="{{ route('payroll.batch.reopen', $batch) }}" method="POST" style="display:inline;" id="reopen-form-{{ $batch->id }}">
+                                        @csrf
+                                    </form>
+                                    <button type="button" class="prl-action-btn reopen"
+                                        onclick="openResubmitModal({{ $batch->id }}, '{{ addslashes($batch->display_name) }}', '{{ $batch->period_start->format('M d') }} – {{ $batch->period_end->format('M d, Y') }}')">
+                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        Edit &amp; Resubmit
+                                    </button>
+                                    <a href="{{ $detailsUrl }}" class="prl-action-btn view">
+                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        View
+                                    </a>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
                 @empty
-                    <div class="prl-batch-empty">No batches yet.</div>
+                    <tr><td colspan="6">
+                        <div class="prl-empty">
+                            <div class="prl-empty-icon">
+                                <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <p class="prl-empty-title">No payroll batches yet</p>
+                            <p class="prl-empty-sub">Click "Generate Payroll Batch" above to get started.</p>
+                        </div>
+                    </td></tr>
                 @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div id="batchNoResults" style="display:none;">
+            <div class="prl-empty" style="padding:28px;">
+                <p class="prl-empty-title">No results</p>
+                <p class="prl-empty-sub">Try adjusting your filters.</p>
             </div>
         </div>
     </div>
 
 </div>
+
+{{-- ── Generate Batch Modal ──────────────────────────────────── --}}
+<div class="prl-modal-overlay" id="generateModal">
+    <div class="prl-modal">
+        <div class="prl-modal-icon generate">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        </div>
+        <h3 class="prl-modal-title">Generate Payroll Batch?</h3>
+        <p class="prl-modal-body">
+            This will create a new payroll batch for the current period.<br>
+            You can add employees, review, and finalize before submitting to accounting.
+        </p>
+        <div style="text-align:center;">
+            <span class="prl-modal-period">
+                {{ \Carbon\Carbon::parse($currentPeriod['start'])->format('M d, Y') }} &mdash; {{ \Carbon\Carbon::parse($currentPeriod['end'])->format('M d, Y') }}
+            </span>
+        </div>
+        <div class="prl-modal-actions">
+            <button type="button" class="prl-modal-cancel" onclick="closeModal('generateModal')">Cancel</button>
+            <form action="{{ route('payroll.batch.generate') }}" method="POST" style="flex:1;">
+                @csrf
+                <button type="submit" class="prl-modal-confirm generate" style="width:100%;">
+                    Yes, Generate Batch
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- ── Edit / Resubmit Modal ────────────────────────────────── --}}
+<div class="prl-modal-overlay" id="resubmitModal">
+    <div class="prl-modal">
+        <div class="prl-modal-icon resubmit">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </div>
+        <h3 class="prl-modal-title" id="resubmitModalTitle">Reopen Batch for Editing?</h3>
+        <p class="prl-modal-body" id="resubmitModalBody">
+            This will reopen the batch so you can make changes. After editing, you will need to finalize and resubmit it to accounting.
+        </p>
+        <div style="text-align:center;">
+            <span class="prl-modal-period" id="resubmitModalPeriod"></span>
+        </div>
+        <div class="prl-modal-actions">
+            <button type="button" class="prl-modal-cancel" onclick="closeModal('resubmitModal')">Cancel</button>
+            <button type="button" class="prl-modal-confirm resubmit" id="resubmitConfirmBtn" onclick="submitReopenForm()">
+                Yes, Reopen &amp; Edit
+            </button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
-(function(){
-    const s=document.getElementById('prlSearch');
-    const tbody=document.getElementById('prlTbody'), nr=document.getElementById('prlNoResults');
-    function run(){
-        const q=s.value.toLowerCase().trim();
-        const rows=Array.from(tbody.querySelectorAll('tr[data-name]'));
-        const vis=rows.filter(r=>!q||r.dataset.name.includes(q));
-        rows.forEach(r=>r.style.display='none');
-        vis.forEach(r=>r.style.display='');
-        nr.style.display=vis.length===0&&rows.length>0?'block':'none';
+// ── Client-side filter ───────────────────────────────────────────
+(function () {
+    const search  = document.getElementById('batchSearch');
+    const statusF = document.getElementById('statusFilter');
+    const tbody   = document.getElementById('batchTbody');
+    const noRes   = document.getElementById('batchNoResults');
+
+    function run() {
+        const q = search.value.toLowerCase().trim();
+        const s = statusF.value;
+        const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
+        const vis = rows.filter(r =>
+            (!q || r.dataset.name.includes(q)) &&
+            (!s || r.dataset.status === s)
+        );
+        rows.forEach(r => r.style.display = 'none');
+        vis.forEach(r => r.style.display = '');
+        noRes.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
     }
-    s.addEventListener('input',run);
+
+    search.addEventListener('input', run);
+    statusF.addEventListener('change', run);
 })();
+
+// ── Modal helpers ────────────────────────────────────────────────
+function openGenerateModal() {
+    document.getElementById('generateModal').classList.add('open');
+}
+
+let _reopenBatchId = null;
+
+function openResubmitModal(batchId, batchName, period) {
+    _reopenBatchId = batchId;
+    document.getElementById('resubmitModalTitle').textContent = 'Reopen "' + batchName + '"?';
+    document.getElementById('resubmitModalPeriod').textContent = period;
+    document.getElementById('resubmitModal').classList.add('open');
+}
+
+function submitReopenForm() {
+    if (_reopenBatchId) {
+        document.getElementById('reopen-form-' + _reopenBatchId).submit();
+    }
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+}
+
+// Close on overlay click
+document.querySelectorAll('.prl-modal-overlay').forEach(function(overlay) {
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) overlay.classList.remove('open');
+    });
+});
+
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.prl-modal-overlay.open').forEach(function(m) {
+            m.classList.remove('open');
+        });
+    }
+});
 </script>
 @endpush

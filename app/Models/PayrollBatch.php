@@ -89,7 +89,7 @@ class PayrollBatch extends Model
 
     public function isEditable(): bool
     {
-        return $this->status === 'draft';
+        return $this->status === 'pending';
     }
 
     /* ── Static helpers ────────────────────────────────────────── */
@@ -127,17 +127,17 @@ class PayrollBatch extends Model
         $period = self::resolvePeriod();
         return self::where('period_start', $period['start'])
                    ->where('period_end',   $period['end'])
-                   ->where('status', '!=', 'draft')
+                   ->where('status', '!=', 'pending')
                    ->exists();
     }
 
-    public static function draftForCurrentPeriod(): ?self
+    public static function pendingForCurrentPeriod(): ?self
     {
         $period = self::resolvePeriod();
 
         return self::where('period_start', $period['start'])
             ->where('period_end', $period['end'])
-            ->where('status', 'draft')
+            ->where('status', 'pending')
             ->latest('id')
             ->first();
     }
@@ -148,7 +148,7 @@ class PayrollBatch extends Model
 
         return self::where('period_start', $period['start'])
             ->where('period_end', $period['end'])
-            ->where('status', '!=', 'draft')
+            ->where('status', '!=', 'pending')
             ->latest('id')
             ->first();
     }

@@ -101,8 +101,8 @@ class NotificationSeeder extends Seeder
                 $rows[] = [
                     'user_id' => $hrId,
                     'type' => 'payroll_created',
-                    'title' => 'Payroll generated (draft)',
-                    'message' => 'Payroll batch draft is ready for review bago i-finalize.',
+                    'title' => 'Payroll batch generated',
+                    'message' => 'Payroll batch is ready for review. Add employees, prepare, and finalize to submit.',
                     'data' => json_encode(['payroll_id' => $samplePayroll->id]),
                     'read_at' => $now->copy()->subHours(2),
                     'created_at' => $now->copy()->subHours(10),

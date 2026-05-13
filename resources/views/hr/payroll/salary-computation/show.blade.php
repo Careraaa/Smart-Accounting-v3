@@ -25,8 +25,6 @@
 
 .prl-status { display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
 .prl-status::before { content:'';width:5px;height:5px;border-radius:50%; }
-.prl-status.s-draft     { background:rgba(255,255,255,0.08);color:#9ca3af; }
-.prl-status.s-draft::before { background:#6b7280; }
 .prl-status.s-pending   { background:rgba(217,119,6,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.2); }
 .prl-status.s-pending::before { background:#fbbf24; }
 .prl-status.s-finalized { background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(96,165,250,0.2); }
@@ -125,7 +123,7 @@
             'approved'  => 's-approved',
             'released', 'paid' => 's-released',
             'rejected'  => 's-rejected',
-            default     => 's-draft',
+            default     => 's-pending',
         };
         $overtimeAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay'));
         $regularAllowances  = $payroll->allowances->reject(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay'));

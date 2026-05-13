@@ -33,54 +33,34 @@ class PayrollController extends Controller
      ══════════════════════════════════════════════════════════════ */
     public function index(Request $request)
     {
-        $sortBy = $request->get('sort_by', 'payroll_period_start');
-        $sortOrder = $request->get('sort_order', 'desc');
-
-        $allowedColumns = ['payroll_period_start', 'gross_pay', 'net_pay', 'status'];
-        if (!in_array($sortBy, $allowedColumns)) {
-            $sortBy = 'payroll_period_start';
-        }
-        if (!in_array($sortOrder, ['asc', 'desc'])) {
-            $sortOrder = 'desc';
-        }
-
-        $payrolls = Payroll::with(['user', 'allowances', 'deductions', 'batch'])
-            ->orderBy($sortBy, $sortOrder)
+        // All batches, newest first, with payrolls loaded for totals
+        $batches = PayrollBatch::with('payrolls')
+            ->orderByDesc('created_at')
             ->get();
+
         $activeEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
             ->where('status', 'active')
             ->count();
 
-        $pendingPayrolls = Payroll::with('user')
-            ->where('status', 'pending')
-            ->orderByDesc('created_at')
-            ->get();
-        $totalPayroll = $pendingPayrolls->sum('net_pay');
-        $payrollCount = $pendingPayrolls->count();
-        $releasedCount = Payroll::whereIn('status', ['released', 'paid'])->count();
+        $nextCutoffDate    = PayrollCutoffSchedule::getNextCutoffDate();
+        $currentPeriod     = PayrollBatch::resolvePeriod();
+        $currentPendingBatch = PayrollBatch::pendingForCurrentPeriod();
 
-        $recentBatches = PayrollBatch::with('payrolls')->orderByDesc('created_at')->limit(5)->get();
+        // Stats
+        $submittedCount = $batches->where('status', 'submitted')->count();
+        $approvedCount  = $batches->where('status', 'approved')->count();
+        $rejectedCount  = $batches->where('status', 'rejected')->count();
 
-        $cutoffSchedules = PayrollCutoffSchedule::where('is_active', true)->orderBy('cutoff_day')->get();
-        $nextCutoffDate = PayrollCutoffSchedule::getNextCutoffDate();
-        $currentPeriod = PayrollBatch::resolvePeriod();
-        $currentDraftBatch = PayrollBatch::draftForCurrentPeriod();
-        $finalizedCurrentBatch = PayrollBatch::finalizedForCurrentPeriod();
-        $batchAlreadyExists = $finalizedCurrentBatch !== null;
-
-        $totalEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])->count();
-        $presentToday = Attendance::whereDate('date', now())->where('status', 'present')->count();
-        $absentToday = Attendance::whereDate('date', now())->where('status', 'absent')->count();
-        $lateToday = Attendance::whereDate('date', now())->where('status', 'late')->count();
-        $onLeaveEmployees = Leave::where('status', 'approved')->whereDate('start_date', '<=', now())->whereDate('end_date', '>=', now())->count();
-        $totalLeaves = Leave::count();
-        $pendingLeaves = Leave::where('status', 'pending')->count();
-        $approvedLeaves = Leave::where('status', 'approved')->count();
-        $inactiveEmployees = $totalEmployees - $activeEmployees;
-        $attendanceRate = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
-        $cutoffInfo = PayrollCutoffSchedule::getCurrentCutoffPeriod();
-
-        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'sortBy', 'sortOrder', 'cutoffSchedules', 'cutoffInfo', 'nextCutoffDate', 'pendingPayrolls', 'totalPayroll', 'payrollCount', 'releasedCount', 'recentBatches', 'currentPeriod', 'batchAlreadyExists', 'currentDraftBatch', 'finalizedCurrentBatch'));
+        return view('hr.payroll.salary-computation.index', compact(
+            'batches',
+            'activeEmployees',
+            'nextCutoffDate',
+            'currentPeriod',
+            'currentPendingBatch',
+            'submittedCount',
+            'approvedCount',
+            'rejectedCount'
+        ));
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -173,14 +153,14 @@ class PayrollController extends Controller
 
         $batch = PayrollBatch::create([
             'period_start' => $period['start'],
-            'period_end' => $period['end'],
-            'status' => 'draft',
+            'period_end'   => $period['end'],
+            'status'       => 'pending',
             'generated_by' => auth()->id(),
         ]);
 
         return redirect()
             ->route('payroll.batch.confirm', $batch)
-            ->with('success', 'Draft batch created. Add employees, review, then finalize.');
+            ->with('success', 'Batch created. Add employees, review, then finalize.');
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -210,7 +190,7 @@ class PayrollController extends Controller
 
     public function batchDetails(PayrollBatch $batch)
     {
-        $batch->load(['payrolls.user']);
+        $batch->load(['payrolls.user', 'rejectedBy']);
 
         return view('hr.payroll.batch.details', compact('batch'));
     }
@@ -256,7 +236,7 @@ class PayrollController extends Controller
             $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
             $payroll->forceFill([
                 'batch_id' => $batch->id,
-                'status'   => 'draft',
+                'status'   => 'pending',
             ])->save();
             PayrollDeductionService::applyLoanDeductions($payroll);
             $added++;
@@ -294,7 +274,7 @@ class PayrollController extends Controller
         $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
         $payroll->forceFill([
             'batch_id' => $batch->id,
-            'status' => 'draft',
+            'status'   => 'pending',
         ])->save();
         PayrollDeductionService::applyLoanDeductions($payroll);
 
@@ -484,6 +464,9 @@ class PayrollController extends Controller
             'finalized_at' => now(),
         ]);
 
+        // Notify accountants that payroll batch is ready for approval
+        PayrollNotification::notifyAccountantsPayrollGenerated($periodStart, $periodEnd, $batch->payrolls->count());
+
         return redirect()->route('payroll.salary-computation.index')
             ->with('success', 'Payroll batch submitted to accounting. Records are now locked.');
     }
@@ -505,23 +488,105 @@ class PayrollController extends Controller
         return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll batch submitted for approval.');
     }
 
+    /* ══════════════════════════════════════════════════════════════
+     |  BATCH — CANCEL (delete entirely — no draft saved)
+     ══════════════════════════════════════════════════════════════ */
+    public function batchCancel(PayrollBatch $batch)
+    {
+        abort_if(!$batch->isEditable(), 403, 'Only pending batches can be cancelled.');
+
+        // Delete all payroll line items and payrolls, then the batch
+        foreach ($batch->payrolls as $payroll) {
+            $payroll->allowances()->delete();
+            $payroll->deductions()->delete();
+            $payroll->delete();
+        }
+        $batch->delete();
+
+        return redirect()
+            ->route('payroll.salary-computation.index')
+            ->with('success', 'Batch cancelled and removed.');
+    }
+
     public function batchReopen(PayrollBatch $batch)
     {
-        abort_if($batch->status !== 'rejected', 403, 'Only rejected batches can be reopened.');
+        // Allow reopening both rejected AND submitted batches
+        abort_if(
+            !in_array($batch->status, ['rejected', 'submitted']),
+            403,
+            'Only rejected or submitted batches can be reopened for editing.'
+        );
+
+        $previousStatus = $batch->status;
 
         // Bring payrolls back to prepared so HR can review/edit then resubmit.
         $batch->payrolls()->update(['status' => 'prepared']);
 
         $batch->update([
-            'status' => 'draft',
-            'rejected_by' => null,
-            'rejected_at' => null,
+            'status'         => 'pending',
+            'rejected_by'    => null,
+            'rejected_at'    => null,
             'rejection_note' => null,
         ]);
 
+        $msg = $previousStatus === 'rejected'
+            ? 'Rejected batch reopened. Review employees and finalize to resubmit.'
+            : 'Batch reopened for editing. Make your changes and finalize to resubmit.';
+
         return redirect()
             ->route('payroll.batch.confirm', $batch)
-            ->with('success', 'Rejected batch reopened. Review employees and finalize to resubmit.');
+            ->with('success', $msg);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     |  BATCH — PREPARE ALL (or selected) EMPLOYEES AT ONCE
+     ══════════════════════════════════════════════════════════════ */
+    public function batchPrepareAll(Request $request, PayrollBatch $batch)
+    {
+        abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+
+        $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
+
+        $periodStart = Carbon::parse($batch->period_start);
+        $periodEnd   = Carbon::parse($batch->period_end);
+
+        // If specific IDs were posted, prepare only those; otherwise prepare all
+        $selectedIds = array_filter((array) $request->input('payroll_ids', []));
+        $payrolls = count($selectedIds)
+            ? $batch->payrolls->whereIn('id', $selectedIds)
+            : $batch->payrolls;
+
+        $count = 0;
+        foreach ($payrolls as $payroll) {
+            if ($payroll->status === 'prepared') continue;
+
+            $manualAllowances = $payroll->allowances
+                ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay'))
+                ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                ->values()->toArray();
+
+            $manualDeductions = $payroll->deductions
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                    || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->values()->toArray();
+
+            $this->payrollService->updatePayroll(
+                $payroll,
+                $payroll->user,
+                $periodStart,
+                $periodEnd,
+                $manualAllowances,
+                $manualDeductions,
+                ['status' => 'prepared']
+            );
+            $count++;
+        }
+
+        $label = $count === 1 ? '1 employee' : "{$count} employees";
+        return redirect()
+            ->route('payroll.batch.confirm', $batch)
+            ->with('success', "Recomputed and marked {$label} as prepared.");
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -591,7 +656,7 @@ class PayrollController extends Controller
 
     public function releasePayroll(Request $request)
     {
-        $count = Payroll::whereIn('status', ['pending', 'draft'])->update(['status' => 'submitted']);
+        $count = Payroll::whereIn('status', ['pending', 'prepared'])->update(['status' => 'submitted']);
         return redirect()
             ->route('payroll.salary-computation.index')
             ->with('success', "Released {$count} payroll(s) for processing.");

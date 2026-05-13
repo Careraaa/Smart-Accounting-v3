@@ -39,7 +39,7 @@ class PayrollService
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
-            'status' => 'draft',
+            'status' => 'prepared',
         ]);
 
         // ── Allowances ────────────────────────────────────────────
@@ -170,8 +170,8 @@ class PayrollService
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
 
-            // ← FIXED: Respect existing status (keep as 'draft' while batch is draft)
-            'status' => $extraData['status'] ?? ($payroll->status ?? 'draft'),
+            // Respect extraData status; fall back to existing status or 'prepared'
+            'status' => $extraData['status'] ?? ($payroll->status ?? 'prepared'),
         ]);
 
         // ── Rebuild allowances from scratch ────────────────────────────────────

@@ -30,10 +30,10 @@ class PayrollSeeder extends Seeder
 
         $generatedBy = User::where('role', 'hr')->orderBy('id')->value('id');
 
-        // Create or fetch batch (unique on period)
+        // Create or fetch batch (unique on period) — always submitted so it shows as historical
         $batch = PayrollBatch::updateOrCreate(
             ['period_start' => $periodStart->toDateString(), 'period_end' => $periodEnd->toDateString()],
-            ['status' => 'draft', 'generated_by' => $generatedBy]
+            ['status' => 'submitted', 'generated_by' => $generatedBy]
         );
 
         // Keep this scoped: seed only the demo employee accounts so we don't disturb other roles.
@@ -90,17 +90,17 @@ class PayrollSeeder extends Seeder
             // Apply seeded cash advance + active salary loan deductions (ONCE)
             PayrollDeductionService::applyLoanDeductions($payroll);
 
-            // Give variety: some draft, some approved, some paid
+            // Give variety: some prepared, some submitted, some approved
             $status = match ($employee->username) {
-                'angela.fernandez' => 'paid',
-                'juan.trabaho'     => 'approved',
-                default            => 'draft',
+                'angela.fernandez' => 'submitted',
+                'juan.trabaho'     => 'submitted',
+                default            => 'prepared',
             };
 
             $payroll->forceFill([
-                'status' => $status,
-                'approved_by' => $status !== 'draft' ? $generatedBy : null,
-                'payment_date' => $status === 'paid' ? $periodEnd->copy()->addDays(5)->startOfDay() : null,
+                'status'      => $status,
+                'approved_by' => null,
+                'payment_date' => null,
             ])->save();
         }
 

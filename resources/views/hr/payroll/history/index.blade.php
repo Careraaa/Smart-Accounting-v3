@@ -65,8 +65,6 @@
 
 .prl-status { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
 .prl-status::before { content:'';width:5px;height:5px;border-radius:50%; }
-.prl-status.s-draft     { background:#f3f4f6;color:#6b7280; }
-.prl-status.s-draft::before     { background:#9ca3af; }
 .prl-status.s-finalized { background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe; }
 .prl-status.s-finalized::before { background:#3b82f6; }
 .prl-status.s-submitted { background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe; }
@@ -203,19 +201,19 @@
                 <tbody id="prlTbody">
                 @forelse($batches as $batch)
                     @php
-                        $sc = match($batch->status ?? 'draft') {
+                        $sc = match($batch->status ?? 'submitted') {
                             'finalized' => 's-finalized',
                             'submitted' => 's-submitted',
                             'approved'  => 's-approved',
                             'released', 'paid' => 's-released',
-                            default     => 's-draft',
+                            default     => 's-submitted',
                         };
                     @endphp
                     <tr data-period="{{ strtolower($batch->period_start->format('M Y')) }}">
                         <td><span class="prl-period-tag">{{ $batch->period_start->format('M d') }} – {{ $batch->period_end->format('M d, Y') }}</span></td>
                         <td><span class="prl-emp-count"><strong>{{ $batch->payrolls->count() }}</strong> employees</span></td>
                         <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($batch->total_net_pay ?? $batch->payrolls->sum('net_pay') ?? 0, 0) }}</span></td>
-                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ ucfirst($batch->status ?? 'draft') }}</span></td>
+                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ ucfirst($batch->status ?? 'submitted') }}</span></td>
                         <td>
                             <div class="prl-actions">
                                 <a href="{{ route('payroll.history.batch', ['start' => $batch->period_start->format('Y-m-d'), 'end' => $batch->period_end->format('Y-m-d')]) }}"

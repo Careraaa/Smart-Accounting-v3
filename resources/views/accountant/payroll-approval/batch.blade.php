@@ -40,18 +40,16 @@
             display: inline-flex; align-items: center; gap: 6px;
             padding: 9px 16px; border-radius: 9px; font-size: 0.82rem; font-weight: 700;
             font-family: 'Sora', sans-serif; border: 1px solid transparent; transition: all .15s ease; cursor: pointer;
+            min-width: 120px; justify-content: center;
         }
         .prl-batch-btn-danger  { background: #fff; border-color: #fecaca; color: #c8292a; }
         .prl-batch-btn-danger:hover  { background: #fff1f2; border-color: #fda4af; color: #a81f20; }
         .prl-batch-btn-primary { background: #c8292a; color: #fff; border-color: #c8292a; box-shadow: 0 4px 18px rgba(200,41,42,.28); }
         .prl-batch-btn-primary:hover { background: #a81f20; border-color: #a81f20; color: #fff; }
 
-        /* ── Employee row avatar ── */
-        .emp-av {
-            width: 36px; height: 36px; border-radius: 10px; background: #f4f4f6; color: #6b7280;
-            font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; border: 1px solid #ececec; text-transform: uppercase;
-        }
+        /* ── Clickable rows ── */
+        .table-hover tbody tr { cursor: pointer; transition: background 0.12s; }
+        .table-hover tbody tr:hover { background: #fdf4f4 !important; }
 
         /* ── Rejection note banner ── */
         .prl-rejection-note {
@@ -215,13 +213,13 @@
                         <thead>
                             <tr>
                                 <th>Employee</th>
+                                <th>Department</th>
                                 <th>Position</th>
                                 <th class="text-center">Days</th>
                                 <th class="text-end">Basic pay</th>
                                 <th class="text-end">Gross pay</th>
                                 <th class="text-end">Deductions</th>
                                 <th class="text-end">Net pay</th>
-                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -230,19 +228,12 @@
                                     $user     = $payroll->user;
                                     $initials = strtoupper(substr($user->first_name ?? '', 0, 1) . substr($user->last_name ?? '', 0, 1));
                                 @endphp
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="emp-av">{{ $initials }}</div>
-                                            <div>
-                                                <div class="fw-bold" style="font-size:0.88rem;color:#111827;">
-                                                    {{ $user->first_name }} {{ $user->last_name }}
-                                                </div>
-                                                <div class="text-muted" style="font-size:0.74rem;">
-                                                    {{ $user->department ?? '' }}
-                                                </div>
-                                            </div>
-                                        </div>
+                                <tr onclick="window.location='{{ route('payroll-approval.show', $payroll) }}'">
+                                    <td class="fw-bold" style="font-size:0.88rem;color:#111827;">
+                                        {{ $user->first_name }} {{ $user->last_name }}
+                                    </td>
+                                    <td style="font-size:0.82rem;color:#6b7280;">
+                                        {{ $user->department ?? 'N/A' }}
                                     </td>
                                     <td>
                                         <span class="text-muted" style="font-size:0.82rem;">
@@ -264,14 +255,6 @@
                                     <td class="text-end font-monospace fw-bold" style="font-size:0.88rem;color:#15803d;">
                                         ₱{{ number_format($payroll->net_pay, 2) }}
                                     </td>
-                                    <td class="text-center">
-                                        <a href="{{ route('payroll-approval.show', $payroll) }}"
-                                           class="emp-action-btn emp-action-view" style="padding:6px 12px;"
-                                           title="View payroll details">
-                                            <i class="feather-eye"></i>
-                                            <span>View</span>
-                                        </a>
-                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -285,7 +268,7 @@
                         @if($payrolls->isNotEmpty())
                         <tfoot>
                             <tr style="background:#f9fafb;font-size:0.85rem;">
-                                <td colspan="4" class="fw-bold" style="padding:12px 16px;color:#111827;">Totals</td>
+                                <td colspan="5" class="fw-bold" style="padding:12px 16px;color:#111827;">Totals</td>
                                 <td class="text-end font-monospace fw-bold" style="padding:12px 16px;">
                                     ₱{{ number_format($totalGross, 2) }}
                                 </td>
@@ -295,7 +278,6 @@
                                 <td class="text-end font-monospace fw-bold" style="padding:12px 16px;color:#15803d;">
                                     ₱{{ number_format($totalNet, 2) }}
                                 </td>
-                                <td></td>
                             </tr>
                         </tfoot>
                         @endif

@@ -15,8 +15,47 @@ class AttendanceController extends Controller
 {
     public function index()
     {
-        $attendances = Attendance::with('employee')->orderBy('date', 'desc')->paginate(10);
-        return view('hr.attendance.index', compact('attendances'));
+        // All employees (excluding system roles)
+        $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
+            ->orderBy('department')
+            ->orderBy('last_name')
+            ->get();
+
+        // Today's attendance keyed by employee id
+        $todayAttendance = Attendance::whereDate('date', today())
+            ->get()
+            ->keyBy('user_id');
+
+        // Recent logs for the side panel (last 15)
+        $recentLogs = AttendanceLog::with('user')
+            ->latest('logged_at')
+            ->limit(15)
+            ->get();
+
+        return view('hr.attendance.index', compact('employees', 'todayAttendance', 'recentLogs'));
+    }
+
+    /**
+     * Show the per-employee attendance calendar.
+     */
+    public function employeeCalendar(Request $request, $employeeId)
+    {
+        $employee = Employee::findOrFail($employeeId);
+
+        // Default to current month; allow ?month=YYYY-MM
+        $monthParam = $request->query('month');
+        $month = $monthParam ? \Carbon\Carbon::createFromFormat('Y-m', $monthParam)->startOfMonth() : now()->startOfMonth();
+
+        // Fetch all attendance records for this employee in the displayed month
+        $attendances = Attendance::where('user_id', $employeeId)
+            ->whereBetween('date', [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()])
+            ->get()
+            ->keyBy(fn($a) => $a->date->format('Y-m-d'));
+
+        $prevMonth = $month->copy()->subMonth()->format('Y-m');
+        $nextMonth = $month->copy()->addMonth()->format('Y-m');
+
+        return view('hr.attendance.calendar', compact('employee', 'month', 'attendances', 'prevMonth', 'nextMonth'));
     }
 
     public function generateQR()

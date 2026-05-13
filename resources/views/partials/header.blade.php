@@ -36,6 +36,27 @@
                 <i class="feather-maximize fs-17"></i>
             </a>
 
+            {{-- ── Nav Search ── --}}
+            <div class="kt-nav-search d-none d-sm-flex" id="kt-nav-search">
+                <div class="kt-ns-wrap">
+                    <i class="feather-search kt-ns-icon"></i>
+                    <input
+                        type="text"
+                        id="kt-ns-input"
+                        class="kt-ns-input"
+                        placeholder="Search pages…"
+                        autocomplete="off"
+                        spellcheck="false"
+                        aria-label="Search pages"
+                        aria-autocomplete="list"
+                        aria-controls="kt-ns-results"
+                        aria-expanded="false"
+                    >
+                    <kbd class="kt-ns-kbd d-none d-md-flex">⌘K</kbd>
+                </div>
+                <ul id="kt-ns-results" class="kt-ns-results" role="listbox" aria-label="Search results"></ul>
+            </div>
+
             {{-- Notifications --}}
             <div class="dropdown">
                 <a class="kt-header-btn position-relative" id="notification-btn" data-bs-toggle="dropdown" href="#" role="button"
@@ -135,6 +156,152 @@
 
 @push('styles')
     <style>
+        /* ── Nav Search ─────────────────────────────────────────── */
+        .kt-nav-search {
+            position: relative;
+            margin: 0 4px;
+        }
+        .kt-ns-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.11);
+            border-radius: 10px;
+            padding: 0 10px;
+            height: 36px;
+            transition: background .15s, border-color .15s, box-shadow .15s;
+            cursor: text;
+        }
+        .kt-ns-wrap:focus-within {
+            background: rgba(255,255,255,.12);
+            border-color: rgba(200,41,42,.55);
+            box-shadow: 0 0 0 3px rgba(200,41,42,.12);
+        }
+        .kt-ns-icon {
+            font-size: 14px;
+            color: rgba(255,255,255,.45);
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+        .kt-ns-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-size: .82rem;
+            font-family: 'Sora', system-ui, sans-serif;
+            width: 160px;
+            min-width: 0;
+        }
+        .kt-ns-input::placeholder { color: rgba(255,255,255,.35); }
+        .kt-ns-kbd {
+            display: inline-flex;
+            align-items: center;
+            gap: 1px;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 5px;
+            padding: 1px 5px;
+            font-size: .65rem;
+            color: rgba(255,255,255,.35);
+            font-family: 'DM Mono', monospace;
+            white-space: nowrap;
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+        /* Results dropdown */
+        .kt-ns-results {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 280px;
+            max-width: min(360px, 92vw);
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            box-shadow: 0 16px 40px rgba(17,24,39,.18), 0 4px 12px rgba(200,41,42,.08);
+            padding: 6px;
+            list-style: none;
+            margin: 0;
+            z-index: 9999;
+            max-height: 340px;
+            overflow-y: auto;
+        }
+        .kt-ns-results.open { display: block; }
+        .kt-ns-result-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 9px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #111827;
+            transition: background .1s;
+        }
+        .kt-ns-result-item:hover,
+        .kt-ns-result-item.active {
+            background: #fff5f5;
+            color: #c8292a;
+        }
+        .kt-ns-result-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 13px;
+            color: #6b7280;
+            transition: background .1s, color .1s;
+        }
+        .kt-ns-result-item:hover .kt-ns-result-icon,
+        .kt-ns-result-item.active .kt-ns-result-icon {
+            background: #ffe4e4;
+            color: #c8292a;
+        }
+        .kt-ns-result-label {
+            font-size: .82rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .kt-ns-result-group {
+            font-size: .68rem;
+            color: #9ca3af;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+        .kt-ns-empty {
+            padding: 18px 12px;
+            text-align: center;
+            font-size: .8rem;
+            color: #9ca3af;
+        }
+        .kt-ns-section-label {
+            font-size: .65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: #9ca3af;
+            padding: 6px 10px 4px;
+        }
+        /* highlight matched chars */
+        .kt-ns-result-label mark {
+            background: transparent;
+            color: #c8292a;
+            font-weight: 900;
+        }
+        @media (max-width: 640px) {
+            .kt-ns-input { width: 100px; }
+            .kt-ns-results { min-width: 240px; }
+        }
+
+        /* ── Dropdowns ──────────────────────────────────────────── */
         .kt-user-dropdown-under-navbar {
             position: absolute !important;
             top: calc(100% + 18px) !important;
@@ -665,5 +832,197 @@
                     'feather-maximize fs-17';
             });
         }
+    </script>
+
+    {{-- ── Nav Search JS ── --}}
+    <script>
+    (() => {
+        // ── Build the page index from the sidebar nav ──────────────
+        // We read the rendered sidebar links so the list is always in sync
+        // with whatever the server rendered for this role — no duplication needed.
+        function buildIndex() {
+            const items = [];
+            const nav = document.querySelector('.nxl-navigation');
+            if (!nav) return items;
+
+            // Walk every anchor that has a real href (not void/# toggles)
+            nav.querySelectorAll('a.nxl-link').forEach(link => {
+                const href = (link.getAttribute('href') || '').trim();
+                if (!href || href === 'javascript:void(0);' || href === '#') return;
+
+                // Label: text of the link itself
+                const label = (link.querySelector('.nxl-mtext')?.textContent || link.textContent || '').trim();
+                if (!label) return;
+
+                // Group: nearest caption label above this item
+                let group = '';
+                let el = link.closest('.nxl-item');
+                if (el) {
+                    // Walk backwards through siblings to find a caption
+                    let prev = el.previousElementSibling;
+                    while (prev) {
+                        if (prev.classList.contains('nxl-caption')) {
+                            group = (prev.querySelector('label')?.textContent || '').trim();
+                            break;
+                        }
+                        // If inside a submenu, go up to the parent hasmenu item
+                        if (!prev.previousElementSibling) {
+                            const parentSubmenu = el.closest('.nxl-submenu');
+                            if (parentSubmenu) {
+                                const parentItem = parentSubmenu.closest('.nxl-item.nxl-hasmenu');
+                                if (parentItem) {
+                                    group = (parentItem.querySelector('.nxl-mtext')?.textContent || '').trim();
+                                }
+                            }
+                            break;
+                        }
+                        prev = prev.previousElementSibling;
+                    }
+                }
+
+                // Icon: feather class from the nearest icon span
+                const iconEl = link.querySelector('.nxl-micon i');
+                const iconClass = iconEl ? iconEl.className : 'feather-link';
+
+                items.push({ label, group, href, iconClass });
+            });
+
+            return items;
+        }
+
+        // ── Fuzzy/substring match with highlight ───────────────────
+        function match(item, query) {
+            const q = query.toLowerCase();
+            const label = item.label.toLowerCase();
+            const group = item.group.toLowerCase();
+            if (label.includes(q) || group.includes(q)) return true;
+            // Also try each word of the query
+            return q.split(/\s+/).every(w => label.includes(w) || group.includes(w));
+        }
+
+        function highlight(text, query) {
+            if (!query) return escHtml(text);
+            const escaped = escHtml(text);
+            const q = escHtml(query.trim());
+            if (!q) return escaped;
+            try {
+                const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                return escaped.replace(re, '<mark>$1</mark>');
+            } catch { return escaped; }
+        }
+
+        function escHtml(s) {
+            return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ── DOM refs ───────────────────────────────────────────────
+        const input   = document.getElementById('kt-ns-input');
+        const results = document.getElementById('kt-ns-results');
+        if (!input || !results) return;
+
+        let index = [];
+        let activeIdx = -1;
+
+        // Build index after DOM is ready (sidebar is already rendered)
+        document.addEventListener('DOMContentLoaded', () => { index = buildIndex(); });
+        // Fallback if DOMContentLoaded already fired
+        if (document.readyState !== 'loading') index = buildIndex();
+
+        // ── Render results ─────────────────────────────────────────
+        function render(query) {
+            activeIdx = -1;
+            const q = query.trim();
+
+            if (!q) { close(); return; }
+
+            const matched = index.filter(item => match(item, q)).slice(0, 8);
+
+            if (!matched.length) {
+                results.innerHTML = `<li class="kt-ns-empty">No pages found for "<strong>${escHtml(q)}</strong>"</li>`;
+                open();
+                return;
+            }
+
+            results.innerHTML = matched.map((item, i) => `
+                <li role="option" aria-selected="false">
+                    <a class="kt-ns-result-item" href="${escHtml(item.href)}" tabindex="-1" data-idx="${i}">
+                        <span class="kt-ns-result-icon"><i class="${escHtml(item.iconClass)}"></i></span>
+                        <span>
+                            <span class="kt-ns-result-label">${highlight(item.label, q)}</span>
+                            ${item.group ? `<span class="kt-ns-result-group">${escHtml(item.group)}</span>` : ''}
+                        </span>
+                    </a>
+                </li>
+            `).join('');
+
+            open();
+        }
+
+        function open() {
+            results.classList.add('open');
+            input.setAttribute('aria-expanded', 'true');
+        }
+
+        function close() {
+            results.classList.remove('open');
+            input.setAttribute('aria-expanded', 'false');
+            activeIdx = -1;
+        }
+
+        function setActive(idx) {
+            const items = results.querySelectorAll('.kt-ns-result-item');
+            items.forEach((el, i) => el.classList.toggle('active', i === idx));
+            activeIdx = idx;
+        }
+
+        // ── Events ─────────────────────────────────────────────────
+        input.addEventListener('input', () => render(input.value));
+
+        input.addEventListener('keydown', e => {
+            const items = results.querySelectorAll('.kt-ns-result-item');
+            if (!items.length) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setActive(Math.min(activeIdx + 1, items.length - 1));
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setActive(Math.max(activeIdx - 1, 0));
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (activeIdx >= 0 && items[activeIdx]) {
+                    window.location.href = items[activeIdx].getAttribute('href');
+                } else if (items[0]) {
+                    window.location.href = items[0].getAttribute('href');
+                }
+            } else if (e.key === 'Escape') {
+                close();
+                input.blur();
+            }
+        });
+
+        // Click on result
+        results.addEventListener('mousedown', e => {
+            const item = e.target.closest('.kt-ns-result-item');
+            if (item) {
+                e.preventDefault();
+                window.location.href = item.getAttribute('href');
+            }
+        });
+
+        // Close on outside click
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#kt-nav-search')) close();
+        });
+
+        // ── Keyboard shortcut: Cmd/Ctrl + K ───────────────────────
+        document.addEventListener('keydown', e => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                input.focus();
+                input.select();
+            }
+        });
+    })();
     </script>
 @endpush
