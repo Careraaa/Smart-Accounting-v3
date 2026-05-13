@@ -55,9 +55,9 @@
 .emp-table thead th { padding:11px 16px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#6b7280;white-space:nowrap;font-family:'Sora',sans-serif; }
 .emp-table thead th a { color:#6b7280;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color 0.13s; }
 .emp-table thead th a:hover { color:#c8292a; }
-.emp-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.1s; }
+.emp-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.1s;cursor:pointer; }
 .emp-table tbody tr:last-child { border-bottom:none; }
-.emp-table tbody tr:hover { background:#fafafa; }
+.emp-table tbody tr:hover { background:#fff5f5; }
 .emp-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
 
 /* Employee cell */
@@ -199,7 +199,9 @@
                         @endphp
                         <tr data-name="{{ strtolower(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '')) }}"
                             data-status="{{ $employee->status }}"
-                            data-dept="{{ strtolower($employee->department ?? '') }}">
+                            data-dept="{{ strtolower($employee->department ?? '') }}"
+                            data-href="{{ route('employees.show', $employee) }}"
+                            onclick="if(!event.target.closest('a,button,form'))window.location=this.dataset.href">
                             <td>
                                 <div class="emp-cell">
                                     <div class="emp-avatar">{{ $initials }}</div>
@@ -215,9 +217,6 @@
                             </td>
                             <td>
                                 <div class="emp-actions">
-                                    <a href="{{ route('employees.show', $employee) }}" class="emp-action-btn" title="View">
-                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                    </a>
                                     <a href="{{ route('employees.edit', $employee) }}" class="emp-action-btn edit" title="Edit">
                                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </a>

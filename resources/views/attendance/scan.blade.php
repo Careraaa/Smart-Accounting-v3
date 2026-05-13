@@ -472,17 +472,6 @@
                         <li>Wait for <strong>"Attendance Recorded"</strong> confirmation</li>
                     </ol>
 
-                    {{-- Last log --}}
-                    <div id="last-log" style="display:none;" class="mt-4">
-                        <p class="scn-section-label mb-3">Last Log</p>
-                        <div style="background: #f4f5f7; border-radius: 8px; padding: 12px 16px;">
-                            <div class="d-flex align-items-center gap-2">
-                                <span id="last-log-type" class="badge"></span>
-                                <span class="text-muted small" id="last-log-time"></span>
-                            </div>
-                        </div>
-                    </div>
-
                     {{-- iOS note --}}
                     <div class="scan-ios-note mt-4">
                         <strong>iOS:</strong>

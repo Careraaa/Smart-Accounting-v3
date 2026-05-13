@@ -34,29 +34,29 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            width: 260px;
+            width: 420px;
             display: flex;
             align-items: center;
             gap: 8px;
             background: #f4f6f8;
             border: 1px solid #e5e7eb;
             border-radius: 999px;
-            padding: 0 14px;
-            height: 36px;
+            padding: 0 16px;
+            height: 40px;
             transition: border-color .15s, box-shadow .15s, background .15s;
             cursor: text;
             z-index: 10;
         ">
-            <i class="feather-search" style="color:#b0b7c3;font-size:13px;flex-shrink:0;pointer-events:none;"></i>
+            <i class="feather-search" style="color:#b0b7c3;font-size:14px;flex-shrink:0;pointer-events:none;"></i>
             <input
                 id="kt-search-input"
                 type="text"
-                placeholder="Search…"
+                placeholder="Search employees, pages…"
                 autocomplete="off"
                 spellcheck="false"
                 style="
                     flex:1;border:none;background:transparent;outline:none;
-                    font-size:0.82rem;color:#111827;min-width:0;padding:0;line-height:1;
+                    font-size:0.85rem;color:#111827;min-width:0;padding:0;line-height:1;
                 "
             >
         </div>
@@ -382,26 +382,26 @@
                 'display:none',
                 'position:fixed',
                 'z-index:99999',
-                'width:380px',
+                'width:520px',
                 'background:#fff',
                 'border:1px solid #f1d0d0',
-                'border-radius:16px',
-                'box-shadow:0 20px 50px rgba(17,24,39,.16),0 6px 18px rgba(200,41,42,.09)',
+                'border-radius:18px',
+                'box-shadow:0 24px 60px rgba(17,24,39,.18),0 8px 24px rgba(200,41,42,.10)',
                 'overflow:hidden',
                 'font-family:inherit',
             ].join(';');
 
             popup.innerHTML = [
-                '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #f3f4f6;background:linear-gradient(135deg,#fff6f6 0%,#fff 65%)">',
-                  '<span style="width:30px;height:30px;border-radius:8px;background:#ffe9e9;color:#c8292a;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="feather-search"></i></span>',
+                '<div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #f3f4f6;background:linear-gradient(135deg,#fff6f6 0%,#fff 65%)">',
+                  '<span style="width:34px;height:34px;border-radius:10px;background:#ffe9e9;color:#c8292a;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="feather-search"></i></span>',
                   '<div>',
-                    '<div style="font-size:.81rem;font-weight:700;color:#111827">Search</div>',
-                    '<div id="kt-sp-sub" style="font-size:.70rem;color:#9ca3af">Start typing…</div>',
+                    '<div style="font-size:.85rem;font-weight:700;color:#111827">Search</div>',
+                    '<div id="kt-sp-sub" style="font-size:.72rem;color:#9ca3af">Start typing…</div>',
                   '</div>',
-                  '<span style="margin-left:auto;font-size:.60rem;font-weight:700;color:#9ca3af;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:4px;padding:2px 5px;text-transform:uppercase;flex-shrink:0">Esc</span>',
+                  '<span style="margin-left:auto;font-size:.62rem;font-weight:700;color:#9ca3af;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:4px;padding:2px 6px;text-transform:uppercase;flex-shrink:0">Esc</span>',
                 '</div>',
-                '<div style="max-height:360px;overflow-y:auto;padding:6px 6px 8px">',
-                  '<div id="kt-sp-state" style="padding:22px 12px;text-align:center;color:#9ca3af;font-size:.80rem"><i class="feather-search" style="display:block;font-size:20px;margin-bottom:6px;opacity:.28"></i>Type to search</div>',
+                '<div style="max-height:460px;overflow-y:auto;padding:8px 8px 10px">',
+                  '<div id="kt-sp-state" style="padding:28px 16px;text-align:center;color:#9ca3af;font-size:.83rem"><i class="feather-search" style="display:block;font-size:24px;margin-bottom:8px;opacity:.28"></i>Type to search</div>',
                   '<ul id="kt-sp-list" style="list-style:none;margin:0;padding:0"></ul>',
                 '</div>',
             ].join('');
@@ -422,10 +422,10 @@
                 var pill = document.getElementById('kt-nav-search');
                 if (!pill) return;
                 var r   = pill.getBoundingClientRect();
-                var w   = 380;
+                var w   = 520;
                 var left = r.left + r.width / 2 - w / 2;
                 left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
-                popup.style.top  = (r.bottom + 6) + 'px';
+                popup.style.top  = (r.bottom + 8) + 'px';
                 popup.style.left = left + 'px';
             }
 
@@ -503,12 +503,12 @@
                     var li = document.createElement('li');
                     var a  = document.createElement('a');
                     a.href = href;
-                    a.style.cssText = 'display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:9px;text-decoration:none;color:#111827;border:1px solid transparent;transition:background .1s,border-color .1s';
+                    a.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;text-decoration:none;color:#111827;border:1px solid transparent;transition:background .1s,border-color .1s';
                     a.innerHTML =
                         left +
                         '<span style="min-width:0">' +
-                            '<div style="font-size:.83rem;font-weight:600;color:#111827;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + nameHtml + '</div>' +
-                            (subHtml ? '<div style="font-size:.70rem;color:#6b7280;margin-top:1px">' + subHtml + '</div>' : '') +
+                            '<div style="font-size:.88rem;font-weight:600;color:#111827;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + nameHtml + '</div>' +
+                            (subHtml ? '<div style="font-size:.74rem;color:#6b7280;margin-top:2px">' + subHtml + '</div>' : '') +
                         '</span>';
                     a.addEventListener('mouseenter', function(){ this.style.background='#fff7f7'; this.style.borderColor='#ffd7d7'; });
                     a.addEventListener('mouseleave', function(){ this.style.background=''; this.style.borderColor='transparent'; });
@@ -518,13 +518,13 @@
 
                 // Pages section
                 addSection('Pages', pages, function(item) {
-                    var iconBox = '<span style="width:32px;height:32px;min-width:32px;border-radius:8px;background:#f4f6f8;color:#6b7280;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="' + escHtml(item.icon) + '"></i></span>';
+                    var iconBox = '<span style="width:36px;height:36px;min-width:36px;border-radius:9px;background:#f4f6f8;color:#6b7280;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="' + escHtml(item.icon) + '"></i></span>';
                     makeRow(escHtml(item.url), iconBox, markText(item.label, q), '');
                 });
 
                 // Employees section
                 addSection('Employees', emps, function(item) {
-                    var avatar = '<span style="width:32px;height:32px;min-width:32px;border-radius:50%;background:#c8292a;color:#fff;font-size:.67rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + escHtml(item.initials) + '</span>';
+                    var avatar = '<span style="width:36px;height:36px;min-width:36px;border-radius:50%;background:#c8292a;color:#fff;font-size:.70rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + escHtml(item.initials) + '</span>';
                     makeRow(escHtml(item.url), avatar, markText(item.label, q), item.subtitle ? escHtml(item.subtitle) : '');
                 });
             }
