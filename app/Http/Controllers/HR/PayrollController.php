@@ -373,20 +373,44 @@ class PayrollController extends Controller
         abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
         abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
 
-        $payroll->loadMissing('user');
+        $payroll->loadMissing(['user', 'allowances', 'deductions']);
 
-        if ($payroll->status === 'prepared') {
-            return redirect()
-                ->route('payroll.batch.confirm', $batch)
-                ->with('info', 'Employee is already prepared.');
-        }
+        // Recompute so any OT/UT approved after initial generation is picked up,
+        // while preserving any manual allowances/deductions HR already added.
+        $periodStart = Carbon::parse($batch->period_start);
+        $periodEnd   = Carbon::parse($batch->period_end);
 
-        $payroll->update(['status' => 'prepared']);
+        $manualAllowances = $payroll->allowances
+            ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay'))
+            ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+            ->values()
+            ->toArray();
+
+        // Preserve manual + loan deductions; statutory and undertime are recomputed.
+        $manualDeductions = $payroll->deductions
+            ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+            ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+            ->values()
+            ->toArray();
+
+        $updatedPayroll = $this->payrollService->updatePayroll(
+            $payroll,
+            $payroll->user,
+            $periodStart,
+            $periodEnd,
+            $manualAllowances,
+            $manualDeductions,
+            ['status' => 'prepared']
+        );
+
+        // Only apply loan deductions if they weren't already applied
+        // (updatePayroll preserves them via manualDeductions above, so skip re-applying).
 
         $name = trim(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? ''));
         return redirect()
             ->route('payroll.batch.confirm', $batch)
-            ->with('success', ($name ? "{$name} marked as prepared." : 'Employee marked as prepared.'));
+            ->with('success', ($name ? "{$name} recomputed and marked as prepared." : 'Employee recomputed and marked as prepared.'));
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -396,7 +420,7 @@ class PayrollController extends Controller
     {
         abort_if(!$batch->isEditable(), 403, 'Batch is already finalized.');
 
-        $batch->load(['payrolls.user']);
+        $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
 
         if ($batch->payrolls->isEmpty()) {
             return redirect()
@@ -420,14 +444,48 @@ class PayrollController extends Controller
                 ->with('error', "Cannot finalize batch. These employees are not prepared yet: {$names}.");
         }
 
-        $batch->payrolls()->update(['status' => 'submitted']);
+        // Recompute every payroll to pick up any OT/UT approved after initial generation.
+        $periodStart = Carbon::parse($batch->period_start);
+        $periodEnd   = Carbon::parse($batch->period_end);
+
+        foreach ($batch->payrolls as $payroll) {
+            // Preserve any manual allowances the HR added via the edit screen.
+            $manualAllowances = $payroll->allowances
+                ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay'))
+                ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                ->values()
+                ->toArray();
+
+            // Preserve manual + loan deductions (everything except statutory and undertime,
+            // which are recomputed by updatePayroll automatically).
+            $manualDeductions = $payroll->deductions
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                    || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->values()
+                ->toArray();
+
+            $this->payrollService->updatePayroll(
+                $payroll,
+                $payroll->user,
+                $periodStart,
+                $periodEnd,
+                $manualAllowances,
+                $manualDeductions,
+                ['status' => 'submitted']
+            );
+            // Note: applyLoanDeductions is NOT called here — it was already applied
+            // during batchMarkPrepared and the loan deductions are preserved above.
+        }
+
         $batch->update([
-            'status' => 'submitted',
+            'status'       => 'submitted',
             'finalized_by' => auth()->id(),
             'finalized_at' => now(),
         ]);
 
-        return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll batch submitted to accounting. Records are now locked.');
+        return redirect()->route('payroll.salary-computation.index')
+            ->with('success', 'Payroll batch submitted to accounting. Records are now locked.');
     }
 
     /* ══════════════════════════════════════════════════════════════

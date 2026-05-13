@@ -378,7 +378,7 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
 
     // Batch approval routes (must come before resource route)
-    Route::get('payroll-approval/batch', [PayrollApprovalController::class, 'showBatch'])->name('payroll-approval.batch');
+    Route::get('payroll-approval/batch/{batch}', [PayrollApprovalController::class, 'showBatch'])->name('payroll-approval.batch');
     Route::post('payroll-approval/batch/approve', [PayrollApprovalController::class, 'approveBatch'])->name('payroll-approval.approve-batch');
     Route::post('payroll-approval/batch/reject', [PayrollApprovalController::class, 'rejectBatch'])->name('payroll-approval.reject-batch');
 

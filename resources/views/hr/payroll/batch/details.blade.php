@@ -54,8 +54,7 @@
             @if(auth()->user()?->role === 'accountant' && $batch->status === 'submitted')
                 <form action="{{ route('payroll-approval.approve-batch') }}" method="POST" style="display:inline;">
                     @csrf
-                    <input type="hidden" name="start" value="{{ $batch->period_start->format('Y-m-d') }}">
-                    <input type="hidden" name="end" value="{{ $batch->period_end->format('Y-m-d') }}">
+                    <input type="hidden" name="batch_id" value="{{ $batch->id }}">
                     <button class="bd-btn primary" type="submit" data-sa-confirm="Approve this entire batch?">
                         <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                         Approve Batch
@@ -63,8 +62,7 @@
                 </form>
                 <form action="{{ route('payroll-approval.reject-batch') }}" method="POST" style="display:inline;">
                     @csrf
-                    <input type="hidden" name="start" value="{{ $batch->period_start->format('Y-m-d') }}">
-                    <input type="hidden" name="end" value="{{ $batch->period_end->format('Y-m-d') }}">
+                    <input type="hidden" name="batch_id" value="{{ $batch->id }}">
                     <input type="text" name="rejection_note" required minlength="3"
                            placeholder="Rejection note (required)"
                            style="padding:10px 12px;border-radius:12px;border:1px solid #e5e7eb;min-width:240px;font-size:.82rem;">
