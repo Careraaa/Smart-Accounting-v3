@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+﻿@extends('layouts.layout')
 
 @push('styles')
 @include('superadmin.partials.prl-theme')
@@ -8,9 +8,7 @@
 @php
     $initials = function ($name) {
         $name = trim((string) $name);
-        if ($name === '') {
-            return '?';
-        }
+        if ($name === '') return '?';
         $p = preg_split('/\s+/', $name);
         $a = strtoupper(substr($p[0] ?? '', 0, 1));
         $b = strtoupper(substr($p[1] ?? '', 0, 1));
@@ -188,10 +186,7 @@
     if (typeof ApexCharts === 'undefined') return;
 
     const font = 'Sora, sans-serif';
-    const mono = "'DM Mono', monospace";
     const red = '#c8292a';
-    const ink = '#111827';
-    const muted = '#94a3b8';
 
     const trend = @json($attendanceTrend);
     const categories = trend.map(function (t) { return t.date; });
@@ -199,14 +194,7 @@
     const elA = document.querySelector('#sa-chart-attendance');
     if (elA) {
         new ApexCharts(elA, {
-            chart: {
-                type: 'area',
-                height: 280,
-                fontFamily: font,
-                toolbar: { show: false },
-                zoom: { enabled: false },
-                animations: { enabled: true, speed: 450 }
-            },
+            chart: { type: 'area', height: 280, fontFamily: font, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: true, speed: 450 } },
             series: [
                 { name: 'Present', data: trend.map(function (t) { return t.present; }) },
                 { name: 'Late', data: trend.map(function (t) { return t.late; }) },
@@ -214,44 +202,13 @@
             ],
             colors: [red, '#d97706', '#cbd5e1'],
             stroke: { width: 2, curve: 'smooth' },
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 0.4,
-                    opacityFrom: 0.35,
-                    opacityTo: 0.02,
-                    stops: [0, 90, 100]
-                }
-            },
+            fill: { type: 'gradient', gradient: { shadeIntensity: 0.4, opacityFrom: 0.35, opacityTo: 0.02, stops: [0, 90, 100] } },
             dataLabels: { enabled: false },
-            xaxis: {
-                categories: categories,
-                labels: { style: { colors: '#64748b', fontSize: '11px' } },
-                axisBorder: { show: false },
-                axisTicks: { show: false }
-            },
-            yaxis: {
-                labels: { style: { colors: '#64748b', fontSize: '11px' } },
-                min: 0,
-                tickAmount: 4,
-                forceNiceScale: true
-            },
-            grid: {
-                borderColor: '#f1f5f9',
-                strokeDashArray: 4,
-                padding: { top: 8, right: 12, bottom: 0, left: 8 }
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'right',
-                fontSize: '11px',
-                fontWeight: 600,
-                itemMargin: { horizontal: 12 }
-            },
-            tooltip: {
-                theme: 'light',
-                y: { formatter: function (v) { return v + ' · day'; } }
-            }
+            xaxis: { categories: categories, labels: { style: { colors: '#64748b', fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
+            yaxis: { labels: { style: { colors: '#64748b', fontSize: '11px' } }, min: 0, tickAmount: 4, forceNiceScale: true },
+            grid: { borderColor: '#f1f5f9', strokeDashArray: 4, padding: { top: 8, right: 12, bottom: 0, left: 8 } },
+            legend: { position: 'top', horizontalAlign: 'right', fontSize: '11px', fontWeight: 600, itemMargin: { horizontal: 12 } },
+            tooltip: { theme: 'light', y: { formatter: function (v) { return v + ' · day'; } } }
         }).render();
     }
 
@@ -259,34 +216,15 @@
     const elP = document.querySelector('#sa-chart-payroll');
     if (elP) {
         new ApexCharts(elP, {
-            chart: {
-                type: 'bar',
-                height: 280,
-                fontFamily: font,
-                toolbar: { show: false }
-            },
+            chart: { type: 'bar', height: 280, fontFamily: font, toolbar: { show: false } },
             series: [{ name: 'Net pay', data: monthly.map(function (m) { return m.total; }) }],
             colors: [red],
-            plotOptions: {
-                bar: { borderRadius: 8, columnWidth: '58%' }
-            },
+            plotOptions: { bar: { borderRadius: 8, columnWidth: '58%' } },
             dataLabels: { enabled: false },
-            xaxis: {
-                categories: monthly.map(function (m) { return m.month; }),
-                labels: { style: { colors: '#64748b', fontSize: '11px' } },
-                axisBorder: { show: false }
-            },
-            yaxis: {
-                labels: {
-                    style: { colors: '#64748b', fontSize: '11px' },
-                    formatter: function (v) { return '₱' + (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v.toFixed(0)); }
-                }
-            },
+            xaxis: { categories: monthly.map(function (m) { return m.month; }), labels: { style: { colors: '#64748b', fontSize: '11px' } }, axisBorder: { show: false } },
+            yaxis: { labels: { style: { colors: '#64748b', fontSize: '11px' }, formatter: function (v) { return '₱' + (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v.toFixed(0)); } } },
             grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
-            tooltip: {
-                theme: 'light',
-                y: { formatter: function (v) { return '₱' + v.toLocaleString(undefined, { maximumFractionDigits: 0 }); } }
-            }
+            tooltip: { theme: 'light', y: { formatter: function (v) { return '₱' + v.toLocaleString(undefined, { maximumFractionDigits: 0 }); } } }
         }).render();
     }
 })();

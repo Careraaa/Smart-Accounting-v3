@@ -1,69 +1,34 @@
-@extends('layouts.layout')
+﻿@extends('layouts.layout')
 
 @push('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.edb-page { font-family:'Sora',sans-serif; }
+.edb { font-family: 'Sora', sans-serif; }
 
-/* ── Backdrop ───────────────────────────────────────────────── */
-.edb-wrap { position:relative; }
-.edb-backdrop {
-    position:absolute; inset:-40px -20px auto -20px; height:340px; pointer-events:none; z-index:0;
-    background:
-        radial-gradient(220px 220px at 10% 35%, rgba(200,41,42,0.14), transparent 60%),
-        radial-gradient(260px 260px at 85% 10%, rgba(2,132,199,0.12), transparent 60%),
-        radial-gradient(240px 240px at 70% 70%, rgba(22,163,74,0.10), transparent 60%),
-        linear-gradient(to bottom, rgba(17,24,39,0.04), transparent 70%);
-    filter:saturate(110%);
-}
-.edb-grid {
-    position:absolute; inset:0;
-    background-image:
-        linear-gradient(to right, rgba(17,24,39,0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(17,24,39,0.06) 1px, transparent 1px);
-    background-size:48px 48px;
-    mask-image:radial-gradient(closest-side at 50% 30%, rgba(0,0,0,0.75), transparent 80%);
-    opacity:.5;
-}
-.edb-content { position:relative; z-index:1; }
-
-/* ── Hero ───────────────────────────────────────────────────── */
+/* ── Hero ── */
 .edb-hero {
-    background:linear-gradient(135deg,#111827 0%,#0b1220 55%,#111827 100%);
-    border-radius:18px; padding:22px 24px; margin-top:24px; margin-bottom:18px;
-    display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;
-    position:relative; overflow:hidden;
+    background: linear-gradient(135deg, #111827 0%, #0b1220 55%, #111827 100%);
+    border-radius: 18px; padding: 22px 24px; margin-bottom: 22px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 18px; flex-wrap: wrap; position: relative; overflow: hidden;
 }
 .edb-hero::before { content:''; position:absolute; top:-70px; right:-70px; width:260px; height:260px; border-radius:50%; background:rgba(200,41,42,0.18); pointer-events:none; }
 .edb-hero::after  { content:''; position:absolute; bottom:-90px; left:-90px; width:260px; height:260px; border-radius:50%; background:rgba(2,132,199,0.14); pointer-events:none; }
-.edb-hero-left  { position:relative; z-index:1; }
+.edb-hero-left { position:relative; z-index:1; }
+.edb-hero h1 { font-size:1.25rem; font-weight:900; color:#fff; margin:0 0 6px; letter-spacing:-0.02em; }
+.edb-hero p  { margin:0; font-size:.82rem; color:#9ca3af; line-height:1.5; }
 .edb-hero-right { position:relative; z-index:1; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-.edb-title { font-size:1.25rem; font-weight:900; color:#fff; margin:0 0 6px; letter-spacing:-0.02em; }
-.edb-sub   { font-size:.82rem; color:#9ca3af; margin:0; }
-.edb-chip  { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid rgba(255,255,255,0.14); border-radius:999px; color:#e5e7eb; background:rgba(255,255,255,0.06); font-size:.75rem; }
-.edb-btn {
-    display:inline-flex; align-items:center; gap:10px; padding:11px 18px;
-    background:#c8292a; color:#fff; border:none; border-radius:12px;
-    font-family:'Sora',sans-serif; font-size:.86rem; font-weight:900; cursor:pointer;
-    transition:background .15s,box-shadow .15s,transform .15s; text-decoration:none;
-    box-shadow:0 4px 20px rgba(200,41,42,.5); white-space:nowrap;
-}
+.edb-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid rgba(255,255,255,0.14); border-radius:999px; color:#e5e7eb; background:rgba(255,255,255,0.06); font-size:.75rem; }
+.edb-btn { display:inline-flex; align-items:center; gap:10px; padding:11px 18px; background:#c8292a; color:#fff; border:none; border-radius:12px; font-size:.86rem; font-weight:900; cursor:pointer; transition:background .15s,box-shadow .15s,transform .15s; text-decoration:none; box-shadow:0 4px 20px rgba(200,41,42,.5); white-space:nowrap; }
 .edb-btn:hover { background:#a81f20; color:#fff; box-shadow:0 10px 34px rgba(200,41,42,.62); transform:translateY(-1px); }
 
-/* ── Stat cards ─────────────────────────────────────────────── */
+/* ── Stat cards ── */
 .edb-stats { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:18px; }
 @media(max-width:700px) { .edb-stats { grid-template-columns:1fr; } }
 
-.edb-stat {
-    background:rgba(255,255,255,0.95); backdrop-filter:blur(6px);
-    border:1px solid rgba(229,231,235,0.9); border-radius:16px;
-    padding:20px 22px; display:flex; gap:14px; align-items:flex-start;
-    position:relative; overflow:hidden;
-    box-shadow:0 10px 30px rgba(17,24,39,0.06);
-    transition:box-shadow .15s, transform .15s;
-}
-.edb-stat:hover { box-shadow:0 14px 36px rgba(17,24,39,0.11); transform:translateY(-2px); }
-.edb-stat::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 14px 14px; }
+.edb-stat { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:20px 22px; display:flex; align-items:flex-start; gap:14px; position:relative; overflow:hidden; transition:box-shadow .15s,transform .15s; }
+.edb-stat:hover { box-shadow:0 14px 36px rgba(17,24,39,0.10); transform:translateY(-2px); }
+.edb-stat::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 16px 16px; }
 .edb-stat.s-amber::after { background:#d97706; }
 .edb-stat.s-green::after { background:#16a34a; }
 
@@ -75,26 +40,20 @@
 .edb-stat-val { font-size:1.05rem; font-weight:900; color:#111827; line-height:1.2; font-family:'DM Mono',monospace; font-variant-numeric:tabular-nums; }
 .edb-stat-sub { font-size:.72rem; color:#9ca3af; margin-top:5px; }
 
-/* ── Layout columns ─────────────────────────────────────────── */
+/* ── Two-col layout ── */
 .edb-two-col { display:grid; grid-template-columns:1fr 340px; gap:16px; align-items:start; }
 @media(max-width:960px) { .edb-two-col { grid-template-columns:1fr; } }
 
-/* ── Cards ──────────────────────────────────────────────────── */
-.edb-card { background:rgba(255,255,255,0.95); backdrop-filter:blur(6px); border:1px solid rgba(229,231,235,0.9); border-radius:16px; overflow:hidden; box-shadow:0 10px 30px rgba(17,24,39,0.06); margin-bottom:16px; }
+/* ── Cards ── */
+.edb-card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; overflow:hidden; margin-bottom:16px; }
 .edb-card:last-child { margin-bottom:0; }
 .edb-card-head { padding:14px 18px; border-bottom:1px solid #f3f4f6; display:flex; align-items:center; gap:10px; }
 .edb-card-title { font-size:.82rem; font-weight:800; color:#111827; margin:0; display:flex; align-items:center; gap:8px; }
 .edb-card-dot { width:7px; height:7px; border-radius:50%; background:#c8292a; display:inline-block; flex-shrink:0; }
 .edb-card-body { padding:18px; }
 
-/* ── Scan action ────────────────────────────────────────────── */
-.edb-scan-btn {
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:10px; padding:28px 20px; border-radius:14px; text-decoration:none;
-    background:linear-gradient(135deg,#fff5f5,#fff0f0);
-    border:2px dashed rgba(200,41,42,0.35);
-    transition:all .18s; text-align:center;
-}
+/* ── Scan action ── */
+.edb-scan-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:28px 20px; border-radius:14px; text-decoration:none; background:linear-gradient(135deg,#fff5f5,#fff0f0); border:2px dashed rgba(200,41,42,0.35); transition:all .18s; text-align:center; }
 .edb-scan-btn:hover { background:linear-gradient(135deg,#c8292a,#a81f20); border-color:transparent; transform:translateY(-2px); box-shadow:0 10px 28px rgba(200,41,42,0.35); }
 .edb-scan-icon { color:#c8292a; transition:color .18s; }
 .edb-scan-btn:hover .edb-scan-icon { color:#fff; }
@@ -103,26 +62,26 @@
 .edb-scan-sub { font-size:.74rem; color:#9ca3af; transition:color .18s; }
 .edb-scan-btn:hover .edb-scan-sub { color:rgba(255,255,255,0.75); }
 
-/* ── Last log panel ─────────────────────────────────────────── */
+/* ── Last log panel ── */
 .edb-lastlog-panel { background:#f8f9fb; border-radius:12px; padding:16px 18px; display:flex; flex-direction:column; justify-content:center; height:100%; }
 .edb-lastlog-lbl { font-size:.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:#9ca3af; margin-bottom:8px; }
 .edb-lastlog-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .edb-lastlog-time { font-family:'DM Mono',monospace; font-size:1.1rem; font-weight:700; color:#111827; }
 .edb-lastlog-hint { font-size:.74rem; color:#9ca3af; margin-top:10px; line-height:1.55; }
 
-/* ── Badges ─────────────────────────────────────────────────── */
+/* ── Badges ── */
 .edb-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
 .edb-badge.in   { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
 .edb-badge.out  { background:#fffbeb; color:#b45309; border:1px solid #fde68a; }
 .edb-badge.none { background:#f3f4f6; color:#6b7280; border:1px solid #e5e7eb; }
 
-/* ── Profile sidebar ────────────────────────────────────────── */
+/* ── Profile sidebar ── */
 .edb-kv { display:grid; grid-template-columns:110px 1fr; gap:10px 14px; align-items:center; }
 .edb-k { font-size:.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:#9ca3af; }
 .edb-v { font-size:.845rem; font-weight:700; color:#111827; }
 .edb-divider { height:1px; background:#f3f4f6; margin:12px 0; }
 
-/* ── Tips ───────────────────────────────────────────────────── */
+/* ── Tips ── */
 .edb-tips-list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
 .edb-tips-item { display:flex; align-items:flex-start; gap:10px; }
 .edb-tips-num { width:22px; height:22px; border-radius:50%; background:#111827; color:#fff; font-size:.68rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
@@ -133,15 +92,13 @@
 @endpush
 
 @section('content')
-<div class="edb-page edb-wrap">
-    <div class="edb-backdrop"><div class="edb-grid"></div></div>
-    <div class="edb-content">
+<div class="col-12 edb">
 
-    {{-- ── Hero ── --}}
+    {{-- Hero --}}
     <div class="edb-hero">
         <div class="edb-hero-left">
-            <h1 class="edb-title">Employee Dashboard</h1>
-            <p class="edb-sub">Your attendance overview and quick actions for today.</p>
+            <h1>Employee Dashboard</h1>
+            <p>Your attendance overview and quick actions for today.</p>
             <div class="d-flex flex-wrap gap-2 mt-2">
                 <span class="edb-chip">
                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -161,7 +118,7 @@
         </div>
     </div>
 
-    {{-- ── Stat cards ── --}}
+    {{-- Stat cards --}}
     <div class="edb-stats">
         <div class="edb-stat s-amber">
             <div class="edb-ico">
@@ -188,7 +145,7 @@
         </div>
     </div>
 
-    {{-- ── Two-column layout ── --}}
+    {{-- Two-column layout --}}
     <div class="edb-two-col">
 
         {{-- Left: Attendance card --}}
@@ -226,8 +183,6 @@
 
         {{-- Right: Profile + Tips --}}
         <div>
-
-            {{-- My Profile --}}
             <div class="edb-card">
                 <div class="edb-card-head">
                     <span class="edb-card-title">
@@ -262,7 +217,6 @@
                 </div>
             </div>
 
-            {{-- Attendance Guidelines --}}
             <div class="edb-card">
                 <div class="edb-card-head">
                     <span class="edb-card-title">
@@ -291,12 +245,10 @@
                     </ul>
                 </div>
             </div>
-
         </div>
-    </div>{{-- end two-col --}}
+    </div>
 
-    </div>{{-- end edb-content --}}
-</div>{{-- end edb-page --}}
+</div>
 
 <script>
 window.addEventListener('load', async () => {
@@ -313,9 +265,7 @@ window.addEventListener('load', async () => {
     }
 
     try {
-        const response = await fetch("{{ route('attendance.lastlog') }}", {
-            headers: { 'Accept': 'application/json' }
-        });
+        const response = await fetch("{{ route('attendance.lastlog') }}", { headers: { 'Accept': 'application/json' } });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
 
@@ -332,7 +282,6 @@ window.addEventListener('load', async () => {
             badgeEl.innerHTML     = makeBadge(null);
         }
     } catch (err) {
-        console.error('Attendance fetch error:', err);
         const errBadge = '<span class="edb-badge none">Error</span>';
         statusEl.innerHTML    = errBadge;
         badgeStatEl.innerHTML = errBadge;

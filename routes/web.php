@@ -35,6 +35,7 @@ use App\Http\Controllers\Employee\LeaveController as EmployeeLeaveController;
 use App\Http\Controllers\Employee\OvertimeUndertimeController as EmployeeOvertimeUndertimeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use Illuminate\Http\Request;
@@ -107,6 +108,9 @@ Route::middleware(['auth', 'check-status'])->group(function () {
             Route::post('/{notification}/unread', [NotificationController::class, 'markAsUnread'])->name('unread');
             Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
         });
+
+    // Global search
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
 
     Route::get('/profile/details', fn() => view('partials.profile.profile-details'))->name('profile.details');
     Route::get('/profile/edit', fn() => view('partials.profile.edit-profile'))->name('profile.edit');
