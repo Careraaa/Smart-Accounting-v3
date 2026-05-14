@@ -10,11 +10,12 @@
 .prl-wrap { max-width: 760px; margin: 0 auto; padding-bottom: 56px; }
 
 .prl-back-link {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 0.78rem; font-weight: 600; color: #9ca3af;
-    text-decoration: none; margin-bottom: 16px; transition: color 0.13s;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.84rem; font-weight: 700; color: #374151;
+    text-decoration: none; margin-bottom: 16px; transition: all 0.13s;
+    padding: 9px 16px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer;
 }
-.prl-back-link:hover { color: #c8292a; }
+.prl-back-link:hover { border-color: #c8292a; color: #c8292a; background: #fff5f5; }
 
 .prl-page-title {
     font-size: 1.25rem; font-weight: 800; color: #111827;
@@ -251,10 +252,10 @@
 <div class="prl-page">
 <div class="prl-wrap">
 
-    <a href="{{ route('payroll.salary-computation.batch-generate') }}" class="prl-back-link">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        Back to Batch Generator
-    </a>
+    <button type="button" onclick="history.back()" class="prl-back-link">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Back
+    </button>
 
     <h1 class="prl-page-title">Individual Payroll</h1>
     <p class="prl-page-sub">Create a fully customized payroll record for a single employee.</p>

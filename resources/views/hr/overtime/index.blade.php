@@ -26,28 +26,6 @@
 .ot-flash.error   { background:#fff0f0;border:1px solid #fecaca;color:#c8292a; }
 @keyframes flashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
 
-/* ── Stats ──────────────────────────────────────────────────── */
-.ot-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px; }
-@media(max-width:900px) { .ot-stats { grid-template-columns:repeat(2,1fr); } }
-@media(max-width:500px) { .ot-stats { grid-template-columns:1fr; } }
-
-.ot-stat { background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden; }
-.ot-stat::after { content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 14px 14px; }
-.ot-stat.c-blue::after  { background:#0284c7; }
-.ot-stat.c-green::after { background:#16a34a; }
-.ot-stat.c-amber::after { background:#d97706; }
-.ot-stat.c-red::after   { background:#c8292a; }
-
-.ot-stat-icon { width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.ot-stat.c-blue  .ot-stat-icon { background:#f0f9ff;color:#0284c7; }
-.ot-stat.c-green .ot-stat-icon { background:#f0fdf4;color:#16a34a; }
-.ot-stat.c-amber .ot-stat-icon { background:#fffbeb;color:#d97706; }
-.ot-stat.c-red   .ot-stat-icon { background:#fff0f0;color:#c8292a; }
-
-.ot-stat-lbl { font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:3px; }
-.ot-stat-val { font-size:1.5rem;font-weight:800;color:#111827;line-height:1;font-family:'DM Mono',monospace; }
-.ot-stat-sub { font-size:0.72rem;color:#9ca3af;margin-top:3px; }
-
 /* ── Filter bar ─────────────────────────────────────────────── */
 .ot-filter-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
 .ot-search-wrap { position:relative;flex:1;min-width:160px; }
@@ -135,50 +113,6 @@
         </div>
     </div>
 
-    {{-- Stats --}}
-    <div class="ot-stats">
-        <div class="ot-stat c-blue">
-            <div class="ot-stat-icon">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
-            </div>
-            <div>
-                <div class="ot-stat-lbl">Employees</div>
-                <div class="ot-stat-val">{{ $employees->count() }}</div>
-                <div class="ot-stat-sub">total staff</div>
-            </div>
-        </div>
-        <div class="ot-stat c-green">
-            <div class="ot-stat-icon">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
-            </div>
-            <div>
-                <div class="ot-stat-lbl">Overtime</div>
-                <div class="ot-stat-val">{{ $overtimeCount }}</div>
-                <div class="ot-stat-sub">{{ number_format($totalOvertimeHours, 1) }} hrs total</div>
-            </div>
-        </div>
-        <div class="ot-stat c-amber">
-            <div class="ot-stat-icon">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v4l-2 2"/></svg>
-            </div>
-            <div>
-                <div class="ot-stat-lbl">Undertime</div>
-                <div class="ot-stat-val">{{ $undertimeCount }}</div>
-                <div class="ot-stat-sub">{{ number_format($totalUndertimeHours, 1) }} hrs total</div>
-            </div>
-        </div>
-        <div class="ot-stat c-red">
-            <div class="ot-stat-icon">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div>
-                <div class="ot-stat-lbl">This Month</div>
-                <div class="ot-stat-val">{{ $monthlySummary->sum('total_records') }}</div>
-                <div class="ot-stat-sub">records logged</div>
-            </div>
-        </div>
-    </div>
-
     {{-- Filter bar --}}
     <div class="ot-filter-bar">
         <div class="ot-search-wrap">
@@ -205,7 +139,6 @@
                         <th class="text-center">OT This Month</th>
                         <th class="text-center">UT This Month</th>
                         <th class="text-center">Records</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody id="empTbody">
@@ -256,15 +189,9 @@
                             <td class="text-center" style="font-family:'DM Mono',monospace;font-size:0.82rem;color:#374151;font-weight:700;">
                                 {{ $recCount > 0 ? $recCount : '—' }}
                             </td>
-                            <td onclick="event.stopPropagation()">
-                                <a href="{{ route('overtime.employee.calendar', $emp->id) }}" class="ot-view-link">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                    Calendar
-                                </a>
-                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7">
+                        <tr><td colspan="6">
                             <div class="ot-empty">
                                 <div class="ot-empty-icon">
                                     <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>

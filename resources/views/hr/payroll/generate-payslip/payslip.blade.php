@@ -329,7 +329,7 @@
 <body>
 
     <div class="controls">
-        <a href="{{ route('payroll.salary-computation.show', $payroll) }}" class="btn btn-ghost">← Back</a>
+        <button type="button" class="btn btn-ghost" onclick="history.back()">← Back</button>
         <button class="btn btn-primary" onclick="window.print()">Print Payslip</button>
     </div>
 

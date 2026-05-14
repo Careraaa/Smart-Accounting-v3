@@ -26,7 +26,16 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // Block login if this account is already actively logged in elsewhere
+        if (auth()->user()->is_logged_in) {
+            Auth::logout();
+            return response()->view('errors.account-in-use', [], 409);
+        }
+
         $request->session()->regenerate();
+
+        // Mark the account as logged in
+        auth()->user()->update(['is_logged_in' => true]);
 
         // Flash notification if user hasn't changed their generated password yet
         if (!auth()->user()->password_changed) {
@@ -41,6 +50,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Free the account slot on logout
+        if (auth()->check()) {
+            auth()->user()->update(['is_logged_in' => false]);
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

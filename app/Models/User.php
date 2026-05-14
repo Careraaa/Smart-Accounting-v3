@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password_changed',
         'role',
         'profile_picture',
+        'is_logged_in',
         // Employee information fields
         'first_name',
         'middle_name',

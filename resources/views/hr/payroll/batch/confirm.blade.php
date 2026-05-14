@@ -1,4 +1,4 @@
-﻿@extends('layouts.layout')
+@extends('layouts.layout')
 
 @push('styles')
 <style>
@@ -6,8 +6,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 .prl-page { font-family: 'Sora', sans-serif; }
 
-.prl-back-link { display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:600;color:#9ca3af;text-decoration:none;margin-bottom:16px;transition:color 0.13s; }
-.prl-back-link:hover { color:#c8292a; }
+.prl-back-link { display:inline-flex;align-items:center;gap:8px;font-size:0.84rem;font-weight:700;color:#374151;text-decoration:none;margin-bottom:16px;padding:9px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;cursor:pointer;transition:all 0.13s; }
+.prl-back-link:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
 
 /* ── Batch hero ─────────────────────────────────────────────── */
 .prl-batch-hero { background:#111827;border-radius:16px;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:20px;flex-wrap:wrap;position:relative;overflow:hidden; }
@@ -31,6 +31,8 @@
 .prl-btn-sec { display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(255,255,255,0.07);color:#9ca3af;border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap; }
 .prl-btn-sec:hover { background:rgba(255,255,255,0.12);color:#fff; }
 .prl-btn-locked { display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(255,255,255,0.04);color:#4b5563;border:1px solid rgba(255,255,255,0.07);border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;cursor:not-allowed; }
+.prl-btn-danger { display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:rgba(225,29,72,0.12);color:#fca5a5;border:1px solid rgba(225,29,72,0.25);border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s;white-space:nowrap; }
+.prl-btn-danger:hover { background:#e11d48;color:#fff;border-color:#e11d48; }
 
 /* ── Prepare-all toolbar ────────────────────────────────────── */
 .prl-bulk-toolbar {
@@ -137,10 +139,10 @@
         @endif
     @endforeach
 
-    <a href="{{ route('payroll.salary-computation.index') }}" class="prl-back-link">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        Back to Payroll
-    </a>
+    <button type="button" onclick="history.back()" class="prl-back-link">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Back
+    </button>
 
     {{-- Batch hero --}}
     <div class="prl-batch-hero">
@@ -181,14 +183,35 @@
                         Finalize &amp; Submit
                     </button>
                 </form>
-                <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="prl-btn-sec"
-                        onclick="return confirm('Cancel this batch? All payroll records in it will be deleted.')">
+                <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="prl-btn-sec">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        Cancel Batch
+                        Cancel
                     </button>
                 </form>
+                {{-- Delete batch (destructive) --}}
+                <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST" id="deleteBatchForm">
+                    @csrf @method('DELETE')
+                </form>
+                <button type="button" class="prl-btn-danger" onclick="document.getElementById('deleteBatchModal').style.display='flex'">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Delete Batch
+                </button>
+            @elseif($batch->status === 'submitted')
+                {{-- Submitted: back link + delete --}}
+                <button type="button" onclick="history.back()" class="prl-btn-sec">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    Back
+                </button>
+                <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST" id="deleteBatchForm">
+                    @csrf @method('DELETE')
+                </form>
+                <button type="button" class="prl-btn-danger" onclick="document.getElementById('deleteBatchModal').style.display='flex'">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Delete Batch
+                </button>
             @elseif($batch->status === 'rejected')
                 <form action="{{ route('payroll.batch.reopen', $batch) }}" method="POST">
                     @csrf
@@ -205,6 +228,36 @@
             @endif
         </div>
     </div>
+
+    {{-- Delete confirmation modal --}}
+    @if($batch->isEditable() || $batch->status === 'submitted')
+    <div id="deleteBatchModal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(17,24,39,0.55);backdrop-filter:blur(2px);">
+        <div style="background:#fff;border-radius:18px;padding:32px 28px;max-width:420px;width:90%;box-shadow:0 24px 60px rgba(17,24,39,0.22);font-family:'Sora',sans-serif;">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+                <div style="width:44px;height:44px;border-radius:12px;background:#fff1f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#e11d48" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </div>
+                <div>
+                    <div style="font-size:1rem;font-weight:800;color:#111827;">Delete this batch?</div>
+                    <div style="font-size:0.78rem;color:#9ca3af;margin-top:2px;">{{ $batch->display_name }}</div>
+                </div>
+            </div>
+            <p style="font-size:0.85rem;color:#6b7280;line-height:1.6;margin:0 0 24px;">
+                This will permanently delete the batch and all payroll records inside it. This action cannot be undone.
+            </p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('deleteBatchModal').style.display='none'"
+                    style="padding:9px 20px;border-radius:9px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">
+                    Never mind
+                </button>
+                <button type="button" onclick="document.getElementById('deleteBatchForm').submit()"
+                    style="padding:9px 20px;border-radius:9px;border:none;background:#e11d48;color:#fff;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(225,29,72,0.3);">
+                    Yes, delete it
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
 
     @if($batch->status === 'rejected' && $batch->rejection_note)
         <div class="prl-flash error">

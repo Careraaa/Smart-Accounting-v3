@@ -25,7 +25,7 @@
             <div class="ps-sub">{{ $batch->display_name }} · {{ $batch->period_start->format('M d, Y') }} – {{ $batch->period_end->format('M d, Y') }}</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <a class="ps-btn" href="{{ route('payroll.batch.details', $batch) }}">Back to Batch</a>
+            <button type="button" class="ps-btn" onclick="history.back()">Back to Batch</button>
         </div>
     </div>
 
@@ -60,4 +60,3 @@
     </div>
 </div>
 @endsection
-

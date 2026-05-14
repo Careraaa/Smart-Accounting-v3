@@ -14,18 +14,6 @@
 .ntf-btn.active{border-color:#c8292a;color:#c8292a;background:#fff5f5}
 .ntf-btn-primary{display:inline-flex;align-items:center;gap:10px;padding:11px 20px;background:#c8292a;color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:.86rem;font-weight:800;cursor:pointer;transition:background .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(200,41,42,.5);white-space:nowrap;text-decoration:none}
 .ntf-btn-primary:hover{background:#a81f20;color:#fff;box-shadow:0 10px 34px rgba(200,41,42,.62)}
-.ntf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
-@media(max-width:900px){.ntf-stats{grid-template-columns:1fr}}
-.ntf-stat{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start;position:relative;overflow:hidden}
-.ntf-stat::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
-.ntf-stat.s-blue::after{background:#0284c7}.ntf-stat.s-amber::after{background:#d97706}.ntf-stat.s-green::after{background:#16a34a}
-.ntf-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ntf-stat.s-blue .ntf-ico{background:#f0f9ff;color:#0284c7}
-.ntf-stat.s-amber .ntf-ico{background:#fffbeb;color:#d97706}
-.ntf-stat.s-green .ntf-ico{background:#f0fdf4;color:#16a34a}
-.ntf-lbl{font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:#9ca3af;margin-bottom:4px}
-.ntf-val{font-size:1.25rem;font-weight:900;color:#111827;line-height:1;font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums}
-.ntf-subval{font-size:.73rem;color:#9ca3af;margin-top:4px}
 .ntf-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
 .ntf-card-head{padding:14px 18px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .ntf-card-title{font-size:.82rem;font-weight:900;color:#111827;margin:0;display:flex;align-items:center;gap:8px}
@@ -67,21 +55,6 @@
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 Mark all as read
             </button>
-        </div>
-    </div>
-
-    <div class="ntf-stats">
-        <div class="ntf-stat s-blue">
-            <div class="ntf-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h18v18H3V3z"/><path stroke-linecap="round" d="M7 8h10M7 12h10M7 16h6"/></svg></div>
-            <div><div class="ntf-lbl">Total</div><div class="ntf-val">{{ $stats['total'] ?? 0 }}</div><div class="ntf-subval">all notifications</div></div>
-        </div>
-        <div class="ntf-stat s-amber">
-            <div class="ntf-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg></div>
-            <div><div class="ntf-lbl">Unread</div><div class="ntf-val">{{ $stats['unread'] ?? 0 }}</div><div class="ntf-subval">need attention</div></div>
-        </div>
-        <div class="ntf-stat s-green">
-            <div class="ntf-ico"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
-            <div><div class="ntf-lbl">Read</div><div class="ntf-val">{{ $stats['read'] ?? 0 }}</div><div class="ntf-subval">already seen</div></div>
         </div>
     </div>
 

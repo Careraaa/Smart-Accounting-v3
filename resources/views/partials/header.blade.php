@@ -100,7 +100,7 @@
                     </div>
                     <div class="kt-notif-body">
                         <div id="notification-list">
-                            @forelse(auth()->user()->notifications()->unread()->recent()->limit(10)->get() as $notification)
+                            @forelse(auth()->user()->notifications()->unread()->recent()->limit(3)->get() as $notification)
                                 <div class="kt-notif-item {{ $notification->isUnread() ? 'unread' : '' }}" data-notif-id="{{ $notification->id }}" data-action-url="{{ $notification->getActionUrl() }}">
                                     <span class="kt-notif-accent"></span>
                                     <div class="kt-notif-content">
@@ -108,9 +108,6 @@
                                         <p class="kt-notif-message">{{ $notification->message }}</p>
                                         <small class="kt-notif-time">{{ $notification->created_at->diffForHumans() }}</small>
                                     </div>
-                                    <button type="button" class="kt-notif-delete notif-delete" data-notif-id="{{ $notification->id }}">
-                                        <i class="feather-x"></i>
-                                    </button>
                                 </div>
                             @empty
                                 <div class="kt-notif-empty">
@@ -306,25 +303,6 @@
         .nxl-header #notification-dropdown .kt-notif-time {
             font-size: 0.72rem;
             color: #9ca3af;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-delete {
-            width: 28px;
-            height: 28px;
-            min-width: 28px;
-            border: 0;
-            border-radius: 8px;
-            background: #f8fafc;
-            color: #94a3b8;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 1;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-delete:hover {
-            background: #ffe4e6;
-            color: #e11d48;
         }
 
         .nxl-header #notification-dropdown .kt-notif-footer {
@@ -593,55 +571,38 @@
         let notificationPollingInterval = null;
         
         const notificationReadUrlTemplate = @json(route('notifications.read', ['notification' => '__ID__']));
-        const notificationDeleteUrlTemplate = @json(route('notifications.destroy', ['notification' => '__ID__']));
-        
-        // Notification functionality
+
+        // ── Notification functionality ────────────────────────────────────
         document.addEventListener('DOMContentLoaded', function() {
             const isNotificationsPage = window.location.pathname.includes('/notifications');
 
-            // Initialize notification system
-            initializeNotifications();
-            
-            // Auto-refresh notifications every 5 seconds
+            attachMarkAllAsReadListener();
+            attachNotificationClickListeners();
+
+            // Auto-refresh every 30 seconds (not on the notifications page itself)
             if (!isNotificationsPage) {
                 startNotificationPolling();
             }
-            
-            // Refresh notifications when dropdown is opened
-            const notificationDropdown = document.getElementById('notification-dropdown');
-            if (notificationDropdown) {
-                const dropdownBtn = document.getElementById('notification-btn');
-                if (dropdownBtn) {
-                    dropdownBtn.addEventListener('show.bs.dropdown', function() {
-                        refreshNotificationList();
-                    });
-                }
+
+            // Refresh list when dropdown opens
+            const dropdownBtn = document.getElementById('notification-btn');
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('show.bs.dropdown', function() {
+                    refreshNotificationList();
+                });
             }
         });
 
-        // Initialize notification event listeners
-        function initializeNotifications() {
-            attachDeleteListeners();
-            attachMarkAllAsReadListener();
-            attachNotificationClickListeners();
-        }
-
-        // Attach click listeners to notification items for navigation
+        // Attach click-to-read listeners on notification items
         function attachNotificationClickListeners() {
             document.querySelectorAll('.kt-notif-item').forEach(item => {
                 item.addEventListener('click', function(e) {
-                    // Don't trigger if clicking the delete button
-                    if (e.target.closest('.notif-delete')) {
-                        return;
-                    }
-
                     e.preventDefault();
                     e.stopPropagation();
 
-                    const notifId = this.dataset.notifId;
+                    const notifId  = this.dataset.notifId;
                     const actionUrl = this.dataset.actionUrl;
 
-                    // Mark notification as read
                     fetch(notificationReadUrlTemplate.replace('__ID__', notifId), {
                         method: 'POST',
                         headers: {
@@ -649,249 +610,124 @@
                             'Accept': 'application/json'
                         }
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Close the dropdown
+                    .then(r => r.json())
+                    .then(() => {
                         const dropdownBtn = document.getElementById('notification-btn');
                         if (dropdownBtn) {
-                            const dropdownInstance = bootstrap.Dropdown.getInstance(dropdownBtn) || new bootstrap.Dropdown(dropdownBtn);
-                            dropdownInstance.hide();
+                            const dd = bootstrap.Dropdown.getInstance(dropdownBtn) || new bootstrap.Dropdown(dropdownBtn);
+                            dd.hide();
                         }
-
-                        // Navigate to the action URL if it exists
                         if (actionUrl && actionUrl !== 'null') {
                             window.location.href = actionUrl;
                         } else {
-                            // Update notification list if no navigation
                             updateNotificationCount();
                             refreshNotificationList();
                         }
                     })
-                    .catch(error => console.error('Error marking notification as read:', error));
-                });
-
-                // Add hover effect
-                item.addEventListener('mouseenter', function() {
-                    this.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
-                });
-
-                item.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('bg-light')) {
-                        this.style.backgroundColor = '';
-                    }
+                    .catch(err => console.error('Error marking notification as read:', err));
                 });
             });
         }
 
-        // Attach delete button listeners
-        function attachDeleteListeners() {
-            document.querySelectorAll('.notif-delete').forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const notifId = this.dataset.notifId;
-                    
-                    fetch(notificationDeleteUrlTemplate.replace('__ID__', notifId), {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            // Remove the notification item from DOM
-                            const notifItem = document.querySelector(`[data-notif-id="${notifId}"]`);
-                            if (notifItem) {
-                                notifItem.remove();
-                            }
-                            updateNotificationCount();
-                        }
-                    })
-                    .catch(error => console.error('Error deleting notification:', error));
-                });
-            });
-        }
-
-        // Attach mark all as read listener
+        // Mark all as read
         function attachMarkAllAsReadListener() {
-            const markAllReadBtn = document.getElementById('mark-all-read');
-            if (markAllReadBtn) {
-                markAllReadBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    fetch(@json(route('notifications.mark-all-as-read')), {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            refreshNotificationList();
-                        }
-                    })
-                    .catch(error => console.error('Error marking as read:', error));
-                });
-            }
-        }
-
-        // Update the notification count
-        function updateNotificationCount() {
-            fetch(@json(route('notifications.count')), {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const notifCount = document.getElementById('notif-count');
-                const notifBadge = document.getElementById('notif-badge');
-                
-                if (data.unread_count > 0) {
-                    if (notifCount) {
-                        notifCount.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
-                    } else {
-                        const newBadge = document.createElement('span');
-                        newBadge.id = 'notif-count';
-                        newBadge.className = 'kt-notif-dot';
-                        newBadge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
-                        document.getElementById('notification-btn').appendChild(newBadge);
-                    }
-                    if (notifBadge) {
-                        notifBadge.textContent = data.unread_count + ' New';
-                    }
-                } else {
-                    if (notifCount) {
-                        notifCount.remove();
-                    }
-                    if (notifBadge) {
-                        notifBadge.textContent = '0 New';
-                    }
-                }
-            })
-            .catch(error => console.error('Error updating count:', error));
-        }
-
-        // Refresh the entire notification list
-        function refreshNotificationList() {
-            fetch(@json(route('notifications.index')) + '?view=unread&limit=10', {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const payload = data && data.status === 'success' ? data.data : null;
-                const notifications = payload && Array.isArray(payload.data) ? payload.data : [];
-                if (data.status === 'success') {
-                    const notificationList = document.getElementById('notification-list');
-                    
-                    if (notifications.length > 0) {
-                        // Build HTML for notifications
-                        let html = '';
-                        notifications.forEach(notification => {
-                            const createdAt = new Date(notification.created_at);
-                            const diffTime = Math.abs(new Date() - createdAt);
-                            const diffMinutes = Math.ceil(diffTime / (1000 * 60));
-                            let timeText = diffMinutes + ' min ago';
-                            
-                            if (diffMinutes >= 60) {
-                                const diffHours = Math.ceil(diffMinutes / 60);
-                                timeText = diffHours + ' hour' + (diffHours > 1 ? 's' : '') + ' ago';
-                            }
-
-                            const actionUrl = notification.action_url || '';
-                            
-                            html += `
-                                <div class="kt-notif-item ${notification.read_at ? '' : 'unread'}" data-notif-id="${notification.id}" data-action-url="${actionUrl}">
-                                    <span class="kt-notif-accent"></span>
-                                    <div class="kt-notif-content">
-                                        <div class="kt-notif-title">${notification.title}</div>
-                                        <p class="kt-notif-message">${notification.message}</p>
-                                        <small class="kt-notif-time">${timeText}</small>
-                                    </div>
-                                    <button type="button" class="kt-notif-delete notif-delete" data-notif-id="${notification.id}">
-                                        <i class="feather-x"></i>
-                                    </button>
-                                </div>
-                            `;
-                        });
-                        
-                        notificationList.innerHTML = html;
-                        
-                        // Re-attach event listeners to new items
-                        attachDeleteListeners();
-                        attachNotificationClickListeners();
-                    } else {
-                        // No unread notifications
-                        notificationList.innerHTML = `
-                            <div class="py-4 text-center text-muted" style="font-size:.83rem;">
-                                <i class="feather-bell-off d-block mb-2" style="font-size:22px;opacity:.4;"></i>
-                                No new notifications
-                            </div>
-                        `;
-                    }
-                }
-                
-                // Update count and mark-all-read button
-                updateNotificationCount();
-                updateMarkAllReadButton();
-            })
-            .catch(error => console.error('Error refreshing notification list:', error));
-        }
-
-        // Update mark-all-read button visibility
-        function updateMarkAllReadButton() {
-            fetch(@json(route('notifications.count')), {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const markBtn = document.getElementById('mark-all-read');
-                
-                if (data.unread_count > 0) {
-                    if (markBtn) markBtn.style.display = '';
-                } else {
-                    if (markBtn) markBtn.style.display = 'none';
-                }
-            })
-            .catch(error => console.error('Error updating mark-all button:', error));
-        }
-
-        // Start polling for new notifications
-        function startNotificationPolling() {
-            // Check for new notifications every 5 seconds
-            notificationPollingInterval = setInterval(function() {
-                fetch(@json(route('notifications.count')), {
+            const btn = document.getElementById('mark-all-read');
+            if (!btn) return;
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fetch(@json(route('notifications.mark-all-as-read')), {
+                    method: 'POST',
                     headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    const currentBadge = document.getElementById('notif-count');
-                    const currentCount = currentBadge ? parseInt(currentBadge.textContent) : 0;
-                    
-                    // If count changed, refresh the list if dropdown is open
-                    if (data.unread_count !== currentCount) {
-                        updateNotificationCount();
-                        
-                        // If dropdown is currently visible, refresh it
-                        const dropdown = document.getElementById('notification-dropdown');
-                        if (dropdown && dropdown.classList.contains('show')) {
-                            refreshNotificationList();
-                        }
+                .then(r => r.json())
+                .then(() => refreshNotificationList())
+                .catch(err => console.error('Error marking all as read:', err));
+            });
+        }
+
+        // Update the bell badge count
+        function updateNotificationCount() {
+            fetch(@json(route('notifications.count')), { headers: { 'Accept': 'application/json' } })
+            .then(r => r.json())
+            .then(data => {
+                const count = data.unread_count || 0;
+                const dot   = document.getElementById('notif-count');
+                const badge = document.getElementById('notif-badge');
+                if (count > 0) {
+                    if (dot) {
+                        dot.textContent = count > 99 ? '99+' : count;
+                        dot.style.display = '';
+                    } else {
+                        const span = document.createElement('span');
+                        span.id = 'notif-count';
+                        span.className = 'kt-notif-dot';
+                        span.textContent = count > 99 ? '99+' : count;
+                        document.getElementById('notification-btn').appendChild(span);
                     }
-                })
-                .catch(error => console.error('Error in polling:', error));
-            }, 5000); // Poll every 5 seconds
+                    if (badge) badge.textContent = count + ' New';
+                } else {
+                    if (dot) dot.style.display = 'none';
+                    if (badge) badge.textContent = '0 New';
+                }
+                const markAllBtn = document.getElementById('mark-all-read');
+                if (markAllBtn) markAllBtn.style.display = count > 0 ? '' : 'none';
+            })
+            .catch(err => console.error('Error updating count:', err));
+        }
+
+        // Refresh the notification list in the dropdown (no delete button, max 3)
+        function refreshNotificationList() {
+            fetch(@json(route('notifications.index')) + '?view=unread&limit=3', {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const payload       = data && data.status === 'success' ? data.data : null;
+                const notifications = payload && Array.isArray(payload.data) ? payload.data : [];
+                const list          = document.getElementById('notification-list');
+                if (!list) return;
+
+                if (notifications.length > 0) {
+                    list.innerHTML = notifications.slice(0, 3).map(n => {
+                        const created = new Date(n.created_at);
+                        const mins    = Math.ceil(Math.abs(new Date() - created) / 60000);
+                        const timeText = mins >= 60
+                            ? Math.ceil(mins / 60) + ' hr' + (Math.ceil(mins / 60) > 1 ? 's' : '') + ' ago'
+                            : mins + ' min ago';
+                        const actionUrl = n.action_url || '';
+                        return `
+                            <div class="kt-notif-item ${n.read_at ? '' : 'unread'}" data-notif-id="${n.id}" data-action-url="${actionUrl}">
+                                <span class="kt-notif-accent"></span>
+                                <div class="kt-notif-content">
+                                    <div class="kt-notif-title">${n.title}</div>
+                                    <p class="kt-notif-message">${n.message}</p>
+                                    <small class="kt-notif-time">${timeText}</small>
+                                </div>
+                            </div>`;
+                    }).join('');
+                } else {
+                    list.innerHTML = `
+                        <div class="kt-notif-empty">
+                            <i class="feather-bell-off"></i>
+                            <p>No new notifications</p>
+                        </div>`;
+                }
+
+                // Re-attach click listeners to freshly rendered items
+                attachNotificationClickListeners();
+                updateNotificationCount();
+            })
+            .catch(err => console.error('Error refreshing notifications:', err));
+        }
+
+        // Start polling
+        function startNotificationPolling() {
+            if (notificationPollingInterval) clearInterval(notificationPollingInterval);
+            notificationPollingInterval = setInterval(refreshNotificationList, 30000);
         }
 
         // Stop polling when page unloads

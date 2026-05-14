@@ -15,6 +15,7 @@ use App\Services\PayrollService;
 use App\Services\PayrollDeductionService;
 use App\Notifications\PayrollNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PayrollController extends Controller
@@ -185,6 +186,18 @@ class PayrollController extends Controller
     public function batchGenerate(Request $request)
     {
         $period = PayrollBatch::resolvePeriod();
+
+        $existing = PayrollBatch::where('period_start', $period['start'])
+            ->where('period_end', $period['end'])
+            ->where('status', 'pending')
+            ->latest('id')
+            ->first();
+
+        if ($existing) {
+            return redirect()
+                ->route('payroll.batch.confirm', $existing)
+                ->with('info', 'A payroll batch for this period is already in progress. Continue it or cancel it to start over.');
+        }
 
         $batch = PayrollBatch::create([
             'period_start' => $period['start'],
@@ -528,19 +541,27 @@ class PayrollController extends Controller
      ══════════════════════════════════════════════════════════════ */
     public function batchCancel(PayrollBatch $batch)
     {
-        abort_if(!$batch->isEditable(), 403, 'Only pending batches can be cancelled.');
+        abort_if(
+            !in_array($batch->status, ['pending', 'submitted']),
+            403,
+            'Only pending or submitted batches can be deleted.'
+        );
 
-        // Delete all payroll line items and payrolls, then the batch
-        foreach ($batch->payrolls as $payroll) {
-            $payroll->allowances()->delete();
-            $payroll->deductions()->delete();
-            $payroll->delete();
-        }
-        $batch->delete();
+        DB::transaction(function () use ($batch) {
+            $batch->load('payrolls');
+
+            foreach ($batch->payrolls as $payroll) {
+                $payroll->allowances()->delete();
+                $payroll->deductions()->delete();
+                $payroll->delete();
+            }
+
+            $batch->delete();
+        });
 
         return redirect()
             ->route('payroll.salary-computation.index')
-            ->with('success', 'Batch cancelled and removed.');
+            ->with('success', 'Batch deleted.');
     }
 
     public function batchReopen(PayrollBatch $batch)

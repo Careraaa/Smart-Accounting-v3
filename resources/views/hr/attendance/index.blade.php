@@ -8,14 +8,7 @@
 
 /* ── Layout ─────────────────────────────────────────────────── */
 .att-layout {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 20px;
-    align-items: start;
-}
-@media (max-width: 900px) {
-    .att-layout { grid-template-columns: 1fr; }
-    .att-side { order: -1; }
+    display: block;
 }
 
 /* ── Topbar ─────────────────────────────────────────────────── */
@@ -211,7 +204,6 @@
                                 <th class="text-center">Today's Status</th>
                                 <th>Time In</th>
                                 <th>Time Out</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody id="empTbody">
@@ -266,15 +258,9 @@
                                     <td style="font-family:'DM Mono',monospace;font-size:0.82rem;color:#374151;">
                                         {{ $att && $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:i A') : '—' }}
                                     </td>
-                                    <td onclick="event.stopPropagation()">
-                                        <a href="{{ route('attendance.employee.calendar', $emp->id) }}" class="att-view-link">
-                                            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                            Calendar
-                                        </a>
-                                    </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="7">
+                                <tr><td colspan="6">
                                     <div class="att-empty">
                                         <div class="att-empty-icon">
                                             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
@@ -297,48 +283,6 @@
             </div>
         </div>
 
-        {{-- ── Side: Recent Logs ───────────────────────────────── --}}
-        <div class="att-side">
-            <div class="att-side-card">
-                <div class="att-side-header">
-                    <div>
-                        <p class="att-side-title">
-                            <span class="att-side-dot"></span>
-                            Recent Logs
-                        </p>
-                        <p class="att-side-sub">Live time-in / time-out activity</p>
-                    </div>
-                </div>
-
-                <div class="att-log-list" id="recentLogsList">
-                    @forelse($recentLogs as $log)
-                        @php
-                            $localTime = $log->logged_at->setTimezone(config('app.timezone'));
-                            $isIn = $log->type === 'time_in';
-                        @endphp
-                        <div class="att-log-item">
-                            <div class="att-log-icon {{ $isIn ? 'in' : 'out' }}">
-                                @if($isIn)
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14"/></svg>
-                                @else
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 8l4 4m0 0l-4 4m4-4H3"/></svg>
-                                @endif
-                            </div>
-                            <div style="flex:1;min-width:0;">
-                                <div class="att-log-name">{{ $log->user->name ?? 'Unknown' }}</div>
-                                <div class="att-log-meta">{{ $isIn ? 'Timed In' : 'Timed Out' }} · {{ $localTime->format('M j') }}</div>
-                            </div>
-                            <div class="att-log-time">{{ $localTime->format('g:i A') }}</div>
-                        </div>
-                    @empty
-                        <div class="att-side-empty">
-                            <p>No recent activity today.</p>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-
     </div>{{-- /.att-layout --}}
 
 </div>
@@ -346,7 +290,6 @@
 
 @push('scripts')
 <script>
-window.recentLogsUrl     = "{{ route('api.attendance.recent') }}";
 window.notificationsCountUrl = "{{ route('notifications.count') }}";
 
 // ── Client-side filter ───────────────────────────────────────────
@@ -376,35 +319,6 @@ window.notificationsCountUrl = "{{ route('notifications.count') }}";
     deptF.addEventListener('change', run);
     statusF.addEventListener('change', run);
 })();
-
-// ── Live recent logs refresh ─────────────────────────────────────
-function refreshRecentLogs() {
-    fetch(window.recentLogsUrl)
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(data => {
-            if (!data || !data.length) return;
-            const list = document.getElementById('recentLogsList');
-            if (!list) return;
-            list.innerHTML = data.map(log => {
-                const isIn = log.type === 'time_in';
-                const icon = isIn
-                    ? `<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14"/></svg>`
-                    : `<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 8l4 4m0 0l-4 4m4-4H3"/></svg>`;
-                return `
-                <div class="att-log-item">
-                    <div class="att-log-icon ${isIn ? 'in' : 'out'}">${icon}</div>
-                    <div style="flex:1;min-width:0;">
-                        <div class="att-log-name">${log.employee_name}</div>
-                        <div class="att-log-meta">${isIn ? 'Timed In' : 'Timed Out'} · ${log.date}</div>
-                    </div>
-                    <div class="att-log-time">${log.time}</div>
-                </div>`;
-            }).join('');
-        })
-        .catch(() => {});
-}
-
-setInterval(refreshRecentLogs, 20000);
 
 // ── Notification polling ─────────────────────────────────────────
 function pollNotifications() {

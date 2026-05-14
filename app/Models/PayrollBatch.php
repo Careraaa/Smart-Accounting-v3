@@ -69,10 +69,14 @@ class PayrollBatch extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        $id = str_pad((string) $this->id, 3, '0', STR_PAD_LEFT);
-        $label = $this->period_start ? $this->period_start->format('M Y') : 'Payroll';
+        if (!$this->period_start) {
+            return 'Payroll Batch';
+        }
 
-        return "Batch #{$id} - {$label} Payroll";
+        $month   = $this->period_start->format('F Y');
+        $half    = $this->period_start->day <= 15 ? '1st Half' : '2nd Half';
+
+        return "{$month} - {$half}";
     }
 
     /* ── Computed ──────────────────────────────────────────────── */
