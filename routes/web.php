@@ -22,7 +22,6 @@ use App\Http\Controllers\HR\PayrollReceivablesController;
 use App\Http\Controllers\HR\StatutoryDeductionController;
 use App\Http\Controllers\HR\LeaveController;
 use App\Http\Controllers\HR\LeaveTypeController;
-use App\Http\Controllers\HR\HolidayController;
 use App\Http\Controllers\HR\OvertimeUndertimeController;
 use App\Http\Controllers\HR\HrReportController; // <-- NEW
 use App\Http\Controllers\Accountant\PayrollApprovalController;
@@ -37,6 +36,7 @@ use App\Http\Controllers\Employee\OvertimeUndertimeController as EmployeeOvertim
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\HR\HolidayController as HRHolidayController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use Illuminate\Http\Request;
@@ -248,8 +248,9 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
 
     Route::resource('leave-type', LeaveTypeController::class);
 
-    Route::get('/holiday/calendar', [HolidayController::class, 'calendar'])->name('holiday.calendar');
-    Route::resource('holiday', HolidayController::class);
+    // Holiday routes - define calendar before resource to avoid {holiday} catch-all conflict
+    Route::get('/holiday/calendar', [HRHolidayController::class, 'calendar'])->name('holiday.calendar');
+    Route::resource('holiday', HRHolidayController::class);
 
     // Define specific overtime routes before resource routes to prevent conflicts
     Route::get('/overtime/pending', [OvertimeUndertimeController::class, 'index'])
@@ -300,6 +301,7 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::delete('/payroll/batch/{batch}/cancel', [PayrollController::class, 'batchCancel'])->name('payroll.batch.cancel');
         Route::post('/payroll/batch/{batch}/prepare-all', [PayrollController::class, 'batchPrepareAll'])->name('payroll.batch.prepare-all');
         Route::post('/payroll/batch/{batch}/submit', [PayrollController::class, 'batchSubmit'])->name('payroll.batch.submit');
+        Route::post('/payroll/cutoff/update', [PayrollController::class, 'updateCutoffSchedule'])->name('payroll.cutoff.update');
     });
 
     Route::prefix('payroll/statutory-deductions')
@@ -445,7 +447,7 @@ Route::middleware(['auth', 'check-status', 'role:superadmin'])->group(function (
     Route::post('/configuration/clear-logs', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'clearLogs'])->name('configuration.clear-logs');
 });
 
-//HOLIDAY ROUTES
-Route::get('/api/holidays', [HolidayController::class, 'index']);
+//HOLIDAY ROUTES - API
+Route::get('/api/holidays', [HRHolidayController::class, 'indexApi']);
 
 require __DIR__ . '/auth.php';

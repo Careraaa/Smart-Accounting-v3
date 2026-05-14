@@ -150,18 +150,6 @@
                         </div>
                     </div>
 
-                    {{-- Description --}}
-                    <div class="hld-field">
-                        <label for="description" class="hld-label">Description</label>
-                        <textarea name="description" id="description"
-                            class="hld-textarea @error('description') is-invalid @enderror"
-                            placeholder="e.g., Year-end holiday"
-                        >{{ old('description', $holiday->description) }}</textarea>
-                        @error('description')
-                            <span class="hld-invalid-feedback">{{ $message }}</span>
-                        @enderror
-                    </div>
-
                     {{-- Form actions --}}
                     <div class="hld-form-actions">
                         <a href="{{ route('holiday.index') }}" class="hld-btn-cancel">

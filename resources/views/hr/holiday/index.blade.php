@@ -134,7 +134,6 @@
                         <th>Holiday Name</th>
                         <th>Date</th>
                         <th>Type</th>
-                        <th>Description</th>
                         <th class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -151,9 +150,6 @@
                             <span class="hld-type {{ $holiday->type }}">
                                 {{ ucfirst($holiday->type) }}
                             </span>
-                        </td>
-                        <td>
-                            <span class="hld-desc">{{ Str::limit($holiday->description, 60) ?? '—' }}</span>
                         </td>
                         <td>
                             <div class="hld-actions">

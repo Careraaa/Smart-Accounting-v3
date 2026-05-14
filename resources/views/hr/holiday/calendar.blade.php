@@ -87,7 +87,7 @@
 
 .hld-cal-table {
     width: 100%;
-    min-width: 900px;
+    min-width: 700px;
     border-collapse: collapse;
     table-layout: fixed;
 }
@@ -105,8 +105,8 @@
 }
 
 .hld-day {
-    height: 130px;
-    min-height: 130px;
+    height: 80px;
+    min-height: 80px;
     border: 1px solid #f1f5f9;
     padding: 8px;
     vertical-align: top;

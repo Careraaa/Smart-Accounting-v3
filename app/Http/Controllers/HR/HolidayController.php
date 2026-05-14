@@ -62,7 +62,6 @@ class HolidayController extends Controller
             'name' => 'required|string|max:255|unique:holidays,name,NULL,id,date,' . $request->date,
             'date' => 'required|date|unique:holidays,date',
             'type' => 'required|in:regular,special',
-            'description' => 'nullable|string|max:500',
         ], [
             'name.unique' => 'A holiday with this name already exists on that date.',
             'date.unique' => 'A holiday already exists on this date.',
@@ -98,7 +97,6 @@ class HolidayController extends Controller
             'name' => 'required|string|max:255|unique:holidays,name,' . $holiday->id . ',id,date,' . $request->date,
             'date' => 'required|date|unique:holidays,date,' . $holiday->id,
             'type' => 'required|in:regular,special',
-            'description' => 'nullable|string|max:500',
         ], [
             'name.unique' => 'A holiday with this name already exists on that date.',
             'date.unique' => 'A holiday already exists on this date.',
@@ -148,5 +146,24 @@ class HolidayController extends Controller
             'regularCount',
             'specialCount'
         ));
+    }
+
+    /**
+     * Get holidays as JSON (API endpoint).
+     */
+    public function indexApi(Request $request)
+    {
+        $year = $request->get('year', now()->year);
+
+        $holidays = Holiday::whereYear('date', $year)
+            ->get()
+            ->map(function ($holiday) {
+                return [
+                    'date' => $holiday->date->format('Y-m-d'),
+                    'name' => $holiday->name,
+                ];
+            });
+
+        return response()->json($holidays);
     }
 }

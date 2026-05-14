@@ -71,7 +71,7 @@ class PayrollController extends Controller
         $pendingLeaves     = Leave::where('status', 'pending')->count();
         $approvedLeaves    = Leave::where('status', 'approved')->count();
         $attendanceRate    = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
-        $cutoffSchedules   = PayrollCutoffSchedule::where('is_active', true)->orderBy('cutoff_day')->get();
+        $cutoffSchedules   = PayrollCutoffSchedule::orderBy('cutoff_day')->get();
         $cutoffInfo        = PayrollCutoffSchedule::getCurrentCutoffPeriod();
         $releasedCount     = Payroll::whereIn('status', ['released', 'paid'])->count();
 
@@ -706,5 +706,62 @@ class PayrollController extends Controller
     {
         $payroll->load(['user', 'allowances', 'deductions']);
         return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     |  CUTOFF SCHEDULE — UPDATE
+     ══════════════════════════════════════════════════════════════ */
+    public function updateCutoffSchedule(Request $request)
+    {
+        $validated = $request->validate([
+            'schedule_id' => 'required|array',
+            'schedule_id.*' => 'required|exists:payroll_cutoff_schedules,id',
+            'active' => 'sometimes|array',
+            'period_start' => 'sometimes|array',
+            'period_end' => 'sometimes|array',
+        ]);
+
+        try {
+            $scheduleIds = $validated['schedule_id'];
+            $active = $request->input('active', []);
+            $periodStarts = $request->input('period_start', []);
+            $periodEnds = $request->input('period_end', []);
+
+            foreach ($scheduleIds as $scheduleId) {
+                $scheduleId = (int) $scheduleId;
+                $schedule = PayrollCutoffSchedule::findOrFail($scheduleId);
+
+                $data = [];
+
+                // Update active status
+                $data['is_active'] = isset($active[$scheduleId]) && $active[$scheduleId] == '1' ? true : false;
+
+                // Update period start date if provided
+                if (isset($periodStarts[$scheduleId]) && !empty($periodStarts[$scheduleId])) {
+                    $data['payroll_period_start'] = Carbon::parse($periodStarts[$scheduleId])->toDateString();
+                }
+
+                // Update period end date if provided
+                if (isset($periodEnds[$scheduleId]) && !empty($periodEnds[$scheduleId])) {
+                    $data['payroll_period_end'] = Carbon::parse($periodEnds[$scheduleId])->toDateString();
+                }
+
+                // Only update if there's data to update
+                if (!empty($data)) {
+                    $schedule->update($data);
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cutoff schedules updated successfully.'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Cutoff schedule update error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
     }
 }
