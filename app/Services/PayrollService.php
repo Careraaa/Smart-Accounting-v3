@@ -6,16 +6,19 @@ use App\Models\User;
 use App\Models\Payroll;
 use App\Models\OvertimeUndertime;
 use App\Services\AttendanceService;
+use App\Services\HolidayWageService;
 use Carbon\Carbon;
 use App\Models\StatutoryDeduction;
 
 class PayrollService
 {
     protected $attendanceService;
+    protected $holidayWageService;
 
-    public function __construct(AttendanceService $attendanceService)
+    public function __construct(AttendanceService $attendanceService, HolidayWageService $holidayWageService)
     {
         $this->attendanceService = $attendanceService;
+        $this->holidayWageService = $holidayWageService;
     }
 
     /**
@@ -48,6 +51,13 @@ class PayrollService
                 'allowance_type' => 'Overtime Pay',
                 'hours' => round($values['otHours'], 2),
                 'amount' => round($values['otPay'], 2),
+            ]);
+        }
+
+        if ($values['holidayPay'] > 0) {
+            $payroll->allowances()->create([
+                'allowance_type' => 'Holiday Pay',
+                'amount' => round($values['holidayPay'], 2),
             ]);
         }
 
@@ -110,6 +120,10 @@ class PayrollService
         $hourlyRate = $dailyRate / 8;
         $basicSalary = $dailyRate * $daysWorked;
 
+        // ── Holiday Wages ────────────────────────────────────────
+        $holidayWagesResult = $this->holidayWageService->calculateHolidayWages($employee, $start, $end);
+        $holidayPay = $holidayWagesResult['holiday_pay'];
+
         // ── OT / UT ───────────────────────────────────────────────
         $otPay = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('amount');
 
@@ -132,12 +146,12 @@ class PayrollService
         $manualDeductTotal = collect($manualDeductions)->sum(fn($d) => (float) ($d['amount'] ?? 0));
 
         // ── Totals ────────────────────────────────────────────────
-        $grossPay = $basicSalary + $otPay + $manualAllowTotal;
+        $grossPay = $basicSalary + $otPay + $holidayPay + $manualAllowTotal;
         $totalDeductions = $utDeduction + $sss + $pagibig + $philhealth + $manualDeductTotal;
         $adjustedGross = $grossPay;
         $netPay = $grossPay - $totalDeductions;
 
-        return compact('daysWorked', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
+        return compact('daysWorked', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'holidayPay', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
     }
 
     /**
@@ -182,6 +196,13 @@ class PayrollService
                 'allowance_type' => 'Overtime Pay',
                 'hours' => round($values['otHours'], 2),
                 'amount' => round($values['otPay'], 2),
+            ]);
+        }
+
+        if ($values['holidayPay'] > 0) {
+            $payroll->allowances()->create([
+                'allowance_type' => 'Holiday Pay',
+                'amount' => round($values['holidayPay'], 2),
             ]);
         }
 

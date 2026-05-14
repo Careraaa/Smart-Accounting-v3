@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         $this->call([PayrollCutoffScheduleSeeder::class]);
         $this->call([PayrollSeeder::class]);
         $this->call([NotificationSeeder::class]);
-        $this->call(RemittanceSeeder::class);
+        $this->call([RemittanceSeeder::class]);
+        $this->call([HolidaySeeder::class]);
     }
 }

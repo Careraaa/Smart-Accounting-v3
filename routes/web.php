@@ -22,6 +22,7 @@ use App\Http\Controllers\HR\PayrollReceivablesController;
 use App\Http\Controllers\HR\StatutoryDeductionController;
 use App\Http\Controllers\HR\LeaveController;
 use App\Http\Controllers\HR\LeaveTypeController;
+use App\Http\Controllers\HR\HolidayController;
 use App\Http\Controllers\HR\OvertimeUndertimeController;
 use App\Http\Controllers\HR\HrReportController; // <-- NEW
 use App\Http\Controllers\Accountant\PayrollApprovalController;
@@ -247,6 +248,9 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
 
     Route::resource('leave-type', LeaveTypeController::class);
 
+    Route::get('/holiday/calendar', [HolidayController::class, 'calendar'])->name('holiday.calendar');
+    Route::resource('holiday', HolidayController::class);
+
     // Define specific overtime routes before resource routes to prevent conflicts
     Route::get('/overtime/pending', [OvertimeUndertimeController::class, 'index'])
         ->name('overtime.pending')
@@ -440,5 +444,8 @@ Route::middleware(['auth', 'check-status', 'role:superadmin'])->group(function (
     Route::post('/configuration/clear-cache', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'clearCache'])->name('configuration.clear-cache');
     Route::post('/configuration/clear-logs', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'clearLogs'])->name('configuration.clear-logs');
 });
+
+//HOLIDAY ROUTES
+Route::get('/api/holidays', [HolidayController::class, 'index']);
 
 require __DIR__ . '/auth.php';

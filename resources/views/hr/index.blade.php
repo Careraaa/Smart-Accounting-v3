@@ -89,6 +89,36 @@
 .hrd-pill-absent   { background:#fef2f2; border-color:#fecaca; color:#b91c1c; }
 .hrd-chevron { color:#d1d5db; font-size:18px; margin-top:2px; }
 .hrd-empty { text-align:center; padding:40px 20px; color:#9ca3af; font-size:.84rem; }
+
+.hrd-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.hrd-main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Right sidebar */
+.hrd-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    position: sticky;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .hrd-layout {
+        flex-direction: column;
+    }
+
+    .hrd-sidebar {
+        width: 100%;
+        position: static;
+    }
+}
 </style>
 @endpush
 
@@ -103,115 +133,161 @@
         return $b !== '' ? $a . $b : $a;
     };
 @endphp
-<div class="col-md-12 hrd">
+<div class="hrd-layout">
+    {{-- Main Dashboard --}}
+    <div class="hrd-main">
 
-    <header class="hrd-hero">
-        <img src="{{ asset('images/landscape-knight.png') }}" alt="" class="hrd-hero-knight" aria-hidden="true">
-        <div class="hrd-hero-left">
-            <h1>HR Dashboard</h1>
-            <p>Workforce, attendance, and leave — charts use live data from your <strong style="color:#e5e7eb;">attendance</strong> and <strong style="color:#e5e7eb;">users</strong> tables.</p>
-            <div class="d-flex flex-wrap gap-2 mt-2">
-                <span class="hrd-chip"><i class="feather-calendar"></i> {{ now()->format('l, F d, Y') }}</span>
-                <span class="hrd-chip"><i class="feather-users"></i> {{ $activeEmployees }} active / {{ $totalEmployees }} total</span>
-                <span class="hrd-chip"><i class="feather-activity"></i> {{ number_format($attendanceRate, 1) }}% today check-in</span>
+        <header class="hrd-hero">
+            <img src="{{ asset('images/landscape-knight.png') }}" alt="" class="hrd-hero-knight" aria-hidden="true">
+            <div class="hrd-hero-left">
+                <h1>HR Dashboard</h1>
+                <p>Workforce, attendance, and leave — charts use live data from your <strong style="color:#e5e7eb;">attendance</strong> and <strong style="color:#e5e7eb;">users</strong> tables.</p>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="hrd-chip"><i class="feather-calendar"></i> {{ now()->format('l, F d, Y') }}</span>
+                    <span class="hrd-chip"><i class="feather-users"></i> {{ $activeEmployees }} active / {{ $totalEmployees }} total</span>
+                    <span class="hrd-chip"><i class="feather-activity"></i> {{ number_format($attendanceRate, 1) }}% today check-in</span>
+                </div>
+            </div>
+            <div class="hrd-hero-actions">
+                <a href="{{ route('employees.index') }}" class="hrd-btn-sec"><i class="feather-users"></i> Employees</a>
+                <a href="{{ route('attendance.create') }}" class="hrd-btn-sec"><i class="feather-edit-3"></i> Manual log</a>
+                <a href="{{ route('leave.create') }}" class="hrd-btn"><i class="feather-plus"></i> Create leave</a>
+            </div>
+        </header>
+
+        <div class="hrd-kpis">
+            <div class="hrd-kpi">
+                <div class="hrd-kpi-top">Workforce</div>
+                <div class="hrd-kpi-main">{{ $activeEmployees }} <span style="color:#9ca3af;font-weight:600;font-size:.95rem;">/ {{ $totalEmployees }}</span></div>
+                <div class="hrd-kpi-note">{{ $inactiveEmployees }} inactive · {{ $onLeaveEmployees }} on leave today</div>
+            </div>
+            <div class="hrd-kpi">
+                <div class="hrd-kpi-top">Today</div>
+                <div class="hrd-kpi-main">{{ $presentToday + $lateToday }}<span style="color:#9ca3af;font-weight:600;font-size:.85rem;"> in</span></div>
+                <div class="hrd-kpi-note">Absent {{ $absentToday }} · Late {{ $lateToday }} · {{ number_format($attendanceRate, 1) }}% check-in rate</div>
+            </div>
+            <div class="hrd-kpi">
+                <div class="hrd-kpi-top">Leave (all time)</div>
+                <div class="hrd-kpi-main">{{ $pendingLeaves }}<span style="color:#9ca3af;font-weight:600;font-size:.85rem;"> pending</span></div>
+                <div class="hrd-kpi-note">{{ $approvedLeaves }} approved · {{ $rejectedLeaves }} rejected</div>
             </div>
         </div>
-        <div class="hrd-hero-actions">
-            <a href="{{ route('employees.index') }}" class="hrd-btn-sec"><i class="feather-users"></i> Employees</a>
-            <a href="{{ route('attendance.create') }}" class="hrd-btn-sec"><i class="feather-edit-3"></i> Manual log</a>
-            <a href="{{ route('leave.create') }}" class="hrd-btn"><i class="feather-plus"></i> Create leave</a>
-        </div>
-    </header>
 
-    <div class="hrd-kpis">
-        <div class="hrd-kpi">
-            <div class="hrd-kpi-top">Workforce</div>
-            <div class="hrd-kpi-main">{{ $activeEmployees }} <span style="color:#9ca3af;font-weight:600;font-size:.95rem;">/ {{ $totalEmployees }}</span></div>
-            <div class="hrd-kpi-note">{{ $inactiveEmployees }} inactive · {{ $onLeaveEmployees }} on leave today</div>
+        <div class="hrd-charts">
+            <div class="hrd-panel">
+                <div class="hrd-panel-hd">
+                    <h2>Attendance trend</h2>
+                    <span>Daily counts · present / late / absent</span>
+                </div>
+                <div class="hrd-panel-bd">
+                    <div id="hrd-chart-attendance" class="hrd-chart"></div>
+                </div>
+            </div>
+            <div class="hrd-panel">
+                <div class="hrd-panel-hd">
+                    <h2>Workforce</h2>
+                    <span>Active vs inactive vs on leave</span>
+                </div>
+                <div class="hrd-panel-bd">
+                    <div id="hrd-chart-workforce" class="hrd-chart" style="min-height:280px;"></div>
+                </div>
+            </div>
         </div>
-        <div class="hrd-kpi">
-            <div class="hrd-kpi-top">Today</div>
-            <div class="hrd-kpi-main">{{ $presentToday + $lateToday }}<span style="color:#9ca3af;font-weight:600;font-size:.85rem;"> in</span></div>
-            <div class="hrd-kpi-note">Absent {{ $absentToday }} · Late {{ $lateToday }} · {{ number_format($attendanceRate, 1) }}% check-in rate</div>
-        </div>
-        <div class="hrd-kpi">
-            <div class="hrd-kpi-top">Leave (all time)</div>
-            <div class="hrd-kpi-main">{{ $pendingLeaves }}<span style="color:#9ca3af;font-weight:600;font-size:.85rem;"> pending</span></div>
-            <div class="hrd-kpi-note">{{ $approvedLeaves }} approved · {{ $rejectedLeaves }} rejected</div>
-        </div>
-    </div>
 
-    <div class="hrd-charts">
-        <div class="hrd-panel">
+        <div class="hrd-charts2">
+            <div class="hrd-panel">
+                <div class="hrd-panel-hd">
+                    <h2>Leave mix</h2>
+                    <span>All-time request totals</span>
+                </div>
+                <div class="hrd-panel-bd">
+                    <div id="hrd-chart-leaves" class="hrd-chart"></div>
+                </div>
+            </div>
+            <div class="hrd-panel">
+                <div class="hrd-panel-hd">
+                    <h2>OT / UT</h2>
+                    <span>Total hours in system</span>
+                </div>
+                <div class="hrd-panel-bd">
+                    <div id="hrd-chart-otut" class="hrd-chart"></div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Recent pending leave --}}
+        <div class="hrd-panel" style="margin-bottom:14px;">
             <div class="hrd-panel-hd">
-                <h2>Attendance trend</h2>
-                <span>Daily counts · present / late / absent</span>
+                <h2>Recent Pending Leave Requests</h2>
+                <a href="{{ route('leave.pending') }}" style="font-size:.78rem;font-weight:700;color:#c8292a;text-decoration:none;">View all →</a>
             </div>
-            <div class="hrd-panel-bd">
-                <div id="hrd-chart-attendance" class="hrd-chart"></div>
-            </div>
+            @if($recentLeaves->isEmpty())
+                <div class="hrd-empty">No leave requests yet.</div>
+            @else
+                <ul class="hrd-feed">
+                    @foreach($recentLeaves as $leave)
+                        @if(($leave->status ?? '') === 'pending')
+                            @php
+                                $st = $leave->status ?? '';
+                                $pillClass = match($st) {
+                                    'approved' => 'hrd-pill-approved',
+                                    'rejected' => 'hrd-pill-rejected',
+                                    default    => 'hrd-pill-pending',
+                                };
+                            @endphp
+                            <li>
+                                <a href="{{ route('leave.show', $leave) }}">
+                                    <div class="hrd-av">{{ $initials($leave->employee->name ?? '') }}</div>
+                                    <div class="hrd-feed-body">
+                                        <p class="hrd-feed-title">{{ $leave->employee->name ?? 'Unknown' }}</p>
+                                        <p class="hrd-feed-meta">
+                                            {{ ucfirst($leave->leave_type ?? 'Leave') }}
+                                            · {{ $leave->start_date?->format('M j') ?? '—' }} – {{ $leave->end_date?->format('M j, Y') ?? '—' }}
+                                            @if(isset($leave->duration_days)) · <code>{{ $leave->duration_days }}d</code>@endif
+                                        </p>
+                                    </div>
+                                    <div class="hrd-feed-right">
+                                        <span class="hrd-pill {{ $pillClass }}">{{ ucfirst($st) }}</span>
+                                        <i class="feather-chevron-right hrd-chevron"></i>
+                                    </div>
+                                </a>
+                            </li>
+                        @endif
+                    @endforeach
+                </ul>
+            @endif
         </div>
-        <div class="hrd-panel">
-            <div class="hrd-panel-hd">
-                <h2>Workforce</h2>
-                <span>Active vs inactive vs on leave</span>
-            </div>
-            <div class="hrd-panel-bd">
-                <div id="hrd-chart-workforce" class="hrd-chart" style="min-height:280px;"></div>
-            </div>
-        </div>
-    </div>
 
-    <div class="hrd-charts2">
-        <div class="hrd-panel">
+        {{-- Recent attendance --}}
+        <div class="hrd-panel" style="margin-bottom:8px;">
             <div class="hrd-panel-hd">
-                <h2>Leave mix</h2>
-                <span>All-time request totals</span>
+                <h2>Recent attendance</h2>
+                <a href="{{ route('attendance.index') }}" style="font-size:.78rem;font-weight:700;color:#c8292a;text-decoration:none;">View all →</a>
             </div>
-            <div class="hrd-panel-bd">
-                <div id="hrd-chart-leaves" class="hrd-chart"></div>
-            </div>
-        </div>
-        <div class="hrd-panel">
-            <div class="hrd-panel-hd">
-                <h2>OT / UT</h2>
-                <span>Total hours in system</span>
-            </div>
-            <div class="hrd-panel-bd">
-                <div id="hrd-chart-otut" class="hrd-chart"></div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Recent pending leave --}}
-    <div class="hrd-panel" style="margin-bottom:14px;">
-        <div class="hrd-panel-hd">
-            <h2>Recent Pending Leave Requests</h2>
-            <a href="{{ route('leave.pending') }}" style="font-size:.78rem;font-weight:700;color:#c8292a;text-decoration:none;">View all →</a>
-        </div>
-        @if($recentLeaves->isEmpty())
-            <div class="hrd-empty">No leave requests yet.</div>
-        @else
-            <ul class="hrd-feed">
-                @foreach($recentLeaves as $leave)
-                    @if(($leave->status ?? '') === 'pending')
+            @if($recentAttendance->isEmpty())
+                <div class="hrd-empty">No attendance rows yet.</div>
+            @else
+                <ul class="hrd-feed">
+                    @foreach($recentAttendance as $att)
                         @php
-                            $st = $leave->status ?? '';
+                            $st = $att->status ?? '';
                             $pillClass = match($st) {
-                                'approved' => 'hrd-pill-approved',
-                                'rejected' => 'hrd-pill-rejected',
-                                default    => 'hrd-pill-pending',
+                                'present' => 'hrd-pill-present',
+                                'late'    => 'hrd-pill-late',
+                                'absent'  => 'hrd-pill-absent',
+                                default   => 'hrd-pill-pending',
                             };
+                            $tIn  = $att->time_in  ? \Carbon\Carbon::parse($att->time_in)->format('g:i A')  : '—';
+                            $tOut = $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('g:i A') : '—';
                         @endphp
                         <li>
-                            <a href="{{ route('leave.show', $leave) }}">
-                                <div class="hrd-av">{{ $initials($leave->employee->name ?? '') }}</div>
+                            <a href="{{ route('attendance.show', $att) }}">
+                                <div class="hrd-av">{{ $initials($att->employee->name ?? '') }}</div>
                                 <div class="hrd-feed-body">
-                                    <p class="hrd-feed-title">{{ $leave->employee->name ?? 'Unknown' }}</p>
+                                    <p class="hrd-feed-title">{{ $att->employee->name ?? 'Unknown' }}</p>
                                     <p class="hrd-feed-meta">
-                                        {{ ucfirst($leave->leave_type ?? 'Leave') }}
-                                        · {{ $leave->start_date?->format('M j') ?? '—' }} – {{ $leave->end_date?->format('M j, Y') ?? '—' }}
-                                        @if(isset($leave->duration_days)) · <code>{{ $leave->duration_days }}d</code>@endif
+                                        {{ $att->date?->format('D, M j, Y') ?? '—' }}
+                                        · In <code>{{ $tIn }}</code> · Out <code>{{ $tOut }}</code>
                                     </p>
                                 </div>
                                 <div class="hrd-feed-right">
@@ -220,55 +296,16 @@
                                 </div>
                             </a>
                         </li>
-                    @endif
-                @endforeach
-            </ul>
-        @endif
-    </div>
-
-    {{-- Recent attendance --}}
-    <div class="hrd-panel" style="margin-bottom:8px;">
-        <div class="hrd-panel-hd">
-            <h2>Recent attendance</h2>
-            <a href="{{ route('attendance.index') }}" style="font-size:.78rem;font-weight:700;color:#c8292a;text-decoration:none;">View all →</a>
+                    @endforeach
+                </ul>
+            @endif
         </div>
-        @if($recentAttendance->isEmpty())
-            <div class="hrd-empty">No attendance rows yet.</div>
-        @else
-            <ul class="hrd-feed">
-                @foreach($recentAttendance as $att)
-                    @php
-                        $st = $att->status ?? '';
-                        $pillClass = match($st) {
-                            'present' => 'hrd-pill-present',
-                            'late'    => 'hrd-pill-late',
-                            'absent'  => 'hrd-pill-absent',
-                            default   => 'hrd-pill-pending',
-                        };
-                        $tIn  = $att->time_in  ? \Carbon\Carbon::parse($att->time_in)->format('g:i A')  : '—';
-                        $tOut = $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('g:i A') : '—';
-                    @endphp
-                    <li>
-                        <a href="{{ route('attendance.show', $att) }}">
-                            <div class="hrd-av">{{ $initials($att->employee->name ?? '') }}</div>
-                            <div class="hrd-feed-body">
-                                <p class="hrd-feed-title">{{ $att->employee->name ?? 'Unknown' }}</p>
-                                <p class="hrd-feed-meta">
-                                    {{ $att->date?->format('D, M j, Y') ?? '—' }}
-                                    · In <code>{{ $tIn }}</code> · Out <code>{{ $tOut }}</code>
-                                </p>
-                            </div>
-                            <div class="hrd-feed-right">
-                                <span class="hrd-pill {{ $pillClass }}">{{ ucfirst($st) }}</span>
-                                <i class="feather-chevron-right hrd-chevron"></i>
-                            </div>
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
-        @endif
-    </div>
 
+    </div>
+    {{-- Right Calendar Sidebar --}}
+    <aside class="hrd-sidebar">
+        @include('partials.calendar')
+    </aside>
 </div>
 @endsection
 

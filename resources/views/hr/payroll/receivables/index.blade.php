@@ -6,7 +6,9 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 
-.prl-page { font-family: 'Sora', sans-serif; }
+.prl-page { font-family: 'Sora', sans-serif;  }
+
+.prl-main { grid-column: 1; }
 
 /* ── Topbar ── */
 .prl-topbar { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
@@ -147,6 +149,7 @@
 
 @section('content')
 <div class="prl-page">
+<div class="prl-main">
 
     {{-- ── Flash messages ── --}}
     @if(session('success'))
@@ -165,7 +168,7 @@
     {{-- ── Topbar ── --}}
     <div class="prl-topbar">
         <div>
-            <h1 class="prl-topbar-title">Payroll Receivables</h1>
+            <h1 class="prl-topbar-title">Employee Receivables</h1>
             <p class="prl-topbar-sub">Manage cash advances and salary loan applications</p>
         </div>
     </div>
@@ -497,6 +500,8 @@
     </div>
     @endif
     @endif
+
+</div>
 
 </div>
 

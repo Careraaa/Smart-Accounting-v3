@@ -61,6 +61,17 @@
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.rejected') }}">Rejected Leaves</a></li>
                         </ul>
                     </li>
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('holiday.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-gift"></i></span>
+                            <span class="nxl-mtext">Holiday Management</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.index') }}">All Holidays</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.calendar') }}">Holiday Calendar</a></li>
+                        </ul>
+                    </li>
                     <li class="nxl-item nxl-hasmenu {{ request()->routeIs('attendance.*', 'overtime.*') ? 'active' : '' }}">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-clock"></i></span>
@@ -250,6 +261,18 @@
                         </ul>
                     </li>
 
+                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('holiday.*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-gift"></i></span>
+                            <span class="nxl-mtext">Holiday Management</span>
+                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                        </a>
+                        <ul class="nxl-submenu">
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.index') }}">All Holidays</a></li>
+                            <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.calendar') }}">Holiday Calendar</a></li>
+                        </ul>
+                    </li>
+
                     <li class="nxl-item nxl-hasmenu {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
                         <a href="javascript:void(0);" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-clock"></i></span>
@@ -278,7 +301,7 @@
                                 <a class="nxl-link" href="{{ route('payroll.statutory-deductions.index') }}">Statutory Deductions</a>
                             </li>
                             <li class="nxl-item {{ request()->routeIs('payroll.receivables.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.receivables.index') }}">Payroll Receivables</a>
+                                <a class="nxl-link" href="{{ route('payroll.receivables.index') }}">Employee Receivables</a>
                             </li>
                         </ul>
                     </li>
