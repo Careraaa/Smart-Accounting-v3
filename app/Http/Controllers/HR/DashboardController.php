@@ -86,6 +86,31 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
         
+        // Pending To-Do Items
+        $pendingItems = [];
+        if ($pendingLeaves > 0) {
+            $pendingItems[] = [
+                'text' => 'Pending Leaves',
+                'count' => $pendingLeaves,
+                'url' => route('leave.pending'),
+                'icon' => 'feather-calendar',
+                'color' => '#fef9c3',
+                'iconColor' => '#ca8a04'
+            ];
+        }
+        
+        $pendingOvertimeRecords = OvertimeUndertime::where('status', 'pending')->count();
+        if ($pendingOvertimeRecords > 0) {
+            $pendingItems[] = [
+                'text' => 'Pending Overtime/Undertime',
+                'count' => $pendingOvertimeRecords,
+                'url' => route('overtime.index'),
+                'icon' => 'feather-clock',
+                'color' => '#dbeafe',
+                'iconColor' => '#0284c7'
+            ];
+        }
+        
         return view('hr.index', compact(
             'totalEmployees',
             'activeEmployees',
@@ -104,7 +129,8 @@ class DashboardController extends Controller
             'totalOvertimeRecords',
             'attendanceTrend',
             'recentLeaves',
-            'recentAttendance'
+            'recentAttendance',
+            'pendingItems'
         ));
     }
 }

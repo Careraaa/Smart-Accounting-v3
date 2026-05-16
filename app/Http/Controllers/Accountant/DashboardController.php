@@ -92,6 +92,19 @@ class DashboardController extends Controller
             ],
         ];
 
+        // ── Pending To-Do Items ──────────────────────────────────────────────
+        $pendingItems = [];
+        if ($processingPayroll > 0) {
+            $pendingItems[] = [
+                'text' => 'Payroll Approvals Needed',
+                'count' => $processingPayroll,
+                'url' => route('payroll-approval.index'),
+                'icon' => 'feather-check-square',
+                'color' => '#f0fdf4',
+                'iconColor' => '#16a34a'
+            ];
+        }
+
         return view('accountant.index', compact(
             'totalEmployees',
             'totalPayroll',
@@ -110,7 +123,8 @@ class DashboardController extends Controller
             'monthlyPayrollTrend',
             'payrollStatusChartLabels',
             'payrollStatusChartSeries',
-            'pipelineBar'
+            'pipelineBar',
+            'pendingItems'
         ));
     }
 }

@@ -29,13 +29,16 @@ class AuthenticatedSessionController extends Controller
         // Block login if this account is already actively logged in elsewhere
         if (auth()->user()->is_logged_in) {
             Auth::logout();
-            return response()->view('errors.account-in-use', [], 409);
+            return redirect()->back()->withErrors(['error' => 'This account is already logged in elsewhere.']);
         }
 
         $request->session()->regenerate();
 
         // Mark the account as logged in
-        auth()->user()->update(['is_logged_in' => true]);
+        auth()->user()->update([
+            'is_logged_in' => true,
+            'last_login_at' => now(),
+        ]);
 
         // Flash notification if user hasn't changed their generated password yet
         if (!auth()->user()->password_changed) {

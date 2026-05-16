@@ -5,6 +5,36 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 .rem-dash { font-family: 'Sora', sans-serif; }
 
+/* ── Layout wrapper with sidebar ── */
+.rem-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.rem-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.rem-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    position: sticky;
+}
+
+@media (max-width: 1200px) {
+    .rem-layout {
+        flex-direction: column;
+    }
+    
+    .rem-sidebar {
+        width: 100%;
+        position: relative;
+        top: auto;
+    }
+}
+
 /* ── Knight mascot inside hero ── */
 .rem-hero-knight {
     position: absolute;
@@ -110,6 +140,8 @@
 
 @section('content')
 <div class="col-12 rem-dash">
+    <div class="rem-layout">
+        <div class="rem-main">
 
     {{-- Hero --}}
     <div class="rem-hero">
@@ -256,8 +288,14 @@
                 @endforeach
             </ul>
         @endif
+        </div>
     </div>
 
+    {{-- Right Calendar Sidebar --}}
+    <aside class="rem-sidebar">
+        @include('partials.calendar')
+        @include('partials.todo')
+    </aside>
 </div>
 @endsection
 

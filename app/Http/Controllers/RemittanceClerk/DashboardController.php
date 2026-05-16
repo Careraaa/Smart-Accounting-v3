@@ -66,6 +66,19 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
+        // ── Pending To-Do Items ──────────────────────────────────────────────
+        $pendingItems = [];
+        if ($pendingRemittances > 0) {
+            $pendingItems[] = [
+                'text' => 'Pending Remittances',
+                'count' => $pendingRemittances,
+                'url' => route('remittances.index'),
+                'icon' => 'feather-layers',
+                'color' => '#fff0f0',
+                'iconColor' => '#c8292a'
+            ];
+        }
+
         return view('remittance-clerk.index', compact(
             'totalRemittances',
             'totalCollections',
@@ -80,7 +93,8 @@ class DashboardController extends Controller
             'averageExpenses',
             'collectionGrowth',
             'monthlyCollectionTrend',
-            'recentRemittances'
+            'recentRemittances',
+            'pendingItems'
         ));
     }
 }

@@ -5,6 +5,36 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 .acd-dash { font-family: 'Sora', sans-serif; }
 
+/* ── Layout wrapper with sidebar ── */
+.acd-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.acd-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.acd-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    position: sticky;
+}
+
+@media (max-width: 1200px) {
+    .acd-layout {
+        flex-direction: column;
+    }
+    
+    .acd-sidebar {
+        width: 100%;
+        position: relative;
+        top: auto;
+    }
+}
+
 /* ── Knight mascot inside hero ── */
 .acd-hero-knight {
     position: absolute;
@@ -130,6 +160,8 @@
 @endphp
 
 <div class="col-12 acd-dash">
+    <div class="acd-layout">
+        <div class="acd-main">
 
     {{-- Hero --}}
     <div class="acd-hero">
@@ -293,8 +325,14 @@
                 @endforeach
             </ul>
         @endif
+        </div>
     </div>
 
+    {{-- Right Calendar Sidebar --}}
+    <aside class="acd-sidebar">
+        @include('partials.calendar')
+        @include('partials.todo')
+    </aside>
 </div>
 @endsection
 

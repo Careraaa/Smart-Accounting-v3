@@ -19,6 +19,7 @@ class User extends Authenticatable
         'role',
         'profile_picture',
         'is_logged_in',
+        'last_login_at',
         // Employee information fields
         'first_name',
         'middle_name',
@@ -60,6 +61,7 @@ class User extends Authenticatable
             'date_of_birth' => 'date',
             'date_of_hire' => 'date',
             'driver_license_validity' => 'date',
+            'last_login_at' => 'datetime',
             'attachments' => 'array',
         ];
     }

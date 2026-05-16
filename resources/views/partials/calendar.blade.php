@@ -23,11 +23,6 @@
             
             <div class="prl-calendar-dates" id="calendarDates"></div>
         </div>
-        
-        <div class="prl-upcoming-holidays">
-            <h4 class="prl-upcoming-title">Upcoming Holidays</h4>
-            <div id="upcomingHolidaysList" class="prl-holidays-list"></div>
-        </div>
     </div>
 </div>
 
