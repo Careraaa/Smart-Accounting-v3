@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -41,7 +43,14 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('username', 'password'), $this->boolean('remember'))) {
+        // Use case-sensitive username lookup
+        $username = $this->string('username')->value();
+        $password = $this->string('password')->value();
+        
+        // Find user with case-sensitive username comparison using binary collation
+        $user = User::whereRaw('BINARY `username` = ?', [$username])->first();
+        
+        if (! $user || ! Hash::check($password, $user->password)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -50,14 +59,16 @@ class LoginRequest extends FormRequest
         }
 
         // Check if the authenticated user's account is active
-        if (auth()->user()->status !== 'active') {
-            Auth::logout();
+        if ($user->status !== 'active') {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
                 'username' => 'This account has been deactivated. Please contact the administrator.',
             ]);
         }
+
+        // Manually authenticate the user
+        Auth::loginUsingId($user->id, $this->boolean('remember'));
 
         RateLimiter::clear($this->throttleKey());
     }

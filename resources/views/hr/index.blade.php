@@ -257,50 +257,6 @@
                 </ul>
             @endif
         </div>
-
-        {{-- Recent attendance --}}
-        <div class="hrd-panel" style="margin-bottom:8px;">
-            <div class="hrd-panel-hd">
-                <h2>Recent attendance</h2>
-                <a href="{{ route('attendance.index') }}" style="font-size:.78rem;font-weight:700;color:#c8292a;text-decoration:none;">View all →</a>
-            </div>
-            @if($recentAttendance->isEmpty())
-                <div class="hrd-empty">No attendance rows yet.</div>
-            @else
-                <ul class="hrd-feed">
-                    @foreach($recentAttendance as $att)
-                        @php
-                            $st = $att->status ?? '';
-                            $pillClass = match($st) {
-                                'present' => 'hrd-pill-present',
-                                'late'    => 'hrd-pill-late',
-                                'absent'  => 'hrd-pill-absent',
-                                default   => 'hrd-pill-pending',
-                            };
-                            $tIn  = $att->time_in  ? \Carbon\Carbon::parse($att->time_in)->format('g:i A')  : '—';
-                            $tOut = $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('g:i A') : '—';
-                        @endphp
-                        <li>
-                            <a href="{{ route('attendance.show', $att) }}">
-                                <div class="hrd-av">{{ $initials($att->employee->name ?? '') }}</div>
-                                <div class="hrd-feed-body">
-                                    <p class="hrd-feed-title">{{ $att->employee->name ?? 'Unknown' }}</p>
-                                    <p class="hrd-feed-meta">
-                                        {{ $att->date?->format('D, M j, Y') ?? '—' }}
-                                        · In <code>{{ $tIn }}</code> · Out <code>{{ $tOut }}</code>
-                                    </p>
-                                </div>
-                                <div class="hrd-feed-right">
-                                    <span class="hrd-pill {{ $pillClass }}">{{ ucfirst($st) }}</span>
-                                    <i class="feather-chevron-right hrd-chevron"></i>
-                                </div>
-                            </a>
-                        </li>
-                    @endforeach
-                </ul>
-            @endif
-        </div>
-
     </div>
     {{-- Right Calendar Sidebar --}}
     <aside class="hrd-sidebar">
