@@ -356,10 +356,9 @@
 
     {{-- HEADER --}}
     <div class="hld-cal-header">
-        <h1 class="hld-cal-title">Holiday Calendar</h1>
 
         <div class="hld-cal-nav">
-            <a href="{{ route('holiday.calendar', ['month' => $prevMonth]) }}"
+            <a href="{{ route('partials.calendar_full', ['month' => $prevMonth]) }}"
                class="hld-nav-btn"
                title="Previous Month">
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24"
@@ -372,7 +371,7 @@
                 {{ $currentMonth->format('F Y') }}
             </div>
 
-            <a href="{{ route('holiday.calendar', ['month' => $nextMonth]) }}"
+            <a href="{{ route('partials.calendar_full', ['month' => $nextMonth]) }}"
                class="hld-nav-btn"
                title="Next Month">
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24"
@@ -463,36 +462,7 @@
         {{-- SIDEBAR --}}
         <div class="hld-sidebar">
 
-            {{-- SUMMARY --}}
-            <div class="hld-side-card">
-                <p class="hld-side-title">
-                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/>
-                    </svg>
-
-                    {{ $currentMonth->format('Y') }} Summary
-                </p>
-
-                <div class="hld-side-stat">
-                    <div class="hld-side-icon regular">R</div>
-
-                    <div>
-                        <div class="hld-side-label">Regular Holidays</div>
-                        <div class="hld-side-value">{{ $regularCount }}</div>
-                    </div>
-                </div>
-
-                <div class="hld-side-stat">
-                    <div class="hld-side-icon special">S</div>
-
-                    <div>
-                        <div class="hld-side-label">Special Holidays</div>
-                        <div class="hld-side-value">{{ $specialCount }}</div>
-                    </div>
-                </div>
-            </div>
+            @include('partials.calendar')
 
             {{-- LEGEND --}}
             <div class="hld-legend">

@@ -118,37 +118,6 @@ class HolidayController extends Controller
     }
 
     /**
-     * Display calendar view of holidays.
-     */
-    public function calendar(Request $request)
-    {
-        $month = $request->query('month');
-        $currentMonth = $month ? Carbon::createFromFormat('Y-m', $month)->startOfMonth() : now()->startOfMonth();
-
-        $holidays = Holiday::whereBetween('date', [
-            $currentMonth->copy()->startOfMonth(),
-            $currentMonth->copy()->endOfMonth(),
-        ])->get();
-
-        $prevMonth = $currentMonth->copy()->subMonth()->format('Y-m');
-        $nextMonth = $currentMonth->copy()->addMonth()->format('Y-m');
-
-        // Get holidays for the whole year for sidebar stats
-        $yearHolidays = Holiday::whereYear('date', $currentMonth->year)->get();
-        $regularCount = $yearHolidays->where('type', 'regular')->count();
-        $specialCount = $yearHolidays->where('type', 'special')->count();
-
-        return view('hr.holiday.calendar', compact(
-            'holidays',
-            'currentMonth',
-            'prevMonth',
-            'nextMonth',
-            'regularCount',
-            'specialCount'
-        ));
-    }
-
-    /**
      * Get holidays as JSON (API endpoint).
      */
     public function indexApi(Request $request)

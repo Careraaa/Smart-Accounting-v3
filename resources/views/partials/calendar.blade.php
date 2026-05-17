@@ -22,6 +22,14 @@
             </div>
             
             <div class="prl-calendar-dates" id="calendarDates"></div>
+            
+            <div class="prl-calendar-footer">
+                @unless(request()->routeIs('partials.calendar_full'))
+                    <a href="{{ route('partials.calendar_full') }}" class="prl-calendar-link prl-calendar-link-left">
+                        full calendar
+                    </a>
+                @endunless
+            </div>
         </div>
     </div>
 </div>
@@ -220,6 +228,34 @@
 .prl-holiday-name {
     color: #6b7280 !important;
     display: block !important;
+}
+
+/* ── Calendar Footer ── */
+.prl-calendar-footer {
+    margin-top: 16px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid #ffffff !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.prl-calendar-link {
+    font-size: 0.60rem !important;
+    color: #000000 !important;
+    cursor: pointer !important;
+    transition: color 0.15s ease !important;
+    font-family: 'Sora', sans-serif !important;
+}
+
+.prl-calendar-link:hover {
+    color: #404040 !important;
+}
+
+.prl-calendar-link-left {
+}
+
+.prl-calendar-link-right {
 }
 </style>
 @endpush

@@ -41,12 +41,40 @@ use App\Http\Controllers\HR\BonusController;
 use App\Http\Controllers\HR\ThirteenthMonthPayController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
+use App\Models\Holiday;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return view('auth/login');
 });
+
+Route::get('/partials/calendar-full', function (Request $request) {
+    $month = $request->query('month');
+    $currentMonth = $month ? Carbon::createFromFormat('Y-m', $month)->startOfMonth() : now()->startOfMonth();
+
+    $holidays = Holiday::whereBetween('date', [
+        $currentMonth->copy()->startOfMonth(),
+        $currentMonth->copy()->endOfMonth(),
+    ])->get();
+
+    $prevMonth = $currentMonth->copy()->subMonth()->format('Y-m');
+    $nextMonth = $currentMonth->copy()->addMonth()->format('Y-m');
+
+    $yearHolidays = Holiday::whereYear('date', $currentMonth->year)->get();
+    $regularCount = $yearHolidays->where('type', 'regular')->count();
+    $specialCount = $yearHolidays->where('type', 'special')->count();
+
+    return view('partials.calendar_full', compact(
+        'holidays',
+        'currentMonth',
+        'prevMonth',
+        'nextMonth',
+        'regularCount',
+        'specialCount'
+    ));
+})->name('partials.calendar_full');
 
 // Emergency maintenance unlock route (works even when logged out).
 // Usage: /emergency/maintenance-off?key=YOUR_UNLOCK_KEY
@@ -250,8 +278,6 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
 
     Route::resource('leave-type', LeaveTypeController::class);
 
-    // Holiday routes - define calendar before resource to avoid {holiday} catch-all conflict
-    Route::get('/holiday/calendar', [HRHolidayController::class, 'calendar'])->name('holiday.calendar');
     Route::resource('holiday', HRHolidayController::class);
 
     // Define specific overtime routes before resource routes to prevent conflicts

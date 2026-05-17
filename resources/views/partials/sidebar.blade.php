@@ -69,7 +69,6 @@
                         </a>
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.index') }}">All Holidays</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.calendar') }}">Holiday Calendar</a></li>
                         </ul>
                     </li>
                     <li class="nxl-item nxl-hasmenu {{ request()->routeIs('attendance.*', 'overtime.*') ? 'active' : '' }}">
@@ -276,7 +275,6 @@
                         </a>
                         <ul class="nxl-submenu">
                             <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.index') }}">All Holidays</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.calendar') }}">Holiday Calendar</a></li>
                         </ul>
                     </li>
 

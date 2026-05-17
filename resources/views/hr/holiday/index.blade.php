@@ -95,10 +95,6 @@
             <p class="hld-topbar-sub">Configure holidays for payroll computation</p>
         </div>
         <div class="hld-topbar-actions">
-            <a href="{{ route('holiday.calendar') }}" class="hld-btn-sec">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                Calendar
-            </a>
             <a href="{{ route('holiday.create') }}" class="hld-btn-primary">
                 <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 Add Holiday

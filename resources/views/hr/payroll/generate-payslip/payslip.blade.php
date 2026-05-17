@@ -34,14 +34,14 @@
             --earn-color: #000000;
             --ded-color: #000000;
             --page-width: 215.9mm;
-            --page-height: 93.1mm;
+            --page-height: 139.7mm;
             --font-body: 'Sora', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
 
         body {
             font-family: var(--font-body);
-            font-size: 10px;
+            font-size: 15px;
             color: var(--black);
             background: #efefef;
             line-height: 1.2;
@@ -129,13 +129,13 @@
         }
 
         .company-name {
-            font-size: 10px;
+            font-size: 15px;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
 
         .slip-title {
-            font-size: 13px;
+            font-size: 18px;
             font-weight: 700;
             letter-spacing: -0.04em;
         }
@@ -147,7 +147,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px 12px;
-            font-size: 8px;
+            font-size: 13px;
         }
 
         .emp-label {
@@ -190,12 +190,12 @@
         .pay-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 8px;
+            font-size: 13px;
             flex: unset;
         }
 
         .pay-table thead th {
-            font-size: 8px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -210,7 +210,7 @@
         .pay-table td {
             padding: 1px 2px;
             color: var(--black);
-            font-size: 8px;
+            font-size: 13px;
             vertical-align: top;
         }
 
@@ -223,7 +223,7 @@
         }
 
         .pay-table td .td-sub {
-            font-size: 8px;
+            font-size: 13px;
             color: var(--black);
             display: block;
         }
@@ -241,11 +241,11 @@
             padding: 3px 2px;
             border-top: 0.5px solid var(--black);
             margin-top: auto;           /* Pushes to bottom */
-            font-size: 8px;
+            font-size: 13px;
         }
 
         .subtotal-row .st-label {
-            font-size: 8px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.07em;
@@ -270,7 +270,7 @@
         }
 
         .np-label {
-            font-size: 10px;
+            font-size: 15px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.12em;
@@ -278,7 +278,7 @@
         }
 
         .np-period {
-            font-size: 10px;
+            font-size: 15px;
             color: var(--black);
         }
 
@@ -290,7 +290,7 @@
         }
 
         .np-words {
-            font-size: 10px;
+            font-size: 15px;
             color: var(--gray-light);
             font-style: italic;
             text-align: right;
@@ -302,7 +302,7 @@
             padding: 3px 10px;
             display: flex;
             flex-direction: column;
-            font-size: 8px;
+            font-size: 13px;
             height: 100%;
         }
 
@@ -329,7 +329,6 @@
 <body>
 
     <div class="controls">
-        <button type="button" class="btn btn-ghost" onclick="history.back()">← Back</button>
         <button class="btn btn-primary" onclick="window.print()">Print Payslip</button>
     </div>
 
@@ -446,7 +445,7 @@
             </div>
         </div>
 
-        <!-- Acknowledgement -->
+        <!-- Acknowledgement
         <div class="acknowledgement">
             <div style="line-height: 1.3; margin-top: 80px; margin-bottom: 10px; font-weight: 600; text-align: justify;">
                 I ACKNOWLEDGE TO HAVE RECEIVED THE AMOUNT BELOW AND HAVE NO FURTHER CLAIMS FOR SERVICES RENDERED.
@@ -479,7 +478,7 @@
                 <div style="font-weight: 600;">_____________</div>
                 <div style="font-weight: 600;">Signature</div>
             </div>
-        </div>
+        </div> -->
 
     </div>
 
