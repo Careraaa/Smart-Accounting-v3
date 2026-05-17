@@ -108,9 +108,9 @@
                         </ul>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('payroll.thirteenth-month-pay.*') ? 'active' : '' }}">
+                    <li class="nxl-item {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'active' : '' }}">
                         <a href="{{ route('bonuses.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-gift"></i></span>
+                            <span class="nxl-micon"><i class="feather-award"></i></span>
                             <span class="nxl-mtext">Bonuses</span>
                         </a>
                     </li>
@@ -313,9 +313,9 @@
                         </ul>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('payroll.thirteenth-month-pay.*') ? 'active' : '' }}">
+                    <li class="nxl-item {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'active' : '' }}">
                         <a href="{{ route('bonuses.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-gift"></i></span>
+                            <span class="nxl-micon"><i class="feather-award"></i></span>
                             <span class="nxl-mtext">Bonuses</span>
                         </a>
                     </li>

@@ -37,6 +37,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\HR\HolidayController as HRHolidayController;
+use App\Http\Controllers\HR\BonusController;
+use App\Http\Controllers\HR\ThirteenthMonthPayController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use Illuminate\Http\Request;
@@ -302,6 +304,21 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::post('/payroll/batch/{batch}/prepare-all', [PayrollController::class, 'batchPrepareAll'])->name('payroll.batch.prepare-all');
         Route::post('/payroll/batch/{batch}/submit', [PayrollController::class, 'batchSubmit'])->name('payroll.batch.submit');
         Route::post('/payroll/cutoff/update', [PayrollController::class, 'updateCutoffSchedule'])->name('payroll.cutoff.update');
+
+        Route::resource('bonuses', BonusController::class)->except(['show']);
+
+        Route::prefix('payroll/thirteenth-month-pay')
+            ->name('payroll.thirteenth-month-pay.')
+            ->group(function () {
+                Route::get('/', [ThirteenthMonthPayController::class, 'index'])->name('index');
+                Route::post('/compute', [ThirteenthMonthPayController::class, 'compute'])->name('compute');
+                Route::get('/{thirteenthMonthPay}/record-payment', [ThirteenthMonthPayController::class, 'recordPaymentForm'])->name('record-payment');
+                Route::post('/{thirteenthMonthPay}/record-payment', [ThirteenthMonthPayController::class, 'recordPayment'])->name('record-payment.store');
+                Route::post('/{thirteenthMonthPay}/recompute', [ThirteenthMonthPayController::class, 'recompute'])->name('recompute');
+                Route::get('/{thirteenthMonthPay}/edit', [ThirteenthMonthPayController::class, 'edit'])->name('edit');
+                Route::put('/{thirteenthMonthPay}', [ThirteenthMonthPayController::class, 'update'])->name('update');
+                Route::get('/{thirteenthMonthPay}', [ThirteenthMonthPayController::class, 'show'])->name('show');
+            });
     });
 
     Route::prefix('payroll/statutory-deductions')
