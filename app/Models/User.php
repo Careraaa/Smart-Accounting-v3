@@ -108,6 +108,11 @@ class User extends Authenticatable
         return $this->hasMany(Leave::class, 'user_id');
     }
 
+    public function leaveBalances()
+    {
+        return $this->hasMany(EmployeeLeaveBalance::class, 'user_id');
+    }
+
     public function allowances()
     {
         return $this->hasMany(Allowance::class, 'user_id');

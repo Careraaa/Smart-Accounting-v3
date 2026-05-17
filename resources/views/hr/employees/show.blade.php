@@ -93,6 +93,18 @@
 /* ── Manage button ───────────────────────────────────────────── */
 .emp-manage-btn { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;font-family:'Sora',sans-serif;font-size:0.75rem;font-weight:600;text-decoration:none;transition:all 0.13s; }
 .emp-manage-btn:hover { background:#fff5f5;border-color:#c8292a;color:#c8292a; }
+
+/* ── Tab bar ── */
+.emp-tabs { display:flex;gap:4px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:5px;margin-bottom:20px;width:fit-content; }
+.emp-tab { display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border-radius:9px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;color:#6b7280;text-decoration:none;transition:all 0.15s;white-space:nowrap;border:none;background:transparent;cursor:pointer; }
+.emp-tab:hover { color:#111827;background:#f3f4f6; }
+.emp-tab.active { background:#111827;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+.emp-tab svg { opacity:0.7; }
+.emp-tab.active svg { opacity:1; }
+
+/* ── Tab content ── */
+.emp-tab-content { display:none; }
+.emp-tab-content.active { display:block; }
 </style>
 @endpush
 
@@ -109,6 +121,7 @@
     if (!$addressFormatted) $addressFormatted = $employee->address ?? '—';
 
     $sc = $employee->status === 'active' ? 's-active' : 's-inactive';
+    $tab = request('tab', 'personal');
 @endphp
 
 <div class="emp-page">
@@ -140,6 +153,35 @@
             </form>
         </div>
     </div>
+
+    {{-- ── Tab bar ── --}}
+    <div class="emp-tabs">
+        <a href="{{ route('employees.show', $employee) }}?tab=personal"
+           class="emp-tab {{ $tab === 'personal' ? 'active' : '' }}">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Personal Info
+        </a>
+        <a href="{{ route('employees.show', $employee) }}?tab=employment"
+           class="emp-tab {{ $tab === 'employment' ? 'active' : '' }}">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+            Employment
+        </a>
+        <a href="{{ route('employees.show', $employee) }}?tab=documents"
+           class="emp-tab {{ $tab === 'documents' ? 'active' : '' }}">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            Documents
+        </a>
+        <a href="{{ route('employees.show', $employee) }}?tab=leaves"
+           class="emp-tab {{ $tab === 'leaves' ? 'active' : '' }}">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Leaves
+        </a>
+    </div>
+
+    {{-- ══════════════════════════════════════════
+         PERSONAL INFO TAB
+    ══════════════════════════════════════════ --}}
+    @if($tab === 'personal')
 
     {{-- Personal Information --}}
     <div class="emp-info-card">
@@ -195,6 +237,13 @@
             </div>
         </div>
     </div>
+
+    @endif
+
+    {{-- ══════════════════════════════════════════
+         EMPLOYMENT TAB
+    ══════════════════════════════════════════ --}}
+    @if($tab === 'employment')
 
     {{-- Employment Information --}}
     <div class="emp-info-card">
@@ -371,10 +420,16 @@
         </div>
     </div>
 
+    @endif
+
+    {{-- ══════════════════════════════════════════
+         DOCUMENTS TAB
+    ══════════════════════════════════════════ --}}
+    @if($tab === 'documents')
+
     {{-- Attachments --}}
     @php
-        use App\Models\EmployeeAttachment;
-        $attachmentTypes  = EmployeeAttachment::attachmentTypes();
+        $attachmentTypes  = \App\Models\EmployeeAttachment::attachmentTypes();
         $attachmentsByKey = $employee->employeeAttachments
             ->groupBy('attachment_key')
             ->map(fn($g) => $g->first());
@@ -432,6 +487,45 @@
             </div>
         </div>
     </div>
+
+    @endif
+
+    {{-- ══════════════════════════════════════════
+         LEAVES TAB
+    ══════════════════════════════════════════ --}}
+    @if($tab === 'leaves')
+
+    {{-- Leave Balance --}}
+    <div class="emp-info-card">
+        <div class="emp-info-card-header">
+            <h2 class="emp-info-card-title"><span class="emp-dot"></span> Leave Balance</h2>
+        </div>
+        <div class="emp-info-card-body" style="padding:0;">
+            <div class="emp-sub-table-wrap" style="border-radius:0;border:none;">
+                <table class="emp-sub-table">
+                    <thead><tr><th style="text-align:center;">Leave Type</th><th style="text-align:center;">Total Days</th><th style="text-align:center;">Used Days</th><th style="text-align:center;">Remaining Days</th></tr></thead>
+                    <tbody>
+                        @forelse($employee->leaveBalances as $balance)
+                            <tr>
+                                <td style="font-weight:600;color:#111827;">{{ $balance->leaveType->name ?? '—' }}</td>
+                                <td style="text-align:center;">{{ $balance->total_days }}</td>
+                                <td style="text-align:center;color:#ef4444;font-weight:600;">{{ $balance->used_days }}</td>
+                                <td style="text-align:center;color:#16a34a;font-weight:600;">{{ $balance->remaining_days }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center text-muted" style="padding:18px;">
+                                    No leave balance records found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @endif
 
 </div>
 @endsection

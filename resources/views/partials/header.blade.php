@@ -18,22 +18,10 @@
                 style="display:none !important;">
                 <i class="feather-menu fs-18"></i>
             </a>
-
-            {{-- Brand --}}
-            <div class="d-none d-md-flex align-items-center gap-2">
-                <span class="kt-brand-name">Knights Transport</span>
-                <span class="kt-role-pill">
-                    {{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}
-                </span>
-            </div>
         </div>
 
         {{-- ── Centre: Global Search ── --}}
         <div id="kt-nav-search" style="
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
             width: 420px;
             display: flex;
             align-items: center;

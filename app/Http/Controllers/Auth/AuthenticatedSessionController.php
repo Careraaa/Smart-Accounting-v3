@@ -26,26 +26,49 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        // Block login if this account is already actively logged in elsewhere
-        if (auth()->user()->is_logged_in) {
-            Auth::logout();
-            return redirect()->back()->withErrors(['error' => 'This account is already logged in elsewhere.']);
-        }
-
+        // Regenerate session first to establish a new session ID
         $request->session()->regenerate();
+        
+        $user = auth()->user();
 
-        // Mark the account as logged in
-        auth()->user()->update([
+        // Invalidate all other sessions for this user (except the current one)
+        $this->invalidateOtherSessions($user, $request->session()->getId());
+
+        // Mark the account as logged in and refresh user data
+        $user->update([
             'is_logged_in' => true,
             'last_login_at' => now(),
         ]);
 
         // Flash notification if user hasn't changed their generated password yet
-        if (!auth()->user()->password_changed) {
+        if ($user->password_changed === 0 || $user->password_changed === false) {
             session()->flash('info', 'Security reminder: you are using a temporary password. Please change it now in Account Settings.');
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Reload the user to ensure we have fresh data including role
+        $user->refresh();
+
+        // Return role-specific redirect
+        return match ($user->role) {
+            'superadmin' => redirect()->route('superadmin.dashboard'),
+            'remittance_clerk' => redirect()->route('remittance-clerk.index'),
+            'accountant' => redirect()->route('accountant.index'),
+            'hr' => redirect()->route('hr.index'),
+            'qr_admin' => redirect()->route('admin.dashboard'),
+            'employee' => redirect()->route('employee.index'),
+            default => redirect()->intended(route('dashboard', absolute: false)),
+        };
+    }
+
+    /**
+     * Invalidate all other sessions for a user, except the current one.
+     */
+    private function invalidateOtherSessions($user, $currentSessionId): void
+    {
+        \DB::table(config('session.table', 'sessions'))
+            ->where('user_id', $user->id)
+            ->where('id', '!=', $currentSessionId)
+            ->delete();
     }
 
     /**

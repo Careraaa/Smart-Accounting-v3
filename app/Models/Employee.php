@@ -108,6 +108,11 @@ class Employee extends Model
         return $this->hasMany(Leave::class, 'user_id');
     }
 
+    public function leaveBalances()
+    {
+        return $this->hasMany(EmployeeLeaveBalance::class, 'user_id');
+    }
+
     public function allowances()
     {
         return $this->hasMany(Allowance::class, 'user_id');
@@ -131,5 +136,10 @@ class Employee extends Model
     public function overtimeUndertimes()
     {
         return $this->hasMany(OvertimeUndertime::class, 'user_id');
+    }
+
+    public function employeeAttachments()
+    {
+        return $this->hasMany(EmployeeAttachment::class, 'user_id')->orderBy('attachment_key')->orderByDesc('created_at');
     }
 }

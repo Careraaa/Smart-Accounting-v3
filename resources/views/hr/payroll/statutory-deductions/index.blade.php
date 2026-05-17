@@ -184,7 +184,7 @@
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
             </div>
             <div>
-                <div class="sd-stat-label">PhilHealth (PHIC)</div>
+                <div class="sd-stat-label">PhilHealth (PHIL)</div>
                 <div class="sd-stat-value">{{ $philMax ?? 2.5 }}%</div>
                 <div class="sd-stat-sub">ee share · 5% total premium</div>
             </div>
@@ -194,7 +194,7 @@
     <div class="sd-layout">
         <div>
             <div class="sd-section-head">
-                <h2 class="sd-section-title"><span class="sd-dot"></span> Contribution Schedule</h2>
+                <h2 class="sd-section-title"><span class="sd-dot"></span> Contribution Table</h2>
             </div>
             <div class="sd-filter-bar">
                 <div class="sd-search-wrap">
@@ -332,21 +332,7 @@
                 </div>
                 <div class="sd-legend-item" style="border-bottom:none">
                     <div class="sd-legend-dot" style="background:#c8292a"></div>
-                    <div><div class="sd-legend-label">PhilHealth (PHIC)</div><div class="sd-legend-sub">Mixed — fixed floor/ceiling, % in between · 5% total split equally</div></div>
-                </div>
-                <div class="sd-key-card">
-                    <div class="sd-key-head">Value Legend</div>
-                    <div class="sd-key-row"><span style="color:#6b7280;font-size:0.75rem">Fixed ₱ amount</span><span class="sd-mono">₱250.00</span></div>
-                    <div class="sd-key-row"><span style="color:#6b7280;font-size:0.75rem">Employee %</span><span class="sd-pct-pill emp" style="font-size:0.70rem">2.5%</span></div>
-                    <div class="sd-key-row"><span style="color:#6b7280;font-size:0.75rem">Employer %</span><span class="sd-pct-pill er" style="font-size:0.70rem">2.5%</span></div>
-                    <div class="sd-key-row"><span style="color:#6b7280;font-size:0.75rem">Not applicable</span><span class="sd-mono null">—</span></div>
-                </div>
-                <div class="sd-info-box">
-                    <div class="sd-info-box-title">
-                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        2025 Rate Note
-                    </div>
-                    <div class="sd-info-box-body">PhilHealth raised its premium to 5% total (2.5% ee + 2.5% er) per PA2025-0002. Verify against the latest advisory before processing payroll.</div>
+                    <div><div class="sd-legend-label">PhilHealth (PHIL)</div><div class="sd-legend-sub">Mixed — fixed floor/ceiling, % in between · 5% total split equally</div></div>
                 </div>
             </div>
         </div>
