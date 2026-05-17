@@ -7,69 +7,79 @@
 @section('content')
 <div class="col-12">
     <div class="remui-page">
-        <div class="remui-backdrop"></div>
 
-        <div class="remui-hero mb-3">
+        <div class="prl-topbar">
             <div>
-                <h5 class="remui-title">{{ $vehicle->plate_number }}</h5>
-                <p class="remui-subtitle mb-0">
+                <h1 class="prl-topbar-title">{{ $vehicle->plate_number }}</h1>
+                <p class="prl-topbar-sub">
                     {{ $vehicle->route ? ($vehicle->route->origin . ' → ' . $vehicle->route->destination) : 'No route assigned' }}
                 </p>
             </div>
-            <div class="d-flex flex-wrap gap-2 justify-content-end">
-                <a href="{{ route('vehicles.edit', $vehicle) }}" class="emp-action-btn emp-action-edit">
-                    <i class="feather-edit-2"></i><span>Edit</span>
+            <div class="prl-topbar-actions">
+                <a href="{{ route('vehicles.edit', $vehicle) }}" class="prl-btn-ghost">
+                    <i class="feather-edit-2"></i> Edit
                 </a>
-                <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST"
-                    onsubmit="return confirm('Delete this vehicle?')" class="d-inline">
+                <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" class="d-inline"
+                    data-sa-confirm="Delete this vehicle?">
                     @csrf @method('DELETE')
-                    <button type="submit" class="emp-action-btn emp-action-danger">
-                        <i class="feather-trash-2"></i><span>Delete</span>
+                    <button type="submit" class="prl-action-btn danger">
+                        <i class="feather-trash-2"></i> Delete
                     </button>
                 </form>
-                <a href="{{ route('vehicles.index') }}" class="emp-action-btn emp-action-back">
-                    <i class="feather-arrow-left"></i><span>Back</span>
+                <a href="{{ route('vehicles.index') }}" class="prl-btn-ghost">
+                    <i class="feather-arrow-left"></i> Back
                 </a>
             </div>
         </div>
 
-    {{-- Vehicle Information --}}
-    <div class="card remui-card mb-3">
-        <div class="card-header"><span class="card-title mb-0">Vehicle Information</span></div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Plate Number</span>
-                    <div class="emp-field-value">{{ $vehicle->plate_number ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Operator</span>
-                    <div class="emp-field-value">{{ $vehicle->operator ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Status</span>
-                    <div class="mt-1">
-                        @php $status = strtolower($vehicle->status ?? 'active'); @endphp
-                        @if ($status === 'active')
-                            <span class="emp-badge emp-badge-active">Active</span>
-                        @elseif ($status === 'pending')
-                            <span class="emp-badge emp-badge-pending">Pending</span>
-                        @else
-                            <span class="emp-badge emp-badge-inactive">Inactive</span>
-                        @endif
+        <div class="prl-detail-card">
+            <div class="prl-detail-head">
+                <h2 class="prl-detail-title">Vehicle Information</h2>
+            </div>
+            <div class="prl-detail-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Plate Number</span>
+                        <div class="prl-field-value">{{ $vehicle->plate_number ?? '—' }}</div>
                     </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Origin</span>
-                    <div class="emp-field-value">{{ $vehicle->route->origin ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Destination</span>
-                    <div class="emp-field-value">{{ $vehicle->route->destination ?? '—' }}</div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Operator</span>
+                        <div class="prl-field-value">{{ $vehicle->operator ?? '—' }}</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Status</span>
+                        <div class="mt-1">
+                            @php $status = strtolower($vehicle->status ?? 'active'); @endphp
+                            @if ($status === 'active')
+                                <span class="prl-status s-active">Active</span>
+                            @elseif ($status === 'under_maintenance')
+                                <span class="prl-status s-pending">Under Maintenance</span>
+                            @else
+                                <span class="prl-status s-inactive">Inactive</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Origin</span>
+                        <div class="prl-field-value">{{ $vehicle->route->origin ?? '—' }}</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Destination</span>
+                        <div class="prl-field-value">{{ $vehicle->route->destination ?? '—' }}</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Boundary Rate</span>
+                        <div class="prl-field-value">
+                            @if($vehicle->route && $vehicle->route->boundary)
+                                ₱{{ number_format($vehicle->route->boundary, 2) }}
+                            @else
+                                —
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
     </div>
 </div>

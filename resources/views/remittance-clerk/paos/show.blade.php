@@ -7,72 +7,77 @@
 @section('content')
 <div class="col-12">
     <div class="remui-page">
-        <div class="remui-backdrop"></div>
 
-        <div class="remui-hero mb-3">
+        <div class="prl-topbar">
             <div>
-                <h5 class="remui-title">{{ $pao->name }}</h5>
-                <p class="remui-subtitle mb-0">PAO / Conductor profile and employment status.</p>
+                <h1 class="prl-topbar-title">{{ $pao->name }}</h1>
+                <p class="prl-topbar-sub">PAO / Conductor profile and employment status.</p>
             </div>
-            <div class="d-flex flex-wrap gap-2 justify-content-end">
-                <a href="{{ route('paos.edit', $pao) }}" class="emp-action-btn emp-action-edit">
-                    <i class="feather-edit-2"></i><span>Edit</span>
+            <div class="prl-topbar-actions">
+                <a href="{{ route('paos.edit', $pao) }}" class="prl-btn-ghost">
+                    <i class="feather-edit-2"></i> Edit
                 </a>
-                <form action="{{ route('paos.destroy', $pao) }}" method="POST"
-                    onsubmit="return confirm('Are you sure you want to delete this PAO?')" class="d-inline">
+                <form action="{{ route('paos.destroy', $pao) }}" method="POST" class="d-inline"
+                    data-sa-confirm="Are you sure you want to delete this PAO?">
                     @csrf @method('DELETE')
-                    <button type="submit" class="emp-action-btn emp-action-danger">
-                        <i class="feather-trash-2"></i><span>Delete</span>
+                    <button type="submit" class="prl-action-btn danger">
+                        <i class="feather-trash-2"></i> Delete
                     </button>
                 </form>
-                <a href="{{ route('paos.index') }}" class="emp-action-btn emp-action-back">
-                    <i class="feather-arrow-left"></i><span>Back</span>
+                <a href="{{ route('paos.index') }}" class="prl-btn-ghost">
+                    <i class="feather-arrow-left"></i> Back
                 </a>
             </div>
         </div>
 
-    {{-- PAO Information --}}
-    <div class="card remui-card mb-3">
-        <div class="card-header"><span class="card-title mb-0">PAO Information</span></div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Name</span>
-                    <div class="emp-field-value">{{ $pao->name ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Contact Number</span>
-                    <div class="emp-field-value">{{ $pao->contact_number ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Email</span>
-                    <div class="emp-field-value">{{ $pao->email ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Date of Hire</span>
-                    <div class="emp-field-value">{{ $pao->date_of_hire?->format('F d, Y') ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Status</span>
-                    <div class="mt-1">
-                        @if ($pao->status === 'active')
-                            <span class="emp-badge emp-badge-active">Active</span>
-                        @elseif ($pao->status === 'pending')
-                            <span class="emp-badge emp-badge-pending">Pending</span>
-                        @else
-                            <span class="emp-badge emp-badge-inactive">Inactive</span>
-                        @endif
+        <div class="prl-detail-card">
+            <div class="prl-detail-head">
+                <h2 class="prl-detail-title">PAO Information</h2>
+            </div>
+            <div class="prl-detail-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Name</span>
+                        <div class="prl-field-value">{{ $pao->name ?? '—' }}</div>
                     </div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Contact Number</span>
+                        <div class="prl-field-value">{{ $pao->contact_number ?? '—' }}</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Email</span>
+                        <div class="prl-field-value">{{ $pao->email ?? '—' }}</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Gender</span>
+                        <div class="prl-field-value">{{ ucfirst(str_replace('_', ' ', $pao->gender ?? '—')) }}</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Date of Hire</span>
+                        <div class="prl-field-value">{{ $pao->date_of_hire?->format('F d, Y') ?? '—' }}</div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <span class="prl-field-label">Status</span>
+                        <div class="mt-1">
+                            @if ($pao->status === 'active')
+                                <span class="prl-status s-active">Active</span>
+                            @elseif ($pao->status === 'pending')
+                                <span class="prl-status s-pending">Pending</span>
+                            @else
+                                <span class="prl-status s-inactive">Inactive</span>
+                            @endif
+                        </div>
+                    </div>
+                    @if ($pao->address)
+                    <div class="col-md-12 mb-3">
+                        <span class="prl-field-label">Address</span>
+                        <div class="prl-field-value">{{ $pao->address }}</div>
+                    </div>
+                    @endif
                 </div>
-                @if ($pao->address)
-                <div class="col-md-12 mb-3">
-                    <span class="emp-field-label">Address</span>
-                    <div class="emp-field-value">{{ $pao->address }}</div>
-                </div>
-                @endif
             </div>
         </div>
-    </div>
+
     </div>
 </div>
 @endsection

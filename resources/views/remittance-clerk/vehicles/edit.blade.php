@@ -7,97 +7,97 @@
 @section('content')
 <div class="col-12">
     <div class="remui-page">
-        <div class="remui-backdrop"></div>
 
-        <div class="remui-hero mb-3">
+        <div class="prl-topbar">
             <div>
-                <h5 class="remui-title">Edit Vehicle</h5>
-                <p class="remui-subtitle mb-0">Update vehicle information, assigned route, and status.</p>
+                <h1 class="prl-topbar-title">Edit Vehicle</h1>
+                <p class="prl-topbar-sub">Update vehicle information, assigned route, and status.</p>
             </div>
-            <div class="d-flex gap-2">
-                <a href="{{ route('vehicles.show', $vehicle) }}" class="emp-action-btn emp-action-view">
-                    <i class="feather-eye"></i><span>View</span>
+            <div class="prl-topbar-actions">
+                <a href="{{ route('vehicles.show', $vehicle) }}" class="prl-btn-ghost">
+                    <i class="feather-eye"></i> View
                 </a>
-                <a href="{{ route('vehicles.index') }}" class="emp-action-btn emp-action-back">
-                    <i class="feather-arrow-left"></i><span>Back</span>
+                <a href="{{ route('vehicles.index') }}" class="prl-btn-ghost">
+                    <i class="feather-arrow-left"></i> Back
                 </a>
             </div>
         </div>
 
-        <div class="card remui-card">
-            <div class="card-header">
-                <span class="card-title mb-0">Vehicle Details</span>
+        <div class="prl-detail-card">
+            <div class="prl-detail-head">
+                <h2 class="prl-detail-title">Vehicle Details</h2>
             </div>
-            <div class="card-body">
-            <form action="{{ route('vehicles.update', $vehicle) }}" method="POST">
-                @csrf
-                @method('PUT')
+            <div class="prl-detail-body">
+                <form action="{{ route('vehicles.update', $vehicle) }}" method="POST">
+                    @csrf
+                    @method('PUT')
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="plate_number" class="form-label">Plate Number <span class="text-danger">*</span></label>
-                        <input type="text" name="plate_number" id="plate_number"
-                            class="form-control @error('plate_number') is-invalid @enderror"
-                            value="{{ old('plate_number', $vehicle->plate_number) }}" placeholder="e.g., ABC-1234" required>
-                        @error('plate_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="operator" class="form-label">Operator <span class="text-danger">*</span></label>
-                        <select name="operator" id="operator"
-                            class="form-select @error('operator') is-invalid @enderror" required>
-                            <option value="">-- Select Operator --</option>
-                            @foreach($operators as $operator)
-                                <option value="{{ $operator }}" @selected(old('operator', $vehicle->operator) === $operator)>{{ $operator }}</option>
-                            @endforeach
-                        </select>
-                        @error('operator')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="route_id" class="form-label">Route <span class="text-danger">*</span></label>
-                        <select name="route_id" id="route_id"
-                            class="form-select @error('route_id') is-invalid @enderror" required>
-                            <option value="">-- Select Route --</option>
-                            @foreach($routes as $route)
-                                <option value="{{ $route->id }}" data-boundary="{{ $route->boundary }}"
-                                    {{ old('route_id', $vehicle->route_id) == $route->id ? 'selected' : '' }}>
-                                    {{ $route->route_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('route_id')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="boundary_display" class="form-label">Boundary Rate</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="text" id="boundary_display"
-                                class="form-control" placeholder="0.00" readonly>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="plate_number" class="form-label">Plate Number <span class="text-danger">*</span></label>
+                            <input type="text" name="plate_number" id="plate_number"
+                                class="form-control @error('plate_number') is-invalid @enderror"
+                                value="{{ old('plate_number', $vehicle->plate_number) }}" placeholder="e.g., ABC-1234" required>
+                            @error('plate_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="operator" class="form-label">Operator <span class="text-danger">*</span></label>
+                            <select name="operator" id="operator"
+                                class="form-select @error('operator') is-invalid @enderror" required>
+                                <option value="">-- Select Operator --</option>
+                                @foreach($operators as $operator)
+                                    <option value="{{ $operator }}" @selected(old('operator', $vehicle->operator) === $operator)>{{ $operator }}</option>
+                                @endforeach
+                            </select>
+                            @error('operator')<span class="invalid-feedback">{{ $message }}</span>@enderror
                         </div>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                        <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
-                            <option value="">-- Select Status --</option>
-                            <option value="active" {{ old('status', $vehicle->status) === 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="under_maintenance" {{ old('status', $vehicle->status) === 'under_maintenance' ? 'selected' : '' }}>Under Maintenance</option>
-                        </select>
-                        @error('status')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="route_id" class="form-label">Route <span class="text-danger">*</span></label>
+                            <select name="route_id" id="route_id"
+                                class="form-select @error('route_id') is-invalid @enderror" required>
+                                <option value="">-- Select Route --</option>
+                                @foreach($routes as $route)
+                                    <option value="{{ $route->id }}" data-boundary="{{ $route->boundary }}"
+                                        {{ old('route_id', $vehicle->route_id) == $route->id ? 'selected' : '' }}>
+                                        {{ $route->route_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('route_id')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="boundary_display" class="form-label">Boundary Rate</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input type="text" id="boundary_display"
+                                    class="form-control" placeholder="0.00" readonly>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="d-flex gap-2 pt-3 border-top">
-                    <button type="submit" class="btn btn-primary btn-sm">Update Vehicle</button>
-                    <a href="{{ route('vehicles.index') }}" class="btn btn-secondary btn-sm">Cancel</a>
-                </div>
-            </form>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
+                                <option value="">-- Select Status --</option>
+                                <option value="active" {{ old('status', $vehicle->status) === 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="under_maintenance" {{ old('status', $vehicle->status) === 'under_maintenance' ? 'selected' : '' }}>Under Maintenance</option>
+                            </select>
+                            @error('status')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 pt-3 border-top">
+                        <button type="submit" class="prl-btn-add">Update Vehicle</button>
+                        <a href="{{ route('vehicles.index') }}" class="prl-btn-ghost">Cancel</a>
+                    </div>
+                </form>
             </div>
         </div>
+
     </div>
 </div>
 

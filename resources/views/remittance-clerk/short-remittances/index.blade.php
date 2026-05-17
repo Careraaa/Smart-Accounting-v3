@@ -6,226 +6,163 @@
 
 @section('content')
 <div class="col-12">
-    <div class="remui-page">
-        <div class="remui-backdrop"></div>
+<div class="remui-page">
 
-        <div class="remui-hero mb-3">
+    {{-- Flash --}}
+    @foreach(['success','error','info'] as $t)
+        @if(session($t))
+        <div class="prl-flash {{ $t }}">
+            @if($t==='success')<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            @else<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>@endif
+            {{ session($t) }}
+        </div>
+        @endif
+    @endforeach
+
+    {{-- Topbar --}}
+    <div class="prl-topbar">
+        <div>
+            <h1 class="prl-topbar-title">Short Remittances</h1>
+            <p class="prl-topbar-sub">Track shortages and resolve liabilities for driver and PAO</p>
+        </div>
+    </div>
+
+    {{-- Stats --}}
+    <div class="prl-stats">
+        <div class="prl-stat s-red">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
             <div>
-                <h5 class="remui-title">Short Remittances</h5>
-                <p class="remui-subtitle mb-0">Track shortages and resolve liabilities for driver and PAO.</p>
+                <div class="prl-stat-label">Pending</div>
+                <div class="prl-stat-value">{{ $pendingRemittances->count() }}</div>
+                <div class="prl-stat-sub">pending resolution</div>
             </div>
         </div>
-
-    {{-- Pending Resolution Section --}}
-    <div class="card remui-card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Pending Resolution</span>
-        </div>
-        <div class="card-body">
-            {{-- Statistics Cards --}}
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">Total Short Remittances</div>
-                            <h3 class="mb-1" style="color: #dc2626;">{{ $pendingRemittances->count() }}</h3>
-                            <small class="text-muted">Pending resolution</small>
-                        </div>
-                        <div class="card-icon" style="color: #ef4444; opacity: 0.2;">
-                            <i class="feather-alert-circle" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">Total Short Amount</div>
-                            <h3 class="mb-1" style="color: #ea580c;">₱{{ number_format($pendingRemittances->sum('short_amount'), 2) }}</h3>
-                            <small class="text-muted">Total shortage</small>
-                        </div>
-                        <div class="card-icon" style="color: #f97316; opacity: 0.2;">
-                            <i class="feather-trending-down" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">Driver Shares</div>
-                            <h3 class="mb-1" style="color: #0369a1;">₱{{ number_format($pendingRemittances->sum('driver_share'), 2) }}</h3>
-                            <small class="text-muted">Total driver liability</small>
-                        </div>
-                        <div class="card-icon" style="color: #0ea5e9; opacity: 0.2;">
-                            <i class="feather-user" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">PAO Shares</div>
-                            <h3 class="mb-1" style="color: #16a34a;">₱{{ number_format($pendingRemittances->sum('pao_share'), 2) }}</h3>
-                            <small class="text-muted">Total PAO liability</small>
-                        </div>
-                        <div class="card-icon" style="color: #22c55e; opacity: 0.2;">
-                            <i class="feather-users" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="prl-stat s-amber">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg></div>
+            <div>
+                <div class="prl-stat-label">Total Short Amount</div>
+                <div class="prl-stat-value" style="font-size:1.1rem;">₱{{ number_format($pendingRemittances->sum('short_amount'), 0) }}</div>
+                <div class="prl-stat-sub">total shortage</div>
             </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0 remui-table">
-                    <thead>
-                        <tr>
-                            @php
-                                $headers = [
-                                    'remittance_date' => 'Date',
-                                ];
-                            @endphp
-                            
-                            @foreach($headers as $column => $label)
-                                <th class="sortable-header @if($column === 'short_amount') @endif" data-column="{{ $column }}">
-                                    <a href="{{ route('short-remittances.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
-                                       class="sort-link">
-                                        {{ $label }}
-                                        @if($sortBy === $column)
-                                            <i class="feather-arrow-{{ $sortOrder === 'asc' ? 'up' : 'down' }} ms-1" style="font-size: 0.875rem;"></i>
-                                        @else
-                                            <i class="feather-arrow-up-down ms-1" style="font-size: 0.875rem; opacity: 0.3;"></i>
-                                        @endif
-                                    </a>
-                                </th>
-                            @endforeach
-                            
-                            <th class="sortable-header"><div class="sort-link">Driver</div></th>
-                            <th class="sortable-header"><div class="sort-link">PAO</div></th>
-                            <th class="sortable-header"><div class="sort-link">Vehicle</div></th>
-                            <th class="sortable-header"><div class="sort-link">Short Amount</div></th>
-                            <th class="sortable-header"><div class="sort-link">Status</div></th>
-                            <th class="sortable-header"><div class="sort-link">Actions</div></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($pendingRemittances as $shortRemittance)
-                            <tr>
-                                <td class="text-muted">{{ $shortRemittance->remittance_date?->format('M d, Y') }}</td>
-                                <td><strong>{{ $shortRemittance->driver->name ?? 'N/A' }}</strong></td>
-                                <td><strong>{{ $shortRemittance->pao->name ?? 'N/A' }}</strong></td>
-                                <td>{{ $shortRemittance->vehicle->plate_number }}</td>
-                                <td><strong style="color: #dc2626;">₱{{ number_format($shortRemittance->short_amount, 2) }}</strong></td>
-                                <td>
-                                    @php
-                                        $driverPaid = $shortRemittance->driver_status === 'paid';
-                                        $paoPaid = $shortRemittance->pao_status === 'paid';
-                                        $driverPartial = $shortRemittance->driver_status === 'partial';
-                                        $paoPartial = $shortRemittance->pao_status === 'partial';
-                                        $isPartial = $driverPartial || $paoPartial;
-                                    @endphp
-                                    @if ($isPartial)
-                                        <span class="emp-badge" style="background-color: #fef08a; color: #854d0e;">Partial Payment</span>
-                                    @else
-                                        <span class="emp-badge emp-badge-pending">Pending</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <a href="{{ route('short-remittances.show', $shortRemittance) }}"
-                                            class="emp-action-btn emp-action-view" title="View">
-                                            <i class="feather-eye"></i>
-                                        </a>
-                                        <a href="{{ route('short-remittances.edit', $shortRemittance) }}"
-                                            class="emp-action-btn emp-action-edit" title="Mark Resolution">
-                                            <i class="feather-edit-2"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="9" class="text-center text-muted py-5">
-                                    <i class="feather-check-circle d-block mb-2" style="font-size:28px; opacity:.3;"></i>
-                                    No pending short remittances
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        </div>
+        <div class="prl-stat s-blue">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div>
+            <div>
+                <div class="prl-stat-label">Driver Shares</div>
+                <div class="prl-stat-value" style="font-size:1.1rem;">₱{{ number_format($pendingRemittances->sum('driver_share'), 0) }}</div>
+                <div class="prl-stat-sub">total driver liability</div>
+            </div>
+        </div>
+        <div class="prl-stat s-green">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+            <div>
+                <div class="prl-stat-label">PAO Shares</div>
+                <div class="prl-stat-value" style="font-size:1.1rem;">₱{{ number_format($pendingRemittances->sum('pao_share'), 0) }}</div>
+                <div class="prl-stat-sub">total PAO liability</div>
             </div>
         </div>
     </div>
 
-    {{-- Fully Resolved Section --}}
-    <div class="card remui-card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Fully Paid / Resolved</span>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0 remui-table">
-                    <thead>
-                        <tr>
-                            @php
-                                $headers = [
-                                    'remittance_date' => 'Date',
-                                ];
-                            @endphp
-                            
-                            @foreach($headers as $column => $label)
-                                <th class="sortable-header @if($column === 'short_amount') @endif" data-column="{{ $column }}">
-                                    <a href="{{ route('short-remittances.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
-                                       class="sort-link">
-                                        {{ $label }}
-                                        @if($sortBy === $column)
-                                            <i class="feather-arrow-{{ $sortOrder === 'asc' ? 'up' : 'down' }} ms-1" style="font-size: 0.875rem;"></i>
-                                        @else
-                                            <i class="feather-arrow-up-down ms-1" style="font-size: 0.875rem; opacity: 0.3;"></i>
-                                        @endif
-                                    </a>
-                                </th>
-                            @endforeach
-                            
-                            <th class="sortable-header"><div class="sort-link">Driver</div></th>
-                            <th class="sortable-header"><div class="sort-link">PAO</div></th>
-                            <th class="sortable-header"><div class="sort-link">Vehicle</div></th>
-                            <th class="sortable-header"><div class="sort-link">Short Amount</div></th>
-                            <th class="sortable-header"><div class="sort-link">Status</div></th>
-                            <th class="sortable-header"><div class="sort-link">Actions</div></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($fullyPaidRemittances as $shortRemittance)
-                            <tr>
-                                <td class="text-muted">{{ $shortRemittance->remittance_date?->format('M d, Y') }}</td>
-                                <td><strong>{{ $shortRemittance->driver->name ?? 'N/A' }}</strong></td>
-                                <td><strong>{{ $shortRemittance->pao->name ?? 'N/A' }}</strong></td>
-                                <td>{{ $shortRemittance->vehicle->plate_number }}</td>
-                                <td><strong style="color: #16a34a;">₱{{ number_format($shortRemittance->short_amount, 2) }}</strong></td>
-                                <td>
-                                    <span class="emp-badge emp-badge-approved">Fully Paid</span>
-                                </td>
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <a href="{{ route('short-remittances.show', $shortRemittance) }}"
-                                            class="emp-action-btn emp-action-view" title="View">
-                                            <i class="feather-eye"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="10" class="text-center text-muted py-5">
-                                    <i class="feather-check-circle d-block mb-2" style="font-size:28px; opacity:.3;"></i>
-                                    No fully paid remittances
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+    {{-- Pending Section --}}
+    <div style="font-size:0.72rem;font-weight:900;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#c8292a;display:inline-block;"></span>
+        Pending Resolution
+    </div>
+    <div class="prl-table-card" style="margin-bottom:24px;">
+        <div class="prl-table-scroll">
+            <table class="prl-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <a href="{{ route('short-remittances.index', ['sort_by' => 'remittance_date', 'sort_order' => ($sortBy === 'remittance_date' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="sort-link">
+                                Date @if($sortBy === 'remittance_date')<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>@endif
+                            </a>
+                        </th>
+                        <th>Driver</th>
+                        <th>PAO</th>
+                        <th>Vehicle</th>
+                        <th class="text-end">Short Amount</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($pendingRemittances as $shortRemittance)
+                    @php
+                        $driverPartial = $shortRemittance->driver_status === 'partial';
+                        $paoPartial    = $shortRemittance->pao_status === 'partial';
+                        $sc = ($driverPartial || $paoPartial) ? 's-partial' : 's-pending';
+                        $label = ($driverPartial || $paoPartial) ? 'Partial' : 'Pending';
+                    @endphp
+                    <tr class="clickable" onclick="window.location='{{ route('short-remittances.show', $shortRemittance) }}'">
+                        <td class="prl-mono muted">{{ $shortRemittance->remittance_date?->format('M d, Y') }}</td>
+                        <td><strong>{{ $shortRemittance->driver->name ?? 'N/A' }}</strong></td>
+                        <td><strong>{{ $shortRemittance->pao->name ?? 'N/A' }}</strong></td>
+                        <td class="prl-mono">{{ $shortRemittance->vehicle->plate_number }}</td>
+                        <td class="text-end"><span class="prl-mono red">₱{{ number_format($shortRemittance->short_amount, 2) }}</span></td>
+                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ $label }}</span></td>
+                        <td onclick="event.stopPropagation()">
+                            <div class="prl-actions">
+                                <a href="{{ route('short-remittances.edit', $shortRemittance) }}" class="prl-action-btn edit" title="Resolve">
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Resolve
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="7">
+                        <div class="prl-empty" style="padding:32px;">
+                            <div class="prl-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+                            <p class="prl-empty-title">No pending short remittances</p>
+                        </div>
+                    </td></tr>
+                @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
-</div>
+
+    {{-- Resolved Section --}}
+    <div style="font-size:0.72rem;font-weight:900;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#16a34a;display:inline-block;"></span>
+        Fully Paid / Resolved
+    </div>
+    <div class="prl-table-card">
+        <div class="prl-table-scroll">
+            <table class="prl-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Driver</th>
+                        <th>PAO</th>
+                        <th>Vehicle</th>
+                        <th class="text-end">Short Amount</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($fullyPaidRemittances as $shortRemittance)
+                    <tr class="clickable" onclick="window.location='{{ route('short-remittances.show', $shortRemittance) }}'">
+                        <td class="prl-mono muted">{{ $shortRemittance->remittance_date?->format('M d, Y') }}</td>
+                        <td><strong>{{ $shortRemittance->driver->name ?? 'N/A' }}</strong></td>
+                        <td><strong>{{ $shortRemittance->pao->name ?? 'N/A' }}</strong></td>
+                        <td class="prl-mono">{{ $shortRemittance->vehicle->plate_number }}</td>
+                        <td class="text-end"><span class="prl-mono green">₱{{ number_format($shortRemittance->short_amount, 2) }}</span></td>
+                        <td class="text-center"><span class="prl-status s-approved">Fully Paid</span></td>
+                    </tr>
+                @empty
+                    <tr><td colspan="6">
+                        <div class="prl-empty" style="padding:32px;">
+                            <div class="prl-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+                            <p class="prl-empty-title">No fully paid remittances</p>
+                        </div>
+                    </td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>{{-- col-12 --}}
 @endsection

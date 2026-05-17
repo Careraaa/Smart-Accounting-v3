@@ -6,146 +6,186 @@
 
 @section('content')
 <div class="col-12">
-    <div class="remui-page">
-        <div class="remui-backdrop"></div>
+<div class="remui-page">
 
-        <div class="remui-hero mb-3">
+    {{-- Flash --}}
+    @foreach(['success','error','info'] as $t)
+        @if(session($t))
+        <div class="prl-flash {{ $t }}">
+            @if($t==='success')<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            @else<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>@endif
+            {{ session($t) }}
+        </div>
+        @endif
+    @endforeach
+
+    {{-- Topbar --}}
+    <div class="prl-topbar">
+        <div>
+            <h1 class="prl-topbar-title">PAOs / Conductors</h1>
+            <p class="prl-topbar-sub">Manage Passenger Assistant Officers for remittance operations</p>
+        </div>
+        <div class="prl-topbar-actions">
+            <a href="{{ route('paos.create') }}" class="prl-btn-add">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Add PAO
+            </a>
+            <a href="{{ route('reports.print.pao-report') }}" class="prl-btn-ghost" target="_blank">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Print
+            </a>
+        </div>
+    </div>
+
+    {{-- Stats --}}
+    <div class="prl-stats prl-stats-3">
+        <div class="prl-stat s-blue">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
             <div>
-                <h5 class="remui-title">PAOs / Conductors</h5>
-                <p class="remui-subtitle mb-0">Manage Passenger Assistant Officers / Conductors for remittance operations.</p>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{{ route('paos.create') }}" class="emp-action-btn emp-action-edit">
-                    <i class="feather-plus"></i><span>Add PAO</span>
-                </a>
-                <a href="{{ route('reports.print.pao-report') }}" class="emp-action-btn emp-action-view" target="_blank">
-                    <i class="feather-printer"></i><span>Print</span>
-                </a>
+                <div class="prl-stat-label">Total PAOs</div>
+                <div class="prl-stat-value">{{ $totalPAOs }}</div>
+                <div class="prl-stat-sub">all PAOs</div>
             </div>
         </div>
-
-        <div class="card remui-card">
-        <div class="card-header">
-            <span class="card-title mb-0">PAO List</span>
-        </div>
-        <div class="card-body">
-            {{-- Statistics Cards --}}
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">Total PAOs</div>
-                            <h3 class="mb-1" style="color: #0369a1;">{{ $totalPAOs }}</h3>
-                            <small class="text-muted">All PAOs</small>
-                        </div>
-                        <div class="card-icon" style="color: #0ea5e9; opacity: 0.2;">
-                            <i class="feather-users" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">Active PAOs</div>
-                            <h3 class="mb-1" style="color: #16a34a;">{{ $activePAOs }}</h3>
-                            <small class="text-muted">Currently active</small>
-                        </div>
-                        <div class="card-icon" style="color: #22c55e; opacity: 0.2;">
-                            <i class="feather-check-circle" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">Inactive PAOs</div>
-                            <h3 class="mb-1" style="color: #dc2626;">{{ $inactivePAOs }}</h3>
-                            <small class="text-muted">Currently inactive</small>
-                        </div>
-                        <div class="card-icon" style="color: #ef4444; opacity: 0.2;">
-                            <i class="feather-x-circle" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="prl-stat s-green">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+            <div>
+                <div class="prl-stat-label">Active</div>
+                <div class="prl-stat-value">{{ $activePAOs }}</div>
+                <div class="prl-stat-sub">currently active</div>
             </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0 remui-table">
-                    <thead>
-                        <tr>
-                            @php
-                                $headers = [
-                                    'name' => 'Name',
-                                    'contact_number' => 'Contact',
-                                    'status' => 'Status'
-                                ];
-                            @endphp
-                            
-                            @foreach($headers as $column => $label)
-                                <th class="sortable-header @if($column === 'status') text-center @endif" data-column="{{ $column }}">
-                                    <a href="{{ route('paos.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
-                                       class="sort-link">
-                                        {{ $label }}
-                                        @if($sortBy === $column)
-                                            <i class="feather-arrow-{{ $sortOrder === 'asc' ? 'up' : 'down' }} ms-1" style="font-size: 0.875rem;"></i>
-                                        @else
-                                            <i class="feather-arrow-up-down ms-1" style="font-size: 0.875rem; opacity: 0.3;"></i>
-                                        @endif
-                                    </a>
-                                </th>
-                            @endforeach
-                            
-                            <th class="sortable-header text-center"><div class="sort-link justify-content-center">Actions</div></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($paos as $pao)
-                            <tr>
-                                <td><strong>{{ $pao->name }}</strong></td>
-                                <td class="text-muted">{{ $pao->contact_number }}</td>
-                                <td class="text-center">
-                                    @if ($pao->status === 'active')
-                                        <span class="emp-badge emp-badge-active">Active</span>
-                                    @elseif ($pao->status === 'pending')
-                                        <span class="emp-badge emp-badge-pending">Pending</span>
-                                    @else
-                                        <span class="emp-badge emp-badge-inactive">Inactive</span>
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-1">
-                                        <a href="{{ route('paos.show', $pao) }}"
-                                            class="emp-action-btn emp-action-view" title="View">
-                                            <i class="feather-eye"></i>
-                                        </a>
-                                        <a href="{{ route('paos.edit', $pao) }}"
-                                            class="emp-action-btn emp-action-edit" title="Edit">
-                                            <i class="feather-edit-2"></i>
-                                        </a>
-                                        <form action="{{ route('paos.destroy', $pao) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="emp-action-btn emp-action-danger" title="Delete"
-                                                onclick="return confirm('Are you sure you want to delete this PAO?')">
-                                                <i class="feather-trash-2"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="text-center text-muted py-5">
-                                    <i class="feather-users d-block mb-2" style="font-size:28px; opacity:.3;"></i>
-                                    No PAOs found
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        </div>
+        <div class="prl-stat s-red">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+            <div>
+                <div class="prl-stat-label">Inactive</div>
+                <div class="prl-stat-value">{{ $inactivePAOs }}</div>
+                <div class="prl-stat-sub">currently inactive</div>
             </div>
         </div>
     </div>
-</div>
+
+    {{-- Filter --}}
+    <div class="prl-filter-bar">
+        <div class="prl-search-wrap">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" class="prl-search-input" id="paoSearch" placeholder="Search PAO…">
+        </div>
+        <select class="prl-filter-select" id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+    </div>
+
+    {{-- Table --}}
+    <div class="prl-table-card">
+        <div class="prl-table-scroll">
+            <table class="prl-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <a href="{{ route('paos.index', ['sort_by' => 'name', 'sort_order' => ($sortBy === 'name' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="sort-link">
+                                Name @if($sortBy === 'name')<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>@endif
+                            </a>
+                        </th>
+                        <th>Contact</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="paoTbody">
+                @forelse($paos as $pao)
+                    @php $sc = match($pao->status) { 'active' => 's-active', 'pending' => 's-pending', default => 's-inactive' }; @endphp
+                    <tr class="clickable"
+                        data-name="{{ strtolower($pao->name) }}"
+                        data-status="{{ $pao->status }}"
+                        onclick="window.location='{{ route('paos.show', $pao) }}'">
+                        <td><strong>{{ $pao->name }}</strong></td>
+                        <td class="prl-mono muted">{{ $pao->contact_number }}</td>
+                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ ucfirst($pao->status) }}</span></td>
+                        <td onclick="event.stopPropagation()">
+                            <div class="prl-actions">
+                                <a href="{{ route('paos.edit', $pao) }}" class="prl-action-btn edit" title="Edit">
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Edit
+                                </a>
+                                <button type="button" class="prl-action-btn danger" title="Delete"
+                                    onclick="openDeleteModal({{ $pao->id }}, '{{ addslashes($pao->name) }}')">
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    Delete
+                                </button>
+                                <form id="delete-form-{{ $pao->id }}" action="{{ route('paos.destroy', $pao) }}" method="POST" style="display:none;">
+                                    @csrf @method('DELETE')
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4">
+                        <div class="prl-empty">
+                            <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+                            <p class="prl-empty-title">No PAOs found</p>
+                            <p class="prl-empty-sub">Add a PAO to get started.</p>
+                        </div>
+                    </td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div id="paoNoResults" style="display:none;">
+            <div class="prl-empty" style="padding:28px;"><p class="prl-empty-title">No results</p><p class="prl-empty-sub">Try adjusting your filters.</p></div>
+        </div>
+    </div>
+
+</div>{{-- remui-page --}}
+</div>{{-- col-12 --}}
+
+{{-- Delete Modal --}}
+<div class="prl-modal-overlay" id="deleteModal">
+    <div class="prl-modal">
+        <div class="prl-modal-icon"><svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></div>
+        <h3 class="prl-modal-title">Delete PAO?</h3>
+        <p class="prl-modal-body" id="deleteModalBody">This action cannot be undone.</p>
+        <div class="prl-modal-actions">
+            <button type="button" class="prl-modal-cancel" onclick="closeModal()">Cancel</button>
+            <button type="button" class="prl-modal-confirm" id="deleteConfirmBtn">Yes, Delete</button>
+        </div>
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const search = document.getElementById('paoSearch');
+    const statusF = document.getElementById('statusFilter');
+    const tbody = document.getElementById('paoTbody');
+    const noRes = document.getElementById('paoNoResults');
+    function run() {
+        const q = search.value.toLowerCase().trim();
+        const s = statusF.value;
+        const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
+        const vis = rows.filter(r => (!q || r.dataset.name.includes(q)) && (!s || r.dataset.status === s));
+        rows.forEach(r => r.style.display = 'none');
+        vis.forEach(r => r.style.display = '');
+        noRes.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
+    }
+    search.addEventListener('input', run);
+    statusF.addEventListener('change', run);
+})();
+
+let _deleteId = null;
+function openDeleteModal(id, name) {
+    _deleteId = id;
+    document.getElementById('deleteModalBody').textContent = 'Delete PAO "' + name + '"? This cannot be undone.';
+    document.getElementById('deleteModal').classList.add('open');
+}
+function closeModal() { document.getElementById('deleteModal').classList.remove('open'); }
+document.getElementById('deleteConfirmBtn').addEventListener('click', function () {
+    if (_deleteId) document.getElementById('delete-form-' + _deleteId).submit();
+});
+document.getElementById('deleteModal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+</script>
+@endpush

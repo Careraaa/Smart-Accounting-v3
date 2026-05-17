@@ -7,139 +7,140 @@
 @section('content')
 <div class="col-12">
     <div class="remui-page">
-        <div class="remui-backdrop"></div>
 
-        <div class="remui-hero mb-3">
+        <div class="prl-topbar">
             <div>
-                <h5 class="remui-title">Edit Remittance</h5>
-                <p class="remui-subtitle mb-0">Update remittance details. Edited approved/rejected entries will return to pending for re-approval.</p>
+                <h1 class="prl-topbar-title">Edit Remittance</h1>
+                <p class="prl-topbar-sub">Update remittance details. Edited approved/rejected entries will return to pending for re-approval.</p>
             </div>
-            <div class="d-flex gap-2">
-                <a href="{{ route('remittances.show', $remittance) }}" class="emp-action-btn emp-action-view">
-                    <i class="feather-eye"></i><span>View</span>
+            <div class="prl-topbar-actions">
+                <a href="{{ route('remittances.show', $remittance) }}" class="prl-btn-ghost">
+                    <i class="feather-eye"></i> View
                 </a>
-                <a href="{{ route('remittances.index') }}" class="emp-action-btn emp-action-back">
-                    <i class="feather-arrow-left"></i><span>Back</span>
+                <a href="{{ route('remittances.index') }}" class="prl-btn-ghost">
+                    <i class="feather-arrow-left"></i> Back
                 </a>
             </div>
         </div>
 
-        <div class="card remui-card">
-            <div class="card-header">
-                <span class="card-title mb-0">Remittance Details</span>
+        <div class="prl-detail-card">
+            <div class="prl-detail-head">
+                <h2 class="prl-detail-title">Remittance Details</h2>
             </div>
-            <div class="card-body">
+            <div class="prl-detail-body">
 
-            @if(in_array($remittance->status, ['approved', 'rejected']))
-                <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
-                    <i class="feather-alert-triangle me-1"></i>
-                    <strong>Notice:</strong> This remittance is currently {{ ucfirst($remittance->status) }}. Any changes will reset the status back to <strong>Pending</strong> for re-approval.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-
-            <form action="{{ route('remittances.update', $remittance) }}" method="POST">
-                @csrf
-                @method('PUT')
-
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="remittance_date" class="form-label">Remittance Date <span class="text-danger">*</span></label>
-                        <input type="date" name="remittance_date" id="remittance_date"
-                            class="form-control @error('remittance_date') is-invalid @enderror"
-                            value="{{ old('remittance_date', $remittance->remittance_date?->format('Y-m-d')) }}" required>
-                        @error('remittance_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                @if(in_array($remittance->status, ['approved', 'rejected']))
+                    <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+                        <i class="feather-alert-triangle me-1"></i>
+                        <strong>Notice:</strong> This remittance is currently {{ ucfirst($remittance->status) }}. Any changes will reset the status back to <strong>Pending</strong> for re-approval.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="driver_id" class="form-label">Driver <span class="text-danger">*</span></label>
-                        <select name="driver_id" id="driver_id"
-                            class="form-control @error('driver_id') is-invalid @enderror" required>
-                            <option value="">— Select Driver —</option>
-                            @foreach ($drivers as $driver)
-                                <option value="{{ $driver->id }}" {{ old('driver_id', $remittance->driver_id) == $driver->id ? 'selected' : '' }}>
-                                    {{ $driver->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('driver_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                </div>
+                @endif
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="pao_id" class="form-label">PAO <span class="text-danger">*</span></label>
-                        <select name="pao_id" id="pao_id"
-                            class="form-control @error('pao_id') is-invalid @enderror" required>
-                            <option value="">— Select PAO —</option>
-                            @foreach ($paos as $pao)
-                                <option value="{{ $pao->id }}" {{ old('pao_id', $remittance->pao_id) == $pao->id ? 'selected' : '' }}>
-                                    {{ $pao->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('pao_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="vehicle_id" class="form-label">Vehicle <span class="text-danger">*</span></label>
-                        <select name="vehicle_id" id="vehicle_id"
-                            class="form-control @error('vehicle_id') is-invalid @enderror" required>
-                            <option value="">— Select Vehicle —</option>
-                            @foreach ($vehicles as $vehicle)
-                                <option value="{{ $vehicle->id }}" data-boundary="{{ $vehicle->route->boundary ?? 0 }}" {{ old('vehicle_id', $remittance->vehicle_id) == $vehicle->id ? 'selected' : '' }}>
-                                    {{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('vehicle_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                </div>
+                <form action="{{ route('remittances.update', $remittance) }}" method="POST">
+                    @csrf
+                    @method('PUT')
 
-                <div class="prl-section-divider">Financials</div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="total_collection" class="form-label">Total Collection <span class="text-danger">*</span></label>
-                        <input type="number" name="total_collection" id="total_collection" min="0" step="0.1"
-                            class="form-control @error('total_collection') is-invalid @enderror"
-                            value="{{ old('total_collection', $remittance->total_collection) }}" required>
-                        @error('total_collection')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="total_expenses" class="form-label">Total Expenses <span class="text-danger">*</span></label>
-                        <input type="number" name="total_expenses" id="total_expenses" min="0" step="0.1"
-                            class="form-control @error('total_expenses') is-invalid @enderror"
-                            value="{{ old('total_expenses', $remittance->total_expenses) }}" required>
-                        @error('total_expenses')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="boundary_display" class="form-label">Boundary Rate</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="text" id="boundary_display"
-                                class="form-control" value="{{ number_format($remittance->boundary ?? $remittance->vehicle->route->boundary ?? 0, 2) }}" readonly>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="remittance_date" class="form-label">Remittance Date <span class="text-danger">*</span></label>
+                            <input type="date" name="remittance_date" id="remittance_date"
+                                class="form-control @error('remittance_date') is-invalid @enderror"
+                                value="{{ old('remittance_date', $remittance->remittance_date?->format('Y-m-d')) }}" required>
+                            @error('remittance_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="driver_id" class="form-label">Driver <span class="text-danger">*</span></label>
+                            <select name="driver_id" id="driver_id"
+                                class="form-control @error('driver_id') is-invalid @enderror" required>
+                                <option value="">— Select Driver —</option>
+                                @foreach ($drivers as $driver)
+                                    <option value="{{ $driver->id }}" {{ old('driver_id', $remittance->driver_id) == $driver->id ? 'selected' : '' }}>
+                                        {{ $driver->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('driver_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
                         </div>
                     </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="net_remittance" class="form-label">Net Remittance <span class="text-danger">*</span></label>
-                        <input type="number" name="net_remittance" id="net_remittance" min="0" step="0.1"
-                            class="form-control @error('net_remittance') is-invalid @enderror"
-                            value="{{ old('net_remittance', $remittance->net_remittance) }}" required>
-                        @error('net_remittance')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                </div>
 
-                <div class="d-flex gap-2 pt-3 border-top">
-                    <button type="submit" class="btn btn-primary btn-sm">Update Remittance</button>
-                    <a href="{{ route('remittances.index') }}" class="btn btn-secondary btn-sm">Cancel</a>
-                </div>
-            </form>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="pao_id" class="form-label">PAO <span class="text-danger">*</span></label>
+                            <select name="pao_id" id="pao_id"
+                                class="form-control @error('pao_id') is-invalid @enderror" required>
+                                <option value="">— Select PAO —</option>
+                                @foreach ($paos as $pao)
+                                    <option value="{{ $pao->id }}" {{ old('pao_id', $remittance->pao_id) == $pao->id ? 'selected' : '' }}>
+                                        {{ $pao->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('pao_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="vehicle_id" class="form-label">Vehicle <span class="text-danger">*</span></label>
+                            <select name="vehicle_id" id="vehicle_id"
+                                class="form-control @error('vehicle_id') is-invalid @enderror" required>
+                                <option value="">— Select Vehicle —</option>
+                                @foreach ($vehicles as $vehicle)
+                                    <option value="{{ $vehicle->id }}" data-boundary="{{ $vehicle->route->boundary ?? 0 }}" {{ old('vehicle_id', $remittance->vehicle_id) == $vehicle->id ? 'selected' : '' }}>
+                                        {{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('vehicle_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+
+                    <div class="prl-section-divider">Financials</div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="total_collection" class="form-label">Total Collection <span class="text-danger">*</span></label>
+                            <input type="number" name="total_collection" id="total_collection" min="0" step="0.1"
+                                class="form-control @error('total_collection') is-invalid @enderror"
+                                value="{{ old('total_collection', $remittance->total_collection) }}" required>
+                            @error('total_collection')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="total_expenses" class="form-label">Total Expenses <span class="text-danger">*</span></label>
+                            <input type="number" name="total_expenses" id="total_expenses" min="0" step="0.1"
+                                class="form-control @error('total_expenses') is-invalid @enderror"
+                                value="{{ old('total_expenses', $remittance->total_expenses) }}" required>
+                            @error('total_expenses')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="boundary_display" class="form-label">Boundary Rate</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₱</span>
+                                <input type="text" id="boundary_display"
+                                    class="form-control" value="{{ number_format($remittance->boundary ?? $remittance->vehicle->route->boundary ?? 0, 2) }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label for="net_remittance" class="form-label">Net Remittance <span class="text-danger">*</span></label>
+                            <input type="number" name="net_remittance" id="net_remittance" min="0" step="0.1"
+                                class="form-control @error('net_remittance') is-invalid @enderror"
+                                value="{{ old('net_remittance', $remittance->net_remittance) }}" required>
+                            @error('net_remittance')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 pt-3 border-top">
+                        <button type="submit" class="prl-btn-add">Update Remittance</button>
+                        <a href="{{ route('remittances.index') }}" class="prl-btn-ghost">Cancel</a>
+                    </div>
+                </form>
             </div>
         </div>
+
     </div>
 </div>
+
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {

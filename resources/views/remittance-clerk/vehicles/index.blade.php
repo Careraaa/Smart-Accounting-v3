@@ -6,149 +6,193 @@
 
 @section('content')
 <div class="col-12">
-    <div class="remui-page">
-        <div class="remui-backdrop"></div>
+<div class="remui-page">
 
-        <div class="remui-hero mb-3">
+    {{-- Flash --}}
+    @foreach(['success','error','info'] as $t)
+        @if(session($t))
+        <div class="prl-flash {{ $t }}">
+            @if($t==='success')<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            @else<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>@endif
+            {{ session($t) }}
+        </div>
+        @endif
+    @endforeach
+
+    {{-- Topbar --}}
+    <div class="prl-topbar">
+        <div>
+            <h1 class="prl-topbar-title">Vehicles</h1>
+            <p class="prl-topbar-sub">Assign routes, track status, and keep fleet records up to date</p>
+        </div>
+        <div class="prl-topbar-actions">
+            <a href="{{ route('vehicles.create') }}" class="prl-btn-add">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Add Vehicle
+            </a>
+            <a href="{{ route('reports.print.vehicle-route-report') }}" class="prl-btn-ghost" target="_blank">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Print
+            </a>
+        </div>
+    </div>
+
+    {{-- Stats --}}
+    <div class="prl-stats prl-stats-3">
+        <div class="prl-stat s-blue">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg></div>
             <div>
-                <h5 class="remui-title">Manage Vehicles</h5>
-                <p class="remui-subtitle mb-0">Assign routes, track status, and keep fleet records up to date.</p>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{{ route('vehicles.create') }}" class="emp-action-btn emp-action-edit">
-                    <i class="feather-plus"></i><span>Add Vehicle</span>
-                </a>
-                <a href="{{ route('reports.print.vehicle-route-report') }}" class="emp-action-btn emp-action-view" target="_blank">
-                    <i class="feather-printer"></i><span>Print</span>
-                </a>
+                <div class="prl-stat-label">Total Vehicles</div>
+                <div class="prl-stat-value">{{ $totalVehicles }}</div>
+                <div class="prl-stat-sub">all vehicles</div>
             </div>
         </div>
-
-        <div class="card remui-card">
-        <div class="card-header">
-            <span class="card-title mb-0">Vehicle List</span>
-        </div>
-        <div class="card-body">
-            {{-- Statistics Cards --}}
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">Total Vehicles</div>
-                            <h3 class="mb-1" style="color: #0369a1;">{{ $totalVehicles }}</h3>
-                            <small class="text-muted">All vehicles</small>
-                        </div>
-                        <div class="card-icon" style="color: #0ea5e9; opacity: 0.2;">
-                            <i class="feather-truck" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">Active Vehicles</div>
-                            <h3 class="mb-1" style="color: #16a34a;">{{ $activeVehicles }}</h3>
-                            <small class="text-muted">Currently active</small>
-                        </div>
-                        <div class="card-icon" style="color: #22c55e; opacity: 0.2;">
-                            <i class="feather-check-circle" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-statistic">
-                        <div class="card-body">
-                            <div class="stat-label">Under Maintenance</div>
-                            <h3 class="mb-1" style="color: #dc2626;">{{ $underMaintenanceVehicles }}</h3>
-                            <small class="text-muted">Currently in maintenance</small>
-                        </div>
-                        <div class="card-icon" style="color: #ef4444; opacity: 0.2;">
-                            <i class="feather-alert-circle" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="prl-stat s-green">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+            <div>
+                <div class="prl-stat-label">Active</div>
+                <div class="prl-stat-value">{{ $activeVehicles }}</div>
+                <div class="prl-stat-sub">currently active</div>
             </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover w-100 mb-0 remui-table">
-                    <thead>
-                        <tr>
-                            @php
-                                $headers = [
-                                    'plate_number' => 'Plate Number'
-                                ];
-                            @endphp
-                            
-                            @foreach($headers as $column => $label)
-                                <th class="sortable-header @if($column === 'status') text-center @endif" data-column="{{ $column }}">
-                                    <a href="{{ route('vehicles.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" 
-                                       class="sort-link">
-                                        {{ $label }}
-                                        @if($sortBy === $column)
-                                            <i class="feather-arrow-{{ $sortOrder === 'asc' ? 'up' : 'down' }} ms-1" style="font-size: 0.875rem;"></i>
-                                        @else
-                                            <i class="feather-arrow-up-down ms-1" style="font-size: 0.875rem; opacity: 0.3;"></i>
-                                        @endif
-                                    </a>
-                                </th>
-                            @endforeach
-                            
-                            <th class="sortable-header"><div class="sort-link">Route Name</div></th>
-                            <th class="sortable-header"><div class="sort-link">Operator</div></th>
-                            <th class="sortable-header text-center"><div class="sort-link justify-content-center">Status</div></th>
-                            <th class="sortable-header text-center"><div class="sort-link justify-content-center">Actions</div></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($vehicles as $vehicle)
-                            <tr>
-                                <td class="align-middle"><strong>{{ $vehicle->plate_number }}</strong></td>
-                                <td class="align-middle">{{ $vehicle->route->route_name ?? 'N/A' }}</td>
-                                <td class="align-middle">{{ $vehicle->operator }}</td>
-                                <td class="text-center align-middle">
-                                    @php $status = strtolower($vehicle->status ?? 'active'); @endphp
-                                    @if ($status === 'active')
-                                        <span class="emp-badge emp-badge-active">Active</span>
-                                    @elseif ($status === 'under_maintenance')
-                                        <span class="emp-badge emp-badge-inactive">Under Maintenance</span>
-                                    @else
-                                        <span class="emp-badge emp-badge-inactive">Inactive</span>
-                                    @endif
-                                </td>
-                                <td class="text-center align-middle">
-                                    <div class="d-flex justify-content-center gap-1">
-                                        <a href="{{ route('vehicles.show', $vehicle) }}"
-                                            class="emp-action-btn emp-action-view" title="View Vehicle">
-                                            <i class="feather-eye"></i>
-                                        </a>
-                                        <a href="{{ route('vehicles.edit', $vehicle) }}"
-                                            class="emp-action-btn emp-action-edit" title="Edit Vehicle">
-                                            <i class="feather-edit-2"></i>
-                                        </a>
-                                        <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="emp-action-btn emp-action-danger" title="Delete"
-                                                onclick="return confirm('Delete this vehicle?')">
-                                                <i class="feather-trash-2"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-5">
-                                    <i class="feather-truck d-block mb-2" style="font-size:28px; opacity:.3;"></i>
-                                    No vehicles found
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        </div>
+        <div class="prl-stat s-purple">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+            <div>
+                <div class="prl-stat-label">Under Maintenance</div>
+                <div class="prl-stat-value">{{ $underMaintenanceVehicles }}</div>
+                <div class="prl-stat-sub">in maintenance</div>
             </div>
         </div>
     </div>
-</div>
+
+    {{-- Filter --}}
+    <div class="prl-filter-bar">
+        <div class="prl-search-wrap">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" class="prl-search-input" id="vehicleSearch" placeholder="Search plate or route…">
+        </div>
+        <select class="prl-filter-select" id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="under_maintenance">Under Maintenance</option>
+            <option value="inactive">Inactive</option>
+        </select>
+    </div>
+
+    {{-- Table --}}
+    <div class="prl-table-card">
+        <div class="prl-table-scroll">
+            <table class="prl-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <a href="{{ route('vehicles.index', ['sort_by' => 'plate_number', 'sort_order' => ($sortBy === 'plate_number' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="sort-link">
+                                Plate Number @if($sortBy === 'plate_number')<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>@endif
+                            </a>
+                        </th>
+                        <th>Route</th>
+                        <th>Operator</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicleTbody">
+                @forelse($vehicles as $vehicle)
+                    @php
+                        $status = strtolower($vehicle->status ?? 'active');
+                        $sc = match($status) { 'active' => 's-active', 'under_maintenance' => 's-maintenance', default => 's-inactive' };
+                        $label = match($status) { 'under_maintenance' => 'Maintenance', default => ucfirst($status) };
+                    @endphp
+                    <tr class="clickable"
+                        data-name="{{ strtolower($vehicle->plate_number . ' ' . ($vehicle->route->route_name ?? '')) }}"
+                        data-status="{{ $status }}"
+                        onclick="window.location='{{ route('vehicles.show', $vehicle) }}'">
+                        <td><strong class="prl-mono">{{ $vehicle->plate_number }}</strong></td>
+                        <td>{{ $vehicle->route->route_name ?? '—' }}</td>
+                        <td>{{ $vehicle->operator }}</td>
+                        <td class="text-center"><span class="prl-status {{ $sc }}">{{ $label }}</span></td>
+                        <td onclick="event.stopPropagation()">
+                            <div class="prl-actions">
+                                <a href="{{ route('vehicles.edit', $vehicle) }}" class="prl-action-btn edit" title="Edit">
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Edit
+                                </a>
+                                <button type="button" class="prl-action-btn danger" title="Delete"
+                                    onclick="openDeleteModal({{ $vehicle->id }}, '{{ addslashes($vehicle->plate_number) }}')">
+                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    Delete
+                                </button>
+                                <form id="delete-form-{{ $vehicle->id }}" action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" style="display:none;">
+                                    @csrf @method('DELETE')
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="5">
+                        <div class="prl-empty">
+                            <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg></div>
+                            <p class="prl-empty-title">No vehicles found</p>
+                            <p class="prl-empty-sub">Add a vehicle to get started.</p>
+                        </div>
+                    </td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div id="vehicleNoResults" style="display:none;">
+            <div class="prl-empty" style="padding:28px;"><p class="prl-empty-title">No results</p><p class="prl-empty-sub">Try adjusting your filters.</p></div>
+        </div>
+    </div>
+
+</div>{{-- remui-page --}}
+</div>{{-- col-12 --}}
+
+{{-- Delete Modal --}}
+<div class="prl-modal-overlay" id="deleteModal">
+    <div class="prl-modal">
+        <div class="prl-modal-icon"><svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></div>
+        <h3 class="prl-modal-title">Delete Vehicle?</h3>
+        <p class="prl-modal-body" id="deleteModalBody">This action cannot be undone.</p>
+        <div class="prl-modal-actions">
+            <button type="button" class="prl-modal-cancel" onclick="closeModal()">Cancel</button>
+            <button type="button" class="prl-modal-confirm" id="deleteConfirmBtn">Yes, Delete</button>
+        </div>
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const search = document.getElementById('vehicleSearch');
+    const statusF = document.getElementById('statusFilter');
+    const tbody = document.getElementById('vehicleTbody');
+    const noRes = document.getElementById('vehicleNoResults');
+    function run() {
+        const q = search.value.toLowerCase().trim();
+        const s = statusF.value;
+        const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
+        const vis = rows.filter(r => (!q || r.dataset.name.includes(q)) && (!s || r.dataset.status === s));
+        rows.forEach(r => r.style.display = 'none');
+        vis.forEach(r => r.style.display = '');
+        noRes.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
+    }
+    search.addEventListener('input', run);
+    statusF.addEventListener('change', run);
+})();
+
+let _deleteId = null;
+function openDeleteModal(id, plate) {
+    _deleteId = id;
+    document.getElementById('deleteModalBody').textContent = 'Delete vehicle "' + plate + '"? This cannot be undone.';
+    document.getElementById('deleteModal').classList.add('open');
+}
+function closeModal() { document.getElementById('deleteModal').classList.remove('open'); }
+document.getElementById('deleteConfirmBtn').addEventListener('click', function () {
+    if (_deleteId) document.getElementById('delete-form-' + _deleteId).submit();
+});
+document.getElementById('deleteModal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+</script>
+@endpush
