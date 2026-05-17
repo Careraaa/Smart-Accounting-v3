@@ -17,7 +17,7 @@ class ReportController extends Controller
 
     public function payslips()
     {
-        $payrolls = Payroll::with('employee')->whereIn('status', ['released', 'paid'])->get();
+        $payrolls = Payroll::with('employee')->whereIn('status', ['approved', 'released', 'paid'])->get();
         return view('accountant.reports.payslips', compact('payrolls'));
     }
 
@@ -46,7 +46,7 @@ class ReportController extends Controller
         $month  = $request->get('month', now()->month);
         $year   = $request->get('year',  now()->year);
  
-        $query = Payroll::where('status', 'released');
+        $query = Payroll::where('status', 'approved');
  
         if ($period === 'weekly') {
             $query->whereYear('payroll_period_start', $year)
@@ -86,7 +86,7 @@ class ReportController extends Controller
         $month  = $request->get('month', now()->month);
         $year   = $request->get('year',  now()->year);
  
-        $query = Payroll::where('status', 'released');
+        $query = Payroll::where('status', 'approved');
  
         if ($period === 'weekly') {
             $query->whereYear('payroll_period_start', $year)

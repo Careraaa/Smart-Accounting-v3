@@ -136,7 +136,7 @@
                                 <tr>
                                     <td colspan="5" class="text-center text-muted py-5">
                                         <i class="feather-file-text d-block mb-2" style="font-size:28px;opacity:.3;"></i>
-                                        No payroll batches for this filter (controller expects status <code>released</code>).
+                                        No payroll batches for this filter.
                                     </td>
                                 </tr>
                             @endforelse
