@@ -20,13 +20,23 @@ class AllowSuperAdminInMaintenance
 
         // Check if maintenance mode is active
         if (file_exists($maintenanceFile)) {
-            // Check if user is authenticated and is a superadmin
-            if (auth()->check() && auth()->user()->role === 'superadmin') {
+            // Allow logout route to work even in maintenance mode
+            if ($request->routeIs('logout')) {
+                return $next($request);
+            }
+
+            // Allow unauthenticated users to access login page
+            if (!auth()->check()) {
+                return $next($request);
+            }
+
+            // Check if authenticated user is a superadmin
+            if (auth()->user()->role === 'superadmin') {
                 // Superadmin can bypass maintenance mode
                 return $next($request);
             }
 
-            // For non-superadmin users, show maintenance page
+            // For authenticated non-superadmin users, show maintenance page
             return response()->view('errors.maintenance', [], 503);
         }
 

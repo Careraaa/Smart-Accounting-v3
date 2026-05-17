@@ -91,6 +91,34 @@
             margin-bottom: 4px;
         }
 
+        .maintenance-actions {
+            margin-top: 24px;
+        }
+
+        .logout-btn {
+            display: inline-block;
+            padding: 10px 24px;
+            background-color: #dc2626;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #b91c1c;
+        }
+
+        @media (max-width: 900px) {
+            .maintenance-actions {
+                margin-top: 20px;
+            }
+        }
+
         .maintenance-icon-wrap {
             display: flex;
             justify-content: center;
@@ -162,6 +190,12 @@
                 <li>Super admin access remains available for emergency work.</li>
                 <li>If this lasts unusually long, please contact your system administrator.</li>
             </ul>
+            <div class="maintenance-actions">
+                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="logout-btn">Back to Login</button>
+                </form>
+            </div>
         </div>
 
         <div class="maintenance-icon-wrap">
