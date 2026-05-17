@@ -28,9 +28,9 @@
 .prl-table { width:100%;border-collapse:collapse;font-size:0.835rem; }
 .prl-table thead tr { background:#f8f9fb;border-bottom:1px solid #e5e7eb; }
 .prl-table thead th { padding:11px 16px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#6b7280;white-space:nowrap;font-family:'Sora',sans-serif; }
-.prl-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.1s; }
+.prl-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.1s;cursor:pointer; }
 .prl-table tbody tr:last-child { border-bottom:none; }
-.prl-table tbody tr:hover { background:#fafafa; }
+.prl-table tbody tr:hover { background:#f0f4ff; }
 .prl-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
 .prl-table-scroll { overflow-x:auto; }
 .prl-table-footer { padding:12px 16px;border-top:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px; }
@@ -121,7 +121,6 @@
                     <th class="text-end">Gross Pay</th>
                     <th class="text-end">Net Pay</th>
                     <th class="text-center">Status</th>
-                    <th class="text-end">Actions</th>
                 </tr></thead>
                 <tbody>
                 @forelse($payrolls as $payroll)
@@ -134,7 +133,7 @@
                             default    => 's-default',
                         };
                     @endphp
-                    <tr>
+                    <tr onclick="window.open('{{ route('payroll.generatePayslip', $payroll) }}', '_blank', 'noopener')">
                         <td>
                             <div class="prl-emp-cell">
                                 <div class="prl-emp-avatar">{{ $initials }}</div>
@@ -152,16 +151,9 @@
                         <td class="text-end"><span class="prl-mono c-green">₱{{ number_format($payroll->gross_pay, 2) }}</span></td>
                         <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
                         <td class="text-center"><span class="prl-status {{ $sc }}">{{ in_array($payroll->status, ['released', 'paid'], true) ? 'Released' : ucfirst($payroll->status) }}</span></td>
-                        <td>
-                            <div class="prl-actions">
-                                <a href="{{ route('payroll.generatePayslip', $payroll) }}" class="prl-action-btn" title="View Payslip" target="_blank">
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                </a>
-                            </div>
-                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7">
+                    <tr><td colspan="6">
                         <div class="prl-empty">
                             <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
                             <p class="prl-empty-title">No payroll records found</p>

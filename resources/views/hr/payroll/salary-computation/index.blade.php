@@ -172,42 +172,6 @@
         </div>
     </div>
 
-    {{-- Stats --}}
-    <div class="prl-stats">
-        <div class="prl-stat s-blue">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
-            <div>
-                <div class="prl-stat-label">Total Batches</div>
-                <div class="prl-stat-value">{{ $batches->count() }}</div>
-                <div class="prl-stat-sub">all time</div>
-            </div>
-        </div>
-        <div class="prl-stat s-amber">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg></div>
-            <div>
-                <div class="prl-stat-label">Pending Approval</div>
-                <div class="prl-stat-value">{{ $submittedCount }}</div>
-                <div class="prl-stat-sub">awaiting accountant</div>
-            </div>
-        </div>
-        <div class="prl-stat s-green">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></div>
-            <div>
-                <div class="prl-stat-label">Approved</div>
-                <div class="prl-stat-value">{{ $approvedCount }}</div>
-                <div class="prl-stat-sub">batches approved</div>
-            </div>
-        </div>
-        <div class="prl-stat s-red">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></div>
-            <div>
-                <div class="prl-stat-label">Rejected</div>
-                <div class="prl-stat-value">{{ $rejectedCount }}</div>
-                <div class="prl-stat-sub">need resubmission</div>
-            </div>
-        </div>
-    </div>
-
     {{-- Generate hero --}}
     <div class="prl-generate-card">
         <div class="prl-generate-left">

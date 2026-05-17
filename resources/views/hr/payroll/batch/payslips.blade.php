@@ -14,6 +14,8 @@
 .ps-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:10px;font-size:.78rem;font-weight:900;text-decoration:none;border:1px solid #e5e7eb;background:#fff;color:#374151;}
 .ps-btn:hover{background:#f9fafb;border-color:#d1d5db;}
 .ps-mono{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums;}
+.ps-row{cursor:pointer;transition:background .15s;}
+.ps-row:hover{background:#f0f4ff;}
 </style>
 @endpush
 
@@ -36,23 +38,16 @@
                     <tr>
                         <th>Employee</th>
                         <th class="text-end">Net</th>
-                        <th class="text-end">Payslip</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($batch->payrolls as $p)
-                        <tr>
+                        <tr class="ps-row" onclick="window.open('{{ route('payroll.generatePayslip', $p) }}', '_blank', 'noopener')">
                             <td><strong>{{ $p->user->first_name }} {{ $p->user->last_name }}</strong></td>
                             <td class="text-end ps-mono">₱{{ number_format($p->net_pay, 2) }}</td>
-                            <td class="text-end">
-                                <a class="ps-btn" href="{{ route('payroll.generatePayslip', $p) }}" target="_blank" rel="noopener">
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    Open payslip
-                                </a>
-                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="3" style="text-align:center;padding:32px;color:#9ca3af;">No payroll rows in this batch.</td></tr>
+                        <tr><td colspan="2" style="text-align:center;padding:32px;color:#9ca3af;">No payroll rows in this batch.</td></tr>
                     @endforelse
                 </tbody>
             </table>
