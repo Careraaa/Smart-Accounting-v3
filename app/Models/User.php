@@ -189,6 +189,15 @@ class User extends Authenticatable
         return $this->daily_rate / 8;
     }
 
+    /**
+     * Capitalize department name for display
+     */
+    public function getDepartmentAttribute()
+    {
+        $dept = $this->attributes['department'] ?? '';
+        return $dept ? ucfirst($dept) : '';
+    }
+
     // ── Address helpers (address JSON -> form fields) ───────────────────
 
     private function decodedAddress(): array

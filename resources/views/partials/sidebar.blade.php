@@ -108,6 +108,13 @@
                         </ul>
                     </li>
 
+                    <li class="nxl-item {{ request()->routeIs('payroll.thirteenth-month-pay.*') ? 'active' : '' }}">
+                        <a href="{{ route('bonuses.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-gift"></i></span>
+                            <span class="nxl-mtext">Bonuses</span>
+                        </a>
+                    </li>
+
                     {{-- Remittance Modules --}}
                     <li class="nxl-item nxl-hasmenu {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active' : '' }}">
                         <a href="javascript:void(0);" class="nxl-link">
@@ -304,6 +311,13 @@
                                 <a class="nxl-link" href="{{ route('payroll.receivables.index') }}">Employee Receivables</a>
                             </li>
                         </ul>
+                    </li>
+
+                    <li class="nxl-item {{ request()->routeIs('payroll.thirteenth-month-pay.*') ? 'active' : '' }}">
+                        <a href="{{ route('bonuses.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-gift"></i></span>
+                            <span class="nxl-mtext">Bonuses</span>
+                        </a>
                     </li>
 
                     <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.payslips', 'reports.payroll*', 'reports.deduction*', 'reports.government*') ? 'active' : '' }}">

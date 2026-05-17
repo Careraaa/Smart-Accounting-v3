@@ -38,7 +38,8 @@ class PayrollService
             'days_worked' => $values['daysWorked'],
             'hours_worked' => round($values['hoursWorked'], 2),
             'total_allowances' => round($values['grossPay'] - $values['basicSalary'], 2),
-            'total_deductions' => round($values['totalDeductions'], 2),
+            'total_deductions' => $values['totalDeductions'], // Keep exact, don't round
+            'net_pay' => $values['netPay'], // Store the rounded final result
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
@@ -94,7 +95,7 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => 'Undertime Deduction',
                 'hours' => round($values['utHours'], 2),
-                'amount' => round($values['utDeduction'], 2),
+                'amount' => $values['utDeduction'], // Store EXACT value, don't round
             ]);
         }
 
@@ -127,11 +128,12 @@ class PayrollService
         // ── OT / UT ───────────────────────────────────────────────
         $otPay = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('amount');
 
-        $utDeduction = abs((float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->undertime()->sum('amount'));
-
         $otHours = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('hours');
 
         $utHours = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->undertime()->sum('hours');
+        
+        // Calculate UT deduction WITHOUT rounding - keep full precision for accurate calculations
+        $utDeductionExact = $utHours > 0 ? $utHours * ($employee->salary_rate / 8) : 0;
 
         // ── Statutory (semi-monthly: monthly contribution ÷ 2) ───
         // SSS uses the official bracket table; Pag-IBIG is percentage-based with ₱200/month cap
@@ -147,9 +149,16 @@ class PayrollService
 
         // ── Totals ────────────────────────────────────────────────
         $grossPay = $basicSalary + $otPay + $holidayPay + $manualAllowTotal;
-        $totalDeductions = $utDeduction + $sss + $pagibig + $philhealth + $manualDeductTotal;
+        $totalDeductionsExact = $utDeductionExact + $sss + $pagibig + $philhealth + $manualDeductTotal;
         $adjustedGross = $grossPay;
-        $netPay = $grossPay - $totalDeductions;
+        
+        // Calculate netPay using exact values, round ONLY the final result
+        $netPay = round($grossPay - $totalDeductionsExact, 2, PHP_ROUND_HALF_UP);
+        
+        // Return EXACT unrounded values for both display and database
+        // Display layer will format as needed, but calculations must use exact values
+        $utDeduction = $utDeductionExact;
+        $totalDeductions = $totalDeductionsExact;
 
         return compact('daysWorked', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'holidayPay', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
     }
@@ -179,7 +188,8 @@ class PayrollService
             'days_worked' => $values['daysWorked'],
             'hours_worked' => round($values['hoursWorked'], 2),
             'total_allowances' => round($values['grossPay'] - $values['basicSalary'], 2),
-            'total_deductions' => round($values['totalDeductions'], 2),
+            'total_deductions' => $values['totalDeductions'], // Keep exact, don't round
+            'net_pay' => $values['netPay'], // Store the rounded final result
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
@@ -241,7 +251,7 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => 'Undertime Deduction',
                 'hours' => round($values['utHours'], 2),
-                'amount' => round($values['utDeduction'], 2),
+                'amount' => $values['utDeduction'], // Store EXACT value, don't round
             ]);
         }
 

@@ -45,12 +45,6 @@ class UserExtrasSeeder extends Seeder
                 'has_pagibig' => 1, 'pagibig_number' => '5555-5555-5555',
                 'has_philhealth' => 1, 'philhealth_number' => '55-5555555555-5',
             ],
-            'angela.fernandez' => [
-                'has_sss' => 1, 'sss_number' => '34-2233445-6',
-                'has_tin' => 1, 'tin_number' => '223-344-556',
-                'has_pagibig' => 1, 'pagibig_number' => '2233-4455-6677',
-                'has_philhealth' => 1, 'philhealth_number' => '22-3344556677-8',
-            ],
         ];
 
         foreach ($numUpdates as $username => $data) {

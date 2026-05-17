@@ -105,7 +105,7 @@ class OvertimeUndertimeController extends Controller
 
         // Compute amount
         $amount = $validated['type'] === 'overtime'
-            ? $validated['hours'] * $hourlyRate
+            ? $validated['hours'] * $hourlyRate * 1.25
             : -($validated['hours'] * $hourlyRate);
 
         $overtime = OvertimeUndertime::create([
@@ -159,7 +159,7 @@ class OvertimeUndertimeController extends Controller
         $hourlyRate = $employee->salary_rate / 8;
 
         $amount = $validated['type'] === 'overtime'
-            ? $validated['hours'] * $hourlyRate
+            ? $validated['hours'] * $hourlyRate * 1.25
             : -($validated['hours'] * $hourlyRate);
 
         $overtime->update([

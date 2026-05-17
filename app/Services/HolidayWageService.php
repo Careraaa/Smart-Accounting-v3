@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Holiday;
 use App\Models\User;
-use App\Models\AttendanceLog;
+use App\Models\Attendance;
 use Carbon\Carbon;
 
 class HolidayWageService
@@ -31,51 +31,50 @@ class HolidayWageService
             $isRestDay = $date->isSunday(); // Sunday is rest day
             
             // Get hours worked on this holiday
-            $attendanceLog = AttendanceLog::where('user_id', $employee->id)
+            $attendance = Attendance::where('user_id', $employee->id)
                 ->whereDate('date', $date)
                 ->first();
             
             $hoursWorked = 0;
-            if ($attendanceLog) {
-                $hoursWorked = $attendanceLog->hours_worked ?? 0;
+            if ($attendance) {
+                $hoursWorked = $attendance->hours_worked ?? 0;
             }
             
             $holidayWage = 0;
             $computationType = 'not_worked';
             
-            // Check if previous day was worked (required for unworked regular holiday pay)
-            $prevDayWorked = $this->wasPreviousDayWorked($employee->id, $date);
-            
-            if ($holiday->type === 'regular') {
-                $holidayWage = $this->computeRegularHolidayWage(
-                    $dailyRate,
-                    $hourlyRate,
-                    $hoursWorked,
-                    $isRestDay,
-                    $prevDayWorked,
-                    $computationType
-                );
-            } elseif ($holiday->type === 'special') {
-                $holidayWage = $this->computeSpecialHolidayWage(
-                    $dailyRate,
-                    $hourlyRate,
-                    $hoursWorked,
-                    $isRestDay,
-                    $computationType
-                );
+            // Only compute holiday pay if employee actually worked on the holiday
+            if ($hoursWorked > 0) {
+                if ($holiday->type === 'regular') {
+                    $holidayWage = $this->computeRegularHolidayWageWorked(
+                        $dailyRate,
+                        $hourlyRate,
+                        $hoursWorked,
+                        $isRestDay,
+                        $computationType
+                    );
+                } elseif ($holiday->type === 'special') {
+                    $holidayWage = $this->computeSpecialHolidayWageWorked(
+                        $dailyRate,
+                        $hourlyRate,
+                        $hoursWorked,
+                        $isRestDay,
+                        $computationType
+                    );
+                }
+                
+                $holidayPay += $holidayWage;
+                
+                $breakdown[] = [
+                    'holiday' => $holiday->name,
+                    'date' => $holiday->date,
+                    'type' => $holiday->type,
+                    'is_rest_day' => $isRestDay,
+                    'hours_worked' => $hoursWorked,
+                    'computation_type' => $computationType,
+                    'amount' => round($holidayWage, 2),
+                ];
             }
-            
-            $holidayPay += $holidayWage;
-            
-            $breakdown[] = [
-                'holiday' => $holiday->name,
-                'date' => $holiday->date,
-                'type' => $holiday->type,
-                'is_rest_day' => $isRestDay,
-                'hours_worked' => $hoursWorked,
-                'computation_type' => $computationType,
-                'amount' => round($holidayWage, 2),
-            ];
         }
         
         return [
@@ -85,44 +84,33 @@ class HolidayWageService
     }
     
     /**
-     * Regular Holiday Wage Computation (Full pay unworked, 200% if worked)
+     * Regular Holiday Wage Computation (Employee worked on holiday)
      * 
-     * 1. No Work: Daily Wage × 100%
-     * 2. Worked (First 8 Hours): (Daily Wage + COLA) × 200%
-     * 3. Overtime (> 8 Hours): Hourly Rate × 200% × 130% × Overtime Hours
-     * 4. Rest Day + Regular Holiday: (Daily Wage × 200%) + 30% of that 200%
+     * 1. Worked (First 8 Hours): (Daily Wage + COLA) × 200%
+     * 2. Overtime (> 8 Hours): Hourly Rate × 200% × 130% × Overtime Hours
+     * 3. Rest Day + Regular Holiday: (Daily Wage × 200%) + 30% of that 200%
      */
-    private function computeRegularHolidayWage(
+    private function computeRegularHolidayWageWorked(
         float $dailyRate,
         float $hourlyRate,
         float $hoursWorked,
         bool $isRestDay,
-        bool $prevDayWorked,
         string &$computationType
     ): float {
         $wage = 0;
-        $cola = $this->getCOLA($dailyRate); // Cost of Living Allowance
+        $cola = $this->getCOLA($dailyRate);
         
-        if ($hoursWorked == 0) {
-            // Not worked - but only paid if previous day was worked (or on paid leave)
-            if ($prevDayWorked) {
-                $wage = $dailyRate * 1.0; // 100%
-                $computationType = 'not_worked_paid';
-            } else {
-                $computationType = 'not_worked_unpaid';
-                $wage = 0;
-            }
-        } elseif ($hoursWorked <= 8) {
+        if ($hoursWorked <= 8) {
             // Worked up to 8 hours
             $regularPay = ($dailyRate + $cola) * 2.0; // 200%
             
             if ($isRestDay) {
                 // Rest Day + Regular Holiday: +30% bonus
                 $wage = $regularPay + ($regularPay * 0.30);
-                $computationType = 'rest_day_regular_holiday';
+                $computationType = 'worked_rest_day_holiday';
             } else {
                 $wage = $regularPay;
-                $computationType = 'worked_8hrs';
+                $computationType = 'worked_regular_holiday';
             }
         } else {
             // Worked more than 8 hours (overtime)
@@ -134,10 +122,10 @@ class HolidayWageService
                 // Rest Day + Regular Holiday with OT: +30% bonus on base
                 $basePay = $regularPay + ($regularPay * 0.30);
                 $wage = $basePay + $overtimePay;
-                $computationType = 'rest_day_regular_holiday_ot';
+                $computationType = 'worked_rest_day_holiday_ot';
             } else {
                 $wage = $regularPay + $overtimePay;
-                $computationType = 'worked_ot';
+                $computationType = 'worked_regular_holiday_ot';
             }
         }
         
@@ -145,14 +133,13 @@ class HolidayWageService
     }
     
     /**
-     * Special Non-Working Day Wage Computation
+     * Special Non-Working Day Wage Computation (Employee worked on special holiday)
      * 
-     * 1. No Work: "No work, no pay" (₱0)
-     * 2. Worked (First 8 Hours): (Daily Wage × 130%) + COLA
-     * 3. Overtime (> 8 Hours): Hourly Rate × 130% × 130% × Overtime Hours
-     * 4. Rest Day + Special Day: (Daily Wage × 150%) + COLA
+     * 1. Worked (First 8 Hours): (Daily Wage × 130%) + COLA
+     * 2. Overtime (> 8 Hours): Hourly Rate × 130% × 130% × Overtime Hours
+     * 3. Rest Day + Special Day: (Daily Wage × 150%) + COLA
      */
-    private function computeSpecialHolidayWage(
+    private function computeSpecialHolidayWageWorked(
         float $dailyRate,
         float $hourlyRate,
         float $hoursWorked,
@@ -162,21 +149,17 @@ class HolidayWageService
         $wage = 0;
         $cola = $this->getCOLA($dailyRate);
         
-        if ($hoursWorked == 0) {
-            // No work = No pay
-            $computationType = 'not_worked_no_pay';
-            $wage = 0;
-        } elseif ($hoursWorked <= 8) {
+        if ($hoursWorked <= 8) {
             // Worked up to 8 hours
             $specialPay = ($dailyRate * 1.30) + $cola; // 130% + COLA
             
             if ($isRestDay) {
                 // Rest Day + Special Day: 150% of daily wage + COLA
                 $wage = ($dailyRate * 1.50) + $cola;
-                $computationType = 'rest_day_special_day';
+                $computationType = 'worked_rest_day_special';
             } else {
                 $wage = $specialPay;
-                $computationType = 'worked_8hrs';
+                $computationType = 'worked_special_holiday';
             }
         } else {
             // Worked more than 8 hours
@@ -188,10 +171,10 @@ class HolidayWageService
                 // Rest Day + Special Day with OT
                 $basePay = ($dailyRate * 1.50) + $cola;
                 $wage = $basePay + $overtimePay;
-                $computationType = 'rest_day_special_day_ot';
+                $computationType = 'worked_rest_day_special_ot';
             } else {
                 $wage = $regularPay + $overtimePay;
-                $computationType = 'worked_ot';
+                $computationType = 'worked_special_holiday_ot';
             }
         }
         
@@ -224,39 +207,6 @@ class HolidayWageService
         }
         
         return $wage;
-    }
-    
-    /**
-     * Check if previous workday was worked
-     * Required for unworked regular holiday pay eligibility
-     */
-    private function wasPreviousDayWorked(int $userId, Carbon $date): bool
-    {
-        // Go back to find the last working day (excluding weekends)
-        $prevDate = $date->copy()->subDay();
-        
-        while ($prevDate->isSunday() || $prevDate->isSaturday()) {
-            $prevDate->subDay();
-        }
-        
-        $attendanceLog = AttendanceLog::where('user_id', $userId)
-            ->whereDate('date', $prevDate)
-            ->first();
-        
-        // Also check if employee was on paid leave
-        $paidLeave = $this->wasPaidLeave($userId, $prevDate);
-        
-        return ($attendanceLog && $attendanceLog->hours_worked > 0) || $paidLeave;
-    }
-    
-    /**
-     * Check if date was a paid leave
-     */
-    private function wasPaidLeave(int $userId, Carbon $date): bool
-    {
-        // TODO: Implement when Leave model is integrated
-        // For now, return false
-        return false;
     }
     
     /**

@@ -9,25 +9,29 @@ use Carbon\CarbonPeriod;
 
 class AttendanceSeeder extends Seeder
 {
-    // Employee user IDs only — matches Users_Seeder exactly
-    private array $employeeIds = [6, 7, 8, 9, 10];
-
-    // PH public holidays within Apr 1 – May 5 2026
-    private array $holidays = [
-        '2026-04-02', // Maundy Thursday
-        '2026-04-03', // Good Friday
-        '2026-04-04', // Black Saturday (special non-working)
-        '2026-04-09', // Araw ng Kagitingan (Day of Valor)
-        '2026-05-01', // Labor Day
+    // Employee user IDs and departments
+    private array $employees = [
+        6  => ['name' => 'John Doe', 'dept' => 'Operation'],
+        7  => ['name' => 'Angela Fernandez', 'dept' => 'Admin'],
+        8  => ['name' => 'Juan Trabaho', 'dept' => 'Admin'],
+        9  => ['name' => 'Maria Halos', 'dept' => 'Admin'],
+        10 => ['name' => 'Carlo Pahinga', 'dept' => 'Operation'],
     ];
 
-    // Per-employee personality — late/absent = % chance; early_out = % chance of leaving at 4 PM
-    private array $personalities = [
-        6  => ['late' =>  8, 'absent' =>  5, 'early_out' => 10], // John Doe          – reliable
-        7  => ['late' => 10, 'absent' =>  6, 'early_out' =>  8], // Angela Fernandez  – mostly on time
-        8  => ['late' =>  3, 'absent' =>  2, 'early_out' =>  5], // Juan Trabaho      – the overachiever
-        9  => ['late' => 30, 'absent' =>  8, 'early_out' => 10], // Maria Halos       – always "on the way"
-        10 => ['late' =>  5, 'absent' =>  2, 'early_out' => 25], // Carlo Pahinga     – 45-min "quick break" guy
+    // May 1-15 2026 working days (excluding weekends and holidays)
+    // May 1 (Thu) = Labor Day (holiday)
+    // Working days: May 2(F), 5-9(M-F), 12-15(M-Th)
+    private array $workDays = [
+        '2026-05-02', // Fri
+        '2026-05-05', // Mon
+        '2026-05-06', // Tue
+        '2026-05-07', // Wed
+        '2026-05-08', // Thu
+        '2026-05-09', // Fri
+        '2026-05-12', // Mon
+        '2026-05-13', // Tue
+        '2026-05-14', // Wed
+        '2026-05-15', // Thu
     ];
 
     public function run(): void
@@ -36,84 +40,75 @@ class AttendanceSeeder extends Seeder
         DB::table('attendance')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // Apr 1 2026 → May 5 2026
-        $period  = CarbonPeriod::create('2026-04-01', '2026-05-05');
         $records = [];
 
-        foreach ($this->employeeIds as $userId) {
-            $p = $this->personalities[$userId];
+        // ======== ADMIN DEPARTMENT ========
+        // Angela Fernandez (ID 7): 7 working days
+        $angelaDays = array_slice($this->workDays, 0, 7); // May 2, 5-9, 12
+        foreach ($angelaDays as $date) {
+            $records[] = $this->createAttendanceRecord(7, $date, 'present');
+        }
 
-            foreach ($period as $date) {
+        // Juan Trabaho (ID 8): 9 working days
+        $juanDays = array_slice($this->workDays, 0, 9); // May 2, 5-9, 12-13
+        foreach ($juanDays as $date) {
+            $records[] = $this->createAttendanceRecord(8, $date, 'present');
+        }
 
-                // Skip weekends and PH holidays
-                if ($date->isWeekend() || in_array($date->toDateString(), $this->holidays)) {
-                    continue;
-                }
+        // Maria Halos (ID 9): 6 working days
+        $mariaDays = array_slice($this->workDays, 0, 6); // May 2, 5-9
+        foreach ($mariaDays as $date) {
+            $records[] = $this->createAttendanceRecord(9, $date, 'present');
+        }
 
-                $roll = rand(1, 100);
+        // ======== OPERATION DEPARTMENT ========
+        // John Doe (ID 6): 8 working days (reliable)
+        $johnDays = array_merge(
+            array_slice($this->workDays, 0, 5),  // May 2, 5-9
+            array_slice($this->workDays, 6, 3)   // May 12-14
+        );
+        foreach ($johnDays as $date) {
+            $records[] = $this->createAttendanceRecord(6, $date, rand(1, 100) > 10 ? 'present' : 'late');
+        }
 
-                if ($roll <= $p['absent']) {
-                    // ── ABSENT ────────────────────────────────────────────
-                    $records[] = [
-                        'user_id'    => $userId,
-                        'date'       => $date->toDateString(),
-                        'time_in'    => null,
-                        'time_out'   => null,
-                        'status'     => 'absent',
-                        'is_manual'  => 1,
-                        'created_at' => $date->toDateString() . ' 08:00:00',
-                        'updated_at' => $date->toDateString() . ' 08:00:00',
-                    ];
-
-                } elseif ($roll <= $p['absent'] + $p['late']) {
-                    // ── LATE (arrived 8:16 – 9:45 AM) ────────────────────
-                    $inHour    = rand(0, 1) ? 8 : 9;
-                    $inMinute  = ($inHour === 8) ? rand(16, 59) : rand(0, 45);
-                    $outHour   = (rand(1, 100) <= $p['early_out']) ? 16 : rand(17, 18);
-                    $outMinute = rand(0, 59);
-
-                    $timeIn  = sprintf('%02d:%02d:00', $inHour, $inMinute);
-                    $timeOut = sprintf('%02d:%02d:00', $outHour, $outMinute);
-
-                    $records[] = [
-                        'user_id'    => $userId,
-                        'date'       => $date->toDateString(),
-                        'time_in'    => $timeIn,
-                        'time_out'   => $timeOut,
-                        'status'     => 'late',
-                        'is_manual'  => rand(0, 1),
-                        'created_at' => $date->toDateString() . ' ' . $timeIn,
-                        'updated_at' => $date->toDateString() . ' ' . $timeOut,
-                    ];
-
-                } else {
-                    // ── PRESENT (arrived 7:45 – 8:15 AM) ─────────────────
-                    $inHour    = rand(0, 1) ? 7 : 8;
-                    $inMinute  = ($inHour === 7) ? rand(45, 59) : rand(0, 15);
-                    $outHour   = (rand(1, 100) <= $p['early_out']) ? 16 : rand(17, 18);
-                    $outMinute = rand(0, 59);
-
-                    $timeIn  = sprintf('%02d:%02d:00', $inHour, $inMinute);
-                    $timeOut = sprintf('%02d:%02d:00', $outHour, $outMinute);
-
-                    $records[] = [
-                        'user_id'    => $userId,
-                        'date'       => $date->toDateString(),
-                        'time_in'    => $timeIn,
-                        'time_out'   => $timeOut,
-                        'status'     => 'present',
-                        'is_manual'  => 0,
-                        'created_at' => $date->toDateString() . ' ' . $timeIn,
-                        'updated_at' => $date->toDateString() . ' ' . $timeOut,
-                    ];
-                }
-            }
+        // Carlo Pahinga (ID 10): 9 working days (mostly present)
+        $carloDays = array_slice($this->workDays, 0, 9); // May 2, 5-9, 12-13
+        foreach ($carloDays as $date) {
+            $records[] = $this->createAttendanceRecord(10, $date, 'present');
         }
 
         foreach (array_chunk($records, 100) as $chunk) {
             DB::table('attendance')->insert($chunk);
         }
 
-        $this->command->info('AttendanceSeeder: ' . count($records) . ' records inserted (Apr 1 – May 5, 2026).');
+        $this->command->info('AttendanceSeeder: ' . count($records) . ' records inserted (May 1-15, 2026).');
+    }
+
+    private function createAttendanceRecord(int $userId, string $date, string $status): array
+    {
+        if ($status === 'late') {
+            $inHour = 8 + rand(15, 60) / 60; // 8:15 - 9:00 AM
+            $inMinute = rand(15, 45);
+            $timeIn = sprintf('%02d:%02d:00', 8, $inMinute);
+        } else {
+            $inHour = rand(7, 8);
+            $inMinute = ($inHour === 7) ? rand(45, 59) : rand(0, 15);
+            $timeIn = sprintf('%02d:%02d:00', $inHour, $inMinute);
+        }
+
+        $outHour = rand(17, 18);
+        $outMinute = rand(0, 59);
+        $timeOut = sprintf('%02d:%02d:00', $outHour, $outMinute);
+
+        return [
+            'user_id'    => $userId,
+            'date'       => $date,
+            'time_in'    => $timeIn,
+            'time_out'   => $timeOut,
+            'status'     => $status,
+            'is_manual'  => 0,
+            'created_at' => $date . ' ' . $timeIn,
+            'updated_at' => $date . ' ' . $timeOut,
+        ];
     }
 }

@@ -58,13 +58,19 @@ class Employee extends Model
         'password'                => 'hashed',
     ];
 
-    // Accessor
+    // Accessors
     public function getNameAttribute()
     {
         if ($this->first_name && $this->last_name) {
             return "{$this->first_name} {$this->last_name}";
         }
         return $this->attributes['name'] ?? '';
+    }
+
+    public function getDepartmentAttribute()
+    {
+        $dept = $this->attributes['department'] ?? '';
+        return $dept ? ucfirst($dept) : '';
     }
 
     // Relationships
