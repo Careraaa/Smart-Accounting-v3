@@ -31,7 +31,6 @@
 .ntf-actions2{margin-left:auto;display:flex;gap:8px;align-items:center}
 .ntf-iconbtn{width:32px;height:32px;border-radius:9px;border:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s;color:#6b7280;background:#f4f5f7}
 .ntf-iconbtn:hover{background:#eff6ff;color:#3b82f6}
-.ntf-iconbtn.danger:hover{background:#fff1f2;color:#e11d48}
 .ntf-empty{padding:56px 24px;text-align:center;color:#9ca3af}
 </style>
 @endpush
@@ -62,9 +61,6 @@
         <a href="{{ route('notifications.all') }}" class="ntf-btn {{ $currentView === 'all' ? 'active' : '' }}">All</a>
         <a href="{{ route('notifications.unread-page') }}" class="ntf-btn {{ $currentView === 'unread' ? 'active' : '' }}">Unread</a>
         <a href="{{ route('notifications.read-page') }}" class="ntf-btn {{ $currentView === 'read' ? 'active' : '' }}">Read</a>
-        <a href="{{ route('notifications.deleted-page') }}" class="ntf-btn {{ $currentView === 'deleted' ? 'active' : '' }}">
-            Deleted ({{ $stats['deleted'] ?? 0 }})
-        </a>
     </div>
 
     <div class="ntf-card">
@@ -86,11 +82,6 @@
                         @if($n->isUnread() && $currentView !== 'deleted')
                             <button class="ntf-iconbtn" title="Mark as read" data-action="read">
                                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            </button>
-                        @endif
-                        @if($currentView !== 'deleted')
-                            <button class="ntf-iconbtn danger" title="Delete" data-action="delete">
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
                         @endif
                     </div>
@@ -138,9 +129,6 @@
                 if (!id) return;
                 if (action === 'read') {
                     fetch(`/notifications/${id}/read`, { method:'POST', headers:{ 'X-CSRF-TOKEN': csrf, 'Accept':'application/json' } })
-                        .then(()=> window.location.reload());
-                } else if (action === 'delete') {
-                    fetch(`/notifications/${id}`, { method:'DELETE', headers:{ 'X-CSRF-TOKEN': csrf, 'Accept':'application/json' } })
                         .then(()=> window.location.reload());
                 }
             });

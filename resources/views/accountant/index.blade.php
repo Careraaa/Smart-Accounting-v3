@@ -371,7 +371,7 @@
             series: stSeries, labels: stLabels,
             colors: ['#f59e0b','#8b5cf6','#64748b','#2563eb','#22c55e','#15803d','#f43f5e'],
             stroke: { width: 1, colors: ['#fff'] },
-            plotOptions: { pie: { donut: { size: '78%', labels: { show: true, total: { show: true, label: 'Records', fontSize: '10px', color: '#94a3b8', formatter: function(){ return String(stSeries.reduce(function(a,b){return a+b;},0)); } } } } } },
+            plotOptions: { pie: { donut: { size: '78%', labels: { show: true, total: { show: true, label: 'Batches', fontSize: '10px', color: '#94a3b8', formatter: function(){ return String(stSeries.reduce(function(a,b){return a+b;},0)); } } } } } },
             dataLabels: { enabled: false },
             legend: { position: 'bottom', fontSize: '11px', fontWeight: 600 }
         }).render();
@@ -399,7 +399,7 @@
     const pipe = @json($pipelineBar);
     new ApexCharts(document.querySelector('#acd-chart-pipeline'), {
         chart: { type: 'bar', height: 260, fontFamily: font, toolbar: { show: false } },
-        series: [{ name: 'Payrolls', data: pipe.values }],
+        series: [{ name: 'Batches', data: pipe.values }],
         colors: [red],
         plotOptions: { bar: { borderRadius: 8, columnWidth: '42%' } },
         xaxis: { categories: pipe.labels, labels: { style: { fontSize: '11px', fontWeight: 600, colors: '#64748b' } }, axisBorder: { show: false }, axisTicks: { show: false } },
@@ -407,7 +407,7 @@
         dataLabels: { enabled: true, offsetY: -18, style: { fontSize: '11px', fontWeight: 700, colors: ['#fff'], fontFamily: mono } },
         grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
         legend: { show: false },
-        tooltip: { y: { formatter: function(v){ return v+' record(s)'; } } }
+        tooltip: { y: { formatter: function(v){ return v+' batch(es)'; } } }
     }).render();
 })();
 </script>

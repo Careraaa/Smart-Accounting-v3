@@ -57,11 +57,6 @@
                 <h5 class="remui-title">Payroll batch approval</h5>
                 <p class="remui-subtitle mb-0">Review and approve payroll batches submitted by HR.</p>
             </div>
-            <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('accountant.index') }}" class="emp-action-btn emp-action-view">
-                    <i class="feather-home"></i><span>Dashboard</span>
-                </a>
-            </div>
         </div>
 
         {{-- Flash ─────────────────────────────────────────────────── --}}
@@ -71,42 +66,6 @@
         @if (session('error'))
             <div class="acd-flash error"><i class="feather-alert-circle"></i> {{ session('error') }}</div>
         @endif
-
-        {{-- Stats ─────────────────────────────────────────────────── --}}
-        <div class="prl-stats">
-            <div class="prl-stat s-red">
-                <div class="prl-stat-icon"><i class="feather-inbox"></i></div>
-                <div>
-                    <div class="prl-stat-label">Pending approval</div>
-                    <div class="prl-stat-value">{{ $totalPending }}</div>
-                    <div class="prl-stat-sub">Awaiting your review</div>
-                </div>
-            </div>
-            <div class="prl-stat s-blue">
-                <div class="prl-stat-icon"><i class="feather-users"></i></div>
-                <div>
-                    <div class="prl-stat-label">Employees</div>
-                    <div class="prl-stat-value">{{ $totalEmployees }}</div>
-                    <div class="prl-stat-sub">In pending batches</div>
-                </div>
-            </div>
-            <div class="prl-stat s-amber">
-                <div class="prl-stat-icon"><i class="feather-dollar-sign"></i></div>
-                <div>
-                    <div class="prl-stat-label">Total gross</div>
-                    <div class="prl-stat-value" style="font-size:1.05rem;">₱{{ number_format($totalGrossAll, 2) }}</div>
-                    <div class="prl-stat-sub">Pending batches</div>
-                </div>
-            </div>
-            <div class="prl-stat s-green">
-                <div class="prl-stat-icon"><i class="feather-trending-up"></i></div>
-                <div>
-                    <div class="prl-stat-label">Total net</div>
-                    <div class="prl-stat-value" style="font-size:1.05rem;">₱{{ number_format($totalNetAll, 2) }}</div>
-                    <div class="prl-stat-sub">Pending batches</div>
-                </div>
-            </div>
-        </div>
 
         {{-- Pending batches ────────────────────────────────────────── --}}
         <div class="card remui-card mb-4">

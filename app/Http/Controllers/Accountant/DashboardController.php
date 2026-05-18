@@ -33,11 +33,12 @@ class DashboardController extends Controller
         $averageBasicSalary = $approvedPayrolls->avg(fn($p) => $p->basic_salary) ?? 0;
 
         // ── Status counts ────────────────────────────────────────────────────
-        $processingPayroll = $payrolls->where('status', 'submitted')->count();
-        $approvedPayroll   = $payrolls->where('status', 'approved')->count();
-        $releasedPayroll   = $payrolls->whereIn('status', ['released', 'paid'])->count();
+        // Count by BATCH, not individual payroll rows — one batch = one approval request
+        $processingPayroll = \App\Models\PayrollBatch::where('status', 'submitted')->count();
+        $approvedPayroll   = \App\Models\PayrollBatch::where('status', 'approved')->count();
+        $releasedPayroll   = \App\Models\PayrollBatch::whereIn('status', ['released', 'paid'])->count();
         // Rejected is outside the active set; query separately for the pipeline bar.
-        $rejectedPayroll   = Payroll::where('status', 'rejected')->count();
+        $rejectedPayroll   = \App\Models\PayrollBatch::where('status', 'rejected')->count();
 
         // ── Salary Loan Statistics ───────────────────────────────────────────
         $totalOutstandingLoans = SalaryLoan::where('status', 'active')->sum('remaining_balance') ?? 0;
@@ -67,14 +68,12 @@ class DashboardController extends Controller
             ];
         }
 
-        // ── Status-mix donut (submitted + approved + released + rejected) ────
+        // ── Status-mix donut (by batch count) ───────────────────────────────
         $statusOrder = ['submitted', 'approved', 'released', 'paid', 'rejected'];
         $payrollStatusChartLabels = [];
         $payrollStatusChartSeries = [];
         foreach ($statusOrder as $st) {
-            $n = $st === 'rejected'
-                ? $rejectedPayroll
-                : $payrolls->where('status', $st)->count();
+            $n = \App\Models\PayrollBatch::where('status', $st)->count();
             if ($n > 0) {
                 $payrollStatusChartLabels[] = ucfirst($st);
                 $payrollStatusChartSeries[] = $n;
@@ -85,9 +84,9 @@ class DashboardController extends Controller
         $pipelineBar = [
             'labels' => ['Awaiting action', 'Approved', 'Released', 'Rejected'],
             'values' => [
-                $payrolls->where('status', 'submitted')->count(),
-                $payrolls->where('status', 'approved')->count(),
-                $payrolls->whereIn('status', ['released', 'paid'])->count(),
+                $processingPayroll,
+                $approvedPayroll,
+                $releasedPayroll,
                 $rejectedPayroll,
             ],
         ];
@@ -96,7 +95,9 @@ class DashboardController extends Controller
         $pendingItems = [];
         if ($processingPayroll > 0) {
             $pendingItems[] = [
-                'text' => 'Payroll Approvals Needed',
+                'text' => $processingPayroll === 1
+                    ? '1 Payroll Batch Needs Approval'
+                    : "{$processingPayroll} Payroll Batches Need Approval",
                 'count' => $processingPayroll,
                 'url' => route('payroll-approval.index'),
                 'icon' => 'feather-check-square',

@@ -608,9 +608,11 @@
 
 @if(auth()->user()->role === 'accountant')
 function openRejectModal(type, id, employeeName, amount) {
+    const caBase   = '{{ url('/cash-advances') }}';
+    const loanBase = '{{ url('/salary-loans') }}';
     const routes = {
-        ca:   `/cash-advances/${id}/reject`,
-        loan: `/salary-loans/${id}/reject`,
+        ca:   caBase   + '/' + id + '/reject',
+        loan: loanBase + '/' + id + '/reject',
     };
     const labels = {
         ca:   'cash advance',
@@ -630,7 +632,8 @@ function openRejectModal(type, id, employeeName, amount) {
 
 @if(in_array(auth()->user()->role, ['hr', 'superadmin']))
 function openPayModal(payrollId) {
-    document.getElementById('payForm').action = `/payroll/receivables/${payrollId}/mark-paid`;
+    const payBase = '{{ url('/payroll/receivables') }}';
+    document.getElementById('payForm').action = payBase + '/' + payrollId + '/mark-paid';
     new bootstrap.Modal(document.getElementById('payModal')).show();
 }
 @endif

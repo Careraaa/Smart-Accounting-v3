@@ -133,7 +133,8 @@
 @push('scripts')
 <script>
 function openRemittanceRejectModal(id, route, date, amount) {
-    document.getElementById('remittanceRejectForm').action = `/remittance-approval/${id}/reject`;
+    const baseUrl = '{{ url('/remittance-approval') }}';
+    document.getElementById('remittanceRejectForm').action = baseUrl + '/' + id + '/reject';
     document.getElementById('remittanceRejectDesc').textContent = `₱${amount} · ${route} · ${date}`;
     document.getElementById('remittanceRejectReason').value = '';
     new bootstrap.Modal(document.getElementById('remittanceRejectModal')).show();
