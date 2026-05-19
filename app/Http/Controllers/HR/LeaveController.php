@@ -237,4 +237,25 @@ class LeaveController extends Controller
 
         return redirect()->route('leave.pending')->with('success', 'Leave request rejected successfully.');
     }
+
+    public function getDetails(Leave $leave)
+    {
+        $leave->load('employee', 'leaveType');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $leave->id,
+                'leave_type_name' => $leave->leave_type,
+                'from_date' => $leave->start_date,
+                'to_date' => $leave->end_date,
+                'number_of_days' => $leave->getDaysAttribute(),
+                'status' => $leave->status,
+                'reason' => $leave->reason,
+                'rejection_reason' => $leave->rejection_reason,
+                'employee_name' => $leave->employee?->first_name . ' ' . $leave->employee?->last_name,
+                'approved_by' => $leave->approvedBy?->first_name . ' ' . $leave->approvedBy?->last_name,
+            ]
+        ]);
+    }
 }

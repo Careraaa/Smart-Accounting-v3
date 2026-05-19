@@ -16,8 +16,8 @@
 }
 .lv-btn-sec:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
 
-/* Two-column layout */
-.lv-layout { display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start; }
+/* Single column layout */
+.lv-layout { display:grid;grid-template-columns:1fr;gap:16px;align-items:start; }
 @media(max-width:900px){ .lv-layout{grid-template-columns:1fr;} }
 
 /* Detail card */
@@ -70,16 +70,16 @@
 
 /* Action buttons */
 .lv-btn-approve {
-    width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
-    padding:11px;background:#16a34a;color:#fff;border:none;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;cursor:pointer;transition:background 0.15s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 16px;background:#16a34a;color:#fff;border:none;border-radius:10px;
+    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;cursor:pointer;transition:background 0.15s;white-space:nowrap;
 }
 .lv-btn-approve:hover { background:#15803d; }
 
 .lv-btn-reject {
-    width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
-    padding:11px;background:#c8292a;color:#fff;border:none;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;cursor:pointer;transition:background 0.15s;margin-top:8px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 16px;background:#c8292a;color:#fff;border:none;border-radius:10px;
+    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;cursor:pointer;transition:background 0.15s;white-space:nowrap;
 }
 .lv-btn-reject:hover { background:#a81f20; }
 
@@ -87,6 +87,29 @@
 .lv-reject-textarea { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;resize:vertical;min-height:80px;transition:border-color 0.15s; }
 .lv-reject-textarea:focus { border-color:#c8292a;box-shadow:0 0 0 3px rgba(200,41,42,0.08);background:#fff; }
 .lv-invalid { font-size:0.75rem;color:#ef4444;margin-top:4px;display:block; }
+
+/* Action section at bottom */
+.lv-action-section { margin-top:24px;padding-top:24px;border-top:1px solid #f3f4f6; }
+.lv-action-section-title { font-size:0.82rem;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:0.09em;margin-bottom:16px;display:flex;align-items:center;gap:8px; }
+
+.lv-btn-group { display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:400px;margin-left:auto; }
+@media(max-width:560px){ .lv-btn-group{grid-template-columns:1fr;margin-left:auto;} }
+
+/* Modal */
+.lv-modal-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px; }
+.lv-modal-overlay.active { display:flex; }
+.lv-modal { background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,0.15);max-width:500px;width:100%;padding:28px; }
+.lv-modal-header { margin-bottom:20px; }
+.lv-modal-title { font-size:1.1rem;font-weight:800;color:#111827;margin:0 0 4px; }
+.lv-modal-subtitle { font-size:0.78rem;color:#9ca3af;margin:0; }
+.lv-modal-body { margin-bottom:24px; }
+.lv-modal-footer { display:flex;gap:10px;justify-content:flex-end; }
+
+.lv-modal-btn { padding:10px 18px;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;cursor:pointer;transition:all 0.15s; }
+.lv-modal-btn-cancel { background:#f3f4f6;color:#374151; }
+.lv-modal-btn-cancel:hover { background:#e5e7eb; }
+.lv-modal-btn-confirm { background:#c8292a;color:#fff; }
+.lv-modal-btn-confirm:hover { background:#a81f20; }
 </style>
 @endpush
 
@@ -155,85 +178,178 @@
                 </div>
 
                 <div class="lv-divider">Reason</div>
-                <div>
+                <div style="margin-bottom:24px;">
                     <span class="lv-field-label">Remarks / Reason</span>
                     <div class="lv-field-textarea">{{ $leave->reason }}</div>
                 </div>
 
-            </div>
-        </div>
-
-        {{-- Right: sidebar --}}
-        <div>
-
-            {{-- Status info --}}
-            @if($leave->status === 'approved')
-            <div class="lv-info-box approved">
-                <div class="lv-info-box-title">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    Approved
+                {{-- Status Info --}}
+                @if($leave->status === 'approved')
+                <div class="lv-info-box approved">
+                    <div class="lv-info-box-title">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Approved
+                    </div>
+                    <div class="lv-info-row"><span class="lv-info-key">By</span><span class="lv-info-val">{{ $leave->approvedBy->first_name ?? 'Admin' }}</span></div>
+                    <div class="lv-info-row"><span class="lv-info-key">Date</span><span class="lv-info-val">{{ $leave->updated_at->format('M d, Y') }}</span></div>
                 </div>
-                <div class="lv-info-row"><span class="lv-info-key">By</span><span class="lv-info-val">{{ $leave->approvedBy->first_name ?? 'Admin' }}</span></div>
-                <div class="lv-info-row"><span class="lv-info-key">Date</span><span class="lv-info-val">{{ $leave->updated_at->format('M d, Y') }}</span></div>
-            </div>
-            @elseif($leave->status === 'rejected')
-            <div class="lv-info-box rejected">
-                <div class="lv-info-box-title">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    Rejected
+                @elseif($leave->status === 'rejected')
+                <div class="lv-info-box rejected">
+                    <div class="lv-info-box-title">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Rejected
+                    </div>
+                    <div class="lv-info-row"><span class="lv-info-key">By</span><span class="lv-info-val">{{ $leave->approvedBy->first_name ?? 'Admin' }}</span></div>
+                    <div class="lv-info-row"><span class="lv-info-key">Date</span><span class="lv-info-val">{{ $leave->updated_at->format('M d, Y') }}</span></div>
+                    @if($leave->rejection_reason)
+                    <div class="lv-info-reason"><strong>Reason:</strong> {{ $leave->rejection_reason }}</div>
+                    @endif
                 </div>
-                <div class="lv-info-row"><span class="lv-info-key">By</span><span class="lv-info-val">{{ $leave->approvedBy->first_name ?? 'Admin' }}</span></div>
-                <div class="lv-info-row"><span class="lv-info-key">Date</span><span class="lv-info-val">{{ $leave->updated_at->format('M d, Y') }}</span></div>
-                @if($leave->rejection_reason)
-                <div class="lv-info-reason"><strong>Reason:</strong> {{ $leave->rejection_reason }}</div>
                 @endif
-            </div>
-            @endif
 
-            {{-- Action panel (pending only) --}}
-            @if($leave->status === 'pending')
-            <div class="lv-side-card">
-                <div class="lv-side-head">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="lv-side-head-title">Take Action</span>
-                </div>
-                <div class="lv-side-body">
+                {{-- Action Buttons --}}
+                @if($leave->status === 'pending')
+                <div class="lv-action-section">
 
-                    {{-- Approve --}}
-                    <form action="{{ route('leave.approve', $leave) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="lv-btn-approve">
+                    <div class="lv-btn-group">
+                        {{-- Approve --}}
+                        <button type="button" class="lv-btn-approve" id="approveBtn">
                             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             Approve Leave
                         </button>
-                    </form>
 
-                    <div style="margin:16px 0;border-top:1px solid #f3f4f6;"></div>
-
-                    {{-- Reject --}}
-                    <form action="{{ route('leave.reject', $leave) }}" method="POST">
-                        @csrf
-                        <div style="margin-bottom:10px;">
-                            <label for="rejection_reason" class="lv-reject-label">Rejection Reason <span style="color:#c8292a;">*</span></label>
-                            <textarea name="rejection_reason" id="rejection_reason"
-                                class="lv-reject-textarea @error('rejection_reason') is-invalid @enderror"
-                                placeholder="Enter reason for rejection…" required></textarea>
-                            @error('rejection_reason')
-                                <span class="lv-invalid">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <button type="submit" class="lv-btn-reject">
+                        {{-- Reject --}}
+                        <button type="button" class="lv-btn-reject" id="rejectBtn">
                             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                             Reject Leave
                         </button>
-                    </form>
-
+                    </div>
                 </div>
-            </div>
-            @endif
+                @endif
 
+            </div>
+        </div>
+    </div>
+
+    {{-- Approval Modal --}}
+    <div class="lv-modal-overlay" id="approvalModal">
+        <div class="lv-modal">
+            <div class="lv-modal-header">
+                <h3 class="lv-modal-title">Approve Leave Request</h3>
+                <p class="lv-modal-subtitle">Are you sure you want to approve this leave request?</p>
+            </div>
+            <form action="{{ route('leave.approve', $leave) }}" method="POST" id="approvalForm">
+                @csrf
+                <div class="lv-modal-body">
+                    <p style="color:#374151;font-size:0.875rem;line-height:1.6;margin:0;">
+                        <strong>Employee:</strong> {{ $leave->employee->first_name }} {{ $leave->employee->last_name }}<br>
+                        <strong>Leave Type:</strong> {{ $leave->leave_type }}<br>
+                        <strong>Period:</strong> {{ $leave->start_date->format('M d, Y') }} to {{ $leave->end_date->format('M d, Y') }}
+                    </p>
+                </div>
+                <div class="lv-modal-footer">
+                    <button type="button" class="lv-modal-btn lv-modal-btn-cancel" id="approvalCancelBtn">Cancel</button>
+                    <button type="submit" class="lv-modal-btn lv-modal-btn-confirm" style="background:#16a34a;">Approve Leave</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Rejection Modal --}}
+    <div class="lv-modal-overlay" id="rejectionModal">
+        <div class="lv-modal">
+            <div class="lv-modal-header">
+                <h3 class="lv-modal-title">Reject Leave Request</h3>
+                <p class="lv-modal-subtitle">Please provide a reason for rejecting this leave request</p>
+            </div>
+            <form action="{{ route('leave.reject', $leave) }}" method="POST" id="rejectionForm">
+                @csrf
+                <div class="lv-modal-body">
+                    <label for="rejection_reason" class="lv-reject-label">Rejection Reason <span style="color:#c8292a;">*</span></label>
+                    <textarea name="rejection_reason" id="rejection_reason"
+                        class="lv-reject-textarea @error('rejection_reason') is-invalid @enderror"
+                        placeholder="Enter reason for rejection…" required></textarea>
+                    @error('rejection_reason')
+                        <span class="lv-invalid">{{ $message }}</span>
+                    @enderror
+                </div>
+                <div class="lv-modal-footer">
+                    <button type="button" class="lv-modal-btn lv-modal-btn-cancel" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="lv-modal-btn lv-modal-btn-confirm">Reject Leave</button>
+                </div>
+            </form>
         </div>
     </div>
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Approve button and modal
+    const approveBtn = document.getElementById('approveBtn');
+    const approvalModal = document.getElementById('approvalModal');
+    const approvalCancelBtn = document.getElementById('approvalCancelBtn');
+
+    if (approveBtn) {
+        approveBtn.addEventListener('click', function() {
+            approvalModal.classList.add('active');
+        });
+    }
+
+    if (approvalCancelBtn) {
+        approvalCancelBtn.addEventListener('click', function() {
+            approvalModal.classList.remove('active');
+        });
+    }
+
+    // Reject button and modal
+    const rejectBtn = document.getElementById('rejectBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const rejectionModal = document.getElementById('rejectionModal');
+
+    if (rejectBtn) {
+        rejectBtn.addEventListener('click', function() {
+            rejectionModal.classList.add('active');
+            document.querySelector('#rejection_reason').focus();
+        });
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() {
+            rejectionModal.classList.remove('active');
+            document.querySelector('#rejection_reason').value = '';
+        });
+    }
+
+    // Close modals on overlay click
+    const approvalOverlay = document.getElementById('approvalModal');
+    const rejectionOverlay = document.getElementById('rejectionModal');
+
+    if (approvalOverlay) {
+        approvalOverlay.addEventListener('click', function(e) {
+            if (e.target === approvalOverlay) {
+                approvalModal.classList.remove('active');
+            }
+        });
+    }
+
+    if (rejectionOverlay) {
+        rejectionOverlay.addEventListener('click', function(e) {
+            if (e.target === rejectionOverlay) {
+                rejectionModal.classList.remove('active');
+                document.querySelector('#rejection_reason').value = '';
+            }
+        });
+    }
+
+    // Close modals on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            approvalModal.classList.remove('active');
+            rejectionModal.classList.remove('active');
+            document.querySelector('#rejection_reason').value = '';
+        }
+    });
+</script>
+@endpush

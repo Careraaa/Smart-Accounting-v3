@@ -23,7 +23,7 @@
                 {{ $isEdit ? 'Update the employee profile and information' : 'Fill out each section to create a new employee record' }}
             </p>
         </div>
-        <a href="{{ route('employees.index') }}" class="emp-btn-sec">
+        <a href="{{ url()->previous() }}" class="emp-btn-sec">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>

@@ -105,6 +105,27 @@
 /* ── Tab content ── */
 .emp-tab-content { display:none; }
 .emp-tab-content.active { display:block; }
+
+/* ── Delete Modal ── */
+.emp-modal-overlay { display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center; }
+.emp-modal-overlay.active { display:flex; }
+.emp-modal { background:#fff;border-radius:14px;padding:24px;box-shadow:0 20px 25px rgba(0,0,0,0.15);max-width:400px;width:90%; }
+.emp-modal-title { font-size:1.1rem;font-weight:700;color:#111827;margin:0 0 8px;font-family:'Sora',sans-serif; }
+.emp-modal-message { font-size:0.9rem;color:#6b7280;margin:0 0 24px;font-family:'Sora',sans-serif;line-height:1.5; }
+.emp-modal-actions { display:flex;gap:8px;justify-content:flex-end; }
+.emp-modal-btn { padding:9px 16px;border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s; }
+.emp-modal-btn-cancel { background:#fff;color:#374151;border-color:#e5e7eb; }
+.emp-modal-btn-cancel:hover { background:#f3f4f6;border-color:#d1d5db; }
+.emp-modal-btn-confirm { background:#c8292a;color:#fff;border-color:#c8292a; }
+.emp-modal-btn-confirm:hover { background:#b01f21;border-color:#b01f21; }
+
+/* ── Leave Details Modal ── */
+.emp-leave-row { cursor:pointer;transition:background 0.1s; }
+.emp-leave-row:hover { background:#f3f4f6 !important; }
+.emp-leave-detail-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px; }
+.emp-leave-detail-field { padding:12px;background:#f8f9fb;border-radius:8px; }
+.emp-leave-detail-label { font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px; }
+.emp-leave-detail-value { font-size:0.9rem;color:#111827;font-weight:500; }
 </style>
 @endpush
 
@@ -144,9 +165,9 @@
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 Edit
             </a>
-            <form action="{{ route('employees.destroy', $employee) }}" method="POST" onsubmit="return confirm('Delete this employee?')" style="display:inline;">
+            <form id="deleteEmployeeForm" action="{{ route('employees.destroy', $employee) }}" method="POST" style="display:inline;">
                 @csrf @method('DELETE')
-                <button type="submit" class="emp-btn-danger">
+                <button type="button" class="emp-btn-danger" onclick="openDeleteModal()">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     Delete
                 </button>
@@ -490,9 +511,6 @@
 
     @endif
 
-    {{-- ══════════════════════════════════════════
-         LEAVES TAB
-    ══════════════════════════════════════════ --}}
     @if($tab === 'leaves')
 
     {{-- Leave Balance --}}
@@ -525,7 +543,181 @@
         </div>
     </div>
 
+    {{-- Recent Leave Requests --}}
+    <div class="emp-info-card">
+        <div class="emp-info-card-header">
+            <h2 class="emp-info-card-title"><span class="emp-dot"></span> Recent Leave Requests</h2>
+        </div>
+        <div class="emp-info-card-body" style="padding:0;">
+            <div class="emp-sub-table-wrap" style="border-radius:0;border:none;">
+                <table class="emp-sub-table">
+                    <thead><tr><th style="text-align:center;">Leave Type</th><th style="text-align:center;">Date Requested</th><th style="text-align:center;">Days</th><th style="text-align:center;">Status</th></tr></thead>
+                    <tbody>
+                        @forelse($employee->leaves()->orderBy('created_at', 'desc')->limit(10)->get() as $leave)
+                            @php
+                                $statusColors = [
+                                    'pending' => ['#fffbeb', '#d97706', '#fde68a'],
+                                    'approved' => ['#f0fdf4', '#16a34a', '#bbf7d0'],
+                                    'rejected' => ['#fff0f0', '#c8292a', '#fecaca'],
+                                    'cancelled' => ['#f3f4f6', '#6b7280', '#e5e7eb']
+                                ];
+                                $sc = $statusColors[strtolower($leave->status)] ?? ['#f3f4f6', '#6b7280', '#e5e7eb'];
+                            @endphp
+                            <tr class="emp-leave-row" onclick="openLeaveModal({{ $leave->id }})">
+                                <td style="font-weight:600;color:#111827;">{{ $leave->leave_type ?? '—' }}</td>
+                                <td style="text-align:center;font-family:'DM Mono',monospace;font-size:0.78rem;color:#6b7280;">{{ $leave->created_at?->format('M d, Y') ?? '—' }}</td>
+                                <td style="text-align:center;">{{ $leave->days ?? '—' }}</td>
+                                <td style="text-align:center;"><span style="background:{{ $sc[0] }};color:{{ $sc[1] }};border:1px solid {{ $sc[2] }};padding:2px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">{{ ucfirst($leave->status) }}</span></td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center text-muted" style="padding:18px;">
+                                    No leave requests found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     @endif
 
 </div>
+
+{{-- Delete Confirmation Modal --}}
+<div id="deleteModal" class="emp-modal-overlay">
+    <div class="emp-modal">
+        <h3 class="emp-modal-title">Delete Employee</h3>
+        <p class="emp-modal-message">Are you sure you want to delete this employee? This action cannot be undone.</p>
+        <div class="emp-modal-actions">
+            <button type="button" class="emp-modal-btn emp-modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button type="button" class="emp-modal-btn emp-modal-btn-confirm" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+
+{{-- Leave Request Details Modal --}}
+<div id="leaveDetailModal" class="emp-modal-overlay">
+    <div class="emp-modal" style="max-width:800px;">
+        <h3 class="emp-modal-title">Leave Request Details</h3>
+        <div id="leaveDetailContent" style="max-height:60vh;overflow-y:auto;">
+            <!-- Content loaded via AJAX -->
+        </div>
+        <div class="emp-modal-actions">
+            <button type="button" class="emp-modal-btn emp-modal-btn-cancel" onclick="closeLeaveModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function openDeleteModal() {
+    document.getElementById('deleteModal').classList.add('active');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+}
+
+function confirmDelete() {
+    document.getElementById('deleteEmployeeForm').submit();
+}
+
+function openLeaveModal(leaveId) {
+    const leaveDetailModal = document.getElementById('leaveDetailModal');
+    const leaveDetailContent = document.getElementById('leaveDetailContent');
+    
+    // Fetch leave details via AJAX
+    fetch(`/api/leaves/${leaveId}`)
+        .then(response => response.json())
+        .then(data => {
+            const leave = data.data;
+            const statusColors = {
+                'pending': ['#fffbeb', '#d97706'],
+                'approved': ['#f0fdf4', '#16a34a'],
+                'rejected': ['#fff0f0', '#c8292a'],
+                'cancelled': ['#f3f4f6', '#6b7280']
+            };
+            const sc = statusColors[leave.status] || ['#f3f4f6', '#6b7280'];
+            
+            let detailsHTML = `
+                <div class="emp-leave-detail-grid" style="grid-template-columns:1fr;">
+                    <div class="emp-leave-detail-field">
+                        <div class="emp-leave-detail-label">Employee</div>
+                        <div class="emp-leave-detail-value">${leave.employee_name}</div>
+                    </div>
+                    <div class="emp-leave-detail-field">
+                        <div class="emp-leave-detail-label">Leave Type</div>
+                        <div class="emp-leave-detail-value">${leave.leave_type_name}</div>
+                    </div>
+                    <div class="emp-leave-detail-field">
+                        <div class="emp-leave-detail-label">From Date</div>
+                        <div class="emp-leave-detail-value">${new Date(leave.from_date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                    </div>
+                    <div class="emp-leave-detail-field">
+                        <div class="emp-leave-detail-label">To Date</div>
+                        <div class="emp-leave-detail-value">${new Date(leave.to_date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                    </div>
+                    <div class="emp-leave-detail-field">
+                        <div class="emp-leave-detail-label">Number of Days</div>
+                        <div class="emp-leave-detail-value">${leave.number_of_days} day(s)</div>
+                    </div>
+                    <div class="emp-leave-detail-field">
+                        <div class="emp-leave-detail-label">Status</div>
+                        <div><span style="background:${sc[0]};color:${sc[1]};padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;display:inline-block;">${leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}</span></div>
+                    </div>
+                    ${leave.reason ? `
+                    <div class="emp-leave-detail-field">
+                        <div class="emp-leave-detail-label">Reason</div>
+                        <div class="emp-leave-detail-value">${leave.reason}</div>
+                    </div>
+                    ` : ''}
+                    ${leave.approved_by ? `
+                    <div class="emp-leave-detail-field">
+                        <div class="emp-leave-detail-label">Approved By</div>
+                        <div class="emp-leave-detail-value">${leave.approved_by}</div>
+                    </div>
+                    ` : ''}
+                    ${leave.rejection_reason ? `
+                    <div class="emp-leave-detail-field">
+                        <div class="emp-leave-detail-label">Rejection Reason</div>
+                        <div class="emp-leave-detail-value" style="color:#c8292a;">${leave.rejection_reason}</div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            leaveDetailContent.innerHTML = detailsHTML;
+            leaveDetailModal.classList.add('active');
+        })
+        .catch(error => {
+            console.error('Error fetching leave details:', error);
+            leaveDetailContent.innerHTML = '<p style="color:#c8292a;padding:20px;">Error loading leave details. Please try again.</p>';
+            leaveDetailModal.classList.add('active');
+        });
+}
+
+function closeLeaveModal() {
+    document.getElementById('leaveDetailModal').classList.remove('active');
+}
+
+// Close modals when clicking outside of them
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = document.getElementById('deleteModal');
+    const leaveDetailModal = document.getElementById('leaveDetailModal');
+    
+    deleteModal.addEventListener('click', function(event) {
+        if (event.target === deleteModal) {
+            closeDeleteModal();
+        }
+    });
+    
+    leaveDetailModal.addEventListener('click', function(event) {
+        if (event.target === leaveDetailModal) {
+            closeLeaveModal();
+        }
+    });
+});
+</script>
 @endsection
