@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Payroll;
 use App\Models\OvertimeUndertime;
+use App\Models\WithholdingTax;
 use App\Services\AttendanceService;
 use App\Services\HolidayWageService;
 use Carbon\Carbon;
@@ -43,6 +44,7 @@ class PayrollService
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
+            'withholding_tax' => round($values['withholdingTax'], 2),
             'status' => 'prepared',
         ]);
 
@@ -88,6 +90,13 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => 'PhilHealth',
                 'amount' => round($values['philhealth'], 2),
+            ]);
+        }
+
+        if ($values['withholdingTax'] > 0) {
+            $payroll->deductions()->create([
+                'deduction_type' => 'Withholding Tax',
+                'amount' => round($values['withholdingTax'], 2),
             ]);
         }
 
@@ -144,13 +153,17 @@ class PayrollService
 
         $philhealth = ($employee->has_philhealth && $daysWorked > 0) ? $this->getStatutoryDeduction('PhilHealth', $monthlySalary) : 0;
 
+        // ── Withholding Tax (BIR) ────────────────────────────────
+        // Calculate based on daily salary rate using daily frequency
+        $withholdingTax = ($daysWorked > 0) ? $this->calculateWithholdingTax($dailyRate, 'Daily') * $daysWorked : 0;
+
         // ── Manual line items ────────────────────────────────────
         $manualAllowTotal = collect($manualAllowances)->sum(fn($a) => (float) ($a['amount'] ?? 0));
         $manualDeductTotal = collect($manualDeductions)->sum(fn($d) => (float) ($d['amount'] ?? 0));
 
         // ── Totals ────────────────────────────────────────────────
         $grossPay = $basicSalary + $otPay + $holidayPay + $manualAllowTotal;
-        $totalDeductionsExact = $utDeductionExact + $sss + $pagibig + $philhealth + $manualDeductTotal;
+        $totalDeductionsExact = $utDeductionExact + $sss + $pagibig + $philhealth + $withholdingTax + $manualDeductTotal;
         $adjustedGross = $grossPay;
         
         // Calculate netPay using exact values, round ONLY the final result
@@ -161,7 +174,7 @@ class PayrollService
         $utDeduction = $utDeductionExact;
         $totalDeductions = $totalDeductionsExact;
 
-        return compact('daysWorked', 'daysAbsent', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'holidayPay', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
+        return compact('daysWorked', 'daysAbsent', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'holidayPay', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'withholdingTax', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
     }
 
     /**
@@ -194,6 +207,7 @@ class PayrollService
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
+            'withholding_tax' => round($values['withholdingTax'], 2),
 
             // Respect caller-provided status; fall back to existing status or 'prepared'
             'status' => $extraData['status'] ?? ($payroll->status ?? 'prepared'),
@@ -248,6 +262,13 @@ class PayrollService
             ]);
         }
 
+        if ($values['withholdingTax'] > 0) {
+            $payroll->deductions()->create([
+                'deduction_type' => 'Withholding Tax',
+                'amount' => round($values['withholdingTax'], 2),
+            ]);
+        }
+
         if ($values['utDeduction'] > 0) {
             $payroll->deductions()->create([
                 'deduction_type' => 'Undertime Deduction',
@@ -294,6 +315,37 @@ class PayrollService
         }
 
         return 0;
+    }
+
+    /**
+     * Calculate BIR Withholding Tax based on monthly salary and frequency.
+     * Returns the withholding tax amount for the pay period.
+     * 
+     * @param float $monthlySalary Monthly salary to use for bracket lookup
+     * @param string $frequency Daily, Weekly, Semi-monthly, or Monthly
+     * @return float Withholding tax amount
+     */
+    private function calculateWithholdingTax(float $monthlySalary, string $frequency = 'Semi-monthly'): float
+    {
+        // Find the withholding tax bracket for the given salary and frequency
+        $tax = WithholdingTax::where('description', $frequency)
+            ->where('min_salary', '<=', $monthlySalary)
+            ->where('max_salary', '>=', $monthlySalary)
+            ->first();
+
+        if (!$tax) {
+            return 0;
+        }
+
+        // Calculate the tax amount
+        $withholdingAmount = $tax->employee_share ?? 0;
+
+        if ($tax->percentage_employee) {
+            $percentageAmount = ($monthlySalary - $tax->min_salary) * ($tax->percentage_employee / 100);
+            $withholdingAmount += $percentageAmount;
+        }
+
+        return round($withholdingAmount, 2);
     }
 
     /**
