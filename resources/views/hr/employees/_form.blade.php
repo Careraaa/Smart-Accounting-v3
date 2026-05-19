@@ -87,7 +87,7 @@
 
             <div class="emp-tab-body">
                 <div class="emp-tab-pane active" data-pane="0">@include('partials.employee.personal')</div>
-                <div class="emp-tab-pane" data-pane="1">@include('partials.employee.employment_hr') @include('partials.employee.employment')</div>
+                <div class="emp-tab-pane" data-pane="1">@include('partials.employee.employment') @include('partials.employee.employment_hr')</div>
                 <div class="emp-tab-pane" data-pane="2">@include('partials.employee.account')</div>
                 <div class="emp-tab-pane" data-pane="3">@include('partials.employee.government')</div>
                 <div class="emp-tab-pane" data-pane="4">@include('partials.employee.work_experience')</div>
