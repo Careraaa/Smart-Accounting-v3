@@ -322,7 +322,7 @@
                         </a>
                         <ul class="nxl-submenu">
                             <li class="nxl-item {{ request()->routeIs('payroll.generate-payslip.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.generate-payslip.index') }}">Pay Slips</a>
+                                <a class="nxl-link" href="{{ route('payroll.generate-payslip.index') }}">Payslips</a>
                             </li>
                             <li class="nxl-item {{ request()->routeIs('payroll.history.*') ? 'active' : '' }}">
                                 <a class="nxl-link" href="{{ route('payroll.history.index') }}">Payroll Summary</a>

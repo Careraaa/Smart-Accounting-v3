@@ -6,7 +6,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 
-.prl-page { font-family: 'Sora', sans-serif;  }
+.prl-page { font-family: 'Sora', sans-serif; }
 
 .prl-main { grid-column: 1; }
 
@@ -15,44 +15,42 @@
 .prl-topbar-title { font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px; }
 .prl-topbar-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
 
+.prl-btn-sec {
+    display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;
+    border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;
+    font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;
+}
+.prl-btn-sec:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
+
+.prl-stats { display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px; }
+@media(max-width:700px){ .prl-stats{grid-template-columns:1fr;} }
+.prl-stat { background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px 20px;display:flex;align-items:flex-start;gap:14px;position:relative;overflow:hidden;transition:box-shadow 0.15s; }
+.prl-stat:hover { box-shadow:0 4px 20px rgba(0,0,0,0.07); }
+.prl-stat::after { content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 14px 14px; }
+.prl-stat.s-green::after { background:#16a34a; }
+.prl-stat.s-orange::after { background:#f59e0b; }
+.prl-stat-icon { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.prl-stat.s-green .prl-stat-icon { background:#f0fdf4;color:#16a34a; }
+.prl-stat.s-orange .prl-stat-icon { background:#fffbeb;color:#f59e0b; }
+.prl-stat-label { font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px; }
+.prl-stat-value { font-size:1.6rem;font-weight:800;color:#111827;line-height:1;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace; }
+.prl-stat-sub   { font-size:0.73rem;color:#9ca3af;margin-top:4px; }
+
 /* ── Flash ── */
 .prl-flash { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:20px;animation:flashIn 0.3s ease; }
 .prl-flash.success { background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d; }
 .prl-flash.error   { background:#fff0f0;border:1px solid #fecaca;color:#c8292a; }
 @keyframes flashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
 
-/* ── Stats ── */
-.prl-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px; }
-@media (max-width:1100px) { .prl-stats { grid-template-columns:repeat(2,1fr); } }
-@media (max-width:600px)  { .prl-stats { grid-template-columns:1fr; } }
-.prl-stat { background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px 20px;display:flex;align-items:flex-start;gap:14px;position:relative;overflow:hidden;transition:box-shadow 0.15s; }
-.prl-stat:hover { box-shadow:0 4px 20px rgba(0,0,0,0.07); }
-.prl-stat::after { content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 14px 14px; }
-.prl-stat.s-red::after   { background:#c8292a; }
-.prl-stat.s-green::after { background:#16a34a; }
-.prl-stat.s-amber::after { background:#d97706; }
-.prl-stat.s-blue::after  { background:#0284c7; }
-.prl-stat-icon { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.prl-stat.s-red   .prl-stat-icon { background:#fff0f0;color:#c8292a; }
-.prl-stat.s-green .prl-stat-icon { background:#f0fdf4;color:#16a34a; }
-.prl-stat.s-amber .prl-stat-icon { background:#fffbeb;color:#d97706; }
-.prl-stat.s-blue  .prl-stat-icon { background:#f0f9ff;color:#0284c7; }
-.prl-stat-label { font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px; }
-.prl-stat-value { font-size:1.6rem;font-weight:800;color:#111827;line-height:1;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace; }
-.prl-stat-sub   { font-size:0.73rem;color:#9ca3af;margin-top:4px; }
-
 /* ── Tab bar ── */
-.prl-tabs { display:flex;gap:4px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:5px;margin-bottom:20px;width:fit-content; }
-.prl-tab { display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border-radius:9px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;color:#6b7280;text-decoration:none;transition:all 0.15s;white-space:nowrap;border:none;background:transparent;cursor:pointer; }
+.prl-tabs { display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap; }
+.prl-tab { display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;
+    font-family:'Sora',sans-serif;font-size:0.78rem;font-weight:600;text-decoration:none;
+    border:1px solid #e5e7eb;background:#fff;color:#6b7280;transition:all 0.15s; }
 .prl-tab:hover { color:#111827;background:#f3f4f6; }
 .prl-tab.active { background:#111827;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.15); }
 .prl-tab svg { opacity:0.7; }
 .prl-tab.active svg { opacity:1; }
-
-/* ── Section head ── */
-.prl-section-head { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px; }
-.prl-section-title { font-size:0.88rem;font-weight:700;color:#111827;margin:0;display:flex;align-items:center;gap:8px; }
-.prl-dot { width:8px;height:8px;border-radius:50%;background:#c8292a;display:inline-block; }
 
 /* ── Filter bar ── */
 .prl-filter-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
@@ -62,8 +60,6 @@
 .prl-search-input:focus { border-color:#c8292a;background:#fff;box-shadow:0 0 0 3px rgba(200,41,42,0.08); }
 .prl-filter-select { border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#374151;background:#f9fafb;outline:none;cursor:pointer;transition:border-color 0.15s; }
 .prl-filter-select:focus { border-color:#c8292a; }
-
-/* ── Table ── */
 .prl-table-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
 .prl-table { width:100%;border-collapse:collapse;font-size:0.835rem; }
 .prl-table thead tr { background:#f8f9fb;border-bottom:1px solid #e5e7eb; }
@@ -71,10 +67,14 @@
 .prl-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.1s; }
 .prl-table tbody tr:last-child { border-bottom:none; }
 .prl-table tbody tr:hover { background:#fafafa; }
+.prl-table tbody tr.prl-data-row { cursor:pointer; }
+.prl-table tbody tr.prl-reason-row { background:#fffbeb !important;border-left:3px solid #f59e0b;display:none; }
+.prl-table tbody tr.prl-reason-row.show { display:table-row; }
 .prl-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
 .prl-table-scroll { overflow-x:auto; }
 
-/* ── Employee cell ── */
+/* ── Rejection reason row ── */
+.prl-reason-text { font-size:0.775rem;color:#92400e;display:flex;align-items:center;gap:6px; }
 .prl-emp-cell { display:flex;align-items:center;gap:10px; }
 .prl-emp-avatar { width:32px;height:32px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#6b7280;flex-shrink:0;border:1.5px solid #e5e7eb;text-transform:uppercase; }
 .prl-emp-name { font-weight:600;color:#111827;font-size:0.845rem; }
@@ -96,6 +96,8 @@
 .prl-status.s-settled::before  { background:#8b5cf6; }
 .prl-status.s-deducted { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
 .prl-status.s-deducted::before { background:#22c55e; }
+.prl-status.s-released { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
+.prl-status.s-released::before { background:#22c55e; }
 .prl-status.s-rejected { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }
 .prl-status.s-rejected::before { background:#ef4444; }
 
@@ -149,9 +151,7 @@
 
 @section('content')
 <div class="prl-page">
-<div class="prl-main">
 
-    {{-- ── Flash messages ── --}}
     @if(session('success'))
     <div class="prl-flash success">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -165,55 +165,25 @@
     </div>
     @endif
 
-    {{-- ── Topbar ── --}}
     <div class="prl-topbar">
         <div>
-            <h1 class="prl-topbar-title">Employee Receivables</h1>
+            <h1 class="prl-topbar-title">Payroll Receivables</h1>
             <p class="prl-topbar-sub">Manage cash advances and salary loan applications</p>
         </div>
     </div>
 
-    {{-- ── Stats ── --}}
     <div class="prl-stats">
-        <div class="prl-stat s-amber">
-            <div class="prl-stat-icon">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
-            </div>
-            <div>
-                <div class="prl-stat-label">Cash Advances</div>
-                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($caApprovedTotal, 2) }}</div>
-                <div class="prl-stat-sub">{{ $caApprovedCount }} approved</div>
-            </div>
-        </div>
-        <div class="prl-stat s-red">
-            <div class="prl-stat-icon">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
-            </div>
-            <div>
-                <div class="prl-stat-label">Pending Advances</div>
-                <div class="prl-stat-value">{{ $caPendingCount }}</div>
-                <div class="prl-stat-sub">awaiting approval</div>
-            </div>
-        </div>
-        <div class="prl-stat s-blue">
-            <div class="prl-stat-icon">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-            </div>
-            <div>
-                <div class="prl-stat-label">Salary Loans</div>
-                <div class="prl-stat-value" style="font-size:1rem;font-family:'DM Mono',monospace;">₱{{ number_format($loanApprovedTotal, 2) }}</div>
-                <div class="prl-stat-sub">active loan portfolio</div>
-            </div>
+        <div class="prl-stat s-green">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg></div>
+            <div><div class="prl-stat-label">Total Cash Advances</div><div class="prl-stat-value">{{ $totalCashAdvances ?? 0 }}</div><div class="prl-stat-sub">Pending & approved</div></div>
         </div>
         <div class="prl-stat s-green">
-            <div class="prl-stat-icon">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div>
-                <div class="prl-stat-label">Active Loans</div>
-                <div class="prl-stat-value">{{ $loanActiveCount }}</div>
-                <div class="prl-stat-sub">currently repaying</div>
-            </div>
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+            <div><div class="prl-stat-label">Total Salary Loans</div><div class="prl-stat-value">{{ $totalSalaryLoans ?? 0 }}</div><div class="prl-stat-sub">Active & pending</div></div>
+        </div>
+        <div class="prl-stat s-orange">
+            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+            <div><div class="prl-stat-label">Outstanding</div><div class="prl-stat-value">{{ $outstandingAmount ?? '₱0' }}</div><div class="prl-stat-sub">Total receivables</div></div>
         </div>
     </div>
 
@@ -235,9 +205,6 @@
          CASH ADVANCES TAB
     ══════════════════════════════════════════ --}}
     @if($tab === 'cash_advances')
-    <div class="prl-section-head">
-        <h2 class="prl-section-title"><span class="prl-dot"></span> Cash Advance Requests</h2>
-    </div>
 
     <div class="prl-filter-bar">
         <div class="prl-search-wrap">
@@ -248,7 +215,7 @@
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
-            <option value="deducted">Deducted</option>
+            <option value="released">Released</option>
             <option value="rejected">Rejected</option>
         </select>
     </div>
@@ -258,10 +225,9 @@
             <table class="prl-table">
                 <thead><tr>
                     <th>Employee</th>
-                    <th class="text-end">Amount</th>
-                    <th>Requested</th>
+                    <th class="text-start">Amount</th>
+                    <th class="text-start">Requested</th>
                     <th class="text-center">Status</th>
-                    <th>Approved By</th>
                     <th>Deducted On</th>
                     @if(auth()->user()->role === 'accountant')
                     <th class="text-end">Actions</th>
@@ -274,12 +240,25 @@
                         $statusCls = match($advance->status) {
                             'pending'  => 's-pending',
                             'approved' => 's-approved',
-                            'deducted' => 's-deducted',
+                            'released' => 's-released',
                             'rejected' => 's-rejected',
                             default    => 's-pending',
                         };
+                        $advanceData = [
+                            'id' => $advance->id,
+                            'type' => 'ca',
+                            'employee' => $advance->user->name ?? '—',
+                            'position' => $advance->user->position ?? '',
+                            'amount' => number_format($advance->amount, 2),
+                            'requestDate' => $advance->request_date ? \Carbon\Carbon::parse($advance->request_date)->format('M d, Y') : '—',
+                            'status' => ucfirst($advance->status),
+                            'approver' => optional($advance->approver)->name ?? '—',
+                            'approvedDate' => $advance->approved_at ? \Carbon\Carbon::parse($advance->approved_at)->format('M d, Y') : '—',
+                            'deducedOn' => $advance->deductedPayroll ? 'Period ending ' . \Carbon\Carbon::parse($advance->deductedPayroll->payroll_period_end)->format('M d, Y') : '—',
+                            'rejectionReason' => $advance->rejection_reason ?? '',
+                        ];
                     @endphp
-                    <tr data-name="{{ strtolower($advance->user->name ?? '') }}" data-status="{{ $advance->status }}">
+                    <tr class="prl-data-row" onclick="window.location='{{ route('payroll.receivables.cash-advances.show', $advance) }}'" style="cursor: pointer;" data-name="{{ strtolower($advance->user->name ?? '') }}" data-status="{{ $advance->status }}">
                         <td>
                             <div class="prl-emp-cell">
                                 <div class="prl-emp-avatar">{{ $initials }}</div>
@@ -307,28 +286,17 @@
                                 @endif
                             </span>
                         </td>
-                        @if(auth()->user()->role === 'accountant')
-                        <td>
-                            <div class="prl-actions">
-                                @if($advance->status === 'pending')
-                                <form method="POST" action="{{ route('cash-advances.approve', $advance) }}" style="display:inline;"
-                                      data-sa-confirm="Approve cash advance of ₱{{ number_format($advance->amount, 2) }} for {{ $advance->user->name ?? 'this employee' }}?">
-                                    @csrf
-                                    <button class="prl-action-btn success" title="Approve">
-                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                    </button>
-                                </form>
-                                <button class="prl-action-btn danger" title="Reject" type="button"
-                                        onclick="openRejectModal('ca', {{ $advance->id }}, '{{ addslashes($advance->user->name ?? 'this employee') }}', '{{ number_format($advance->amount, 2) }}')">
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
-                                @else
-                                <span style="font-size:.75rem;color:#d1d5db;">—</span>
-                                @endif
+                    </tr>
+                    @if($advance->rejection_reason)
+                    <tr class="prl-reason-row" id="ca-reason-{{ $advance->id }}">
+                        <td colspan="{{ auth()->user()->role === 'accountant' ? 7 : 6 }}">
+                            <div class="prl-reason-text">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4v2m0-6a4 4 0 110 8 4 4 0 010-8z"/></svg>
+                                <strong>Rejection Reason:</strong> {{ $advance->rejection_reason }}
                             </div>
                         </td>
-                        @endif
                     </tr>
+                    @endif
                 @empty
                     <tr><td colspan="{{ auth()->user()->role === 'accountant' ? 7 : 6 }}">
                         <div class="prl-empty">
@@ -351,28 +319,12 @@
         <div class="prl-table-footer">{{ $cashAdvances->links() }}</div>
         @endif
     </div>
-    @php
-        $cashAdvanceRejections = $cashAdvances->getCollection()->filter(fn($item) => !empty($item->rejection_reason));
-    @endphp
-    @if($cashAdvanceRejections->isNotEmpty())
-    <div class="prl-bottom-reasons">
-        <p class="prl-bottom-reasons-title">Rejection Reasons</p>
-        <ul class="prl-bottom-reasons-list">
-            @foreach($cashAdvanceRejections as $advance)
-                <li><strong>{{ $advance->user->name ?? 'Employee' }}:</strong> {{ $advance->rejection_reason }}</li>
-            @endforeach
-        </ul>
-    </div>
-    @endif
     @endif
 
     {{-- ══════════════════════════════════════════
          SALARY LOANS TAB
     ══════════════════════════════════════════ --}}
     @if($tab === 'salary_loans')
-    <div class="prl-section-head">
-        <h2 class="prl-section-title"><span class="prl-dot"></span> Salary Loan Applications</h2>
-    </div>
 
     <div class="prl-filter-bar">
         <div class="prl-search-wrap">
@@ -382,8 +334,8 @@
         <select class="prl-filter-select" id="loanStatusFilter">
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
-            <option value="active">Active</option>
-            <option value="settled">Settled</option>
+            <option value="approved">Approved</option>
+            <option value="released">Released</option>
             <option value="rejected">Rejected</option>
         </select>
     </div>
@@ -413,13 +365,28 @@
                         $initials = strtoupper(substr($loan->user->first_name ?? ($loan->user->name ?? 'U'), 0, 1) . substr($loan->user->last_name ?? '', 0, 1));
                         $loanCls = match($loan->status) {
                             'pending'  => 's-pending',
-                            'active'   => 's-approved',
-                            'settled'  => 's-settled',
+                            'approved' => 's-approved',
+                            'released' => 's-released',
                             'rejected' => 's-rejected',
                             default    => 's-pending',
                         };
+                        $loanData = [
+                            'id' => $loan->id,
+                            'type' => 'loan',
+                            'employee' => $loan->user->name ?? '—',
+                            'position' => $loan->user->position ?? '',
+                            'loanAmount' => number_format($loan->loan_amount, 2),
+                            'monthlyDeduction' => number_format($loan->monthly_deduction, 2),
+                            'remainingBalance' => number_format($loan->remaining_balance, 2),
+                            'monthsPaid' => $loan->months_paid,
+                            'totalMonths' => $totalMonths,
+                            'progress' => $progress,
+                            'status' => ucfirst($loan->status),
+                            'startDate' => $loan->start_date ? \Carbon\Carbon::parse($loan->start_date)->format('M d, Y') : '—',
+                            'rejectionReason' => $loan->rejection_reason ?? '',
+                        ];
                     @endphp
-                    <tr data-name="{{ strtolower($loan->user->name ?? '') }}" data-status="{{ $loan->status }}">
+                    <tr class="prl-data-row" onclick="window.location='{{ route('payroll.receivables.salary-loans.show', $loan) }}'" style="cursor: pointer;" data-name="{{ strtolower($loan->user->name ?? '') }}" data-status="{{ $loan->status }}">
                         <td>
                             <div class="prl-emp-cell">
                                 <div class="prl-emp-avatar">{{ $initials }}</div>
@@ -442,28 +409,17 @@
                         </td>
                         <td class="text-center"><span class="prl-status {{ $loanCls }}">{{ ucfirst($loan->status) }}</span></td>
                         <td><span style="font-size:.82rem;color:#374151;">{{ $loan->start_date ? \Carbon\Carbon::parse($loan->start_date)->format('M d, Y') : '—' }}</span></td>
-                        @if(auth()->user()->role === 'accountant')
-                        <td>
-                            <div class="prl-actions">
-                                @if($loan->status === 'pending')
-                                <form method="POST" action="{{ route('salary-loans.approve', $loan) }}" style="display:inline;"
-                                      data-sa-confirm="Approve salary loan of ₱{{ number_format($loan->loan_amount, 2) }} for {{ $loan->user->name ?? 'this employee' }}?">
-                                    @csrf
-                                    <button class="prl-action-btn success" title="Approve">
-                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                    </button>
-                                </form>
-                                <button class="prl-action-btn danger" title="Reject" type="button"
-                                        onclick="openRejectModal('loan', {{ $loan->id }}, '{{ addslashes($loan->user->name ?? 'this employee') }}', '{{ number_format($loan->loan_amount, 2) }}')">
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
-                                @else
-                                <span style="font-size:.75rem;color:#d1d5db;">—</span>
-                                @endif
+                    </tr>
+                    @if($loan->rejection_reason)
+                    <tr class="prl-reason-row" id="loan-reason-{{ $loan->id }}">
+                        <td colspan="{{ auth()->user()->role === 'accountant' ? 8 : 7 }}">
+                            <div class="prl-reason-text">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4v2m0-6a4 4 0 110 8 4 4 0 010-8z"/></svg>
+                                <strong>Rejection Reason:</strong> {{ $loan->rejection_reason }}
                             </div>
                         </td>
-                        @endif
                     </tr>
+                    @endif
                 @empty
                     <tr><td colspan="{{ auth()->user()->role === 'accountant' ? 8 : 7 }}">
                         <div class="prl-empty">
@@ -486,57 +442,115 @@
         <div class="prl-table-footer">{{ $salaryLoans->links() }}</div>
         @endif
     </div>
-    @php
-        $loanRejections = $salaryLoans->getCollection()->filter(fn($item) => !empty($item->rejection_reason));
-    @endphp
-    @if($loanRejections->isNotEmpty())
-    <div class="prl-bottom-reasons">
-        <p class="prl-bottom-reasons-title">Rejection Reasons</p>
-        <ul class="prl-bottom-reasons-list">
-            @foreach($loanRejections as $loan)
-                <li><strong>{{ $loan->user->name ?? 'Employee' }}:</strong> {{ $loan->rejection_reason }}</li>
-            @endforeach
-        </ul>
-    </div>
-    @endif
     @endif
 
 </div>
 
-</div>
-
-{{-- ── Reject Modal ── --}}
-@if(auth()->user()->role === 'accountant')
-<div class="modal fade prl-modal" id="rejectModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
+{{-- ── Detail Modal ── --}}
+<div class="modal fade prl-modal" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form id="rejectForm" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h6 class="modal-title">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color:#c8292a;margin-right:6px;vertical-align:-2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        Reject Request
-                    </h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header">
+                <h6 class="modal-title" id="detailModalTitle">Request Details</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Cash Advance Details -->
+                <div id="caDetailContent" style="display:none;">
+                    <div style="display:grid;gap:16px;">
+                        <div>
+                            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Employee</div>
+                            <div style="font-size:0.9rem;font-weight:600;color:#111827;" id="caEmpName">—</div>
+                            <div style="font-size:0.78rem;color:#9ca3af;" id="caPosition">—</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Amount</div>
+                                <div style="font-size:1.1rem;font-weight:700;color:#111827;font-family:'DM Mono',monospace;" id="caAmount">₱0.00</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Status</div>
+                                <div style="font-size:0.82rem;" id="caStatus"></div>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Request Date</div>
+                                <div style="font-size:0.82rem;color:#374151;" id="caRequestDate">—</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Approved Date</div>
+                                <div style="font-size:0.82rem;color:#374151;" id="caApprovedDate">—</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Approver</div>
+                            <div style="font-size:0.82rem;color:#374151;" id="caApprover">—</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Deducted On</div>
+                            <div style="font-size:0.82rem;color:#374151;" id="caDeducedOn">—</div>
+                        </div>
+                        <div id="caReasonWrapper" style="display:none;">
+                            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Rejection Reason</div>
+                            <div style="font-size:0.82rem;color:#374151;" id="caReason"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <p id="rejectModalDesc" style="font-size:0.82rem;color:#6b7280;margin:0 0 14px;line-height:1.45;"></p>
-                    <label class="form-label">Reason for Rejection <span style="color:#c8292a;">*</span></label>
-                    <textarea name="rejection_reason" class="form-control" rows="3"
-                              placeholder="Enter reason…" required></textarea>
+
+                <!-- Salary Loan Details -->
+                <div id="loanDetailContent" style="display:none;">
+                    <div style="display:grid;gap:16px;">
+                        <div>
+                            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Employee</div>
+                            <div style="font-size:0.9rem;font-weight:600;color:#111827;" id="loanEmpName">—</div>
+                            <div style="font-size:0.78rem;color:#9ca3af;" id="loanPosition">—</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Loan Amount</div>
+                                <div style="font-size:1.1rem;font-weight:700;color:#111827;font-family:'DM Mono',monospace;" id="loanAmount">₱0.00</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Status</div>
+                                <div style="font-size:0.82rem;" id="loanStatus"></div>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Monthly Deduction</div>
+                                <div style="font-size:0.82rem;font-family:'DM Mono',monospace;color:#374151;" id="loanMonthly">₱0.00</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Remaining Balance</div>
+                                <div style="font-size:0.82rem;font-family:'DM Mono',monospace;color:#c8292a;font-weight:600;" id="loanRemaining">₱0.00</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Progress</div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="flex:1;height:6px;border-radius:4px;background:#f3f4f6;overflow:hidden;">
+                                    <div id="loanProgressBar" style="height:100%;border-radius:4px;background:linear-gradient(90deg,#16a34a,#4ade80);transition:width 0.3s;width:0%;"></div>
+                                </div>
+                                <span style="font-size:0.72rem;color:#9ca3af;white-space:nowrap;font-family:'DM Mono',monospace;" id="loanProgressLabel">0/0mo</span>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Start Date</div>
+                                <div style="font-size:0.82rem;color:#374151;" id="loanStartDate">—</div>
+                            </div>
+                        </div>
+                        <div id="loanReasonWrapper" style="display:none;">
+                            <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px;">Rejection Reason</div>
+                            <div style="font-size:0.82rem;color:#374151;" id="loanReason"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="prl-modal-btn cancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="prl-modal-btn danger-btn">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        Reject
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
-@endif
 
 {{-- ── Mark Paid Modal (HR / superadmin) ── --}}
 @if(in_array(auth()->user()->role, ['hr', 'superadmin']))
@@ -568,6 +582,9 @@
 
 @push('scripts')
 <script>
+    modal.show();
+}
+
 (function () {
     // Cash Advances filter
     const caSearch  = document.getElementById('caSearch');
@@ -579,10 +596,18 @@
         if (!caTbody) return;
         const q  = caSearch.value.toLowerCase().trim();
         const st = caFilter.value;
-        const rows = Array.from(caTbody.querySelectorAll('tr[data-name]'));
+        const rows = Array.from(caTbody.querySelectorAll('tr.prl-data-row'));
         const vis  = rows.filter(r => (!q || r.dataset.name.includes(q)) && (!st || r.dataset.status === st));
-        rows.forEach(r => r.style.display = 'none');
-        vis.forEach(r => r.style.display = '');
+        rows.forEach(r => {
+            r.style.display = 'none';
+            const reasonRow = r.nextElementSibling;
+            if (reasonRow && reasonRow.classList.contains('prl-reason-row')) {
+                reasonRow.style.display = 'none';
+            }
+        });
+        vis.forEach(r => {
+            r.style.display = '';
+        });
         if (caNR) caNR.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
     }
     if (caSearch) { caSearch.addEventListener('input', runCA); caFilter.addEventListener('change', runCA); }
@@ -597,38 +622,22 @@
         if (!loanTbody) return;
         const q  = loanSearch.value.toLowerCase().trim();
         const st = loanFilter.value;
-        const rows = Array.from(loanTbody.querySelectorAll('tr[data-name]'));
+        const rows = Array.from(loanTbody.querySelectorAll('tr.prl-data-row'));
         const vis  = rows.filter(r => (!q || r.dataset.name.includes(q)) && (!st || r.dataset.status === st));
-        rows.forEach(r => r.style.display = 'none');
-        vis.forEach(r => r.style.display = '');
+        rows.forEach(r => {
+            r.style.display = 'none';
+            const reasonRow = r.nextElementSibling;
+            if (reasonRow && reasonRow.classList.contains('prl-reason-row')) {
+                reasonRow.style.display = 'none';
+            }
+        });
+        vis.forEach(r => {
+            r.style.display = '';
+        });
         if (loanNR) loanNR.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
     }
     if (loanSearch) { loanSearch.addEventListener('input', runLoan); loanFilter.addEventListener('change', runLoan); }
 })();
-
-@if(auth()->user()->role === 'accountant')
-function openRejectModal(type, id, employeeName, amount) {
-    const caBase   = '{{ url('/cash-advances') }}';
-    const loanBase = '{{ url('/salary-loans') }}';
-    const routes = {
-        ca:   caBase   + '/' + id + '/reject',
-        loan: loanBase + '/' + id + '/reject',
-    };
-    const labels = {
-        ca:   'cash advance',
-        loan: 'salary loan',
-    };
-    document.getElementById('rejectForm').action = routes[type];
-    const desc = document.getElementById('rejectModalDesc');
-    if (desc) {
-        desc.textContent = `You are about to reject the ${labels[type]} of ₱${amount} for ${employeeName}. Please provide a reason below.`;
-    }
-    // Clear previous reason
-    const textarea = document.querySelector('#rejectForm textarea[name="rejection_reason"]');
-    if (textarea) textarea.value = '';
-    new bootstrap.Modal(document.getElementById('rejectModal')).show();
-}
-@endif
 
 @if(in_array(auth()->user()->role, ['hr', 'superadmin']))
 function openPayModal(payrollId) {
