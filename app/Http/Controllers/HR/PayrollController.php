@@ -58,7 +58,7 @@
 
             $nextCutoffDate      = PayrollCutoffSchedule::getNextCutoffDate();
             $currentPeriod       = PayrollBatch::resolvePeriod();
-            $currentPendingBatch = PayrollBatch::pendingForCurrentPeriod();
+            $currentInProgressBatch = PayrollBatch::inProgressForCurrentPeriod();
             $finalizedCurrentBatch = PayrollBatch::finalizedForCurrentPeriod();
             $batchAlreadyExists    = $finalizedCurrentBatch !== null;
 
@@ -94,7 +94,7 @@
                 'cutoffSchedules', 'cutoffInfo', 'nextCutoffDate',
                 'totalPayroll', 'payrollCount', 'releasedCount',
                 'recentBatches', 'currentPeriod', 'batchAlreadyExists',
-                'currentPendingBatch', 'finalizedCurrentBatch',
+                'currentInProgressBatch', 'finalizedCurrentBatch',
                 'submittedCount', 'approvedCount', 'rejectedCount'
             ));
         }
@@ -188,11 +188,7 @@
         {
             $period = PayrollBatch::resolvePeriod();
 
-            $existing = PayrollBatch::where('period_start', $period['start'])
-                ->where('period_end', $period['end'])
-                ->where('status', 'pending')
-                ->latest('id')
-                ->first();
+            $existing = PayrollBatch::inProgressForCurrentPeriod();
 
             if ($existing) {
                 return redirect()
@@ -203,7 +199,7 @@
             $batch = PayrollBatch::create([
                 'period_start' => $period['start'],
                 'period_end'   => $period['end'],
-                'status'       => 'pending',
+                'status'       => 'submitted',
                 'generated_by' => auth()->id(),
             ]);
 
@@ -285,7 +281,7 @@
                 $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
                 $payroll->forceFill([
                     'batch_id' => $batch->id,
-                    'status'   => 'pending',
+                    'status'   => 'prepared',
                 ])->save();
                 PayrollDeductionService::applyLoanDeductions($payroll);
                 $added++;
@@ -323,7 +319,7 @@
             $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
             $payroll->forceFill([
                 'batch_id' => $batch->id,
-                'status'   => 'pending',
+                'status'   => 'prepared',
             ])->save();
             PayrollDeductionService::applyLoanDeductions($payroll);
 
@@ -517,7 +513,7 @@
             PayrollNotification::notifyAccountantsPayrollGenerated($periodStart, $periodEnd, $batch->payrolls->count());
 
             return redirect()->route('payroll.salary-computation.index')
-                ->with('success', 'Payroll batch submitted to accounting. Records are now locked.');
+                ->with('success', 'Payroll batch submitted to accounting.');
         }
 
         /* ══════════════════════════════════════════════════════════════
@@ -543,9 +539,9 @@
         public function batchCancel(PayrollBatch $batch)
         {
             abort_if(
-                !in_array($batch->status, ['pending', 'submitted']),
+                $batch->status !== 'submitted',
                 403,
-                'Only pending or submitted batches can be deleted.'
+                'Only submitted batches can be deleted.'
             );
 
             DB::transaction(function () use ($batch) {
@@ -580,7 +576,7 @@
             $batch->payrolls()->update(['status' => 'prepared']);
 
             $batch->update([
-                'status'         => 'pending',
+                'status'         => 'submitted',
                 'rejected_by'    => null,
                 'rejected_at'    => null,
                 'rejection_note' => null,
