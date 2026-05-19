@@ -267,15 +267,11 @@
                         </ul>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('holiday.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
+                    <li class="nxl-item {{ request()->routeIs('holiday.*') ? 'active' : '' }}">
+                        <a href="{{ route('holiday.index') }}" class="nxl-link">
                             <span class="nxl-micon"><i class="feather-gift"></i></span>
                             <span class="nxl-mtext">Holiday Management</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.index') }}">All Holidays</a></li>
-                        </ul>
                     </li>
 
                     <li class="nxl-item nxl-hasmenu {{ request()->routeIs('attendance.*') ? 'active' : '' }}">

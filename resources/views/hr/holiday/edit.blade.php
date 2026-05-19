@@ -52,6 +52,28 @@
 .hld-btn-cancel:hover { border-color:#d1d5db;color:#111827;background:#f9fafb; }
 .hld-btn-submit { display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:#c8292a;color:#fff;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:background 0.15s; }
 .hld-btn-submit:hover { background:#a81f20; }
+
+.hld-btn-danger {
+    display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:#ef4444;color:#fff;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:background 0.15s;
+}
+.hld-btn-danger:hover { background:#dc2626; }
+
+/* Modal */
+.hld-modal-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity 0.2s; }
+.hld-modal-overlay.active { opacity:1;pointer-events:all; }
+
+/* Employee modal styles */
+.emp-modal-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity 0.2s; }
+.emp-modal-overlay.active { opacity:1;pointer-events:all; }
+.emp-modal { background:#fff;border-radius:12px;padding:24px;max-width:400px;width:90%;box-shadow:0 20px 25px -5px rgba(0,0,0,0.15); }
+.emp-modal-title { font-size:1rem;font-weight:700;color:#111827;margin:0 0 12px; }
+.emp-modal-message { font-size:0.84rem;color:#6b7280;margin:0 0 20px;line-height:1.5; }
+.emp-modal-actions { display:flex;gap:10px;justify-content:flex-end; }
+.emp-modal-btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s;border:none; }
+.emp-modal-btn-cancel { background:#fff;color:#374151;border:1px solid #e5e7eb; }
+.emp-modal-btn-cancel:hover { border-color:#d1d5db;background:#f9fafb; }
+.emp-modal-btn-confirm { background:#ef4444;color:#fff; }
+.emp-modal-btn-confirm:hover { background:#dc2626; }
 </style>
 @endpush
 
@@ -79,10 +101,16 @@
             <h1 class="hld-topbar-title">Edit Holiday</h1>
             <p class="hld-topbar-sub">Update details for <strong>{{ $holiday->name }}</strong></p>
         </div>
-        <a href="{{ route('holiday.index') }}" class="hld-btn-sec">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Back to Holidays
-        </a>
+        <div style="display:flex;gap:10px;">
+            <a href="{{ url()->previous() }}" class="hld-btn-sec">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Back
+            </a>
+            <button type="button" class="hld-btn-danger" onclick="document.getElementById('deleteModal').classList.add('active');">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Delete
+            </button>
+        </div>
     </div>
 
     {{-- Form card --}}
@@ -152,10 +180,6 @@
 
                     {{-- Form actions --}}
                     <div class="hld-form-actions">
-                        <a href="{{ route('holiday.index') }}" class="hld-btn-cancel">
-                            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                            Cancel
-                        </a>
                         <button type="submit" class="hld-btn-submit">
                             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             Save Changes
@@ -168,3 +192,42 @@
 
 </div>
 @endsection
+
+{{-- Delete Confirmation Modal --}}
+<div id="deleteModal" class="emp-modal-overlay">
+    <div class="emp-modal">
+        <h3 class="emp-modal-title">Delete Holiday</h3>
+        <p class="emp-modal-message">Are you sure you want to delete <strong>{{ $holiday->name }}</strong>? This action cannot be undone.</p>
+        <div class="emp-modal-actions">
+            <button type="button" class="emp-modal-btn emp-modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <button type="button" class="emp-modal-btn emp-modal-btn-confirm" onclick="confirmDelete()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+}
+
+function confirmDelete() {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{{ route('holiday.destroy', $holiday) }}';
+    form.innerHTML = '@csrf @method('DELETE')';
+    document.body.appendChild(form);
+    form.submit();
+}
+
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        this.classList.remove('active');
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeDeleteModal();
+    }
+});
+</script>

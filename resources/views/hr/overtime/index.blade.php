@@ -106,17 +106,13 @@
             </p>
         </div>
         <div class="ot-topbar-actions">
-            <a href="{{ route('overtime.pending') }}" class="ot-btn-primary" style="background:#d97706;box-shadow:none;">
+            <a href="{{ route('overtime.pending') }}" class="ot-btn-primary">
                 <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 3"/></svg>
                 Pending Requests
                 @php $pendingOtCount = \App\Models\OvertimeUndertime::where('status','pending')->count(); @endphp
                 @if($pendingOtCount > 0)
                     <span style="background:rgba(255,255,255,0.25);border-radius:999px;padding:1px 7px;font-size:0.72rem;font-weight:800;">{{ $pendingOtCount }}</span>
                 @endif
-            </a>
-            <a href="{{ route('overtime.create') }}" class="ot-btn-primary">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                New Record
             </a>
         </div>
     </div>

@@ -156,9 +156,9 @@
             <h1 class="otp-topbar-title">OT / UT Requests</h1>
             <p class="otp-topbar-sub">Review and act on overtime &amp; undertime requests submitted by employees.</p>
         </div>
-        <a href="{{ route('overtime.index') }}" class="otp-btn-back">
+        <a href="{{ url()->previous() }}" class="otp-btn-back">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Back to Overview
+            Back
         </a>
     </div>
 
@@ -208,9 +208,7 @@
                         <th>Date</th>
                         <th class="text-center">Hours</th>
                         <th class="text-end">Amount</th>
-                        <th>Reason</th>
                         <th class="text-center">Status</th>
-                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -232,13 +230,7 @@
                             </td>
                             <td>
                                 <span class="otp-type {{ $req->type === 'overtime' ? 'ot' : 'ut' }}">
-                                    @if($req->type === 'overtime')
-                                        <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                                        Overtime
-                                    @else
-                                        <svg width="9" height="9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-                                        Undertime
-                                    @endif
+                                    {{ $req->type === 'overtime' ? 'Overtime' : 'Undertime' }}
                                 </span>
                             </td>
                             <td style="font-family:'DM Mono',monospace;font-size:0.82rem;white-space:nowrap;">
@@ -248,36 +240,10 @@
                                 {{ number_format($req->hours, 1) }}h
                             </td>
                             <td class="text-end" style="font-family:'DM Mono',monospace;font-size:0.82rem;font-weight:700;color:{{ $req->type === 'overtime' ? '#16a34a' : '#c8292a' }};">
-                                {{ $req->type === 'overtime' ? '+' : '' }}₱{{ number_format(abs($req->amount), 2) }}
-                            </td>
-                            <td style="max-width:200px;">
-                                <div style="font-size:0.80rem;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $req->reason }}">
-                                    {{ $req->reason }}
-                                </div>
+                                ₱{{ number_format(abs($req->amount), 2) }}
                             </td>
                             <td class="text-center">
                                 <span class="otp-status {{ $req->status }}">{{ ucfirst($req->status) }}</span>
-                            </td>
-                            <td class="text-center" onclick="event.stopPropagation()">
-                                <div class="otp-actions" style="justify-content:center;">
-                                    @if($req->status === 'pending')
-                                        {{-- Approve --}}
-                                        <form action="{{ route('overtime.approve', $req) }}" method="POST" style="display:inline;">
-                                            @csrf
-                                            <button type="submit" class="otp-btn-approve" title="Approve">
-                                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                                Approve
-                                            </button>
-                                        </form>
-                                        {{-- Reject --}}
-                                        <button type="button" class="otp-btn-reject-open"
-                                            onclick="event.stopPropagation(); openRejectModal({{ $req->id }}, '{{ addslashes($name) }}')"
-                                            title="Reject">
-                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                            Reject
-                                        </button>
-                                    @endif
-                                </div>
                             </td>
                         </tr>
                     @empty
