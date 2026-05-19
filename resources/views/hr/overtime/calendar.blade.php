@@ -169,10 +169,6 @@
             </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <a href="{{ route('overtime.create') }}" class="otcal-add-btn">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                Add Record
-            </a>
             <a href="{{ route('overtime.index') }}" class="otcal-btn-back">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Back

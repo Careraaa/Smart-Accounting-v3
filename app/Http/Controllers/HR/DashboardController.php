@@ -104,7 +104,7 @@ class DashboardController extends Controller
             $pendingItems[] = [
                 'text' => 'Pending Overtime/Undertime',
                 'count' => $pendingOvertimeRecords,
-                'url' => route('overtime.index'),
+                'url' => route('overtime.pending'),
                 'icon' => 'feather-clock',
                 'color' => '#dbeafe',
                 'iconColor' => '#0284c7'

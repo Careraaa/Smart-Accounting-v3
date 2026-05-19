@@ -13,11 +13,11 @@
 
 .hld-btn-primary {
     display:inline-flex;align-items:center;gap:7px;padding:9px 18px;
-    background:#c8292a;color:#fff;border:none;border-radius:10px;
+    background:#111827;color:#fff;border:none;border-radius:10px;
     font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;
     text-decoration:none;cursor:pointer;transition:background 0.15s;white-space:nowrap;
 }
-.hld-btn-primary:hover { background:#a81f20;color:#fff; }
+.hld-btn-primary:hover { background:#000;color:#fff; }
 
 .hld-btn-sec {
     display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;
@@ -33,13 +33,15 @@
 @keyframes hldFlashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
 
 /* ── Filters ────────────────────────────────────────────────── */
-.hld-filter-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
+.hld-filter-bar { display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap; }
 .hld-filter-select { border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#374151;background:#f9fafb;outline:none;cursor:pointer;transition:border-color 0.15s; }
 .hld-filter-select:focus { border-color:#c8292a; }
 
-.hld-filter-btn { display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid #e5e7eb;background:#fff;color:#374151;border-radius:8px;font-family:'Sora',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.15s; }
+.hld-filter-btn { display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;
+    font-family:'Sora',sans-serif;font-size:0.78rem;font-weight:600;text-decoration:none;
+    border:1px solid #e5e7eb;background:#fff;color:#6b7280;transition:all 0.15s; }
 .hld-filter-btn:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
-.hld-filter-btn.active { background:#c8292a;color:#fff;border-color:#c8292a; }
+.hld-filter-btn.active { background:#111827;border-color:#111827;color:#fff; }
 
 /* ── Table ──────────────────────────────────────────────────── */
 .hld-table-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
@@ -135,7 +137,7 @@
                 </thead>
                 <tbody>
                     @forelse($holidays as $holiday)
-                    <tr>
+                    <tr style="cursor:pointer;" onclick="window.location='{{ route('holiday.edit', $holiday) }}'">
                         <td>
                             <div class="hld-name">{{ $holiday->name }}</div>
                         </td>

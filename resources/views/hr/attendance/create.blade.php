@@ -28,7 +28,7 @@
 .att-card-sub   { font-size:0.75rem;color:#9ca3af;margin:0; }
 
 .att-card-body  { padding:24px; }
-.att-card-footer { padding:16px 24px;border-top:1px solid #f3f4f6;background:#fafafa;display:flex;align-items:center;gap:10px; }
+.att-card-footer { padding:16px 24px;border-top:1px solid #f3f4f6;background:#fafafa;display:flex;align-items:center;justify-content:flex-end;gap:10px; }
 
 /* ── Form field styles ──────────────────────────────────────── */
 .att-label {
@@ -230,9 +230,6 @@
                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     Save Attendance
                 </button>
-                <a href="{{ route('attendance.index') }}" class="att-btn-cancel">
-                    Cancel
-                </a>
             </div>
 
         </div>

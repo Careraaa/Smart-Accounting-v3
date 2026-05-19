@@ -19,15 +19,13 @@
 .lv-stat-value { font-size:1.6rem;font-weight:800;color:#111827;line-height:1;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace; }
 .lv-stat-sub   { font-size:0.73rem;color:#9ca3af;margin-top:4px; }
 
-.lv-filter-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
-.lv-search-wrap { position:relative;flex:1;min-width:180px; }
-.lv-search-wrap svg { position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none; }
-.lv-search-input { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px 8px 34px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;transition:border-color 0.15s; }
-.lv-search-input:focus { border-color:#c8292a;background:#fff;box-shadow:0 0 0 3px rgba(200,41,42,0.08); }
-.lv-filter-select { border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#374151;background:#f9fafb;outline:none;cursor:pointer;flex:1;min-width:140px; }
-.lv-filter-select:focus { border-color:#c8292a; }
-.lv-filter-btn { display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#111827;color:#fff;border:none;border-radius:8px;font-family:'Sora',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;white-space:nowrap; }
-.lv-filter-btn:hover { background:#000; }
+.emp-filter-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
+.emp-search-wrap { position:relative;flex:1;min-width:180px; }
+.emp-search-wrap svg { position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none; }
+.emp-search-input { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px 8px 34px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;transition:border-color 0.15s,background 0.15s; }
+.emp-search-input:focus { border-color:#c8292a;background:#fff;box-shadow:0 0 0 3px rgba(200,41,42,0.08); }
+.emp-filter-select { border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#374151;background:#f9fafb;outline:none;cursor:pointer;transition:border-color 0.15s; }
+.emp-filter-select:focus { border-color:#c8292a; }
 
 .lv-flash { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:16px;animation:lvFlash 0.3s ease; }
 .lv-flash.success { background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d; }
@@ -97,31 +95,24 @@
         </div>
     </div>
 
-    <form method="GET" action="{{ route('leave.pending') }}">
-        <input type="hidden" name="status" value="rejected">
-        <div class="lv-filter-bar">
-            <select name="department" class="lv-filter-select">
-                <option value="">All Departments</option>
-                @foreach($departments as $dept)
-                    <option value="{{ $dept }}" @selected(request('department') === $dept)>{{ $dept }}</option>
-                @endforeach
-            </select>
-            <select name="leave_type" class="lv-filter-select">
-                <option value="">All Leave Types</option>
-                @foreach($leaveTypeStats as $stat)
-                    <option value="{{ $stat->leave_type }}" @selected(request('leave_type') === $stat->leave_type)>{{ $stat->leave_type }}</option>
-                @endforeach
-            </select>
-            <div class="lv-search-wrap">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-                <input type="text" name="search" class="lv-search-input" placeholder="Search employee…" value="{{ request('search') }}">
-            </div>
-            <button type="submit" class="lv-filter-btn">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-                Filter
-            </button>
+    <div class="emp-filter-bar">
+        <div class="emp-search-wrap">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" class="emp-search-input" id="lvSearch" placeholder="Search employee…">
         </div>
-    </form>
+        <select class="emp-filter-select" id="lvDeptFilter">
+            <option value="">All Departments</option>
+            @foreach($departments as $dept)
+                <option value="{{ strtolower($dept) }}">{{ $dept }}</option>
+            @endforeach
+        </select>
+        <select class="emp-filter-select" id="lvLeaveTypeFilter">
+            <option value="">All Leave Types</option>
+            @foreach($leaveTypeStats as $stat)
+                <option value="{{ strtolower($stat->leave_type) }}">{{ $stat->leave_type }}</option>
+            @endforeach
+        </select>
+    </div>
 
     <div class="lv-table-card">
         <div style="overflow-x:auto;">
@@ -133,16 +124,17 @@
                         <th>Leave Type</th>
                         <th>Dates</th>
                         <th>Days</th>
-                        <th>Rejected By</th>
                         <th>Rejected Date</th>
-                        <th>Reason</th>
-                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="lvTbody">
                     @forelse($leaves as $leave)
                     @php $initials = strtoupper(substr($leave->employee->first_name??'U',0,1).substr($leave->employee->last_name??'',0,1)); @endphp
-                    <tr>
+                    <tr style="cursor:pointer;"
+                        data-name="{{ strtolower(($leave->employee->first_name ?? '') . ' ' . ($leave->employee->last_name ?? '')) }}"
+                        data-dept="{{ strtolower($leave->employee->department ?? '') }}"
+                        data-type="{{ strtolower($leave->leave_type ?? '') }}"
+                        onclick="window.location='{{ route('leave.show', $leave) }}';">
                         <td>
                             <div class="lv-emp-cell">
                                 <div class="lv-emp-avatar">{{ $initials }}</div>
@@ -156,22 +148,7 @@
                             @php $days = $leave->start_date->diffInDays($leave->end_date) + 1; @endphp
                             <span class="lv-days-tag">{{ $days }}d</span>
                         </td>
-                        <td>
-                            @if($leave->approvedBy)
-                                <span class="lv-role-text">{{ strtoupper(str_replace('_',' ',$leave->approvedBy->role)) }}</span>
-                            @else
-                                <span class="lv-muted">N/A</span>
-                            @endif
-                        </td>
                         <td><span class="lv-muted">{{ $leave->updated_at->format('M d, Y') }}</span></td>
-                        <td>
-                            <span class="lv-rejection" title="{{ $leave->rejection_reason }}">{{ Str::limit($leave->rejection_reason ?? 'N/A', 28) }}</span>
-                        </td>
-                        <td style="text-align:center;">
-                            <a href="{{ route('leave.show', $leave) }}" class="lv-action-btn" title="View">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            </a>
-                        </td>
                     </tr>
                     @empty
                     <tr><td colspan="9">
@@ -185,6 +162,15 @@
                 </tbody>
             </table>
         </div>
+
+        <div id="lvNoResults" style="display:none;">
+            <div class="lv-empty">
+                <div class="lv-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg></div>
+                <p class="lv-empty-title">No results found</p>
+                <p class="lv-empty-sub">Try a different search or filter.</p>
+            </div>
+        </div>
+
         @if($leaves->hasPages())
         <div style="padding:14px 16px;border-top:1px solid #f3f4f6;">{{ $leaves->links() }}</div>
         @endif
@@ -192,3 +178,34 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const search = document.getElementById('lvSearch');
+    const deptF = document.getElementById('lvDeptFilter');
+    const typeF = document.getElementById('lvLeaveTypeFilter');
+    const tbody = document.getElementById('lvTbody');
+    const noRes = document.getElementById('lvNoResults');
+
+    function run() {
+        const q = search.value.toLowerCase().trim();
+        const dt = deptF.value;
+        const ty = typeF.value;
+        const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
+        const vis = rows.filter(r =>
+            (!q || r.dataset.name.includes(q)) &&
+            (!dt || r.dataset.dept === dt) &&
+            (!ty || r.dataset.type === ty)
+        );
+        rows.forEach(r => r.style.display = 'none');
+        vis.forEach(r => r.style.display = '');
+        noRes.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
+    }
+
+    search.addEventListener('input', run);
+    deptF.addEventListener('change', run);
+    typeF.addEventListener('change', run);
+})();
+</script>
+@endpush
