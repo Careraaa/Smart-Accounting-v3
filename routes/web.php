@@ -10,8 +10,8 @@ use App\Http\Controllers\RemittanceClerk\ShortRemittanceController;
 use App\Http\Controllers\RemittanceClerk\ReportController as RemittanceClerkReportController;
 use App\Http\Controllers\RemittanceClerk\DashboardController as RemittanceClerkDashboardController;
 use App\Http\Controllers\Accountant\DashboardController as AccountantDashboardController;
-use App\Http\Controllers\Accountant\CashAdvanceController as AccountantCashAdvanceController;
-use App\Http\Controllers\Accountant\SalaryLoanController as AccountantSalaryLoanController;
+use App\Http\Controllers\Accountant\AccountantCashAdvanceController;
+use App\Http\Controllers\Accountant\AccountantSalaryLoanController;
 use App\Http\Controllers\HR\DashboardController as HRDashboardController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\EmployeeAttachmentController;
@@ -362,8 +362,15 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         ->name('payroll.receivables.')
         ->group(function () {
             Route::get('/', [PayrollReceivablesController::class, 'index'])->name('index');
+            Route::get('/cash-advances/{cashAdvance}', [PayrollReceivablesController::class, 'showCashAdvance'])->name('cash-advances.show');
+            Route::get('/salary-loans/{salaryLoan}', [PayrollReceivablesController::class, 'showSalaryLoan'])->name('salary-loans.show');
             Route::post('/{payroll}/mark-paid', [PayrollReceivablesController::class, 'markAsPaid'])->name('mark-paid');
             Route::post('/batch-paid', [PayrollReceivablesController::class, 'markBatchPaid'])->name('batch-paid');
+            // HR approval routes
+            Route::post('/cash-advances/{cashAdvance}/approve', [PayrollReceivablesController::class, 'approveCashAdvance'])->name('cash-advances.approve');
+            Route::post('/cash-advances/{cashAdvance}/reject', [PayrollReceivablesController::class, 'rejectCashAdvance'])->name('cash-advances.reject');
+            Route::post('/salary-loans/{salaryLoan}/approve', [PayrollReceivablesController::class, 'approveSalaryLoan'])->name('salary-loans.approve');
+            Route::post('/salary-loans/{salaryLoan}/reject', [PayrollReceivablesController::class, 'rejectSalaryLoan'])->name('salary-loans.reject');
         });
 
     Route::post('/payroll/statutory-deductions/compute', [PayrollController::class, 'computeStatutory'])->name('payroll.statutory.compute');
@@ -420,9 +427,12 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::post('/remittance-approval/{remittance}/approve', [RemittanceApprovalController::class, 'approve'])->name('remittance-approval.approve');
     Route::post('/remittance-approval/{remittance}/reject', [RemittanceApprovalController::class, 'reject'])->name('remittance-approval.reject');
 
-    Route::post('/cash-advances/{cashAdvance}/approve', [AccountantCashAdvanceController::class, 'approve'])->name('cash-advances.approve');
+    // Accountant release routes (for releasing approved requests)
+    Route::get('/cash-advances/{cashAdvance}', [AccountantCashAdvanceController::class, 'show'])->name('cash-advances.show');
+    Route::post('/cash-advances/{cashAdvance}/release', [AccountantCashAdvanceController::class, 'release'])->name('cash-advances.release');
     Route::post('/cash-advances/{cashAdvance}/reject', [AccountantCashAdvanceController::class, 'reject'])->name('cash-advances.reject');
-    Route::post('/salary-loans/{salaryLoan}/approve', [AccountantSalaryLoanController::class, 'approve'])->name('salary-loans.approve');
+    Route::get('/salary-loans/{salaryLoan}', [AccountantSalaryLoanController::class, 'show'])->name('salary-loans.show');
+    Route::post('/salary-loans/{salaryLoan}/release', [AccountantSalaryLoanController::class, 'release'])->name('salary-loans.release');
     Route::post('/salary-loans/{salaryLoan}/reject', [AccountantSalaryLoanController::class, 'reject'])->name('salary-loans.reject');
 
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');

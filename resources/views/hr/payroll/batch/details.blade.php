@@ -56,6 +56,7 @@
                 <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                 Back
             </button>
+            
             @if($batch->status === 'rejected')
                 <span class="bd-btn disabled">
                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -126,9 +127,6 @@
     <div class="bd-card">
         <div class="bd-head">
             <h2><span class="bd-dot"></span> Employees in this batch</h2>
-            <div class="bd-meta">
-                {{ $batch->payrolls->count() }} employees · Total net <span class="bd-mono">₱{{ number_format($batch->total_net_pay,2) }}</span>
-            </div>
         </div>
         <div class="table-responsive">
             <table class="bd-table">
@@ -138,10 +136,10 @@
                         <th>Department</th>
                         <th>Position</th>
                         <th class="text-center">Days</th>
-                        <th class="text-end">Basic pay</th>
-                        <th class="text-end">Gross pay</th>
-                        <th class="text-end">Deductions</th>
-                        <th class="text-end">Net pay</th>
+                        <th class="text-start">Basic pay</th>
+                        <th class="text-start">Gross pay</th>
+                        <th class="text-start">Deductions</th>
+                        <th class="text-start">Net pay</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -163,16 +161,16 @@
                             <td class="text-center bd-mono" style="font-size:0.85rem;">
                                 {{ $p->days_worked ?? '—' }}
                             </td>
-                            <td class="text-end bd-mono" style="font-size:0.85rem;">
+                            <td class="text-start bd-mono" style="font-size:0.85rem;">
                                 ₱{{ number_format($p->basic_salary, 2) }}
                             </td>
-                            <td class="text-end bd-mono" style="font-size:0.85rem;">
+                            <td class="text-start bd-mono" style="font-size:0.85rem;">
                                 ₱{{ number_format($p->gross_pay, 2) }}
                             </td>
-                            <td class="text-end bd-mono text-muted" style="font-size:0.85rem;">
+                            <td class="text-start bd-mono text-muted" style="font-size:0.85rem;">
                                 ₱{{ number_format($p->total_deductions, 2) }}
                             </td>
-                            <td class="text-end bd-mono fw-bold" style="font-size:0.88rem;color:#15803d;">
+                            <td class="text-start bd-mono fw-bold" style="font-size:0.88rem;color:#15803d;">
                                 ₱{{ number_format($p->net_pay, 2) }}
                             </td>
                         </tr>
@@ -187,13 +185,13 @@
                 <tfoot>
                     <tr style="background:#f9fafb;font-size:0.85rem;">
                         <td colspan="5" class="fw-bold" style="color:#111827;">Totals</td>
-                        <td class="text-end bd-mono fw-bold">
+                        <td class="text-start bd-mono fw-bold">
                             ₱{{ number_format($batch->payrolls->sum('gross_pay'), 2) }}
                         </td>
-                        <td class="text-end bd-mono text-muted">
+                        <td class="text-start bd-mono text-muted">
                             ₱{{ number_format($batch->payrolls->sum('total_deductions'), 2) }}
                         </td>
-                        <td class="text-end bd-mono fw-bold" style="color:#15803d;">
+                        <td class="text-start bd-mono fw-bold" style="color:#15803d;">
                             ₱{{ number_format($batch->total_net_pay, 2) }}
                         </td>
                     </tr>
