@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
         $this->call([OvertimeUndertimeSeeder::class]);
         $this->call([AllowanceDeductionSeeder::class]);
         $this->call([LeaveTypeSeeder::class]);
-        $this->call([LeaveBalanceSeeder::class]); // Initialize leave balances after leave types
         $this->call([EmployeeLeavesSeeder::class]);
+        $this->call([LeaveBalanceSeeder::class]); // After leave requests so used_days are accurate
         $this->call([EmployeeCashAdvancesSeeder::class]);
         $this->call([EmployeeSalaryLoansSeeder::class]);
         $this->call([EmployeeAttachmentsSeeder::class]);
@@ -31,5 +31,6 @@ class DatabaseSeeder extends Seeder
         $this->call([RemittanceSeeder::class]);
         $this->call([HolidaySeeder::class]);
         $this->call([BonusSeeder::class]);
+        $this->call([MayAdminPayrollBenchmarkSeeder::class]);
     }
 }

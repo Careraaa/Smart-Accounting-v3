@@ -3,45 +3,35 @@
 namespace Database\Seeders;
 
 use App\Models\EmployeeAttachment;
+use Database\Seeders\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class EmployeeAttachmentsSeeder extends Seeder
 {
     public function run(): void
     {
-        $employees = DB::table('users')
-            ->where('role', 'employee')
+        $targets = DB::table('users')
+            ->whereIn('id', SeedConfig::employeeIds())
             ->select('id', 'username', 'first_name', 'last_name')
-            ->get()
-            ->keyBy('username');
+            ->get();
 
-        $hr = DB::table('users')->where('role', 'hr')->orderBy('id')->first();
-        $hrId = $hr->id ?? null;
-
-        $usernames = ['john.doe', 'angela.fernandez', 'juan.trabaho', 'maria.halos', 'carlo.pahinga'];
-        $targets = $employees->only($usernames);
         if ($targets->isEmpty()) {
-            $this->command?->warn('Demo employee users not found; skipping EmployeeAttachmentsSeeder.');
+            $this->command?->warn('No employees found; skipping EmployeeAttachmentsSeeder.');
             return;
         }
 
+        $hrId = DB::table('users')->where('role', 'hr')->orderBy('id')->value('id');
         $baseDir = 'seed-attachments';
         Storage::disk('public')->makeDirectory($baseDir);
 
-        // Create small placeholder IMAGE files (SVG) so URLs don't 404
-        $mk = function (string $path, string $contents) {
-            if (!Storage::disk('public')->exists($path)) {
-                Storage::disk('public')->put($path, $contents);
-            }
-            return $path;
-        };
+        DB::table('employee_attachments')->whereIn('user_id', $targets->pluck('id'))->delete();
 
         $types = EmployeeAttachment::attachmentTypes();
-
-        // Clear previous seed attachments for these employees
-        DB::table('employee_attachments')->whereIn('user_id', $targets->pluck('id')->values()->all())->delete();
+        $statusCycle = ['approved', 'pending', 'approved', 'rejected'];
+        $seedKeys = ['drivers_license', 'valid_id_1', 'barangay_clearance', 'medical_cert'];
 
         $rows = [];
         $now = now();
@@ -50,52 +40,11 @@ class EmployeeAttachmentsSeeder extends Seeder
             $full = trim(($u->first_name ?? '') . ' ' . ($u->last_name ?? '')) ?: $u->username;
             $slug = strtolower(str_replace([' ', '.'], ['_', '_'], $u->username));
 
-            // Seed a curated subset so the page shows a mix of statuses
-            $seedKeys = [
-                'drivers_license'     => ['status' => 'approved', 'mime' => 'image/svg+xml'],
-                'valid_id_1'          => ['status' => 'pending',  'mime' => 'image/svg+xml'],
-                'barangay_clearance'  => ['status' => 'rejected', 'mime' => 'image/svg+xml'],
-                'medical_cert'        => ['status' => 'approved', 'mime' => 'image/svg+xml'],
-            ];
-
-            foreach ($seedKeys as $key => $meta) {
+            foreach ($seedKeys as $ki => $key) {
+                $status = $statusCycle[($u->id + $ki) % count($statusCycle)];
                 $label = $types[$key] ?? $key;
-                $filename = "{$slug}_{$key}.svg";
-                $filePath = "{$baseDir}/{$filename}";
-
-                // Simple SVG "card" – renders as an actual image in the browser
-                $initial = strtoupper(mb_substr($full, 0, 1));
-                $safeLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
-                $safeName  = htmlspecialchars($full, ENT_QUOTES, 'UTF-8');
-
-                $svg = <<<SVG
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#e5f0ff"/>
-      <stop offset="100%" stop-color="#ffe5e7"/>
-    </linearGradient>
-  </defs>
-  <rect x="0" y="0" width="640" height="400" fill="url(#bg)"/>
-  <rect x="36" y="36" width="568" height="328" rx="20" ry="20" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
-  <circle cx="150" cy="180" r="60" fill="#e5e7eb"/>
-  <text x="150" y="185" text-anchor="middle"
-        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-        font-size="40" fill="#4b5563">{$initial}</text>
-  <text x="260" y="160"
-        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-        font-size="20" font-weight="600" fill="#111827">{$safeName}</text>
-  <text x="260" y="190"
-        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-        font-size="15" fill="#6b7280">{$safeLabel}</text>
-  <text x="260" y="225"
-        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-        font-size="12" fill="#9ca3af">Demo attachment image generated by seeder.</text>
-</svg>
-SVG;
-
-                $mk($filePath, $svg);
+                $filePath = "{$baseDir}/{$slug}_{$key}.svg";
+                $this->writePlaceholderSvg($filePath, $full, $label);
 
                 $rows[] = [
                     'user_id' => $u->id,
@@ -103,36 +52,62 @@ SVG;
                     'label' => $label,
                     'file_path' => $filePath,
                     'original_name' => strtoupper($key) . '.svg',
-                    'mime_type' => $meta['mime'],
+                    'mime_type' => 'image/svg+xml',
                     'file_size' => Storage::disk('public')->size($filePath),
-                    'status' => $meta['status'],
-                    'rejection_reason' => $meta['status'] === 'rejected'
-                        ? "File is unclear / kulang ang details. Please re-upload a clearer copy."
-                        : null,
-                    'reviewed_by' => in_array($meta['status'], ['approved', 'rejected'], true) ? $hrId : null,
-                    'reviewed_at' => in_array($meta['status'], ['approved', 'rejected'], true) ? $now->copy()->subDays(10) : null,
+                    'status' => $status,
+                    'rejection_reason' => $status === 'rejected' ? 'Document is blurry. Please upload a clearer scan.' : null,
+                    'reviewed_by' => in_array($status, ['approved', 'rejected'], true) ? $hrId : null,
+                    'reviewed_at' => in_array($status, ['approved', 'rejected'], true) ? $now->copy()->subDays(8) : null,
                     'uploaded_by_role' => 'employee',
-                    'created_at' => $now->copy()->subDays(12),
-                    'updated_at' => $now->copy()->subDays(10),
+                    'created_at' => $now->copy()->subDays(14),
+                    'updated_at' => $now->copy()->subDays(8),
                 ];
             }
         }
 
-        // Some projects may not have rejection_reason/review fields yet (but your migration does).
-        $hasRejection = \Illuminate\Support\Facades\Schema::hasColumn('employee_attachments', 'rejection_reason');
-        $hasReviewedBy = \Illuminate\Support\Facades\Schema::hasColumn('employee_attachments', 'reviewed_by');
-        $hasReviewedAt = \Illuminate\Support\Facades\Schema::hasColumn('employee_attachments', 'reviewed_at');
-        $hasUploadedByRole = \Illuminate\Support\Facades\Schema::hasColumn('employee_attachments', 'uploaded_by_role');
-
         foreach ($rows as &$r) {
-            if (!$hasRejection) unset($r['rejection_reason']);
-            if (!$hasReviewedBy) unset($r['reviewed_by']);
-            if (!$hasReviewedAt) unset($r['reviewed_at']);
-            if (!$hasUploadedByRole) unset($r['uploaded_by_role']);
+            if (!Schema::hasColumn('employee_attachments', 'rejection_reason')) {
+                unset($r['rejection_reason']);
+            }
+            if (!Schema::hasColumn('employee_attachments', 'reviewed_by')) {
+                unset($r['reviewed_by']);
+            }
+            if (!Schema::hasColumn('employee_attachments', 'reviewed_at')) {
+                unset($r['reviewed_at']);
+            }
+            if (!Schema::hasColumn('employee_attachments', 'uploaded_by_role')) {
+                unset($r['uploaded_by_role']);
+            }
         }
 
-        DB::table('employee_attachments')->insert($rows);
-        $this->command?->info('✅ EmployeeAttachmentsSeeder: seeded ' . count($rows) . ' attachment records + placeholder files.');
+        foreach (array_chunk($rows, 100) as $chunk) {
+            DB::table('employee_attachments')->insert($chunk);
+        }
+
+        $this->command?->info('EmployeeAttachmentsSeeder: ' . count($rows) . ' attachments for ' . $targets->count() . ' employees.');
+    }
+
+    private function writePlaceholderSvg(string $path, string $fullName, string $label): void
+    {
+        if (Storage::disk('public')->exists($path)) {
+            return;
+        }
+
+        $initial = strtoupper(mb_substr($fullName, 0, 1));
+        $safeLabel = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+        $safeName = htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8');
+
+        $svg = <<<SVG
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400">
+  <rect width="640" height="400" fill="#f3f4f6"/>
+  <rect x="36" y="36" width="568" height="328" rx="16" fill="#fff" stroke="#d1d5db"/>
+  <text x="320" y="180" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#111827">{$safeName}</text>
+  <text x="320" y="220" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#6b7280">{$safeLabel}</text>
+  <text x="320" y="260" text-anchor="middle" font-family="sans-serif" font-size="48" fill="#9ca3af">{$initial}</text>
+</svg>
+SVG;
+
+        Storage::disk('public')->put($path, $svg);
     }
 }
-

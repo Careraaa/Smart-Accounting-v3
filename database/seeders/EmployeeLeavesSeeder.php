@@ -2,36 +2,18 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class EmployeeLeavesSeeder extends Seeder
 {
     public function run(): void
     {
-        $employees = DB::table('users')
-            ->where('role', 'employee')
-            ->select('id', 'username')
-            ->get()
-            ->keyBy('username');
+        $employeeIds = SeedConfig::employeeIds();
+        $hrId = DB::table('users')->where('role', 'hr')->orderBy('id')->value('id');
 
-        $hr = DB::table('users')->where('role', 'hr')->orderBy('id')->first();
-        $hrId = $hr->id ?? null;
-
-        if ($employees->isEmpty()) {
-            $this->command?->warn('No employee users found; skipping EmployeeLeavesSeeder.');
-            return;
-        }
-
-        $usernames = ['john.doe', 'angela.fernandez', 'juan.trabaho', 'maria.halos', 'carlo.pahinga'];
-        $targetIds = $employees->only($usernames)->pluck('id')->values()->all();
-        if (!$targetIds) {
-            $this->command?->warn('Demo employee users not found; skipping EmployeeLeavesSeeder.');
-            return;
-        }
-
-        // Get leave type IDs from database
         $leaveTypes = DB::table('leave_types')
             ->whereIn('name', ['Vacation Leave', 'Sick Leave', 'Emergency Leave', 'Bereavement Leave'])
             ->pluck('id', 'name');
@@ -41,93 +23,48 @@ class EmployeeLeavesSeeder extends Seeder
             return;
         }
 
-        // Clear only the demo employees' seeded leaves (keeps real data safe)
-        DB::table('leaves')->whereIn('user_id', $targetIds)->delete();
+        DB::table('leaves')->whereIn('user_id', $employeeIds)->delete();
 
-        $now = now();
         $rows = [];
+        $hasRejection = Schema::hasColumn('leaves', 'rejection_reason');
 
-        $rows[] = [
-            'user_id' => $employees['juan.trabaho']->id ?? $targetIds[0],
-            'leave_type_id' => $leaveTypes['Vacation Leave'] ?? 1,
-            'leave_type' => 'Vacation Leave',
-            'start_date' => '2026-03-23',
-            'end_date' => '2026-03-25',
-            'reason' => "VL muna — family out of town (Laguna). Will endorse tasks before leaving.",
-            'status' => 'approved',
-            'approved_by' => $hrId,
-            'rejection_reason' => null,
-            'created_at' => $now->copy()->subDays(30),
-            'updated_at' => $now->copy()->subDays(28),
+        $templates = [
+            ['type' => 'Vacation Leave', 'start' => '2026-02-10', 'end' => '2026-02-12', 'reason' => 'Family visit to province; tasks endorsed to team lead.', 'status' => 'approved'],
+            ['type' => 'Sick Leave', 'start' => '2026-02-24', 'end' => '2026-02-24', 'reason' => 'Fever and body pain; rest advised by clinic.', 'status' => 'approved'],
+            ['type' => 'Vacation Leave', 'start' => '2026-03-17', 'end' => '2026-03-19', 'reason' => 'Scheduled VL; son\'s school recognition day.', 'status' => 'approved'],
+            ['type' => 'Sick Leave', 'start' => '2026-03-24', 'end' => '2026-03-25', 'reason' => 'Dental procedure and recovery.', 'status' => 'approved'],
+            ['type' => 'Emergency Leave', 'start' => '2026-04-02', 'end' => '2026-04-02', 'reason' => 'Urgent home repair (flooding after heavy rain).', 'status' => 'approved'],
+            ['type' => 'Vacation Leave', 'start' => '2026-04-14', 'end' => '2026-04-15', 'reason' => 'Personal errands and government ID renewal.', 'status' => 'pending'],
+            ['type' => 'Bereavement Leave', 'start' => '2026-03-06', 'end' => '2026-03-07', 'reason' => 'Death of close relative; travel to hometown.', 'status' => 'rejected', 'rejection' => 'Please submit death certificate or obituary for HR records.'],
+            ['type' => 'Emergency Leave', 'start' => '2026-04-22', 'end' => '2026-04-22', 'reason' => 'Child picked up from school due to illness.', 'status' => 'pending'],
         ];
 
-        $rows[] = [
-            'user_id' => $employees['maria.halos']->id ?? $targetIds[0],
-            'leave_type_id' => $leaveTypes['Sick Leave'] ?? 2,
-            'leave_type' => 'Sick Leave',
-            'start_date' => '2026-03-18',
-            'end_date' => '2026-03-18',
-            'reason' => "SL — flu-like symptoms. Will submit med cert if needed.",
-            'status' => 'approved',
-            'approved_by' => $hrId,
-            'rejection_reason' => null,
-            'created_at' => $now->copy()->subDays(35),
-            'updated_at' => $now->copy()->subDays(34),
-        ];
+        foreach (SeedConfig::employeeIds() as $i => $userId) {
+            $tpl = $templates[$i % count($templates)];
+            $approved = $tpl['status'] === 'approved';
 
-        $rows[] = [
-            'user_id' => $employees['carlo.pahinga']->id ?? $targetIds[0],
-            'leave_type_id' => $leaveTypes['Emergency Leave'] ?? 5,
-            'leave_type' => 'Emergency Leave',
-            'start_date' => '2026-03-28',
-            'end_date' => '2026-03-28',
-            'reason' => "Emergency EL — biglang kailangan sa bahay (may aayusin na tubig/kuryente).",
-            'status' => 'pending',
-            'approved_by' => null,
-            'rejection_reason' => null,
-            'created_at' => $now->copy()->subDays(5),
-            'updated_at' => $now->copy()->subDays(5),
-        ];
+            $row = [
+                'user_id' => $userId,
+                'leave_type_id' => $leaveTypes[$tpl['type']] ?? $leaveTypes->first(),
+                'leave_type' => $tpl['type'],
+                'start_date' => $tpl['start'],
+                'end_date' => $tpl['end'],
+                'reason' => $tpl['reason'],
+                'status' => $tpl['status'],
+                'approved_by' => $approved ? $hrId : null,
+                'rejection_reason' => ($tpl['status'] === 'rejected') ? ($tpl['rejection'] ?? 'Incomplete documentation.') : null,
+                'created_at' => $tpl['start'] . ' 09:00:00',
+                'updated_at' => $tpl['start'] . ' 10:00:00',
+            ];
 
-        $rows[] = [
-            'user_id' => $employees['john.doe']->id ?? $targetIds[0],
-            'leave_type_id' => $leaveTypes['Bereavement Leave'] ?? 6,
-            'leave_type' => 'Bereavement Leave',
-            'start_date' => '2026-03-12',
-            'end_date' => '2026-03-13',
-            'reason' => "BL — family matter. Requesting 2 days off.",
-            'status' => 'rejected',
-            'approved_by' => $hrId,
-            'rejection_reason' => "Need supporting document / clarification on relationship. Please resubmit with details.",
-            'created_at' => $now->copy()->subDays(55),
-            'updated_at' => $now->copy()->subDays(54),
-        ];
-
-        // A couple more assorted requests for variety
-        $rows[] = [
-            'user_id' => $employees['angela.fernandez']->id ?? $targetIds[0],
-            'leave_type_id' => $leaveTypes['Vacation Leave'] ?? 1,
-            'leave_type' => 'Vacation Leave',
-            'start_date' => '2026-04-06',
-            'end_date' => '2026-04-07',
-            'reason' => "VL — personal errands + renewal ng IDs. Will be back Wednesday.",
-            'status' => 'pending',
-            'approved_by' => null,
-            'rejection_reason' => null,
-            'created_at' => $now->copy()->subDays(2),
-            'updated_at' => $now->copy()->subDays(2),
-        ];
-
-        // Insert only columns that exist (rejection_reason added via later migration)
-        $hasRejection = \Illuminate\Support\Facades\Schema::hasColumn('leaves', 'rejection_reason');
-        if (!$hasRejection) {
-            foreach ($rows as &$r) {
-                unset($r['rejection_reason']);
+            if (!$hasRejection) {
+                unset($row['rejection_reason']);
             }
+
+            $rows[] = $row;
         }
 
         DB::table('leaves')->insert($rows);
-        $this->command?->info('✅ EmployeeLeavesSeeder: seeded ' . count($rows) . ' leave requests.');
+        $this->command?->info('EmployeeLeavesSeeder: ' . count($rows) . ' leave requests (Feb–Apr 2026).');
     }
 }
-
