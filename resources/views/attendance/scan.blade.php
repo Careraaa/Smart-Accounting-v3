@@ -546,203 +546,687 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+
 <script>
-let video, canvas, ctx, scanner_running = false;
+let video = null;
+let canvas = null;
+let ctx = null;
+
+let scanner_running = false;
 let scanFrameId = null;
 
 function isIOS() {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
 }
 
 function updateClock() {
     const now = new Date();
+
     document.getElementById('time-display').textContent =
-        now.toLocaleTimeString([], { hour12: true });
+        now.toLocaleTimeString([], {
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+
     document.getElementById('current-date').textContent =
-        now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        now.toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
 }
+
 setInterval(updateClock, 1000);
 updateClock();
 
-window.addEventListener('load', async () => {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        updateScannerStatus('Browser does not support camera access', 'danger');
-        document.getElementById('start-camera-btn').disabled = true;
+window.addEventListener('load', () => {
+
+    if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+    ) {
+        updateScannerStatus(
+            'Browser does not support camera access',
+            'danger'
+        );
+
+        document.getElementById(
+            'start-camera-btn'
+        ).disabled = true;
+
         return;
     }
-    await fetchLastLog();
-    document.getElementById('start-camera-btn').addEventListener('click', async () => {
-        const btn = document.getElementById('start-camera-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa fa-spinner me-2 spin-icon"></i>Requesting…';
-        updateScannerStatus('Requesting camera permission…', 'idle');
-        await initializeCamera();
-        if (!scanner_running) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa fa-camera me-2"></i>Start Camera';
-        }
-    });
+
+    fetchLastLog();
+
+    const btn =
+        document.getElementById(
+            'start-camera-btn'
+        );
+
+    btn.addEventListener(
+        'click',
+        startCamera
+    );
 });
 
-async function fetchLastLog() {
-    try {
-        const r = await fetch("{{ route('attendance.lastlog') }}", { headers: { 'Accept': 'application/json' } });
-        if (r.ok) { const d = await r.json(); if (d?.type) { displayLastLog(d); return; } }
-        document.getElementById('last-log').style.display = 'none';
-    } catch { document.getElementById('last-log').style.display = 'none'; }
+
+
+async function startCamera() {
+
+    const btn =
+        document.getElementById(
+            'start-camera-btn'
+        );
+
+    btn.disabled = true;
+
+    btn.innerHTML =
+        '<i class="fa fa-spinner spin-icon me-2"></i>Starting...';
+
+    updateScannerStatus(
+        'Requesting camera access...',
+        'idle'
+    );
+
+    await initializeCamera();
+
+    if (!scanner_running) {
+
+        btn.disabled = false;
+
+        btn.innerHTML =
+            '<i class="fa fa-camera me-2"></i>Start Camera';
+    }
 }
 
-function displayLastLog(logData) {
-    document.getElementById('last-log').style.display = 'block';
-    const badge = document.getElementById('last-log-type');
-    badge.textContent = logData.type.toUpperCase().replace('_', ' ');
-    badge.className = 'badge bg-' + (logData.type === 'time_in' ? 'success' : 'warning');
-    document.getElementById('last-log-time').textContent = logData.time;
+
+async function fetchLastLog() {
+
+    try {
+
+        const response =
+            await fetch(
+                "{{ route('attendance.lastlog') }}",
+                {
+                    headers: {
+                        Accept:
+                            'application/json'
+                    }
+                }
+            );
+
+        if (!response.ok) return;
+
+        const data =
+            await response.json();
+
+        if (
+            data?.type &&
+            document.getElementById(
+                'last-log'
+            )
+        ) {
+            displayLastLog(data);
+        }
+
+    } catch (e) {
+        console.log(
+            'Last log unavailable'
+        );
+    }
+}
+
+function displayLastLog(data) {
+
+    const log =
+        document.getElementById(
+            'last-log'
+        );
+
+    const type =
+        document.getElementById(
+            'last-log-type'
+        );
+
+    const time =
+        document.getElementById(
+            'last-log-time'
+        );
+
+    if (
+        !log ||
+        !type ||
+        !time
+    ) return;
+
+    log.style.display =
+        'block';
+
+    type.textContent =
+        data.type
+            .replace(
+                '_',
+                ' '
+            )
+            .toUpperCase();
+
+    type.className =
+        'badge bg-' +
+        (
+            data.type ===
+            'time_in'
+                ? 'success'
+                : 'warning'
+        );
+
+    time.textContent =
+        data.time;
 }
 
 async function initializeCamera() {
-    video  = document.getElementById('camera-stream');
-    canvas = document.getElementById('canvas');
-    ctx    = canvas.getContext('2d', { willReadFrequently: true });
+
+    video =
+        document.getElementById(
+            'camera-stream'
+        );
+
+    canvas =
+        document.getElementById(
+            'canvas'
+        );
+
+    ctx =
+        canvas.getContext(
+            '2d',
+            {
+                willReadFrequently:
+                    true
+            }
+        );
+
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-        video.srcObject = stream;
-        try { await video.play(); } catch {}
-        video.onloadedmetadata = () => {
-            if (video.videoWidth === 0) { setTimeout(() => { if (video.videoWidth > 0) startScanning(); }, 1000); return; }
-            startScanning();
-        };
-        setTimeout(() => { if (!scanner_running && video.videoWidth > 0) startScanning(); }, 5000);
-    } catch (error) { handleCameraError(error); }
+
+        const stream =
+            await navigator
+                .mediaDevices
+                .getUserMedia({
+                    video: {
+                        facingMode:
+                            'environment'
+                    },
+                    audio: false
+                });
+
+        video.srcObject =
+            stream;
+
+        await video.play();
+
+        video.onloadedmetadata =
+            () => {
+
+                requestAnimationFrame(
+                    startScanning
+                );
+
+            };
+
+    } catch (error) {
+
+        handleCameraError(
+            error
+        );
+
+    }
 }
 
+
 function startScanning() {
-    document.getElementById('camera-controls').style.display = 'none';
-    const vc = document.getElementById('video-container');
-    vc.style.display = 'block';
-    document.getElementById('camera-stream').style.display = 'block';
-    document.getElementById('no-camera-message').style.display = 'none';
-    canvas.width  = video.videoWidth;
-    canvas.height = video.videoHeight;
+
+    if (
+        !video ||
+        !video.videoWidth
+    ) {
+        setTimeout(
+            startScanning,
+            300
+        );
+        return;
+    }
+
     scanner_running = true;
-    updateScannerStatus('Camera ready — scanning…', 'idle');
+
+    document.getElementById(
+        'camera-controls'
+    ).style.display =
+        'none';
+
+    document.getElementById(
+        'video-container'
+    ).style.display =
+        'block';
+
+    canvas.width =
+        video.videoWidth;
+
+    canvas.height =
+        video.videoHeight;
+
+    updateScannerStatus(
+        'Camera ready — scanning...',
+        'idle'
+    );
+
     scanQRCode();
 }
 
-function handleCameraError(error) {
-    let msg = 'Camera not available.', hint = 'Use manual token input below.';
-    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        msg  = isIOS() ? 'Camera Permission Denied' : 'Permission Denied';
-        hint = isIOS() ? 'Settings → Privacy → Camera → enable Safari.' : 'Allow camera access in browser settings.';
-    } else if (error.name === 'NotFoundError')    { msg = 'No camera found on this device.'; }
-    else if (error.name === 'NotReadableError')   { msg = 'Camera in use by another app.'; hint = 'Close other apps and try again.'; }
-    else if (error.name === 'SecurityError')      { msg = 'HTTPS required for camera access.'; }
-
-    document.getElementById('video-container').style.display = 'block';
-    document.getElementById('camera-controls').style.display = 'block';
-    document.getElementById('camera-stream').style.display = 'none';
-    const noCam = document.getElementById('no-camera-message');
-    noCam.style.display = 'flex';
-    noCam.innerHTML = `<div style="text-align:center;"><i class="fa fa-camera-slash" style="font-size:40px;margin-bottom:10px;display:block;opacity:.5;"></i><p class="mb-0 fw-semibold small">${msg}</p><p class="small opacity-50">${hint}</p></div>`;
-    const btn = document.getElementById('start-camera-btn');
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa fa-camera me-2"></i>Start Camera';
-    updateScannerStatus(msg, 'danger');
-}
-
 function scanQRCode() {
-    if (!scanner_running) return;
-    if (video.readyState !== video.HAVE_ENOUGH_DATA) { scanFrameId = requestAnimationFrame(scanQRCode); return; }
+
+    if (
+        !scanner_running
+    ) return;
+
+    if (
+        video.readyState <
+        2
+    ) {
+
+        scanFrameId =
+            requestAnimationFrame(
+                scanQRCode
+            );
+
+        return;
+    }
+
     try {
-        if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+
+        ctx.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        const image =
+            ctx.getImageData(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+        const code =
+            jsQR(
+                image.data,
+                canvas.width,
+                canvas.height
+            );
+
+        if (
+            code &&
+            code.data
+        ) {
+            handleQRCode(
+                code.data
+            );
+            return;
         }
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-        if (code) { handleQRCode(code.data); return; }
+
     } catch {}
-    scanFrameId = requestAnimationFrame(scanQRCode);
+
+    scanFrameId =
+        requestAnimationFrame(
+            scanQRCode
+        );
 }
 
-function handleQRCode(qrData) {
-    scanner_running = false;
-    if (scanFrameId) cancelAnimationFrame(scanFrameId);
-    try {
-        const url = new URL(qrData);
-        const token = url.searchParams.get('token');
-        if (token) { submitAttendance(token); }
-        else if (qrData.length === 20) { submitAttendance(qrData); }
-        else { updateScannerStatus('Invalid QR code format', 'danger'); resumeScanning(); }
-    } catch {
-        if (qrData?.length > 0) { submitAttendance(qrData); }
-        else { updateScannerStatus('Invalid QR code', 'danger'); resumeScanning(); }
-    }
+
+function handleQRCode(data) {
+
+    scanner_running =
+        false;
+
+    cancelAnimationFrame(
+        scanFrameId
+    );
+
+    submitAttendance(
+        data
+    );
 }
 
 async function submitAttendance(token) {
     try {
-        updateScannerStatus('Submitting attendance…', 'idle');
-        const response = await fetch("{{ route('hr.qr.submit') }}", {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ token })
-        });
-        const data = await response.json();
+
+        updateScannerStatus(
+            'Submitting attendance…',
+            'idle'
+        );
+
+        const response = await fetch(
+            "{{ route('hr.qr.submit') }}",
+            {
+                method: 'POST',
+
+                headers: {
+                    'X-CSRF-TOKEN':
+                        '{{ csrf_token() }}',
+
+                    'Content-Type':
+                        'application/json',
+
+                    'Accept':
+                        'application/json'
+                },
+
+                body: JSON.stringify({
+                    token
+                })
+            }
+        );
+
+        const data =
+            await response.json();
+
         if (response.ok) {
-            const logType = data.message.toLowerCase().includes('time in') ? 'time_in' : 'time_out';
-            showResult(data.message, 'success');
-            updateScannerStatus('Attendance recorded!', 'success');
-            displayLastLog({ type: logType, time: new Date().toLocaleTimeString() });
-            setTimeout(async () => { await fetchLastLog(); resumeScanning(); }, 3000);
+
+            const logType =
+                data.message
+                    .toLowerCase()
+                    .includes('time in')
+                    ? 'time_in'
+                    : 'time_out';
+
+            showResult(
+                data.message,
+                'success'
+            );
+
+            updateScannerStatus(
+                'Attendance recorded!',
+                'success'
+            );
+
+            displayLastLog({
+                type: logType,
+                time:
+                    new Date()
+                    .toLocaleTimeString()
+            });
+
+            setTimeout(
+                async () => {
+
+                    // Hide result message
+                    const result =
+                        document.getElementById(
+                            'scan-result'
+                        );
+
+                    result.style.display =
+                        'none';
+
+                    // Reset scanner status
+                    updateScannerStatus(
+                        'Camera ready — scanning…',
+                        'idle'
+                    );
+
+                    await fetchLastLog();
+
+                    resumeScanning();
+
+                },
+                3000
+            );
+
         } else {
-            showResult(data.message || 'Failed to record attendance', 'danger');
-            updateScannerStatus('Scan failed — try again', 'danger');
-            resumeScanning();
+
+            showResult(
+                data.message ||
+                'Failed to record attendance',
+                'danger'
+            );
+
+            updateScannerStatus(
+                'Scan failed — try again',
+                'danger'
+            );
+
+            setTimeout(
+                () => {
+
+                    updateScannerStatus(
+                        'Camera ready — scanning…',
+                        'idle'
+                    );
+
+                    resumeScanning();
+
+                },
+                3000
+            );
         }
+
     } catch {
-        showResult('Network error. Check your connection.', 'danger');
-        updateScannerStatus('Error — try again', 'danger');
-        resumeScanning();
+
+        showResult(
+            'Network error. Check connection.',
+            'danger'
+        );
+
+        updateScannerStatus(
+            'Error — try again',
+            'danger'
+        );
+
+        setTimeout(
+            () => {
+
+                updateScannerStatus(
+                    'Camera ready — scanning…',
+                    'idle'
+                );
+
+                resumeScanning();
+
+            },
+            3000
+        );
     }
 }
 
 function resumeScanning() {
-    scanner_running = true;
-    updateScannerStatus('Camera ready — scanning…', 'idle');
+
+    scanner_running =
+        true;
+
     scanQRCode();
 }
 
-function updateScannerStatus(message, type) {
-    const el = document.getElementById('scanner-status');
-    el.className = 'scan-status scan-status-' + (type || 'idle') + ' mb-3';
-    document.getElementById('status-text').textContent = message;
+
+function updateScannerStatus(
+    text,
+    type
+) {
+
+    const el =
+        document.getElementById(
+            'scanner-status'
+        );
+
+    el.className =
+        'scan-status scan-status-' +
+        type;
+
+    document.getElementById(
+        'status-text'
+    ).textContent =
+        text;
 }
 
-function showResult(message, type) {
-    const el = document.getElementById('scan-result');
-    el.className = 'scan-status scan-status-' + type + ' mb-3';
-    el.style.display = 'block';
-    el.innerHTML = `<i class="fa fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i><strong>${message}</strong>`;
-    if (type === 'danger') setTimeout(() => { el.style.display = 'none'; }, 5000);
+
+function showResult(
+    message,
+    type
+) {
+
+    const el =
+        document.getElementById(
+            'scan-result'
+        );
+
+    clearTimeout(
+        el.hideTimer
+    );
+
+    el.className =
+        'scan-status scan-status-' +
+        type +
+        ' w-100 mb-3';
+
+    el.style.display =
+        'flex';
+
+    el.innerHTML = `
+        <i class="fa fa-${
+            type === 'success'
+                ? 'check-circle'
+                : 'exclamation-circle'
+        } me-2"></i>
+
+        <strong>
+            ${message}
+        </strong>
+    `;
+
+    // Auto hide result
+    el.hideTimer =
+        setTimeout(
+            () => {
+
+                el.style.display =
+                    'none';
+
+                if (
+                    scanner_running
+                ) {
+
+                    updateScannerStatus(
+                        'Camera ready — scanning…',
+                        'idle'
+                    );
+
+                }
+
+            },
+            3000
+        );
 }
 
-document.getElementById('manual-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const input = document.getElementById('manual-token');
-    const token = input.value.trim().toUpperCase();
-    if (!token) { showResult('Please enter a token', 'danger'); return; }
-    if (token.length !== 8) { showResult('Token must be 8 characters', 'danger'); return; }
-    input.value = '';
-    scanner_running = false;
-    if (scanFrameId) cancelAnimationFrame(scanFrameId);
-    await submitAttendance(token);
-});
 
-window.addEventListener('beforeunload', function() {
-    scanner_running = false;
-    if (scanFrameId) cancelAnimationFrame(scanFrameId);
-    if (video?.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
-});
+function handleCameraError(
+    error
+) {
+
+    console.log(error);
+
+    updateScannerStatus(
+        error.message ||
+        'Camera unavailable',
+        'danger'
+    );
+
+    document.getElementById(
+        'start-camera-btn'
+    ).disabled =
+        false;
+
+    document.getElementById(
+        'start-camera-btn'
+    ).innerHTML =
+        '<i class="fa fa-camera me-2"></i>Start Camera';
+}
+
+
+
+document
+.getElementById(
+    'manual-form'
+)
+.addEventListener(
+    'submit',
+    async function (
+        e
+    ) {
+
+        e.preventDefault();
+
+        const input =
+            document.getElementById(
+                'manual-token'
+            );
+
+        const token =
+            input.value
+                .trim();
+
+        if (
+            token.length !==
+            8
+        ) {
+            showResult(
+                'Token must be 8 characters',
+                'danger'
+            );
+            return;
+        }
+
+        input.value =
+            '';
+
+        await submitAttendance(
+            token
+        );
+
+    }
+);
+
+window.addEventListener(
+    'beforeunload',
+    () => {
+
+        scanner_running =
+            false;
+
+        if (
+            scanFrameId
+        ) {
+            cancelAnimationFrame(
+                scanFrameId
+            );
+        }
+
+        if (
+            video?.srcObject
+        ) {
+
+            video.srcObject
+                .getTracks()
+                .forEach(
+                    t =>
+                        t.stop()
+                );
+        }
+    }
+);
+
 </script>
 
 @endsection

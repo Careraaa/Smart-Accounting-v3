@@ -172,21 +172,6 @@
         </div>
     </div>
 
-    <div class="prl-stats">
-        <div class="prl-stat s-green">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg></div>
-            <div><div class="prl-stat-label">Total Cash Advances</div><div class="prl-stat-value">{{ $totalCashAdvances ?? 0 }}</div><div class="prl-stat-sub">Pending & approved</div></div>
-        </div>
-        <div class="prl-stat s-green">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
-            <div><div class="prl-stat-label">Total Salary Loans</div><div class="prl-stat-value">{{ $totalSalaryLoans ?? 0 }}</div><div class="prl-stat-sub">Active & pending</div></div>
-        </div>
-        <div class="prl-stat s-orange">
-            <div class="prl-stat-icon"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-            <div><div class="prl-stat-label">Outstanding</div><div class="prl-stat-value">{{ $outstandingAmount ?? '₱0' }}</div><div class="prl-stat-sub">Total receivables</div></div>
-        </div>
-    </div>
-
     {{-- ── Tab bar ── --}}
     <div class="prl-tabs">
         <a href="{{ route('payroll.receivables.index') }}?tab=cash_advances"
@@ -268,15 +253,9 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($advance->amount, 2) }}</span></td>
+                        <td class="text-start"><span class="prl-mono c-bold">₱{{ number_format($advance->amount, 2) }}</span></td>
                         <td><span style="font-size:.82rem;color:#374151;">{{ $advance->request_date ? \Carbon\Carbon::parse($advance->request_date)->format('M d, Y') : '—' }}</span></td>
                         <td class="text-center"><span class="prl-status {{ $statusCls }}">{{ ucfirst($advance->status) }}</span></td>
-                        <td>
-                            <span style="font-size:.82rem;color:#374151;">{{ optional($advance->approver)->name ?? '—' }}</span>
-                            @if($advance->approved_at)
-                                <div style="font-size:.72rem;color:#9ca3af;">{{ \Carbon\Carbon::parse($advance->approved_at)->format('M d, Y') }}</div>
-                            @endif
-                        </td>
                         <td>
                             <span style="font-size:.82rem;color:#374151;">
                                 @if($advance->deductedPayroll)
