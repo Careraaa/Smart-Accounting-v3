@@ -64,6 +64,7 @@
 .sd-name-icon.pagibig{background:#f0fdf4;color:#16a34a}
 .sd-name-icon.sss{background:#f0f9ff;color:#0284c7}
 .sd-name-icon.phil{background:#fff0f0;color:#c8292a}
+.sd-name-icon.withholding{background:#fef3c7;color:#ea580c}
 .sd-name-text{font-weight:600;color:#111827;font-size:0.835rem}
 
 .sd-mono{font-family:'DM Mono',monospace;font-size:0.80rem;font-variant-numeric:tabular-nums;color:#374151}
@@ -103,22 +104,32 @@
 @php
     $grouped = $deductions->groupBy('name');
     $counts  = $grouped->map->count();
+    $wtGrouped = $taxes->groupBy('description');
+    $wtCounts = $wtGrouped->map->count();
 
-    function sdIcon(string $name): string {
+    $pagibigMax = $deductions->where('name','Pag-IBIG')->max('percentage_employee');
+    $sssMax     = $deductions->where('name','SSS')->max('employee_share');
+    $philMax    = $deductions->where('name','PhilHealth')->max('percentage_employee');
+    $wtMax      = $taxes->max('employee_share');
+
+    function sdIcon(string $name, bool $isWT = false): string {
+        if ($isWT) return 'withholding';
         return match(true) {
             str_contains($name,'Pag')  => 'pagibig',
             str_contains($name,'SSS')  => 'sss',
             default                    => 'phil',
         };
     }
-    function sdAbbr(string $name): string {
+    function sdAbbr(string $name, bool $isWT = false): string {
+        if ($isWT) return 'WT';
         return match(true) {
             str_contains($name,'Pag') => 'P',
             str_contains($name,'SSS') => 'S',
             default                   => 'PH',
         };
     }
-    function sdSwatch(string $name): string {
+    function sdSwatch(string $name, bool $isWT = false): string {
+        if ($isWT) return '#ea580c';
         return match(true) {
             str_contains($name,'Pag') => '#16a34a',
             str_contains($name,'SSS') => '#0284c7',
@@ -150,13 +161,18 @@
                 <span class="sd-ref-dot" style="background:#c8292a"></span>PhilHealth Table
                 <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
             </a>
+            <a href="https://www.bir.gov.ph/WithHoldingTax" target="_blank" class="sd-ref-link">
+                <span class="sd-ref-dot" style="background:#ea580c"></span>BIR Withholding Tax
+                <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
         </div>
     </div>
 
-    @php
+    <!-- @php
         $pagibigMax = $deductions->where('name','Pag-IBIG')->max('percentage_employee');
         $sssMax     = $deductions->where('name','SSS')->max('employee_share');
         $philMax    = $deductions->where('name','PhilHealth')->max('percentage_employee');
+        $wtMax      = $taxes->max('employee_share');
     @endphp
     <div class="sd-stats">
         <div class="sd-stat s-green">
@@ -189,7 +205,18 @@
                 <div class="sd-stat-sub">ee share · 5% total premium</div>
             </div>
         </div>
-    </div>
+        <div class="sd-stat" style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px;display:flex;align-items:flex-start;gap:12px;position:relative;overflow:hidden;transition:box-shadow 0.15s;">
+            <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:#ea580c;border-radius:0 0 14px 14px"></div>
+            <div style="width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#fef3c7;color:#ea580c">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div>
+                <div style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px">Withholding Tax (BIR)</div>
+                <div style="font-size:1.5rem;font-weight:800;color:#111827;line-height:1;font-family:'DM Mono',monospace">₱{{ number_format($wtMax ?? 0, 2) }}</div>
+                <div style="font-size:0.72rem;color:#9ca3af;margin-top:3px">max base · {{ $wtGrouped->count() }} {{ Str::plural('frequency', $wtGrouped->count()) }}</div>
+            </div>
+        </div>
+    </div> -->
 
     <div class="sd-layout">
         <div>
@@ -206,6 +233,7 @@
                     @foreach($grouped->keys() as $gname)
                         <option value="{{ $gname }}">{{ $gname }}</option>
                     @endforeach
+                    <option value="Withholding Tax">Withholding Tax</option>
                 </select>
             </div>
 
@@ -301,6 +329,64 @@
                             </tr>
                             @endforeach
                         @endforeach
+                        
+                        {{-- Withholding Tax Brackets --}}
+                        @foreach($wtGrouped as $frequency => $wtRows)
+                            @php
+                                $wtIcon = sdIcon($frequency, true);
+                                $wtAbbr = sdAbbr($frequency, true);
+                                $wtSwatch = sdSwatch($frequency, true);
+                            @endphp
+                            <tr class="sd-group-sep" data-group="Withholding Tax ({{ $frequency }})">
+                                <td colspan="4">
+                                    <div class="sd-group-label">
+                                        <span class="sd-group-label-swatch" style="background:{{ $wtSwatch }}"></span>
+                                        <span class="sd-group-label-text">Withholding Tax ({{ $frequency }})</span>
+                                        <span class="sd-group-count">{{ $wtRows->count() }} {{ Str::plural('bracket', $wtRows->count()) }}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @foreach($wtRows as $wt)
+                            @php
+                                $wtIsMaxed = $wt->max_salary >= 999999;
+                            @endphp
+                            <tr data-type="Withholding Tax">
+                                <td>
+                                    <div class="sd-name-cell">
+                                        <div class="sd-name-icon {{ $wtIcon }}">{{ $wtAbbr }}</div>
+                                        <div class="sd-name-text">Withholding Tax</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="sd-range">
+                                        <span class="sd-mono">₱{{ number_format($wt->min_salary, 2) }}</span>
+                                        <span class="sd-range-sep">{{ $wtIsMaxed ? '+' : '–' }}</span>
+                                        @unless($wtIsMaxed)
+                                            <span class="sd-mono">₱{{ number_format($wt->max_salary, 2) }}</span>
+                                        @endunless
+                                    </div>
+                                </td>
+                                {{-- Employee share (Tax Amount) --}}
+                                <td>
+                                    <div class="sd-val-cell">
+                                        @if($wt->employee_share)
+                                            <span class="sd-mono">₱{{ number_format($wt->employee_share, 2) }}</span>
+                                        @endif
+                                        @if($wt->percentage_employee)
+                                            <span class="sd-pct-pill emp">{{ $wt->percentage_employee }}% + base</span>
+                                        @endif
+                                        @if(!$wt->employee_share && !$wt->percentage_employee)
+                                            <span class="sd-mono null">—</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                {{-- Employer share (N/A for withholding tax) --}}
+                                <td>
+                                    <span class="sd-mono null">—</span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -330,9 +416,13 @@
                     <div class="sd-legend-dot" style="background:#16a34a"></div>
                     <div><div class="sd-legend-label">Pag-IBIG (HDMF)</div><div class="sd-legend-sub">% of salary · capped at ₱100/mo ee share</div></div>
                 </div>
-                <div class="sd-legend-item" style="border-bottom:none">
+                <div class="sd-legend-item">
                     <div class="sd-legend-dot" style="background:#c8292a"></div>
                     <div><div class="sd-legend-label">PhilHealth (PHIL)</div><div class="sd-legend-sub">Mixed — fixed floor/ceiling, % in between · 5% total split equally</div></div>
+                </div>
+                <div class="sd-legend-item" style="border-bottom:none">
+                    <div class="sd-legend-dot" style="background:#ea580c"></div>
+                    <div><div class="sd-legend-label">Withholding Tax (BIR)</div><div class="sd-legend-sub">{{ $wtCounts->sum() ?? 0 }} brackets · 4 frequencies (Daily, Weekly, Semi-mo, Monthly)</div></div>
                 </div>
             </div>
         </div>

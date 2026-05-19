@@ -20,6 +20,7 @@ use App\Http\Controllers\HR\PayrollController;
 use App\Http\Controllers\HR\PayrollHistoryController;
 use App\Http\Controllers\HR\PayrollReceivablesController;
 use App\Http\Controllers\HR\StatutoryDeductionController;
+use App\Http\Controllers\HR\WithholdingTaxController;
 use App\Http\Controllers\HR\LeaveController;
 use App\Http\Controllers\HR\LeaveTypeController;
 use App\Http\Controllers\HR\OvertimeUndertimeController;
@@ -356,6 +357,18 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
             Route::get('/{id}/edit', [StatutoryDeductionController::class, 'edit'])->name('edit');
             Route::put('/{id}', [StatutoryDeductionController::class, 'update'])->name('update');
             Route::delete('/{id}', [StatutoryDeductionController::class, 'destroy'])->name('destroy');
+
+            Route::prefix('withholding-taxes')
+                ->name('withholding-taxes.')
+                ->group(function () {
+                    Route::get('/', [WithholdingTaxController::class, 'index'])->name('index');
+                });
+        });
+
+    Route::prefix('payroll/withholding-taxes')
+        ->name('withholding-taxes.')
+        ->group(function () {
+            Route::get('/', [WithholdingTaxController::class, 'index'])->name('index');
         });
 
     Route::prefix('payroll/receivables')

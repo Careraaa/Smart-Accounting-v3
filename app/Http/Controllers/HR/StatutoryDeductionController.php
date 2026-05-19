@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\WithholdingTax;
 use Illuminate\Support\Facades\DB;
 
 class StatutoryDeductionController extends Controller
@@ -13,6 +14,7 @@ class StatutoryDeductionController extends Controller
     public function index()
     {
         $deductions = DB::table('statutory_deductions')->orderBy('name')->get();
-        return view('hr.payroll.statutory-deductions.index', compact('deductions'));
+        $taxes = WithholdingTax::orderBy('name')->get();
+        return view('hr.payroll.statutory-deductions.index', compact('deductions', 'taxes'));
     }
 }
