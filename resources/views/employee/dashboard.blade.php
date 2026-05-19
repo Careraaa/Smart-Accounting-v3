@@ -31,7 +31,7 @@
 /* ── Hero ── */
 .edb-hero {
     background: linear-gradient(135deg, #111827 0%, #0b1220 55%, #111827 100%);
-    border-radius: 18px; padding: 22px 24px; margin-bottom: 22px;
+    border-radius: 18px; padding: 22px 24px; margin-top: 24px; margin-bottom: 22px;
     display: flex; align-items: flex-start; justify-content: space-between;
     gap: 18px; flex-wrap: wrap; position: relative; overflow: hidden;
 }
@@ -290,7 +290,24 @@ window.addEventListener('load', async () => {
 
     try {
         const response = await fetch("{{ route('attendance.lastlog') }}", { headers: { 'Accept': 'application/json' } });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        // If not OK or redirected to login (HTML response), treat as no log
+        if (!response.ok) {
+            statusEl.innerHTML    = '<span class="edb-badge none">Not Logged</span>';
+            badgeStatEl.innerHTML = makeBadge(null);
+            badgeEl.innerHTML     = makeBadge(null);
+            return;
+        }
+
+        // Guard against HTML redirect responses (e.g. session expired → login page)
+        const contentType = response.headers.get('content-type') ?? '';
+        if (!contentType.includes('application/json')) {
+            statusEl.innerHTML    = '<span class="edb-badge none">Not Logged</span>';
+            badgeStatEl.innerHTML = makeBadge(null);
+            badgeEl.innerHTML     = makeBadge(null);
+            return;
+        }
+
         const data = await response.json();
 
         if (data && data.type) {
@@ -306,10 +323,10 @@ window.addEventListener('load', async () => {
             badgeEl.innerHTML     = makeBadge(null);
         }
     } catch (err) {
-        const errBadge = '<span class="edb-badge none">Error</span>';
-        statusEl.innerHTML    = errBadge;
-        badgeStatEl.innerHTML = errBadge;
-        badgeEl.innerHTML     = errBadge;
+        // Fallback: show no-log state rather than a confusing "Error" label
+        statusEl.innerHTML    = '<span class="edb-badge none">Not Logged</span>';
+        badgeStatEl.innerHTML = makeBadge(null);
+        badgeEl.innerHTML     = makeBadge(null);
     }
 });
 </script>

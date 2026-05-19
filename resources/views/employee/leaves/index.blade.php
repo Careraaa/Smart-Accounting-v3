@@ -151,13 +151,15 @@
                             <th>Leave Type</th>
                             <th>Duration</th>
                             <th>Status</th>
+                            @if($leaves->where('status', 'pending')->count())
                             <th class="text-end">Actions</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($leaves as $leave)
                             @php $pill = in_array($leave->status, ['pending','approved','rejected'], true) ? $leave->status : 'neutral'; @endphp
-                            <tr>
+                            <tr class="empui-clickable-row" style="cursor:pointer;" onclick="window.location='{{ route('employee.leaves.show', $leave) }}'">
                                 <td>
                                     <div class="fw-bold" style="color:#111827;font-size:.845rem;">{{ $leave->leaveType?->name ?? 'N/A' }}</div>
                                     <div class="empui-muted">Submitted {{ $leave->created_at?->diffForHumans() ?? '—' }}</div>
@@ -169,12 +171,9 @@
                                 <td>
                                     <span class="empui-pill {{ $pill }}">{{ ucfirst($leave->status) }}</span>
                                 </td>
-                                <td class="text-end">
+                                @if($leaves->where('status', 'pending')->count())
+                                <td class="text-end" onclick="event.stopPropagation()">
                                     <div style="display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;">
-                                        <a href="{{ route('employee.leaves.show', $leave) }}" class="empui-tbl-btn">
-                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                            View
-                                        </a>
                                         @if($leave->status === 'pending')
                                             <a href="{{ route('employee.leaves.edit', $leave) }}" class="empui-tbl-btn edit">
                                                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -190,6 +189,7 @@
                                         @endif
                                     </div>
                                 </td>
+                                @endif
                             </tr>
                         @empty
                             <tr>

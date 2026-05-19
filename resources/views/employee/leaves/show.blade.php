@@ -79,10 +79,15 @@
                                 <i class="feather-check-circle me-2"></i>
                                 <strong>Approved</strong> by {{ $leave->approvedBy->name }} on {{ $leave->updated_at->format('F d, Y') }}
                             </div>
-                        @elseif($leave->status === 'rejected' && $leave->approvedBy)
+                        @elseif($leave->status === 'rejected')
                             <div class="alert alert-danger mt-4 mb-0" role="alert">
                                 <i class="feather-x-circle me-2"></i>
-                                <strong>Rejected</strong> by {{ $leave->approvedBy->name }} on {{ $leave->updated_at->format('F d, Y') }}
+                                <strong>Rejected</strong>
+                                @if($leave->approvedBy) by {{ $leave->approvedBy->name }} on {{ $leave->updated_at->format('F d, Y') }}@endif
+                                @if($leave->rejection_reason)
+                                    <hr class="my-2" style="border-color:rgba(220,53,69,0.2);">
+                                    <div style="font-size:.85rem;"><strong>Reason:</strong> {{ $leave->rejection_reason }}</div>
+                                @endif
                             </div>
                         @endif
                     </div>

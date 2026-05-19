@@ -122,6 +122,8 @@
     .empui-table tbody td { padding: 12px 16px; vertical-align: middle; border-bottom: 1px solid #f3f4f6; }
     .empui-table tbody tr:last-child td { border-bottom: none; }
     .empui-table tbody tr:hover td { background: #fafafa; }
+    .empui-clickable-row:hover td { background: #f5f7ff !important; }
+    .empui-clickable-row:active td { background: #eef1fb !important; }
 
     /* ── Status pills ─────────────────────────────────────────── */
     .empui-pill {
