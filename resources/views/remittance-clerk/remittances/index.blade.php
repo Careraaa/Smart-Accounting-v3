@@ -88,7 +88,6 @@
                         <th>Vehicle</th>
                         <th class="text-end">Net Remittance</th>
                         <th class="text-center">Status</th>
-                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,25 +102,12 @@
                             </span>
                         </td>
                         <td class="text-center"><span class="prl-status s-pending">Pending</span></td>
-                        <td onclick="event.stopPropagation()">
-                            <div class="prl-actions">
-                                <a href="{{ route('remittances.edit', $remittance) }}" class="prl-action-btn edit" title="Edit">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    Edit
-                                </a>
-                                <button type="button" class="prl-action-btn danger" title="Delete"
-                                    onclick="openDeleteModal({{ $remittance->id }}, '{{ $remittance->remittance_date?->format('M d, Y') }}')">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    Delete
-                                </button>
-                                <form id="delete-form-{{ $remittance->id }}" action="{{ route('remittances.destroy', $remittance) }}" method="POST" style="display:none;">
-                                    @csrf @method('DELETE')
-                                </form>
-                            </div>
-                        </td>
+                        <form id="delete-form-{{ $remittance->id }}" action="{{ route('remittances.destroy', $remittance) }}" method="POST" style="display:none;">
+                            @csrf @method('DELETE')
+                        </form>
                     </tr>
                 @empty
-                    <tr><td colspan="6">
+                    <tr><td colspan="5">
                         <div class="prl-empty" style="padding:32px;">
                             <div class="prl-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
                             <p class="prl-empty-title">No pending remittances</p>
@@ -148,7 +134,6 @@
                         <th>Vehicle</th>
                         <th class="text-end">Net Remittance</th>
                         <th class="text-center">Status</th>
-                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -163,17 +148,9 @@
                             </span>
                         </td>
                         <td class="text-center"><span class="prl-status s-approved">Approved</span></td>
-                        <td onclick="event.stopPropagation()">
-                            <div class="prl-actions">
-                                <a href="{{ route('remittances.edit', $remittance) }}" class="prl-action-btn edit" title="Edit">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    Edit
-                                </a>
-                            </div>
-                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6">
+                    <tr><td colspan="5">
                         <div class="prl-empty" style="padding:32px;">
                             <div class="prl-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
                             <p class="prl-empty-title">No approved remittances</p>

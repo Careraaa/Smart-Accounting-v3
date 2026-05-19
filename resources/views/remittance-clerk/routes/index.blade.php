@@ -81,7 +81,6 @@
                         <th>Boundary</th>
                         <th class="text-center">Vehicles</th>
                         <th class="text-center">Active</th>
-                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="routeTbody">
@@ -101,25 +100,12 @@
                         </td>
                         <td class="text-center" style="font-family:'DM Mono',monospace;font-weight:700;">{{ $route->vehicles->count() }}</td>
                         <td class="text-center" style="font-family:'DM Mono',monospace;font-weight:700;color:#16a34a;">{{ $route->vehicles->where('status', 'active')->count() }}</td>
-                        <td onclick="event.stopPropagation()">
-                            <div class="prl-actions">
-                                <a href="{{ route('routes.edit', $route) }}" class="prl-action-btn edit" title="Edit">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    Edit
-                                </a>
-                                <button type="button" class="prl-action-btn danger" title="Delete"
-                                    onclick="openDeleteModal({{ $route->id }}, '{{ addslashes($route->route_name ?? ($route->origin . ' – ' . $route->destination)) }}')">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    Delete
-                                </button>
-                                <form id="delete-form-{{ $route->id }}" action="{{ route('routes.destroy', $route) }}" method="POST" style="display:none;">
-                                    @csrf @method('DELETE')
-                                </form>
-                            </div>
-                        </td>
+                        <form id="delete-form-{{ $route->id }}" action="{{ route('routes.destroy', $route) }}" method="POST" style="display:none;">
+                            @csrf @method('DELETE')
+                        </form>
                     </tr>
                 @empty
-                    <tr><td colspan="7">
+                    <tr><td colspan="6">
                         <div class="prl-empty">
                             <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg></div>
                             <p class="prl-empty-title">No routes found</p>

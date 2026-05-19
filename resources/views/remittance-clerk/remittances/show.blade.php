@@ -6,101 +6,122 @@
 
 @section('content')
 <div class="col-12">
-    <div class="remui-page">
+<div class="remui-page">
+<div class="rem-wrap">
 
-        <div class="prl-topbar">
-            <div>
-                <h1 class="prl-topbar-title">{{ $remittance->remittance_date?->format('F d, Y') ?? 'Remittance' }}</h1>
-                <p class="prl-topbar-sub">{{ $remittance->route->route_name ?? '—' }}</p>
-            </div>
-            <div class="prl-topbar-actions">
-                <a href="{{ route('remittances.edit', $remittance) }}" class="prl-btn-ghost">
-                    <i class="feather-edit-2"></i> Edit
-                </a>
-                <form action="{{ route('remittances.destroy', $remittance) }}" method="POST" class="d-inline"
-                    data-sa-confirm="Delete this remittance?">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="prl-action-btn danger">
-                        <i class="feather-trash-2"></i> Delete
-                    </button>
-                </form>
-                <a href="{{ route('remittances.index') }}" class="prl-btn-ghost">
-                    <i class="feather-arrow-left"></i> Back
-                </a>
-            </div>
+    @php
+        $rsc = match($remittance->status) { 'approved' => 's-approved', 'pending' => 's-pending', default => 's-rejected' };
+        $rlabel = ucfirst($remittance->status ?? 'pending');
+    @endphp
+
+    {{-- Hero --}}
+    <div class="rem-hero">
+        <div class="rem-hero-left">
+            <p class="rem-hero-sub">{{ $remittance->route->route_name ?? '—' }}</p>
+            <h1 class="rem-hero-title">{{ $remittance->remittance_date?->format('F d, Y') ?? 'Remittance' }}</h1>
         </div>
-
-        {{-- Remittance Details --}}
-        <div class="prl-detail-card mb-3">
-            <div class="prl-detail-head">
-                <h2 class="prl-detail-title">Remittance Details</h2>
-            </div>
-            <div class="prl-detail-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Remittance Date</span>
-                        <div class="prl-field-value">{{ $remittance->remittance_date?->format('F d, Y') ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Driver</span>
-                        <div class="prl-field-value">{{ $remittance->driver->name ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">PAO</span>
-                        <div class="prl-field-value">{{ $remittance->pao->name ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Vehicle</span>
-                        <div class="prl-field-value">{{ $remittance->vehicle->plate_number ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Route</span>
-                        <div class="prl-field-value">{{ $remittance->route->route_name ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Status</span>
-                        <div class="mt-1">
-                            @if ($remittance->status === 'approved')
-                                <span class="prl-status s-active">Approved</span>
-                            @elseif ($remittance->status === 'pending')
-                                <span class="prl-status s-pending">Pending</span>
-                            @else
-                                <span class="prl-status s-inactive">Rejected</span>
-                            @endif
-                        </div>
-                    </div>
+        <div class="rem-hero-right">
+            <span class="prl-status {{ $rsc }}">{{ $rlabel }}</span>
+            <div class="rem-hero-chips">
+                <div class="rem-hero-chip">
+                    <span class="rem-hero-chip-lbl">Vehicle</span>
+                    <span class="rem-hero-chip-val">{{ $remittance->vehicle->plate_number ?? '—' }}</span>
+                </div>
+                <div class="rem-hero-chip">
+                    <span class="rem-hero-chip-lbl">Driver</span>
+                    <span class="rem-hero-chip-val" style="font-family:'Sora',sans-serif;font-size:0.82rem;">{{ $remittance->driver->name ?? '—' }}</span>
+                </div>
+                <div class="rem-hero-chip">
+                    <span class="rem-hero-chip-lbl">PAO</span>
+                    <span class="rem-hero-chip-val" style="font-family:'Sora',sans-serif;font-size:0.82rem;">{{ $remittance->pao->name ?? '—' }}</span>
                 </div>
             </div>
         </div>
-
-        {{-- Financial Summary --}}
-        <div class="prl-detail-card mb-3">
-            <div class="prl-detail-head">
-                <h2 class="prl-detail-title">Financial Summary</h2>
-            </div>
-            <div class="prl-detail-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Total Collection</span>
-                        <div style="font-size: 1rem; font-weight: 700; color: #16a34a;">₱{{ number_format($remittance->total_collection, 2) }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Total Expenses</span>
-                        <div style="font-size: 1rem; font-weight: 700; color: #e11d48;">₱{{ number_format($remittance->total_expenses, 2) }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Net Remittance</span>
-                        <div style="font-size: 1rem; font-weight: 700; color: #1c1c1e;">₱{{ number_format($remittance->net_remittance, 2) }}</div>
-                    </div>
-                </div>
-
-                <div class="prl-net-box mt-2">
-                    <span class="prl-net-label">Net Remittance</span>
-                    <span class="prl-net-value">₱{{ number_format($remittance->net_remittance, 2) }}</span>
-                </div>
-            </div>
-        </div>
-
     </div>
-</div>
+
+    {{-- Remittance Details Card --}}
+    <div class="rem-card">
+        <div class="rem-card-head">
+            <div class="rem-card-icon blue">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <span class="rem-card-title">Remittance Details</span>
+        </div>
+        <div class="rem-card-body">
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Date</span>
+                <span class="rem-brow-val">{{ $remittance->remittance_date?->format('F d, Y') ?? '—' }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Driver</span>
+                <span class="rem-brow-val" style="font-family:'Sora',sans-serif;">{{ $remittance->driver->name ?? '—' }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">PAO</span>
+                <span class="rem-brow-val" style="font-family:'Sora',sans-serif;">{{ $remittance->pao->name ?? '—' }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Vehicle</span>
+                <span class="rem-brow-val">{{ $remittance->vehicle->plate_number ?? '—' }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Route</span>
+                <span class="rem-brow-val" style="font-family:'Sora',sans-serif;">{{ $remittance->route->route_name ?? '—' }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Status</span>
+                <span class="rem-brow-val"><span class="prl-status {{ $rsc }}">{{ $rlabel }}</span></span>
+            </div>
+        </div>
+    </div>
+
+    {{-- Financial Summary Card --}}
+    <div class="rem-card">
+        <div class="rem-card-head">
+            <div class="rem-card-icon green">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <span class="rem-card-title">Financial Summary</span>
+        </div>
+        <div class="rem-card-body">
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Total Collection</span>
+                <span class="rem-brow-val green">₱{{ number_format($remittance->total_collection, 2) }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Total Expenses</span>
+                <span class="rem-brow-val red">₱{{ number_format($remittance->total_expenses, 2) }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Net Remittance</span>
+                <span class="rem-brow-val">₱{{ number_format($remittance->net_remittance, 2) }}</span>
+            </div>
+        </div>
+    </div>
+
+    {{-- Net Box --}}
+    <div class="rem-net">
+        <span class="rem-net-lbl">Net Remittance</span>
+        <span class="rem-net-val">₱{{ number_format($remittance->net_remittance, 2) }}</span>
+    </div>
+
+    {{-- Footer --}}
+    <div class="rem-footer">
+        <a href="{{ route('remittances.edit', $remittance) }}" class="rem-btn-edit">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            Edit Remittance
+        </a>
+        <form action="{{ route('remittances.destroy', $remittance) }}" method="POST" class="d-inline"
+            data-sa-confirm="Delete this remittance?">
+            @csrf @method('DELETE')
+            <button type="submit" class="rem-btn-delete">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Delete
+            </button>
+        </form>
+    </div>
+
+</div>{{-- rem-wrap --}}
+</div>{{-- remui-page --}}
+</div>{{-- col-12 --}}
 @endsection

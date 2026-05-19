@@ -91,7 +91,6 @@
                         </th>
                         <th>Contact</th>
                         <th class="text-center">Status</th>
-                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="paoTbody">
@@ -104,25 +103,12 @@
                         <td><strong>{{ $pao->name }}</strong></td>
                         <td class="prl-mono muted">{{ $pao->contact_number }}</td>
                         <td class="text-center"><span class="prl-status {{ $sc }}">{{ ucfirst($pao->status) }}</span></td>
-                        <td onclick="event.stopPropagation()">
-                            <div class="prl-actions">
-                                <a href="{{ route('paos.edit', $pao) }}" class="prl-action-btn edit" title="Edit">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    Edit
-                                </a>
-                                <button type="button" class="prl-action-btn danger" title="Delete"
-                                    onclick="openDeleteModal({{ $pao->id }}, '{{ addslashes($pao->name) }}')">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    Delete
-                                </button>
-                                <form id="delete-form-{{ $pao->id }}" action="{{ route('paos.destroy', $pao) }}" method="POST" style="display:none;">
-                                    @csrf @method('DELETE')
-                                </form>
-                            </div>
-                        </td>
+                        <form id="delete-form-{{ $pao->id }}" action="{{ route('paos.destroy', $pao) }}" method="POST" style="display:none;">
+                            @csrf @method('DELETE')
+                        </form>
                     </tr>
                 @empty
-                    <tr><td colspan="4">
+                    <tr><td colspan="3">
                         <div class="prl-empty">
                             <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
                             <p class="prl-empty-title">No PAOs found</p>
