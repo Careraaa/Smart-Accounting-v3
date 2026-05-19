@@ -139,11 +139,6 @@
         @endif
     @endforeach
 
-    <button type="button" onclick="history.back()" class="prl-back-link">
-        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        Back
-    </button>
-
     {{-- Batch hero --}}
     <div class="prl-batch-hero">
         <div class="prl-hero-left">
@@ -200,11 +195,7 @@
                     Delete Batch
                 </button>
             @elseif($batch->status === 'submitted')
-                {{-- Submitted: back link + delete --}}
-                <button type="button" onclick="history.back()" class="prl-btn-sec">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                    Back
-                </button>
+                {{-- Submitted: delete only --}}
                 <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST" id="deleteBatchForm">
                     @csrf @method('DELETE')
                 </form>
@@ -277,36 +268,49 @@
     {{-- Add employee panel (draft only) --}}
     @if($batch->isEditable())
     <div class="prl-add-emp-card">
-        <div style="font-size:.78rem;color:#6b7280;font-weight:700;width:100%;">Add employee to this batch</div>
-        <form action="{{ route('payroll.batch.add-employee', $batch) }}" method="POST" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            @csrf
-            <select name="user_id" required>
-                <option value="">Select employee...</option>
-                @foreach($availableEmployees as $emp)
-                    <option value="{{ $emp->id }}">{{ $emp->first_name }} {{ $emp->last_name }}{{ $emp->position ? ' — '.$emp->position : '' }}</option>
-                @endforeach
-            </select>
-            <button type="submit" class="prl-add-emp-btn">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                Add Employee
-            </button>
-        </form>
-        <div style="width:100%;height:1px;background:#f3f4f6;margin:4px 0;"></div>
-        <div style="font-size:.78rem;color:#6b7280;font-weight:700;width:100%;">Add all employees by department</div>
-        <form action="{{ route('payroll.batch.add-department', $batch) }}" method="POST" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            @csrf
-            <select name="department" required class="prl-bulk-dept-select">
-                <option value="">Select department...</option>
-                <option value="Admin">Admin</option>
-                <option value="Operation">Operation</option>
-            </select>
-            <button type="submit" class="prl-bulk-dept-btn">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Add Department
-            </button>
-        </form>
+        <div style="display:flex;gap:16px;width:100%;flex-wrap:wrap;align-items:flex-end;">
+
+            {{-- Add individual employee --}}
+            <div style="flex:1;min-width:220px;">
+                <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;">Add Employee</div>
+                <form action="{{ route('payroll.batch.add-employee', $batch) }}" method="POST" style="display:flex;gap:8px;align-items:center;">
+                    @csrf
+                    <select name="user_id" required style="flex:1;min-width:0;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:.82rem;color:#374151;background:#f9fafb;">
+                        <option value="">Select employee...</option>
+                        @foreach($availableEmployees as $emp)
+                            <option value="{{ $emp->id }}">{{ $emp->first_name }} {{ $emp->last_name }}{{ $emp->position ? ' — '.$emp->position : '' }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="prl-add-emp-btn" style="flex-shrink:0;">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        Add
+                    </button>
+                </form>
+            </div>
+
+            {{-- Vertical divider --}}
+            <div style="width:1px;background:#e5e7eb;align-self:stretch;flex-shrink:0;"></div>
+
+            {{-- Add by department --}}
+            <div style="flex:1;min-width:220px;">
+                <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;">Add by Department</div>
+                <form action="{{ route('payroll.batch.add-department', $batch) }}" method="POST" style="display:flex;gap:8px;align-items:center;">
+                    @csrf
+                    <select name="department" required class="prl-bulk-dept-select" style="flex:1;min-width:0;">
+                        <option value="">Select department...</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Operation">Operation</option>
+                    </select>
+                    <button type="submit" class="prl-bulk-dept-btn" style="flex-shrink:0;">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Add
+                    </button>
+                </form>
+            </div>
+
+        </div>
         @if($availableEmployees->isEmpty())
-            <span style="font-size:.75rem;color:#9ca3af;">All eligible employees already have payroll for this period.</span>
+            <span style="font-size:.75rem;color:#9ca3af;margin-top:6px;display:block;">All eligible employees already have payroll for this period.</span>
         @endif
     </div>
     @endif
