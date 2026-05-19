@@ -1,11 +1,11 @@
-﻿@extends('layouts.layout')
+@extends('layouts.layout')
 
 @push('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 .hrd { font-family: 'Sora', sans-serif; }
 
-/* ── Knight mascot inside hero ── */
+/* -- Knight mascot inside hero -- */
 .hrd-hero-knight {
     position: absolute;
     left: 50%;
@@ -28,7 +28,7 @@
     100% { transform: translate(-50%, -50%) translateY(0)    rotate(0deg);    opacity: 0.12; }
 }
 
-/* ── Hero ── */
+/* -- Hero -- */
 .hrd-hero {
     background: linear-gradient(135deg, #111827 0%, #0b1220 55%, #111827 100%);
     border-radius: 18px; padding: 22px 24px; margin-bottom: 22px;
@@ -47,7 +47,7 @@
 .hrd-btn-sec { display:inline-flex; align-items:center; gap:7px; padding:9px 14px; background:rgba(255,255,255,0.06); color:#e5e7eb; border:1px solid rgba(255,255,255,0.14); border-radius:10px; font-size:.82rem; font-weight:700; text-decoration:none; transition:background .15s,border-color .15s; }
 .hrd-btn-sec:hover { background:rgba(255,255,255,0.10); border-color:rgba(255,255,255,0.22); color:#fff; }
 
-/* ── KPI cards ── */
+/* -- KPI cards -- */
 .hrd-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:22px; }
 @media(max-width:900px) { .hrd-kpis { grid-template-columns:1fr; } }
 .hrd-kpi { border:1px solid #e8e8ef; border-radius:14px; padding:16px 18px; background:#fff; }
@@ -55,7 +55,7 @@
 .hrd-kpi-main { font-size:1.2rem; font-weight:800; color:#111827; font-family:'DM Mono',monospace; letter-spacing:-.02em; }
 .hrd-kpi-note { font-size:.78rem; color:#6b7280; margin-top:8px; line-height:1.45; }
 
-/* ── Chart panels ── */
+/* -- Chart panels -- */
 .hrd-charts  { display:grid; grid-template-columns:1.55fr 1fr; gap:14px; margin-bottom:14px; }
 .hrd-charts2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:28px; }
 @media(max-width:1100px) { .hrd-charts  { grid-template-columns:1fr; } }
@@ -68,7 +68,22 @@
 .hrd-panel-bd { padding:8px 12px 4px; }
 .hrd-chart { min-height:260px; }
 
-/* ── Feed ── */
+/* -- Attendance trend -- */
+.hrd-trend-chart { min-height: 280px; }
+#hrd-chart-attendance .apexcharts-canvas,
+#hrd-chart-attendance .apexcharts-svg {
+    width: 100% !important;
+}
+/* Force visible connector lines between markers (Apex sometimes omits stroke when fill is used) */
+#hrd-chart-attendance .apexcharts-line-series .apexcharts-series path {
+    fill: none !important;
+    stroke-width: 4px !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    opacity: 1 !important;
+}
+
+/* -- Feed -- */
 .hrd-feed { margin:0; padding:0; list-style:none; }
 .hrd-feed li { border-top:1px solid #f3f4f6; }
 .hrd-feed li:first-child { border-top:none; }
@@ -177,10 +192,10 @@
             <div class="hrd-panel">
                 <div class="hrd-panel-hd">
                     <h2>Attendance trend</h2>
-                    <span>Daily counts · present / late / absent</span>
+                    <span>Daily counts · present / late</span>
                 </div>
                 <div class="hrd-panel-bd">
-                    <div id="hrd-chart-attendance" class="hrd-chart"></div>
+                    <div id="hrd-chart-attendance" class="hrd-trend-chart"></div>
                 </div>
             </div>
             <div class="hrd-panel">
@@ -269,37 +284,100 @@
 @push('scripts')
 <script>
 (function () {
-    if (typeof ApexCharts === 'undefined') return;
+    function initHrdCharts() {
+        if (typeof ApexCharts === 'undefined') return;
 
-    const font = 'Sora, sans-serif';
-    const mono = "'DM Mono', monospace";
-    const red  = '#c8292a';
-    const ink  = '#111827';
-    const soft = '#cbd5e1';
+        const font = 'Sora, sans-serif';
+        const mono = "'DM Mono', monospace";
+        const red  = '#c8292a';
+        const ink  = '#111827';
 
-    const trend = @json($attendanceTrend);
-    const categories = trend.map(function (t) { return t.label || t.date_iso; });
+        const trend = @json($attendanceTrend);
+        const trendCategories = trend.map(function (t) { return t.label || t.date_iso || ''; });
+        const trendEl = document.querySelector('#hrd-chart-attendance');
+        if (trendEl && trend.length) {
+            const trendColors = ['#1d4ed8', '#ea580c'];
+            const trendChart = new ApexCharts(trendEl, {
+                chart: {
+                    type: 'line',
+                    height: 280,
+                    fontFamily: font,
+                    toolbar: { show: false },
+                    zoom: { enabled: false },
+                    animations: { enabled: true, speed: 450 },
+                    events: {
+                        mounted: function (ctx) { enforceTrendConnectors(ctx.el); },
+                        updated: function (ctx) { enforceTrendConnectors(ctx.el); },
+                    },
+                },
+                series: [
+                    { name: 'Present', data: trend.map(function (t) { return Number(t.present) || 0; }) },
+                    { name: 'Late', data: trend.map(function (t) { return Number(t.late) || 0; }) },
+                ],
+                colors: trendColors,
+                stroke: { show: true, width: 4, curve: 'straight', lineCap: 'round' },
+                fill: { opacity: 0 },
+                markers: {
+                    size: 6,
+                    strokeWidth: 2.5,
+                    strokeColors: '#fff',
+                    hover: { size: 8, strokeWidth: 3 },
+                },
+                dataLabels: { enabled: false },
+                xaxis: {
+                    categories: trendCategories,
+                    labels: { style: { colors: '#6b7280', fontSize: '11px' } },
+                    axisBorder: { show: true, color: '#e5e7eb' },
+                    axisTicks: { show: false },
+                },
+                yaxis: {
+                    min: 0,
+                    forceNiceScale: true,
+                    tickAmount: 5,
+                    labels: {
+                        style: { colors: '#6b7280', fontSize: '11px' },
+                        formatter: function (v) { return Math.round(v); },
+                    },
+                },
+                grid: {
+                    borderColor: '#e5e7eb',
+                    strokeDashArray: 4,
+                    padding: { top: 8, right: 16, bottom: 0, left: 12 },
+                },
+                legend: {
+                    show: true,
+                    position: 'bottom',
+                    horizontalAlign: 'center',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    labels: { colors: '#6b7280' },
+                },
+                tooltip: {
+                    theme: 'light',
+                    shared: true,
+                    intersect: false,
+                    y: { formatter: function (v) { return v + ' records'; } },
+                },
+            });
+            trendChart.render().then(function () { enforceTrendConnectors(trendEl); });
 
-    new ApexCharts(document.querySelector('#hrd-chart-attendance'), {
-        chart: { type: 'line', height: 280, fontFamily: font, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: true, speed: 400 }, parentHeightOffset: 0 },
-        series: [
-            { name: 'Present', data: trend.map(function (t) { return t.present; }) },
-            { name: 'Late',    data: trend.map(function (t) { return t.late; }) },
-            { name: 'Absent',  data: trend.map(function (t) { return t.absent; }) }
-        ],
-        colors: [red, ink, soft],
-        stroke: { width: 2, curve: 'straight' },
-        fill: { opacity: 0 },
-        markers: { size: 3, strokeWidth: 0, hover: { size: 5 } },
-        dataLabels: { enabled: false },
-        xaxis: { categories: categories, labels: { style: { colors: '#64748b', fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { style: { colors: '#64748b', fontSize: '11px' } }, min: 0, tickAmount: 4, forceNiceScale: true },
-        grid: { borderColor: '#f1f5f9', strokeDashArray: 4, xaxis: { lines: { show: false } }, yaxis: { lines: { show: true } }, padding: { top: 8, right: 12, bottom: 0, left: 8 } },
-        legend: { show: true, position: 'top', horizontalAlign: 'right', fontSize: '11px', fontWeight: 600, itemMargin: { horizontal: 12 } },
-        tooltip: { theme: 'light', style: { fontSize: '12px' }, y: { formatter: function (v) { return v + ' logs'; } } }
-    }).render();
+            function enforceTrendConnectors(root) {
+                if (!root) return;
+                root.querySelectorAll('.apexcharts-line-series .apexcharts-series').forEach(function (series, idx) {
+                    const color = trendColors[idx] || trendColors[0];
+                    series.querySelectorAll('path').forEach(function (path) {
+                        path.setAttribute('fill', 'none');
+                        path.setAttribute('stroke', color);
+                        path.setAttribute('stroke-width', '4');
+                        path.style.fill = 'none';
+                        path.style.stroke = color;
+                        path.style.strokeWidth = '4px';
+                    });
+                });
+            }
+        }
 
-    const wfActive   = {{ (int) $activeEmployees }};
+        const wfActive   = {{ (int) $activeEmployees }};
     const wfInactive = {{ (int) $inactiveEmployees }};
     const wfLeave    = {{ (int) $onLeaveEmployees }};
 
@@ -344,6 +422,13 @@
         legend: { show: false },
         tooltip: { y: { formatter: function (v) { return v.toFixed(2) + ' h'; } } }
     }).render();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHrdCharts);
+    } else {
+        initHrdCharts();
+    }
 })();
 </script>
 @endpush
