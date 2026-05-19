@@ -129,6 +129,9 @@
         $regularAllowances  = $payroll->allowances->reject(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay'));
         $undertimeDeductions= $payroll->deductions->filter(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
         $regularDeductions  = $payroll->deductions->reject(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
+        $otAllowanceTotal = $overtimeAllowances->sum('amount');
+        $regularAllowanceTotal = $regularAllowances->sum('amount');
+        $holidayPay = max(0, (float)($payroll->gross_pay ?? 0) - (float)($payroll->basic_salary ?? 0) - $otAllowanceTotal - $regularAllowanceTotal);
     @endphp
 
     {{-- Hero ──────────────────────────────────────────────────────── --}}
@@ -193,6 +196,13 @@
                     <span class="prl-brow-lbl">Basic Pay <span class="prl-badge">daily rate × {{ $payroll->days_worked }} days</span></span>
                     <span class="prl-brow-val">₱{{ number_format($payroll->basic_salary, 2) }}</span>
                 </div>
+
+                @if($holidayPay > 0)
+                <div class="prl-brow">
+                    <span class="prl-brow-lbl c-green">+ Holiday Pay <span class="prl-badge">premium</span></span>
+                    <span class="prl-brow-val c-green">+₱{{ number_format($holidayPay, 2) }}</span>
+                </div>
+                @endif
 
                 @foreach($overtimeAllowances as $ot)
                 <div class="prl-brow">
@@ -261,6 +271,38 @@
             </div>
         </div>
     </div>
+
+    {{-- Bonuses ─────────────────────────────────────────────────────── --}}
+    @if($payroll->bonuses->count())
+    <div class="prl-card">
+        <div class="prl-card-head">
+            <div class="prl-card-head-icon" style="background:#f3e8ff;color:#9333ea;">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+            </div>
+            <div>
+                <p class="prl-card-head-title">Bonuses</p>
+                <p class="prl-card-head-sub">Performance, holiday, and special bonuses</p>
+            </div>
+        </div>
+        <div class="prl-card-body">
+            <div class="prl-breakdown">
+                @foreach($payroll->bonuses as $bonus)
+                <div class="prl-brow">
+                    <span class="prl-brow-lbl" style="color:#9333ea;">
+                        + {{ $bonus->bonus_type }}
+                        @if($bonus->description)<span class="prl-badge">{{ $bonus->description }}</span>@endif
+                    </span>
+                    <span class="prl-brow-val" style="color:#9333ea;">+₱{{ number_format($bonus->amount, 2) }}</span>
+                </div>
+                @endforeach
+                <div class="prl-brow">
+                    <span class="prl-brow-lbl c-bold">Total Bonuses</span>
+                    <span class="prl-brow-val" style="font-size:1rem;color:#9333ea;">+₱{{ number_format($payroll->total_bonuses, 2) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     {{-- OT / UT Breakdown ────────────────────────────────────────────── --}}
     @if($overtimeUndertimeBreakdown->count())

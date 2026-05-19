@@ -395,6 +395,10 @@
                         $sc          = $payroll->status === 'prepared' ? 's-prepared' : ($payroll->status === 'submitted' ? 's-submitted' : 's-pending');
                         $otAllowances = $payroll->total_allowances;
                         $editUrl     = route('payroll.batch.edit-employee', [$batch, $payroll]);
+                        // Calculate breakdown
+                        $overtimeTotal = $payroll->allowances->where('allowance_type', 'like', 'Overtime Pay%')->sum('amount');
+                        $regularAllowances = $payroll->allowances->sum('amount') - $overtimeTotal;
+                        $holidayPay = max(0, $otAllowances - $overtimeTotal - $regularAllowances);
                     @endphp
                     <tr class="{{ $batch->isEditable() ? 'clickable' : '' }}"
                         @if($batch->isEditable()) data-href="{{ $editUrl }}" @endif
@@ -431,7 +435,14 @@
                         <td class="text-end"><span class="prl-mono">&#8369;{{ number_format($payroll->basic_salary, 2) }}</span></td>
                         <td class="text-end">
                             @if($otAllowances > 0)
-                                <span class="prl-mono c-green">+&#8369;{{ number_format($otAllowances, 2) }}</span>
+                                <div style="font-size:0.78rem;">
+                                    <span class="prl-mono c-green">+&#8369;{{ number_format($otAllowances, 2) }}</span>
+                                    <div style="font-size:0.7rem;color:#9ca3af;margin-top:2px;">
+                                        @if($holidayPay > 0)<div>Holiday: &#8369;{{ number_format($holidayPay, 2) }}</div>@endif
+                                        @if($overtimeTotal > 0)<div>OT: &#8369;{{ number_format($overtimeTotal, 2) }}</div>@endif
+                                        @if($regularAllowances > 0)<div>Allow: &#8369;{{ number_format($regularAllowances, 2) }}</div>@endif
+                                    </div>
+                                </div>
                             @else
                                 <span style="color:#d1d5db;font-size:0.75rem;">—</span>
                             @endif
