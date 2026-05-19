@@ -242,9 +242,25 @@
 
         public function batchPayslips(PayrollBatch $batch)
         {
-            $batch->load(['payrolls.user']);
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
 
             return view('hr.payroll.batch.payslips', compact('batch'));
+        }
+
+        public function generatePayslipIndex(Request $request)
+        {
+            $query = PayrollBatch::withCount('payrolls')
+                ->with('payrolls')
+                ->whereHas('payrolls')
+                ->orderByDesc('created_at');
+
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            $batches = $query->paginate(15)->withQueryString();
+
+            return view('hr.payroll.generate-payslip.index', compact('batches'));
         }
 
         public function batchAddDepartment(Request $request, PayrollBatch $batch)

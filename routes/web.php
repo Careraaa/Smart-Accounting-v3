@@ -373,34 +373,7 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
     Route::prefix('payroll/generate-payslip')
         ->name('payroll.generate-payslip.')
         ->group(function () {
-            Route::get('/', function (\Illuminate\Http\Request $request) {
-                $query = \App\Models\Payroll::with(['user', 'allowances', 'deductions'])->latest('payroll_period_start');
-
-                if ($request->filled('user_id')) {
-                    $query->where('user_id', $request->user_id);
-                }
-
-                if ($request->filled('period_start')) {
-                    $query->whereDate('payroll_period_start', '>=', $request->period_start);
-                }
-
-                if ($request->filled('period_end')) {
-                    $query->whereDate('payroll_period_end', '<=', $request->period_end);
-                }
-
-                if ($request->filled('status')) {
-                    $query->where('status', $request->status);
-                }
-
-                $payrolls = $query->paginate(15)->withQueryString();
-
-                $employees = \App\Models\User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
-                    ->where('status', 'active')
-                    ->orderBy('first_name')
-                    ->get(['id', 'name', 'first_name', 'last_name', 'position']);
-
-                return view('hr.payroll.generate-payslip.index', compact('payrolls', 'employees'));
-            })->name('index');
+            Route::get('/', [PayrollController::class, 'generatePayslipIndex'])->name('index');
         });
 
     Route::get('payroll/{payroll}/payslip', [PayrollController::class, 'generatePayslip'])->name('payroll.generatePayslip');
