@@ -44,12 +44,12 @@ class DashboardController extends Controller
         $pendingLeaves = Leave::where('status', 'pending')->count();
         $rejectedLeaves = Leave::where('status', 'rejected')->count();
         
-        // Overtime/Undertime Statistics
-        $totalOvertimeHours = OvertimeUndertime::where('type', 'overtime')
+        // Overtime/Undertime Statistics (approved only)
+        $totalOvertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')
             ->sum('hours') ?? 0;
-        $totalUndertimeHours = OvertimeUndertime::where('type', 'undertime')
+        $totalUndertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')
             ->sum('hours') ?? 0;
-        $totalOvertimeRecords = OvertimeUndertime::where('type', 'overtime')->count();
+        $totalOvertimeRecords = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')->count();
         
         // Attendance trend (last 7 calendar days) — counts rows in `attendances` per status per day
         $attendanceTrend = [];

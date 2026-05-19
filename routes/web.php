@@ -281,9 +281,8 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
     Route::resource('holiday', HRHolidayController::class);
 
     // Define specific overtime routes before resource routes to prevent conflicts
-    Route::get('/overtime/pending', [OvertimeUndertimeController::class, 'index'])
-        ->name('overtime.pending')
-        ->defaults('status', 'pending');
+    Route::get('/overtime/pending', [OvertimeUndertimeController::class, 'pendingRequests'])
+        ->name('overtime.pending');
     Route::get('/overtime/approved', [OvertimeUndertimeController::class, 'index'])
         ->name('overtime.approved')
         ->defaults('status', 'approved');

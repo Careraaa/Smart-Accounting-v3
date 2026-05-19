@@ -11,6 +11,37 @@ use Illuminate\Support\Facades\DB;
 
 class OvertimeUndertimeController extends Controller
 {
+    /**
+     * List all pending OT/UT requests submitted by employees, with approve/reject actions.
+     */
+    public function pendingRequests(Request $request)
+    {
+        $status = $request->query('status', 'pending');
+        $type   = $request->query('type', 'all');
+
+        $query = OvertimeUndertime::with('employee')
+            ->whereHas('employee', fn($q) => $q->whereNotIn('role', ['superadmin', 'qr_admin']));
+
+        if (in_array($status, ['pending', 'approved', 'rejected'])) {
+            $query->where('status', $status);
+        }
+
+        if ($type !== 'all') {
+            $query->where('type', $type);
+        }
+
+        $requests = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+
+        $pendingCount  = OvertimeUndertime::where('status', 'pending')->count();
+        $approvedCount = OvertimeUndertime::where('status', 'approved')->count();
+        $rejectedCount = OvertimeUndertime::where('status', 'rejected')->count();
+
+        return view('hr.overtime.pending', compact(
+            'requests', 'status', 'type',
+            'pendingCount', 'approvedCount', 'rejectedCount'
+        ));
+    }
+
     public function index(Request $request)
     {
         // All employees (excluding system roles), ordered by department then name
@@ -24,6 +55,7 @@ class OvertimeUndertimeController extends Controller
         $monthEnd   = now()->endOfMonth();
 
         $monthlySummary = OvertimeUndertime::whereBetween('date', [$monthStart, $monthEnd])
+            ->where('status', 'approved')
             ->selectRaw('user_id,
                 SUM(CASE WHEN type = "overtime"  THEN hours ELSE 0 END) as ot_hours,
                 SUM(CASE WHEN type = "undertime" THEN hours ELSE 0 END) as ut_hours,
@@ -32,11 +64,11 @@ class OvertimeUndertimeController extends Controller
             ->get()
             ->keyBy('user_id');
 
-        // Global stats
-        $totalOvertimeHours  = OvertimeUndertime::where('type', 'overtime')->sum('hours');
-        $totalUndertimeHours = OvertimeUndertime::where('type', 'undertime')->sum('hours');
-        $overtimeCount       = OvertimeUndertime::where('type', 'overtime')->count();
-        $undertimeCount      = OvertimeUndertime::where('type', 'undertime')->count();
+        // Global stats (approved only)
+        $totalOvertimeHours  = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')->sum('hours');
+        $totalUndertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')->sum('hours');
+        $overtimeCount       = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')->count();
+        $undertimeCount      = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')->count();
 
         return view('hr.overtime.index', compact(
             'employees',
@@ -61,6 +93,7 @@ class OvertimeUndertimeController extends Controller
             : now()->startOfMonth();
 
         $records = OvertimeUndertime::where('user_id', $employeeId)
+            ->where('status', 'approved')
             ->whereBetween('date', [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()])
             ->orderBy('date')
             ->get()

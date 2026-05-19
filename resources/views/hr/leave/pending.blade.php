@@ -154,13 +154,12 @@
                         <th>Dates</th>
                         <th>Days</th>
                         <th>Applied</th>
-                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($leaves as $leave)
                     @php $initials = strtoupper(substr($leave->employee->first_name??'U',0,1).substr($leave->employee->last_name??'',0,1)); @endphp
-                    <tr>
+                    <tr style="cursor:pointer;" onclick="window.location='{{ route('leave.show', $leave) }}'">
                         <td>
                             <div class="lv-emp-cell">
                                 <div class="lv-emp-avatar">{{ $initials }}</div>
@@ -175,14 +174,9 @@
                             <span class="lv-days-tag">{{ $days }}d</span>
                         </td>
                         <td><span class="lv-muted">{{ $leave->created_at->format('M d, Y') }}</span></td>
-                        <td style="text-align:center;">
-                            <a href="{{ route('leave.show', $leave) }}" class="lv-action-btn" title="View / Action">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            </a>
-                        </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7">
+                    <tr><td colspan="6">
                         <div class="lv-empty">
                             <div class="lv-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg></div>
                             <p class="lv-empty-title">No pending leave requests</p>

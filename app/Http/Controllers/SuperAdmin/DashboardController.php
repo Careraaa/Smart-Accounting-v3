@@ -48,11 +48,11 @@ class DashboardController extends Controller
         $rejectedLeaves = Leave::where('status', 'rejected')->count();
 
         // ============ OVERTIME/UNDERTIME STATISTICS ============
-        $totalOvertimeHours = OvertimeUndertime::where('type', 'overtime')
+        $totalOvertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')
             ->sum('hours') ?? 0;
-        $totalUndertimeHours = OvertimeUndertime::where('type', 'undertime')
+        $totalUndertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')
             ->sum('hours') ?? 0;
-        $totalOvertimeRecords = OvertimeUndertime::where('type', 'overtime')->count();
+        $totalOvertimeRecords = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')->count();
 
         // ============ PAYROLL STATISTICS ============
         $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])->get();
