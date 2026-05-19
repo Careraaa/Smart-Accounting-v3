@@ -1062,10 +1062,11 @@ html.minimenu .nxl-navigation:hover .navbar-content {
 .kt-footer {
     background: var(--kt-white);
     border-top: 1px solid var(--kt-border);
-    padding: 14px 24px;
+    padding: 14px 30px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin: 0;
 }
 .kt-footer-copy {
     font-size: 0.72rem;

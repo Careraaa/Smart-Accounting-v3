@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Services\AttendanceService;
 use Carbon\Carbon;
+use App\Models\OvertimeUndertime;
 
 class Payroll extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'batch_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'payment_method', 'approved_by', 'total_allowances', 'total_deductions', 'days_worked', 'hours_worked', 'basic_salary', 'gross_pay', 'net_pay', 'sss', 'pagibig', 'philhealth', 'withholding_tax'];
+    protected $fillable = ['user_id', 'batch_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'payment_method', 'approved_by', 'total_allowances', 'total_bonuses', 'total_deductions', 'days_worked', 'hours_worked', 'basic_salary', 'gross_pay', 'net_pay', 'sss', 'pagibig', 'philhealth', 'withholding_tax'];
 
     protected $casts = [
         'payroll_period_start' => 'date',
@@ -46,6 +47,11 @@ class Payroll extends Model
     public function allowances()
     {
         return $this->hasMany(PayrollAllowance::class);
+    }
+
+    public function bonuses()
+    {
+        return $this->hasMany(PayrollBonus::class);
     }
 
     public function batch()

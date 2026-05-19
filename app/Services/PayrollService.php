@@ -26,21 +26,24 @@ class PayrollService
      * Generate payroll for a single employee in a cutoff period.
      * NOTE: Does NOT call applyLoanDeductions — caller is responsible.
      */
-    public function generatePayrollForEmployee(User $employee, Carbon $start, Carbon $end, array $manualAllowances = [], array $manualDeductions = []): Payroll
+    public function generatePayrollForEmployee(User $employee, Carbon $start, Carbon $end, array $manualAllowances = [], array $manualDeductions = [], array $manualBonuses = []): Payroll
     {
         $values = $this->computePayroll($employee, $start, $end, $manualAllowances, $manualDeductions);
+
+        $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
         $payroll = Payroll::create([
             'user_id' => $employee->id,
             'payroll_period_start' => $start,
             'payroll_period_end' => $end,
             'basic_salary' => round($values['basicSalary'], 2),
-            'gross_pay' => round($values['grossPay'], 2), // ✅ ADD HERE
+            'gross_pay' => round($values['grossPay'] + $totalBonuses, 2),
             'days_worked' => $values['daysWorked'],
             'hours_worked' => round($values['hoursWorked'], 2),
             'total_allowances' => round($values['grossPay'] - $values['basicSalary'], 2),
-            'total_deductions' => $values['totalDeductions'], // Keep exact, don't round
-            'net_pay' => $values['netPay'], // Store the rounded final result
+            'total_bonuses' => round($totalBonuses, 2),
+            'total_deductions' => $values['totalDeductions'],
+            'net_pay' => round($values['netPay'] + $totalBonuses, 2),
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
@@ -112,6 +115,15 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => $deduct['name'],
                 'amount' => round((float) $deduct['amount'], 2),
+            ]);
+        }
+
+        // ── Bonuses ───────────────────────────────────────────────
+        foreach ($manualBonuses as $bonus) {
+            $payroll->bonuses()->create([
+                'bonus_type'  => $bonus['type'],
+                'description' => $bonus['description'] ?? null,
+                'amount'      => round((float) $bonus['amount'], 2),
             ]);
         }
 
@@ -189,27 +201,30 @@ class PayrollService
         Carbon $end,
         array $manualAllowances = [],
         array $manualDeductions = [],
-        array $extraData = [], // ← New parameter for status, gross_pay, etc.
+        array $extraData = [],
+        array $manualBonuses = [],
     ): Payroll {
         $values = $this->computePayroll($employee, $start, $end, $manualAllowances, $manualDeductions);
+
+        $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
         $payroll->update([
             'user_id' => $employee->id,
             'payroll_period_start' => $start,
             'payroll_period_end' => $end,
             'basic_salary' => round($values['basicSalary'], 2),
-            'gross_pay' => round($values['grossPay'], 2), // important
+            'gross_pay' => round($values['grossPay'] + $totalBonuses, 2),
             'days_worked' => $values['daysWorked'],
             'hours_worked' => round($values['hoursWorked'], 2),
             'total_allowances' => round($values['grossPay'] - $values['basicSalary'], 2),
-            'total_deductions' => $values['totalDeductions'], // Keep exact, don't round
-            'net_pay' => $values['netPay'], // Store the rounded final result
+            'total_bonuses' => round($totalBonuses, 2),
+            'total_deductions' => $values['totalDeductions'],
+            'net_pay' => round($values['netPay'] + $totalBonuses, 2),
             'sss' => round($values['sss'], 2),
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
             'withholding_tax' => round($values['withholdingTax'], 2),
 
-            // Respect caller-provided status; fall back to existing status or 'prepared'
             'status' => $extraData['status'] ?? ($payroll->status ?? 'prepared'),
         ]);
 
@@ -281,6 +296,17 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => $deduct['name'],
                 'amount' => round((float) $deduct['amount'], 2),
+            ]);
+        }
+
+        // ── Rebuild bonuses from scratch ───────────────────────────────────────
+        $payroll->bonuses()->delete();
+
+        foreach ($manualBonuses as $bonus) {
+            $payroll->bonuses()->create([
+                'bonus_type'  => $bonus['type'],
+                'description' => $bonus['description'] ?? null,
+                'amount'      => round((float) $bonus['amount'], 2),
             ]);
         }
 

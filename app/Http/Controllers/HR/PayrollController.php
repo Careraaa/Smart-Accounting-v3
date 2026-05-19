@@ -172,6 +172,7 @@
                 'undertime_hours' => round($v['utHours'], 2),
                 'overtime_pay' => round($v['otPay'], 2),
                 'undertime_deduction' => round($v['utDeduction'], 2),
+                'holiday_pay' => round($v['holidayPay'], 2),
                 'sss' => round($v['sss'], 2),
                 'pagibig' => round($v['pagibig'], 2),
                 'adjusted_gross' => round($v['adjustedGross'], 2),
@@ -355,6 +356,7 @@
             // Remove line items first to avoid orphans if FK cascade isn't set up.
             $payroll->allowances()->delete();
             $payroll->deductions()->delete();
+            $payroll->bonuses()->delete();
             $payroll->delete();
 
             return redirect()
@@ -370,7 +372,7 @@
             abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
             abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
 
-            $payroll->load(['user', 'allowances', 'deductions']);
+            $payroll->load(['user', 'allowances', 'deductions', 'bonuses']);
 
             return view('hr.payroll.batch.edit-employee', compact('batch', 'payroll'));
         }
@@ -390,6 +392,10 @@
                 'deductions' => 'array',
                 'deductions.*.name' => 'required|string',
                 'deductions.*.amount' => 'required|numeric|min:0',
+                'bonuses' => 'array',
+                'bonuses.*.type' => 'required|in:performance,holiday,attendance,special',
+                'bonuses.*.description' => 'nullable|string|max:255',
+                'bonuses.*.amount' => 'required|numeric|min:0',
             ]);
 
             $employee = $payroll->user;
@@ -401,7 +407,16 @@
                 'status' => 'prepared',
             ];
 
-            $updatedPayroll = $this->payrollService->updatePayroll($payroll, $employee, $periodStart, $periodEnd, $validated['allowances'] ?? [], $validated['deductions'] ?? [], $extraData);
+            $updatedPayroll = $this->payrollService->updatePayroll(
+                $payroll,
+                $employee,
+                $periodStart,
+                $periodEnd,
+                $validated['allowances'] ?? [],
+                $validated['deductions'] ?? [],
+                $extraData,
+                $validated['bonuses'] ?? [],
+            );
 
             PayrollDeductionService::applyLoanDeductions($updatedPayroll);
             return redirect()
@@ -414,7 +429,7 @@
             abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
             abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
 
-            $payroll->loadMissing(['user', 'allowances', 'deductions']);
+            $payroll->loadMissing(['user', 'allowances', 'deductions', 'bonuses']);
 
             // Recompute so any OT/UT approved after initial generation is picked up,
             // while preserving any manual allowances/deductions HR already added.
@@ -435,6 +450,11 @@
                 ->values()
                 ->toArray();
 
+            $manualBonuses = $payroll->bonuses
+                ->map(fn ($b) => ['type' => $b->bonus_type, 'description' => $b->description, 'amount' => $b->amount])
+                ->values()
+                ->toArray();
+
             $updatedPayroll = $this->payrollService->updatePayroll(
                 $payroll,
                 $payroll->user,
@@ -442,7 +462,8 @@
                 $periodEnd,
                 $manualAllowances,
                 $manualDeductions,
-                ['status' => 'prepared']
+                ['status' => 'prepared'],
+                $manualBonuses,
             );
 
             // Only apply loan deductions if they weren't already applied
@@ -461,7 +482,7 @@
         {
             abort_if(!$batch->isEditable(), 403, 'Batch is already finalized.');
 
-            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
 
             if ($batch->payrolls->isEmpty()) {
                 return redirect()
@@ -506,6 +527,11 @@
                     ->values()
                     ->toArray();
 
+                $manualBonuses = $payroll->bonuses
+                    ->map(fn ($b) => ['type' => $b->bonus_type, 'description' => $b->description, 'amount' => $b->amount])
+                    ->values()
+                    ->toArray();
+
                 $this->payrollService->updatePayroll(
                     $payroll,
                     $payroll->user,
@@ -513,7 +539,8 @@
                     $periodEnd,
                     $manualAllowances,
                     $manualDeductions,
-                    ['status' => 'submitted']
+                    ['status' => 'submitted'],
+                    $manualBonuses,
                 );
                 // Note: applyLoanDeductions is NOT called here — it was already applied
                 // during batchMarkPrepared and the loan deductions are preserved above.
@@ -566,6 +593,7 @@
                 foreach ($batch->payrolls as $payroll) {
                     $payroll->allowances()->delete();
                     $payroll->deductions()->delete();
+                    $payroll->bonuses()->delete();
                     $payroll->delete();
                 }
 
@@ -614,7 +642,7 @@
         {
             abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
 
-            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
 
             $periodStart = Carbon::parse($batch->period_start);
             $periodEnd   = Carbon::parse($batch->period_end);
@@ -640,6 +668,10 @@
                     ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
                     ->values()->toArray();
 
+                $manualBonuses = $payroll->bonuses
+                    ->map(fn ($b) => ['type' => $b->bonus_type, 'description' => $b->description, 'amount' => $b->amount])
+                    ->values()->toArray();
+
                 $this->payrollService->updatePayroll(
                     $payroll,
                     $payroll->user,
@@ -647,7 +679,8 @@
                     $periodEnd,
                     $manualAllowances,
                     $manualDeductions,
-                    ['status' => 'prepared']
+                    ['status' => 'prepared'],
+                    $manualBonuses,
                 );
                 $count++;
             }

@@ -309,6 +309,7 @@
     @php
         $totalGross      = $batch->payrolls->sum('gross_pay');
         $totalDeductions = $batch->payrolls->sum('total_deductions');
+        $totalBonuses    = $batch->payrolls->sum('total_bonuses');
         $totalNet        = $batch->payrolls->sum('net_pay');
         $preparedCount   = $batch->payrolls->where('status', 'prepared')->count();
         $totalCount      = $batch->payrolls->count();
@@ -317,6 +318,11 @@
         <div>
             <div class="prl-totals-lbl">Total Gross</div>
             <div class="prl-totals-val">&#8369;{{ number_format($totalGross, 2) }}</div>
+        </div>
+        <div class="prl-totals-divider"></div>
+        <div>
+            <div class="prl-totals-lbl">Total Bonuses</div>
+            <div class="prl-totals-val" style="color:#7c3aed;">&#8369;{{ number_format($totalBonuses, 2) }}</div>
         </div>
         <div class="prl-totals-divider"></div>
         <div>
@@ -376,6 +382,7 @@
                         <th class="text-end">Days</th>
                         <th class="text-end">Basic</th>
                         <th class="text-end">OT / Allow</th>
+                        <th class="text-end">Bonuses</th>
                         <th class="text-end">Deductions</th>
                         <th class="text-end">Net Pay</th>
                         <th class="text-center">Status</th>
@@ -430,6 +437,13 @@
                             @endif
                         </td>
                         <td class="text-end">
+                            @if($payroll->total_bonuses > 0)
+                                <span class="prl-mono" style="color:#7c3aed;font-weight:500;">+&#8369;{{ number_format($payroll->total_bonuses, 2) }}</span>
+                            @else
+                                <span style="color:#d1d5db;font-size:0.75rem;">—</span>
+                            @endif
+                        </td>
+                        <td class="text-end">
                             @if($payroll->total_deductions > 0)
                                 <span class="prl-mono c-red">&#8369;{{ number_format($payroll->total_deductions, 2) }}</span>
                             @else
@@ -444,7 +458,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="{{ $batch->isEditable() ? 9 : 8 }}" style="text-align:center;padding:40px;color:#9ca3af;font-size:0.82rem;">No payroll records in this batch yet.</td></tr>
+                    <tr><td colspan="{{ $batch->isEditable() ? 10 : 9 }}" style="text-align:center;padding:40px;color:#9ca3af;font-size:0.82rem;">No payroll records in this batch yet.</td></tr>
                 @endforelse
                 </tbody>
             </table>

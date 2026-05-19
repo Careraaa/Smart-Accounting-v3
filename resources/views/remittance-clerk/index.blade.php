@@ -78,31 +78,28 @@
 .rem-btn-sec:hover { background:rgba(255,255,255,0.10); color:#fff; }
 
 /* ── Stat grid ── */
-.rem-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px; }
-@media(max-width:900px) { .rem-stats { grid-template-columns:1fr 1fr; } }
-@media(max-width:560px) { .rem-stats { grid-template-columns:1fr; } }
+.rem-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+@media(max-width:900px)  { .rem-stats { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:560px)  { .rem-stats { grid-template-columns:1fr; } }
 
-.rem-stat { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:20px 22px; display:flex; align-items:flex-start; gap:14px; position:relative; overflow:hidden; transition:box-shadow .15s,transform .15s; }
-.rem-stat:hover { box-shadow:0 14px 36px rgba(17,24,39,0.10); transform:translateY(-2px); }
-.rem-stat::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 16px 16px; }
-.rem-stat.s-green::after { background:#16a34a; }
-.rem-stat.s-red::after   { background:#c8292a; }
-.rem-stat.s-blue::after  { background:#0284c7; }
-.rem-stat.s-amber::after { background:#d97706; }
-.rem-stat.s-slate::after { background:#64748b; }
-.rem-stat.s-purple::after{ background:#7c3aed; }
+.rem-stat { background:#fff; border:1px solid #e5e7eb; border-radius:14px; padding:16px 18px; position:relative; overflow:hidden; transition:box-shadow .15s,transform .15s; }
+.rem-stat:hover { box-shadow:0 10px 28px rgba(17,24,39,.09); transform:translateY(-2px); }
+.rem-stat::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 14px 14px; }
+.rem-stat.s-green::after  { background:#16a34a; }
+.rem-stat.s-red::after    { background:#c8292a; }
+.rem-stat.s-blue::after   { background:#0284c7; }
+.rem-stat.s-amber::after  { background:#d97706; }
+.rem-stat.s-slate::after  { background:#64748b; }
+.rem-stat.s-purple::after { background:#7c3aed; }
 
-.rem-ico { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.rem-stat.s-green .rem-ico  { background:#f0fdf4; color:#16a34a; }
-.rem-stat.s-red   .rem-ico  { background:#fff0f0; color:#c8292a; }
-.rem-stat.s-blue  .rem-ico  { background:#f0f9ff; color:#0284c7; }
-.rem-stat.s-amber .rem-ico  { background:#fffbeb; color:#d97706; }
-.rem-stat.s-slate .rem-ico  { background:#f3f4f6; color:#64748b; }
-.rem-stat.s-purple .rem-ico { background:#f5f3ff; color:#7c3aed; }
+.rem-stat-lbl { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:#9ca3af; margin-bottom:6px; }
+.rem-stat-val { font-size:1.3rem; font-weight:800; color:#111827; line-height:1.1; font-family:'DM Mono',monospace; font-variant-numeric:tabular-nums; }
+.rem-stat-sub { font-size:.71rem; color:#9ca3af; margin-top:5px; line-height:1.4; }
+.rem-stat-badge { display:inline-flex; align-items:center; gap:3px; font-size:.68rem; font-weight:700; padding:2px 7px; border-radius:999px; margin-top:5px; }
+.rem-stat-badge.up   { background:#f0fdf4; color:#16a34a; }
+.rem-stat-badge.down { background:#fff0f0; color:#c8292a; }
+.rem-stat-badge.flat { background:#f3f4f6; color:#6b7280; }
 
-.rem-stat-lbl { font-size:.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:#9ca3af; margin-bottom:5px; }
-.rem-stat-val { font-size:1.45rem; font-weight:800; color:#111827; line-height:1.1; font-family:'DM Mono',monospace; font-variant-numeric:tabular-nums; }
-.rem-stat-sub { font-size:.72rem; color:#9ca3af; margin-top:5px; }
 
 /* ── Two-col charts ── */
 .rem-two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
@@ -115,6 +112,60 @@
 .rem-panel-hd span { font-size:.72rem; color:#9ca3af; font-weight:500; }
 .rem-panel-bd { padding:8px 12px 4px; }
 .rem-chart { min-height:260px; }
+
+/* ── Collections vs Expenses card ── */
+.cve-body { padding:20px 20px 18px; }
+.cve-totals { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+.cve-side { border-radius:12px; padding:14px 16px; }
+.cve-side.col { background:#111827; }
+.cve-side.exp { background:#f8f9fb; border:1px solid #e5e7eb; }
+.cve-side-lbl { font-size:.62rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; margin-bottom:5px; }
+.cve-side.col .cve-side-lbl { color:#6b7280; }
+.cve-side.exp .cve-side-lbl { color:#9ca3af; }
+.cve-side-val { font-family:'DM Mono',monospace; font-size:1.35rem; font-weight:800; line-height:1; }
+.cve-side.col .cve-side-val { color:#fff; }
+.cve-side.exp .cve-side-val { color:#111827; }
+.cve-side-sub { font-size:.68rem; margin-top:4px; }
+.cve-side.col .cve-side-sub { color:#4b5563; }
+.cve-side.exp .cve-side-sub { color:#9ca3af; }
+/* stacked bar */
+.cve-track-wrap { margin-bottom:14px; }
+.cve-track-labels { display:flex; justify-content:space-between; font-size:.67rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+.cve-track { height:10px; border-radius:999px; background:#f3f4f6; overflow:hidden; display:flex; gap:2px; }
+.cve-track-col { height:100%; border-radius:999px; background:#111827; transition:width .7s cubic-bezier(.4,0,.2,1); }
+.cve-track-exp { height:100%; border-radius:999px; background:#c8292a; transition:width .7s cubic-bezier(.4,0,.2,1); }
+/* net row */
+.cve-net { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; background:#f8f9fb; border-radius:10px; }
+.cve-net-lbl { font-size:.72rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; }
+.cve-net-val { font-family:'DM Mono',monospace; font-size:1rem; font-weight:800; color:#111827; }
+.cve-margin-lbl { font-size:.68rem; font-weight:700; color:#9ca3af; }
+.cve-margin-val { font-family:'DM Mono',monospace; font-size:.82rem; font-weight:700; color:#16a34a; }
+
+/* ── Monthly trend card ── */
+.mct-body { padding:20px 20px 0; }
+.mct-bars { display:flex; align-items:flex-end; gap:8px; height:130px; margin-bottom:12px; }
+.mct-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:0; cursor:pointer; }
+.mct-bar-wrap { width:100%; display:flex; align-items:flex-end; justify-content:center; height:110px; }
+.mct-bar {
+    width:100%; max-width:36px; border-radius:6px 6px 0 0;
+    transition:height .5s cubic-bezier(.4,0,.2,1), filter .15s, transform .15s;
+    background:#e5e7eb;
+    position:relative;
+}
+.mct-bar.has-data { background:#111827; }
+.mct-bar.active   { background:#c8292a; transform:scaleX(1.08); }
+.mct-bar:hover    { filter:brightness(1.15); }
+.mct-month { font-size:.65rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.06em; margin-top:6px; }
+.mct-col.active .mct-month { color:#111827; }
+/* detail strip */
+.mct-detail {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px; background:#f8f9fb; border-radius:10px;
+    margin-bottom:16px; transition:opacity .2s;
+}
+.mct-detail-label { font-size:.72rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.08em; }
+.mct-detail-val { font-family:'DM Mono',monospace; font-size:1rem; font-weight:800; color:#111827; }
+.mct-detail-sub { font-size:.68rem; color:#9ca3af; margin-top:1px; }
 
 /* ── Feed ── */
 .rem-feed { margin:0; padding:0; list-style:none; }
@@ -162,89 +213,135 @@
     </div>
 
     {{-- Stat cards --}}
+    @php
+        $growthClass = $collectionGrowth > 0 ? 'up' : ($collectionGrowth < 0 ? 'down' : 'flat');
+        $growthIcon  = $collectionGrowth > 0 ? '↑' : ($collectionGrowth < 0 ? '↓' : '→');
+        $margin      = $totalCollections > 0 ? round(($totalNetRemittance / $totalCollections) * 100, 1) : 0;
+    @endphp
     <div class="rem-stats">
+        {{-- Collections --}}
         <div class="rem-stat s-green">
-            <div class="rem-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
+            <div class="rem-stat-lbl">Collections</div>
+            <div class="rem-stat-val">₱{{ number_format($totalCollections, 0) }}</div>
             <div>
-                <div class="rem-stat-lbl">Total Collections</div>
-                <div class="rem-stat-val">₱{{ number_format($totalCollections, 0) }}</div>
-                <div class="rem-stat-sub">{{ $collectionGrowth > 0 ? '+' : '' }}{{ number_format($collectionGrowth, 1) }}% vs last 30 days</div>
+                <span class="rem-stat-badge {{ $growthClass }}">
+                    {{ $growthIcon }} {{ number_format(abs($collectionGrowth), 1) }}% vs prev 30d
+                </span>
             </div>
         </div>
+        {{-- Expenses --}}
         <div class="rem-stat s-red">
-            <div class="rem-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-            </div>
-            <div>
-                <div class="rem-stat-lbl">Total Expenses</div>
-                <div class="rem-stat-val">₱{{ number_format($totalExpenses, 0) }}</div>
-                <div class="rem-stat-sub">Across all finalized records</div>
-            </div>
+            <div class="rem-stat-lbl">Expenses</div>
+            <div class="rem-stat-val">₱{{ number_format($totalExpenses, 0) }}</div>
+            <div class="rem-stat-sub">Avg ₱{{ number_format($averageExpenses, 0) }} / record</div>
         </div>
+        {{-- Net --}}
         <div class="rem-stat s-blue">
-            <div class="rem-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-            </div>
-            <div>
-                <div class="rem-stat-lbl">Net Remittance</div>
-                <div class="rem-stat-val">₱{{ number_format($totalNetRemittance, 0) }}</div>
-                <div class="rem-stat-sub">Collections minus expenses</div>
-            </div>
+            <div class="rem-stat-lbl">Net Remittance</div>
+            <div class="rem-stat-val">₱{{ number_format($totalNetRemittance, 0) }}</div>
+            <div class="rem-stat-sub">{{ $margin }}% margin</div>
         </div>
+        {{-- Avg collection --}}
         <div class="rem-stat s-amber">
-            <div class="rem-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-            </div>
-            <div>
-                <div class="rem-stat-lbl">Avg. Collection</div>
-                <div class="rem-stat-val">₱{{ number_format($averageCollection, 0) }}</div>
-                <div class="rem-stat-sub">Per finalized remittance</div>
-            </div>
-        </div>
-        <div class="rem-stat s-slate">
-            <div class="rem-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            </div>
-            <div>
-                <div class="rem-stat-lbl">Active Drivers</div>
-                <div class="rem-stat-val">{{ $activeDrivers }}</div>
-                <div class="rem-stat-sub"><a href="{{ route('drivers.index') }}" style="color:#c8292a;font-weight:600;text-decoration:none;">View drivers →</a></div>
-            </div>
-        </div>
-        <div class="rem-stat s-purple">
-            <div class="rem-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-            </div>
-            <div>
-                <div class="rem-stat-lbl">Resources</div>
-                <div class="rem-stat-val">{{ $activeVehicles }}<span style="font-size:.9rem;color:#9ca3af;font-weight:600;"> v · </span>{{ $activePAOs }}<span style="font-size:.9rem;color:#9ca3af;font-weight:600;"> p</span></div>
-                <div class="rem-stat-sub">Vehicles · PAOs active</div>
-            </div>
+            <div class="rem-stat-lbl">Avg. Collection</div>
+            <div class="rem-stat-val">₱{{ number_format($averageCollection, 0) }}</div>
+            <div class="rem-stat-sub">Per finalized record</div>
         </div>
     </div>
 
     {{-- Charts row --}}
+    @php
+        $cveSum    = $totalCollections + $totalExpenses;
+        $colPct    = $cveSum > 0 ? round(($totalCollections / $cveSum) * 100) : 50;
+        $expPct    = $cveSum > 0 ? round(($totalExpenses    / $cveSum) * 100) : 50;
+        $mctMax    = collect($monthlyCollectionTrend)->max('total_collection') ?: 1;
+        $mctLast   = count($monthlyCollectionTrend) > 0 ? $monthlyCollectionTrend[array_key_last($monthlyCollectionTrend)] : null;
+        $mctActive = count($monthlyCollectionTrend) - 1;
+    @endphp
     <div class="rem-two-col">
+
+        {{-- Collections vs Expenses --}}
         <div class="rem-panel">
             <div class="rem-panel-hd">
                 <h2>Collections vs Expenses</h2>
                 <span>Finalized records only</span>
             </div>
-            <div class="rem-panel-bd">
-                <div id="rem-chart-colexp" class="rem-chart"></div>
+            <div class="cve-body">
+                <div class="cve-totals">
+                    <div class="cve-side col">
+                        <div class="cve-side-lbl">Collections</div>
+                        <div class="cve-side-val">₱{{ number_format($totalCollections, 0) }}</div>
+                        <div class="cve-side-sub">{{ $colPct }}% of total</div>
+                    </div>
+                    <div class="cve-side exp">
+                        <div class="cve-side-lbl">Expenses</div>
+                        <div class="cve-side-val">₱{{ number_format($totalExpenses, 0) }}</div>
+                        <div class="cve-side-sub">{{ $expPct }}% of total</div>
+                    </div>
+                </div>
+                <div class="cve-track-wrap">
+                    <div class="cve-track-labels">
+                        <span>Collections</span>
+                        <span>Expenses</span>
+                    </div>
+                    <div class="cve-track">
+                        <div class="cve-track-col" style="width:{{ $colPct }}%;"></div>
+                        <div class="cve-track-exp" style="width:{{ $expPct }}%;"></div>
+                    </div>
+                </div>
+                <div class="cve-net">
+                    <div>
+                        <div class="cve-net-lbl">Net Remittance</div>
+                        <div class="cve-net-val">₱{{ number_format($totalNetRemittance, 0) }}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="cve-margin-lbl">Margin</div>
+                        <div class="cve-margin-val">{{ $margin }}%</div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        {{-- Monthly Collection Trend --}}
         <div class="rem-panel">
             <div class="rem-panel-hd">
                 <h2>Monthly Collection Trend</h2>
                 <span>Last 6 months</span>
             </div>
-            <div class="rem-panel-bd">
-                <div id="rem-chart-monthly" class="rem-chart"></div>
+            <div class="mct-body">
+                @if(count($monthlyCollectionTrend))
+                    <div class="mct-bars" id="mct-bars">
+                        @foreach($monthlyCollectionTrend as $i => $m)
+                            @php
+                                $barH = $mctMax > 0 ? max(6, round(($m['total_collection'] / $mctMax) * 110)) : 6;
+                            @endphp
+                            <div class="mct-col {{ $i === $mctActive ? 'active' : '' }}"
+                                 data-val="{{ $m['total_collection'] }}"
+                                 data-month="{{ $m['month'] }}"
+                                 data-idx="{{ $i }}">
+                                <div class="mct-bar-wrap">
+                                    <div class="mct-bar has-data {{ $i === $mctActive ? 'active' : '' }}"
+                                         style="height:{{ $barH }}px;"></div>
+                                </div>
+                                <span class="mct-month">{{ $m['month'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mct-detail" id="mct-detail">
+                        <div>
+                            <div class="mct-detail-label" id="mct-detail-month">{{ $mctLast['month'] ?? '—' }}</div>
+                            <div class="mct-detail-val" id="mct-detail-val">₱{{ number_format($mctLast['total_collection'] ?? 0, 0) }}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="mct-detail-sub">Total collection</div>
+                        </div>
+                    </div>
+                @else
+                    <div style="display:flex;align-items:center;justify-content:center;height:180px;color:#9ca3af;font-size:.84rem;">No data yet.</div>
+                @endif
             </div>
         </div>
+
     </div>
 
     {{-- Recent remittances feed --}}
@@ -302,72 +399,51 @@
 @push('scripts')
 <script>
 (function () {
-    if (typeof ApexCharts === 'undefined') return;
-    const font = 'Sora, sans-serif';
-    const mono = "'DM Mono', monospace";
-    const red  = '#c8292a';
+    /* ── Monthly trend interaction ── */
+    function initMCT() {
+        const cols     = document.querySelectorAll('#mct-bars .mct-col');
+        const detMonth = document.getElementById('mct-detail-month');
+        const detVal   = document.getElementById('mct-detail-val');
+        if (!cols.length || !detMonth) return;
 
-    const tc = {{ (float) $totalCollections }};
-    const te = {{ (float) $totalExpenses }};
+        function fmt(n) {
+            return '₱' + Number(n).toLocaleString('en-PH', { maximumFractionDigits: 0 });
+        }
 
-    const elCE = document.querySelector('#rem-chart-colexp');
-    if (elCE && (tc > 0 || te > 0)) {
-        new ApexCharts(elCE, {
-            chart: { type: 'donut', height: 260, fontFamily: font },
-            series: [tc, te],
-            labels: ['Collections', 'Expenses'],
-            colors: ['#16a34a', '#c8292a'],
-            stroke: { width: 1, colors: ['#fff'] },
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '78%',
-                        labels: {
-                            show: true,
-                            value: { fontSize: '16px', fontWeight: 700, color: '#111827', fontFamily: mono,
-                                formatter: function(v) { return '₱' + Number(v).toLocaleString(undefined,{maximumFractionDigits:0}); }
-                            },
-                            total: {
-                                show: true, label: 'Total', fontSize: '10px', color: '#94a3b8',
-                                formatter: function(w) {
-                                    var s = w.globals.seriesTotals.reduce(function(a,b){return a+b;},0);
-                                    return '₱' + s.toLocaleString(undefined,{maximumFractionDigits:0});
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom', fontSize: '11px', fontWeight: 600 }
-        }).render();
-    } else if (elCE) {
-        elCE.innerHTML = '<div class="rem-empty" style="min-height:240px;display:flex;align-items:center;justify-content:center;">No data yet.</div>';
+        function activate(col) {
+            cols.forEach(c => {
+                c.classList.remove('active');
+                c.querySelector('.mct-bar').classList.remove('active');
+            });
+            col.classList.add('active');
+            col.querySelector('.mct-bar').classList.add('active');
+
+            const raw = parseFloat(col.dataset.val) || 0;
+            detMonth.textContent = col.dataset.month;
+
+            /* count-up */
+            const prev = parseFloat(detVal.textContent.replace(/[^0-9.]/g, '')) || 0;
+            if (prev === raw) { detVal.textContent = fmt(raw); return; }
+            const steps = 18, dur = 200;
+            let cur = 0;
+            const inc = (raw - prev) / steps;
+            const t = setInterval(() => {
+                cur++;
+                detVal.textContent = fmt(Math.round(prev + inc * cur));
+                if (cur >= steps) { detVal.textContent = fmt(raw); clearInterval(t); }
+            }, dur / steps);
+        }
+
+        cols.forEach(col => {
+            col.addEventListener('mouseenter', () => activate(col));
+            col.addEventListener('click',      () => activate(col));
+        });
     }
 
-    const monthly = @json($monthlyCollectionTrend);
-    const elM = document.querySelector('#rem-chart-monthly');
-    if (elM) {
-        new ApexCharts(elM, {
-            chart: { type: 'bar', height: 260, fontFamily: font, toolbar: { show: false } },
-            series: [{ name: 'Collection', data: monthly.map(function(m){ return m.total_collection; }) }],
-            colors: [red],
-            plotOptions: { bar: { borderRadius: 8, columnWidth: '52%' } },
-            dataLabels: { enabled: false },
-            xaxis: {
-                categories: monthly.map(function(m){ return m.month; }),
-                labels: { style: { colors: '#64748b', fontSize: '11px' } },
-                axisBorder: { show: false }, axisTicks: { show: false }
-            },
-            yaxis: {
-                labels: {
-                    style: { colors: '#64748b', fontSize: '11px' },
-                    formatter: function(v){ return '₱'+(v>=1000?(v/1000).toFixed(0)+'k':v.toFixed(0)); }
-                }
-            },
-            grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
-            tooltip: { y: { formatter: function(v){ return '₱'+Number(v).toLocaleString(undefined,{maximumFractionDigits:0}); } } }
-        }).render();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMCT);
+    } else {
+        initMCT();
     }
 })();
 </script>
