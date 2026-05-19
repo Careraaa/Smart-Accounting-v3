@@ -420,7 +420,18 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="text-end"><span class="prl-mono">{{ $payroll->days_worked }}</span></td>
+                        <td class="text-end">
+                            @php
+                                $absCount = \App\Models\Attendance::where('user_id', $payroll->user_id)
+                                    ->whereBetween('date', [$batch->period_start, $batch->period_end])
+                                    ->where('status', 'absent')
+                                    ->count();
+                            @endphp
+                            <span class="prl-mono">{{ $payroll->days_worked }}</span>
+                            @if($absCount > 0)
+                                <br><span style="font-size:0.68rem;color:#c8292a;font-family:'DM Mono',monospace;">{{ $absCount }} absent</span>
+                            @endif
+                        </td>
                         <td class="text-end"><span class="prl-mono">&#8369;{{ number_format($payroll->basic_salary, 2) }}</span></td>
                         <td class="text-end">
                             @if($otAllowances > 0)

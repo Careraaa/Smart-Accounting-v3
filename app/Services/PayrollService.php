@@ -113,6 +113,7 @@ class PayrollService
     {
         // ── Attendance ────────────────────────────────────────────
         $daysWorked = $this->attendanceService->countWorkDaysInPeriod($employee->id, $start, $end);
+        $daysAbsent = $this->attendanceService->countAbsentDaysInPeriod($employee->id, $start, $end);
         $hoursWorked = $this->attendanceService->calculateTotalHoursWorked($employee->id, $start, $end);
 
         // ── Salary rates ─────────────────────────────────────────
@@ -160,7 +161,7 @@ class PayrollService
         $utDeduction = $utDeductionExact;
         $totalDeductions = $totalDeductionsExact;
 
-        return compact('daysWorked', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'holidayPay', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
+        return compact('daysWorked', 'daysAbsent', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'holidayPay', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
     }
 
     /**
