@@ -144,6 +144,18 @@
                     <span class="prl-hero-chip-lbl">Days Worked</span>
                     <span class="prl-hero-chip-val">{{ $payroll->days_worked }}</span>
                 </div>
+                @php
+                    $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
+                        ->whereBetween('date', [$payroll->payroll_period_start, $payroll->payroll_period_end])
+                        ->where('status', 'absent')
+                        ->count();
+                @endphp
+                @if($daysAbsent > 0)
+                <div class="prl-hero-chip" style="border-color:#fecaca;">
+                    <span class="prl-hero-chip-lbl" style="color:#f87171;">Days Absent</span>
+                    <span class="prl-hero-chip-val" style="color:#f87171;">{{ $daysAbsent }}</span>
+                </div>
+                @endif
                 <div class="prl-hero-chip">
                     <span class="prl-hero-chip-lbl">Daily Rate</span>
                     <span class="prl-hero-chip-val">₱{{ number_format($payroll->per_day_rate, 2) }}</span>

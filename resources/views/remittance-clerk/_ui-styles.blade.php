@@ -184,4 +184,54 @@
 .prl-modal-cancel:hover { border-color:#c8292a;color:#c8292a; }
 .prl-modal-confirm { flex:1;padding:11px;background:#c8292a;color:#fff;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;cursor:pointer;transition:all 0.12s; }
 .prl-modal-confirm:hover { background:#a81f20; }
+
+/* ── Show page: dark hero + card style ──────────────────────── */
+.rem-wrap { max-width:860px;margin:0 auto;padding-bottom:48px;font-family:'Sora',sans-serif; }
+
+/* Hero */
+.rem-hero { background:#111827;border-radius:16px;padding:22px 26px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px;flex-wrap:wrap;position:relative;overflow:hidden; }
+.rem-hero::before { content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(200,41,42,0.12);pointer-events:none; }
+.rem-hero-left { position:relative;z-index:1; }
+.rem-hero-title { font-size:1.15rem;font-weight:800;color:#fff;margin:0 0 3px;letter-spacing:-0.02em; }
+.rem-hero-sub { font-size:0.78rem;color:#6b7280;margin:0 0 12px; }
+.rem-hero-right { position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:8px; }
+.rem-hero-chips { display:flex;gap:10px;flex-wrap:wrap; }
+.rem-hero-chip { background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 14px;text-align:center; }
+.rem-hero-chip-lbl { font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#6b7280;display:block;margin-bottom:3px; }
+.rem-hero-chip-val { font-family:'DM Mono',monospace;font-size:0.95rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums; }
+
+/* Cards */
+.rem-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:16px; }
+.rem-card-head { padding:14px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px; }
+.rem-card-icon { width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.rem-card-icon.blue  { background:#eff6ff;color:#2563eb; }
+.rem-card-icon.green { background:#f0fdf4;color:#16a34a; }
+.rem-card-icon.red   { background:#fff0f0;color:#c8292a; }
+.rem-card-icon.amber { background:#fffbeb;color:#d97706; }
+.rem-card-icon.slate { background:#f3f4f6;color:#374151; }
+.rem-card-title { font-size:0.845rem;font-weight:700;color:#111827;margin:0; }
+.rem-card-sub   { font-size:0.72rem;color:#9ca3af;margin:0; }
+.rem-card-body  { padding:18px 20px; }
+
+/* Breakdown rows */
+.rem-brow { display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6;gap:10px; }
+.rem-brow:last-child { border-bottom:none;padding-bottom:0; }
+.rem-brow-lbl { font-size:0.845rem;color:#6b7280;flex:1; }
+.rem-brow-val { font-size:0.9rem;font-weight:700;color:#111827;font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap; }
+.rem-brow-val.green { color:#16a34a; }
+.rem-brow-val.red   { color:#dc2626; }
+
+/* Net box */
+.rem-net { background:#111827;border-radius:12px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; }
+.rem-net-lbl { font-size:0.72rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:#6b7280; }
+.rem-net-val { font-size:1.55rem;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace; }
+
+/* Footer */
+.rem-footer { display:flex;gap:10px;padding-top:20px;border-top:1px solid #f3f4f6;flex-wrap:wrap; }
+.rem-btn-edit { display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:600;text-decoration:none;transition:all 0.13s; }
+.rem-btn-edit:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
+.rem-btn-delete { display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:600;cursor:pointer;transition:all 0.13s; }
+.rem-btn-delete:hover { background:#fff0f0;border-color:#fca5a5; }
+.rem-btn-primary { display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#c8292a;color:#fff;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;text-decoration:none;transition:background 0.15s; }
+.rem-btn-primary:hover { background:#a81f20;color:#fff; }
 </style>

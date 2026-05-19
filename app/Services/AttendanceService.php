@@ -10,7 +10,8 @@ use Carbon\Carbon;
 class AttendanceService
 {
     /**
-     * Calculate total days worked in a period for an employee
+     * Calculate total days worked (status = 'present') in a period for an employee.
+     * Absent days are NOT counted — daily-rate employees are only paid for days present.
      *
      * @param int $employeeId
      * @param Carbon $periodStart
@@ -22,6 +23,24 @@ class AttendanceService
         return Attendance::where('user_id', $employeeId)
             ->whereBetween('date', [$periodStart, $periodEnd])
             ->where('status', 'present')
+            ->count();
+    }
+
+    /**
+     * Count absent days (status = 'absent') in a period for an employee.
+     * Used for payroll transparency — absent days reduce basic pay implicitly
+     * because daily-rate employees are only paid for days present.
+     *
+     * @param int $employeeId
+     * @param Carbon $periodStart
+     * @param Carbon $periodEnd
+     * @return int
+     */
+    public function countAbsentDaysInPeriod($employeeId, $periodStart, $periodEnd)
+    {
+        return Attendance::where('user_id', $employeeId)
+            ->whereBetween('date', [$periodStart, $periodEnd])
+            ->where('status', 'absent')
             ->count();
     }
 

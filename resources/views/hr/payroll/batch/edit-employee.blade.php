@@ -620,8 +620,8 @@
                                     id="prl_days_worked">—</span></div>
                             <div class="prl-chip"><span class="prl-chip-lbl">Hours Worked</span><span class="prl-chip-val"
                                     id="prl_hours_worked">—</span></div>
-                            <div class="prl-chip"><span class="prl-chip-lbl">Worked Days</span><span class="prl-chip-val"
-                                    id="prl_worked_days">—</span></div>
+                            <div class="prl-chip"><span class="prl-chip-lbl">Days Absent</span><span class="prl-chip-val"
+                                    id="prl_days_absent" style="color:#dc2626;">—</span></div>
                         </div>
                     </div>
                 </div>

@@ -176,18 +176,18 @@
     <div class="prl-generate-card">
         <div class="prl-generate-left">
             <div class="prl-generate-eyebrow">
-                @if($currentPendingBatch) Batch in progress @else Ready to generate @endif
+                @if($currentInProgressBatch) Batch in progress @else Ready to generate @endif
             </div>
             <h2 class="prl-generate-title">
-                @if($currentPendingBatch) Continue Pending Batch @else Generate New Payroll Batch @endif
+                @if($currentInProgressBatch) Continue Batch @else Generate New Payroll Batch @endif
             </h2>
             <div class="prl-generate-period">
                 Period: {{ \Carbon\Carbon::parse($currentPeriod['start'])->format('M d, Y') }} &mdash; {{ \Carbon\Carbon::parse($currentPeriod['end'])->format('M d, Y') }}
             </div>
         </div>
         <div class="prl-generate-right">
-            @if($currentPendingBatch)
-                <a href="{{ route('payroll.batch.confirm', $currentPendingBatch) }}" class="prl-btn-generate">
+            @if($currentInProgressBatch)
+                <a href="{{ route('payroll.batch.confirm', $currentInProgressBatch) }}" class="prl-btn-generate">
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     Continue Batch
                 </a>
@@ -208,7 +208,6 @@
         </div>
         <select class="prl-filter-select" id="statusFilter">
             <option value="">All Statuses</option>
-            <option value="pending">Pending</option>
             <option value="submitted">Submitted</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
@@ -226,7 +225,6 @@
                         <th class="text-center">Employees</th>
                         <th class="text-end">Total Net Pay</th>
                         <th class="text-center">Status</th>
-                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="batchTbody">
@@ -239,8 +237,12 @@
                             default     => 's-pending',
                         };
                         $detailsUrl = route('payroll.batch.details', $batch);
-                        $confirmUrl = route('payroll.batch.confirm', $batch);
                     @endphp
+                    {{-- Hidden reopen form (used by the resubmit modal) --}}
+                    @if(in_array($batch->status, ['submitted', 'rejected']))
+                    <form action="{{ route('payroll.batch.reopen', $batch) }}" method="POST"
+                          style="display:none;" id="reopen-form-{{ $batch->id }}">@csrf</form>
+                    @endif
                     <tr
                         data-name="{{ strtolower($batch->display_name) }}"
                         data-status="{{ $batch->status }}"
@@ -267,57 +269,9 @@
                         <td class="text-center">
                             <span class="prl-status {{ $sc }}">{{ ucfirst($batch->status) }}</span>
                         </td>
-                        <td onclick="event.stopPropagation()">
-                            <div class="prl-actions">
-                                @if($batch->status === 'pending')
-                                    {{-- Pending: edit (go to confirm/build page) --}}
-                                    <a href="{{ $confirmUrl }}" class="prl-action-btn edit">
-                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        Edit &amp; Submit
-                                    </a>
-
-                                @elseif($batch->status === 'submitted')
-                                    {{-- Submitted: can edit (reopen to pending) then resubmit --}}
-                                    <form action="{{ route('payroll.batch.reopen', $batch) }}" method="POST" style="display:inline;" id="reopen-form-{{ $batch->id }}">
-                                        @csrf
-                                    </form>
-                                    <button type="button" class="prl-action-btn edit"
-                                        onclick="openResubmitModal({{ $batch->id }}, '{{ addslashes($batch->display_name) }}', '{{ $batch->period_start->format('M d') }} – {{ $batch->period_end->format('M d, Y') }}')">
-                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        Edit
-                                    </button>
-                                    <a href="{{ $detailsUrl }}" class="prl-action-btn view">
-                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        View
-                                    </a>
-
-                                @elseif($batch->status === 'approved')
-                                    {{-- Approved: view only, no edit --}}
-                                    <a href="{{ $detailsUrl }}" class="prl-action-btn view">
-                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        View
-                                    </a>
-
-                                @elseif($batch->status === 'rejected')
-                                    {{-- Rejected: reopen to edit and resubmit --}}
-                                    <form action="{{ route('payroll.batch.reopen', $batch) }}" method="POST" style="display:inline;" id="reopen-form-{{ $batch->id }}">
-                                        @csrf
-                                    </form>
-                                    <button type="button" class="prl-action-btn reopen"
-                                        onclick="openResubmitModal({{ $batch->id }}, '{{ addslashes($batch->display_name) }}', '{{ $batch->period_start->format('M d') }} – {{ $batch->period_end->format('M d, Y') }}')">
-                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                        Edit &amp; Resubmit
-                                    </button>
-                                    <a href="{{ $detailsUrl }}" class="prl-action-btn view">
-                                        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        View
-                                    </a>
-                                @endif
-                            </div>
-                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6">
+                    <tr><td colspan="5">
                         <div class="prl-empty">
                             <div class="prl-empty-icon">
                                 <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

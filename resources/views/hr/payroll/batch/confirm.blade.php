@@ -14,7 +14,6 @@
 .prl-batch-hero::before { content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(200,41,42,0.12);pointer-events:none; }
 .prl-hero-left { position:relative;z-index:1; }
 .prl-hero-eyebrow { font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px; }
-.prl-hero-eyebrow.pending   { color:#d97706; }
 .prl-hero-eyebrow.submitted { color:#8b5cf6; }
 .prl-hero-eyebrow.rejected  { color:#ef4444; }
 .prl-hero-title  { font-size:1.1rem;font-weight:800;color:#fff;margin:0 0 6px;letter-spacing:-0.02em; }
@@ -143,9 +142,9 @@
     <div class="prl-batch-hero">
         <div class="prl-hero-left">
             <div class="prl-hero-eyebrow {{ $batch->status }}">
-                @if($batch->status === 'pending') ● Pending — Review &amp; edit before finalizing
-                @elseif($batch->status === 'submitted') ● Submitted — Awaiting approval
-                @elseif($batch->status === 'rejected') ● Rejected — Review note and reopen to edit
+                @if($batch->status === 'submitted' && !$batch->finalized_at) ● In progress — Review &amp; edit, then finalize
+                @elseif($batch->status === 'submitted') ● Submitted — Edit or awaiting approval
+                @elseif($batch->status === 'rejected') ● Rejected — Review note and edit to resubmit
                 @else ● {{ ucfirst($batch->status) }}
                 @endif
             </div>
@@ -187,15 +186,6 @@
                     </button>
                 </form>
                 {{-- Delete batch (destructive) --}}
-                <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST" id="deleteBatchForm">
-                    @csrf @method('DELETE')
-                </form>
-                <button type="button" class="prl-btn-danger" onclick="document.getElementById('deleteBatchModal').style.display='flex'">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    Delete Batch
-                </button>
-            @elseif($batch->status === 'submitted')
-                {{-- Submitted: delete only --}}
                 <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST" id="deleteBatchForm">
                     @csrf @method('DELETE')
                 </form>
@@ -265,7 +255,7 @@
     </div>
     @endif
 
-    {{-- Add employee panel (draft only) --}}
+    {{-- Add employee panel --}}
     @if($batch->isEditable())
     <div class="prl-add-emp-card">
         <div style="display:flex;gap:16px;width:100%;flex-wrap:wrap;align-items:flex-end;">
@@ -389,7 +379,6 @@
                         <th class="text-end">Deductions</th>
                         <th class="text-end">Net Pay</th>
                         <th class="text-center">Status</th>
-                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -420,7 +409,18 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="text-end"><span class="prl-mono">{{ $payroll->days_worked }}</span></td>
+                        <td class="text-end">
+                            @php
+                                $absCount = \App\Models\Attendance::where('user_id', $payroll->user_id)
+                                    ->whereBetween('date', [$batch->period_start, $batch->period_end])
+                                    ->where('status', 'absent')
+                                    ->count();
+                            @endphp
+                            <span class="prl-mono">{{ $payroll->days_worked }}</span>
+                            @if($absCount > 0)
+                                <br><span style="font-size:0.68rem;color:#c8292a;font-family:'DM Mono',monospace;">{{ $absCount }} absent</span>
+                            @endif
+                        </td>
                         <td class="text-end"><span class="prl-mono">&#8369;{{ number_format($payroll->basic_salary, 2) }}</span></td>
                         <td class="text-end">
                             @if($otAllowances > 0)
@@ -442,27 +442,9 @@
                                 {{ ucfirst($payroll->status) }}
                             </span>
                         </td>
-                        <td onclick="event.stopPropagation()">
-                            <div class="prl-actions">
-                                @if($batch->isEditable())
-                                    <form action="{{ route('payroll.batch.remove-employee', [$batch, $payroll]) }}"
-                                          method="POST" style="display:inline;">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="prl-action-btn remove" title="Remove from batch"
-                                            onclick="return confirm('Remove this employee from the batch?')">
-                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="prl-action-btn locked" title="Batch is locked">
-                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                                    </span>
-                                @endif
-                            </div>
-                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="{{ $batch->isEditable() ? 10 : 9 }}" style="text-align:center;padding:40px;color:#9ca3af;font-size:0.82rem;">No payroll records in this batch yet.</td></tr>
+                    <tr><td colspan="{{ $batch->isEditable() ? 9 : 8 }}" style="text-align:center;padding:40px;color:#9ca3af;font-size:0.82rem;">No payroll records in this batch yet.</td></tr>
                 @endforelse
                 </tbody>
             </table>

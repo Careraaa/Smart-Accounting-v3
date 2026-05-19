@@ -83,7 +83,6 @@
                         <th>Vehicle</th>
                         <th class="text-end">Short Amount</th>
                         <th class="text-center">Status</th>
-                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -101,17 +100,9 @@
                         <td class="prl-mono">{{ $shortRemittance->vehicle->plate_number }}</td>
                         <td class="text-end"><span class="prl-mono red">₱{{ number_format($shortRemittance->short_amount, 2) }}</span></td>
                         <td class="text-center"><span class="prl-status {{ $sc }}">{{ $label }}</span></td>
-                        <td onclick="event.stopPropagation()">
-                            <div class="prl-actions">
-                                <a href="{{ route('short-remittances.edit', $shortRemittance) }}" class="prl-action-btn edit" title="Resolve">
-                                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    Resolve
-                                </a>
-                            </div>
-                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7">
+                    <tr><td colspan="6">
                         <div class="prl-empty" style="padding:32px;">
                             <div class="prl-empty-icon"><svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
                             <p class="prl-empty-title">No pending short remittances</p>

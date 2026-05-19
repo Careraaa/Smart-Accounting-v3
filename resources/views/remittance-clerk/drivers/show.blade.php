@@ -6,82 +6,97 @@
 
 @section('content')
 <div class="col-12">
-    <div class="remui-page">
+<div class="remui-page">
+<div class="rem-wrap">
 
-        <div class="prl-topbar">
-            <div>
-                <h1 class="prl-topbar-title">{{ $driver->name }}</h1>
-                <p class="prl-topbar-sub">Driver profile and current status.</p>
+    {{-- Hero --}}
+    <div class="rem-hero">
+        <div class="rem-hero-left">
+            <p class="rem-hero-sub">Driver profile</p>
+            <h1 class="rem-hero-title">{{ $driver->name }}</h1>
+        </div>
+        <div class="rem-hero-right">
+            @php $sc = match($driver->status) { 'active' => 's-active', 'pending' => 's-pending', default => 's-inactive' }; @endphp
+            <span class="prl-status {{ $sc }}">{{ ucfirst($driver->status) }}</span>
+            <div class="rem-hero-chips">
+                <div class="rem-hero-chip">
+                    <span class="rem-hero-chip-lbl">License No.</span>
+                    <span class="rem-hero-chip-val">{{ $driver->license_number ?? '—' }}</span>
+                </div>
+                <div class="rem-hero-chip">
+                    <span class="rem-hero-chip-lbl">Date of Hire</span>
+                    <span class="rem-hero-chip-val">{{ $driver->date_of_hire?->format('M d, Y') ?? '—' }}</span>
+                </div>
             </div>
-            <div class="prl-topbar-actions">
-                <a href="{{ route('drivers.edit', $driver) }}" class="prl-btn-ghost">
-                    <i class="feather-edit-2"></i> Edit
+        </div>
+    </div>
+
+    {{-- Driver Information Card --}}
+    <div class="rem-card">
+        <div class="rem-card-head">
+            <div class="rem-card-icon blue">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <span class="rem-card-title">Driver Information</span>
+        </div>
+        <div class="rem-card-body">
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Full Name</span>
+                <span class="rem-brow-val">{{ $driver->name ?? '—' }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">License Number</span>
+                <span class="rem-brow-val">{{ $driver->license_number ?? '—' }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Contact Number</span>
+                <span class="rem-brow-val">{{ $driver->contact_number ?? '—' }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Email</span>
+                <span class="rem-brow-val">{{ $driver->email ?? '—' }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Gender</span>
+                <span class="rem-brow-val">{{ ucfirst(str_replace('_', ' ', $driver->gender ?? '—')) }}</span>
+            </div>
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Date of Hire</span>
+                <span class="rem-brow-val">{{ $driver->date_of_hire?->format('F d, Y') ?? '—' }}</span>
+            </div>
+            @if($driver->address)
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Address</span>
+                <span class="rem-brow-val" style="font-family:'Sora',sans-serif;text-align:right;max-width:60%;">{{ $driver->address }}</span>
+            </div>
+            @endif
+            <div class="rem-brow">
+                <span class="rem-brow-lbl">Status</span>
+                <span class="rem-brow-val">
+                    @php $sc = match($driver->status) { 'active' => 's-active', 'pending' => 's-pending', default => 's-inactive' }; @endphp
+                    <span class="prl-status {{ $sc }}">{{ ucfirst($driver->status) }}</span>
+                </span>
+            </div>
+
+            {{-- Footer --}}
+            <div class="rem-footer">
+                <a href="{{ route('drivers.edit', $driver) }}" class="rem-btn-edit">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Edit Driver
                 </a>
                 <form action="{{ route('drivers.destroy', $driver) }}" method="POST" class="d-inline"
                     data-sa-confirm="Are you sure you want to delete this driver?">
                     @csrf @method('DELETE')
-                    <button type="submit" class="prl-action-btn danger">
-                        <i class="feather-trash-2"></i> Delete
+                    <button type="submit" class="rem-btn-delete">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        Delete
                     </button>
                 </form>
-                <a href="{{ route('drivers.index') }}" class="prl-btn-ghost">
-                    <i class="feather-arrow-left"></i> Back
-                </a>
             </div>
         </div>
-
-        <div class="prl-detail-card">
-            <div class="prl-detail-head">
-                <h2 class="prl-detail-title">Driver Information</h2>
-            </div>
-            <div class="prl-detail-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Name</span>
-                        <div class="prl-field-value">{{ $driver->name ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">License Number</span>
-                        <div class="prl-field-value">{{ $driver->license_number ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Contact Number</span>
-                        <div class="prl-field-value">{{ $driver->contact_number ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Email</span>
-                        <div class="prl-field-value">{{ $driver->email ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Gender</span>
-                        <div class="prl-field-value">{{ ucfirst(str_replace('_', ' ', $driver->gender ?? '—')) }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Date of Hire</span>
-                        <div class="prl-field-value">{{ $driver->date_of_hire?->format('F d, Y') ?? '—' }}</div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <span class="prl-field-label">Status</span>
-                        <div class="mt-1">
-                            @if ($driver->status === 'active')
-                                <span class="prl-status s-active">Active</span>
-                            @elseif ($driver->status === 'pending')
-                                <span class="prl-status s-pending">Pending</span>
-                            @else
-                                <span class="prl-status s-inactive">Inactive</span>
-                            @endif
-                        </div>
-                    </div>
-                    @if ($driver->address)
-                    <div class="col-md-12 mb-3">
-                        <span class="prl-field-label">Address</span>
-                        <div class="prl-field-value">{{ $driver->address }}</div>
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
     </div>
-</div>
+
+</div>{{-- rem-wrap --}}
+</div>{{-- remui-page --}}
+</div>{{-- col-12 --}}
 @endsection

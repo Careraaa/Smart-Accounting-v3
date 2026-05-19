@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         daysWorked: g("prl_days_worked"),
         hoursWorked: g("prl_hours_worked"),
-        workedDays: g("prl_worked_days"),
+        daysAbsent: g("prl_days_absent"),
 
         basicDisplay: g("prl_basic_display"),
         basicInput: g("prl_basic_input"),
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (EL.daysWorked) EL.daysWorked.textContent = S.daysWorked;
         if (EL.hoursWorked)
             EL.hoursWorked.textContent = S.hoursWorked.toFixed(2);
-        if (EL.workedDays) EL.workedDays.textContent = S.daysWorked;
+        if (EL.daysAbsent) EL.daysAbsent.textContent = S.absentDays;
 
         // Basic salary (server-computed, hidden input is reference only)
         if (EL.basicDisplay) EL.basicDisplay.textContent = fmt(S.basicSalary);
@@ -336,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
             S.hoursWorked = data.hours_worked ?? 0;
             S.presentDays = data.present_days ?? 0;
             S.lateDays = data.late_days ?? 0;
-            S.absentDays = data.absent_days ?? 0;
+            S.absentDays = data.days_absent ?? 0;
             S.basicSalary = data.basic_salary ?? 0;
             S.dailyRate = data.daily_rate ?? 0;
             S.otHours = data.overtime_hours ?? 0;
