@@ -55,6 +55,9 @@
 .prl-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.1s; }
 .prl-table tbody tr:last-child { border-bottom:none; }
 .prl-table tbody tr:hover { background:#fafafa; }
+.prl-table tbody tr.prl-clickable { cursor:pointer; }
+.prl-table tbody tr.prl-clickable:hover { background:#f5f7ff; }
+.prl-table tbody tr.prl-clickable:active { background:#eef1fb; }
 .prl-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
 .prl-table-scroll { overflow-x:auto; }
 .prl-table-footer { padding:12px 16px;border-top:1px solid #f3f4f6;display:flex;justify-content:flex-end; }
@@ -196,7 +199,6 @@
                     <th>Employees</th>
                     <th class="text-end">Total Net Pay</th>
                     <th class="text-center">Status</th>
-                    <th class="text-end">Actions</th>
                 </tr></thead>
                 <tbody id="prlTbody">
                 @forelse($batches as $batch)
@@ -208,23 +210,16 @@
                             'released', 'paid' => 's-released',
                             default     => 's-submitted',
                         };
+                        $batchUrl = route('payroll.history.batch', ['start' => $batch->period_start->format('Y-m-d'), 'end' => $batch->period_end->format('Y-m-d')]);
                     @endphp
-                    <tr data-period="{{ strtolower($batch->period_start->format('M Y')) }}">
+                    <tr class="prl-clickable" data-period="{{ strtolower($batch->period_start->format('M Y')) }}" onclick="window.location='{{ $batchUrl }}'">
                         <td><span class="prl-period-tag">{{ $batch->period_start->format('M d') }} – {{ $batch->period_end->format('M d, Y') }}</span></td>
                         <td><span class="prl-emp-count"><strong>{{ $batch->payrolls->count() }}</strong> employees</span></td>
                         <td class="text-end"><span class="prl-mono c-bold">₱{{ number_format($batch->total_net_pay ?? $batch->payrolls->sum('net_pay') ?? 0, 0) }}</span></td>
                         <td class="text-center"><span class="prl-status {{ $sc }}">{{ ucfirst($batch->status ?? 'submitted') }}</span></td>
-                        <td>
-                            <div class="prl-actions">
-                                <a href="{{ route('payroll.history.batch', ['start' => $batch->period_start->format('Y-m-d'), 'end' => $batch->period_end->format('Y-m-d')]) }}"
-                                   class="prl-action-btn" title="View Batch">
-                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                </a>
-                            </div>
-                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5">
+                    <tr><td colspan="4">
                         <div class="prl-empty">
                             <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M8 21h8M12 17v4"/></svg></div>
                             <p class="prl-empty-title">No payroll batches yet</p>

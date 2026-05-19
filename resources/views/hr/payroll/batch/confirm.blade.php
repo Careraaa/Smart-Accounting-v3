@@ -394,10 +394,10 @@
                         $initials    = strtoupper(substr($payroll->user->first_name??'U',0,1).substr($payroll->user->last_name??'',0,1));
                         $sc          = $payroll->status === 'prepared' ? 's-prepared' : ($payroll->status === 'submitted' ? 's-submitted' : 's-pending');
                         $otAllowances = $payroll->total_allowances;
-                        $showUrl     = route('payroll.salary-computation.show', $payroll);
+                        $editUrl     = route('payroll.batch.edit-employee', [$batch, $payroll]);
                     @endphp
                     <tr class="{{ $batch->isEditable() ? 'clickable' : '' }}"
-                        @if($batch->isEditable()) data-href="{{ $showUrl }}" @endif
+                        @if($batch->isEditable()) data-href="{{ $editUrl }}" @endif
                         onclick="{{ $batch->isEditable() ? 'rowClick(event, this)' : '' }}"
                     >
                         @if($batch->isEditable())
@@ -441,10 +441,6 @@
                         <td onclick="event.stopPropagation()">
                             <div class="prl-actions">
                                 @if($batch->isEditable())
-                                    <a href="{{ route('payroll.batch.edit-employee', [$batch, $payroll]) }}"
-                                       class="prl-action-btn edit" title="Edit allowances &amp; deductions">
-                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </a>
                                     <form action="{{ route('payroll.batch.remove-employee', [$batch, $payroll]) }}"
                                           method="POST" style="display:inline;">
                                         @csrf @method('DELETE')

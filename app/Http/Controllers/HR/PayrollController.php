@@ -284,7 +284,7 @@ class PayrollController extends Controller
             $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
             $payroll->forceFill([
                 'batch_id' => $batch->id,
-                'status'   => 'prepared',
+                'status'   => 'pending',
             ])->save();
             PayrollDeductionService::applyLoanDeductions($payroll);
             $added++;
@@ -322,7 +322,7 @@ class PayrollController extends Controller
         $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
         $payroll->forceFill([
             'batch_id' => $batch->id,
-            'status'   => 'prepared',
+            'status'   => 'pending',
         ])->save();
         PayrollDeductionService::applyLoanDeductions($payroll);
 
