@@ -8,108 +8,115 @@ use App\Models\User;
 use App\Services\PayrollDeductionService;
 use App\Services\PayrollService;
 use Carbon\Carbon;
+use Database\Seeders\Support\SeedConfig;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class PayrollSeeder extends Seeder
 {
     public function run(): void
     {
-        // Seed a PREVIOUS payroll period (relative to today) so HR can still test generating the current period.
-        // Current period logic is in PayrollBatch::resolvePeriod(); this intentionally picks the cycle before it.
-        $today = Carbon::today();
-        if ($today->day <= 15) {
-            // Current: prev month 16–end; Seed: prev month 1–15
-            $periodStart = $today->copy()->subMonth()->startOfMonth()->startOfDay();
-            $periodEnd   = $today->copy()->subMonth()->setDay(15)->endOfDay();
-        } else {
-            // Current: this month 1–15; Seed: prev month 16–end
-            $periodStart = $today->copy()->subMonth()->setDay(16)->startOfDay();
-            $periodEnd   = $today->copy()->subMonth()->endOfMonth()->endOfDay();
-        }
-
         $generatedBy = User::where('role', 'hr')->orderBy('id')->value('id');
 
-        // Create or fetch batch (unique on period) — always submitted so it shows as historical
-        $batch = PayrollBatch::updateOrCreate(
-            ['period_start' => $periodStart->toDateString(), 'period_end' => $periodEnd->toDateString()],
-            ['status' => 'submitted', 'generated_by' => $generatedBy]
-        );
-
-        // Keep this scoped: seed only the demo employee accounts so we don't disturb other roles.
         $employees = User::where('role', 'employee')
-            ->whereIn('username', ['john.doe', 'angela.fernandez', 'juan.trabaho', 'maria.halos', 'carlo.pahinga'])
+            ->whereIn('id', SeedConfig::employeeIds())
+            ->orderBy('id')
             ->get();
 
         if ($employees->isEmpty()) {
-            $this->command?->warn('No demo employees found; skipping PayrollSeeder.');
+            $this->command?->warn('No employees found; skipping PayrollSeeder.');
             return;
         }
 
         /** @var PayrollService $payrollService */
         $payrollService = app(PayrollService::class);
 
-        foreach ($employees as $employee) {
-            // Ensure idempotency
-            $existing = Payroll::where('user_id', $employee->id)
-                ->whereDate('payroll_period_start', $periodStart->toDateString())
-                ->whereDate('payroll_period_end', $periodEnd->toDateString())
-                ->first();
+        $periods = SeedConfig::payrollPeriods();
+        $totalPayrolls = 0;
 
-            if ($existing) {
-                // Refresh batch link
-                $existing->forceFill(['batch_id' => $batch->id])->save();
-                continue;
-            }
+        foreach ($periods as $index => $period) {
+            $periodStart = Carbon::parse($period['start'])->startOfDay();
+            $periodEnd = Carbon::parse($period['end'])->endOfDay();
+            $isLatest = $index === count($periods) - 1;
 
-            // A little contextual “manual” lines so payslips look real
-            $manualAllowances = [];
-            $manualDeductions = [];
-
-            if ($employee->username === 'juan.trabaho') {
-                $manualAllowances[] = ['name' => 'Meal Allowance', 'amount' => 300.00];
-            }
-            if ($employee->username === 'maria.halos') {
-                $manualDeductions[] = ['name' => 'Uniform (Installment)', 'amount' => 200.00];
-            }
-            if ($employee->username === 'john.doe') {
-                $manualAllowances[] = ['name' => 'Communication Allowance', 'amount' => 250.00];
-            }
-
-            $payroll = $payrollService->generatePayrollForEmployee(
-                $employee,
-                $periodStart->copy(),
-                $periodEnd->copy(),
-                $manualAllowances,
-                $manualDeductions
+            $batch = PayrollBatch::updateOrCreate(
+                ['period_start' => $periodStart->toDateString(), 'period_end' => $periodEnd->toDateString()],
+                [
+                    'status' => $isLatest ? 'submitted' : 'submitted',
+                    'generated_by' => $generatedBy,
+                    'finalized_at' => $isLatest ? null : $periodEnd->copy()->addDays(3),
+                ]
             );
 
-            // Attach to batch
-            $payroll->forceFill(['batch_id' => $batch->id])->save();
+            foreach ($employees as $employee) {
+                $existing = Payroll::where('user_id', $employee->id)
+                    ->whereDate('payroll_period_start', $periodStart->toDateString())
+                    ->whereDate('payroll_period_end', $periodEnd->toDateString())
+                    ->first();
 
-            // Apply seeded cash advance + active salary loan deductions (ONCE)
-            PayrollDeductionService::applyLoanDeductions($payroll);
+                if ($existing) {
+                    $existing->forceFill(['batch_id' => $batch->id])->save();
+                    continue;
+                }
 
-            // Give variety: some prepared, some submitted, some approved
-            $status = match ($employee->username) {
-                'angela.fernandez' => 'submitted',
-                'juan.trabaho'     => 'submitted',
-                default            => 'prepared',
-            };
+                [$manualAllowances, $manualDeductions] = $this->manualLinesFor($employee, $index);
 
-            $payroll->forceFill([
-                'status'      => $status,
-                'approved_by' => null,
-                'payment_date' => null,
-            ])->save();
+                $payroll = $payrollService->generatePayrollForEmployee(
+                    $employee,
+                    $periodStart->copy(),
+                    $periodEnd->copy(),
+                    $manualAllowances,
+                    $manualDeductions
+                );
+
+                $payroll->forceFill(['batch_id' => $batch->id])->save();
+                PayrollDeductionService::applyLoanDeductions($payroll);
+
+                $status = $this->payrollStatusFor($employee->id, $index, $isLatest);
+                $payroll->forceFill([
+                    'status' => $status,
+                    'approved_by' => $status === 'approved' ? User::where('role', 'accountant')->value('id') : null,
+                    'payment_date' => $status === 'approved' ? $periodEnd->copy()->addDays(5)->toDateString() : null,
+                ])->save();
+
+                $totalPayrolls++;
+            }
         }
 
-        $count = Payroll::whereDate('payroll_period_start', $periodStart->toDateString())
-            ->whereDate('payroll_period_end', $periodEnd->toDateString())
-            ->whereIn('user_id', $employees->pluck('id')->all())
-            ->count();
+        $this->command?->info("PayrollSeeder: {$totalPayrolls} payroll records across " . count($periods) . ' periods (Feb–Apr 2026).');
+    }
 
-        $this->command?->info("✅ PayrollSeeder: seeded {$count} payroll records + line items for payslips.");
+    /**
+     * @return array{0: list<array{name: string, amount: float}>, 1: list<array{name: string, amount: float}>}
+     */
+    private function manualLinesFor(User $employee, int $periodIndex): array
+    {
+        $allowances = [];
+        $deductions = [];
+        $h = SeedConfig::hashFloat($employee->id, 'manual-' . $periodIndex);
+
+        if ($h > 0.7 && in_array($employee->department, ['Operation', 'Maintenance'], true)) {
+            $allowances[] = ['name' => 'Transport Allowance', 'amount' => 200.00];
+        }
+        if ($h > 0.85) {
+            $allowances[] = ['name' => 'Meal Allowance', 'amount' => 300.00];
+        }
+        if ($h < 0.15 && $periodIndex % 2 === 1) {
+            $deductions[] = ['name' => 'Uniform Installment', 'amount' => 150.00];
+        }
+
+        return [$allowances, $deductions];
+    }
+
+    private function payrollStatusFor(int $userId, int $periodIndex, bool $isLatest): string
+    {
+        if ($isLatest) {
+            return SeedConfig::hashFloat($userId, 'latest') > 0.5 ? 'submitted' : 'prepared';
+        }
+
+        if ($periodIndex >= 4) {
+            return SeedConfig::hashFloat($userId, 'apr') > 0.3 ? 'approved' : 'submitted';
+        }
+
+        return 'approved';
     }
 }
-

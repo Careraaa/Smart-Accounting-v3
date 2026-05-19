@@ -10,20 +10,32 @@ use Carbon\Carbon;
 class AttendanceService
 {
     /**
-     * Calculate total days worked (status = 'present') in a period for an employee.
-     * Absent days are NOT counted — daily-rate employees are only paid for days present.
+     * Days worked in period (present/late). Full day when no times logged;
+     * otherwise capped fraction of an 8-hour day from time in/out.
      *
-     * @param int $employeeId
-     * @param Carbon $periodStart
-     * @param Carbon $periodEnd
-     * @return int
+     * @return float
      */
     public function countWorkDaysInPeriod($employeeId, $periodStart, $periodEnd)
     {
-        return Attendance::where('user_id', $employeeId)
+        $attendances = Attendance::where('user_id', $employeeId)
             ->whereBetween('date', [$periodStart, $periodEnd])
-            ->where('status', 'present')
-            ->count();
+            ->whereIn('status', ['present', 'late'])
+            ->get();
+
+        $days = 0.0;
+
+        foreach ($attendances as $attendance) {
+            if ($attendance->time_in && $attendance->time_out) {
+                $timeIn = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $attendance->time_in);
+                $timeOut = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $attendance->time_out);
+                $hours = abs(($timeOut->timestamp - $timeIn->timestamp) / 3600);
+                $days += min($hours / 8, 1.0);
+            } else {
+                $days += 1.0;
+            }
+        }
+
+        return round($days, 2);
     }
 
     /**

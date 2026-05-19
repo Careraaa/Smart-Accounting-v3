@@ -2,70 +2,70 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class AllowanceDeductionSeeder extends Seeder
 {
-    /*
-     | Standing allowances and deductions per employee.
-     | These are employee-level records (no payroll_id) — active and recurring.
-     */
-
     public function run(): void
     {
-        $users = DB::table('users')
-            ->whereIn('username', ['carlo.pahinga'])
-            ->pluck('id', 'username');
+        $employeeIds = SeedConfig::employeeIds();
+        DB::table('allowances')->whereIn('user_id', $employeeIds)->whereNull('payroll_id')->delete();
+        DB::table('deductions')->whereIn('user_id', $employeeIds)->whereNull('payroll_id')->delete();
 
-        $carloId = $users['carlo.pahinga'];
+        $users = DB::table('users')->whereIn('id', $employeeIds)->get()->keyBy('id');
+        $allowances = [];
+        $deductions = [];
+        $now = now();
 
-        // -----------------------------------------------------------
-        // ALLOWANCES
-        // -----------------------------------------------------------
-        $allowances = [
-            // Carlo — rice subsidy (the man has priorities)
-            [
-                'user_id'        => $carloId,
-                'payroll_id'     => null,
-                'allowance_type' => 'Rice Subsidy',
-                'amount'         => 500.00,
-                'effective_date' => '2022-03-10',
-                'status'         => 'active',
-                'created_at'     => now(),
-                'updated_at'     => now(),
-            ],
-            [
-                'user_id'        => $carloId,
-                'payroll_id'     => null,
-                'allowance_type' => 'Meal Allowance',
-                'amount'         => 1500.00,
-                'effective_date' => '2022-03-10',
-                'status'         => 'active',
-                'created_at'     => now(),
-                'updated_at'     => now(),
-            ],
-        ];
+        foreach ($users as $user) {
+            $h = SeedConfig::hashFloat($user->id, 'allowance');
+            if ($h > 0.35) {
+                $allowances[] = [
+                    'user_id' => $user->id,
+                    'payroll_id' => null,
+                    'allowance_type' => 'Rice Subsidy',
+                    'amount' => 500.00,
+                    'effective_date' => $user->date_of_hire ?? '2022-01-01',
+                    'status' => 'active',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+            if ($h > 0.55 && in_array($user->department, ['Operation', 'Maintenance'], true)) {
+                $allowances[] = [
+                    'user_id' => $user->id,
+                    'payroll_id' => null,
+                    'allowance_type' => 'Transport Allowance',
+                    'amount' => 800.00,
+                    'effective_date' => $user->date_of_hire ?? '2022-01-01',
+                    'status' => 'active',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+            if ((bool) $user->has_sss && SeedConfig::hashFloat($user->id, 'sss-ded') > 0.4) {
+                $deductions[] = [
+                    'user_id' => $user->id,
+                    'payroll_id' => null,
+                    'deduction_type' => 'SSS',
+                    'amount' => min(450.00, round((float) $user->salary_rate * 0.045, 2)),
+                    'effective_date' => $user->date_of_hire ?? '2022-01-01',
+                    'status' => 'active',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
 
-        DB::table('allowances')->insert($allowances);
+        if ($allowances) {
+            DB::table('allowances')->insert($allowances);
+        }
+        if ($deductions) {
+            DB::table('deductions')->insert($deductions);
+        }
 
-        // -----------------------------------------------------------
-        // DEDUCTIONS
-        // -----------------------------------------------------------
-        $deductions = [
-            // Carlo — SSS only (Operation department, has government contributions)
-            [
-                'user_id'        => $carloId,
-                'payroll_id'     => null,
-                'deduction_type' => 'SSS',
-                'amount'         => 450.00,
-                'effective_date' => '2022-03-10',
-                'status'         => 'active',
-                'created_at'     => now(),
-                'updated_at'     => now(),
-            ],
-        ];
-
-        DB::table('deductions')->insert($deductions);
+        $this->command?->info('AllowanceDeductionSeeder: ' . count($allowances) . ' allowances, ' . count($deductions) . ' deductions.');
     }
 }

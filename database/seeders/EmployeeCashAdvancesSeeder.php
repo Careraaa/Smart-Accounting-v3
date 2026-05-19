@@ -2,59 +2,64 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class EmployeeCashAdvancesSeeder extends Seeder
 {
     public function run(): void
     {
-        $employees = DB::table('users')
-            ->where('role', 'employee')
-            ->select('id', 'username')
-            ->get()
-            ->keyBy('username');
+        $employeeIds = SeedConfig::employeeIds();
+        $hrId = DB::table('users')->where('role', 'hr')->orderBy('id')->value('id');
 
-        $hr = DB::table('users')->where('role', 'hr')->orderBy('id')->first();
-        $hrId = $hr->id ?? null;
+        DB::table('cash_advances')->whereIn('user_id', $employeeIds)->delete();
 
-        $usernames = ['john.doe', 'angela.fernandez', 'juan.trabaho', 'maria.halos', 'carlo.pahinga'];
-        $targetIds = $employees->only($usernames)->pluck('id')->values()->all();
-        if (!$targetIds) {
-            $this->command?->warn('Demo employee users not found; skipping EmployeeCashAdvancesSeeder.');
-            return;
-        }
+        $hasRejection = Schema::hasColumn('cash_advances', 'rejection_reason');
+        $rows = [];
 
-        DB::table('cash_advances')->whereIn('user_id', $targetIds)->delete();
-
-        $now = now();
-        $rows = [
-            [
-                'user_id' => $employees['carlo.pahinga']->id ?? $targetIds[0],
-                'amount' => 3500.00,
-                'request_date' => '2026-03-05',
-                'approval_date' => '2026-03-06',
-                'status' => 'rejected',
-                'approved_by' => $hrId,
-                'approved_at' => $now->copy()->subDays(45),
-                'rejection_reason' => "Need clearer reason + supporting proof (if medical/urgent).",
-                'deducted_payroll_id' => null,
-                'notes' => "Emergency cash needed ASAP.",
-                'created_at' => $now->copy()->subDays(46),
-                'updated_at' => $now->copy()->subDays(45),
-            ],
+        $samples = [
+            ['amount' => 5000, 'request' => '2026-02-05', 'approval' => '2026-02-06', 'status' => 'approved', 'notes' => 'Tuition installment for dependent.'],
+            ['amount' => 3000, 'request' => '2026-03-12', 'approval' => '2026-03-13', 'status' => 'approved', 'notes' => 'Medical checkup and prescribed medication.'],
+            ['amount' => 2500, 'request' => '2026-04-08', 'approval' => null, 'status' => 'pending', 'notes' => 'Home appliance repair after power surge.'],
+            ['amount' => 4000, 'request' => '2026-03-20', 'approval' => '2026-03-21', 'status' => 'rejected', 'notes' => 'Urgent travel expense.', 'rejection' => 'Please attach itinerary or supporting receipt before approval.'],
         ];
 
-        // If the rejection_reason column doesn't exist yet, drop it from rows to avoid SQL error.
-        $hasRejection = \Illuminate\Support\Facades\Schema::hasColumn('cash_advances', 'rejection_reason');
-        if (!$hasRejection) {
-            foreach ($rows as &$r) {
-                unset($r['rejection_reason']);
+        foreach (SeedConfig::employeeIds() as $i => $userId) {
+            if (SeedConfig::hashFloat($userId, 'ca') < 0.55) {
+                continue;
             }
+
+            $s = $samples[$i % count($samples)];
+            $approved = $s['status'] === 'approved';
+
+            $row = [
+                'user_id' => $userId,
+                'amount' => $s['amount'],
+                'request_date' => $s['request'],
+                'approval_date' => $s['approval'],
+                'status' => $s['status'],
+                'approved_by' => in_array($s['status'], ['approved', 'rejected'], true) ? $hrId : null,
+                'approved_at' => $s['approval'] ? $s['approval'] . ' 14:00:00' : null,
+                'rejection_reason' => ($s['status'] === 'rejected') ? ($s['rejection'] ?? null) : null,
+                'deducted_payroll_id' => null,
+                'notes' => $s['notes'],
+                'created_at' => $s['request'] . ' 08:30:00',
+                'updated_at' => ($s['approval'] ?? $s['request']) . ' 15:00:00',
+            ];
+
+            if (!$hasRejection) {
+                unset($row['rejection_reason']);
+            }
+
+            $rows[] = $row;
         }
 
-        DB::table('cash_advances')->insert($rows);
-        $this->command?->info('✅ EmployeeCashAdvancesSeeder: seeded ' . count($rows) . ' cash advances.');
+        if ($rows) {
+            DB::table('cash_advances')->insert($rows);
+        }
+
+        $this->command?->info('EmployeeCashAdvancesSeeder: ' . count($rows) . ' cash advances.');
     }
 }
-
