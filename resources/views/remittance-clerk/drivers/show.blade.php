@@ -9,6 +9,14 @@
 <div class="remui-page">
 <div class="rem-wrap">
 
+    {{-- Back --}}
+    <div style="margin-bottom:12px;">
+        <a href="{{ route('drivers.index') }}" class="rem-btn-edit">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back
+        </a>
+    </div>
+
     {{-- Hero --}}
     <div class="rem-hero">
         <div class="rem-hero-left">
@@ -16,8 +24,6 @@
             <h1 class="rem-hero-title">{{ $driver->name }}</h1>
         </div>
         <div class="rem-hero-right">
-            @php $sc = match($driver->status) { 'active' => 's-active', 'pending' => 's-pending', default => 's-inactive' }; @endphp
-            <span class="prl-status {{ $sc }}">{{ ucfirst($driver->status) }}</span>
             <div class="rem-hero-chips">
                 <div class="rem-hero-chip">
                     <span class="rem-hero-chip-lbl">License No.</span>
