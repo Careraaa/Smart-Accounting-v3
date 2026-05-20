@@ -122,9 +122,13 @@
 .prl-flash.info    { background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8; }
 @keyframes saFlashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
 
-.prl-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa;flex-wrap:wrap;gap:10px; }
-.prl-pagination-info  { font-size:0.75rem;color:#9ca3af; }
-.prl-pagination-info strong { color:#374151; }
+/* Pagination strip */
+.prl-pagination-strip,
+.lv-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa;flex-wrap:wrap;gap:10px; }
+.prl-pagination-info,
+.lv-pagination-info  { font-size:0.75rem;color:#9ca3af; }
+.prl-pagination-info strong,
+.lv-pagination-info strong { color:#374151; }
 
 /* Account role / status (super admin) */
 .sa-role {

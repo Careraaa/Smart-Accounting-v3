@@ -152,15 +152,18 @@
         </div>
 
         {{-- Pagination --}}
-        @if($users->count() > 0)
+        @if(method_exists($users, 'hasPages') && $users->hasPages())
         <div class="prl-pagination-strip">
-            <p class="prl-pagination-info">
-                Showing <strong>{{ $users->firstItem() }}</strong> to <strong>{{ $users->lastItem() }}</strong>
-                of <strong>{{ $users->total() }}</strong> users
-            </p>
-            <div>
-                {{ $users->links() }}
+
+            <div class="prl-pagination-info">
+                Showing
+                <strong>{{ $users->firstItem() }}</strong>–<strong>{{ $users->lastItem() }}</strong>
+                of
+                <strong>{{ $users->total() }}</strong> users
             </div>
+
+            {{ $users->withQueryString()->links('pagination::bootstrap-5') }}
+
         </div>
         @endif
     </div>
