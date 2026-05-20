@@ -21,10 +21,42 @@ class ReportController extends Controller
         $week = 1;
 
         $remittances = $this->filterRemittances($period, $month, $year, $week);
+        
+        // Group remittances by date and paginate
+        $groupedRemittances = collect($remittances)->groupBy(function ($item) {
+            return $item->remittance_date->format('Y-m-d');
+        })->map(function ($group) {
+            return [
+                'remittance_date' => $group->first()->remittance_date,
+                'total_collection' => $group->sum('total_collection'),
+                'total_expenses' => $group->sum('total_expenses'),
+                'net_remittance' => $group->sum('net_remittance'),
+                'is_short_remittance' => $group->where('is_short_remittance', true)->count() > 0,
+            ];
+        })->sortBy('remittance_date')->values();
+        
+        // Paginate the grouped results
+        $page = 1;
+        $perPage = 10;
+        $groupedRemittances = new \Illuminate\Pagination\Paginator(
+            $groupedRemittances->forPage($page, $perPage),
+            $perPage,
+            $page,
+            [
+                'path' => route('reports.remittance-report'),
+                'query' => [
+                    'period' => $period,
+                    'month' => $month,
+                    'year' => $year,
+                    'week' => $week,
+                ],
+            ]
+        );
+        
         $totals = $this->calculateTotals($remittances);
 
         return view('remittance-clerk.reports.remittance-report', compact(
-            'remittances',
+            'groupedRemittances',
             'period',
             'month',
             'year',
@@ -40,10 +72,37 @@ class ReportController extends Controller
         $week = $request->get('week', 1);
 
         $remittances = $this->filterRemittances($period, $month, $year, $week);
+        
+        // Group remittances by date and paginate
+        $groupedRemittances = collect($remittances)->groupBy(function ($item) {
+            return $item->remittance_date->format('Y-m-d');
+        })->map(function ($group) {
+            return [
+                'remittance_date' => $group->first()->remittance_date,
+                'total_collection' => $group->sum('total_collection'),
+                'total_expenses' => $group->sum('total_expenses'),
+                'net_remittance' => $group->sum('net_remittance'),
+                'is_short_remittance' => $group->where('is_short_remittance', true)->count() > 0,
+            ];
+        })->sortBy('remittance_date')->values();
+        
+        // Paginate the grouped results
+        $page = $request->get('page', 1);
+        $perPage = 10;
+        $groupedRemittances = new \Illuminate\Pagination\Paginator(
+            $groupedRemittances->forPage($page, $perPage),
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+        
         $totals = $this->calculateTotals($remittances);
 
         return view('remittance-clerk.reports.remittance-report', compact(
-            'remittances',
+            'groupedRemittances',
             'period',
             'month',
             'year',

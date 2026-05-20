@@ -2,6 +2,12 @@
 
 @push('styles')
     @include('remittance-clerk._ui-styles')
+    <style>
+        /* Pagination strip */
+        .lv-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa; }
+        .lv-pagination-info  { font-size:0.75rem;color:#9ca3af; }
+        .lv-pagination-info strong { color:#374151; }
+    </style>
 @endpush
 
 @section('content')
@@ -117,6 +123,18 @@
                 </tbody>
             </table>
         </div>
+        {{-- Pagination --}}
+        @if(method_exists($pendingRemittances, 'hasPages') && $pendingRemittances->hasPages())
+        <div class="lv-pagination-strip">
+            <div class="lv-pagination-info">
+                Showing
+                <strong>{{ $pendingRemittances->firstItem() }}</strong>–<strong>{{ $pendingRemittances->lastItem() }}</strong>
+                of
+                <strong>{{ $pendingRemittances->total() }}</strong> pending remittances
+            </div>
+            {{ $pendingRemittances->withQueryString()->links('pagination::bootstrap-5') }}
+        </div>
+        @endif
     </div>
 
     {{-- Approved Section --}}
@@ -160,6 +178,18 @@
                 </tbody>
             </table>
         </div>
+        {{-- Pagination --}}
+        @if(method_exists($approvedRemittances, 'hasPages') && $approvedRemittances->hasPages())
+        <div class="lv-pagination-strip">
+            <div class="lv-pagination-info">
+                Showing
+                <strong>{{ $approvedRemittances->firstItem() }}</strong>–<strong>{{ $approvedRemittances->lastItem() }}</strong>
+                of
+                <strong>{{ $approvedRemittances->total() }}</strong> approved remittances
+            </div>
+            {{ $approvedRemittances->withQueryString()->links('pagination::bootstrap-5') }}
+        </div>
+        @endif
     </div>
 
 </div>{{-- col-12 --}}

@@ -243,23 +243,15 @@
     border-radius: 6px;
     margin-top: 8px;
 }
+/* Pagination strip */
+.lv-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa; }
+.lv-pagination-info  { font-size:0.75rem;color:#9ca3af; }
+.lv-pagination-info strong { color:#374151; }
 </style>
 @endpush
 
 @section('content')
 @php
-    $groupedRemittances = $remittances->groupBy(function ($item) {
-        return $item->remittance_date->format('Y-m-d');
-    })->map(function ($group) {
-        return [
-            'remittance_date' => $group->first()->remittance_date,
-            'total_collection' => $group->sum('total_collection'),
-            'total_expenses' => $group->sum('total_expenses'),
-            'net_remittance' => $group->sum('net_remittance'),
-            'is_short_remittance' => $group->where('is_short_remittance', true)->count() > 0,
-        ];
-    })->sortBy('remittance_date')->values();
-
     $periodLabel = match ($period) {
         'weekly' => 'Week ' . $week . ', ' . $year,
         'monthly' => \Carbon\Carbon::createFromDate($year, $month, 1)->format('F Y'),
@@ -384,6 +376,18 @@
                 </tbody>
             </table>
         </div>
+        {{-- Pagination --}}
+        @if(method_exists($groupedRemittances, 'hasPages') && $groupedRemittances->hasPages())
+        <div class="lv-pagination-strip">
+            <div class="lv-pagination-info">
+                Showing
+                <strong>{{ $groupedRemittances->firstItem() }}</strong>–<strong>{{ $groupedRemittances->lastItem() }}</strong>
+                of
+                <strong>{{ $groupedRemittances->total() }}</strong> daily totals
+            </div>
+            {{ $groupedRemittances->withQueryString()->links('pagination::bootstrap-5') }}
+        </div>
+        @endif
     </div>
 </div>
 @endsection

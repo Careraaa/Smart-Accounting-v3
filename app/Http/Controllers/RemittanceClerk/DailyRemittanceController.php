@@ -29,17 +29,17 @@ class DailyRemittanceController extends Controller
             $sortOrder = 'desc';
         }
         
-        $allRemittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
-            ->orderBy($sortBy, $sortOrder)->get();
+        // Paginate pending remittances
+        $pendingRemittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
+            ->where('status', 'pending')
+            ->orderBy($sortBy, $sortOrder)
+            ->paginate(15, ['*'], 'pending_page');
         
-        // Separate remittances by status
-        $pendingRemittances = $allRemittances->filter(function ($remittance) {
-            return $remittance->status === 'pending';
-        });
-        
-        $approvedRemittances = $allRemittances->filter(function ($remittance) {
-            return $remittance->status === 'approved';
-        });
+        // Paginate approved remittances
+        $approvedRemittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
+            ->where('status', 'approved')
+            ->orderBy($sortBy, $sortOrder)
+            ->paginate(15, ['*'], 'approved_page');
         
         // Calculate statistics
         $totalRemittances = DailyRemittance::count();
