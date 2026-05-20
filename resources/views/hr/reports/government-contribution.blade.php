@@ -67,10 +67,10 @@
     background: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 14px 16px;
+    padding: 12px 16px;
     display: flex;
-    align-items: flex-end;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 20px;
     flex-wrap: wrap;
 }
@@ -78,14 +78,14 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-    min-width: 150px;
+    min-width: 140px;
     flex: 1;
 }
 .gc-filter-group label {
-    font-size: 0.67rem;
+    font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.09em;
     color: #9ca3af;
     margin: 0;
 }
@@ -93,49 +93,20 @@
 .gc-filter-group select {
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 0.8rem;
+    padding: 8px 12px;
+    font-size: 0.82rem;
     font-family: 'Sora', sans-serif;
     color: #111827;
     background: #f9fafb;
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
 }
 .gc-filter-group input:focus,
 .gc-filter-group select:focus {
     border-color: #c8292a;
     background: #fff;
     box-shadow: 0 0 0 3px rgba(200, 41, 42, 0.08);
-}
-.gc-filter-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
-}
-.gc-reset-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #6b7280;
-    background: #fff;
-    text-decoration: none;
-    transition: all 0.14s ease;
-    white-space: nowrap;
-}
-.gc-reset-btn:hover {
-    border-color: #c8292a;
-    color: #c8292a;
-    background: #fff5f5;
-}
-@media (max-width: 768px) {
-    .gc-filter-actions { margin-left: 0; width: 100%; }
-    .gc-filter-actions .gc-reset-btn { flex: 1; }
 }
 
 .gc-stats {
@@ -285,6 +256,11 @@
     border-radius: 6px;
     margin-top: 8px;
 }
+
+/* Pagination strip */
+.gc-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa; }
+.gc-pagination-info  { font-size:0.75rem;color:#9ca3af; }
+.gc-pagination-info strong { color:#374151; }
 </style>
 @endpush
 
@@ -325,7 +301,7 @@
             <label for="gc-date-to">Date to</label>
             <input type="date" id="gc-date-to" name="date_to" value="{{ $dateTo }}" onchange="this.form.submit()">
         </div>
-        <div class="gc-filter-group" style="min-width:200px;flex:1.4;">
+        <div class="gc-filter-group">
             <label for="gc-employee">Employee</label>
             <select id="gc-employee" name="employee_id" onchange="this.form.submit()">
                 <option value="">All employees</option>
@@ -336,33 +312,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="gc-filter-actions">
-            <a href="{{ route('reports.government-contribution') }}" class="gc-reset-btn">Reset filters</a>
-        </div>
     </form>
-
-    <div class="gc-stats">
-        <div class="gc-stat s-emp">
-            <div class="gc-stat-label">Employee share</div>
-            <div class="gc-stat-value">₱{{ number_format($empTotal, 2) }}</div>
-            <div class="gc-stat-sub">SSS · Pag-IBIG · PhilHealth</div>
-        </div>
-        <div class="gc-stat s-er">
-            <div class="gc-stat-label">Employer share</div>
-            <div class="gc-stat-value">₱{{ number_format($erTotal, 2) }}</div>
-            <div class="gc-stat-sub">Matching employer totals</div>
-        </div>
-        <div class="gc-stat s-tot">
-            <div class="gc-stat-label">Grand total</div>
-            <div class="gc-stat-value">₱{{ number_format($grandTotal, 2) }}</div>
-            <div class="gc-stat-sub">Combined contributions</div>
-        </div>
-        <div class="gc-stat s-rec">
-            <div class="gc-stat-label">Records</div>
-            <div class="gc-stat-value">{{ count($contributions) }}</div>
-            <div class="gc-stat-sub">Payroll rows in range</div>
-        </div>
-    </div>
 
     <div class="gc-table-card">
         <div class="gc-table-head">
@@ -452,5 +402,18 @@
             </table>
         </div>
     </div>
+    {{-- Pagination --}}
+    @if($contributions->hasPages())
+    <div class="gc-pagination-strip">
+        <div class="gc-pagination-info">
+            Showing
+            <strong>{{ $contributions->firstItem() }}</strong>–<strong>{{ $contributions->lastItem() }}</strong>
+            of
+            <strong>{{ $contributions->total() }}</strong> contribution records
+        </div>
+
+        {{ $contributions->withQueryString()->links('pagination::bootstrap-5') }}
+    </div>
+    @endif
 </div>
 @endsection

@@ -86,6 +86,11 @@ class PayrollBatch extends Model
         return $this->payrolls->sum('net_pay');
     }
 
+    public function getTotalGrossPayAttribute(): float
+    {
+        return $this->payrolls->sum('gross_pay');
+    }
+
     public function getEmployeeCountAttribute(): int
     {
         return $this->payrolls->count();

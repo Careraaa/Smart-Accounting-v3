@@ -69,6 +69,11 @@
 .lv-empty-icon { width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#d1d5db; }
 .lv-empty-title { font-size:0.9rem;font-weight:700;color:#374151;margin:0 0 6px; }
 .lv-empty-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
+
+/* Pagination strip */
+.lv-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa; }
+.lv-pagination-info  { font-size:0.75rem;color:#9ca3af; }
+.lv-pagination-info strong { color:#374151; }
 </style>
 @endpush
 
@@ -191,8 +196,20 @@
             </div>
         </div>
 
-        @if($leaves->hasPages())
-        <div style="padding:14px 16px;border-top:1px solid #f3f4f6;">{{ $leaves->links() }}</div>
+        {{-- Pagination --}}
+        @if(method_exists($leaves, 'hasPages') && $leaves->hasPages())
+        <div class="lv-pagination-strip">
+
+            <div class="lv-pagination-info">
+                Showing
+                <strong>{{ $leaves->firstItem() }}</strong>–<strong>{{ $leaves->lastItem() }}</strong>
+                of
+                <strong>{{ $leaves->total() }}</strong> leave requests
+            </div>
+
+            {{ $leaves->withQueryString()->links('pagination::bootstrap-5') }}
+
+        </div>
         @endif
     </div>
 

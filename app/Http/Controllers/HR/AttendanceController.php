@@ -19,7 +19,7 @@ class AttendanceController extends Controller
         $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
             ->orderBy('department')
             ->orderBy('last_name')
-            ->get();
+            ->paginate(10);
 
         // Today's attendance keyed by employee id
         $todayAttendance = Attendance::whereDate('date', today())

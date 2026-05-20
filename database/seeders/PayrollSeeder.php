@@ -110,7 +110,7 @@ class PayrollSeeder extends Seeder
     private function payrollStatusFor(int $userId, int $periodIndex, bool $isLatest): string
     {
         if ($isLatest) {
-            return SeedConfig::hashFloat($userId, 'latest') > 0.5 ? 'submitted' : 'prepared';
+            return SeedConfig::hashFloat($userId, 'latest') > 0.5 ? 'submitted' : 'submitted';
         }
 
         if ($periodIndex >= 4) {

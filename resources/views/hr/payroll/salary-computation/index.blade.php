@@ -109,6 +109,34 @@
 .prl-action-btn.view    { background:#f3f4f6;color:#374151;border:1px solid #e5e7eb; }
 .prl-action-btn.view:hover { background:#111827;color:#fff;border-color:#111827; }
 
+/* ── Batch cards ────────────────────────────────────────────── */
+.prl-pending-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
+.prl-pending-header { padding:14px 18px;border-bottom:1px solid #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px; }
+.prl-pending-title { font-size:0.85rem;font-weight:700;color:#111827;display:flex;align-items:center;gap:8px;margin:0; }
+.prl-pending-sub { font-size:0.75rem;color:#9ca3af;margin:0; }
+.prl-pending-body { padding:0; }
+.prl-batch-grid { display:flex;flex-direction:column;gap:0; }
+@media (max-width:900px) { .prl-batch-grid { flex-direction:column; } }
+.prl-batch-col { width:100%;border-bottom:1px solid #f3f4f6; }
+.prl-batch-col:last-child { border-bottom:none; }
+.prl-batch-col-full { width:100%; }
+.prl-batch-card-link { text-decoration:none;color:inherit;display:block; }
+.prl-batch-card { background:#fff;border:none;border-radius:0;padding:0;transition:background 0.15s;cursor:pointer; }
+.prl-batch-card:hover { background:#fafafa; }
+.prl-batch-card-inner { display:flex;align-items:center;gap:18px;padding:18px 20px;flex-wrap:nowrap;justify-content:flex-start; }
+.prl-batch-card-icon { width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:1.35rem; }
+.prl-batch-card-icon.a { background:linear-gradient(135deg, #c8292a, #9f1e1f); }
+.prl-batch-card-icon.b { background:linear-gradient(135deg, #0284c7, #0369a1); }
+.prl-batch-card-content { flex:0 1 auto;min-width:200px; }
+.prl-batch-card-title { font-size:0.9rem;font-weight:700;color:#111827;margin:0 0 4px;line-height:1.2; }
+.prl-batch-card-date { font-size:0.75rem;color:#9ca3af;font-family:'DM Mono',monospace;margin:0; }
+.prl-batch-card-stats { display:flex;align-items:center;gap:18px;margin-left:auto;flex-shrink:0;flex-wrap:nowrap;justify-content:flex-end; }
+.prl-batch-status { display:inline-flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0;height:24px;min-width:100px; }
+.prl-batch-stat { display:flex;flex-direction:column;align-items:center;text-align:center;flex-shrink:0;min-width:80px;justify-content:center; }
+.prl-batch-stat small { font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;margin-bottom:4px;display:block; }
+.prl-batch-stat strong { font-family:'DM Mono',monospace;font-size:0.92rem;color:#111827;line-height:1.2;white-space:nowrap; }
+.prl-batch-card-arrow { width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:#d1d5db;flex-shrink:0;font-size:1.1rem;margin-left:12px; }
+
 /* Empty state */
 .prl-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 24px;text-align:center; }
 .prl-empty-icon  { width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#d1d5db; }
@@ -200,94 +228,82 @@
         </div>
     </div>
 
-    {{-- Filter bar --}}
-    <div class="prl-filter-bar">
-        <div class="prl-search-wrap">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" class="prl-search-input" id="batchSearch" placeholder="Search batch…">
+    {{-- Pending batches ────────────────────────────────────────── --}}
+    <div class="prl-pending-card">
+        <div class="prl-pending-header">
+            <span class="prl-pending-title">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:-2px;color:#c8292a;"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>Payroll Batches
+            </span>
         </div>
-        <select class="prl-filter-select" id="statusFilter">
-            <option value="">All Statuses</option>
-            <option value="submitted">Submitted</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-        </select>
-    </div>
-
-    {{-- Batch table --}}
-    <div class="prl-table-card">
-        <div class="prl-table-scroll">
-            <table class="prl-table">
-                <thead>
-                    <tr>
-                        <th>Batch</th>
-                        <th>Period</th>
-                        <th class="text-center">Employees</th>
-                        <th class="text-end">Total Net Pay</th>
-                        <th class="text-center">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="batchTbody">
+        <div class="prl-pending-body">
+            <div class="prl-batch-grid">
                 @forelse($batches as $batch)
                     @php
-                        $sc = match($batch->status) {
-                            'approved'  => 's-approved',
-                            'rejected'  => 's-rejected',
-                            'submitted' => 's-submitted',
-                            default     => 's-pending',
-                        };
-                        $detailsUrl = route('payroll.batch.details', $batch);
+                        $startDate = $batch->period_start;
+                        $endDate   = $batch->period_end;
+                        $isFirst   = $startDate->format('d') <= 15;
+                        $variant   = $isFirst ? 'a' : 'b';
+                        $statusColors = [
+                            'pending' => ['bg' => '#fef3c7', 'color' => '#92400e', 'label' => 'Pending'],
+                            'submitted' => ['bg' => '#f5f3ff', 'color' => '#7c3aed', 'label' => 'Submitted'],
+                            'approved' => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'label' => 'Approved'],
+                            'rejected' => ['bg' => '#fff0f0', 'color' => '#c8292a', 'label' => 'Rejected'],
+                        ];
+                        $statusInfo = $statusColors[$batch->status] ?? $statusColors['pending'];
                     @endphp
-                    {{-- Hidden reopen form (used by the resubmit modal) --}}
-                    @if(in_array($batch->status, ['submitted', 'rejected']))
-                    <form action="{{ route('payroll.batch.reopen', $batch) }}" method="POST"
-                          style="display:none;" id="reopen-form-{{ $batch->id }}">@csrf</form>
-                    @endif
-                    <tr
-                        data-name="{{ strtolower($batch->display_name) }}"
-                        data-status="{{ $batch->status }}"
-                        onclick="window.location='{{ $detailsUrl }}'"
-                    >
-                        <td>
-                            <div class="prl-batch-name">{{ $batch->display_name }}</div>
-                            <div class="prl-batch-sub">
-                                Created {{ $batch->created_at->format('M d, Y') }}
-                                @if($batch->finalized_at) &middot; Submitted {{ $batch->finalized_at->format('M d') }} @endif
+                    <div class="prl-batch-col">
+                        <a href="{{ route('payroll.batch.details', $batch) }}" class="prl-batch-card-link">
+                            <div class="prl-batch-card">
+                                <div class="prl-batch-card-inner">
+                                    <div class="prl-batch-card-icon {{ $variant }}">
+                                        @if($isFirst)
+                                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        @else
+                                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        @endif
+                                    </div>
+                                    <div class="prl-batch-card-content">
+                                        <h6 class="prl-batch-card-title">
+                                            {{ $startDate->format('F Y') }} — {{ $isFirst ? '1st' : '2nd' }} half
+                                        </h6>
+                                        <div class="prl-batch-card-date">
+                                            {{ $startDate->format('M d') }} – {{ $endDate->format('M d, Y') }}
+                                        </div>
+                                    </div>
+                                    <div class="prl-batch-card-stats">
+                                        <span class="prl-batch-status" style="background:{{ $statusInfo['bg'] }};color:{{ $statusInfo['color'] }};">
+                                            {{ $statusInfo['label'] }}
+                                        </span>
+                                        <div class="prl-batch-stat">
+                                            <small>Employees</small>
+                                            <strong>{{ $batch->employee_count }}</strong>
+                                        </div>
+                                        <div class="prl-batch-stat">
+                                            <small>Gross</small>
+                                            <strong>₱{{ number_format($batch->total_gross_pay ?? 0, 2) }}</strong>
+                                        </div>
+                                        <div class="prl-batch-stat">
+                                            <small>Net</small>
+                                            <strong style="color:#16a34a;">₱{{ number_format($batch->total_net_pay, 2) }}</strong>
+                                        </div>
+                                        <div class="prl-batch-card-arrow">
+                                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </td>
-                        <td>
-                            <span class="prl-period-tag">
-                                {{ $batch->period_start->format('M d') }} &ndash; {{ $batch->period_end->format('M d, Y') }}
-                            </span>
-                        </td>
-                        <td class="text-center" style="font-family:'DM Mono',monospace;font-weight:700;color:#374151;">
-                            {{ $batch->employee_count }}
-                        </td>
-                        <td class="text-end">
-                            <span class="prl-mono bold">&#8369;{{ number_format($batch->total_net_pay, 2) }}</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="prl-status {{ $sc }}">{{ ucfirst($batch->status) }}</span>
-                        </td>
-                    </tr>
+                        </a>
+                    </div>
                 @empty
-                    <tr><td colspan="5">
-                        <div class="prl-empty">
+                    <div class="prl-batch-col-full">
+                        <div class="prl-empty" style="padding:40px 20px;">
                             <div class="prl-empty-icon">
                                 <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </div>
-                            <p class="prl-empty-title">No payroll batches yet</p>
-                            <p class="prl-empty-sub">Click "Generate Payroll Batch" above to get started.</p>
+                            <p class="prl-empty-title">No batches pending approval</p>
                         </div>
-                    </td></tr>
+                    </div>
                 @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div id="batchNoResults" style="display:none;">
-            <div class="prl-empty" style="padding:28px;">
-                <p class="prl-empty-title">No results</p>
-                <p class="prl-empty-sub">Try adjusting your filters.</p>
             </div>
         </div>
     </div>
@@ -348,48 +364,9 @@
 
 @push('scripts')
 <script>
-// ── Client-side filter ───────────────────────────────────────────
-(function () {
-    const search  = document.getElementById('batchSearch');
-    const statusF = document.getElementById('statusFilter');
-    const tbody   = document.getElementById('batchTbody');
-    const noRes   = document.getElementById('batchNoResults');
-
-    function run() {
-        const q = search.value.toLowerCase().trim();
-        const s = statusF.value;
-        const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
-        const vis = rows.filter(r =>
-            (!q || r.dataset.name.includes(q)) &&
-            (!s || r.dataset.status === s)
-        );
-        rows.forEach(r => r.style.display = 'none');
-        vis.forEach(r => r.style.display = '');
-        noRes.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
-    }
-
-    search.addEventListener('input', run);
-    statusF.addEventListener('change', run);
-})();
-
 // ── Modal helpers ────────────────────────────────────────────────
 function openGenerateModal() {
     document.getElementById('generateModal').classList.add('open');
-}
-
-let _reopenBatchId = null;
-
-function openResubmitModal(batchId, batchName, period) {
-    _reopenBatchId = batchId;
-    document.getElementById('resubmitModalTitle').textContent = 'Reopen "' + batchName + '"?';
-    document.getElementById('resubmitModalPeriod').textContent = period;
-    document.getElementById('resubmitModal').classList.add('open');
-}
-
-function submitReopenForm() {
-    if (_reopenBatchId) {
-        document.getElementById('reopen-form-' + _reopenBatchId).submit();
-    }
 }
 
 function closeModal(id) {

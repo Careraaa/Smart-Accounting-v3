@@ -127,6 +127,11 @@
     background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;
     font-size:0.68rem;font-weight:700;color:#16a34a;
 }
+
+/* Pagination strip */
+.att-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa; }
+.att-pagination-info  { font-size:0.75rem;color:#9ca3af; }
+.att-pagination-info strong { color:#374151; }
 </style>
 @endpush
 
@@ -282,9 +287,22 @@
                 </div>
             </div>
         </div>
+    </div>
+    {{-- Pagination --}}
+        @if(method_exists($employees, 'hasPages') && $employees->hasPages())
+        <div class="att-pagination-strip">
 
-    </div>{{-- /.att-layout --}}
+            <div class="att-pagination-info">
+                Showing
+                <strong>{{ $employees->firstItem() }}</strong>–<strong>{{ $employees->lastItem() }}</strong>
+                of
+                <strong>{{ $employees->total() }}</strong> employees
+            </div>
 
+            {{ $employees->links('pagination::bootstrap-5') }}
+
+        </div>
+        @endif
 </div>
 @endsection
 

@@ -92,8 +92,8 @@
 .prl-status.s-approved::before { background:#0284c7; }
 .prl-status.s-active   { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
 .prl-status.s-active::before   { background:#16a34a; }
-.prl-status.s-settled  { background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe; }
-.prl-status.s-settled::before  { background:#8b5cf6; }
+.prl-status.s-settled  { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
+.prl-status.s-settled::before  { background:#22c55e; }
 .prl-status.s-deducted { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
 .prl-status.s-deducted::before { background:#22c55e; }
 .prl-status.s-released { background:#f0fdf4;color:#15803d;border:1px solid #86efac; }
@@ -346,6 +346,7 @@
                             'pending'  => 's-pending',
                             'approved' => 's-approved',
                             'released' => 's-released',
+                            'settled'  => 's-settled',
                             'rejected' => 's-rejected',
                             default    => 's-pending',
                         };

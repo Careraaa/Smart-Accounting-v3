@@ -24,7 +24,7 @@ class EmployeeController extends Controller
             $sortOrder = 'asc';
         }
 
-        $employees = User::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy($sortBy, $sortOrder)->get();
+        $employees = User::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy($sortBy, $sortOrder)->paginate(15);
 
         return view('hr.employees.index', compact('employees', 'sortBy', 'sortOrder'));
     }

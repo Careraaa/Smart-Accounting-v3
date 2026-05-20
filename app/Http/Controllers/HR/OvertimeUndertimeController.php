@@ -48,14 +48,15 @@ class OvertimeUndertimeController extends Controller
         $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
             ->orderBy('department')
             ->orderBy('last_name')
-            ->get();
+            ->paginate(10);
 
-        // Per-employee OT/UT summary for the current month
+        // Per-employee OT/UT summary for the current month (only for paginated employees)
         $monthStart = now()->startOfMonth();
         $monthEnd   = now()->endOfMonth();
 
         $monthlySummary = OvertimeUndertime::whereBetween('date', [$monthStart, $monthEnd])
             ->where('status', 'approved')
+            ->whereIn('user_id', $employees->pluck('id'))
             ->selectRaw('user_id,
                 SUM(CASE WHEN type = "overtime"  THEN hours ELSE 0 END) as ot_hours,
                 SUM(CASE WHEN type = "undertime" THEN hours ELSE 0 END) as ut_hours,

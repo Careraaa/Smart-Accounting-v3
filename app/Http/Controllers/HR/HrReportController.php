@@ -8,6 +8,7 @@ use App\Models\Leave;
 use App\Models\Payroll;
 use App\Models\StatutoryDeduction;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Carbon\Carbon;
 
 class HrReportController extends Controller
@@ -138,6 +139,20 @@ class HrReportController extends Controller
             $summary['employee_philhealth'] += $contribution['employee_philhealth'];
             $summary['employer_philhealth'] += $contribution['employer_philhealth'];
         }
+
+        // Paginate contributions (15 items per page)
+        $perPage = 10;
+        $page = request()->get('page', 1);
+        $contributions = new \Illuminate\Pagination\LengthAwarePaginator(
+            array_slice($contributions, ($page - 1) * $perPage, $perPage),
+            count($contributions),
+            $perPage,
+            $page,
+            [
+                'path' => route('reports.government-contribution'),
+                'query' => request()->query(),
+            ]
+        );
 
         return view('hr.reports.government-contribution', compact(
             'employees',

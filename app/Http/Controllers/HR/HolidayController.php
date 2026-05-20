@@ -30,7 +30,7 @@ class HolidayController extends Controller
         }
 
         // Sort by date
-        $holidays = $query->orderBy('date')->paginate(15);
+        $holidays = $query->orderBy('date')->paginate(10)->appends($request->query());
 
         // Get available years for filter
         $availableYears = Holiday::selectRaw('YEAR(date) as year')

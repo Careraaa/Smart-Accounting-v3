@@ -52,7 +52,7 @@ class LeaveController extends Controller
         $sortOrder = $request->sort_order ?? 'desc';
         $query->orderBy($sortBy, $sortOrder);
 
-        $leaves = $query->paginate(10);
+        $leaves = $query->paginate(10)->appends($request->query());
 
         // Statistics (aligned to current filters: search/department/leave_type)
         $totalLeaves = (clone $baseQuery)->count();

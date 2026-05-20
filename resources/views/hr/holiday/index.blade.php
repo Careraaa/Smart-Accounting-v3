@@ -70,6 +70,11 @@
 .hld-empty-icon { width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#d1d5db; }
 .hld-empty-title { font-size:0.9rem;font-weight:700;color:#374151;margin:0 0 6px; }
 .hld-empty-sub { font-size:0.78rem;color:#9ca3af;margin:0; }
+
+/* Pagination strip */
+.hld-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa; }
+.hld-pagination-info  { font-size:0.75rem;color:#9ca3af; }
+.hld-pagination-info strong { color:#374151; }
 </style>
 @endpush
 
@@ -181,9 +186,18 @@
         </div>
 
         {{-- Pagination --}}
-        @if($holidays->hasPages())
-        <div style="padding:14px 16px;border-top:1px solid #f3f4f6;">
-            {{ $holidays->links() }}
+        @if(method_exists($holidays, 'hasPages') && $holidays->hasPages())
+        <div class="hld-pagination-strip">
+
+            <div class="hld-pagination-info">
+                Showing
+                <strong>{{ $holidays->firstItem() }}</strong>–<strong>{{ $holidays->lastItem() }}</strong>
+                of
+                <strong>{{ $holidays->total() }}</strong> holidays
+            </div>
+
+            {{ $holidays->withQueryString()->links('pagination::bootstrap-5') }}
+
         </div>
         @endif
     </div>
