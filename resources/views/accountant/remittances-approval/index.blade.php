@@ -36,7 +36,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($remittances as $remittance)
+                        @foreach($remittances->where('status', 'pending') as $remittance)
                             <tr>
                                 <td class="text-muted" style="font-size:.82rem;">{{ $remittance->remittance_date?->format('M d, Y') }}</td>
                                 <td>{{ $remittance->route->route_name }}</td>

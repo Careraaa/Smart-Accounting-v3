@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Payroll;
 use App\Models\Employee;
 use App\Models\SalaryLoan;
+use App\Models\DailyRemittance;
+use App\Models\CashAdvance;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -93,6 +95,8 @@ class DashboardController extends Controller
 
         // ── Pending To-Do Items ──────────────────────────────────────────────
         $pendingItems = [];
+        
+        // Pending Payroll Batches
         if ($processingPayroll > 0) {
             $pendingItems[] = [
                 'text' => $processingPayroll === 1
@@ -103,6 +107,51 @@ class DashboardController extends Controller
                 'icon' => 'feather-check-square',
                 'color' => '#f0fdf4',
                 'iconColor' => '#16a34a'
+            ];
+        }
+        
+        // Pending Remittance Approvals
+        $pendingRemittances = DailyRemittance::where('status', 'pending')->count();
+        if ($pendingRemittances > 0) {
+            $pendingItems[] = [
+                'text' => $pendingRemittances === 1
+                    ? '1 Remittance Needs Approval'
+                    : "{$pendingRemittances} Remittances Need Approval",
+                'count' => $pendingRemittances,
+                'url' => route('remittance-approval.index'),
+                'icon' => 'feather-send',
+                'color' => '#f5f3ff',
+                'iconColor' => '#7c3aed'
+            ];
+        }
+        
+        // Pending Cash Advances
+        $pendingCashAdvances = CashAdvance::where('status', 'pending')->count();
+        if ($pendingCashAdvances > 0) {
+            $pendingItems[] = [
+                'text' => $pendingCashAdvances === 1
+                    ? '1 Cash Advance Needs Approval'
+                    : "{$pendingCashAdvances} Cash Advances Need Approval",
+                'count' => $pendingCashAdvances,
+                'url' => route('payroll.receivables.index', ['tab' => 'cash_advances']),
+                'icon' => 'feather-dollar-sign',
+                'color' => '#fef3c7',
+                'iconColor' => '#d97706'
+            ];
+        }
+        
+        // Pending Salary Loans
+        $pendingSalaryLoans = SalaryLoan::where('status', 'pending')->count();
+        if ($pendingSalaryLoans > 0) {
+            $pendingItems[] = [
+                'text' => $pendingSalaryLoans === 1
+                    ? '1 Salary Loan Needs Approval'
+                    : "{$pendingSalaryLoans} Salary Loans Need Approval",
+                'count' => $pendingSalaryLoans,
+                'url' => route('payroll.receivables.index', ['tab' => 'salary_loans']),
+                'icon' => 'feather-credit-card',
+                'color' => '#e0f2fe',
+                'iconColor' => '#0284c7'
             ];
         }
 
