@@ -475,48 +475,6 @@
             </div>
         </div>
 
-        {{-- Recent pending leave --}}
-        <div class="hrd-panel" style="margin-bottom:14px;">
-            <div class="hrd-panel-hd">
-                <h2>Recent Pending Leave Requests</h2>
-                <a href="{{ route('leave.pending') }}" style="font-size:.78rem;font-weight:700;color:#c8292a;text-decoration:none;">View all →</a>
-            </div>
-            @if($recentLeaves->isEmpty())
-                <div class="hrd-empty">No leave requests yet.</div>
-            @else
-                <ul class="hrd-feed">
-                    @foreach($recentLeaves as $leave)
-                        @if(($leave->status ?? '') === 'pending')
-                            @php
-                                $st = $leave->status ?? '';
-                                $pillClass = match($st) {
-                                    'approved' => 'hrd-pill-approved',
-                                    'rejected' => 'hrd-pill-rejected',
-                                    default    => 'hrd-pill-pending',
-                                };
-                            @endphp
-                            <li>
-                                <a href="{{ route('leave.show', $leave) }}">
-                                    <div class="hrd-av">{{ $initials($leave->employee->name ?? '') }}</div>
-                                    <div class="hrd-feed-body">
-                                        <p class="hrd-feed-title">{{ $leave->employee->name ?? 'Unknown' }}</p>
-                                        <p class="hrd-feed-meta">
-                                            {{ ucfirst($leave->leave_type ?? 'Leave') }}
-                                            · {{ $leave->start_date?->format('M j') ?? '—' }} – {{ $leave->end_date?->format('M j, Y') ?? '—' }}
-                                            @if(isset($leave->duration_days)) · <code>{{ $leave->duration_days }}d</code>@endif
-                                        </p>
-                                    </div>
-                                    <div class="hrd-feed-right">
-                                        <span class="hrd-pill {{ $pillClass }}">{{ ucfirst($st) }}</span>
-                                        <i class="feather-chevron-right hrd-chevron"></i>
-                                    </div>
-                                </a>
-                            </li>
-                        @endif
-                    @endforeach
-                </ul>
-            @endif
-        </div>
     </div>
     {{-- Right Calendar Sidebar --}}
     <aside class="hrd-sidebar">
