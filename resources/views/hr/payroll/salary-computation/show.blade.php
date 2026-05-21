@@ -126,12 +126,20 @@
             default     => 's-pending',
         };
         $overtimeAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay'));
-        $regularAllowances  = $payroll->allowances->reject(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay'));
+        $holidayAllowances  = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Holiday Pay'));
+        $regularAllowances  = $payroll->allowances->reject(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay') || str_starts_with($a->allowance_type, 'Holiday Pay'));
         $undertimeDeductions= $payroll->deductions->filter(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
         $regularDeductions  = $payroll->deductions->reject(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
         $otAllowanceTotal = $overtimeAllowances->sum('amount');
         $regularAllowanceTotal = $regularAllowances->sum('amount');
         $holidayPay = max(0, (float)($payroll->gross_pay ?? 0) - (float)($payroll->basic_salary ?? 0) - $otAllowanceTotal - $regularAllowanceTotal);
+
+        // For old records stored as generic "Holiday Pay" (before per-holiday labels),
+        // look up the actual holidays in the period so we can display their names.
+        $periodHolidayNames = \App\Models\Holiday::whereBetween('date', [
+            $payroll->payroll_period_start->toDateString(),
+            $payroll->payroll_period_end->toDateString(),
+        ])->orderBy('date')->pluck('name');
     @endphp
 
     {{-- Hero ──────────────────────────────────────────────────────── --}}
@@ -197,12 +205,31 @@
                     <span class="prl-brow-val">₱{{ number_format($payroll->basic_salary, 2) }}</span>
                 </div>
 
-                @if($holidayPay > 0)
+                @foreach($holidayAllowances as $hol)
+                @php
+                    // allowance_type format (new): "Holiday Pay — {Name} ({Type}, {worked_label})"
+                    // allowance_type format (old): "Holiday Pay"
+                    $holLabel = $hol->allowance_type;
+                    $holBadge = 'holiday';
+                    if (preg_match('/^Holiday Pay\s*[—\-]+\s*(.+?)\s*\((.+)\)$/', $holLabel, $m)) {
+                        // New format — name and detail are embedded in the label
+                        $holName  = $m[1];
+                        $holBadge = $m[2];
+                    } else {
+                        // Old format — look up holiday names from the period
+                        $holName = $periodHolidayNames->isNotEmpty()
+                            ? $periodHolidayNames->implode(' + ')
+                            : 'Holiday';
+                    }
+                @endphp
                 <div class="prl-brow">
-                    <span class="prl-brow-lbl c-green">+ Holiday Pay <span class="prl-badge">premium</span></span>
-                    <span class="prl-brow-val c-green">+₱{{ number_format($holidayPay, 2) }}</span>
+                    <span class="prl-brow-lbl c-green">
+                        + Holiday Pay — {{ $holName }}
+                        <span class="prl-badge">{{ $holBadge }}</span>
+                    </span>
+                    <span class="prl-brow-val c-green">+₱{{ number_format($hol->amount, 2) }}</span>
                 </div>
-                @endif
+                @endforeach
 
                 @foreach($overtimeAllowances as $ot)
                 <div class="prl-brow">

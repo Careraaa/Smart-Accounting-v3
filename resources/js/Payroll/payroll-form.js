@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // Salary
         basicSalary: 0,
         dailyRate: 0,
+        // Holiday
+        holidayBreakdown: [],
         // OT / UT
         otHours: 0,
         utHours: 0,
@@ -59,7 +61,10 @@ document.addEventListener("DOMContentLoaded", function () {
         daysAbsent: g("prl_days_absent"),
 
         basicDisplay: g("prl_basic_display"),
+        basicBadge: g("prl_basic_badge"),
         basicInput: g("prl_basic_input"),
+
+        holidayRows: g("prl_holiday_rows"),
 
         otRow: g("prl_ot_row"),
         otHrs: g("prl_ot_hrs"),
@@ -131,6 +136,38 @@ document.addEventListener("DOMContentLoaded", function () {
         // Basic salary (server-computed, hidden input is reference only)
         if (EL.basicDisplay) EL.basicDisplay.textContent = fmt(S.basicSalary);
         if (EL.basicInput) EL.basicInput.value = S.basicSalary.toFixed(2);
+
+        // Update Basic Pay badge to show actual rate × days so it's clear
+        // why basicSalary is ₱0 when the employee only has unworked holiday days.
+        if (EL.basicBadge) {
+            if (S.dailyRate > 0) {
+                EL.basicBadge.textContent = `₱${S.dailyRate.toFixed(2)} × ${S.daysWorked} day${S.daysWorked !== 1 ? 's' : ''}`;
+            } else {
+                EL.basicBadge.textContent = 'rate × days';
+            }
+        }
+
+        // Holiday breakdown rows — one row per holiday in the period.
+        // For regular holidays not worked, the label says "unworked — statutory
+        // entitlement" so the user understands it's not a bonus on top of basic pay.
+        if (EL.holidayRows) {
+            EL.holidayRows.innerHTML = '';
+            (S.holidayBreakdown || []).forEach((hol) => {
+                const row = document.createElement('div');
+                row.className = 'prl-brow';
+
+                const lbl = document.createElement('span');
+                lbl.className = 'prl-brow-lbl c-green';
+                lbl.textContent = `+ ${hol.label}`;
+
+                const val = document.createElement('span');
+                val.className = 'prl-brow-val c-green';
+                val.textContent = `+${fmt(hol.amount)}`;
+
+                row.append(lbl, val);
+                EL.holidayRows.appendChild(row);
+            });
+        }
 
         // OT
         if (EL.otRow) EL.otRow.style.display = S.otPay > 0 ? "flex" : "none";
@@ -275,6 +312,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 absentDays: 0,
                 basicSalary: 0,
                 dailyRate: 0,
+                holidayBreakdown: [],
                 otHours: 0,
                 utHours: 0,
                 otPay: 0,
@@ -339,6 +377,7 @@ document.addEventListener("DOMContentLoaded", function () {
             S.absentDays = data.days_absent ?? 0;
             S.basicSalary = data.basic_salary ?? 0;
             S.dailyRate = data.daily_rate ?? 0;
+            S.holidayBreakdown = data.holiday_breakdown ?? [];
             S.otHours = data.overtime_hours ?? 0;
             S.utHours = data.undertime_hours ?? 0;
             S.otPay = data.overtime_pay ?? 0;

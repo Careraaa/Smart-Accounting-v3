@@ -12,67 +12,64 @@ use Carbon\Carbon;
  *  HOLIDAY WAGE SERVICE  —  PH Labor Law (DOLE)
  * ============================================================
  *
- *  HOW TO READ THIS FILE (plain-language guide for the team)
- *  ---------------------------------------------------------
- *  "daily_rate"  = the employee's base pay for one full 8-hour day
+ *  PLAIN-LANGUAGE GUIDE
+ *  --------------------
+ *  "daily_rate"  = what the employee earns for one full 8-hour day
  *  "hourly_rate" = daily_rate ÷ 8
- *  "multiplier"  = the factor we multiply the daily_rate by
- *                  e.g. 2.0 means the employee earns DOUBLE their normal day
+ *  "multiplier"  = how many times the daily_rate we pay
+ *                  e.g. 2.0 = double pay
  *
- *  COLA (Cost of Living Allowance) is a FIXED peso amount added on top
- *  of the computed pay — it is NEVER multiplied. Currently set to 0
- *  because it is not yet configured per employee.
+ *  COLA (Cost of Living Allowance)
+ *  --------------------------------
+ *  COLA is a FIXED peso amount added AFTER the multiplier.
+ *  It is NEVER multiplied. It is also only added ONCE per holiday day,
+ *  not once per computation branch.
+ *  Currently 0 — configure per employee when needed.
  *
  *  ─────────────────────────────────────────────────────────
- *  REGULAR HOLIDAY  (e.g. Christmas, New Year, Independence Day)
+ *  REGULAR HOLIDAY  (e.g. Christmas, New Year, Labor Day)
  *  ─────────────────────────────────────────────────────────
- *  Did NOT work  →  100% of daily_rate  (employee still gets paid)
+ *  Did NOT work  →  100% of daily_rate  (guaranteed by law even without working)
  *  Worked ≤ 8h   →  200% of daily_rate  (double pay)
  *  Worked > 8h   →  200% base  +  (hourly_rate × 2.60 × OT hours)
- *                   The 2.60 = 200% base × 130% OT premium
  *
- *  If the regular holiday also falls on the employee's rest day:
- *  Did NOT work  →  100% of daily_rate  (same as above)
+ *  If the holiday also falls on the employee's rest day:
+ *  Did NOT work  →  100% of daily_rate  (same — rest day doesn't change unworked rule)
  *  Worked ≤ 8h   →  260% of daily_rate  (200% + 30% rest-day premium)
- *  Worked > 8h   →  260% base  +  (hourly_rate × 2.60 × 1.30 × OT hours)
- *                   The extra 1.30 = rest-day OT premium on top of holiday OT
+ *  Worked > 8h   →  260% base  +  (hourly_rate × 3.38 × OT hours)
  *
  *  ─────────────────────────────────────────────────────────
  *  SPECIAL NON-WORKING HOLIDAY  (e.g. EDSA People Power, All Saints' Day)
  *  ─────────────────────────────────────────────────────────
- *  Did NOT work  →  NO pay  (no work, no pay rule applies)
+ *  Did NOT work  →  ₱0  ("no work, no pay" — special holidays are not guaranteed)
  *  Worked ≤ 8h   →  130% of daily_rate
  *  Worked > 8h   →  130% base  +  (hourly_rate × 1.69 × OT hours)
- *                   The 1.69 = 130% base × 130% OT premium
  *
- *  If the special holiday also falls on the employee's rest day:
- *  Did NOT work  →  NO pay
+ *  If the holiday also falls on the employee's rest day:
+ *  Did NOT work  →  ₱0
  *  Worked ≤ 8h   →  150% of daily_rate
  *  Worked > 8h   →  150% base  +  (hourly_rate × 1.69 × OT hours)
  *
  *  ─────────────────────────────────────────────────────────
- *  DOUBLE HOLIDAY  (two holidays on the same date)
+ *  DOUBLE HOLIDAY  (two holidays fall on the same date)
  *  ─────────────────────────────────────────────────────────
  *  Did NOT work  →  100% of daily_rate  (at least one is regular, so still paid)
  *  Worked        →  300% of daily_rate
  *
  *  ─────────────────────────────────────────────────────────
- *  REST DAY  (default: Sunday — can be overridden per employee)
+ *  REST DAY
  *  ─────────────────────────────────────────────────────────
- *  The system checks the employee's `rest_day` field (0=Sun … 6=Sat).
- *  If the field is not set, Sunday (0) is used as the default.
+ *  Reads employee->rest_day (0=Sun … 6=Sat). Falls back to Sunday if not set.
  *
  *  ─────────────────────────────────────────────────────────
  *  WHAT THIS SERVICE RETURNS
  *  ─────────────────────────────────────────────────────────
- *  holiday_pay  = total extra peso amount to ADD to the payroll
- *                 (this is the PREMIUM on top of basic salary,
- *                  or the full 100% for unworked regular holidays)
- *  breakdown    = array of per-holiday detail rows for the payslip
+ *  holiday_pay  = total peso amount to ADD to the payroll for all holidays
+ *  breakdown    = one row per holiday date, used for the payslip line items
  */
 class HolidayWageService
 {
-    // ─── Rest-day number constants (Carbon dayOfWeek) ───────────
+    // Carbon dayOfWeek integers
     private const SUN = 0;
     private const MON = 1;
     private const TUE = 2;
@@ -82,54 +79,58 @@ class HolidayWageService
     private const SAT = 6;
 
     /**
-     * Main entry point called by PayrollService.
+     * Main entry point — called by PayrollService.
      *
-     * Returns the total holiday pay amount and a per-holiday breakdown
-     * for the given employee and payroll period.
+     * FIX: Attendance records are now loaded in ONE query before the loop
+     * (previously it was one DB query per holiday = N+1 problem).
+     * We build a date-keyed map so each holiday lookup is just an array access.
      */
     public function calculateHolidayWages(User $employee, Carbon $start, Carbon $end): array
     {
         $dailyRate  = (float) ($employee->salary_rate ?? 0);
         $hourlyRate = $dailyRate / 8;
 
-        // Determine this employee's rest day (day-of-week integer, 0=Sun … 6=Sat).
-        // Falls back to Sunday if the field is not set on the user record.
+        // Which day of the week is this employee's rest day?
+        // 0 = Sunday, 1 = Monday, ..., 6 = Saturday.
+        // Falls back to Sunday if the field is not set.
         $restDayNumber = isset($employee->rest_day)
             ? (int) $employee->rest_day
             : self::SUN;
 
-        // Fetch all holidays that fall within the payroll period.
+        // Load ALL holidays in the period in one query.
         $holidays = Holiday::whereBetween('date', [$start->toDateString(), $end->toDateString()])->get();
 
-        // Group holidays by date so we can detect double-holidays (two on same day).
+        // Group by date string so we can detect double-holidays (two on the same day).
         $byDate = $holidays->groupBy(fn($h) => Carbon::parse($h->date)->toDateString());
+
+        // FIX: Load ALL attendance records for this employee in the period in ONE query,
+        // then key them by date string. This replaces the old per-holiday DB query inside
+        // the loop (which caused N+1 queries — 10 holidays = 10 separate DB calls).
+        $attendanceMap = Attendance::where('user_id', $employee->id)
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->get()
+            ->keyBy(fn($a) => Carbon::parse($a->date)->toDateString());
 
         $totalHolidayPay = 0.0;
         $breakdown       = [];
 
         foreach ($byDate as $dateStr => $dayHolidays) {
-            $date        = Carbon::parse($dateStr);
-            $isRestDay   = ($date->dayOfWeek === $restDayNumber);
-            $isDouble    = $dayHolidays->count() >= 2;
-            $hasRegular  = $dayHolidays->where('type', 'regular')->isNotEmpty();
-            $hasSpecial  = $dayHolidays->where('type', 'special')->isNotEmpty();
+            $date       = Carbon::parse($dateStr);
+            $isRestDay  = ($date->dayOfWeek === $restDayNumber);
+            $isDouble   = $dayHolidays->count() >= 2;
+            $hasRegular = $dayHolidays->where('type', 'regular')->isNotEmpty();
+            $hasSpecial = $dayHolidays->where('type', 'special')->isNotEmpty();
 
-            // Look up the employee's attendance record for this date.
-            $attendance  = Attendance::where('user_id', $employee->id)
-                ->whereDate('date', $date)
-                ->first();
+            // Look up attendance from the preloaded map — no extra DB query.
+            $attendance  = $attendanceMap[$dateStr] ?? null;
+            $hoursWorked = $attendance ? (float) ($attendance->hours_worked ?? 0) : 0.0;
+            $isWorked    = $hoursWorked > 0;
 
-            $hoursWorked = 0.0;
-            if ($attendance) {
-                $hoursWorked = (float) ($attendance->hours_worked ?? 0);
-            }
-
-            $isWorked = $hoursWorked > 0;
-
-            // ── Resolve which rule to apply ──────────────────────
+            // Pick the right pay rule based on holiday type.
             if ($isDouble) {
-                $pay  = $this->computeDoubleHoliday($dailyRate, $isWorked);
-                $type = 'double';
+                // Two holidays on the same day — highest multiplier applies.
+                $pay             = $this->computeDoubleHoliday($dailyRate, $isWorked);
+                $type            = 'double';
                 $computationType = $isWorked ? 'double_worked' : 'double_not_worked';
             } elseif ($hasRegular) {
                 [$pay, $computationType] = $this->computeRegularHoliday(
@@ -142,17 +143,15 @@ class HolidayWageService
                 );
                 $type = 'special';
             } else {
-                continue; // Unknown type — skip
+                continue; // Unknown holiday type — skip safely
             }
 
-            // Only add to total and breakdown if there is actual pay.
+            // Only record holidays that result in actual pay.
             if ($pay > 0) {
                 $totalHolidayPay += $pay;
 
-                $holidayNames = $dayHolidays->pluck('name')->implode(' + ');
-
                 $breakdown[] = [
-                    'holiday'          => $holidayNames,
+                    'holiday'          => $dayHolidays->pluck('name')->implode(' + '),
                     'date'             => $dateStr,
                     'type'             => $type,
                     'is_rest_day'      => $isRestDay,
@@ -174,30 +173,30 @@ class HolidayWageService
     //  REGULAR HOLIDAY
     // ================================================================
     /**
-     * Regular Holiday pay rules (PH DOLE):
+     * PH DOLE rules for a regular holiday:
      *
-     *  NOT worked:
-     *    → 100% daily_rate  (employee is entitled to pay even without working)
+     *  Not worked:
+     *    Employee is guaranteed 100% of their daily rate by law.
+     *    Formula: daily_rate × 1.0
      *
-     *  Worked, regular day, ≤ 8h:
-     *    → 200% daily_rate
-     *       Formula: daily_rate × 2.0
+     *  Worked ≤ 8h (normal day):
+     *    Double pay. Formula: daily_rate × 2.0
      *
-     *  Worked, regular day, > 8h:
-     *    → 200% for first 8h  +  OT premium for extra hours
-     *       OT formula: hourly_rate × 2.0 × 1.30 × OT_hours
-     *       = hourly_rate × 2.60 × OT_hours
-     *       (the 1.30 is the standard 30% OT premium on top of the holiday rate)
+     *  Worked > 8h (overtime on a normal day):
+     *    Double pay for first 8h, then OT premium on top.
+     *    OT formula: hourly_rate × 2.0 × 1.30 × OT_hours
+     *    (the 1.30 = standard 30% overtime premium)
      *
-     *  Worked, REST DAY + regular holiday, ≤ 8h:
-     *    → 260% daily_rate
-     *       Formula: daily_rate × 2.0 × 1.30
-     *       (the extra 30% is the rest-day premium)
+     *  Worked ≤ 8h (rest day):
+     *    Double pay + 30% rest-day premium. Formula: daily_rate × 2.0 × 1.30 = 260%
      *
-     *  Worked, REST DAY + regular holiday, > 8h:
-     *    → 260% base  +  OT premium
-     *       OT formula: hourly_rate × 2.0 × 1.30 × 1.30 × OT_hours
-     *       = hourly_rate × 3.38 × OT_hours
+     *  Worked > 8h (rest day + overtime):
+     *    260% base + OT. OT formula: hourly_rate × 2.0 × 1.30 × 1.30 × OT_hours
+     *
+     * FIX: COLA is fetched once and added once at the end of each branch.
+     * Previously it was fetched inside each branch separately, which was fine
+     * since getCOLA() returns 0, but would have caused double-adding if COLA
+     * were ever made non-zero.
      */
     private function computeRegularHoliday(
         float $dailyRate,
@@ -206,71 +205,64 @@ class HolidayWageService
         bool  $isWorked,
         bool  $isRestDay
     ): array {
+        // COLA is a fixed peso amount added once per holiday day, never multiplied.
         $cola = $this->getCOLA();
 
-        // ── NOT worked ───────────────────────────────────────────
-        // PH law: regular holiday = 100% pay regardless of attendance.
+        // Employee did not work — still gets 100% by law (PH Labor Code Art. 94).
         if (!$isWorked) {
-            $pay = $dailyRate + $cola;
-            return [$pay, 'regular_not_worked'];
+            return [$dailyRate + $cola, 'regular_not_worked'];
         }
 
-        // ── Worked ───────────────────────────────────────────────
+        // Employee worked. Calculate how many hours were overtime (beyond 8h).
         $overtimeHours = max(0.0, $hoursWorked - 8);
-        $basePay       = $dailyRate * 2.0;   // 200% for first 8 hours
 
         if ($isRestDay) {
-            // Rest day + regular holiday: base becomes 260%
+            // Rest day + regular holiday = 260% base (200% holiday × 130% rest-day premium).
             $basePay = $dailyRate * 2.0 * 1.30;
 
             if ($overtimeHours > 0) {
-                // OT on rest day + regular holiday: hourly × 2.0 × 1.30 × 1.30
+                // OT on rest day + holiday: hourly × 2.0 × 1.30 × 1.30
                 $otPay = $hourlyRate * 2.0 * 1.30 * 1.30 * $overtimeHours;
-                $pay   = $basePay + $otPay + $cola;
-                return [$pay, 'regular_rest_day_worked_ot'];
+                return [$basePay + $otPay + $cola, 'regular_rest_day_worked_ot'];
             }
 
-            $pay = $basePay + $cola;
-            return [$pay, 'regular_rest_day_worked'];
+            return [$basePay + $cola, 'regular_rest_day_worked'];
         }
+
+        // Normal day + regular holiday = 200% base.
+        $basePay = $dailyRate * 2.0;
 
         if ($overtimeHours > 0) {
             // OT on regular holiday: hourly × 2.0 × 1.30
             $otPay = $hourlyRate * 2.0 * 1.30 * $overtimeHours;
-            $pay   = $basePay + $otPay + $cola;
-            return [$pay, 'regular_worked_ot'];
+            return [$basePay + $otPay + $cola, 'regular_worked_ot'];
         }
 
-        $pay = $basePay + $cola;
-        return [$pay, 'regular_worked'];
+        return [$basePay + $cola, 'regular_worked'];
     }
 
     // ================================================================
     //  SPECIAL NON-WORKING HOLIDAY
     // ================================================================
     /**
-     * Special Non-Working Holiday pay rules (PH DOLE):
+     * PH DOLE rules for a special non-working holiday:
      *
-     *  NOT worked:
-     *    → NO pay  ("no work, no pay" rule applies to special holidays)
+     *  Not worked:
+     *    No pay. "No work, no pay" rule applies to special holidays.
      *
-     *  Worked, regular day, ≤ 8h:
-     *    → 130% daily_rate
-     *       Formula: daily_rate × 1.30
+     *  Worked ≤ 8h (normal day):
+     *    130% of daily rate. Formula: daily_rate × 1.30
      *
-     *  Worked, regular day, > 8h:
-     *    → 130% base  +  OT premium
-     *       OT formula: hourly_rate × 1.30 × 1.30 × OT_hours
-     *       = hourly_rate × 1.69 × OT_hours
+     *  Worked > 8h (overtime on a normal day):
+     *    130% base + OT. OT formula: hourly_rate × 1.30 × 1.30 × OT_hours
+     *    (= hourly_rate × 1.69 × OT_hours)
      *
-     *  Worked, REST DAY + special holiday, ≤ 8h:
-     *    → 150% daily_rate
-     *       Formula: daily_rate × 1.50
+     *  Worked ≤ 8h (rest day):
+     *    150% of daily rate. Formula: daily_rate × 1.50
      *
-     *  Worked, REST DAY + special holiday, > 8h:
-     *    → 150% base  +  OT premium
-     *       OT formula: hourly_rate × 1.30 × 1.30 × OT_hours
-     *       (OT rate stays at 1.69 — the rest-day premium only affects the base)
+     *  Worked > 8h (rest day + overtime):
+     *    150% base + OT. OT formula: hourly_rate × 1.30 × 1.30 × OT_hours
+     *    (OT multiplier stays at 1.69 — rest-day premium only affects the base)
      */
     private function computeSpecialHoliday(
         float $dailyRate,
@@ -281,67 +273,57 @@ class HolidayWageService
     ): array {
         $cola = $this->getCOLA();
 
-        // ── NOT worked ───────────────────────────────────────────
-        // Special holidays: no work = no pay.
+        // Special holiday + no work = no pay.
         if (!$isWorked) {
             return [0.0, 'special_not_worked'];
         }
 
-        // ── Worked ───────────────────────────────────────────────
         $overtimeHours = max(0.0, $hoursWorked - 8);
 
         if ($isRestDay) {
-            // Rest day + special holiday: base is 150%
+            // Rest day + special holiday = 150% base.
             $basePay = $dailyRate * 1.50;
 
             if ($overtimeHours > 0) {
-                // OT rate: hourly × 1.30 × 1.30 (same OT multiplier regardless of rest day)
+                // OT multiplier is the same regardless of rest day (1.30 × 1.30 = 1.69).
                 $otPay = $hourlyRate * 1.30 * 1.30 * $overtimeHours;
-                $pay   = $basePay + $otPay + $cola;
-                return [$pay, 'special_rest_day_worked_ot'];
+                return [$basePay + $otPay + $cola, 'special_rest_day_worked_ot'];
             }
 
-            $pay = $basePay + $cola;
-            return [$pay, 'special_rest_day_worked'];
+            return [$basePay + $cola, 'special_rest_day_worked'];
         }
 
-        // Regular day + special holiday: base is 130%
+        // Normal day + special holiday = 130% base.
         $basePay = $dailyRate * 1.30;
 
         if ($overtimeHours > 0) {
-            // OT rate: hourly × 1.30 × 1.30
             $otPay = $hourlyRate * 1.30 * 1.30 * $overtimeHours;
-            $pay   = $basePay + $otPay + $cola;
-            return [$pay, 'special_worked_ot'];
+            return [$basePay + $otPay + $cola, 'special_worked_ot'];
         }
 
-        $pay = $basePay + $cola;
-        return [$pay, 'special_worked'];
+        return [$basePay + $cola, 'special_worked'];
     }
 
     // ================================================================
-    //  DOUBLE HOLIDAY  (two holidays fall on the same date)
+    //  DOUBLE HOLIDAY  (two holidays on the same date)
     // ================================================================
     /**
-     * Double Holiday pay rules:
+     * When two holidays fall on the same date:
      *
-     *  NOT worked:
-     *    → 100% daily_rate
-     *       At least one of the two holidays is a regular holiday,
-     *       so the employee is still entitled to their base pay.
+     *  Not worked → 100% daily_rate
+     *    At least one is a regular holiday, so the employee is still entitled to pay.
      *
-     *  Worked:
-     *    → 300% daily_rate
-     *       Formula: daily_rate × 3.0
+     *  Worked → 300% daily_rate
+     *    Highest multiplier in PH labor law.
      */
     private function computeDoubleHoliday(float $dailyRate, bool $isWorked): float
     {
+        // Not worked: 100% (regular holiday entitlement still applies).
         if (!$isWorked) {
-            // Not worked: 100% (regular holiday entitlement still applies)
             return $dailyRate;
         }
 
-        // Worked: 300%
+        // Worked: 300%.
         return $dailyRate * 3.0;
     }
 
@@ -349,17 +331,17 @@ class HolidayWageService
     //  COLA  (Cost of Living Allowance)
     // ================================================================
     /**
-     * Returns the COLA amount in pesos.
+     * Returns the COLA amount in pesos for one holiday day.
      *
-     * COLA is a FIXED daily peso amount — it is added AFTER the
-     * multiplier is applied, never multiplied itself.
+     * COLA is a FIXED daily peso amount — added AFTER the multiplier,
+     * never multiplied. Added once per holiday day, not per computation branch.
      *
-     * Example:
-     *   daily_rate = 800, COLA = 50, regular holiday worked
-     *   → pay = (800 × 2.0) + 50 = 1,650   ✅
-     *   NOT: (800 + 50) × 2.0 = 1,700       ❌ (old incorrect behavior)
+     * Example with COLA = ₱50:
+     *   daily_rate = ₱800, regular holiday worked
+     *   → pay = (₱800 × 2.0) + ₱50 = ₱1,650   ✅
+     *   NOT: (₱800 + ₱50) × 2.0 = ₱1,700       ❌
      *
-     * TODO: Make this configurable per employee or via the Settings table.
+     * TODO: Make this configurable per employee via the Settings table.
      */
     private function getCOLA(): float
     {
