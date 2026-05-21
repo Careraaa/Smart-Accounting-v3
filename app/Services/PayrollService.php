@@ -48,7 +48,7 @@ class PayrollService
             'pagibig' => round($values['pagibig'], 2),
             'philhealth' => round($values['philhealth'], 2),
             'withholding_tax' => round($values['withholdingTax'], 2),
-            'status' => 'prepared',
+            'status' => 'pending',
         ]);
 
         // ── Allowances ────────────────────────────────────────────

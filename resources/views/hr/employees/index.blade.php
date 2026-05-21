@@ -62,9 +62,12 @@
 
 /* Employee cell */
 .emp-cell   { display:flex;align-items:center;gap:10px; }
-.emp-avatar { width:32px;height:32px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#6b7280;flex-shrink:0;border:1.5px solid #e5e7eb;text-transform:uppercase; }
-.emp-name   { font-weight:600;color:#111827;font-size:0.845rem; }
-.emp-dept   { font-size:0.72rem;color:#9ca3af;margin-top:1px; }
+.emp-avatar { width:34px;height:34px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#6b7280;flex-shrink:0;border:1.5px solid #e5e7eb;text-transform:uppercase; }
+.emp-name   { font-weight:600;color:#111827;font-size:0.845rem;line-height:1.2; }
+.emp-pos    { font-size:0.72rem;color:#9ca3af;margin-top:1px; }
+
+/* Department badge */
+.emp-dept { display:inline-block;padding:2px 9px;border-radius:20px;font-size:0.68rem;font-weight:700;background:#f3f4f6;color:#374151;white-space:nowrap; }
 
 /* Status badges */
 .emp-status { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
@@ -88,9 +91,84 @@
 .emp-empty-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
 
 /* Pagination strip */
-.emp-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa; }
-.emp-pagination-info  { font-size:0.75rem;color:#9ca3af; }
-.emp-pagination-info strong { color:#374151; }
+.emp-pagination-strip {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 16px;
+    border-top:1px solid #f3f4f6;
+    background:#fafafa;
+    flex-wrap:wrap;
+    gap:16px;
+}
+
+.emp-pagination-info {
+    font-size:0.75rem;
+    color:#9ca3af;
+}
+
+.emp-pagination-info strong {
+    color:#374151;
+}
+
+.emp-pagination-strip nav {
+    margin-left:auto;
+}
+
+.emp-pagination-strip .pagination {
+    display:flex;
+    align-items:center;
+    gap:4px;
+    margin:0;
+    padding:0;
+    list-style:none;
+}
+
+.emp-pagination-strip .page-item {
+    display:flex;
+}
+
+.emp-pagination-strip .page-item .page-link {
+    width:28px;
+    height:28px;
+
+    border-radius:7px !important;
+    border:1px solid #e5e7eb;
+
+    background:#fff;
+    color:#6b7280;
+
+    font-size:0.74rem;
+    font-weight:600;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:0;
+    text-decoration:none;
+
+    transition:all .15s ease;
+}
+
+.emp-pagination-strip .page-item .page-link:hover {
+    background:#f3f4f6;
+    border-color:#d1d5db;
+    color:#111827;
+}
+
+.emp-pagination-strip .page-item.active .page-link {
+    background:#c8292a;
+    border-color:#c8292a;
+    color:#fff;
+}
+
+.emp-pagination-strip .page-item.disabled .page-link {
+    background:#f9fafb;
+    color:#d1d5db;
+    pointer-events:none;
+    cursor:not-allowed;
+}
 
 /* No results */
 #empNoResults { display:none; }
@@ -149,10 +227,9 @@
         </select>
         <select class="emp-filter-select" id="empDeptFilter">
             <option value="">All Departments</option>
-            <option value="admin">Admin</option>
-            <option value="operation">Operation</option>
-            <option value="hr">HR Department</option>
-            <option value="accounting">Accounting Department</option>
+            @foreach($departments as $dept)
+                <option value="{{ strtolower($dept) }}">{{ $dept }}</option>
+            @endforeach
         </select>
     </div>
 
@@ -162,20 +239,10 @@
             <table class="emp-table">
                 <thead>
                     <tr>
-                        @php
-                            $headers = [
-                                'first_name'  => 'First Name',
-                                'last_name'   => 'Last Name',
-                                'gender'      => 'Gender',
-                                'position'    => 'Position',
-                                'department'  => 'Department',
-                            ];
-                        @endphp
-                        @foreach($headers as $column => $label)
                         <th>
-                            <a href="{{ route('employees.index', ['sort_by' => $column, 'sort_order' => ($sortBy === $column && $sortOrder === 'asc') ? 'desc' : 'asc']) }}">
-                                {{ $label }}
-                                @if($sortBy === $column)
+                            <a href="{{ route('employees.index', ['sort_by' => 'first_name', 'sort_order' => ($sortBy === 'first_name' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}">
+                                Employee
+                                @if($sortBy === 'first_name')
                                     @if($sortOrder === 'asc')
                                         <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
                                     @else
@@ -186,7 +253,9 @@
                                 @endif
                             </a>
                         </th>
-                        @endforeach
+                        <th>Gender</th>
+                        <th>Department</th>
+                        <th>Contact Number</th>
                         <th class="text-center">Status</th>
                     </tr>
                 </thead>
@@ -196,6 +265,7 @@
                             $initials = strtoupper(substr($employee->first_name ?? 'U', 0, 1) . substr($employee->last_name ?? '', 0, 1));
                             $sc = $employee->status === 'active' ? 's-active' : 's-inactive';
                         @endphp
+                        
                         <tr data-name="{{ strtolower(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '')) }}"
                             data-status="{{ $employee->status }}"
                             data-dept="{{ strtolower($employee->department ?? '') }}"
@@ -204,19 +274,21 @@
                             <td>
                                 <div class="emp-cell">
                                     <div class="emp-avatar">{{ $initials }}</div>
-                                    <div class="emp-name">{{ $employee->first_name }}</div>
+                                    <div>
+                                        <div class="emp-name">{{ $employee->first_name }} {{ $employee->last_name }}</div>
+                                        <div class="emp-pos">{{ $employee->position ?? '—' }}</div>
+                                    </div>
                                 </div>
                             </td>
-                            <td><span style="color:#111827;font-weight:600;font-size:0.845rem;">{{ $employee->last_name }}</span></td>
                             <td><span style="font-size:0.835rem;color:#6b7280;">{{ $employee->gender ? ucwords(str_replace('_', ' ', $employee->gender)) : '—' }}</span></td>
-                            <td><span style="color:#374151;font-size:0.835rem;">{{ $employee->position ?? '—' }}</span></td>
-                            <td><span style="font-size:0.835rem;color:#6b7280;">{{ ucfirst($employee->department ?? '—') }}</span></td>
+                            <td><span class="emp-dept">{{ $employee->department ?? '—' }}</span></td>
+                            <td><span style="font-family:'DM Mono',monospace;font-size:0.835rem;color:#374151;">{{ $employee->phone ?? '—' }}</span></td>
                             <td class="text-center">
                                 <span class="emp-status {{ $sc }}">{{ ucfirst($employee->status) }}</span>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7">
+                        <tr><td colspan="5">
                             <div class="emp-empty">
                                 <div class="emp-empty-icon">
                                     <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -236,48 +308,205 @@
                 <p class="emp-empty-sub">Try a different search or filter.</p>
             </div>
         </div>
-
-        @if(method_exists($employees, 'hasPages') && $employees->hasPages())
-        <div class="emp-pagination-strip">
-            <div class="emp-pagination-info">
-                Showing <strong>{{ $employees->firstItem() }}</strong>–<strong>{{ $employees->lastItem() }}</strong>
-                of <strong>{{ $employees->total() }}</strong> employees
-            </div>
-            {{ $employees->links('pagination::bootstrap-5') }}
-        </div>
-        @endif
     </div>
+    {{-- Pagination --}}
+    <div class="emp-pagination-strip">
+        <div class="emp-pagination-info" id="empPaginationInfo">
+            Showing <strong>1</strong>–<strong>10</strong> of <strong>0</strong> employees
+        </div>
 
+        <nav id="empPaginationNav"></nav>
+    </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
+// ── Build complete employee data ──────────────────────────────────
+window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
+    'id' => $e->id,
+    'firstName' => $e->first_name,
+    'lastName' => $e->last_name,
+    'name' => strtolower(($e->first_name ?? '') . ' ' . ($e->last_name ?? '')),
+    'gender' => $e->gender,
+    'position' => $e->position,
+    'department' => strtolower($e->department ?? ''),
+    'departmentDisplay' => $e->department,
+    'phone' => $e->phone,
+    'status' => $e->status,
+])) !!};
+
+// ── Client-side filter and pagination ─────────────────────────────
 (function () {
     const search = document.getElementById('empSearch');
     const statusF = document.getElementById('empStatusFilter');
     const deptF   = document.getElementById('empDeptFilter');
     const tbody   = document.getElementById('empTbody');
     const noRes   = document.getElementById('empNoResults');
+    const paginationStrip = document.querySelector('.emp-pagination-strip');
+    
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let filteredData = [];
 
-    function run() {
-        const q  = search.value.toLowerCase().trim();
+    function applyFilters() {
+        const q = search.value.toLowerCase().trim();
         const st = statusF.value;
         const dt = deptF.value;
-        const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
-        const vis = rows.filter(r =>
-            (!q  || r.dataset.name.includes(q)) &&
-            (!st || r.dataset.status === st) &&
-            (!dt || r.dataset.dept === dt)
-        );
-        rows.forEach(r => r.style.display = 'none');
-        vis.forEach(r => r.style.display = '');
-        noRes.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
+
+        filteredData = window.allEmployeesData.filter(emp => {
+            const matchesSearch = !q || emp.name.includes(q);
+            const matchesStatus = !st || emp.status === st;
+            const matchesDept = !dt || emp.department === dt;
+            return matchesSearch && matchesStatus && matchesDept;
+        });
+
+        currentPage = 1;
+        renderTable();
     }
 
-    search.addEventListener('input', run);
-    statusF.addEventListener('change', run);
-    deptF.addEventListener('change', run);
+    function renderTable() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageData = filteredData.slice(start, end);
+        
+        tbody.innerHTML = '';
+
+        if (pageData.length === 0) {
+            if (filteredData.length === 0 && window.allEmployeesData.length > 0) {
+                noRes.style.display = 'block';
+            } else if (window.allEmployeesData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5"><div class="emp-empty"><div class="emp-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><p class="emp-empty-title">No employees found</p><p class="emp-empty-sub">Add your first employee to get started.</p></div></td></tr>';
+            }
+        } else {
+            noRes.style.display = 'none';
+            pageData.forEach(emp => {
+                const initials = (emp.firstName.charAt(0) + emp.lastName.charAt(0)).toUpperCase();
+                const sc = emp.status === 'active' ? 's-active' : 's-inactive';
+                const empRoute = '/employees/' + emp.id;
+
+                const row = document.createElement('tr');
+                row.dataset.name = emp.name;
+                row.dataset.status = emp.status;
+                row.dataset.dept = emp.department;
+                row.dataset.href = empRoute;
+                row.style.cursor = 'pointer';
+                row.onclick = (e) => {
+                    if (!e.target.closest('a,button,form')) {
+                        window.location = empRoute;
+                    }
+                };
+
+                row.innerHTML = `
+                    <td>
+                        <div class="emp-cell">
+                            <div class="emp-avatar">${initials}</div>
+                            <div>
+                                <div class="emp-name">${emp.firstName} ${emp.lastName}</div>
+                                <div class="emp-pos">${emp.position ?? '—'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span style="font-size:0.835rem;color:#6b7280;">${emp.gender ? emp.gender.charAt(0).toUpperCase() + emp.gender.slice(1).replace('_', ' ') : '—'}</span></td>
+                    <td><span class="emp-dept">${emp.departmentDisplay ? emp.departmentDisplay.charAt(0).toUpperCase() + emp.departmentDisplay.slice(1) : '—'}</span></td>
+                    <td><span style="font-family:'DM Mono',monospace;font-size:0.835rem;color:#374151;">${emp.phone ?? '—'}</span></td>
+                    <td class="text-center">
+                        <span class="emp-status ${sc}">${emp.status.charAt(0).toUpperCase() + emp.status.slice(1)}</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        updatePagination();
+    }
+
+    function updatePagination() {
+        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+        const info = document.getElementById('empPaginationInfo');
+        const nav = document.getElementById('empPaginationNav');
+
+        if (!info || !nav) return;
+
+        // No results
+        if (filteredData.length === 0) {
+            info.innerHTML = 'No employees to display';
+            nav.innerHTML = '';
+            return;
+        }
+
+        const start = (currentPage - 1) * itemsPerPage + 1;
+        const end = Math.min(currentPage * itemsPerPage, filteredData.length);
+
+        info.innerHTML = `
+            Showing <strong>${start}</strong>–<strong>${end}</strong>
+            of <strong>${filteredData.length}</strong>
+            employee${filteredData.length > 1 ? 's' : ''}
+        `;
+
+        // Hide pagination if only 1 page
+        if (totalPages <= 1) {
+            nav.innerHTML = '';
+            return;
+        }
+
+        let html = `<ul class="pagination mb-0">`;
+
+        // Previous button
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage - 1}">
+                    ‹
+                </a>
+            </li>
+        `;
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            html += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">
+                        ${i}
+                    </a>
+                </li>
+            `;
+        }
+
+        // Next button
+        html += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage + 1}">
+                    ›
+                </a>
+            </li>
+        `;
+
+        html += `</ul>`;
+
+        nav.innerHTML = html;
+
+        // Click handlers
+        nav.querySelectorAll('a[data-page]').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+
+                const page = parseInt(link.dataset.page);
+
+                if (page < 1 || page > totalPages) return;
+
+                currentPage = page;
+                renderTable();
+            });
+        });
+    }
+
+    search.addEventListener('input', applyFilters);
+    statusF.addEventListener('change', applyFilters);
+    deptF.addEventListener('change', applyFilters);
+
+    // Initial render
+    applyFilters();
 })();
 </script>
 @endpush

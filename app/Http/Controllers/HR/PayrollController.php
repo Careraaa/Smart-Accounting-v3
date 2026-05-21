@@ -231,7 +231,15 @@
                 ->orderBy('last_name')
                 ->get(['id', 'first_name', 'last_name', 'position']);
 
-            return view('hr.payroll.batch.confirm', compact('batch', 'availableEmployees'));
+            $departments = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+                ->where('status', 'active')
+                ->whereNotNull('department')
+                ->distinct()
+                ->pluck('department')
+                ->sort()
+                ->values();
+
+            return view('hr.payroll.batch.confirm', compact('batch', 'availableEmployees', 'departments'));
         }
 
         public function batchDetails(PayrollBatch $batch)
@@ -269,7 +277,7 @@
             abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
 
             $validated = $request->validate([
-                'department' => 'required|in:Admin,Operation',
+                'department' => 'required|string',
             ]);
 
             $periodStart = Carbon::parse($batch->period_start);
@@ -298,7 +306,6 @@
                 $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
                 $payroll->forceFill([
                     'batch_id' => $batch->id,
-                    'status'   => 'prepared',
                 ])->save();
                 PayrollDeductionService::applyLoanDeductions($payroll);
                 $added++;
@@ -336,7 +343,6 @@
             $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
             $payroll->forceFill([
                 'batch_id' => $batch->id,
-                'status'   => 'prepared',
             ])->save();
             PayrollDeductionService::applyLoanDeductions($payroll);
 
@@ -503,7 +509,7 @@
                 $names = $notPrepared->implode(', ');
                 return redirect()
                     ->route('payroll.batch.confirm', $batch)
-                    ->with('error', "Cannot finalize batch. These employees are not prepared yet: {$names}.");
+                    ->with('error', "Cannot finalize batch. Some employees are not marked as prepared yet.");
             }
 
             // Recompute every payroll to pick up any OT/UT approved after initial generation.
@@ -689,6 +695,37 @@
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
                 ->with('success', "Recomputed and marked {$label} as prepared.");
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — DELETE SELECTED (or all) EMPLOYEES AT ONCE
+        ══════════════════════════════════════════════════════════════ */
+        public function batchRemoveSelected(Request $request, PayrollBatch $batch)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+
+            $batch->load(['payrolls.user']);
+
+            // Get specific IDs if posted; otherwise delete all
+            $selectedIds = array_filter((array) $request->input('payroll_ids', []));
+            $payrolls = count($selectedIds)
+                ? $batch->payrolls->whereIn('id', $selectedIds)
+                : $batch->payrolls;
+
+            $count = 0;
+            foreach ($payrolls as $payroll) {
+                // Remove line items first to avoid orphans if FK cascade isn't set up.
+                $payroll->allowances()->delete();
+                $payroll->deductions()->delete();
+                $payroll->bonuses()->delete();
+                $payroll->delete();
+                $count++;
+            }
+
+            $label = $count === 1 ? '1 employee' : "{$count} employees";
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', "Removed {$label} from batch.");
         }
 
         /* ══════════════════════════════════════════════════════════════

@@ -129,9 +129,84 @@
 }
 
 /* Pagination strip */
-.att-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa; }
-.att-pagination-info  { font-size:0.75rem;color:#9ca3af; }
-.att-pagination-info strong { color:#374151; }
+.att-pagination-strip {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 16px;
+    border-top:1px solid #f3f4f6;
+    background:#fafafa;
+    flex-wrap:wrap;
+    gap:16px;
+}
+
+.att-pagination-info {
+    font-size:0.75rem;
+    color:#9ca3af;
+}
+
+.att-pagination-info strong {
+    color:#374151;
+}
+
+.att-pagination-strip nav {
+    margin-left:auto;
+}
+
+.att-pagination-strip .pagination {
+    display:flex;
+    align-items:center;
+    gap:4px;
+    margin:0;
+    padding:0;
+    list-style:none;
+}
+
+.att-pagination-strip .page-item {
+    display:flex;
+}
+
+.att-pagination-strip .page-item .page-link {
+    width:28px;
+    height:28px;
+
+    border-radius:7px !important;
+    border:1px solid #e5e7eb;
+
+    background:#fff;
+    color:#6b7280;
+
+    font-size:0.74rem;
+    font-weight:600;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:0;
+    text-decoration:none;
+
+    transition:all .15s ease;
+}
+
+.att-pagination-strip .page-item .page-link:hover {
+    background:#f3f4f6;
+    border-color:#d1d5db;
+    color:#111827;
+}
+
+.att-pagination-strip .page-item.active .page-link {
+    background:#c8292a;
+    border-color:#c8292a;
+    color:#fff;
+}
+
+.att-pagination-strip .page-item.disabled .page-link {
+    background:#f9fafb;
+    color:#d1d5db;
+    pointer-events:none;
+    cursor:not-allowed;
+}
 </style>
 @endpush
 
@@ -185,7 +260,7 @@
                 </div>
                 <select class="att-filter-select" id="deptFilter">
                     <option value="">All Departments</option>
-                    @foreach($employees->pluck('department')->filter()->unique()->sort() as $dept)
+                    @foreach($departments as $dept)
                         <option value="{{ strtolower($dept) }}">{{ $dept }}</option>
                     @endforeach
                 </select>
@@ -205,7 +280,6 @@
                             <tr>
                                 <th>Employee</th>
                                 <th>Department</th>
-                                <th>Position</th>
                                 <th class="text-center">Today's Status</th>
                                 <th>Time In</th>
                                 <th>Time Out</th>
@@ -236,6 +310,7 @@
                                     }
                                 @endphp
                                 <tr
+                                    data-emp-id="{{ $emp->id }}"
                                     data-name="{{ strtolower($emp->first_name . ' ' . $emp->last_name) }}"
                                     data-dept="{{ strtolower($emp->department ?? '') }}"
                                     data-status="{{ $todayStatus }}"
@@ -253,7 +328,6 @@
                                     <td>
                                         <span class="att-dept">{{ $emp->department ?? '—' }}</span>
                                     </td>
-                                    <td style="font-size:0.82rem;color:#6b7280;">{{ $emp->position ?? '—' }}</td>
                                     <td class="text-center">
                                         <span class="att-status {{ $statusClass }}">{{ $statusLabel }}</span>
                                     </td>
@@ -289,53 +363,231 @@
         </div>
     </div>
     {{-- Pagination --}}
-        @if(method_exists($employees, 'hasPages') && $employees->hasPages())
-        <div class="att-pagination-strip">
-
-            <div class="att-pagination-info">
-                Showing
-                <strong>{{ $employees->firstItem() }}</strong>–<strong>{{ $employees->lastItem() }}</strong>
-                of
-                <strong>{{ $employees->total() }}</strong> employees
-            </div>
-
-            {{ $employees->links('pagination::bootstrap-5') }}
-
+    <div class="att-pagination-strip">
+        <div class="att-pagination-info" id="attPaginationInfo">
+            Showing <strong>1</strong>–<strong>10</strong> of <strong>0</strong> employees
         </div>
-        @endif
+
+        <nav id="attPaginationNav"></nav>
+    </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
 window.notificationsCountUrl = "{{ route('notifications.count') }}";
+window.attendanceCalendarRoute = "{{ route('attendance.employee.calendar', ['employee' => ':id']) }}";
 
-// ── Client-side filter ───────────────────────────────────────────
+// ── Build complete employee data with attendance ──────────────────
+window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
+    'id' => $e->id,
+    'firstName' => $e->first_name,
+    'lastName' => $e->last_name,
+    'name' => strtolower($e->first_name . ' ' . $e->last_name),
+    'dept' => strtolower($e->department ?? ''),
+    'department' => $e->department,
+    'position' => $e->position,
+])) !!};
+
+window.todayAttendance = {!! json_encode($todayAttendance->map(fn($a) => [
+    'user_id' => $a->user_id,
+    'time_in' => $a->time_in,
+    'time_out' => $a->time_out,
+    'status' => $a->status,
+])->keyBy('user_id')) !!};
+
+// ── Client-side filter and pagination ─────────────────────────────
 (function () {
     const search  = document.getElementById('empSearch');
     const deptF   = document.getElementById('deptFilter');
     const statusF = document.getElementById('statusFilter');
     const tbody   = document.getElementById('empTbody');
     const noRes   = document.getElementById('empNoResults');
+    const paginationStrip = document.querySelector('.att-pagination-strip');
+    
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let filteredData = [];
 
-    function run() {
-        const q  = search.value.toLowerCase().trim();
-        const d  = deptF.value;
-        const s  = statusF.value;
-        const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
-        const vis = rows.filter(r =>
-            (!q || r.dataset.name.includes(q)) &&
-            (!d || r.dataset.dept === d) &&
-            (!s || r.dataset.status === s)
-        );
-        rows.forEach(r => r.style.display = 'none');
-        vis.forEach(r => r.style.display = '');
-        noRes.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
+    function getEmployeeStatus(emp) {
+        const att = window.todayAttendance[emp.id];
+        if (!att) return 'absent';
+        if (att.time_out) return 'out';
+        if (att.status === 'late') return 'in';
+        return 'in';
     }
 
-    search.addEventListener('input', run);
-    deptF.addEventListener('change', run);
-    statusF.addEventListener('change', run);
+    function applyFilters() {
+        const q = search.value.toLowerCase().trim();
+        const d = deptF.value;
+        const s = statusF.value;
+
+        filteredData = window.allEmployeesData.filter(emp => {
+            const matchesSearch = !q || emp.name.includes(q);
+            const matchesDept = !d || emp.dept === d;
+            const matchesStatus = !s || getEmployeeStatus(emp) === s;
+            return matchesSearch && matchesDept && matchesStatus;
+        });
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    function renderTable() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageData = filteredData.slice(start, end);
+        
+        // Clear tbody
+        tbody.innerHTML = '';
+
+        if (pageData.length === 0) {
+            if (filteredData.length === 0 && window.allEmployeesData.length > 0) {
+                noRes.style.display = 'block';
+            } else if (window.allEmployeesData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="att-empty"><div class="att-empty-icon"><svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg></div><p class="att-empty-title">No employees found</p><p class="att-empty-sub">Add employees to start tracking attendance.</p></div></td></tr>';
+            }
+        } else {
+            noRes.style.display = 'none';
+            pageData.forEach(emp => {
+                const att = window.todayAttendance[emp.id];
+                const status = getEmployeeStatus(emp);
+                let statusClass = 's-absent';
+                let statusLabel = 'Not Yet In';
+                
+                if (att) {
+                    if (att.time_out) {
+                        statusClass = 's-out';
+                        statusLabel = 'Timed Out';
+                    } else if (att.status === 'late') {
+                        statusClass = 's-late';
+                        statusLabel = 'Late';
+                    } else {
+                        statusClass = 's-in';
+                        statusLabel = 'Timed In';
+                    }
+                }
+
+                const initials = (emp.firstName.charAt(0) + emp.lastName.charAt(0)).toUpperCase();
+                const timeIn = att && att.time_in ? new Date('2000-01-01 ' + att.time_in).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true}) : '—';
+                const timeOut = att && att.time_out ? new Date('2000-01-01 ' + att.time_out).toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true}) : '—';
+
+                const calendarUrl = window.attendanceCalendarRoute.replace(':id', emp.id);
+                const row = document.createElement('tr');
+                row.dataset.empId = emp.id;
+                row.dataset.name = emp.name;
+                row.dataset.dept = emp.dept;
+                row.dataset.status = status;
+                row.style.cursor = 'pointer';
+                row.onclick = () => window.location = calendarUrl;
+                row.innerHTML = `
+                    <td>
+                        <div class="att-emp-cell">
+                            <div class="att-emp-avatar">${initials}</div>
+                            <div>
+                                <div class="att-emp-name">${emp.firstName} ${emp.lastName}</div>
+                                <div class="att-emp-pos">${emp.position || '—'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="att-dept">${emp.department || '—'}</span></td>
+                    <td class="text-center"><span class="att-status ${statusClass}">${statusLabel}</span></td>
+                    <td style="font-family:'DM Mono',monospace;font-size:0.82rem;color:#374151;">${timeIn}</td>
+                    <td style="font-family:'DM Mono',monospace;font-size:0.82rem;color:#374151;">${timeOut}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        updatePagination();
+    }
+
+    function updatePagination() {
+        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+        const info = document.getElementById('attPaginationInfo');
+        const nav = document.getElementById('attPaginationNav');
+
+        if (!info || !nav) return;
+
+        // No results
+        if (filteredData.length === 0) {
+            info.innerHTML = 'No employees to display';
+            nav.innerHTML = '';
+            return;
+        }
+
+        const start = (currentPage - 1) * itemsPerPage + 1;
+        const end = Math.min(currentPage * itemsPerPage, filteredData.length);
+
+        info.innerHTML = `
+            Showing <strong>${start}</strong>–<strong>${end}</strong>
+            of <strong>${filteredData.length}</strong>
+            employee${filteredData.length > 1 ? 's' : ''}
+        `;
+
+        // Hide pagination if only 1 page
+        if (totalPages <= 1) {
+            nav.innerHTML = '';
+            return;
+        }
+
+        let html = `<ul class="pagination mb-0">`;
+
+        // Previous button
+        html += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage - 1}">
+                    ‹
+                </a>
+            </li>
+        `;
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            html += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">
+                        ${i}
+                    </a>
+                </li>
+            `;
+        }
+
+        // Next button
+        html += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <a class="page-link" href="#" data-page="${currentPage + 1}">
+                    ›
+                </a>
+            </li>
+        `;
+
+        html += `</ul>`;
+
+        nav.innerHTML = html;
+
+        // Click handlers
+        nav.querySelectorAll('a[data-page]').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+
+                const page = parseInt(link.dataset.page);
+
+                if (page < 1 || page > totalPages) return;
+
+                currentPage = page;
+                renderTable();
+            });
+        });
+    }
+
+    search.addEventListener('input', applyFilters);
+    deptF.addEventListener('change', applyFilters);
+    statusF.addEventListener('change', applyFilters);
+
+    // Initial render
+    applyFilters();
 })();
 
 // ── Notification polling ─────────────────────────────────────────

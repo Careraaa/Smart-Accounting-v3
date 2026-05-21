@@ -281,15 +281,39 @@ html.minimenu .m-header .b-brand .logo-mini {
 }
 
 /* Sidebar scrollbar */
+.nxl-navigation .navbar-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.4) var(--kt-red);
+}
+
 .nxl-navigation .navbar-content::-webkit-scrollbar {
-    width: 3px;
+    width: 10px;
+    height: 10px;
 }
+
 .nxl-navigation .navbar-content::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--kt-red);
+    border-radius: 5px;
 }
+
 .nxl-navigation .navbar-content::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.18);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 5px;
+    border: 2px solid var(--kt-red);
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+}
+
+.nxl-navigation .navbar-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px solid var(--kt-red);
+    background-clip: padding-box;
+}
+
+.nxl-navigation .navbar-content::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid var(--kt-red);
+    background-clip: padding-box;
 }
 
 /* -- Sidebar collapsed (minimenu) ------------------------------ */

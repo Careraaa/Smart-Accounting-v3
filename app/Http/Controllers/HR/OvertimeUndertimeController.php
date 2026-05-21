@@ -45,18 +45,21 @@ class OvertimeUndertimeController extends Controller
     public function index(Request $request)
     {
         // All employees (excluding system roles), ordered by department then name
-        $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
+        $allEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
             ->orderBy('department')
             ->orderBy('last_name')
-            ->paginate(10);
+            ->get();
 
-        // Per-employee OT/UT summary for the current month (only for paginated employees)
+        // All unique departments
+        $departments = $allEmployees->pluck('department')->filter()->unique()->sort()->values();
+
+        // Per-employee OT/UT summary for the current month (for all employees)
         $monthStart = now()->startOfMonth();
         $monthEnd   = now()->endOfMonth();
 
         $monthlySummary = OvertimeUndertime::whereBetween('date', [$monthStart, $monthEnd])
             ->where('status', 'approved')
-            ->whereIn('user_id', $employees->pluck('id'))
+            ->whereIn('user_id', $allEmployees->pluck('id'))
             ->selectRaw('user_id,
                 SUM(CASE WHEN type = "overtime"  THEN hours ELSE 0 END) as ot_hours,
                 SUM(CASE WHEN type = "undertime" THEN hours ELSE 0 END) as ut_hours,
@@ -72,7 +75,8 @@ class OvertimeUndertimeController extends Controller
         $undertimeCount      = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')->count();
 
         return view('hr.overtime.index', compact(
-            'employees',
+            'allEmployees',
+            'departments',
             'monthlySummary',
             'totalOvertimeHours',
             'totalUndertimeHours',

@@ -32,6 +32,7 @@ class Attendance extends Model
 
     /**
      * Get the hours worked for this day
+     * Office hours: 8am - 5pm with 1-hour break = 8 hours
      *
      * @return float|null
      */
@@ -44,6 +45,9 @@ class Attendance extends Model
             
             // Calculate hours using timestamp difference to avoid sign issues, use absolute value
             $hoursWorked = abs(($timeOut->timestamp - $timeIn->timestamp) / 3600);
+            
+            // Subtract 1-hour break from total time
+            $hoursWorked = max(0, $hoursWorked - 1);
             
             return round($hoursWorked, 2);
         }

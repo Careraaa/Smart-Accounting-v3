@@ -30,7 +30,7 @@
             --gray-bg: #f7f7f7;
             --white: #ffffff;
             --accent: #1a1a1a;
-            --page-w: 900px;
+            --page-w: 279.4mm;
             --font-body: 'Sora', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
@@ -87,10 +87,11 @@
         /* Page */
         .page {
             background: var(--white);
-            max-width: var(--page-w);
+            width: 279.4mm; /* Letter landscape width */
+            min-height: 215.9mm; /* Letter landscape height */
             margin: 0 auto 40px;
             box-shadow: 0 2px 24px rgba(0, 0, 0, .08);
-            padding: 40px;
+            padding: 12mm;
         }
 
         /* Header */
@@ -239,15 +240,16 @@
             }
 
             .page {
+                width: 279.4mm;
+                min-height: 215.9mm;
                 margin: 0;
                 box-shadow: none;
-                max-width: 100%;
                 padding: 12mm;
             }
         }
 
         @page {
-            size: A4 landscape;
+            size: Letter landscape;
             margin: 12mm;
         }
     </style>
@@ -280,8 +282,7 @@
         <table>
             <thead>
                 <tr>
-                    <th><strong>First Name</strong></th>
-                    <th><strong>Last Name</strong></th>
+                    <th><strong>Name</strong></th>
                     <th><strong>Gender</strong></th>
                     <th><strong>Position</strong></th>
                     <th><strong>Email</strong></th>
@@ -292,9 +293,8 @@
             <tbody>
                 @forelse ($employees as $employee)
                     <tr>
-                        <td>{{ $employee->first_name }}</td>
-                        <td>{{ $employee->last_name }}</td>
-                        <td>{{ $employee->gender ?? 'N/A' }}</td>
+                        <td>{{ $employee->first_name }} {{ $employee->last_name }}</td>
+                        <td>{{ ucfirst($employee->gender ?? 'N/A') }}</td>
                         <td>{{ $employee->position ?? 'N/A' }}</td>
                         <td>{{ $employee->email ?? 'N/A' }}</td>
                         <td>{{ $employee->phone ?? 'N/A' }}</td>

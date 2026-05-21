@@ -57,6 +57,14 @@
 }
 .prl-btn-prepare-sel:hover { background:#16a34a;color:#fff;border-color:#16a34a; }
 .prl-btn-prepare-sel:disabled { opacity:0.4;cursor:not-allowed; }
+.prl-btn-delete-sel {
+    display:inline-flex;align-items:center;gap:7px;padding:8px 16px;
+    background:#fef2f2;color:#e11d48;border:1px solid #fecaca;border-radius:9px;
+    font-family:'Sora',sans-serif;font-size:0.78rem;font-weight:700;
+    cursor:pointer;transition:all 0.15s;white-space:nowrap;
+}
+.prl-btn-delete-sel:hover { background:#e11d48;color:#fff;border-color:#e11d48; }
+.prl-btn-delete-sel:disabled { opacity:0.4;cursor:not-allowed; }
 
 /* ── Totals bar ─────────────────────────────────────────────── */
 .prl-totals-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 20px;display:flex;gap:24px;align-items:center;margin-bottom:16px;flex-wrap:wrap; }
@@ -177,14 +185,6 @@
                         Finalize &amp; Submit
                     </button>
                 </form>
-                <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="prl-btn-sec">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        Cancel
-                    </button>
-                </form>
                 {{-- Delete batch (destructive) --}}
                 <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST" id="deleteBatchForm">
                     @csrf @method('DELETE')
@@ -240,6 +240,62 @@
     </div>
     @endif
 
+    {{-- Prepare selected confirmation modal --}}
+    <div id="prepareSelectedModal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(17,24,39,0.55);backdrop-filter:blur(2px);">
+        <div style="background:#fff;border-radius:18px;padding:32px 28px;max-width:420px;width:90%;box-shadow:0 24px 60px rgba(17,24,39,0.22);font-family:'Sora',sans-serif;">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+                <div style="width:44px;height:44px;border-radius:12px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <div>
+                    <div style="font-size:1rem;font-weight:800;color:#111827;">Prepare selected payrolls?</div>
+                    <div style="font-size:0.78rem;color:#9ca3af;margin-top:2px;" id="prepareCountDisplay"></div>
+                </div>
+            </div>
+            <p style="font-size:0.85rem;color:#6b7280;line-height:1.6;margin:0 0 24px;">
+                The selected payroll records will be marked as prepared and moved to the next stage.
+            </p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('prepareSelectedModal').style.display='none'"
+                    style="padding:9px 20px;border-radius:9px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="button" onclick="confirmPrepareSelected()"
+                    style="padding:9px 20px;border-radius:9px;border:none;background:#16a34a;color:#fff;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,0.3);">
+                    Yes, prepare them
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Remove selected confirmation modal --}}
+    <div id="removeSelectedModal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(17,24,39,0.55);backdrop-filter:blur(2px);">
+        <div style="background:#fff;border-radius:18px;padding:32px 28px;max-width:420px;width:90%;box-shadow:0 24px 60px rgba(17,24,39,0.22);font-family:'Sora',sans-serif;">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+                <div style="width:44px;height:44px;border-radius:12px;background:#fef2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#e11d48" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </div>
+                <div>
+                    <div style="font-size:1rem;font-weight:800;color:#111827;">Remove selected payrolls?</div>
+                    <div style="font-size:0.78rem;color:#9ca3af;margin-top:2px;" id="removeCountDisplay"></div>
+                </div>
+            </div>
+            <p style="font-size:0.85rem;color:#6b7280;line-height:1.6;margin:0 0 24px;">
+                The selected payroll records will be removed from the batch. This action cannot be undone.
+            </p>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('removeSelectedModal').style.display='none'"
+                    style="padding:9px 20px;border-radius:9px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">
+                    Cancel
+                </button>
+                <button type="button" onclick="confirmRemoveSelected()"
+                    style="padding:9px 20px;border-radius:9px;border:none;background:#e11d48;color:#fff;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(225,29,72,0.3);">
+                    Yes, remove them
+                </button>
+            </div>
+        </div>
+    </div>
+
     @if($batch->status === 'rejected' && $batch->rejection_note)
         <div class="prl-flash error">
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
@@ -265,7 +321,7 @@
                 <div style="font-size:.72rem;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;">Add Employee</div>
                 <form action="{{ route('payroll.batch.add-employee', $batch) }}" method="POST" style="display:flex;gap:8px;align-items:center;">
                     @csrf
-                    <select name="user_id" required style="flex:1;min-width:0;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:.82rem;color:#374151;background:#f9fafb;">
+                    <select name="user_id" required style="flex:1;min-width:0;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:.82rem;color:#374151;background:#f9fafb;max-height:300px;overflow-y:scroll;">
                         <option value="">Select employee...</option>
                         @foreach($availableEmployees as $emp)
                             <option value="{{ $emp->id }}">{{ $emp->first_name }} {{ $emp->last_name }}{{ $emp->position ? ' — '.$emp->position : '' }}</option>
@@ -288,8 +344,9 @@
                     @csrf
                     <select name="department" required class="prl-bulk-dept-select" style="flex:1;min-width:0;">
                         <option value="">Select department...</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Operation">Operation</option>
+                        @foreach($departments as $dept)
+                            <option value="{{ $dept }}">{{ $dept }}</option>
+                        @endforeach
                     </select>
                     <button type="submit" class="prl-bulk-dept-btn" style="flex-shrink:0;">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -352,16 +409,19 @@
                 <span class="prl-bulk-count">
                     <strong id="selCount">0</strong> selected
                 </span>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button type="button" class="prl-btn-delete-sel" id="deleteSelBtn" disabled
+                    onclick="submitRemoveSelected()">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Remove Selected
+                </button>
                 <button type="button" class="prl-btn-prepare-sel" id="prepareSelBtn" disabled
                     onclick="submitPrepareSelected()">
                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     Prepare Selected
                 </button>
             </div>
-            <button type="button" class="prl-btn-prepare-all" onclick="submitPrepareAll()">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                Prepare All
-            </button>
         </div>
     </form>
     @endif
@@ -377,14 +437,13 @@
                             <input type="checkbox" class="prl-cb" id="selectAll" title="Select all">
                         </th>
                         @endif
-                        <th>#</th>
-                        <th>Employee</th>
-                        <th class="text-end">Days</th>
-                        <th class="text-end">Basic</th>
-                        <th class="text-end">OT / Allow</th>
-                        <th class="text-end">Bonuses</th>
-                        <th class="text-end">Deductions</th>
-                        <th class="text-end">Net Pay</th>
+                        <th>Employee Name</th>
+                        <th class="text-center">Days</th>
+                        <th class="text-center">Basic Pay</th>
+                        <th class="text-center">Additional Earnings</th>
+                        <th class="text-center">Bonuses</th>
+                        <th class="text-center">Deductions</th>
+                        <th class="text-center">Net Pay</th>
                         <th class="text-center">Status</th>
                     </tr>
                 </thead>
@@ -410,17 +469,15 @@
                                 onchange="updateSelection()">
                         </td>
                         @endif
-                        <td style="color:#9ca3af;font-size:0.78rem;font-family:'DM Mono',monospace;">{{ $i + 1 }}</td>
                         <td>
                             <div class="prl-emp-cell">
-                                <div class="prl-emp-avatar">{{ $initials }}</div>
                                 <div>
                                     <div class="prl-emp-name">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</div>
                                     <div class="prl-emp-meta">{{ $payroll->user->position ?? ($payroll->user->department ?? 'N/A') }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="text-end">
+                        <td class="text-center">
                             @php
                                 $absCount = \App\Models\Attendance::where('user_id', $payroll->user_id)
                                     ->whereBetween('date', [$batch->period_start, $batch->period_end])
@@ -432,36 +489,31 @@
                                 <br><span style="font-size:0.68rem;color:#c8292a;font-family:'DM Mono',monospace;">{{ $absCount }} absent</span>
                             @endif
                         </td>
-                        <td class="text-end"><span class="prl-mono">&#8369;{{ number_format($payroll->basic_salary, 2) }}</span></td>
-                        <td class="text-end">
+                        <td class="text-center"><span class="prl-mono">&#8369;{{ number_format($payroll->basic_salary, 2) }}</span></td>
+                        <td class="text-center">
                             @if($otAllowances > 0)
                                 <div style="font-size:0.78rem;">
-                                    <span class="prl-mono c-green">+&#8369;{{ number_format($otAllowances, 2) }}</span>
-                                    <div style="font-size:0.7rem;color:#9ca3af;margin-top:2px;">
-                                        @if($holidayPay > 0)<div>Holiday: &#8369;{{ number_format($holidayPay, 2) }}</div>@endif
-                                        @if($overtimeTotal > 0)<div>OT: &#8369;{{ number_format($overtimeTotal, 2) }}</div>@endif
-                                        @if($regularAllowances > 0)<div>Allow: &#8369;{{ number_format($regularAllowances, 2) }}</div>@endif
-                                    </div>
+                                    <span class="prl-mono c-green">&#8369;{{ number_format($otAllowances, 2) }}</span>
                                 </div>
                             @else
                                 <span style="color:#d1d5db;font-size:0.75rem;">—</span>
                             @endif
                         </td>
-                        <td class="text-end">
+                        <td class="text-center">
                             @if($payroll->total_bonuses > 0)
                                 <span class="prl-mono" style="color:#7c3aed;font-weight:500;">+&#8369;{{ number_format($payroll->total_bonuses, 2) }}</span>
                             @else
                                 <span style="color:#d1d5db;font-size:0.75rem;">—</span>
                             @endif
                         </td>
-                        <td class="text-end">
+                        <td class="text-center">
                             @if($payroll->total_deductions > 0)
                                 <span class="prl-mono c-red">&#8369;{{ number_format($payroll->total_deductions, 2) }}</span>
                             @else
                                 <span style="color:#d1d5db;font-size:0.75rem;">—</span>
                             @endif
                         </td>
-                        <td class="text-end"><span class="prl-mono c-bold">&#8369;{{ number_format($payroll->net_pay, 2) }}</span></td>
+                        <td class="text-center"><span class="prl-mono c-bold">&#8369;{{ number_format($payroll->net_pay, 2) }}</span></td>
                         <td class="text-center">
                             <span class="prl-status {{ $sc }}">
                                 {{ ucfirst($payroll->status) }}
@@ -487,14 +539,32 @@ function rowClick(event, row) {
     window.location = row.dataset.href;
 }
 
+// ── Close modal when clicking outside ────────────────────────────
+function setupModalBackdropClose(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+}
+
+// Setup backdrop close for all modals
+setupModalBackdropClose('deleteBatchModal');
+setupModalBackdropClose('prepareSelectedModal');
+setupModalBackdropClose('removeSelectedModal');
+
 // ── Checkbox selection ───────────────────────────────────────────
 function updateSelection() {
     const cbs  = Array.from(document.querySelectorAll('.row-cb'));
     const sel  = cbs.filter(c => c.checked);
-    const btn  = document.getElementById('prepareSelBtn');
+    const prepareBtn = document.getElementById('prepareSelBtn');
+    const deleteBtn = document.getElementById('deleteSelBtn');
     const cnt  = document.getElementById('selCount');
     if (cnt) cnt.textContent = sel.length;
-    if (btn) btn.disabled = sel.length === 0;
+    if (prepareBtn) prepareBtn.disabled = sel.length === 0;
+    if (deleteBtn) deleteBtn.disabled = sel.length === 0;
 }
 
 const selectAll = document.getElementById('selectAll');
@@ -511,6 +581,14 @@ if (selectAll) {
 function submitPrepareSelected() {
     const ids = Array.from(document.querySelectorAll('.row-cb:checked')).map(c => c.value);
     if (!ids.length) return;
+    document.getElementById('prepareCountDisplay').textContent = ids.length + ' record' + (ids.length !== 1 ? 's' : '');
+    document.getElementById('prepareSelectedModal').style.display = 'flex';
+    window.prepareIds = ids;
+}
+
+function confirmPrepareSelected() {
+    const ids = window.prepareIds;
+    if (!ids || !ids.length) return;
     const container = document.getElementById('prepareAllIds');
     container.innerHTML = '';
     ids.forEach(id => {
@@ -520,13 +598,37 @@ function submitPrepareSelected() {
         inp.value = id;
         container.appendChild(inp);
     });
+    document.getElementById('prepareSelectedModal').style.display = 'none';
     document.getElementById('prepareAllForm').submit();
 }
 
-// ── Prepare all ──────────────────────────────────────────────────
-function submitPrepareAll() {
-    document.getElementById('prepareAllIds').innerHTML = '';
-    document.getElementById('prepareAllForm').submit();
+// ── Remove selected ──────────────────────────────────────────────
+function submitRemoveSelected() {
+    const ids = Array.from(document.querySelectorAll('.row-cb:checked')).map(c => c.value);
+    if (!ids.length) return;
+    document.getElementById('removeCountDisplay').textContent = ids.length + ' record' + (ids.length !== 1 ? 's' : '');
+    document.getElementById('removeSelectedModal').style.display = 'flex';
+    window.deleteIds = ids;
+}
+
+function confirmRemoveSelected() {
+    const ids = window.deleteIds;
+    if (!ids || !ids.length) return;
+    const container = document.getElementById('prepareAllIds');
+    container.innerHTML = '';
+    ids.forEach(id => {
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'payroll_ids[]';
+        inp.value = id;
+        container.appendChild(inp);
+    });
+    const form = document.getElementById('prepareAllForm');
+    const originalAction = form.action;
+    form.action = form.action.replace('prepare-all', 'remove-selected');
+    document.getElementById('removeSelectedModal').style.display = 'none';
+    form.submit();
+    form.action = originalAction;
 }
 </script>
 @endpush

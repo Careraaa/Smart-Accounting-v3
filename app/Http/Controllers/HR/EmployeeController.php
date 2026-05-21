@@ -24,9 +24,21 @@ class EmployeeController extends Controller
             $sortOrder = 'asc';
         }
 
-        $employees = User::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy($sortBy, $sortOrder)->paginate(15);
+        // Paginated employees for display
+        $employees = User::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy($sortBy, $sortOrder)->paginate(10);
 
-        return view('hr.employees.index', compact('employees', 'sortBy', 'sortOrder'));
+        // All employees for client-side filtering
+        $allEmployees = User::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy($sortBy, $sortOrder)->get();
+
+        // Get unique departments for filter
+        $departments = User::whereNotIn('role', ['superadmin', 'qr_admin'])
+            ->whereNotNull('department')
+            ->distinct()
+            ->pluck('department')
+            ->sort()
+            ->values();
+
+        return view('hr.employees.index', compact('employees', 'allEmployees', 'departments', 'sortBy', 'sortOrder'));
     }
 
     public function create()

@@ -329,6 +329,7 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::post('/payroll/batch/{batch}/reopen', [PayrollController::class, 'batchReopen'])->name('payroll.batch.reopen');
         Route::delete('/payroll/batch/{batch}/cancel', [PayrollController::class, 'batchCancel'])->name('payroll.batch.cancel');
         Route::post('/payroll/batch/{batch}/prepare-all', [PayrollController::class, 'batchPrepareAll'])->name('payroll.batch.prepare-all');
+        Route::post('/payroll/batch/{batch}/remove-selected', [PayrollController::class, 'batchRemoveSelected'])->name('payroll.batch.remove-selected');
         Route::post('/payroll/batch/{batch}/submit', [PayrollController::class, 'batchSubmit'])->name('payroll.batch.submit');
         Route::post('/payroll/cutoff/update', [PayrollController::class, 'updateCutoffSchedule'])->name('payroll.cutoff.update');
 

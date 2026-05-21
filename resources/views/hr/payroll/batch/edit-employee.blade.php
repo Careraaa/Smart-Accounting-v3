@@ -79,7 +79,7 @@
 .ep-net{background:#111827;border-radius:14px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;margin-top:16px}
 .ep-net-lbl{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6b7280}
 .ep-net-val{font-size:1.6rem;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.02em;font-family:'DM Mono',monospace}
-.ep-footer{display:flex;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #f3f4f6;flex-wrap:wrap}
+.ep-footer{display:flex;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #f3f4f6;flex-wrap:wrap;justify-content:flex-end}
 .ep-btn-save{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;background:#c8292a;color:#fff;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:.855rem;font-weight:700;cursor:pointer;transition:background .15s,box-shadow .15s;box-shadow:0 4px 14px rgba(200,41,42,.25)}
 .ep-btn-save:hover{background:#a81f20;box-shadow:0 6px 20px rgba(200,41,42,.35);color:#fff}
 .ep-btn-cancel{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:.845rem;font-weight:600;text-decoration:none;transition:background .13s,border-color .13s}
@@ -115,11 +115,17 @@
         {{-- Row 1: Attendance + Salary --}}
         <div class="ep-grid">
             <div class="ep-card">
-                <div class="ep-card-head">
-                    <div class="ep-card-icon amber">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <div class="ep-card-head" style="justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:10px;flex:1;">
+                        <div class="ep-card-icon amber">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        </div>
+                        <div><p class="ep-card-title">Attendance</p><p class="ep-card-sub">Live from records</p></div>
                     </div>
-                    <div><p class="ep-card-title">Attendance</p><p class="ep-card-sub">Live from records</p></div>
+                    <a href="{{ route('attendance.employee.calendar', $payroll->user_id) }}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;border-radius:6px;text-decoration:none;font-size:.75rem;font-weight:600;transition:all .13s;white-space:nowrap;flex-shrink:0;" onmouseover="this.style.background='#e5e7eb';this.style.color='#374151';" onmouseout="this.style.background='#f3f4f6';this.style.color='#6b7280';">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                       Attendance Record
+                    </a>
                 </div>
                 <div class="ep-card-body">
                     <div class="ep-chips">
@@ -135,16 +141,16 @@
                     <div class="ep-card-icon green">
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
-                    <div><p class="ep-card-title">Salary Computation</p><p class="ep-card-sub">Read-only base figures</p></div>
+                    <div><p class="ep-card-title">Salary Computation</p><p class="ep-card-sub">Earnings and Deductions</p></div>
                 </div>
                 <div class="ep-card-body">
                     <div class="ep-rows">
                         <div class="ep-row">
-                            <span class="ep-row-lbl">Basic Salary <span class="ep-badge">rate &times; days</span></span>
+                            <span class="ep-row-lbl">Basic Pay <span class="ep-badge">rate &times; days</span></span>
                             <span class="ep-row-val" id="ep_basic_display">&#8369;{{ number_format($payroll->basic_salary??0,2) }}</span>
                         </div>
                         <div class="ep-row" id="ep_holiday_row" style="display:none;">
-                            <span class="ep-row-lbl green">Holiday Pay <span class="ep-badge">holiday premium</span></span>
+                            <span class="ep-row-lbl green">Holiday Pay</span>
                             <span class="ep-row-val green" id="ep_holiday_display">+&#8369;0.00</span>
                         </div>
                         <div class="ep-row" id="ep_ot_row" style="display:none;">
@@ -156,39 +162,10 @@
                             <span class="ep-row-val red" id="ep_ut_display">-&#8369;0.00</span>
                         </div>
                         <div class="ep-row">
-                            <span class="ep-row-lbl bold">Adjusted Gross</span>
+                            <span class="ep-row-lbl bold">Initial Net Pay</span>
                             <span class="ep-row-val" id="ep_adjusted" style="font-size:.95rem;">&#8369;{{ number_format($payroll->gross_pay??0,2) }}</span>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- System Deductions (read-only) --}}
-        @php
-            $systemDeductionItems = $payroll->deductions->filter(function($d) {
-                $type = (string)($d->deduction_type ?? $d->name ?? '');
-                return in_array($type, ['SSS','Pag-IBIG','PhilHealth','Withholding Tax','Cash Advance','Salary Loan'])
-                    || str_starts_with($type, 'Undertime Deduction');
-            })->values();
-        @endphp
-        <div class="ep-card" style="margin-bottom:16px;">
-            <div class="ep-card-head">
-                <div class="ep-card-icon red">
-                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-                </div>
-                <div><p class="ep-card-title">System Deductions</p><p class="ep-card-sub">Auto-generated &mdash; read-only</p></div>
-            </div>
-            <div class="ep-card-body">
-                <div class="ep-rows">
-                    @forelse($systemDeductionItems as $item)
-                        <div class="ep-row">
-                            <span class="ep-row-lbl red">{{ $item->deduction_type ?? $item->name }}</span>
-                            <span class="ep-row-val red">&#8369;{{ number_format((float)$item->amount,2) }}</span>
-                        </div>
-                    @empty
-                        <span class="ep-empty-hint">No system deductions for this period.</span>
-                    @endforelse
                 </div>
             </div>
         </div>
@@ -200,7 +177,7 @@
                     <div class="ep-card-icon green">
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     </div>
-                    <div><p class="ep-card-title">Allowances <span style="font-weight:400;color:#9ca3af;font-size:.68rem;">optional</span></p><p class="ep-card-sub">Transportation, meal, housing&hellip;</p></div>
+                    <div><p class="ep-card-title">Allowances <span style="font-weight:400;color:#9ca3af;font-size:.68rem;">(optional)</span></p><p class="ep-card-sub">Transportation, meal, housing&hellip;</p></div>
                 </div>
                 <div class="ep-card-body">
                     <div class="ep-add-row">
@@ -221,7 +198,7 @@
                     <div class="ep-card-icon red">
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
                     </div>
-                    <div><p class="ep-card-title">Additional Deductions <span style="font-weight:400;color:#9ca3af;font-size:.68rem;">optional</span></p><p class="ep-card-sub">Cash advances, loans, custom&hellip;</p></div>
+                    <div><p class="ep-card-title">Additional Deductions <span style="font-weight:400;color:#9ca3af;font-size:.68rem;">(optional)</span></p><p class="ep-card-sub">Penalty, medical, savings&hellip;</p></div>
                 </div>
                 <div class="ep-card-body">
                     <div class="ep-add-row">
@@ -245,8 +222,8 @@
                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
                 </div>
                 <div>
-                    <p class="ep-card-title">Bonuses <span style="font-weight:400;color:#9ca3af;font-size:.68rem;">optional</span></p>
-                    <p class="ep-card-sub">Performance, holiday, attendance, and special bonuses</p>
+                    <p class="ep-card-title">Bonuses <span style="font-weight:400;color:#9ca3af;font-size:.68rem;">(optional)</span></p>
+                    <p class="ep-card-sub">Performance and other special bonuses</p>
                 </div>
             </div>
             <div class="ep-card-body">
@@ -273,8 +250,8 @@
         {{-- Net Salary --}}
         <div class="ep-net">
             <div>
-                <div class="ep-net-lbl">Estimated Net Salary</div>
-                <div style="font-size:.7rem;color:#4b5563;margin-top:2px;">Gross + Bonuses &minus; All Deductions</div>
+                <div class="ep-net-lbl">Net Pay</div>
+                <div style="font-size:.7rem;color:#4b5563;margin-top:2px;">Initial Net Pay + Allowances &minus; Additional Deductions + Bonuses</div>
             </div>
             <span class="ep-net-val" id="ep_net_salary">&#8369;{{ number_format($payroll->net_pay??0,2) }}</span>
         </div>
@@ -282,9 +259,8 @@
         <div class="ep-footer">
             <button type="submit" class="ep-btn-save">
                 <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                Save &amp; Mark Prepared
+                Save &amp; Mark as Prepared
             </button>
-            <a href="{{ route('payroll.batch.confirm', $batch) }}" class="ep-btn-cancel">Cancel</a>
         </div>
     </form>
 </div>
@@ -369,7 +345,9 @@ window._ep = {
 
     function renderSalary(c) {
         $('ep_basic_display').textContent = fmt(c.basicSalary ?? 0);
-        $('ep_adjusted').textContent      = fmt(c.adjustedGross ?? 0);
+        // Compute adjusted total: Basic + Holiday + OT - Undertime - System Deductions
+        const adjustedTotal = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.otPay ?? 0) - (c.utDeduction ?? 0) - (c.sss ?? 0) - (c.pagibig ?? 0) - (c.philhealth ?? 0) - (c.withholdingTax ?? 0);
+        $('ep_adjusted').textContent      = fmt(Math.max(0, adjustedTotal));
         const holidayRow = $('ep_holiday_row');
         if (c.holidayPay > 0) {
             $('ep_holiday_display').textContent = '+' + fmt(c.holidayPay);
@@ -390,7 +368,13 @@ window._ep = {
     }
 
     function recalcNet() {
-        $('ep_net_salary').textContent = fmt(computed.netPay ?? 0);
+        const allowTotal = allowances.reduce((s,a) => s + a.amount, 0);
+        const deductTotal = deductions.reduce((s,d) => s + d.amount, 0);
+        const bonusTotal = bonuses.reduce((s,b) => s + b.amount, 0);
+        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
+        const finalNetPay = Math.max(0, adjustedTotal + allowTotal - deductTotal + bonusTotal);
+        computed.netPay = finalNetPay;
+        $('ep_net_salary').textContent = fmt(finalNetPay);
     }
 
     function renderPills(cid, eid, items, cls, labelFn, removeFn) {

@@ -15,11 +15,26 @@ class AttendanceController extends Controller
 {
     public function index()
     {
-        // All employees (excluding system roles)
+        // All employees (excluding system roles) - paginated for display
         $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
             ->orderBy('department')
             ->orderBy('last_name')
             ->paginate(10);
+
+        // ALL employees (excluding system roles) for search - unpaginated
+        $allEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
+            ->orderBy('department')
+            ->orderBy('last_name')
+            ->get();
+
+        // All distinct departments from database
+        $departments = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
+            ->distinct()
+            ->whereNotNull('department')
+            ->pluck('department')
+            ->filter()
+            ->sort()
+            ->values();
 
         // Today's attendance keyed by employee id
         $todayAttendance = Attendance::whereDate('date', today())
@@ -32,7 +47,7 @@ class AttendanceController extends Controller
             ->limit(15)
             ->get();
 
-        return view('hr.attendance.index', compact('employees', 'todayAttendance', 'recentLogs'));
+        return view('hr.attendance.index', compact('employees', 'allEmployees', 'departments', 'todayAttendance', 'recentLogs'));
     }
 
     /**
