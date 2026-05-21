@@ -167,16 +167,29 @@ html.minimenu .m-header .b-brand .logo-mini {
     color: var(--kt-red) !important;
 }
 
-/* Active parent (has submenu) — subtle highlight, no white pill */
-.nxl-navigation .nxl-item.active:has(> .nxl-submenu) > .nxl-link {
-    background: rgba(255, 255, 255, 0.13) !important;
-    color: #fff !important;
-    font-weight: 500 !important;
+.nxl-navigation .nxl-item.active:has(> .nxl-submenu) > .nxl-link,
+.nxl-navigation .nxl-item.nxl-hasmenu:hover > .nxl-link,
+.nxl-navigation .nxl-item.nxl-hasmenu.nxl-trigger > .nxl-link,
+.nxl-navigation .nxl-item.nxl-hasmenu:has(.nxl-submenu:hover) > .nxl-link {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
     box-shadow: none !important;
 }
+
+/* Keep icons readable */
 .nxl-navigation .nxl-item.active:has(> .nxl-submenu) > .nxl-link .nxl-micon i,
-.nxl-navigation .nxl-item.active:has(> .nxl-submenu) > .nxl-link .nxl-arrow i {
-    color: rgba(255, 255, 255, 0.8) !important;
+.nxl-navigation .nxl-item.active:has(> .nxl-submenu) > .nxl-link .nxl-arrow i,
+.nxl-navigation .nxl-item.nxl-hasmenu:hover > .nxl-link .nxl-micon i,
+.nxl-navigation .nxl-item.nxl-hasmenu:hover > .nxl-link .nxl-arrow i,
+.nxl-navigation .nxl-item.nxl-hasmenu:has(.nxl-submenu:hover) > .nxl-link .nxl-micon i,
+.nxl-navigation .nxl-item.nxl-hasmenu:has(.nxl-submenu:hover) > .nxl-link .nxl-arrow i {
+    color: #ffffff !important;
+}
+
+/* Prevent parent row from fading */
+.nxl-navigation .nxl-item.nxl-hasmenu:has(.nxl-submenu:hover) {
+    background: transparent !important;
 }
 
 /* Icons */
@@ -221,6 +234,7 @@ html.minimenu .m-header .b-brand .logo-mini {
 .nxl-navigation .nxl-item.nxl-hasmenu.nxl-trigger > .nxl-submenu {
     display: block !important;
 }
+
 .nxl-navigation .nxl-submenu .nxl-link {
     color: rgba(255, 255, 255, 0.76) !important;
     font-size: 0.79rem !important;
@@ -248,12 +262,13 @@ html.minimenu .m-header .b-brand .logo-mini {
     transition: background 0.16s ease, transform 0.16s ease !important;
 }
 .nxl-navigation .nxl-submenu .nxl-link:hover {
-    color: #fff !important;
-    background: rgba(255, 255, 255, 0.14) !important;
+    background: #ffffff !important;
+    color: var(--kt-red-dark) !important;
     transform: translateX(2px);
+    font-weight: 600 !important;
 }
 .nxl-navigation .nxl-submenu .nxl-link:hover::before {
-    background: rgba(255, 255, 255, 0.88);
+    background: var(--kt-red) !important;
     transform: translateY(-50%) scale(1.2);
 }
 .nxl-navigation .nxl-submenu .nxl-item.active > .nxl-link {
