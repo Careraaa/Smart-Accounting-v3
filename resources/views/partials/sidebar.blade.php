@@ -367,6 +367,13 @@
                             <span class="nxl-mtext">OT / UT Requests</span>
                         </a>
                     </li>
+
+                    <li class="nxl-item {{ request()->routeIs('employee.attendance.*') ? 'active' : '' }}">
+                        <a href="{{ route('employee.attendance.index') }}" class="nxl-link">
+                            <span class="nxl-micon"><i class="feather-calendar"></i></span>
+                            <span class="nxl-mtext">My Attendance</span>
+                        </a>
+                    </li>
                 @endif
 
                 {{-- ── Accountant ── --}}

@@ -34,6 +34,7 @@ use App\Http\Controllers\Employee\AttachmentController as EmployeeSelfAttachment
 use App\Http\Controllers\Employee\ProfileController as EmployeeProfileController;
 use App\Http\Controllers\Employee\LeaveController as EmployeeLeaveController;
 use App\Http\Controllers\Employee\OvertimeUndertimeController as EmployeeOvertimeUndertimeController;
+use App\Http\Controllers\Employee\AttendanceController as EmployeeAttendanceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
@@ -227,6 +228,9 @@ Route::middleware(['auth', 'check-status', 'role:employee,superadmin'])->group(f
     Route::get('/my/overtime-undertime/{overtimeUndertime}/edit', [EmployeeOvertimeUndertimeController::class, 'edit'])->name('employee.overtime-undertime.edit');
     Route::patch('/my/overtime-undertime/{overtimeUndertime}', [EmployeeOvertimeUndertimeController::class, 'update'])->name('employee.overtime-undertime.update');
     Route::delete('/my/overtime-undertime/{overtimeUndertime}', [EmployeeOvertimeUndertimeController::class, 'destroy'])->name('employee.overtime-undertime.destroy');
+
+    // My Attendance Calendar
+    Route::get('/my/attendance', [EmployeeAttendanceController::class, 'index'])->name('employee.attendance.index');
 });
 
 // ===== SHARED ATTENDANCE ROUTES (all authenticated users) =====
