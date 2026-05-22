@@ -282,6 +282,23 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
 
     Route::resource('holiday', HRHolidayController::class);
 
+    // HR Settings Routes (HR and Superadmin only)
+    Route::middleware(['role:hr,superadmin'])->group(function () {
+        // Unified Settings Routes
+        Route::get('/settings', [\App\Http\Controllers\HR\ConfigurationController::class, 'index'])->name('settings.index');
+        
+        // Shift routes
+        Route::post('/settings/shifts', [\App\Http\Controllers\HR\ConfigurationController::class, 'storeShift'])->name('settings.shift.store');
+        Route::put('/settings/shifts/{shift}', [\App\Http\Controllers\HR\ConfigurationController::class, 'updateShift'])->name('settings.shift.update');
+        Route::delete('/settings/shifts/{shift}', [\App\Http\Controllers\HR\ConfigurationController::class, 'destroyShift'])->name('settings.shift.destroy');
+        
+        // Payroll Cutoff routes
+        Route::post('/settings/payroll-cutoff', [\App\Http\Controllers\HR\ConfigurationController::class, 'updatePayrollCutoff'])->name('settings.payroll-cutoff.update');
+        
+        // Attendance Settings routes
+        Route::post('/settings/attendance-settings', [\App\Http\Controllers\HR\ConfigurationController::class, 'updateAttendanceSettings'])->name('settings.attendance-settings.update');
+    });
+
     // Define specific overtime routes before resource routes to prevent conflicts
     Route::get('/overtime/pending', [OvertimeUndertimeController::class, 'pendingRequests'])
         ->name('overtime.pending');

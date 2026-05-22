@@ -518,12 +518,6 @@
             @endif
         </div>
     </div>
-    {{-- Right Calendar Sidebar --}}
-    <aside class="hrd-sidebar">
-        @include('partials.calendar')
-        @include('partials.todo')
-    </aside>
-</div>
 @endsection
 
 @push('scripts')

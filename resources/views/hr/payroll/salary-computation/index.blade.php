@@ -68,6 +68,12 @@
 .prl-filter-select { border:1px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#374151;background:#f9fafb;outline:none;cursor:pointer; }
 .prl-filter-select:focus { border-color:#c8292a; }
 
+/* ── Period selector ────────────────────────────────────────── */
+.prl-period-selector { margin-bottom: 16px; }
+.prl-period-label { display: block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #6b7280; margin-bottom: 8px; }
+.prl-period-select { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; font-family: 'Sora', sans-serif; color: #111827; background: #f9fafb; outline: none; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.prl-period-select:focus { border-color: #c8292a; background: #fff; box-shadow: 0 0 0 3px rgba(200,41,42,0.08); }
+
 /* ── Batch table ─────────────────────────────────────────────── */
 .prl-table-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
 .prl-table-scroll { overflow-x:auto; }
@@ -210,7 +216,11 @@
                 @if($currentInProgressBatch) Continue Batch @else Generate New Payroll Batch @endif
             </h2>
             <div class="prl-generate-period">
-                Period: {{ \Carbon\Carbon::parse($currentPeriod['start'])->format('M d, Y') }} &mdash; {{ \Carbon\Carbon::parse($currentPeriod['end'])->format('M d, Y') }}
+                @if($currentInProgressBatch)
+                    Period: {{ \Carbon\Carbon::parse($currentInProgressBatch->period_start)->format('M d, Y') }} &mdash; {{ \Carbon\Carbon::parse($currentInProgressBatch->period_end)->format('M d, Y') }}
+                @else
+                    Select any period from the current or past 24 months to create a new batch
+                @endif
             </div>
         </div>
         <div class="prl-generate-right">
@@ -316,25 +326,32 @@
         <div class="prl-modal-icon generate">
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
         </div>
-        <h3 class="prl-modal-title">Generate Payroll Batch?</h3>
+        <h3 class="prl-modal-title">Generate Payroll Batch</h3>
         <p class="prl-modal-body">
-            This will create a new payroll batch for the current period.<br>
+            Select a payroll period and create a new batch.<br>
             You can add employees, review, and finalize before submitting to accounting.
         </p>
-        <div style="text-align:center;">
-            <span class="prl-modal-period">
-                {{ \Carbon\Carbon::parse($currentPeriod['start'])->format('M d, Y') }} &mdash; {{ \Carbon\Carbon::parse($currentPeriod['end'])->format('M d, Y') }}
-            </span>
-        </div>
-        <div class="prl-modal-actions">
-            <button type="button" class="prl-modal-cancel" onclick="closeModal('generateModal')">Cancel</button>
-            <form action="{{ route('payroll.batch.generate') }}" method="POST" style="flex:1;">
-                @csrf
+        <form action="{{ route('payroll.batch.generate') }}" method="POST">
+            @csrf
+            <div class="prl-period-selector">
+                <label class="prl-period-label">Payroll Period</label>
+                <select name="period" class="prl-period-select" id="periodSelect" required>
+                    <option value="">-- Select a period --</option>
+                    @foreach($availablePeriods as $period)
+                    <option value="{{ $period['start'] }}|{{ $period['end'] }}" 
+                            @if($period['start'] === $currentPeriod['start'] && $period['end'] === $currentPeriod['end']) selected @endif>
+                        {{ $period['display'] }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="prl-modal-actions">
+                <button type="button" class="prl-modal-cancel" onclick="closeModal('generateModal')">Cancel</button>
                 <button type="submit" class="prl-modal-confirm generate" style="width:100%;">
                     Yes, Generate Batch
                 </button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 

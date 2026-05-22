@@ -58,6 +58,7 @@
 
             $nextCutoffDate      = PayrollCutoffSchedule::getNextCutoffDate();
             $currentPeriod       = PayrollBatch::resolvePeriod();
+            $availablePeriods    = PayrollBatch::getAvailablePeriods();
             $currentInProgressBatch = PayrollBatch::inProgressForCurrentPeriod();
             $finalizedCurrentBatch = PayrollBatch::finalizedForCurrentPeriod();
             $batchAlreadyExists    = $finalizedCurrentBatch !== null;
@@ -93,7 +94,7 @@
                 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate',
                 'cutoffSchedules', 'cutoffInfo', 'nextCutoffDate',
                 'totalPayroll', 'payrollCount', 'releasedCount',
-                'recentBatches', 'currentPeriod', 'batchAlreadyExists',
+                'recentBatches', 'currentPeriod', 'availablePeriods', 'batchAlreadyExists',
                 'currentInProgressBatch', 'finalizedCurrentBatch',
                 'submittedCount', 'approvedCount', 'rejectedCount'
             ));
@@ -187,9 +188,27 @@
         ══════════════════════════════════════════════════════════════ */
         public function batchGenerate(Request $request)
         {
-            $period = PayrollBatch::resolvePeriod();
+            // Get period from request or use current period
+            $period = $request->input('period');
+            
+            if ($period) {
+                // Period is sent as "start|end" from the dropdown
+                [$periodStart, $periodEnd] = explode('|', $period);
+                $period = [
+                    'start' => $periodStart,
+                    'end' => $periodEnd,
+                ];
+            } else {
+                // Fallback to current period
+                $period = PayrollBatch::resolvePeriod();
+            }
 
-            $existing = PayrollBatch::inProgressForCurrentPeriod();
+            // Check if batch already exists for this period
+            $existing = PayrollBatch::where('period_start', $period['start'])
+                ->where('period_end', $period['end'])
+                ->where('status', 'submitted')
+                ->whereNull('finalized_at')
+                ->first();
 
             if ($existing) {
                 return redirect()

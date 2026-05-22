@@ -12,17 +12,21 @@ class PayrollCutoffScheduleSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create payroll cutoff schedules for Batch 1 (5th) and Batch 2 (28th) of each month
-        PayrollCutoffSchedule::create([
-            'cutoff_day' => 5,
-            'label' => 'Batch 1',
-            'is_active' => true,
-        ]);
+        // Create payroll cutoff schedules for bi-monthly periods: 1-15 and 16-30/31
+        PayrollCutoffSchedule::firstOrCreate(
+            ['cutoff_day' => 15],
+            [
+                'label' => '1st Half',
+                'is_active' => true,
+            ]
+        );
 
-        PayrollCutoffSchedule::create([
-            'cutoff_day' => 28,
-            'label' => 'Batch 2',
-            'is_active' => true,
-        ]);
+        PayrollCutoffSchedule::firstOrCreate(
+            ['cutoff_day' => 31],
+            [
+                'label' => '2nd Half',
+                'is_active' => true,
+            ]
+        );
     }
 }

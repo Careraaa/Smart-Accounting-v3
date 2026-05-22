@@ -27,6 +27,16 @@ class PayrollCutoffSchedule extends Model
     ];
 
     /**
+     * Safely set a cutoff day, using last day of month if day doesn't exist
+     */
+    private static function setCutoffDay(Carbon $date, int $day): Carbon
+    {
+        $daysInMonth = $date->daysInMonth;
+        $actualDay = min($day, $daysInMonth);
+        return $date->setDay($actualDay);
+    }
+
+    /**
      * Get the next cutoff date from today
      */
     public static function getNextCutoffDate()
@@ -47,7 +57,7 @@ class PayrollCutoffSchedule extends Model
         // Find the next cutoff day in the current month
         foreach ($cutoffs as $cutoffDay) {
             if ($cutoffDay > $currentDay) {
-                $nextCutoff = $today->copy()->setDay($cutoffDay);
+                $nextCutoff = self::setCutoffDay($today->copy(), $cutoffDay);
                 break;
             }
         }
@@ -55,7 +65,7 @@ class PayrollCutoffSchedule extends Model
         // If no cutoff found in current month, use first cutoff of next month
         if (!$nextCutoff) {
             $firstCutoff = reset($cutoffs);
-            $nextCutoff = $today->copy()->addMonth()->setDay($firstCutoff);
+            $nextCutoff = self::setCutoffDay($today->copy()->addMonth(), $firstCutoff);
         }
 
         return $nextCutoff;
@@ -80,7 +90,7 @@ class PayrollCutoffSchedule extends Model
         $nextCutoff = null;
 
         foreach ($activeSchedules as $schedule) {
-            $potentialDate = $today->copy()->setDay($schedule->cutoff_day);
+            $potentialDate = self::setCutoffDay($today->copy(), $schedule->cutoff_day);
 
             if ($potentialDate->isPast() || $potentialDate->isToday()) {
                 if (!$lastCutoff || $potentialDate->isAfter($lastCutoff)) {
@@ -96,13 +106,13 @@ class PayrollCutoffSchedule extends Model
         // If no next cutoff found, use first cutoff of next month
         if (!$nextCutoff) {
             $firstSchedule = $activeSchedules->first();
-            $nextCutoff = $today->copy()->addMonth()->setDay($firstSchedule->cutoff_day);
+            $nextCutoff = self::setCutoffDay($today->copy()->addMonth(), $firstSchedule->cutoff_day);
         }
 
         // If no last cutoff, use the last active cutoff from previous month
         if (!$lastCutoff) {
             $lastSchedule = $activeSchedules->last();
-            $lastCutoff = $today->copy()->subMonth()->setDay($lastSchedule->cutoff_day);
+            $lastCutoff = self::setCutoffDay($today->copy()->subMonth(), $lastSchedule->cutoff_day);
         }
 
         return [
