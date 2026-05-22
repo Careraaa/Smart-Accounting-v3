@@ -22,18 +22,12 @@ class ConfigurationController extends Controller
         $activeCutoff = PayrollCutoffSchedule::where('is_active', true)->first();
 
         // Get attendance settings
-        $lateThreshold = (int) config('attendance.late_threshold_minutes', 15);
-        $checkInType = config('attendance.check_in_type', 'biometric');
-        $requiresApproval = (bool) config('attendance.requires_manager_approval', false);
         $gracePeriod = (int) config('attendance.grace_period_minutes', 5);
 
         return view('hr.configuration.index', compact(
             'shifts',
             'cutoffs',
             'activeCutoff',
-            'lateThreshold',
-            'checkInType',
-            'requiresApproval',
             'gracePeriod'
         ));
     }
@@ -47,20 +41,20 @@ class ConfigurationController extends Controller
             'name' => 'required|string|max:100|unique:shifts,name',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
-            'break_duration' => 'nullable|numeric|min:0|max:24',
+            'break_start' => 'nullable|date_format:H:i',
+            'break_end' => 'nullable|date_format:H:i',
             'is_active' => 'boolean',
         ]);
 
         $validated['start_time'] = $validated['start_time'] . ':00';
         $validated['end_time'] = $validated['end_time'] . ':00';
         
-        // Convert hours to TIME format (HH:MM:SS)
-        if (isset($validated['break_duration']) && $validated['break_duration'] !== null && $validated['break_duration'] !== '') {
-            $hours = floor($validated['break_duration']);
-            $minutes = round(($validated['break_duration'] - $hours) * 60);
-            $validated['break_duration'] = sprintf('%02d:%02d:00', $hours, $minutes);
-        } else {
-            $validated['break_duration'] = null;
+        // Convert break times to TIME format (HH:MM:SS)
+        if ($validated['break_start']) {
+            $validated['break_start'] = $validated['break_start'] . ':00';
+        }
+        if ($validated['break_end']) {
+            $validated['break_end'] = $validated['break_end'] . ':00';
         }
         
         $validated['is_active'] = $request->boolean('is_active');
@@ -79,20 +73,20 @@ class ConfigurationController extends Controller
             'name' => 'required|string|max:100|unique:shifts,name,' . $shift->id,
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
-            'break_duration' => 'nullable|numeric|min:0|max:24',
+            'break_start' => 'nullable|date_format:H:i',
+            'break_end' => 'nullable|date_format:H:i',
             'is_active' => 'boolean',
         ]);
 
         $validated['start_time'] = $validated['start_time'] . ':00';
         $validated['end_time'] = $validated['end_time'] . ':00';
         
-        // Convert hours to TIME format (HH:MM:SS)
-        if (isset($validated['break_duration']) && $validated['break_duration'] !== null && $validated['break_duration'] !== '') {
-            $hours = floor($validated['break_duration']);
-            $minutes = round(($validated['break_duration'] - $hours) * 60);
-            $validated['break_duration'] = sprintf('%02d:%02d:00', $hours, $minutes);
-        } else {
-            $validated['break_duration'] = null;
+        // Convert break times to TIME format (HH:MM:SS)
+        if ($validated['break_start']) {
+            $validated['break_start'] = $validated['break_start'] . ':00';
+        }
+        if ($validated['break_end']) {
+            $validated['break_end'] = $validated['break_end'] . ':00';
         }
         
         $validated['is_active'] = $request->boolean('is_active');
@@ -156,17 +150,11 @@ class ConfigurationController extends Controller
     public function updateAttendanceSettings(Request $request)
     {
         $validated = $request->validate([
-            'late_threshold' => 'required|integer|min:1|max:60',
-            'check_in_type' => 'required|in:biometric,qr,manual,mixed',
-            'requires_approval' => 'boolean',
             'grace_period' => 'required|integer|min:0|max:30',
         ]);
 
         // Store settings using config cache or database
         $settings = [
-            'attendance.late_threshold_minutes' => $validated['late_threshold'],
-            'attendance.check_in_type' => $validated['check_in_type'],
-            'attendance.requires_manager_approval' => $validated['requires_approval'] ?? false,
             'attendance.grace_period_minutes' => $validated['grace_period'],
         ];
 

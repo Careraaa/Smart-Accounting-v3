@@ -17,7 +17,7 @@
 .ep-hero-period{position:relative;z-index:1;font-family:'DM Mono',monospace;font-size:.75rem;color:#9ca3af;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:6px 12px;border-radius:8px;white-space:nowrap}
 .ep-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 @media(max-width:680px){.ep-grid{grid-template-columns:1fr}}
-.ep-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
+.ep-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:visible;display:flex;flex-direction:column}
 .ep-card-head{padding:13px 18px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px}
 .ep-card-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .ep-card-icon.amber{background:#fffbeb;color:#d97706}
@@ -84,6 +84,8 @@
 .ep-btn-save:hover{background:#a81f20;box-shadow:0 6px 20px rgba(200,41,42,.35);color:#fff}
 .ep-btn-cancel{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:.845rem;font-weight:600;text-decoration:none;transition:background .13s,border-color .13s}
 .ep-btn-cancel:hover{background:#f9fafb;border-color:#d1d5db;color:#374151}
+.ep-holiday-item{display: flex; align-items: center; justify-content: space-between;  padding: 9px 0; border-bottom: 1px solid #f3f4f6 !important; gap: 8px;}
+#ep_holiday_rows{display:contents;}
 </style>
 @endpush
 @section('content')
@@ -149,7 +151,7 @@
                             <span class="ep-row-lbl">Basic Pay <span class="ep-badge" id="ep_basic_badge">rate &times; days</span></span>
                             <span class="ep-row-val" id="ep_basic_display">&#8369;{{ number_format($payroll->basic_salary??0,2) }}</span>
                         </div>
-                        <div class="ep-row" id="ep_holiday_rows">
+                        <div id="ep_holiday_rows">
                             {{-- One row per holiday, populated on page load and on preview refresh --}}
                             @php
                                 $holidayAllowances = $payroll->allowances
@@ -189,6 +191,9 @@
                         <div class="ep-row" id="ep_ut_row" style="display:none;">
                             <span class="ep-row-lbl red">Undertime Deduction <span class="ep-badge" id="ep_ut_hrs_badge"></span></span>
                             <span class="ep-row-val red" id="ep_ut_display">-&#8369;0.00</span>
+                        </div>
+                        <div id="ep_gov_contrib_rows">
+                            {{-- Individual government contribution rows populated on page load and preview refresh --}}
                         </div>
                         <div class="ep-row">
                             <span class="ep-row-lbl bold">Initial Net Pay</span>
@@ -348,7 +353,7 @@ window._ep = {
         utHours:        {{ (float)($payroll->deductions->where('deduction_type', 'like', 'Undertime Deduction%')->sum('hours') ?? 0) }},
         sss:            {{ (float)($payroll->sss ?? 0) }},
         pagibig:        {{ (float)($payroll->pagibig ?? 0) }},
-        philhealth:     {{ (float)($payroll->philhealth ?? 0) }},
+        philhealth:     {{ (float)($payroll->phil_health ?? $payroll->philhealth ?? 0) }},
         withholdingTax: {{ (float)($payroll->withholding_tax ?? 0) }},
     },
     userId:      {{ $payroll->user_id }},
@@ -426,6 +431,28 @@ window._ep = {
             $('ep_ut_hrs_badge').textContent = c.utHours + ' hrs';
             utRow.style.display = '';
         } else { utRow.style.display = 'none'; }
+
+        // Render individual government contribution rows
+        const govContribContainer = $('ep_gov_contrib_rows');
+        govContribContainer.innerHTML = '';
+        const govContribs = [
+            {label: 'SSS', amount: c.sss ?? 0, badge: 'sss'},
+            {label: 'Pag-IBIG', amount: c.pagibig ?? 0, badge: 'pagibig'},
+            {label: 'PhilHealth', amount: c.philhealth ?? 0, badge: 'philhealth'},
+            {label: 'Withholding Tax', amount: c.withholdingTax ?? 0, badge: 'withholding'}
+        ];
+        const totalGovContrib = govContribs.reduce((sum, gc) => sum + gc.amount, 0);
+        if (totalGovContrib > 0) {
+            govContribs.forEach(gc => {
+                if (gc.amount > 0) {
+                    const row = document.createElement('div');
+                    row.className = 'ep-row';
+                    row.innerHTML = '<span class="ep-row-lbl red">' + gc.label + ' <span class="ep-badge">' + gc.badge + '</span></span>'
+                                  + '<span class="ep-row-val red">-' + fmt(gc.amount) + '</span>';
+                    govContribContainer.appendChild(row);
+                }
+            });
+        }
     }
 
     function recalcNet() {
@@ -544,7 +571,7 @@ window._ep = {
                 holidayBreakdown:data.holiday_breakdown??[],
                 otPay:data.overtime_pay??0, otHours:data.overtime_hours??0,
                 utDeduction:data.undertime_deduction??0, utHours:data.undertime_hours??0,
-                sss:data.sss??0, pagibig:data.pagibig??0, philhealth:data.philhealth??0, withholdingTax:data.withholding_tax??0,
+                sss:data.sss??0, pagibig:data.pagibig??0, philhealth:data.phil_health??data.philhealth??0, withholdingTax:data.withholding_tax??0,
             };
             render();
         }).catch(()=>{});

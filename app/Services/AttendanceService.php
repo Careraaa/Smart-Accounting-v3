@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AttendanceLog;
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Shift;
 use Carbon\Carbon;
 
 class AttendanceService
@@ -22,20 +23,12 @@ class AttendanceService
             ->whereIn('status', ['present', 'late'])
             ->get();
 
-        $days = 0.0;
+        // Count full days for any presence, regardless of hours worked.
+        // Undertime is handled separately as a deduction, not by reducing days.
+        // This prevents double-counting when undertime penalty is applied.
+        $days = $attendances->count();
 
-        foreach ($attendances as $attendance) {
-            if ($attendance->time_in && $attendance->time_out) {
-                $timeIn = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $attendance->time_in);
-                $timeOut = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $attendance->time_out);
-                $hours = abs(($timeOut->timestamp - $timeIn->timestamp) / 3600);
-                $days += min($hours / 8, 1.0);
-            } else {
-                $days += 1.0;
-            }
-        }
-
-        return round($days, 2);
+        return (float) $days;
     }
 
     /**
@@ -82,6 +75,9 @@ class AttendanceService
             
             // Calculate hours using timestamp difference to avoid sign issues
             $hoursWorked = abs(($timeOut->timestamp - $timeIn->timestamp) / 3600);
+            
+            // Subtract 1-hour break from each day
+            $hoursWorked = max(0, $hoursWorked - 1);
             $totalHours += $hoursWorked;
         }
 
@@ -126,13 +122,21 @@ class AttendanceService
             }
         }
 
-        // Determine attendance status
+        // Determine attendance status based on shift start time
         $status = 'present';
         if ($timeIn) {
-            // You can customize this logic - for example, consider anything after 9 AM as late
-            $expectedTimeIn = today()->setTime(9, 0);
-            if ($timeIn->isAfter($expectedTimeIn)) {
-                $status = 'late';
+            // Get the active shift (assuming one shift per day)
+            $shift = Shift::where('is_active', true)->first();
+            if ($shift) {
+                $shiftStart = Carbon::createFromFormat('H:i:s', $shift->start_time);
+                $expectedTimeIn = today()
+                    ->setHour($shiftStart->hour)
+                    ->setMinute($shiftStart->minute)
+                    ->setSecond($shiftStart->second);
+                
+                if ($timeIn->isAfter($expectedTimeIn)) {
+                    $status = 'late';
+                }
             }
         }
 

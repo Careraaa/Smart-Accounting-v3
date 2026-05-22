@@ -15,7 +15,8 @@ class Shift extends Model
         'name',
         'start_time',
         'end_time',
-        'break_duration',
+        'break_start',
+        'break_end',
         'is_active',
     ];
 
@@ -47,20 +48,23 @@ class Shift extends Model
         }
         
         $minutes = abs($end->diffInMinutes($start));
-        $breakMinutes = $this->parseTimeToMinutes($this->break_duration ?? '00:00:00');
+        
+        // Calculate break time from break_start and break_end
+        $breakMinutes = 0;
+        if ($this->break_start && $this->break_end) {
+            $breakStart = \Carbon\Carbon::createFromFormat('H:i:s', $this->break_start);
+            $breakEnd = \Carbon\Carbon::createFromFormat('H:i:s', $this->break_end);
+            
+            // Handle break that spans across end of shift
+            if ($breakEnd->lessThan($breakStart)) {
+                $breakEnd->addHours(24);
+            }
+            
+            $breakMinutes = abs($breakStart->diffInMinutes($breakEnd));
+        }
+        
         $workMinutes = $minutes - $breakMinutes;
         
         return round($workMinutes / 60, 2);
-    }
-
-    /**
-     * Parse time string (H:i:s) to minutes
-     */
-    private function parseTimeToMinutes($timeString)
-    {
-        $parts = explode(':', $timeString);
-        $hours = (int)($parts[0] ?? 0);
-        $minutes = (int)($parts[1] ?? 0);
-        return ($hours * 60) + $minutes;
     }
 }

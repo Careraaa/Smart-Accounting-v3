@@ -142,15 +142,26 @@ class PayrollService
         $grossPay         = $basicSalary + $otPay + $holidayPay + $manualAllowTotal;
 
         // ── Step 6: Statutory deductions (SSS, Pag-IBIG, PhilHealth) ─────────
-        // These are semi-monthly contributions (monthly amount ÷ 2).
+        // These are contributions based on actual earnings this period.
+        // Bracket lookup uses basicSalary (not hypothetical monthly), as employees
+        // contribute based on what they actually earned, not a full-month projection.
         // Gate: employee must have income this period (worked days OR holiday pay).
-        // FIX: previously only gated on daysWorked > 0, which incorrectly skipped
-        // deductions for employees who only have unworked regular holiday pay.
-        $hasIncome = ($daysWorked > 0 || $holidayPay > 0);
+        $contributionBasis = $basicSalary + $holidayPay + $otPay;
 
-        $sss        = ($employee->has_sss        && $hasIncome) ? $this->getStatutoryDeduction('SSS',        $monthlySalary) : 0;
-        $pagibig    = ($employee->has_pagibig    && $hasIncome) ? $this->getStatutoryDeduction('Pag-IBIG',   $monthlySalary) : 0;
-        $philhealth = ($employee->has_philhealth && $hasIncome) ? $this->getStatutoryDeduction('PhilHealth', $monthlySalary) : 0;
+        $hasIncome = $contributionBasis > 0;
+        $monthlySalaryForBracket = $contributionBasis * 2;
+
+        $sss = ($employee->has_sss && $hasIncome)
+            ? $this->getStatutoryDeduction('SSS', $monthlySalaryForBracket)
+            : 0;
+
+        $pagibig = ($employee->has_pagibig && $hasIncome)
+            ? $this->getStatutoryDeduction('Pag-IBIG', $monthlySalaryForBracket)
+            : 0;
+
+        $philhealth = ($employee->has_philhealth && $hasIncome)
+            ? $this->getStatutoryDeduction('PhilHealth', $monthlySalaryForBracket)
+            : 0;
 
         // ── Step 7: Withholding Tax (BIR) ─────────────────────────────────────
         // FIX: Previously computed as dailyBracketTax × daysWorked, which is wrong.
@@ -375,33 +386,88 @@ class PayrollService
      *   employee_share   = fixed monthly peso amount (SSS uses this)
      *   percentage_employee = % of monthly salary (Pag-IBIG, PhilHealth use this)
      */
-    private function getStatutoryDeduction(string $name, float $salary): float
-    {
-        // Find the bracket row where min_salary ≤ salary ≤ max_salary.
+    private function getStatutoryDeduction(
+        string $name,
+        float $salary
+    ): float {
+
+        // Find the correct contribution bracket.
+        //
+        // Supports:
+        //   min_salary <= salary <= max_salary
+        //
+        // OR highest open-ended bracket:
+        //   max_salary IS NULL
+        //
         $row = StatutoryDeduction::where('name', $name)
             ->where('min_salary', '<=', $salary)
-            ->where('max_salary', '>=', $salary)
+            ->where(function ($q) use ($salary) {
+
+                $q->where('max_salary', '>=', $salary)
+                    ->orWhereNull('max_salary');
+
+            })
+            ->orderByDesc('min_salary')
             ->first();
 
+        // No matching bracket.
         if (!$row) {
-            return 0; // No matching bracket — employee is outside the table range
+            return 0;
         }
 
-        // Fixed-amount bracket (e.g. SSS contribution table).
-        if ($row->employee_share) {
-            return round($row->employee_share / 2, 2); // monthly ÷ 2 = semi-monthly
+        // ============================================================
+        // FIXED AMOUNT CONTRIBUTION
+        // ============================================================
+        //
+        // Used by SSS tables.
+        //
+        if (!is_null($row->employee_share)) {
+
+            // Stored as MONTHLY contribution.
+            // Payroll is SEMI-MONTHLY.
+            return round(
+                $row->employee_share / 2,
+                2
+            );
         }
 
-        // Percentage-based bracket (e.g. Pag-IBIG, PhilHealth).
-        if ($row->percentage_employee) {
-            $monthly = $salary * $row->percentage_employee / 100;
+        // ============================================================
+        // PERCENTAGE-BASED CONTRIBUTION
+        // ============================================================
+        //
+        // Used by Pag-IBIG and PhilHealth.
+        //
+        if (!is_null($row->percentage_employee)) {
 
-            // Pag-IBIG has a ₱200/month cap (₱100 semi-monthly).
+            $monthly =
+                $salary *
+                ($row->percentage_employee / 100);
+
+            // ========================================================
+            // PAG-IBIG CAP
+            // ========================================================
+            //
+            // Employee share capped at ₱200/month.
+            //
             if ($name === 'Pag-IBIG') {
                 $monthly = min($monthly, 200.0);
             }
 
-            return round($monthly / 2, 2); // monthly ÷ 2 = semi-monthly
+            // ========================================================
+            // PHILHEALTH CAP
+            // ========================================================
+            //
+            // Employee share capped at ₱2,500/month.
+            //
+            if ($name === 'PhilHealth') {
+                $monthly = min($monthly, 2500.0);
+            }
+
+            // Convert MONTHLY → SEMI-MONTHLY
+            return round(
+                $monthly / 2,
+                2
+            );
         }
 
         return 0;

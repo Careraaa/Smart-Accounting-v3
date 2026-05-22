@@ -180,6 +180,8 @@
                 ], $v['holidayBreakdown']),
                 'sss' => round($v['sss'], 2),
                 'pagibig' => round($v['pagibig'], 2),
+                'phil_health' => round($v['philhealth'] ?? 0, 2),
+                'withholding_tax' => round($v['withholdingTax'] ?? 0, 2),
                 'adjusted_gross' => round($v['adjustedGross'], 2),
                 'gross_pay' => round($v['grossPay'], 2),
                 'total_deductions' => round($v['totalDeductions'], 2),

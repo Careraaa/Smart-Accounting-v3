@@ -8,6 +8,7 @@ use App\Models\AttendanceLog;
 use App\Models\AttendanceToken;
 use App\Models\Employee;
 use App\Models\OvertimeUndertime;
+use App\Models\Shift;
 use App\Models\User;
 use App\Notifications\AttendanceNotification;
 use App\Notifications\OvertimeNotification;
@@ -260,7 +261,6 @@ class AttendanceController extends Controller
             'date' => 'required|date',
             'time_in' => 'nullable|date_format:H:i',
             'time_out' => 'nullable|date_format:H:i',
-            'status' => 'required|in:present,absent,late,early_leave',
         ]);
 
         $userId = $request->input('user_id');
@@ -283,12 +283,32 @@ class AttendanceController extends Controller
                 ->withInput();
         }
 
+        // Auto-determine status based on office hours (08:00 - 17:00)
+        $status = 'present'; // default
+        if (!$request->time_in || !$request->time_out) {
+            $status = 'absent';
+        } else {
+            $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
+            $timeOut = Carbon::createFromFormat('H:i', $request->time_out);
+            $officeStart = Carbon::createFromFormat('H:i', '08:00');
+            $officeEnd = Carbon::createFromFormat('H:i', '17:00');
+            
+            // Check if employee came in late
+            if ($timeIn->isAfter($officeStart)) {
+                $status = 'late';
+            }
+            // Check if employee left early
+            elseif ($timeOut->isBefore($officeEnd)) {
+                $status = 'early_leave';
+            }
+        }
+
         Attendance::updateOrCreate(
             ['user_id' => $userId, 'date' => $request->date],
             [
                 'time_in' => $request->time_in ? $request->time_in . ':00' : null,
                 'time_out' => $request->time_out ? $request->time_out . ':00' : null,
-                'status' => $request->status,
+                'status' => $status,
                 'is_manual' => true,
             ],
         );
@@ -310,12 +330,81 @@ class AttendanceController extends Controller
             $timeIn   = Carbon::parse($dateStr . ' ' . $request->time_in);
             $timeOut  = Carbon::parse($dateStr . ' ' . $request->time_out);
 
-            // Standard schedule: 08:00 – 17:00 (8 working hours + 1h break)
+            // Get employee to find their shift assignment
+            $employee = Employee::find($userId);
+            
+            // Try to get shift from employee (if shift_id exists) or use default shift
+            $shift = null;
+            if ($employee) {
+                // Check if employee has a shift_id attribute
+                if (isset($employee->shift_id) && $employee->shift_id) {
+                    $shift = Shift::find($employee->shift_id);
+                } else {
+                    // Otherwise, try to get the active/default shift
+                    $shift = Shift::where('is_active', true)->first();
+                }
+            }
+
+            // Calculate break duration from shift's break times
+            // Only count the break time that overlaps with the logged time period
+            $breakMinutes = 0;
+            if ($shift && $shift->break_start && $shift->break_end) {
+                // Create break times with the same date as the logged time
+                $breakStart = Carbon::parse($dateStr . ' ' . $shift->break_start);
+                $breakEnd = Carbon::parse($dateStr . ' ' . $shift->break_end);
+                
+                // Handle break that spans across end of shift
+                if ($breakEnd->lessThan($breakStart)) {
+                    $breakEnd->addHours(24);
+                }
+                
+                // Calculate the overlap between logged time and break time
+                // Overlap starts at: max(time_in, break_start)
+                // Overlap ends at: min(time_out, break_end)
+                $overlapStart = $timeIn->copy();
+                if ($breakStart->isAfter($overlapStart)) {
+                    $overlapStart = $breakStart->copy();
+                }
+                
+                $overlapEnd = $timeOut->copy();
+                if ($breakEnd->isBefore($overlapEnd)) {
+                    $overlapEnd = $breakEnd->copy();
+                }
+                
+                // Only count overlap if it's valid (start before end)
+                if ($overlapStart->isBefore($overlapEnd)) {
+                    $breakMinutes = abs($overlapStart->diffInMinutes($overlapEnd));
+                }
+                
+                logger()->info('Manual attendance: Shift found', [
+                    'shift_name' => $shift->name,
+                    'break_start' => $shift->break_start,
+                    'break_end' => $shift->break_end,
+                    'break_minutes' => $breakMinutes,
+                    'user_id' => $userId,
+                    'date' => $dateStr,
+                    'time_in' => $request->time_in,
+                    'time_out' => $request->time_out,
+                ]);
+            } else {
+                // Default: 1 hour break if no shift assigned
+                $breakMinutes = 60;
+                
+                logger()->info('Manual attendance: No shift found, using default 1 hour break', [
+                    'user_id' => $userId,
+                    'shift_id' => $employee ? ($employee->shift_id ?? 'none') : 'no employee',
+                    'date' => $dateStr,
+                    'time_in' => $request->time_in,
+                    'time_out' => $request->time_out,
+                ]);
+            }
+
+            // Standard schedule: 08:00 – 17:00 (8 working hours + break)
             $schedStart = Carbon::parse($dateStr . ' 08:00');
             $schedEnd   = Carbon::parse($dateStr . ' 17:00');
 
-            // Net minutes worked (subtract 1-hour break)
-            $workedMinutes = max(0, $timeOut->diffInMinutes($timeIn) - 60);
+            // Net minutes worked (subtract calculated break)
+            $workedMinutes = max(0, $timeIn->diffInMinutes($timeOut) - $breakMinutes);
 
             // Standard = 8h = 480 min
             $standardMinutes = 480;
@@ -323,7 +412,6 @@ class AttendanceController extends Controller
 
             // Only act if deviation is at least 1 minute
             if (abs($diffMinutes) >= 1) {
-                $employee   = Employee::find($userId);
                 $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
                 $hours      = round(abs($diffMinutes) / 60, 2);
                 $type       = $diffMinutes > 0 ? 'overtime' : 'undertime';
@@ -410,5 +498,32 @@ class AttendanceController extends Controller
             });
 
         return response()->json(['rows' => $attendances]);
+    }
+
+    public function getShiftBreakTimes()
+    {
+        $userId = auth()->id();
+        $employee = Employee::find($userId);
+
+        // Try to get shift from employee or use default
+        $shift = null;
+        if ($employee && isset($employee->shift_id) && $employee->shift_id) {
+            $shift = Shift::find($employee->shift_id);
+        } else {
+            $shift = Shift::where('is_active', true)->first();
+        }
+
+        if ($shift && $shift->break_start && $shift->break_end) {
+            return response()->json([
+                'break_start' => $shift->break_start,
+                'break_end' => $shift->break_end,
+            ]);
+        }
+
+        // Fallback: 1 hour break (12:00-13:00)
+        return response()->json([
+            'break_start' => '12:00:00',
+            'break_end' => '13:00:00',
+        ]);
     }
 }

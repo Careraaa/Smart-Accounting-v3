@@ -201,27 +201,6 @@
                         </div>
                     </div>
 
-                    {{-- Status --}}
-                    <div class="att-divider" style="margin-top:4px;">Status</div>
-                    <div class="att-field">
-                        <label for="status" class="att-label">Attendance Status <span class="req">*</span></label>
-                        <div class="att-select-wrap">
-                            <select name="status" id="status"
-                                class="att-select @error('status') is-invalid @enderror"
-                                required>
-                                <option value="">— Select Status —</option>
-                                <option value="present"     @selected(old('status') == 'present')>Present</option>
-                                <option value="absent"      @selected(old('status') == 'absent')>Absent</option>
-                                <option value="late"        @selected(old('status') == 'late')>Late</option>
-                                <option value="early_leave" @selected(old('status') == 'early_leave')>Early Leave</option>
-                            </select>
-                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                        </div>
-                        @error('status')
-                            <span class="att-invalid-feedback">{{ $message }}</span>
-                        @enderror
-                    </div>
-
                     {{-- OT/UT preview hint --}}
                     <div id="otut-hint" style="display:none;margin-top:4px;padding:12px 14px;border-radius:10px;font-size:0.8rem;font-weight:600;line-height:1.5;"></div>
 
@@ -244,19 +223,26 @@
 @push('scripts')
 <script>
 (function () {
-    // Standard schedule: 08:00 – 17:00, 8 working hours (1h break deducted)
-    const SCHED_START_H = 8, SCHED_START_M = 0;
-    const SCHED_END_H   = 17, SCHED_END_M  = 0;
+    // Standard 8 working hours
     const STANDARD_MIN  = 480; // 8h × 60
-    const BREAK_MIN     = 60;
 
     const timeIn  = document.getElementById('time_in');
     const timeOut = document.getElementById('time_out');
     const hint    = document.getElementById('otut-hint');
 
+    // Shift break times (fetched via AJAX)
+    let breakStart = null;  // minutes from midnight
+    let breakEnd = null;    // minutes from midnight
+
     function toMinutes(hhmm) {
         if (!hhmm) return null;
         const [h, m] = hhmm.split(':').map(Number);
+        return h * 60 + m;
+    }
+
+    function timeStringToMinutes(hhmmss) {
+        if (!hhmmss) return null;
+        const [h, m, s] = hhmmss.split(':').map(Number);
         return h * 60 + m;
     }
 
@@ -268,6 +254,20 @@
         return `${m}m`;
     }
 
+    function calculateBreakOverlap(inMin, outMin) {
+        if (breakStart === null || breakEnd === null) return 0;
+
+        // Calculate overlap between [inMin, outMin] and [breakStart, breakEnd]
+        // overlapStart = max(inMin, breakStart)
+        // overlapEnd = min(outMin, breakEnd)
+        // overlap = max(0, overlapEnd - overlapStart)
+
+        const overlapStart = Math.max(inMin, breakStart);
+        const overlapEnd = Math.min(outMin, breakEnd);
+
+        return Math.max(0, overlapEnd - overlapStart);
+    }
+
     function update() {
         const inMin  = toMinutes(timeIn.value);
         const outMin = toMinutes(timeOut.value);
@@ -277,7 +277,9 @@
             return;
         }
 
-        const workedMin = Math.max(0, (outMin - inMin) - BREAK_MIN);
+        // Calculate break overlap instead of using fixed break
+        const breakOverlapMin = calculateBreakOverlap(inMin, outMin);
+        const workedMin = Math.max(0, (outMin - inMin) - breakOverlapMin);
         const diff      = workedMin - STANDARD_MIN;
 
         if (Math.abs(diff) < 1) {
@@ -307,9 +309,24 @@
         }
     }
 
+    // Fetch shift break times from API
+    fetch('{{ route("api.shift.break-times") }}')
+        .then(res => res.json())
+        .then(data => {
+            breakStart = timeStringToMinutes(data.break_start);
+            breakEnd = timeStringToMinutes(data.break_end);
+            // Re-calculate preview with fetched break times
+            update();
+        })
+        .catch(err => {
+            console.warn('Failed to fetch shift break times:', err);
+            // Fallback: use default 1 hour break (12:00-13:00 = 720-780 minutes)
+            breakStart = 12 * 60;
+            breakEnd = 13 * 60;
+        });
+
     timeIn.addEventListener('change', update);
     timeOut.addEventListener('change', update);
-    update();
 })();
 </script>
 @endpush

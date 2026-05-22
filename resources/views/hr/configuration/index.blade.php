@@ -124,7 +124,7 @@
                                         <th>Shift Name</th>
                                         <th>Start Time</th>
                                         <th>End Time</th>
-                                        <th>Break Duration</th>
+                                        <th>Break Time</th>
                                         <th>Work Hours</th>
                                         <th>Status</th>
                                         <th>Actions</th>
@@ -137,8 +137,8 @@
                                             <td>{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->start_time)->format('H:i') }}</td>
                                             <td>{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->end_time)->format('H:i') }}</td>
                                             <td>
-                                                @if($shift->break_duration)
-                                                    {{ number_format((int)substr($shift->break_duration, 0, 2) + (int)substr($shift->break_duration, 3, 2) / 60, 1) }} hrs
+                                                @if($shift->break_start && $shift->break_end)
+                                                    {{ substr($shift->break_start, 0, 5) }} - {{ substr($shift->break_end, 0, 5) }}
                                                 @else
                                                     <span style="color:#9ca3af;">-</span>
                                                 @endif
@@ -197,8 +197,12 @@
                                                                 <input type="time" class="prl-ctrl" name="end_time" value="{{ substr($shift->end_time, 0, 5) }}" required>
                                                             </div>
                                                             <div style="margin-bottom:16px;">
-                                                                <label class="prl-cfg-label">Break Duration (Hours) (Optional)</label>
-                                                                <input type="number" class="prl-ctrl" name="break_duration" step="0.5" min="0" max="8" placeholder="e.g., 1.5" value="{{ $shift->break_duration ? number_format((int)substr($shift->break_duration, 0, 2) + (int)substr($shift->break_duration, 3, 2) / 60, 1) : '' }}">
+                                                            <label class="prl-cfg-label">Break Start Time (Optional)</label>
+                                                            <input type="time" class="prl-ctrl" name="break_start" value="{{ $shift->break_start ? substr($shift->break_start, 0, 5) : '' }}">
+                                                        </div>
+                                                        <div style="margin-bottom:16px;">
+                                                            <label class="prl-cfg-label">Break End Time (Optional)</label>
+                                                            <input type="time" class="prl-ctrl" name="break_end" value="{{ $shift->break_end ? substr($shift->break_end, 0, 5) : '' }}">
                                                             </div>
                                                             <div style="display:flex;align-items:center;gap:8px;">
                                                                 <input type="checkbox" id="is_active{{ $shift->id }}" name="is_active" value="1" {{ $shift->is_active ? 'checked' : '' }} style="width:16px;height:16px;cursor:pointer;border-radius:4px;border:1px solid #e5e7eb;">
@@ -341,79 +345,15 @@
                 <form action="{{ route('settings.attendance-settings.update') }}" method="POST">
                     @csrf
 
-                    <h4 style="font-size:0.82rem;font-weight:700;color:#374151;margin:0 0 12px;">General Attendance Settings</h4>
+                    <h4 style="font-size:0.82rem;font-weight:700;color:#374151;margin:0 0 12px;">Grace Period</h4>
 
-                    <div class="prl-cfg-form-row">
-                        <div class="prl-cfg-field">
-                            <label class="prl-cfg-label">Late Threshold (Minutes) <span class="req">*</span></label>
-                            <input type="number" class="prl-ctrl @error('late_threshold') is-invalid @enderror" name="late_threshold" min="1" max="60" value="{{ old('late_threshold', $lateThreshold) }}" required>
-                            <p class="prl-cfg-desc">Time after which an employee is marked as late</p>
-                            @error('late_threshold')
-                                <span class="prl-err">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        <div class="prl-cfg-field">
-                            <label class="prl-cfg-label">Grace Period (Minutes) <span class="req">*</span></label>
-                            <input type="number" class="prl-ctrl @error('grace_period') is-invalid @enderror" name="grace_period" min="0" max="30" value="{{ old('grace_period', $gracePeriod) }}" required>
-                            <p class="prl-cfg-desc">Additional time before marking as late</p>
-                            @error('grace_period')
-                                <span class="prl-err">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <hr style="margin:20px 0;border:none;border-top:1px solid #f3f4f6;">
-
-                    <h4 style="font-size:0.82rem;font-weight:700;color:#374151;margin:0 0 12px;">Check-in Methods</h4>
-
-                    <div style="margin-bottom:20px;">
-                        <label style="display:block;font-size:0.82rem;font-weight:600;color:#374151;margin-bottom:10px;">Enabled Check-in Type</label>
-                        <div style="display:flex;flex-direction:column;gap:12px;">
-                            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;cursor:pointer;" onclick="document.getElementById('biometric').checked=true;">
-                                <input type="radio" id="biometric" name="check_in_type" value="biometric" {{ $checkInType === 'biometric' ? 'checked' : '' }} style="margin-top:2px;width:16px;height:16px;cursor:pointer;">
-                                <div>
-                                    <label for="biometric" style="font-weight:600;color:#111827;cursor:pointer;margin:0;display:block;">Biometric Only</label>
-                                    <small style="color:#9ca3af;display:block;margin-top:2px;">Fingerprint or facial recognition</small>
-                                </div>
-                            </div>
-
-                            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;cursor:pointer;" onclick="document.getElementById('qr').checked=true;">
-                                <input type="radio" id="qr" name="check_in_type" value="qr" {{ $checkInType === 'qr' ? 'checked' : '' }} style="margin-top:2px;width:16px;height:16px;cursor:pointer;">
-                                <div>
-                                    <label for="qr" style="font-weight:600;color:#111827;cursor:pointer;margin:0;display:block;">QR Code Only</label>
-                                    <small style="color:#9ca3af;display:block;margin-top:2px;">Scanning QR codes at kiosk</small>
-                                </div>
-                            </div>
-
-                            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;cursor:pointer;" onclick="document.getElementById('manual').checked=true;">
-                                <input type="radio" id="manual" name="check_in_type" value="manual" {{ $checkInType === 'manual' ? 'checked' : '' }} style="margin-top:2px;width:16px;height:16px;cursor:pointer;">
-                                <div>
-                                    <label for="manual" style="font-weight:600;color:#111827;cursor:pointer;margin:0;display:block;">Manual Only</label>
-                                    <small style="color:#9ca3af;display:block;margin-top:2px;">HR manually logs attendance</small>
-                                </div>
-                            </div>
-
-                            <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;cursor:pointer;" onclick="document.getElementById('mixed').checked=true;">
-                                <input type="radio" id="mixed" name="check_in_type" value="mixed" {{ $checkInType === 'mixed' ? 'checked' : '' }} style="margin-top:2px;width:16px;height:16px;cursor:pointer;">
-                                <div>
-                                    <label for="mixed" style="font-weight:600;color:#111827;cursor:pointer;margin:0;display:block;">Mixed Methods</label>
-                                    <small style="color:#9ca3af;display:block;margin-top:2px;">Biometric, QR, and manual all enabled</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <hr style="margin:20px 0;border:none;border-top:1px solid #f3f4f6;">
-
-                    <h4 style="font-size:0.82rem;font-weight:700;color:#374151;margin:0 0 12px;">Approval Workflow</h4>
-
-                    <div style="display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;cursor:pointer;" onclick="document.getElementById('requires_approval').checked=!document.getElementById('requires_approval').checked;">
-                        <input type="checkbox" id="requires_approval" name="requires_approval" value="1" {{ $requiresApproval ? 'checked' : '' }} style="margin-top:2px;width:16px;height:16px;cursor:pointer;">
-                        <div>
-                            <label for="requires_approval" style="font-weight:600;color:#111827;cursor:pointer;margin:0;display:block;">Require manager approval for manual logs</label>
-                            <small style="color:#9ca3af;display:block;margin-top:4px;line-height:1.4;">When enabled, manually entered attendance records must be approved by department managers</small>
-                        </div>
+                    <div class="prl-cfg-field">
+                        <label class="prl-cfg-label">Grace Period (Minutes) <span class="req">*</span></label>
+                        <input type="number" class="prl-ctrl @error('grace_period') is-invalid @enderror" name="grace_period" min="0" max="30" value="{{ old('grace_period', $gracePeriod) }}" required>
+                        <p class="prl-cfg-desc">Additional time before marking as late</p>
+                        @error('grace_period')
+                            <span class="prl-err">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div style="margin-top:20px;">
@@ -455,8 +395,12 @@
                         <input type="time" class="prl-ctrl" name="end_time" required>
                     </div>
                     <div style="margin-bottom:16px;">
-                        <label class="prl-cfg-label">Break Duration (Hours) (Optional)</label>
-                        <input type="number" class="prl-ctrl" name="break_duration" step="0.5" min="0" max="8" placeholder="e.g., 1.5">
+                        <label class="prl-cfg-label">Break Start Time (Optional)</label>
+                        <input type="time" class="prl-ctrl" name="break_start" placeholder="e.g., 12:00">
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label class="prl-cfg-label">Break End Time (Optional)</label>
+                        <input type="time" class="prl-ctrl" name="break_end" placeholder="e.g., 13:00">
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <input type="checkbox" id="new_is_active" name="is_active" value="1" checked style="width:16px;height:16px;cursor:pointer;border-radius:4px;border:1px solid #e5e7eb;">

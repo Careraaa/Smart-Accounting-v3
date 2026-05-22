@@ -63,11 +63,11 @@
 .cal-half-label span { background:#fff;padding-right:8px; }
 
 /* Day-of-week header */
-.cal-dow-row { display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px; }
+.cal-dow-row { display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px; }
 .cal-dow { text-align:center;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;padding:4px 0; }
 
 /* Day cells row */
-.cal-days-row { display:grid;grid-template-columns:repeat(5,1fr);gap:6px; }
+.cal-days-row { display:grid;grid-template-columns:repeat(7,1fr);gap:6px; }
 
 .cal-day {
     border-radius:10px;padding:10px 8px 8px;min-height:72px;
@@ -144,11 +144,11 @@
 
     for ($d = 1; $d <= 15 && $d <= $monthEnd->day; $d++) {
         $date = $monthStart->copy()->setDay($d);
-        if ($date->isWeekday()) $firstHalfDays->push($date);
+        $firstHalfDays->push($date);
     }
     for ($d = 16; $d <= $monthEnd->day; $d++) {
         $date = $monthStart->copy()->setDay($d);
-        if ($date->isWeekday()) $secondHalfDays->push($date);
+        $secondHalfDays->push($date);
     }
 
     // Summary counts
@@ -217,28 +217,28 @@
             <div class="cal-half-label"><span>1st Cutoff &nbsp;·&nbsp; {{ $monthStart->format('M 1') }} – {{ $monthStart->copy()->setDay(15)->format('M 15') }}</span></div>
 
             <div class="cal-dow-row">
-                @foreach(['Mon','Tue','Wed','Thu','Fri'] as $dow)
+                @foreach(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $dow)
                     <div class="cal-dow">{{ $dow }}</div>
                 @endforeach
             </div>
 
             @php
-                // Pad first half to start on correct weekday (Mon=0)
+                // Pad first half to start on correct weekday (Sun=0, Mon=1, ..., Sat=6)
                 $firstDay = $firstHalfDays->first();
-                $padStart = $firstDay ? ($firstDay->dayOfWeekIso - 1) : 0; // Mon=1 → 0 pads
-                // But we only show Mon–Fri, so we need to fill the grid row by row
+                $dayOfWeek = $firstDay ? $firstDay->dayOfWeekIso : 1;
+                $padStart = $dayOfWeek === 7 ? 0 : $dayOfWeek; // Sun=7 → 0 pads, Mon=1 → 1 pad, etc.
                 // Build a flat array of cells: null = empty, Carbon = day
                 $firstCells = [];
                 if ($firstDay) {
                     for ($p = 0; $p < $padStart; $p++) $firstCells[] = null;
                 }
                 foreach ($firstHalfDays as $d) $firstCells[] = $d;
-                // Pad end to complete last row
-                $rem = count($firstCells) % 5;
-                if ($rem > 0) for ($p = 0; $p < (5 - $rem); $p++) $firstCells[] = null;
+                // Pad end to complete last row (7 columns instead of 5)
+                $rem = count($firstCells) % 7;
+                if ($rem > 0) for ($p = 0; $p < (7 - $rem); $p++) $firstCells[] = null;
             @endphp
 
-            @foreach(array_chunk($firstCells, 5) as $week)
+            @foreach(array_chunk($firstCells, 7) as $week)
             <div class="cal-days-row" style="margin-bottom:6px;">
                 @foreach($week as $day)
                     @if($day === null)
@@ -249,6 +249,7 @@
                             $att = $attendances[$key] ?? null;
                             $isToday = $day->isSameDay($today);
                             $isFuture = $day->isAfter($today);
+                            $isWeekend = $day->isSaturday() || $day->isSunday();
 
                             $dayClass = '';
                             $statusLabel = '';
@@ -277,7 +278,7 @@
                                 };
                             }
                         @endphp
-                        <div class="cal-day {{ $dayClass }} {{ $isToday ? 'is-today' : '' }} {{ $isFuture ? 'is-future' : '' }}">
+                        <div class="cal-day {{ $dayClass }} {{ $isToday ? 'is-today' : '' }} {{ $isFuture ? 'is-future' : '' }} {{ $isWeekend ? 'is-weekend' : '' }}">
                             <div class="cal-day-num">{{ $day->day }}</div>
                             @if($att && !$isFuture)
                                 <div class="cal-day-status {{ $statusBadge }}">{{ $statusLabel }}</div>
@@ -306,24 +307,25 @@
             <div class="cal-half-label"><span>2nd Cutoff &nbsp;·&nbsp; {{ $monthStart->copy()->setDay(16)->format('M 16') }} – {{ $monthEnd->format('M j') }}</span></div>
 
             <div class="cal-dow-row">
-                @foreach(['Mon','Tue','Wed','Thu','Fri'] as $dow)
+                @foreach(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $dow)
                     <div class="cal-dow">{{ $dow }}</div>
                 @endforeach
             </div>
 
             @php
                 $secondFirst = $secondHalfDays->first();
-                $padStart2 = $secondFirst ? ($secondFirst->dayOfWeekIso - 1) : 0;
+                $dayOfWeek2 = $secondFirst ? $secondFirst->dayOfWeekIso : 1;
+                $padStart2 = $dayOfWeek2 === 7 ? 0 : $dayOfWeek2;
                 $secondCells = [];
                 if ($secondFirst) {
                     for ($p = 0; $p < $padStart2; $p++) $secondCells[] = null;
                 }
                 foreach ($secondHalfDays as $d) $secondCells[] = $d;
-                $rem2 = count($secondCells) % 5;
-                if ($rem2 > 0) for ($p = 0; $p < (5 - $rem2); $p++) $secondCells[] = null;
+                $rem2 = count($secondCells) % 7;
+                if ($rem2 > 0) for ($p = 0; $p < (7 - $rem2); $p++) $secondCells[] = null;
             @endphp
 
-            @foreach(array_chunk($secondCells, 5) as $week)
+            @foreach(array_chunk($secondCells, 7) as $week)
             <div class="cal-days-row" style="margin-bottom:6px;">
                 @foreach($week as $day)
                     @if($day === null)
@@ -334,6 +336,7 @@
                             $att = $attendances[$key] ?? null;
                             $isToday = $day->isSameDay($today);
                             $isFuture = $day->isAfter($today);
+                            $isWeekend = $day->isSaturday() || $day->isSunday();
 
                             $dayClass = '';
                             $statusLabel = '';
@@ -362,7 +365,7 @@
                                 };
                             }
                         @endphp
-                        <div class="cal-day {{ $dayClass }} {{ $isToday ? 'is-today' : '' }} {{ $isFuture ? 'is-future' : '' }}">
+                        <div class="cal-day {{ $dayClass }} {{ $isToday ? 'is-today' : '' }} {{ $isFuture ? 'is-future' : '' }} {{ $isWeekend ? 'is-weekend' : '' }}">
                             <div class="cal-day-num">{{ $day->day }}</div>
                             @if($att && !$isFuture)
                                 <div class="cal-day-status {{ $statusBadge }}">{{ $statusLabel }}</div>

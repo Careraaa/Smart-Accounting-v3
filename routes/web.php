@@ -264,6 +264,7 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
     Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])->name('hr.qr.generate');
     Route::get('/api/attendance/recent', [AttendanceController::class, 'getRecentAttendance'])->name('api.attendance.recent');
     Route::get('/api/attendance/table-rows', [AttendanceController::class, 'getAttendanceTableRows'])->name('api.attendance.table-rows');
+    Route::get('/api/shift/break-times', [AttendanceController::class, 'getShiftBreakTimes'])->name('api.shift.break-times');
     Route::get('/api/qr/token-status', [AttendanceController::class, 'checkQRTokenStatus'])->name('api.qr.token-status');
     Route::get('/api/leaves/{leave}', [LeaveController::class, 'getDetails'])->name('api.leave.details');
 

@@ -205,40 +205,68 @@ class HolidayWageService
         bool  $isWorked,
         bool  $isRestDay
     ): array {
-        // COLA is a fixed peso amount added once per holiday day, never multiplied.
         $cola = $this->getCOLA();
 
-        // Employee did not work — still gets 100% by law (PH Labor Code Art. 94).
+        // ============================================================
+        // NOT WORKED
+        // ============================================================
+        // Regular holiday not worked still earns 100%.
+        // Since no basic pay may exist for non-worked days,
+        // return the full daily rate.
         if (!$isWorked) {
             return [$dailyRate + $cola, 'regular_not_worked'];
         }
 
-        // Employee worked. Calculate how many hours were overtime (beyond 8h).
         $overtimeHours = max(0.0, $hoursWorked - 8);
 
+        // ============================================================
+        // REST DAY + REGULAR HOLIDAY
+        // ============================================================
+        // Total legal pay = 260%
+        // Basic pay already exists = 100%
+        // Holiday premium only = 160%
         if ($isRestDay) {
-            // Rest day + regular holiday = 260% base (200% holiday × 130% rest-day premium).
-            $basePay = $dailyRate * 2.0 * 1.30;
+
+            $premiumPay = $dailyRate * 1.60;
 
             if ($overtimeHours > 0) {
-                // OT on rest day + holiday: hourly × 2.0 × 1.30 × 1.30
+
                 $otPay = $hourlyRate * 2.0 * 1.30 * 1.30 * $overtimeHours;
-                return [$basePay + $otPay + $cola, 'regular_rest_day_worked_ot'];
+
+                return [
+                    $premiumPay + $otPay + $cola,
+                    'regular_rest_day_worked_ot'
+                ];
             }
 
-            return [$basePay + $cola, 'regular_rest_day_worked'];
+            return [
+                $premiumPay + $cola,
+                'regular_rest_day_worked'
+            ];
         }
 
-        // Normal day + regular holiday = 200% base.
-        $basePay = $dailyRate * 2.0;
+        // ============================================================
+        // REGULAR HOLIDAY WORKED
+        // ============================================================
+        // Total legal pay = 200%
+        // Basic pay already exists = 100%
+        // Holiday premium only = 100%
+        $premiumPay = $dailyRate;
 
         if ($overtimeHours > 0) {
-            // OT on regular holiday: hourly × 2.0 × 1.30
+
             $otPay = $hourlyRate * 2.0 * 1.30 * $overtimeHours;
-            return [$basePay + $otPay + $cola, 'regular_worked_ot'];
+
+            return [
+                $premiumPay + $otPay + $cola,
+                'regular_worked_ot'
+            ];
         }
 
-        return [$basePay + $cola, 'regular_worked'];
+        return [
+            $premiumPay + $cola,
+            'regular_worked'
+        ];
     }
 
     // ================================================================
@@ -273,35 +301,64 @@ class HolidayWageService
     ): array {
         $cola = $this->getCOLA();
 
-        // Special holiday + no work = no pay.
+        // ============================================================
+        // SPECIAL HOLIDAY NOT WORKED
+        // ============================================================
+        // No work, no pay.
         if (!$isWorked) {
             return [0.0, 'special_not_worked'];
         }
 
         $overtimeHours = max(0.0, $hoursWorked - 8);
 
+        // ============================================================
+        // REST DAY + SPECIAL HOLIDAY
+        // ============================================================
+        // Total legal pay = 150%
+        // Basic pay already exists = 100%
+        // Holiday premium only = 50%
         if ($isRestDay) {
-            // Rest day + special holiday = 150% base.
-            $basePay = $dailyRate * 1.50;
+
+            $premiumPay = $dailyRate * 0.50;
 
             if ($overtimeHours > 0) {
-                // OT multiplier is the same regardless of rest day (1.30 × 1.30 = 1.69).
+
                 $otPay = $hourlyRate * 1.30 * 1.30 * $overtimeHours;
-                return [$basePay + $otPay + $cola, 'special_rest_day_worked_ot'];
+
+                return [
+                    $premiumPay + $otPay + $cola,
+                    'special_rest_day_worked_ot'
+                ];
             }
 
-            return [$basePay + $cola, 'special_rest_day_worked'];
+            return [
+                $premiumPay + $cola,
+                'special_rest_day_worked'
+            ];
         }
 
-        // Normal day + special holiday = 130% base.
-        $basePay = $dailyRate * 1.30;
+        // ============================================================
+        // SPECIAL HOLIDAY WORKED
+        // ============================================================
+        // Total legal pay = 130%
+        // Basic pay already exists = 100%
+        // Holiday premium only = 30%
+        $premiumPay = $dailyRate * 0.30;
 
         if ($overtimeHours > 0) {
+
             $otPay = $hourlyRate * 1.30 * 1.30 * $overtimeHours;
-            return [$basePay + $otPay + $cola, 'special_worked_ot'];
+
+            return [
+                $premiumPay + $otPay + $cola,
+                'special_worked_ot'
+            ];
         }
 
-        return [$basePay + $cola, 'special_worked'];
+        return [
+            $premiumPay + $cola,
+            'special_worked'
+        ];
     }
 
     // ================================================================
@@ -318,13 +375,22 @@ class HolidayWageService
      */
     private function computeDoubleHoliday(float $dailyRate, bool $isWorked): float
     {
-        // Not worked: 100% (regular holiday entitlement still applies).
+        // ============================================================
+        // DOUBLE HOLIDAY NOT WORKED
+        // ============================================================
+        // At least one regular holiday exists,
+        // therefore employee still earns 100%.
         if (!$isWorked) {
             return $dailyRate;
         }
 
-        // Worked: 300%.
-        return $dailyRate * 3.0;
+        // ============================================================
+        // DOUBLE HOLIDAY WORKED
+        // ============================================================
+        // Total legal pay = 300%
+        // Basic pay already exists = 100%
+        // Holiday premium only = 200%
+        return $dailyRate * 2.0;
     }
 
     // ================================================================
