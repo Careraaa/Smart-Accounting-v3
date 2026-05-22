@@ -174,6 +174,10 @@
                 'overtime_pay' => round($v['otPay'], 2),
                 'undertime_deduction' => round($v['utDeduction'], 2),
                 'holiday_pay' => round($v['holidayPay'], 2),
+                'holiday_breakdown' => array_map(fn($hb) => [
+                    'label'  => $this->payrollService->buildHolidayLabel($hb),
+                    'amount' => round($hb['amount'], 2),
+                ], $v['holidayBreakdown']),
                 'sss' => round($v['sss'], 2),
                 'pagibig' => round($v['pagibig'], 2),
                 'adjusted_gross' => round($v['adjustedGross'], 2),

@@ -146,12 +146,41 @@
                 <div class="ep-card-body">
                     <div class="ep-rows">
                         <div class="ep-row">
-                            <span class="ep-row-lbl">Basic Pay <span class="ep-badge">rate &times; days</span></span>
+                            <span class="ep-row-lbl">Basic Pay <span class="ep-badge" id="ep_basic_badge">rate &times; days</span></span>
                             <span class="ep-row-val" id="ep_basic_display">&#8369;{{ number_format($payroll->basic_salary??0,2) }}</span>
                         </div>
-                        <div class="ep-row" id="ep_holiday_row" style="display:none;">
-                            <span class="ep-row-lbl green">Holiday Pay</span>
-                            <span class="ep-row-val green" id="ep_holiday_display">+&#8369;0.00</span>
+                        <div class="ep-row" id="ep_holiday_rows">
+                            {{-- One row per holiday, populated on page load and on preview refresh --}}
+                            @php
+                                $holidayAllowances = $payroll->allowances
+                                    ->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Holiday Pay'));
+                                // For old "Holiday Pay" records, look up names from the period
+                                $batchPeriodHolidayNames = \App\Models\Holiday::whereBetween('date', [
+                                    $payroll->payroll_period_start->toDateString(),
+                                    $payroll->payroll_period_end->toDateString(),
+                                ])->orderBy('date')->pluck('name');
+                            @endphp
+                            @foreach($holidayAllowances as $ha)
+                            @php
+                                $haLabel = $ha->allowance_type ?? '';
+                                $haBadge = 'holiday';
+                                if (preg_match('/^Holiday Pay\s*[—\-]+\s*(.+?)\s*\((.+)\)$/', $haLabel, $hm)) {
+                                    $haName  = 'Holiday Pay — ' . $hm[1];
+                                    $haBadge = $hm[2];
+                                } else {
+                                    $haName = 'Holiday Pay — ' . ($batchPeriodHolidayNames->isNotEmpty()
+                                        ? $batchPeriodHolidayNames->implode(' + ')
+                                        : 'Holiday');
+                                }
+                            @endphp
+                            <div class="ep-row ep-holiday-item">
+                                <span class="ep-row-lbl green">
+                                    {{ $haName }}
+                                    <span class="ep-badge">{{ $haBadge }}</span>
+                                </span>
+                                <span class="ep-row-val green">+&#8369;{{ number_format($ha->amount, 2) }}</span>
+                            </div>
+                            @endforeach
                         </div>
                         <div class="ep-row" id="ep_ot_row" style="display:none;">
                             <span class="ep-row-lbl green">Overtime Pay <span class="ep-badge" id="ep_ot_hrs_badge"></span></span>
@@ -272,7 +301,7 @@
 @php
     $manualAllowances = $payroll->allowances
         ->filter(fn($a) => !str_starts_with((string)($a->allowance_type ?? $a->name ?? ''), 'Overtime Pay')
-                        && ($a->allowance_type ?? $a->name ?? '') !== 'Holiday Pay')
+                        && !str_starts_with((string)($a->allowance_type ?? $a->name ?? ''), 'Holiday Pay'))
         ->map(fn($a) => ['name' => $a->allowance_type ?? $a->name, 'amount' => $a->amount])
         ->values();
     $manualDeductions = $payroll->deductions
@@ -302,9 +331,16 @@ window._ep = {
         daysWorked:     {{ (float)($payroll->days_worked ?? 0) }},
         hoursWorked:    {{ (float)($payroll->hours_worked ?? 0) }},
         daysAbsent:     0,
+        dailyRate:      {{ (float)($payroll->user->salary_rate ?? 0) }},
         basicSalary:    {{ (float)($payroll->basic_salary ?? 0) }},
         adjustedGross:  {{ (float)($payroll->gross_pay ?? 0) }},
         holidayPay:     {{ round($holidayPay, 2) }},
+        holidayBreakdown: @json(
+            $payroll->allowances
+                ->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Holiday Pay'))
+                ->map(fn($a) => ['label' => $a->allowance_type, 'amount' => (float)$a->amount])
+                ->values()
+        ),
         netPay:         {{ (float)($payroll->net_pay ?? 0) }},
         otPay:          {{ (float)($payroll->overtime_pay ?? 0) }},
         otHours:        {{ (float)($payroll->allowances->where('allowance_type', 'like', 'Overtime Pay%')->sum('hours') ?? 0) }},
@@ -345,14 +381,39 @@ window._ep = {
 
     function renderSalary(c) {
         $('ep_basic_display').textContent = fmt(c.basicSalary ?? 0);
+        // Update the Basic Pay badge to show actual rate × days
+        const basicBadge = $('ep_basic_badge');
+        if (basicBadge) {
+            const rate = c.dailyRate ?? 0;
+            const days = c.daysWorked ?? 0;
+            basicBadge.textContent = '\u20B1' + Number(rate).toLocaleString('en-PH', {minimumFractionDigits:2,maximumFractionDigits:2})
+                + ' \u00D7 ' + days + (days === 1 ? ' day' : ' days');
+        }
         // Compute adjusted total: Basic + Holiday + OT - Undertime - System Deductions
         const adjustedTotal = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.otPay ?? 0) - (c.utDeduction ?? 0) - (c.sss ?? 0) - (c.pagibig ?? 0) - (c.philhealth ?? 0) - (c.withholdingTax ?? 0);
         $('ep_adjusted').textContent      = fmt(Math.max(0, adjustedTotal));
-        const holidayRow = $('ep_holiday_row');
-        if (c.holidayPay > 0) {
-            $('ep_holiday_display').textContent = '+' + fmt(c.holidayPay);
-            holidayRow.style.display = '';
-        } else { holidayRow.style.display = 'none'; }
+
+        // Render one row per holiday using the breakdown array
+        const holidayContainer = $('ep_holiday_rows');
+        // Remove previously rendered holiday items (keep any static ones from server render)
+        holidayContainer.querySelectorAll('.ep-holiday-item').forEach(el => el.remove());
+        const breakdown = c.holidayBreakdown ?? [];
+        breakdown.forEach(hb => {
+            if (hb.amount > 0) {
+                const row = document.createElement('div');
+                row.className = 'ep-row ep-holiday-item';
+                // Add a "statutory" badge on unworked regular holidays so it's clear
+                // this is the 100% entitlement, not a bonus on top of basic pay
+                const isUnworked = hb.label && hb.label.includes('not worked');
+                const note = isUnworked
+                    ? ' <span class="ep-badge" style="background:#fef9c3;color:#854d0e;border-color:#fde68a;">statutory</span>'
+                    : '';
+                row.innerHTML = '<span class="ep-row-lbl green">' + hb.label + note + '</span>'
+                              + '<span class="ep-row-val green">+' + fmt(hb.amount) + '</span>';
+                holidayContainer.appendChild(row);
+            }
+        });
+
         const otRow = $('ep_ot_row');
         if (c.otPay > 0) {
             $('ep_ot_display').textContent   = '+' + fmt(c.otPay);
@@ -478,7 +539,9 @@ window._ep = {
             computed = {
                 daysWorked:data.days_worked, hoursWorked:data.hours_worked, daysAbsent:data.days_absent,
                 basicSalary:data.basic_salary, adjustedGross:data.adjusted_gross??data.gross_pay,
+                dailyRate:data.daily_rate??0,
                 holidayPay:data.holiday_pay??0,
+                holidayBreakdown:data.holiday_breakdown??[],
                 otPay:data.overtime_pay??0, otHours:data.overtime_hours??0,
                 utDeduction:data.undertime_deduction??0, utHours:data.undertime_hours??0,
                 sss:data.sss??0, pagibig:data.pagibig??0, philhealth:data.philhealth??0, withholdingTax:data.withholding_tax??0,

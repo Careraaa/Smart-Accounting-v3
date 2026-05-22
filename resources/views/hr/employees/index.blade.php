@@ -383,7 +383,7 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
             pageData.forEach(emp => {
                 const initials = (emp.firstName.charAt(0) + emp.lastName.charAt(0)).toUpperCase();
                 const sc = emp.status === 'active' ? 's-active' : 's-inactive';
-                const empRoute = '/employees/' + emp.id;
+                const empRoute = '{{ route('employees.show', ['employee' => '__ID__']) }}'.replace('__ID__', emp.id);
 
                 const row = document.createElement('tr');
                 row.dataset.name = emp.name;

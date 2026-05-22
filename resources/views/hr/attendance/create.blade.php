@@ -222,6 +222,9 @@
                         @enderror
                     </div>
 
+                    {{-- OT/UT preview hint --}}
+                    <div id="otut-hint" style="display:none;margin-top:4px;padding:12px 14px;border-radius:10px;font-size:0.8rem;font-weight:600;line-height:1.5;"></div>
+
                 </form>
             </div>
 
@@ -237,3 +240,76 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    // Standard schedule: 08:00 – 17:00, 8 working hours (1h break deducted)
+    const SCHED_START_H = 8, SCHED_START_M = 0;
+    const SCHED_END_H   = 17, SCHED_END_M  = 0;
+    const STANDARD_MIN  = 480; // 8h × 60
+    const BREAK_MIN     = 60;
+
+    const timeIn  = document.getElementById('time_in');
+    const timeOut = document.getElementById('time_out');
+    const hint    = document.getElementById('otut-hint');
+
+    function toMinutes(hhmm) {
+        if (!hhmm) return null;
+        const [h, m] = hhmm.split(':').map(Number);
+        return h * 60 + m;
+    }
+
+    function fmt(totalMin) {
+        const h = Math.floor(totalMin / 60);
+        const m = totalMin % 60;
+        if (h > 0 && m > 0) return `${h}h ${m}m`;
+        if (h > 0) return `${h}h`;
+        return `${m}m`;
+    }
+
+    function update() {
+        const inMin  = toMinutes(timeIn.value);
+        const outMin = toMinutes(timeOut.value);
+
+        if (inMin === null || outMin === null || outMin <= inMin) {
+            hint.style.display = 'none';
+            return;
+        }
+
+        const workedMin = Math.max(0, (outMin - inMin) - BREAK_MIN);
+        const diff      = workedMin - STANDARD_MIN;
+
+        if (Math.abs(diff) < 1) {
+            hint.style.display = 'none';
+            return;
+        }
+
+        const absDiff = Math.abs(diff);
+        const isOT    = diff > 0;
+
+        hint.style.display = 'block';
+
+        if (isOT) {
+            hint.style.background  = '#f0fdf4';
+            hint.style.border      = '1px solid #bbf7d0';
+            hint.style.color       = '#15803d';
+            hint.innerHTML =
+                `<svg style="display:inline;vertical-align:-3px;margin-right:6px;" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg>` +
+                `<strong>Overtime detected:</strong> ${fmt(absDiff)} beyond the 8h schedule — an OT record will be auto-created and approved on save.`;
+        } else {
+            hint.style.background  = '#fffbeb';
+            hint.style.border      = '1px solid #fde68a';
+            hint.style.color       = '#b45309';
+            hint.innerHTML =
+                `<svg style="display:inline;vertical-align:-3px;margin-right:6px;" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>` +
+                `<strong>Undertime detected:</strong> ${fmt(absDiff)} short of the 8h schedule — a UT record will be auto-created and approved on save.`;
+        }
+    }
+
+    timeIn.addEventListener('change', update);
+    timeOut.addEventListener('change', update);
+    update();
+})();
+</script>
+@endpush

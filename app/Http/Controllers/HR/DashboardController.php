@@ -74,12 +74,6 @@ class DashboardController extends Controller
             ];
         }
         
-        // Recent leaves
-        $recentLeaves = Leave::with('employee')
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
-        
         // Recent attendance records
         $recentAttendance = Attendance::with('employee')
             ->orderBy('date', 'desc')
@@ -128,7 +122,6 @@ class DashboardController extends Controller
             'totalUndertimeHours',
             'totalOvertimeRecords',
             'attendanceTrend',
-            'recentLeaves',
             'recentAttendance',
             'pendingItems'
         ));

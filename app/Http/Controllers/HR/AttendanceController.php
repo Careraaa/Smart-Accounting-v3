@@ -7,8 +7,11 @@ use App\Models\Attendance;
 use App\Models\AttendanceLog;
 use App\Models\AttendanceToken;
 use App\Models\Employee;
+use App\Models\OvertimeUndertime;
 use App\Models\User;
 use App\Notifications\AttendanceNotification;
+use App\Notifications\OvertimeNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
@@ -293,13 +296,100 @@ class AttendanceController extends Controller
         try {
             $user = User::find($userId);
             if ($user) {
-                AttendanceNotification::attendanceRecorded($user, 'manual_entry', \Carbon\Carbon::parse($request->date));
+                AttendanceNotification::attendanceRecorded($user, 'manual_entry', Carbon::parse($request->date));
             }
         } catch (\Throwable $e) {
             logger()->warning('AttendanceNotification failed: ' . $e->getMessage());
         }
 
-        return redirect()->route('attendance.index')->with('success', 'Attendance record saved successfully.');
+        // ── Auto OT/UT detection ──────────────────────────────────────────────
+        $otutMessage = null;
+
+        if ($request->time_in && $request->time_out) {
+            $dateStr  = $request->date;
+            $timeIn   = Carbon::parse($dateStr . ' ' . $request->time_in);
+            $timeOut  = Carbon::parse($dateStr . ' ' . $request->time_out);
+
+            // Standard schedule: 08:00 – 17:00 (8 working hours + 1h break)
+            $schedStart = Carbon::parse($dateStr . ' 08:00');
+            $schedEnd   = Carbon::parse($dateStr . ' 17:00');
+
+            // Net minutes worked (subtract 1-hour break)
+            $workedMinutes = max(0, $timeOut->diffInMinutes($timeIn) - 60);
+
+            // Standard = 8h = 480 min
+            $standardMinutes = 480;
+            $diffMinutes     = $workedMinutes - $standardMinutes;
+
+            // Only act if deviation is at least 1 minute
+            if (abs($diffMinutes) >= 1) {
+                $employee   = Employee::find($userId);
+                $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
+                $hours      = round(abs($diffMinutes) / 60, 2);
+                $type       = $diffMinutes > 0 ? 'overtime' : 'undertime';
+
+                $amount = $type === 'overtime'
+                    ? $hours * $hourlyRate * 1.25
+                    : -($hours * $hourlyRate);
+
+                $reason = $type === 'overtime'
+                    ? "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $request->time_out)->format('g:i A') . ")"
+                    : "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $request->time_in)->format('g:i A') . ")";
+
+                // Upsert: one OT/UT record per employee per date (from manual log)
+                OvertimeUndertime::updateOrCreate(
+                    [
+                        'user_id' => $userId,
+                        'date'    => $dateStr,
+                        'type'    => $type,
+                    ],
+                    [
+                        'hours'            => $hours,
+                        'reason'           => $reason,
+                        'status'           => 'approved',
+                        'approved_by'      => auth()->id(),
+                        'amount'           => $amount,
+                        'hourly_rate_used' => $hourlyRate,
+                    ]
+                );
+
+                // Remove any opposite-type record for the same day (e.g. old UT if now OT)
+                $oppositeType = $type === 'overtime' ? 'undertime' : 'overtime';
+                OvertimeUndertime::where('user_id', $userId)
+                    ->where('date', $dateStr)
+                    ->where('type', $oppositeType)
+                    ->whereIn('reason', [
+                        "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $request->time_out)->format('g:i A') . ")",
+                        "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $request->time_in)->format('g:i A') . ")",
+                    ])
+                    ->delete();
+
+                try {
+                    $otRecord = OvertimeUndertime::where('user_id', $userId)
+                        ->where('date', $dateStr)
+                        ->where('type', $type)
+                        ->latest()
+                        ->first();
+                    if ($otRecord) {
+                        $otRecord->load('employee');
+                        OvertimeNotification::submitted($otRecord);
+                    }
+                } catch (\Throwable $e) {
+                    logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
+                }
+
+                $hoursLabel = number_format($hours, 2);
+                $otutMessage = ucfirst($type) . " of {$hoursLabel}h auto-logged and approved.";
+            }
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
+        $successMsg = 'Attendance record saved successfully.';
+        if ($otutMessage) {
+            $successMsg .= ' ' . $otutMessage;
+        }
+
+        return redirect()->route('attendance.index')->with('success', $successMsg);
     }
 
     public function getAttendanceTableRows()

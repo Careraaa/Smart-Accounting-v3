@@ -366,10 +366,13 @@
         <div class="prl-card-body">
             <div class="prl-breakdown">
                 <div class="prl-brow">
-                    <span class="prl-brow-lbl">Basic Salary <span class="prl-badge">rate × days</span></span>
+                    <span class="prl-brow-lbl">Basic Salary <span class="prl-badge" id="prl_basic_badge">rate × days</span></span>
                     <span class="prl-brow-val" id="prl_basic_display">₱0.00</span>
                 </div>
                 <input type="hidden" name="basic_salary" id="prl_basic_input" value="0">
+
+                {{-- Holiday pay breakdown rows (injected by JS from preview response) --}}
+                <div id="prl_holiday_rows"></div>
 
                 <div class="prl-brow" id="prl_ot_row" style="display:none;">
                     <span class="prl-brow-lbl c-green">

@@ -23,176 +23,172 @@ class PayrollService
     }
 
     /**
-     * Generate payroll for a single employee in a cutoff period.
-     * NOTE: Does NOT call applyLoanDeductions — caller is responsible.
+     * Generate and persist a brand-new payroll record for one employee.
+     * NOTE: Does NOT apply loan deductions — the caller must do that separately.
      */
-    public function generatePayrollForEmployee(User $employee, Carbon $start, Carbon $end, array $manualAllowances = [], array $manualDeductions = [], array $manualBonuses = []): Payroll
-    {
+    public function generatePayrollForEmployee(
+        User $employee,
+        Carbon $start,
+        Carbon $end,
+        array $manualAllowances = [],
+        array $manualDeductions = [],
+        array $manualBonuses = []
+    ): Payroll {
+        // Run all the math first, then save everything to the DB.
         $values = $this->computePayroll($employee, $start, $end, $manualAllowances, $manualDeductions);
 
         $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
         $payroll = Payroll::create([
-            'user_id' => $employee->id,
+            'user_id'              => $employee->id,
             'payroll_period_start' => $start,
-            'payroll_period_end' => $end,
-            'basic_salary' => round($values['basicSalary'], 2),
-            'gross_pay' => round($values['grossPay'] + $totalBonuses, 2),
-            'days_worked' => $values['daysWorked'],
-            'hours_worked' => round($values['hoursWorked'], 2),
-            'total_allowances' => round($values['grossPay'] - $values['basicSalary'], 2),
-            'total_bonuses' => round($totalBonuses, 2),
-            'total_deductions' => $values['totalDeductions'],
-            'net_pay' => round($values['netPay'] + $totalBonuses, 2),
-            'sss' => round($values['sss'], 2),
-            'pagibig' => round($values['pagibig'], 2),
-            'philhealth' => round($values['philhealth'], 2),
-            'withholding_tax' => round($values['withholdingTax'], 2),
-            'status' => 'pending',
+            'payroll_period_end'   => $end,
+            'basic_salary'         => round($values['basicSalary'], 2),
+            'gross_pay'            => round($values['grossPay'] + $totalBonuses, 2),
+            'days_worked'          => $values['daysWorked'],
+            'hours_worked'         => round($values['hoursWorked'], 2),
+            // total_allowances = everything on top of basic salary (OT + holiday + manual)
+            'total_allowances'     => round($values['grossPay'] - $values['basicSalary'], 2),
+            'total_bonuses'        => round($totalBonuses, 2),
+            'total_deductions'     => $values['totalDeductions'],
+            'net_pay'              => round($values['netPay'] + $totalBonuses, 2),
+            'sss'                  => round($values['sss'], 2),
+            'pagibig'              => round($values['pagibig'], 2),
+            'philhealth'           => round($values['philhealth'], 2),
+            'withholding_tax'      => round($values['withholdingTax'], 2),
+            'status'               => 'pending',
         ]);
 
-        // ── Allowances ────────────────────────────────────────────
-        if ($values['otPay'] > 0) {
-            $payroll->allowances()->create([
-                'allowance_type' => 'Overtime Pay',
-                'hours' => round($values['otHours'], 2),
-                'amount' => round($values['otPay'], 2),
-            ]);
-        }
-
-        if ($values['holidayPay'] > 0) {
-            $payroll->allowances()->create([
-                'allowance_type' => 'Holiday Pay',
-                'amount' => round($values['holidayPay'], 2),
-            ]);
-        }
-
-        foreach ($manualAllowances as $allow) {
-            $payroll->allowances()->create([
-                'allowance_type' => $allow['name'],
-                'amount' => round((float) $allow['amount'], 2),
-            ]);
-        }
-
-        // ── Deductions ────────────────────────────────────────────
-        if ($values['sss'] > 0) {
-            $payroll->deductions()->create([
-                'deduction_type' => 'SSS',
-                'amount' => round($values['sss'], 2),
-            ]);
-        }
-
-        if ($values['pagibig'] > 0) {
-            $payroll->deductions()->create([
-                'deduction_type' => 'Pag-IBIG',
-                'amount' => round($values['pagibig'], 2),
-            ]);
-        }
-
-        if ($values['philhealth'] > 0) {
-            $payroll->deductions()->create([
-                'deduction_type' => 'PhilHealth',
-                'amount' => round($values['philhealth'], 2),
-            ]);
-        }
-
-        if ($values['withholdingTax'] > 0) {
-            $payroll->deductions()->create([
-                'deduction_type' => 'Withholding Tax',
-                'amount' => round($values['withholdingTax'], 2),
-            ]);
-        }
-
-        if ($values['utDeduction'] > 0) {
-            $payroll->deductions()->create([
-                'deduction_type' => 'Undertime Deduction',
-                'hours' => round($values['utHours'], 2),
-                'amount' => $values['utDeduction'], // Store EXACT value, don't round
-            ]);
-        }
-
-        foreach ($manualDeductions as $deduct) {
-            $payroll->deductions()->create([
-                'deduction_type' => $deduct['name'],
-                'amount' => round((float) $deduct['amount'], 2),
-            ]);
-        }
-
-        // ── Bonuses ───────────────────────────────────────────────
-        foreach ($manualBonuses as $bonus) {
-            $payroll->bonuses()->create([
-                'bonus_type'  => $bonus['type'],
-                'description' => $bonus['description'] ?? null,
-                'amount'      => round((float) $bonus['amount'], 2),
-            ]);
-        }
+        $this->saveAllowances($payroll, $values, $manualAllowances);
+        $this->saveDeductions($payroll, $values, $manualDeductions);
+        $this->saveBonuses($payroll, $manualBonuses);
 
         return $payroll;
     }
 
-    public function computePayroll(User $employee, Carbon $start, Carbon $end, array $manualAllowances = [], array $manualDeductions = []): array
-    {
-        // ── Attendance ────────────────────────────────────────────
-        $daysWorked = $this->attendanceService->countWorkDaysInPeriod($employee->id, $start, $end);
-        $daysAbsent = $this->attendanceService->countAbsentDaysInPeriod($employee->id, $start, $end);
+    /**
+     * The core math engine. Computes everything for one employee in one period.
+     * Returns a plain array of values — does NOT touch the database.
+     *
+     * HOW THE NUMBERS FLOW:
+     *   basicSalary  = dailyRate × daysWorked
+     *                  (days actually present/late per attendance records)
+     *
+     *   holidayPay   = computed by HolidayWageService based on PH DOLE rules
+     *                  For unworked regular holidays this IS the full day's pay
+     *                  (basicSalary will be ₱0 for those days since daysWorked = 0)
+     *
+     *   grossPay     = basicSalary + otPay + holidayPay + manualAllowances
+     *
+     *   FIX — Withholding Tax:
+     *   Previously: tax = dailyBracket × daysWorked  (wrong — BIR tax is period-based)
+     *   Now:        taxableIncome = grossPay (the full period earnings)
+     *               tax = computeBracketTax(taxableIncome, 'Semi-monthly')
+     *   This is correct because BIR computes tax on the total taxable income
+     *   for the pay period, not as a per-day micro-tax.
+     *
+     *   FIX — Statutory deductions gate:
+     *   Previously: only deducted SSS/Pag-IBIG/PhilHealth when daysWorked > 0
+     *   Now:        also deducts when holidayPay > 0 (employee has taxable income
+     *               even if they didn't physically work — e.g. unworked regular holiday)
+     *
+     *   netPay = grossPay − totalDeductions
+     *   (rounded only at the final step to avoid accumulated rounding errors)
+     */
+    public function computePayroll(
+        User $employee,
+        Carbon $start,
+        Carbon $end,
+        array $manualAllowances = [],
+        array $manualDeductions = []
+    ): array {
+        // ── Step 1: Attendance ────────────────────────────────────────────────
+        // How many days did the employee actually show up?
+        $daysWorked  = $this->attendanceService->countWorkDaysInPeriod($employee->id, $start, $end);
+        $daysAbsent  = $this->attendanceService->countAbsentDaysInPeriod($employee->id, $start, $end);
         $hoursWorked = $this->attendanceService->calculateTotalHoursWorked($employee->id, $start, $end);
 
-        // ── Salary rates ─────────────────────────────────────────
-        $dailyRate = (float) ($employee->salary_rate ?? 0);
-        $monthlySalary = $dailyRate * 22;
-        $hourlyRate = $dailyRate / 8;
+        // ── Step 2: Salary rates ──────────────────────────────────────────────
+        // salary_rate on the user record is the daily rate (not monthly).
+        $dailyRate     = (float) ($employee->salary_rate ?? 0);
+        $monthlySalary = $dailyRate * 22; // 22 working days/month — used for statutory bracket lookups only
+        $hourlyRate    = $dailyRate / 8;
+
+        // Basic salary = what the employee earns for the days they actually worked.
+        // On a period with only unworked regular holidays, this will be ₱0 —
+        // the holiday pay covers those days instead.
         $basicSalary = $dailyRate * $daysWorked;
 
-        // ── Holiday Wages ────────────────────────────────────────
+        // ── Step 3: Holiday wages ─────────────────────────────────────────────
+        // HolidayWageService handles all PH DOLE holiday rules.
+        // Returns the total holiday pay amount + a per-holiday breakdown for the payslip.
         $holidayWagesResult = $this->holidayWageService->calculateHolidayWages($employee, $start, $end);
-        $holidayPay = $holidayWagesResult['holiday_pay'];
+        $holidayPay         = $holidayWagesResult['holiday_pay'];
+        $holidayBreakdown   = $holidayWagesResult['breakdown'];
 
-        // ── OT / UT ───────────────────────────────────────────────
-        $otPay = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('amount');
-
+        // ── Step 4: Overtime / Undertime ──────────────────────────────────────
+        // OT pay is stored on approved OvertimeUndertime records (HR-entered amounts).
+        // We sum them directly rather than recomputing, so historical records stay stable.
+        $otPay   = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('amount');
         $otHours = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('hours');
 
-        $utHours = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->undertime()->sum('hours');
-        
-        // Calculate UT deduction WITHOUT rounding - keep full precision for accurate calculations
-        $utDeductionExact = $utHours > 0 ? $utHours * ($employee->salary_rate / 8) : 0;
+        // Undertime deduction = hours short × hourly rate.
+        // Kept at full precision (no rounding) until the final netPay calculation.
+        $utHours          = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->undertime()->sum('hours');
+        $utDeductionExact = $utHours > 0 ? $utHours * ($dailyRate / 8) : 0.0;
 
-        // ── Statutory (semi-monthly: monthly contribution ÷ 2) ───
-        // SSS uses the official bracket table; Pag-IBIG is percentage-based with ₱200/month cap
-        $sss = ($employee->has_sss && $daysWorked > 0) ? $this->getStatutoryDeduction('SSS', $monthlySalary) : 0;
-
-        $pagibig = ($employee->has_pagibig && $daysWorked > 0) ? $this->getStatutoryDeduction('Pag-IBIG', $monthlySalary) : 0;
-
-        $philhealth = ($employee->has_philhealth && $daysWorked > 0) ? $this->getStatutoryDeduction('PhilHealth', $monthlySalary) : 0;
-
-        // ── Withholding Tax (BIR) ────────────────────────────────
-        // Calculate based on daily salary rate using daily frequency
-        $withholdingTax = ($daysWorked > 0) ? $this->calculateWithholdingTax($dailyRate, 'Daily') * $daysWorked : 0;
-
-        // ── Manual line items ────────────────────────────────────
+        // ── Step 5: Gross pay ─────────────────────────────────────────────────
         $manualAllowTotal = collect($manualAllowances)->sum(fn($a) => (float) ($a['amount'] ?? 0));
-        $manualDeductTotal = collect($manualDeductions)->sum(fn($d) => (float) ($d['amount'] ?? 0));
+        $grossPay         = $basicSalary + $otPay + $holidayPay + $manualAllowTotal;
 
-        // ── Totals ────────────────────────────────────────────────
-        $grossPay = $basicSalary + $otPay + $holidayPay + $manualAllowTotal;
+        // ── Step 6: Statutory deductions (SSS, Pag-IBIG, PhilHealth) ─────────
+        // These are semi-monthly contributions (monthly amount ÷ 2).
+        // Gate: employee must have income this period (worked days OR holiday pay).
+        // FIX: previously only gated on daysWorked > 0, which incorrectly skipped
+        // deductions for employees who only have unworked regular holiday pay.
+        $hasIncome = ($daysWorked > 0 || $holidayPay > 0);
+
+        $sss        = ($employee->has_sss        && $hasIncome) ? $this->getStatutoryDeduction('SSS',        $monthlySalary) : 0;
+        $pagibig    = ($employee->has_pagibig    && $hasIncome) ? $this->getStatutoryDeduction('Pag-IBIG',   $monthlySalary) : 0;
+        $philhealth = ($employee->has_philhealth && $hasIncome) ? $this->getStatutoryDeduction('PhilHealth', $monthlySalary) : 0;
+
+        // ── Step 7: Withholding Tax (BIR) ─────────────────────────────────────
+        // FIX: Previously computed as dailyBracketTax × daysWorked, which is wrong.
+        // BIR withholding tax is computed on the TOTAL taxable income for the period,
+        // not as a per-day micro-tax. We use the semi-monthly bracket table with
+        // grossPay as the taxable income for this period.
+        //
+        // Why grossPay and not basicSalary?
+        // Because OT pay and holiday pay are taxable income under BIR rules.
+        // Manual allowances that are non-taxable (e.g. de minimis) would need to be
+        // excluded here — for now we treat all income as taxable (conservative approach).
+        $withholdingTax = $hasIncome ? $this->calculateWithholdingTax($grossPay, 'Semi-monthly') : 0;
+
+        // ── Step 8: Total deductions & net pay ────────────────────────────────
+        $manualDeductTotal    = collect($manualDeductions)->sum(fn($d) => (float) ($d['amount'] ?? 0));
         $totalDeductionsExact = $utDeductionExact + $sss + $pagibig + $philhealth + $withholdingTax + $manualDeductTotal;
-        $adjustedGross = $grossPay;
-        
-        // Calculate netPay using exact values, round ONLY the final result
-        $netPay = round($grossPay - $totalDeductionsExact, 2, PHP_ROUND_HALF_UP);
-        
-        // Return EXACT unrounded values for both display and database
-        // Display layer will format as needed, but calculations must use exact values
-        $utDeduction = $utDeductionExact;
+
+        // Round only the final result — keep all intermediate values exact.
+        $netPay          = round($grossPay - $totalDeductionsExact, 2, PHP_ROUND_HALF_UP);
+        $adjustedGross   = $grossPay; // alias kept for display layer compatibility
+        $utDeduction     = $utDeductionExact;
         $totalDeductions = $totalDeductionsExact;
 
-        return compact('daysWorked', 'daysAbsent', 'hoursWorked', 'basicSalary', 'dailyRate', 'hourlyRate', 'otHours', 'utHours', 'otPay', 'holidayPay', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'withholdingTax', 'manualAllowTotal', 'manualDeductTotal', 'grossPay', 'adjustedGross', 'totalDeductions', 'netPay');
+        return compact(
+            'daysWorked', 'daysAbsent', 'hoursWorked',
+            'basicSalary', 'dailyRate', 'hourlyRate',
+            'otHours', 'utHours', 'otPay',
+            'holidayPay', 'holidayBreakdown',
+            'utDeduction', 'sss', 'pagibig', 'philhealth', 'withholdingTax',
+            'manualAllowTotal', 'manualDeductTotal',
+            'grossPay', 'adjustedGross', 'totalDeductions', 'netPay'
+        );
     }
 
     /**
      * Recompute and persist an existing payroll record (edit / batch-edit).
-     * Rebuilds all allowance & deduction line items from scratch.
-     * NOTE: Does NOT call applyLoanDeductions — caller is responsible.
+     * Wipes and rebuilds all allowance, deduction, and bonus line items from scratch.
+     * NOTE: Does NOT apply loan deductions — the caller must do that separately.
      */
     public function updatePayroll(
         Payroll $payroll,
@@ -204,104 +200,120 @@ class PayrollService
         array $extraData = [],
         array $manualBonuses = [],
     ): Payroll {
-        $values = $this->computePayroll($employee, $start, $end, $manualAllowances, $manualDeductions);
-
+        $values       = $this->computePayroll($employee, $start, $end, $manualAllowances, $manualDeductions);
         $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
         $payroll->update([
-            'user_id' => $employee->id,
+            'user_id'              => $employee->id,
             'payroll_period_start' => $start,
-            'payroll_period_end' => $end,
-            'basic_salary' => round($values['basicSalary'], 2),
-            'gross_pay' => round($values['grossPay'] + $totalBonuses, 2),
-            'days_worked' => $values['daysWorked'],
-            'hours_worked' => round($values['hoursWorked'], 2),
-            'total_allowances' => round($values['grossPay'] - $values['basicSalary'], 2),
-            'total_bonuses' => round($totalBonuses, 2),
-            'total_deductions' => $values['totalDeductions'],
-            'net_pay' => round($values['netPay'] + $totalBonuses, 2),
-            'sss' => round($values['sss'], 2),
-            'pagibig' => round($values['pagibig'], 2),
-            'philhealth' => round($values['philhealth'], 2),
-            'withholding_tax' => round($values['withholdingTax'], 2),
-
-            'status' => $extraData['status'] ?? ($payroll->status ?? 'prepared'),
+            'payroll_period_end'   => $end,
+            'basic_salary'         => round($values['basicSalary'], 2),
+            'gross_pay'            => round($values['grossPay'] + $totalBonuses, 2),
+            'days_worked'          => $values['daysWorked'],
+            'hours_worked'         => round($values['hoursWorked'], 2),
+            'total_allowances'     => round($values['grossPay'] - $values['basicSalary'], 2),
+            'total_bonuses'        => round($totalBonuses, 2),
+            'total_deductions'     => $values['totalDeductions'],
+            'net_pay'              => round($values['netPay'] + $totalBonuses, 2),
+            'sss'                  => round($values['sss'], 2),
+            'pagibig'              => round($values['pagibig'], 2),
+            'philhealth'           => round($values['philhealth'], 2),
+            'withholding_tax'      => round($values['withholdingTax'], 2),
+            'status'               => $extraData['status'] ?? ($payroll->status ?? 'prepared'),
         ]);
 
-        // ── Rebuild allowances from scratch ────────────────────────────────────
+        // Wipe and rebuild all line items so they always match the recomputed values.
         $payroll->allowances()->delete();
+        $payroll->deductions()->delete();
+        $payroll->bonuses()->delete();
 
+        $this->saveAllowances($payroll, $values, $manualAllowances);
+        $this->saveDeductions($payroll, $values, $manualDeductions);
+        $this->saveBonuses($payroll, $manualBonuses);
+
+        return $payroll->fresh();
+    }
+
+    // =========================================================================
+    //  PRIVATE HELPERS — line-item persistence
+    // =========================================================================
+
+    /**
+     * Save all earning line items (OT, holiday breakdown, manual allowances).
+     * Extracted so generate and update share the same logic.
+     */
+    private function saveAllowances(Payroll $payroll, array $values, array $manualAllowances): void
+    {
+        // Overtime pay — one line showing hours and amount.
         if ($values['otPay'] > 0) {
             $payroll->allowances()->create([
                 'allowance_type' => 'Overtime Pay',
-                'hours' => round($values['otHours'], 2),
-                'amount' => round($values['otPay'], 2),
+                'hours'          => round($values['otHours'], 2),
+                'amount'         => round($values['otPay'], 2),
             ]);
         }
 
-        if ($values['holidayPay'] > 0) {
-            $payroll->allowances()->create([
-                'allowance_type' => 'Holiday Pay',
-                'amount' => round($values['holidayPay'], 2),
-            ]);
+        // Holiday pay — one line per holiday so the payslip shows each holiday name.
+        // e.g. "Holiday Pay — Christmas Day (Regular, worked)"
+        foreach ($values['holidayBreakdown'] as $hb) {
+            if ($hb['amount'] > 0) {
+                $payroll->allowances()->create([
+                    'allowance_type' => $this->buildHolidayLabel($hb),
+                    'amount'         => round($hb['amount'], 2),
+                ]);
+            }
         }
 
+        // HR-entered manual allowances (transportation, meal, etc.).
         foreach ($manualAllowances as $allow) {
             $payroll->allowances()->create([
                 'allowance_type' => $allow['name'],
-                'amount' => round((float) $allow['amount'], 2),
+                'amount'         => round((float) $allow['amount'], 2),
             ]);
         }
+    }
 
-        // ── Rebuild deductions from scratch ────────────────────────────────────
-        $payroll->deductions()->delete();
-
+    /**
+     * Save all deduction line items (statutory, undertime, manual).
+     */
+    private function saveDeductions(Payroll $payroll, array $values, array $manualDeductions): void
+    {
         if ($values['sss'] > 0) {
-            $payroll->deductions()->create([
-                'deduction_type' => 'SSS',
-                'amount' => round($values['sss'], 2),
-            ]);
+            $payroll->deductions()->create(['deduction_type' => 'SSS',        'amount' => round($values['sss'], 2)]);
         }
-
         if ($values['pagibig'] > 0) {
-            $payroll->deductions()->create([
-                'deduction_type' => 'Pag-IBIG',
-                'amount' => round($values['pagibig'], 2),
-            ]);
+            $payroll->deductions()->create(['deduction_type' => 'Pag-IBIG',   'amount' => round($values['pagibig'], 2)]);
         }
-
         if ($values['philhealth'] > 0) {
-            $payroll->deductions()->create([
-                'deduction_type' => 'PhilHealth',
-                'amount' => round($values['philhealth'], 2),
-            ]);
+            $payroll->deductions()->create(['deduction_type' => 'PhilHealth', 'amount' => round($values['philhealth'], 2)]);
         }
-
         if ($values['withholdingTax'] > 0) {
-            $payroll->deductions()->create([
-                'deduction_type' => 'Withholding Tax',
-                'amount' => round($values['withholdingTax'], 2),
-            ]);
+            $payroll->deductions()->create(['deduction_type' => 'Withholding Tax', 'amount' => round($values['withholdingTax'], 2)]);
         }
 
+        // Undertime deduction stored at full precision (not rounded) to avoid
+        // accumulated rounding errors when summing deductions.
         if ($values['utDeduction'] > 0) {
             $payroll->deductions()->create([
                 'deduction_type' => 'Undertime Deduction',
-                'hours' => round($values['utHours'], 2),
-                'amount' => $values['utDeduction'], // Store EXACT value, don't round
+                'hours'          => round($values['utHours'], 2),
+                'amount'         => $values['utDeduction'],
             ]);
         }
 
         foreach ($manualDeductions as $deduct) {
             $payroll->deductions()->create([
                 'deduction_type' => $deduct['name'],
-                'amount' => round((float) $deduct['amount'], 2),
+                'amount'         => round((float) $deduct['amount'], 2),
             ]);
         }
+    }
 
-        // ── Rebuild bonuses from scratch ───────────────────────────────────────
-        $payroll->bonuses()->delete();
-
+    /**
+     * Save bonus line items.
+     */
+    private function saveBonuses(Payroll $payroll, array $manualBonuses): void
+    {
         foreach ($manualBonuses as $bonus) {
             $payroll->bonuses()->create([
                 'bonus_type'  => $bonus['type'],
@@ -309,201 +321,151 @@ class PayrollService
                 'amount'      => round((float) $bonus['amount'], 2),
             ]);
         }
-
-        return $payroll->fresh(); // return fresh model
     }
 
-    // ── Statutory helpers ─────────────────────────────────────────────────
+    // =========================================================================
+    //  HOLIDAY LABEL BUILDER
+    // =========================================================================
 
-    // ── Statutory helpers ─────────────────────────────────────────────────
+    /**
+     * Builds the human-readable label stored as allowance_type for each holiday line.
+     *
+     * Examples:
+     *   "Holiday Pay — Christmas Day (Regular, worked)"
+     *   "Holiday Pay — Labor Day (Regular, unworked — statutory entitlement)"
+     *   "Holiday Pay — All Saints' Day (Special, not worked)"
+     *   "Holiday Pay — Rizal Day + Bonus Holiday (Double, worked)"
+     *   "Holiday Pay — Labor Day (Regular, rest day, worked)"
+     */
+    public function buildHolidayLabel(array $hb): string
+    {
+        $typeLabel = match($hb['type']) {
+            'regular' => 'Regular',
+            'special' => 'Special',
+            'double'  => 'Double',
+            default   => ucfirst($hb['type']),
+        };
 
+        $restLabel = $hb['is_rest_day'] ? ', rest day' : '';
+
+        // For regular/double holidays not worked, the 100% pay is a legal entitlement,
+        // not a bonus — label it clearly so it's not confused with extra pay.
+        if (!$hb['is_worked']) {
+            $workedLabel = ($hb['type'] === 'regular' || $hb['type'] === 'double')
+                ? 'unworked — statutory entitlement'
+                : 'not worked';
+        } else {
+            $workedLabel = 'worked';
+        }
+
+        return "Holiday Pay — {$hb['holiday']} ({$typeLabel}{$restLabel}, {$workedLabel})";
+    }
+
+    // =========================================================================
+    //  STATUTORY DEDUCTION HELPERS
+    // =========================================================================
+
+    /**
+     * Look up the employee's share for SSS, Pag-IBIG, or PhilHealth
+     * from the statutory_deductions table (bracket-based).
+     *
+     * Returns the SEMI-MONTHLY amount (monthly contribution ÷ 2).
+     *
+     * The table stores either:
+     *   employee_share   = fixed monthly peso amount (SSS uses this)
+     *   percentage_employee = % of monthly salary (Pag-IBIG, PhilHealth use this)
+     */
     private function getStatutoryDeduction(string $name, float $salary): float
     {
-        $row = StatutoryDeduction::where('name', $name)->where('min_salary', '<=', $salary)->where('max_salary', '>=', $salary)->first();
+        // Find the bracket row where min_salary ≤ salary ≤ max_salary.
+        $row = StatutoryDeduction::where('name', $name)
+            ->where('min_salary', '<=', $salary)
+            ->where('max_salary', '>=', $salary)
+            ->first();
 
         if (!$row) {
-            return 0;
+            return 0; // No matching bracket — employee is outside the table range
         }
 
+        // Fixed-amount bracket (e.g. SSS contribution table).
         if ($row->employee_share) {
-            return round($row->employee_share / 2, 2); // semi-monthly
+            return round($row->employee_share / 2, 2); // monthly ÷ 2 = semi-monthly
         }
 
+        // Percentage-based bracket (e.g. Pag-IBIG, PhilHealth).
         if ($row->percentage_employee) {
-            $monthlyContribution = $salary * $row->percentage_employee / 100;
-            
-            // Apply cap if it's Pag-IBIG (max ₱200/month)
+            $monthly = $salary * $row->percentage_employee / 100;
+
+            // Pag-IBIG has a ₱200/month cap (₱100 semi-monthly).
             if ($name === 'Pag-IBIG') {
-                $monthlyContribution = min($monthlyContribution, 200.0);
+                $monthly = min($monthly, 200.0);
             }
-            
-            return round($monthlyContribution / 2, 2); // percentage-based: divide by 100, then semi-monthly
+
+            return round($monthly / 2, 2); // monthly ÷ 2 = semi-monthly
         }
 
         return 0;
     }
 
     /**
-     * Calculate BIR Withholding Tax based on monthly salary and frequency.
-     * Returns the withholding tax amount for the pay period.
-     * 
-     * @param float $monthlySalary Monthly salary to use for bracket lookup
-     * @param string $frequency Daily, Weekly, Semi-monthly, or Monthly
-     * @return float Withholding tax amount
+     * Compute BIR withholding tax for the pay period.
+     *
+     * FIX: This now takes the full period taxable income (grossPay) and looks up
+     * the semi-monthly bracket table — NOT a per-day calculation.
+     *
+     * How it works:
+     *   1. Find the bracket row where min_salary ≤ taxableIncome ≤ max_salary
+     *   2. Base tax = employee_share (fixed amount for the bracket floor)
+     *   3. Percentage tax = (taxableIncome − bracket floor) × percentage_employee
+     *   4. Total = base + percentage
+     *
+     * The WithholdingTax table rows have a 'description' column that stores
+     * the frequency: 'Daily', 'Weekly', 'Semi-monthly', 'Monthly'.
+     * We always use 'Semi-monthly' now since payroll is semi-monthly.
      */
-    private function calculateWithholdingTax(float $monthlySalary, string $frequency = 'Semi-monthly'): float
+    private function calculateWithholdingTax(float $taxableIncome, string $frequency = 'Semi-monthly'): float
     {
-        // Find the withholding tax bracket for the given salary and frequency
         $tax = WithholdingTax::where('description', $frequency)
-            ->where('min_salary', '<=', $monthlySalary)
-            ->where('max_salary', '>=', $monthlySalary)
+            ->where('min_salary', '<=', $taxableIncome)
+            ->where('max_salary', '>=', $taxableIncome)
             ->first();
 
         if (!$tax) {
-            return 0;
+            return 0; // Income is below the taxable threshold
         }
 
-        // Calculate the tax amount
-        $withholdingAmount = $tax->employee_share ?? 0;
+        // Base amount for this bracket (fixed floor tax).
+        $amount = $tax->employee_share ?? 0;
 
+        // Add the percentage portion on the income above the bracket floor.
         if ($tax->percentage_employee) {
-            $percentageAmount = ($monthlySalary - $tax->min_salary) * ($tax->percentage_employee / 100);
-            $withholdingAmount += $percentageAmount;
+            $amount += ($taxableIncome - $tax->min_salary) * ($tax->percentage_employee / 100);
         }
 
-        return round($withholdingAmount, 2);
+        return round($amount, 2);
     }
 
+    // =========================================================================
+    //  BATCH GENERATION
+    // =========================================================================
+
     /**
-     * SSS employee share using the 2023 contribution table.
-     * Returns the SEMI-MONTHLY amount (monthly contribution ÷ 2).
+     * Generate payroll for a list of employees in one go.
+     * Skips employees who already have a payroll for this period.
+     * Returns the count of newly created payrolls.
      *
-     * Bracket format: [monthly salary ceiling, monthly employee contribution]
-     * Source: SSS Circular 2023-001
-     */
-    private function computeSSS(float $monthlySalary): float
-    {
-        $brackets = [
-            [4999.99, 180.0],
-            [5249.99, 202.5],
-            [5499.99, 225.0],
-            [5749.99, 247.5],
-            [5999.99, 270.0],
-            [6249.99, 292.5],
-            [6499.99, 315.0],
-            [6749.99, 337.5],
-            [6999.99, 360.0],
-            [7249.99, 382.5],
-            [7499.99, 405.0],
-            [7749.99, 427.5],
-            [7999.99, 450.0],
-            [8249.99, 472.5],
-            [8499.99, 495.0],
-            [8749.99, 517.5],
-            [8999.99, 540.0],
-            [9249.99, 562.5],
-            [9499.99, 585.0],
-            [9749.99, 607.5],
-            [9999.99, 630.0],
-            [10249.99, 652.5],
-            [10499.99, 675.0],
-            [10749.99, 697.5],
-            [10999.99, 720.0],
-            [11249.99, 742.5],
-            [11499.99, 765.0],
-            [11749.99, 787.5],
-            [11999.99, 810.0],
-            [12249.99, 832.5],
-            [12499.99, 855.0],
-            [12749.99, 877.5],
-            [12999.99, 900.0],
-            [13249.99, 922.5],
-            [13499.99, 945.0],
-            [13749.99, 967.5],
-            [13999.99, 990.0],
-            [14249.99, 1012.5],
-            [14499.99, 1035.0],
-            [14749.99, 1057.5],
-            [14999.99, 1080.0],
-            [15249.99, 1102.5],
-            [15499.99, 1125.0],
-            [15749.99, 1147.5],
-            [15999.99, 1170.0],
-            [16249.99, 1192.5],
-            [16499.99, 1215.0],
-            [16749.99, 1237.5],
-            [16999.99, 1260.0],
-            [17249.99, 1282.5],
-            [17499.99, 1305.0],
-            [17749.99, 1327.5],
-            [17999.99, 1350.0],
-            [18249.99, 1372.5],
-            [18499.99, 1395.0],
-            [18749.99, 1417.5],
-            [18999.99, 1440.0],
-            [19249.99, 1462.5],
-            [19499.99, 1485.0],
-            [19749.99, 1507.5],
-            [19999.99, 1530.0],
-            [20249.99, 1552.5],
-            [20499.99, 1575.0],
-            [20749.99, 1597.5],
-            [20999.99, 1620.0],
-            [21249.99, 1642.5],
-            [21499.99, 1665.0],
-            [21749.99, 1687.5],
-            [21999.99, 1710.0],
-            [22249.99, 1732.5],
-            [22499.99, 1755.0],
-            [22749.99, 1777.5],
-            [22999.99, 1800.0],
-            [23249.99, 1822.5],
-            [23499.99, 1845.0],
-            [23749.99, 1867.5],
-            [23999.99, 1890.0],
-            [24249.99, 1912.5],
-            [24499.99, 1935.0],
-            [24749.99, 1957.5],
-            [24999.99, 1980.0],
-            [PHP_INT_MAX, 1900.0], // Salary credit cap at ₱29,750 → max ee share ₱1,900
-        ];
-
-        foreach ($brackets as [$ceiling, $monthlyContribution]) {
-            if ($monthlySalary <= $ceiling) {
-                return round($monthlyContribution / 2, 2); // semi-monthly
-            }
-        }
-
-        return round(1900.0 / 2, 2);
-    }
-
-    /**
-     * Pag-IBIG employee share.
-     * - 1% of monthly salary if salary ≤ ₱1,500
-     * - 2% of monthly salary if salary > ₱1,500
-     * - Maximum monthly contribution: ₱200
-     * Returns the SEMI-MONTHLY amount (monthly ÷ 2).
-     */
-    private function computePagibig(float $monthlySalary): float
-    {
-        $rate = $monthlySalary <= 1500 ? 0.01 : 0.02;
-        $monthly = min($monthlySalary * $rate, 200.0);
-
-        return round($monthly / 2, 2); // semi-monthly → max ₱100
-    }
-
-    // ── Batch helper ──────────────────────────────────────────────────────
-
-    /**
-     * Batch generation. Returns count of newly-created payrolls.
-     * Loan deductions are applied per-payroll inside the loop.
+     * NOTE: Loan deductions are applied per-payroll inside the loop.
      */
     public function generateBatch($employees, Carbon $start, Carbon $end): int
     {
         $count = 0;
 
         foreach ($employees as $employee) {
-            $alreadyExists = Payroll::where('user_id', $employee->id)->where('payroll_period_start', $start)->where('payroll_period_end', $end)->exists();
+            // Skip if payroll already exists for this employee + period.
+            $alreadyExists = Payroll::where('user_id', $employee->id)
+                ->where('payroll_period_start', $start)
+                ->where('payroll_period_end', $end)
+                ->exists();
 
             if ($alreadyExists) {
                 continue;

@@ -75,14 +75,19 @@ class Payroll extends Model
 
     public function getGrossPayAttribute()
     {
-        // Gross = Basic + OT allowances
-        return $this->basic_salary + $this->total_allowances;
+        // Return the stored gross_pay column directly.
+        // gross_pay is saved by PayrollService as: basicSalary + OT + holidayPay + manualAllowances + bonuses
+        // We must NOT recompute it here — doing so would silently drop bonuses and holiday pay
+        // because total_allowances only covers OT + holiday + manual, not bonuses.
+        return $this->attributes['gross_pay'] ?? 0;
     }
 
     public function getNetPayAttribute()
     {
-        // Net = Gross − deductions (including statutory if stored)
-        return $this->gross_pay - $this->total_deductions;
+        // Return the stored net_pay column directly.
+        // net_pay is saved by PayrollService as: grossPay − totalDeductions (including bonuses).
+        // We must NOT recompute it here — doing so would drop bonuses from the net pay figure.
+        return $this->attributes['net_pay'] ?? 0;
     }
 
     public function getOvertimePayAttribute()
