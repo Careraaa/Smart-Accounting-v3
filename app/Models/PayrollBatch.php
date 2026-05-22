@@ -237,115 +237,56 @@ class PayrollBatch extends Model
     }
 
     /**
-     * Get all available payroll periods (current + past 24 months).
-     * Returns array of periods with start, end, and formatted display.
+     * Get all available payroll periods from the database.
+     * Returns existing periods from PayrollBatch records plus the current period.
+     * Sorted newest first.
      */
     public static function getAvailablePeriods(): array
     {
         $periods = [];
-        $today = Carbon::today();
+        $currentPeriod = self::resolvePeriod();
         
-        // Get active cutoff schedule
-        $activeCutoff = PayrollCutoffSchedule::where('is_active', true)->first();
+        // Get all unique periods from existing batches, ordered by period_start descending
+        $batches = self::select('period_start', 'period_end')
+            ->distinct()
+            ->orderByDesc('period_start')
+            ->get();
         
-        if (!$activeCutoff) {
-            // Fallback: generate bi-monthly periods for past 24 months
-            $startDate = $today->copy()->subMonths(24)->startOfMonth();
-            $endDate = $today->copy()->endOfMonth();
-            
-            while ($startDate <= $endDate) {
-                $monthStart = $startDate->copy()->startOfMonth();
-                $fifteenth = $monthStart->copy()->setDay(15);
-                $monthEnd = $monthStart->copy()->endOfMonth();
+        $seen = [];
+        
+        // Add existing batch periods
+        foreach ($batches as $batch) {
+            $key = $batch->period_start->toDateString() . '|' . $batch->period_end->toDateString();
+            if (!isset($seen[$key])) {
+                $seen[$key] = true;
+                $startDate = $batch->period_start;
+                $endDate = $batch->period_end;
+                $isFirst = $startDate->format('d') <= 15;
                 
-                // First half: 1st to 15th
                 $periods[] = [
-                    'start' => $monthStart->toDateString(),
-                    'end' => $fifteenth->toDateString(),
-                    'display' => $monthStart->format('F Y') . ' — 1st Half',
+                    'start' => $startDate->toDateString(),
+                    'end' => $endDate->toDateString(),
+                    'display' => $startDate->format('F Y') . ' — ' . ($isFirst ? '1st' : '2nd') . ' Half',
                 ];
-                
-                // Second half: 16th to end of month
-                $periods[] = [
-                    'start' => $fifteenth->copy()->addDay()->toDateString(),
-                    'end' => $monthEnd->toDateString(),
-                    'display' => $monthStart->format('F Y') . ' — 2nd Half',
-                ];
-                
-                $startDate->addMonth();
             }
-        } else {
-            // Generate periods based on cutoff schedule
-            $cutoffDays = PayrollCutoffSchedule::where('is_active', true)
-                ->orderBy('cutoff_day')
-                ->pluck('cutoff_day')
-                ->map(fn($day) => (int) $day)
-                ->toArray();
+        }
+        
+        // Add current period if not already in database
+        $currentKey = $currentPeriod['start'] . '|' . $currentPeriod['end'];
+        if (!isset($seen[$currentKey])) {
+            $startCarbon = Carbon::parse($currentPeriod['start']);
+            $isFirst = $startCarbon->format('d') <= 15;
             
-            if (empty($cutoffDays)) {
-                $cutoffDays = [(int) $activeCutoff->cutoff_day];
-            }
-            
-            // Generate periods for past 24 months
-            $startDate = $today->copy()->subMonths(24)->startOfMonth();
-            $endDate = $today->copy()->endOfMonth();
-            
-            while ($startDate <= $endDate) {
-                $currentMonth = $startDate->copy();
-                $nextMonth = $currentMonth->copy()->addMonth();
-                
-                $previousCutoff = null;
-                $nextCutoff = null;
-                
-                // Find cutoff days in current month
-                foreach ($cutoffDays as $day) {
-                    if ($day < $nextMonth->day) {
-                        $previousCutoff = $day;
-                    } elseif ($day >= $nextMonth->day && $nextCutoff === null) {
-                        $nextCutoff = $day;
-                    }
-                }
-                
-                // Generate periods from cutoff days
-                foreach ($cutoffDays as $idx => $cutoffDay) {
-                    $periodStart = $currentMonth->copy()->setDay($cutoffDay)->addDay()->startOfDay();
-                    
-                    $nextIdx = ($idx + 1) % count($cutoffDays);
-                    $nextCutoffDay = $cutoffDays[$nextIdx];
-                    
-                    if ($nextCutoffDay <= $cutoffDay) {
-                        $periodEnd = $currentMonth->copy()->addMonth()->setDay($nextCutoffDay)->endOfDay();
-                    } else {
-                        $periodEnd = $currentMonth->copy()->setDay($nextCutoffDay)->endOfDay();
-                    }
-                    
-                    if ($periodStart <= $endDate && $periodEnd >= $startDate) {
-                        $periods[] = [
-                            'start' => $periodStart->toDateString(),
-                            'end' => $periodEnd->toDateString(),
-                            'display' => $periodStart->format('M d, Y') . ' — ' . $periodEnd->format('M d, Y'),
-                        ];
-                    }
-                }
-                
-                $startDate->addMonth();
-            }
+            $periods[] = [
+                'start' => $currentPeriod['start'],
+                'end' => $currentPeriod['end'],
+                'display' => $startCarbon->format('F Y') . ' — ' . ($isFirst ? '1st' : '2nd') . ' Half',
+            ];
         }
         
         // Sort by start date descending (newest first)
         usort($periods, fn($a, $b) => strtotime($b['start']) - strtotime($a['start']));
         
-        // Remove duplicates and return
-        $seen = [];
-        $unique = [];
-        foreach ($periods as $period) {
-            $key = $period['start'] . '|' . $period['end'];
-            if (!isset($seen[$key])) {
-                $seen[$key] = true;
-                $unique[] = $period;
-            }
-        }
-        
-        return array_values($unique);
+        return array_values($periods);
     }
 }
