@@ -269,7 +269,7 @@
                 @forelse($regularDeductions as $d)
                 <div class="prl-brow">
                     <span class="prl-brow-lbl c-red">
-                        − {{ $d->deduction_type }}
+                        − {{ $d->deduction_type === 'Late Deduction' ? 'Tardiness' : $d->deduction_type }}
                         @if($d->description)<span class="prl-badge">{{ $d->description }}</span>@endif
                     </span>
                     <span class="prl-brow-val c-red">₱{{ number_format($d->amount, 2) }}</span>
@@ -279,7 +279,7 @@
 
                 @foreach($undertimeDeductions as $ut)
                 <div class="prl-brow">
-                    <span class="prl-brow-lbl c-red">− {{ $ut->deduction_type }} <span class="prl-badge">attendance-based</span></span>
+                    <span class="prl-brow-lbl c-red">− {{ $ut->deduction_type === 'Late Deduction' ? 'Tardiness' : $ut->deduction_type }} <span class="prl-badge">attendance-based</span></span>
                     <span class="prl-brow-val c-red">₱{{ number_format($ut->amount, 2) }}</span>
                 </div>
                 @endforeach

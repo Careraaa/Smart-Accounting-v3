@@ -192,6 +192,10 @@
                             <span class="ep-row-lbl red">Undertime Deduction <span class="ep-badge" id="ep_ut_hrs_badge"></span></span>
                             <span class="ep-row-val red" id="ep_ut_display">-&#8369;0.00</span>
                         </div>
+                        <div class="ep-row" id="ep_late_row" style="display:none;">
+                            <span class="ep-row-lbl red">Tardiness <span class="ep-badge" id="ep_late_mins_badge"></span></span>
+                            <span class="ep-row-val red" id="ep_late_display">-&#8369;0.00</span>
+                        </div>
                         <div id="ep_gov_contrib_rows">
                             {{-- Individual government contribution rows populated on page load and preview refresh --}}
                         </div>
@@ -313,7 +317,8 @@
         ->filter(function($d) {
             $type = (string)($d->deduction_type ?? $d->name ?? '');
             return !in_array($type, ['SSS','Pag-IBIG','PhilHealth','Withholding Tax'])
-                && !str_starts_with($type, 'Undertime Deduction');
+                && !str_starts_with($type, 'Undertime Deduction')
+                && !str_starts_with($type, 'Late Deduction');
         })
         ->map(fn($d) => ['name' => $d->deduction_type ?? $d->name, 'amount' => $d->amount])
         ->values();
@@ -351,6 +356,8 @@ window._ep = {
         otHours:        {{ (float)($payroll->allowances->where('allowance_type', 'like', 'Overtime Pay%')->sum('hours') ?? 0) }},
         utDeduction:    {{ (float)($payroll->undertime_deduction ?? 0) }},
         utHours:        {{ (float)($payroll->deductions->where('deduction_type', 'like', 'Undertime Deduction%')->sum('hours') ?? 0) }},
+        late_deduction:  {{ (float)($payroll->deductions->where('deduction_type', 'Late Deduction')->sum('amount') ?? 0) }},
+        late_minutes:    {{ (int)($payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description ? preg_match('/^(\\d+)/', $payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description, $m) ? $m[1] : 0 : 0) }},
         sss:            {{ (float)($payroll->sss ?? 0) }},
         pagibig:        {{ (float)($payroll->pagibig ?? 0) }},
         philhealth:     {{ (float)($payroll->phil_health ?? $payroll->philhealth ?? 0) }},
@@ -394,8 +401,8 @@ window._ep = {
             basicBadge.textContent = '\u20B1' + Number(rate).toLocaleString('en-PH', {minimumFractionDigits:2,maximumFractionDigits:2})
                 + ' \u00D7 ' + days + (days === 1 ? ' day' : ' days');
         }
-        // Compute adjusted total: Basic + Holiday + OT - Undertime - System Deductions
-        const adjustedTotal = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.otPay ?? 0) - (c.utDeduction ?? 0) - (c.sss ?? 0) - (c.pagibig ?? 0) - (c.philhealth ?? 0) - (c.withholdingTax ?? 0);
+        // Compute adjusted total: Basic + Holiday + OT - Undertime - Late - System Deductions
+        const adjustedTotal = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.otPay ?? 0) - (c.utDeduction ?? 0) - (c.late_deduction ?? 0) - (c.sss ?? 0) - (c.pagibig ?? 0) - (c.philhealth ?? 0) - (c.withholdingTax ?? 0);
         $('ep_adjusted').textContent      = fmt(Math.max(0, adjustedTotal));
 
         // Render one row per holiday using the breakdown array
@@ -431,6 +438,12 @@ window._ep = {
             $('ep_ut_hrs_badge').textContent = c.utHours + ' hrs';
             utRow.style.display = '';
         } else { utRow.style.display = 'none'; }
+        const lateRow = $('ep_late_row');
+        if (c.late_deduction > 0) {
+            $('ep_late_display').textContent   = '-' + fmt(c.late_deduction);
+            $('ep_late_mins_badge').textContent = c.late_minutes + ' mins';
+            lateRow.style.display = '';
+        } else { lateRow.style.display = 'none'; }
 
         // Render individual government contribution rows
         const govContribContainer = $('ep_gov_contrib_rows');
@@ -459,7 +472,7 @@ window._ep = {
         const allowTotal = allowances.reduce((s,a) => s + a.amount, 0);
         const deductTotal = deductions.reduce((s,d) => s + d.amount, 0);
         const bonusTotal = bonuses.reduce((s,b) => s + b.amount, 0);
-        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
+        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.late_deduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
         const finalNetPay = Math.max(0, adjustedTotal + allowTotal - deductTotal + bonusTotal);
         computed.netPay = finalNetPay;
         $('ep_net_salary').textContent = fmt(finalNetPay);
@@ -571,6 +584,7 @@ window._ep = {
                 holidayBreakdown:data.holiday_breakdown??[],
                 otPay:data.overtime_pay??0, otHours:data.overtime_hours??0,
                 utDeduction:data.undertime_deduction??0, utHours:data.undertime_hours??0,
+                late_deduction:data.late_deduction??0, late_minutes:data.late_minutes??0,
                 sss:data.sss??0, pagibig:data.pagibig??0, philhealth:data.phil_health??data.philhealth??0, withholdingTax:data.withholding_tax??0,
             };
             render();

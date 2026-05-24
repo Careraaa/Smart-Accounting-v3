@@ -134,11 +134,11 @@
                                     @foreach($shifts as $shift)
                                         <tr>
                                             <td><strong>{{ $shift->name }}</strong></td>
-                                            <td>{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->start_time)->format('H:i') }}</td>
-                                            <td>{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->end_time)->format('H:i') }}</td>
+                                            <td>{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->start_time)->format('h:i A') }}</td>
+                                            <td>{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->end_time)->format('h:i A') }}</td>
                                             <td>
                                                 @if($shift->break_start && $shift->break_end)
-                                                    {{ substr($shift->break_start, 0, 5) }} - {{ substr($shift->break_end, 0, 5) }}
+                                                    {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->break_start)->format('h:i A') }} - {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->break_end)->format('h:i A') }}
                                                 @else
                                                     <span style="color:#9ca3af;">-</span>
                                                 @endif
@@ -190,18 +190,26 @@
                                                             </div>
                                                             <div style="margin-bottom:16px;">
                                                                 <label class="prl-cfg-label">Start Time</label>
+                                                                <p style="font-size:0.75rem;color:#9ca3af;margin:0 0 6px;">Current: {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->start_time)->format('h:i A') }}</p>
                                                                 <input type="time" class="prl-ctrl" name="start_time" value="{{ substr($shift->start_time, 0, 5) }}" required>
                                                             </div>
                                                             <div style="margin-bottom:16px;">
                                                                 <label class="prl-cfg-label">End Time</label>
+                                                                <p style="font-size:0.75rem;color:#9ca3af;margin:0 0 6px;">Current: {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->end_time)->format('h:i A') }}</p>
                                                                 <input type="time" class="prl-ctrl" name="end_time" value="{{ substr($shift->end_time, 0, 5) }}" required>
                                                             </div>
                                                             <div style="margin-bottom:16px;">
                                                             <label class="prl-cfg-label">Break Start Time (Optional)</label>
+                                                            @if($shift->break_start)
+                                                                <p style="font-size:0.75rem;color:#9ca3af;margin:0 0 6px;">Current: {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->break_start)->format('h:i A') }}</p>
+                                                            @endif
                                                             <input type="time" class="prl-ctrl" name="break_start" value="{{ $shift->break_start ? substr($shift->break_start, 0, 5) : '' }}">
                                                         </div>
                                                         <div style="margin-bottom:16px;">
                                                             <label class="prl-cfg-label">Break End Time (Optional)</label>
+                                                            @if($shift->break_end)
+                                                                <p style="font-size:0.75rem;color:#9ca3af;margin:0 0 6px;">Current: {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->break_end)->format('h:i A') }}</p>
+                                                            @endif
                                                             <input type="time" class="prl-ctrl" name="break_end" value="{{ $shift->break_end ? substr($shift->break_end, 0, 5) : '' }}">
                                                             </div>
                                                             <div style="display:flex;align-items:center;gap:8px;">
@@ -388,19 +396,23 @@
                     </div>
                     <div style="margin-bottom:16px;">
                         <label class="prl-cfg-label">Start Time</label>
+                        <p style="font-size:0.75rem;color:#9ca3af;margin:0 0 6px;">Format: 12-hour (e.g., 09:00 AM)</p>
                         <input type="time" class="prl-ctrl" name="start_time" required>
                     </div>
                     <div style="margin-bottom:16px;">
                         <label class="prl-cfg-label">End Time</label>
+                        <p style="font-size:0.75rem;color:#9ca3af;margin:0 0 6px;">Format: 12-hour (e.g., 05:00 PM)</p>
                         <input type="time" class="prl-ctrl" name="end_time" required>
                     </div>
                     <div style="margin-bottom:16px;">
                         <label class="prl-cfg-label">Break Start Time (Optional)</label>
-                        <input type="time" class="prl-ctrl" name="break_start" placeholder="e.g., 12:00">
+                        <p style="font-size:0.75rem;color:#9ca3af;margin:0 0 6px;">Format: 12-hour (e.g., 12:00 PM)</p>
+                        <input type="time" class="prl-ctrl" name="break_start">
                     </div>
                     <div style="margin-bottom:16px;">
                         <label class="prl-cfg-label">Break End Time (Optional)</label>
-                        <input type="time" class="prl-ctrl" name="break_end" placeholder="e.g., 13:00">
+                        <p style="font-size:0.75rem;color:#9ca3af;margin:0 0 6px;">Format: 12-hour (e.g., 01:00 PM)</p>
+                        <input type="time" class="prl-ctrl" name="break_end">
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <input type="checkbox" id="new_is_active" name="is_active" value="1" checked style="width:16px;height:16px;cursor:pointer;border-radius:4px;border:1px solid #e5e7eb;">

@@ -173,6 +173,8 @@
                 'undertime_hours' => round($v['utHours'], 2),
                 'overtime_pay' => round($v['otPay'], 2),
                 'undertime_deduction' => round($v['utDeduction'], 2),
+                'late_deduction' => round($v['lateDeductionData']['total_late_deduction'], 2),
+                'late_minutes' => $v['lateDeductionData']['total_minutes_late'],
                 'holiday_pay' => round($v['holidayPay'], 2),
                 'holiday_breakdown' => array_map(fn($hb) => [
                     'label'  => $this->payrollService->buildHolidayLabel($hb),

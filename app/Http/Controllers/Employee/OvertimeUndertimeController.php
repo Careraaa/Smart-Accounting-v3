@@ -93,8 +93,11 @@ class OvertimeUndertimeController extends Controller
         $hourlyRate = $user->salary_rate / 8;
 
         // Compute amount
+        // OT rate = hourlyRate * 1.25
+        // OT pay = otHours * otRate
+        // UT deduction = utHours * hourlyRate (negative)
         $amount = $validated['type'] === 'overtime'
-            ? $validated['hours'] * $hourlyRate
+            ? $validated['hours'] * $hourlyRate * 1.25
             : -($validated['hours'] * $hourlyRate);
 
         // Add the authenticated user's ID
@@ -173,8 +176,11 @@ class OvertimeUndertimeController extends Controller
         $hourlyRate = $user->salary_rate / 8;
 
         // Compute amount
+        // OT rate = hourlyRate * 1.25
+        // OT pay = otHours * otRate
+        // UT deduction = utHours * hourlyRate (negative)
         $amount = $validated['type'] === 'overtime'
-            ? $validated['hours'] * $hourlyRate
+            ? $validated['hours'] * $hourlyRate * 1.25
             : -($validated['hours'] * $hourlyRate);
 
         $validated['amount'] = $amount;

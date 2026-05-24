@@ -4,6 +4,7 @@ namespace App\Http\Controllers\HR;
 
 use App\Models\Shift;
 use App\Models\PayrollCutoffSchedule;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -21,8 +22,8 @@ class ConfigurationController extends Controller
         $cutoffs = PayrollCutoffSchedule::all();
         $activeCutoff = PayrollCutoffSchedule::where('is_active', true)->first();
 
-        // Get attendance settings
-        $gracePeriod = (int) config('attendance.grace_period_minutes', 5);
+        // Get attendance settings from database
+        $gracePeriod = (int) Setting::get('attendance.grace_period_minutes', 5);
 
         return view('hr.configuration.index', compact(
             'shifts',
@@ -153,16 +154,8 @@ class ConfigurationController extends Controller
             'grace_period' => 'required|integer|min:0|max:30',
         ]);
 
-        // Store settings using config cache or database
-        $settings = [
-            'attendance.grace_period_minutes' => $validated['grace_period'],
-        ];
-
-        // Store in database or cache based on your implementation
-        foreach ($settings as $key => $value) {
-            // You can store these in a settings table if available
-            // Setting::updateOrCreate(['key' => $key], ['value' => $value]);
-        }
+        // Store settings in database using Setting model
+        Setting::set('attendance.grace_period_minutes', $validated['grace_period']);
 
         return redirect()->route('settings.index')->with('success', 'Attendance settings updated successfully!');
     }

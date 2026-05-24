@@ -175,9 +175,15 @@ class PayrollService
         // excluded here — for now we treat all income as taxable (conservative approach).
         $withholdingTax = $hasIncome ? $this->calculateWithholdingTax($grossPay, 'Semi-monthly') : 0;
 
-        // ── Step 8: Total deductions & net pay ────────────────────────────────
+        // ── Step 8: Late Deduction ───────────────────────────────────────────
+        // Calculate the total late deduction for the entire period.
+        // Includes only minutes beyond the grace period, converted to hourly deduction.
+        $lateDeductionData = $this->attendanceService->calculateTotalLateDeduction($employee->id, $start, $end, $dailyRate);
+        $lateDeductionExact = $lateDeductionData['total_late_deduction'];
+
+        // ── Step 9: Total deductions & net pay ────────────────────────────────
         $manualDeductTotal    = collect($manualDeductions)->sum(fn($d) => (float) ($d['amount'] ?? 0));
-        $totalDeductionsExact = $utDeductionExact + $sss + $pagibig + $philhealth + $withholdingTax + $manualDeductTotal;
+        $totalDeductionsExact = $lateDeductionExact + $utDeductionExact + $sss + $pagibig + $philhealth + $withholdingTax + $manualDeductTotal;
 
         // Round only the final result — keep all intermediate values exact.
         $netPay          = round($grossPay - $totalDeductionsExact, 2, PHP_ROUND_HALF_UP);
@@ -190,7 +196,7 @@ class PayrollService
             'basicSalary', 'dailyRate', 'hourlyRate',
             'otHours', 'utHours', 'otPay',
             'holidayPay', 'holidayBreakdown',
-            'utDeduction', 'sss', 'pagibig', 'philhealth', 'withholdingTax',
+            'lateDeductionData', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'withholdingTax',
             'manualAllowTotal', 'manualDeductTotal',
             'grossPay', 'adjustedGross', 'totalDeductions', 'netPay'
         );
@@ -285,10 +291,20 @@ class PayrollService
     }
 
     /**
-     * Save all deduction line items (statutory, undertime, manual).
+     * Save all deduction line items (late, statutory, undertime, manual).
      */
     private function saveDeductions(Payroll $payroll, array $values, array $manualDeductions): void
     {
+        // Late deduction — includes all minutes beyond grace period.
+        if ($values['lateDeductionData']['total_late_deduction'] > 0) {
+            $payroll->deductions()->create([
+                'deduction_type' => 'Late Deduction',
+                'hours'          => round($values['lateDeductionData']['total_hours_late'], 4),
+                'amount'         => $values['lateDeductionData']['total_late_deduction'],
+                'description'    => $values['lateDeductionData']['total_minutes_late'] . ' minutes late',
+            ]);
+        }
+
         if ($values['sss'] > 0) {
             $payroll->deductions()->create(['deduction_type' => 'SSS',        'amount' => round($values['sss'], 2)]);
         }

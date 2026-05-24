@@ -410,8 +410,8 @@
                                 @forelse ($payroll->deductions as $ded)
                                     <tr>
                                         <td>
-                                            {{ $ded->deduction_type }}
-                                            @if ($ded->description && $ded->deduction_type !== 'Cash Advance')
+                                            {{ $ded->deduction_type === 'Late Deduction' ? 'Tardiness' : $ded->deduction_type }}
+                                            @if ($ded->description && $ded->deduction_type !== 'Cash Advance' && $ded->deduction_type !== 'Late Deduction')
                                                 <span class="td-sub">{{ $ded->description }}</span>
                                             @endif
                                         </td>

@@ -230,9 +230,11 @@
     const timeOut = document.getElementById('time_out');
     const hint    = document.getElementById('otut-hint');
 
-    // Shift break times (fetched via AJAX)
-    let breakStart = null;  // minutes from midnight
-    let breakEnd = null;    // minutes from midnight
+    // Shift break times and settings (fetched via AJAX)
+    let breakStart = null;      // minutes from midnight
+    let breakEnd = null;        // minutes from midnight
+    let gracePeriodMin = {{ $gracePeriodMinutes }};     // Grace period in minutes from server
+    let shiftStart = null;      // Shift start time in minutes from midnight
 
     function toMinutes(hhmm) {
         if (!hhmm) return null;
@@ -254,6 +256,17 @@
         return `${m}m`;
     }
 
+    // Convert minutes to 0.5-hour increments (matches backend conversion)
+    // floor(minutes / 30) * 0.5
+    function convertMinutesToHourIncrement(minutes) {
+        return Math.floor(minutes / 30) * 0.5;
+    }
+
+    // Convert hours (0.5 increments) back to minutes for display
+    function hoursToMinutes(hours) {
+        return Math.round(hours * 60);
+    }
+
     function calculateBreakOverlap(inMin, outMin) {
         if (breakStart === null || breakEnd === null) return 0;
 
@@ -269,7 +282,7 @@
     }
 
     function update() {
-        const inMin  = toMinutes(timeIn.value);
+        let inMin  = toMinutes(timeIn.value);
         const outMin = toMinutes(timeOut.value);
 
         if (inMin === null || outMin === null || outMin <= inMin) {
@@ -277,18 +290,31 @@
             return;
         }
 
+        // Apply grace period logic: if time in is within grace period, use shift start time
+        if (shiftStart !== null) {
+            const minutesLate = inMin - shiftStart;
+            if (minutesLate >= 0 && minutesLate <= gracePeriodMin) {
+                // Employee is within grace period; use scheduled start time for OT/UT computation
+                inMin = shiftStart;
+            }
+        }
+
         // Calculate break overlap instead of using fixed break
         const breakOverlapMin = calculateBreakOverlap(inMin, outMin);
         const workedMin = Math.max(0, (outMin - inMin) - breakOverlapMin);
         const diff      = workedMin - STANDARD_MIN;
 
-        if (Math.abs(diff) < 1) {
+        // Convert to 0.5-hour increments (matching backend logic)
+        const diffHours = convertMinutesToHourIncrement(Math.abs(diff));
+        
+        // Only show OT/UT if it converts to at least 0.5 hours (30 minutes)
+        if (diffHours === 0) {
             hint.style.display = 'none';
             return;
         }
 
-        const absDiff = Math.abs(diff);
-        const isOT    = diff > 0;
+        const isOT = diff > 0;
+        const displayMin = hoursToMinutes(diffHours);
 
         hint.style.display = 'block';
 
@@ -298,24 +324,26 @@
             hint.style.color       = '#15803d';
             hint.innerHTML =
                 `<svg style="display:inline;vertical-align:-3px;margin-right:6px;" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg>` +
-                `<strong>Overtime detected:</strong> ${fmt(absDiff)} beyond the 8h schedule — an OT record will be auto-created and approved on save.`;
+                `<strong>Overtime detected:</strong> ${fmt(displayMin)} beyond the 8h schedule — an OT record will be auto-created and approved on save.`;
         } else {
             hint.style.background  = '#fffbeb';
             hint.style.border      = '1px solid #fde68a';
             hint.style.color       = '#b45309';
             hint.innerHTML =
                 `<svg style="display:inline;vertical-align:-3px;margin-right:6px;" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>` +
-                `<strong>Undertime detected:</strong> ${fmt(absDiff)} short of the 8h schedule — a UT record will be auto-created and approved on save.`;
+                `<strong>Undertime detected:</strong> ${fmt(displayMin)} short of the 8h schedule — a UT record will be auto-created and approved on save.`;
         }
     }
 
-    // Fetch shift break times from API
+    // Fetch shift break times and grace period from API
     fetch('{{ route("api.shift.break-times") }}')
         .then(res => res.json())
         .then(data => {
             breakStart = timeStringToMinutes(data.break_start);
             breakEnd = timeStringToMinutes(data.break_end);
-            // Re-calculate preview with fetched break times
+            shiftStart = timeStringToMinutes(data.start_time);
+            gracePeriodMin = data.grace_period_minutes || 5;
+            // Re-calculate preview with fetched break times and grace period
             update();
         })
         .catch(err => {
@@ -323,6 +351,8 @@
             // Fallback: use default 1 hour break (12:00-13:00 = 720-780 minutes)
             breakStart = 12 * 60;
             breakEnd = 13 * 60;
+            shiftStart = 8 * 60;  // Default 8:00 AM
+            gracePeriodMin = 5;   // Default grace period
         });
 
     timeIn.addEventListener('change', update);

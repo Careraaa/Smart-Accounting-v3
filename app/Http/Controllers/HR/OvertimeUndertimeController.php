@@ -141,7 +141,9 @@ class OvertimeUndertimeController extends Controller
         // Calculate hourly rate from daily salary_rate
         $hourlyRate = $employee->salary_rate / 8;
 
-        // Compute amount
+        // Compute amount based on type:
+        // OT: otHours * (hourlyRate * 1.25)
+        // UT: -(utHours * hourlyRate)
         $amount = $validated['type'] === 'overtime'
             ? $validated['hours'] * $hourlyRate * 1.25
             : -($validated['hours'] * $hourlyRate);
@@ -196,6 +198,9 @@ class OvertimeUndertimeController extends Controller
 
         $hourlyRate = $employee->salary_rate / 8;
 
+        // Compute amount based on type:
+        // OT: otHours * (hourlyRate * 1.25)
+        // UT: -(utHours * hourlyRate)
         $amount = $validated['type'] === 'overtime'
             ? $validated['hours'] * $hourlyRate * 1.25
             : -($validated['hours'] * $hourlyRate);

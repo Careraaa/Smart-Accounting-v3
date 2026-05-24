@@ -18,7 +18,8 @@ class ShiftSeeder extends Seeder
             [
                 'start_time' => '08:00:00',
                 'end_time' => '17:00:00',
-                'break_duration' => '01:00:00', // 1 hour lunch break
+                'break_start' => '12:00:00', // Lunch break starts at noon
+                'break_end' => '13:00:00',   // Lunch break ends at 1pm
                 'is_active' => true,
             ]
         );

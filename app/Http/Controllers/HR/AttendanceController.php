@@ -8,10 +8,12 @@ use App\Models\AttendanceLog;
 use App\Models\AttendanceToken;
 use App\Models\Employee;
 use App\Models\OvertimeUndertime;
+use App\Models\Setting;
 use App\Models\Shift;
 use App\Models\User;
 use App\Notifications\AttendanceNotification;
 use App\Notifications\OvertimeNotification;
+use App\Services\AttendanceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -250,7 +252,8 @@ class AttendanceController extends Controller
     public function create()
     {
         $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->get();
-        return view('hr.attendance.create', compact('employees'));
+        $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
+        return view('hr.attendance.create', compact('employees', 'gracePeriodMinutes'));
     }
 
     public function store(Request $request)
@@ -283,7 +286,7 @@ class AttendanceController extends Controller
                 ->withInput();
         }
 
-        // Auto-determine status based on office hours (08:00 - 17:00)
+        // Auto-determine status based on office hours and grace period
         $status = 'present'; // default
         if (!$request->time_in || !$request->time_out) {
             $status = 'absent';
@@ -293,8 +296,14 @@ class AttendanceController extends Controller
             $officeStart = Carbon::createFromFormat('H:i', '08:00');
             $officeEnd = Carbon::createFromFormat('H:i', '17:00');
             
-            // Check if employee came in late
-            if ($timeIn->isAfter($officeStart)) {
+            // Get grace period from settings (default: 5 minutes)
+            $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
+            
+            // Apply grace period: only mark as late if beyond (officeStart + gracePeriod)
+            $lateThreshold = $officeStart->copy()->addMinutes($gracePeriodMinutes);
+            
+            // Check if employee came in late (after grace period)
+            if ($timeIn->isAfter($lateThreshold)) {
                 $status = 'late';
             }
             // Check if employee left early
@@ -323,151 +332,121 @@ class AttendanceController extends Controller
         }
 
         // ── Auto OT/UT detection ──────────────────────────────────────────────
+        // Uses AttendanceService with proper shift-based calculation.
+        // Requirements:
+        // 1. Follow set work hours from shift schedule
+        // 2. Lunch break is unpaid (deducted from total hours)
+        // 3. Overtime only starts if employee renders ≥30 mins beyond scheduled timeout
+        // 4. Both OT and UT use 0.5-hour increments (formula: floor(minutes/30)*0.5)
+        // 5. Overtime and undertime do NOT offset each other
         $otutMessage = null;
 
         if ($request->time_in && $request->time_out) {
             $dateStr  = $request->date;
-            $timeIn   = Carbon::parse($dateStr . ' ' . $request->time_in);
-            $timeOut  = Carbon::parse($dateStr . ' ' . $request->time_out);
-
-            // Get employee to find their shift assignment
-            $employee = Employee::find($userId);
             
-            // Try to get shift from employee (if shift_id exists) or use default shift
-            $shift = null;
-            if ($employee) {
-                // Check if employee has a shift_id attribute
-                if (isset($employee->shift_id) && $employee->shift_id) {
-                    $shift = Shift::find($employee->shift_id);
-                } else {
-                    // Otherwise, try to get the active/default shift
+            // Fetch the attendance record we just created
+            $attendance = Attendance::where('user_id', $userId)
+                ->where('date', $dateStr)
+                ->first();
+
+            if ($attendance) {
+                // Get employee to find their shift assignment
+                $employee = Employee::find($userId);
+                
+                // Try to get shift from employee (if shift_id exists) or use default shift
+                $shift = null;
+                if ($employee) {
+                    // Check if employee has a shift_id attribute
+                    if (isset($employee->shift_id) && $employee->shift_id) {
+                        $shift = Shift::find($employee->shift_id);
+                    }
+                }
+                
+                // Fallback to active shift if not assigned to employee
+                if (!$shift) {
                     $shift = Shift::where('is_active', true)->first();
                 }
-            }
 
-            // Calculate break duration from shift's break times
-            // Only count the break time that overlaps with the logged time period
-            $breakMinutes = 0;
-            if ($shift && $shift->break_start && $shift->break_end) {
-                // Create break times with the same date as the logged time
-                $breakStart = Carbon::parse($dateStr . ' ' . $shift->break_start);
-                $breakEnd = Carbon::parse($dateStr . ' ' . $shift->break_end);
-                
-                // Handle break that spans across end of shift
-                if ($breakEnd->lessThan($breakStart)) {
-                    $breakEnd->addHours(24);
-                }
-                
-                // Calculate the overlap between logged time and break time
-                // Overlap starts at: max(time_in, break_start)
-                // Overlap ends at: min(time_out, break_end)
-                $overlapStart = $timeIn->copy();
-                if ($breakStart->isAfter($overlapStart)) {
-                    $overlapStart = $breakStart->copy();
-                }
-                
-                $overlapEnd = $timeOut->copy();
-                if ($breakEnd->isBefore($overlapEnd)) {
-                    $overlapEnd = $breakEnd->copy();
-                }
-                
-                // Only count overlap if it's valid (start before end)
-                if ($overlapStart->isBefore($overlapEnd)) {
-                    $breakMinutes = abs($overlapStart->diffInMinutes($overlapEnd));
-                }
-                
-                logger()->info('Manual attendance: Shift found', [
-                    'shift_name' => $shift->name,
-                    'break_start' => $shift->break_start,
-                    'break_end' => $shift->break_end,
-                    'break_minutes' => $breakMinutes,
-                    'user_id' => $userId,
-                    'date' => $dateStr,
-                    'time_in' => $request->time_in,
-                    'time_out' => $request->time_out,
-                ]);
-            } else {
-                // Default: 1 hour break if no shift assigned
-                $breakMinutes = 60;
-                
-                logger()->info('Manual attendance: No shift found, using default 1 hour break', [
-                    'user_id' => $userId,
-                    'shift_id' => $employee ? ($employee->shift_id ?? 'none') : 'no employee',
-                    'date' => $dateStr,
-                    'time_in' => $request->time_in,
-                    'time_out' => $request->time_out,
-                ]);
-            }
+                // If we have a shift, calculate OT/UT using the new logic
+                if ($shift) {
+                    $attendanceService = new AttendanceService();
+                    $otutResult = $attendanceService->calculateOvertimeAndUndertime($attendance, $shift);
 
-            // Standard schedule: 08:00 – 17:00 (8 working hours + break)
-            $schedStart = Carbon::parse($dateStr . ' 08:00');
-            $schedEnd   = Carbon::parse($dateStr . ' 17:00');
+                    $overtimeHours = $otutResult['overtime_hours'];
+                    $undertimeHours = $otutResult['undertime_hours'];
+                    $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
 
-            // Net minutes worked (subtract calculated break)
-            $workedMinutes = max(0, $timeIn->diffInMinutes($timeOut) - $breakMinutes);
-
-            // Standard = 8h = 480 min
-            $standardMinutes = 480;
-            $diffMinutes     = $workedMinutes - $standardMinutes;
-
-            // Only act if deviation is at least 1 minute
-            if (abs($diffMinutes) >= 1) {
-                $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
-                $hours      = round(abs($diffMinutes) / 60, 2);
-                $type       = $diffMinutes > 0 ? 'overtime' : 'undertime';
-
-                $amount = $type === 'overtime'
-                    ? $hours * $hourlyRate * 1.25
-                    : -($hours * $hourlyRate);
-
-                $reason = $type === 'overtime'
-                    ? "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $request->time_out)->format('g:i A') . ")"
-                    : "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $request->time_in)->format('g:i A') . ")";
-
-                // Upsert: one OT/UT record per employee per date (from manual log)
-                OvertimeUndertime::updateOrCreate(
-                    [
-                        'user_id' => $userId,
-                        'date'    => $dateStr,
-                        'type'    => $type,
-                    ],
-                    [
-                        'hours'            => $hours,
-                        'reason'           => $reason,
-                        'status'           => 'approved',
-                        'approved_by'      => auth()->id(),
-                        'amount'           => $amount,
-                        'hourly_rate_used' => $hourlyRate,
-                    ]
-                );
-
-                // Remove any opposite-type record for the same day (e.g. old UT if now OT)
-                $oppositeType = $type === 'overtime' ? 'undertime' : 'overtime';
-                OvertimeUndertime::where('user_id', $userId)
-                    ->where('date', $dateStr)
-                    ->where('type', $oppositeType)
-                    ->whereIn('reason', [
-                        "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $request->time_out)->format('g:i A') . ")",
-                        "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $request->time_in)->format('g:i A') . ")",
-                    ])
-                    ->delete();
-
-                try {
-                    $otRecord = OvertimeUndertime::where('user_id', $userId)
+                    // Remove any existing auto-detected OT/UT records for this day
+                    OvertimeUndertime::where('user_id', $userId)
                         ->where('date', $dateStr)
-                        ->where('type', $type)
-                        ->latest()
-                        ->first();
-                    if ($otRecord) {
-                        $otRecord->load('employee');
-                        OvertimeNotification::submitted($otRecord);
-                    }
-                } catch (\Throwable $e) {
-                    logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
-                }
+                        ->where('reason', 'like', 'Auto-detected from manual attendance log%')
+                        ->delete();
 
-                $hoursLabel = number_format($hours, 2);
-                $otutMessage = ucfirst($type) . " of {$hoursLabel}h auto-logged and approved.";
+                    // Create overtime record if applicable
+                    if ($overtimeHours > 0) {
+                        $otAmount = $overtimeHours * $hourlyRate * 1.25;
+                        
+                        OvertimeUndertime::create([
+                            'user_id'          => $userId,
+                            'date'             => $dateStr,
+                            'type'             => 'overtime',
+                            'hours'            => $overtimeHours,
+                            'reason'           => "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $request->time_out)->format('g:i A') . ")",
+                            'status'           => 'approved',
+                            'approved_by'      => auth()->id(),
+                            'amount'           => $otAmount,
+                            'hourly_rate_used' => $hourlyRate,
+                        ]);
+
+                        try {
+                            $otRecord = OvertimeUndertime::where('user_id', $userId)
+                                ->where('date', $dateStr)
+                                ->where('type', 'overtime')
+                                ->latest()
+                                ->first();
+                            if ($otRecord) {
+                                $otRecord->load('employee');
+                                OvertimeNotification::submitted($otRecord);
+                            }
+                        } catch (\Throwable $e) {
+                            logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
+                        }
+
+                        $otutMessage = "Overtime of " . number_format($overtimeHours, 1) . "h auto-logged and approved.";
+                    }
+                    // Create undertime record if applicable
+                    elseif ($undertimeHours > 0) {
+                        $utAmount = -($undertimeHours * $hourlyRate);
+                        
+                        OvertimeUndertime::create([
+                            'user_id'          => $userId,
+                            'date'             => $dateStr,
+                            'type'             => 'undertime',
+                            'hours'            => $undertimeHours,
+                            'reason'           => "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $request->time_in)->format('g:i A') . ")",
+                            'status'           => 'approved',
+                            'approved_by'      => auth()->id(),
+                            'amount'           => $utAmount,
+                            'hourly_rate_used' => $hourlyRate,
+                        ]);
+
+                        try {
+                            $utRecord = OvertimeUndertime::where('user_id', $userId)
+                                ->where('date', $dateStr)
+                                ->where('type', 'undertime')
+                                ->latest()
+                                ->first();
+                            if ($utRecord) {
+                                $utRecord->load('employee');
+                                OvertimeNotification::submitted($utRecord);
+                            }
+                        } catch (\Throwable $e) {
+                            logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
+                        }
+
+                        $otutMessage = "Undertime of " . number_format($undertimeHours, 1) . "h auto-logged and approved.";
+                    }
+                }
             }
         }
         // ─────────────────────────────────────────────────────────────────────
@@ -513,17 +492,24 @@ class AttendanceController extends Controller
             $shift = Shift::where('is_active', true)->first();
         }
 
+        // Get grace period from settings
+        $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
+
         if ($shift && $shift->break_start && $shift->break_end) {
             return response()->json([
                 'break_start' => $shift->break_start,
                 'break_end' => $shift->break_end,
+                'start_time' => $shift->start_time,
+                'grace_period_minutes' => $gracePeriodMinutes,
             ]);
         }
 
-        // Fallback: 1 hour break (12:00-13:00)
+        // Fallback: 1 hour break (12:00-13:00), shift starts at 8:00 AM
         return response()->json([
             'break_start' => '12:00:00',
             'break_end' => '13:00:00',
+            'start_time' => '08:00:00',
+            'grace_period_minutes' => $gracePeriodMinutes,
         ]);
     }
 }
