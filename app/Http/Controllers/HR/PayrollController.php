@@ -760,7 +760,7 @@
         ══════════════════════════════════════════════════════════════ */
         public function show(Payroll $payroll)
         {
-            $payroll->load(['user', 'allowances', 'deductions']);
+            $payroll->load(['user', 'allowances', 'deductions', 'bonuses']);
             $overtimeUndertimeBreakdown = OvertimeUndertime::where('user_id', $payroll->user_id)
                 ->whereBetween('date', [$payroll->payroll_period_start, $payroll->payroll_period_end])
                 ->where('status', 'approved')
