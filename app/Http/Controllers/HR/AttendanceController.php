@@ -388,8 +388,7 @@ class AttendanceController extends Controller
                             'type'             => 'overtime',
                             'hours'            => $overtimeHours,
                             'reason'           => "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $request->time_out)->format('g:i A') . ")",
-                            'status'           => 'approved',
-                            'approved_by'      => auth()->id(),
+                            'status'           => 'pending',
                             'amount'           => $otAmount,
                             'hourly_rate_used' => $hourlyRate,
                         ]);
@@ -408,7 +407,7 @@ class AttendanceController extends Controller
                             logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
                         }
 
-                        $otutMessage = "Overtime of " . number_format($overtimeHours, 1) . "h auto-logged and approved.";
+                        $otutMessage = "Overtime of " . number_format($overtimeHours, 1) . "h auto-logged and pending approval.";
                     }
                     // Create undertime record if applicable
                     elseif ($undertimeHours > 0) {
@@ -420,8 +419,7 @@ class AttendanceController extends Controller
                             'type'             => 'undertime',
                             'hours'            => $undertimeHours,
                             'reason'           => "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $request->time_in)->format('g:i A') . ")",
-                            'status'           => 'approved',
-                            'approved_by'      => auth()->id(),
+                            'status'           => 'pending',
                             'amount'           => $utAmount,
                             'hourly_rate_used' => $hourlyRate,
                         ]);
@@ -440,7 +438,7 @@ class AttendanceController extends Controller
                             logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
                         }
 
-                        $otutMessage = "Undertime of " . number_format($undertimeHours, 1) . "h auto-logged and approved.";
+                        $otutMessage = "Undertime of " . number_format($undertimeHours, 1) . "h auto-logged and pending approval.";
                     }
                 }
             }
