@@ -310,22 +310,29 @@
             $periodStart = Carbon::parse($batch->period_start);
             $periodEnd   = Carbon::parse($batch->period_end);
 
-            // Get all active employees in the selected department not yet in this batch period
-            $employees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
-                ->where('status', 'active')
-                ->where('department', $validated['department'])
-                ->whereNotIn('id', function ($q) use ($periodStart, $periodEnd) {
-                    $q->select('user_id')
-                        ->from('payrolls')
-                        ->whereDate('payroll_period_start', $periodStart->toDateString())
-                        ->whereDate('payroll_period_end', $periodEnd->toDateString());
-                })
-                ->get();
+            // Get all active employees in the selected department(s) not yet in this batch period
+            $query = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+                ->where('status', 'active');
+
+            // If not "all", filter by specific department
+            if ($validated['department'] !== 'all') {
+                $query->where('department', $validated['department']);
+            }
+
+            $employees = $query->whereNotIn('id', function ($q) use ($periodStart, $periodEnd) {
+                $q->select('user_id')
+                    ->from('payrolls')
+                    ->whereDate('payroll_period_start', $periodStart->toDateString())
+                    ->whereDate('payroll_period_end', $periodEnd->toDateString());
+            })
+            ->get();
+
+            $deptLabel = $validated['department'] === 'all' ? 'All departments' : $validated['department'];
 
             if ($employees->isEmpty()) {
                 return redirect()
                     ->route('payroll.batch.confirm', $batch)
-                    ->with('info', "All {$validated['department']} employees already have payroll for this period.");
+                    ->with('info', "All {$deptLabel} employees already have payroll for this period.");
             }
 
             $added = 0;
@@ -340,7 +347,7 @@
 
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
-                ->with('success', "{$added} {$validated['department']} employee" . ($added !== 1 ? 's' : '') . " added to batch.");
+                ->with('success', "{$added} employee" . ($added !== 1 ? 's' : '') . " added to batch.");
         }
 
         public function batchAddEmployee(Request $request, PayrollBatch $batch)

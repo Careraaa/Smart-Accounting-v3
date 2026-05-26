@@ -344,6 +344,7 @@
                     @csrf
                     <select name="department" required class="prl-bulk-dept-select" style="flex:1;min-width:0;">
                         <option value="">Select department...</option>
+                        <option value="all">All Departments</option>
                         @foreach($departments as $dept)
                             <option value="{{ $dept }}">{{ $dept }}</option>
                         @endforeach
