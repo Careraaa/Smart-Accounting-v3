@@ -213,6 +213,17 @@
                         </div>
                         @endforeach
 
+                        @foreach($payroll->bonuses as $bonus)
+                        <div class="prl-brow">
+                            <span class="prl-brow-lbl" style="color:#9333ea;">
+                                <i class="feather-plus-circle" style="font-size:12px;"></i>
+                                {{ $bonus->bonus_type }}
+                                @if($bonus->description)<span class="prl-badge">{{ $bonus->description }}</span>@endif
+                            </span>
+                            <span class="prl-brow-val" style="color:#9333ea;">+₱{{ number_format($bonus->amount, 2) }}</span>
+                        </div>
+                        @endforeach
+
                         <div class="prl-brow">
                             <span class="prl-brow-lbl c-bold">Gross pay</span>
                             <span class="prl-brow-val" style="font-size:1rem;">₱{{ number_format($payroll->gross_pay, 2) }}</span>

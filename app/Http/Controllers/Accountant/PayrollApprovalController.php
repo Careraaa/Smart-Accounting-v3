@@ -66,7 +66,7 @@ class PayrollApprovalController extends Controller
      ══════════════════════════════════════════════════════════════ */
     public function show($id)
     {
-        $payroll = Payroll::with(['user', 'deductions', 'allowances', 'batch'])->findOrFail($id);
+        $payroll = Payroll::with(['user', 'deductions', 'allowances', 'bonuses', 'batch'])->findOrFail($id);
         $overtimeUndertimeBreakdown = $payroll->getOvertimeUndertimeBreakdown();
         return view('accountant.payroll-approval.show', compact('payroll', 'overtimeUndertimeBreakdown'));
     }
