@@ -44,7 +44,6 @@
 .cal-legend-dot.present  { background:#dcfce7;border:1.5px solid #86efac; }
 .cal-legend-dot.late     { background:#fef9c3;border:1.5px solid #fde047; }
 .cal-legend-dot.absent   { background:#fee2e2;border:1.5px solid #fca5a5; }
-.cal-legend-dot.early    { background:#ede9fe;border:1.5px solid #c4b5fd; }
 .cal-legend-dot.weekend  { background:#f9fafb;border:1.5px solid #e5e7eb; }
 .cal-legend-dot.nodata   { background:#fff;border:1.5px solid #e5e7eb; }
 
@@ -91,7 +90,6 @@
 .cal-day.s-present  { background:#f0fdf4;border-color:#86efac; }
 .cal-day.s-late     { background:#fefce8;border-color:#fde047; }
 .cal-day.s-absent   { background:#fef2f2;border-color:#fca5a5; }
-.cal-day.s-early    { background:#f5f3ff;border-color:#c4b5fd; }
 
 .cal-day-num { font-size:0.78rem;font-weight:800;color:#374151;line-height:1; }
 
@@ -102,7 +100,6 @@
 .cal-day-status.s-present { background:#dcfce7;color:#16a34a; }
 .cal-day-status.s-late    { background:#fef9c3;color:#ca8a04; }
 .cal-day-status.s-absent  { background:#fee2e2;color:#dc2626; }
-.cal-day-status.s-early   { background:#ede9fe;color:#7c3aed; }
 
 .cal-day-times { font-family:'DM Mono',monospace;font-size:0.6rem;color:#6b7280;line-height:1.5; }
 .cal-day-times span { display:block; }
@@ -155,7 +152,6 @@
     $presentCount = $attendances->where('status', 'present')->count();
     $lateCount    = $attendances->where('status', 'late')->count();
     $absentCount  = $attendances->where('status', 'absent')->count();
-    $earlyCount   = $attendances->where('status', 'early_leave')->count();
 
     $initials = strtoupper(substr($employee->first_name ?? 'U', 0, 1) . substr($employee->last_name ?? '', 0, 1));
 @endphp
@@ -204,7 +200,6 @@
         <div class="cal-legend-item"><div class="cal-legend-dot present"></div> Present</div>
         <div class="cal-legend-item"><div class="cal-legend-dot late"></div> Late</div>
         <div class="cal-legend-item"><div class="cal-legend-dot absent"></div> Absent</div>
-        <div class="cal-legend-item"><div class="cal-legend-dot early"></div> Early Leave</div>
         <div class="cal-legend-item"><div class="cal-legend-dot weekend"></div> Weekend / Holiday</div>
         <div class="cal-legend-item"><div class="cal-legend-dot nodata"></div> No Record</div>
     </div>
@@ -259,21 +254,18 @@
                                     'present'     => 's-present',
                                     'late'        => 's-late',
                                     'absent'      => 's-absent',
-                                    'early_leave' => 's-early',
                                     default       => '',
                                 };
                                 $statusLabel = match($att->status) {
                                     'present'     => 'Present',
                                     'late'        => 'Late',
                                     'absent'      => 'Absent',
-                                    'early_leave' => 'Early',
                                     default       => ucfirst($att->status),
                                 };
                                 $statusBadge = match($att->status) {
                                     'present'     => 's-present',
                                     'late'        => 's-late',
                                     'absent'      => 's-absent',
-                                    'early_leave' => 's-early',
                                     default       => '',
                                 };
                             }
@@ -346,21 +338,18 @@
                                     'present'     => 's-present',
                                     'late'        => 's-late',
                                     'absent'      => 's-absent',
-                                    'early_leave' => 's-early',
                                     default       => '',
                                 };
                                 $statusLabel = match($att->status) {
                                     'present'     => 'Present',
                                     'late'        => 'Late',
                                     'absent'      => 'Absent',
-                                    'early_leave' => 'Early',
                                     default       => ucfirst($att->status),
                                 };
                                 $statusBadge = match($att->status) {
                                     'present'     => 's-present',
                                     'late'        => 's-late',
                                     'absent'      => 's-absent',
-                                    'early_leave' => 's-early',
                                     default       => '',
                                 };
                             }
@@ -418,15 +407,6 @@
             <div>
                 <div class="cal-stat-val">{{ $absentCount }}</div>
                 <div class="cal-stat-lbl">Absent days</div>
-            </div>
-        </div>
-        <div class="cal-stat">
-            <div class="cal-stat-icon purple">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-            </div>
-            <div>
-                <div class="cal-stat-val">{{ $earlyCount }}</div>
-                <div class="cal-stat-lbl">Early leaves</div>
             </div>
         </div>
     </div>

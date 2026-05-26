@@ -70,7 +70,6 @@
 .empcal-day.s-present { background:#f0fdf4;border-color:#86efac; }
 .empcal-day.s-late    { background:#fefce8;border-color:#fde047; }
 .empcal-day.s-absent  { background:#fef2f2;border-color:#fca5a5; }
-.empcal-day.s-early   { background:#f5f3ff;border-color:#c4b5fd; }
 
 /* OT/UT overlay stripe on top-right corner */
 .empcal-day.has-ot::after  { content:'OT';position:absolute;top:5px;right:5px;font-size:0.52rem;font-weight:800;background:#dbeafe;color:#1d4ed8;padding:1px 4px;border-radius:3px;line-height:1.4; }
@@ -86,7 +85,6 @@
 .empcal-day-status.s-present { background:#dcfce7;color:#16a34a; }
 .empcal-day-status.s-late    { background:#fef9c3;color:#ca8a04; }
 .empcal-day-status.s-absent  { background:#fee2e2;color:#dc2626; }
-.empcal-day-status.s-early   { background:#ede9fe;color:#7c3aed; }
 
 .empcal-day-times { font-family:'DM Mono',monospace;font-size:0.58rem;color:#6b7280;line-height:1.5; }
 .empcal-day-times span { display:block; }
@@ -235,14 +233,12 @@
                                         'present'     => 's-present',
                                         'late'        => 's-late',
                                         'absent'      => 's-absent',
-                                        'early_leave' => 's-early',
                                         default       => '',
                                     };
                                     $statusLabel = match($att->status) {
                                         'present'     => 'Present',
                                         'late'        => 'Late',
                                         'absent'      => 'Absent',
-                                        'early_leave' => 'Early',
                                         default       => ucfirst($att->status),
                                     };
                                     $statusBadge = $dayClass;
@@ -325,14 +321,12 @@
                                         'present'     => 's-present',
                                         'late'        => 's-late',
                                         'absent'      => 's-absent',
-                                        'early_leave' => 's-early',
                                         default       => '',
                                     };
                                     $statusLabel = match($att->status) {
                                         'present'     => 'Present',
                                         'late'        => 'Late',
                                         'absent'      => 'Absent',
-                                        'early_leave' => 'Early',
                                         default       => ucfirst($att->status),
                                     };
                                     $statusBadge = $dayClass;

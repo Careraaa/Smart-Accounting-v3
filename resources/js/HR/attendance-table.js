@@ -16,11 +16,6 @@ function refreshAttendanceTable() {
                 present: { bg: "#f0fdf4", color: "#16a34a", border: "#bbf7d0" },
                 late: { bg: "#fffbeb", color: "#d97706", border: "#fde68a" },
                 absent: { bg: "#fff1f2", color: "#e11d48", border: "#fcd0d0" },
-                early_leave: {
-                    bg: "#f5f3ff",
-                    color: "#7c3aed",
-                    border: "#ddd6fe",
-                },
             };
 
             let html = "";

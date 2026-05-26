@@ -42,7 +42,6 @@ class AttendanceController extends Controller
         $presentCount = $attendances->where('status', 'present')->count();
         $lateCount    = $attendances->where('status', 'late')->count();
         $absentCount  = $attendances->where('status', 'absent')->count();
-        $earlyCount   = $attendances->where('status', 'early_leave')->count();
 
         $allOtut     = $otutRecords->flatten();
         $otHours     = $allOtut->where('type', 'overtime')->sum('hours');

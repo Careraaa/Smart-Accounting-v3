@@ -306,10 +306,6 @@ class AttendanceController extends Controller
             if ($timeIn->isAfter($lateThreshold)) {
                 $status = 'late';
             }
-            // Check if employee left early
-            elseif ($timeOut->isBefore($officeEnd)) {
-                $status = 'early_leave';
-            }
         }
 
         Attendance::updateOrCreate(
