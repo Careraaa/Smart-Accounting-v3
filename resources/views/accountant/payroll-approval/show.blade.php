@@ -312,7 +312,7 @@
                             @foreach($overtimeUndertimeBreakdown as $record)
                             @php
                                 $isOT   = $record->type === 'overtime';
-                                $amount = round($payroll->hourly_rate * $record->hours, 2);
+                                $amount = $record->amount !== null ? abs($record->amount) : round($payroll->hourly_rate * $record->hours, 2);
                             @endphp
                             <tr>
                                 <td style="font-family:'DM Mono',monospace;font-size:0.78rem;">

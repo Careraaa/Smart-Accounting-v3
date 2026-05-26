@@ -61,8 +61,8 @@ class OvertimeUndertimeController extends Controller
             ->where('status', 'approved')
             ->whereIn('user_id', $allEmployees->pluck('id'))
             ->selectRaw('user_id,
-                SUM(CASE WHEN type = "overtime"  THEN hours ELSE 0 END) as ot_hours,
-                SUM(CASE WHEN type = "undertime" THEN hours ELSE 0 END) as ut_hours,
+                SUM(CASE WHEN type = \'overtime\'  THEN hours ELSE 0 END) as ot_hours,
+                SUM(CASE WHEN type = \'undertime\' THEN hours ELSE 0 END) as ut_hours,
                 COUNT(*) as total_records')
             ->groupBy('user_id')
             ->get()
