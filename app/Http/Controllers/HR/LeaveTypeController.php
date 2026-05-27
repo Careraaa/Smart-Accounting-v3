@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\EmployeeLeaveBalance;
 use App\Models\LeaveType;
 use Illuminate\Http\Request;
 
@@ -94,6 +95,12 @@ class LeaveTypeController extends Controller
         ]);
 
         $leaveType->update($validated);
+
+        // Sync total_days on all existing employee balances for this leave type
+        if ($leaveType->wasChanged('days_allowed')) {
+            EmployeeLeaveBalance::where('leave_type_id', $leaveType->id)
+                ->update(['total_days' => $leaveType->days_allowed]);
+        }
 
         return redirect()->route('leave-type.index')->with('success', 'Leave type updated successfully.');
     }
