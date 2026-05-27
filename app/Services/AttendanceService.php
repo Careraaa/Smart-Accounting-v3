@@ -431,6 +431,20 @@ class AttendanceService
             return $result;
         }
 
+        // Subtract any break time that falls within the late period
+        if ($shift->break_start && $shift->break_end) {
+            $breakStart = Carbon::parse($dateStr . ' ' . $shift->break_start);
+            $breakEnd   = Carbon::parse($dateStr . ' ' . $shift->break_end);
+
+            $overlapStart = Carbon::instance($expectedStart)->max($breakStart);
+            $overlapEnd   = Carbon::instance($actualStart)->min($breakEnd);
+
+            if ($overlapEnd->greaterThan($overlapStart)) {
+                $breakOverlapMinutes = abs($overlapStart->diffInMinutes($overlapEnd));
+                $minutesLate -= $breakOverlapMinutes;
+            }
+        }
+
         // Late minutes exceed grace period - count FULL late minutes
         $result['minutes_late'] = $minutesLate;
 
