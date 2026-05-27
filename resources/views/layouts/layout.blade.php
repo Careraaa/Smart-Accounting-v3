@@ -13,13 +13,12 @@
     <title>Knights TSC</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
 
-    <!-- Template CSS -->
+    {{-- Vendors CSS (feather icons, Bootstrap for non-converted pages) --}}
     <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">
-    {{-- daterangepicker assets removed (no longer used) --}}
     @stack('head_scripts')
 
-    <!-- Vite compiled assets (CSS & JS) – Tailwind last so its utilities override Bootstrap -->
-    @vite(['resources/scss/app.scss', 'resources/css/tailwind.css', 'resources/js/app.js'])
+    {{-- Vite — Tailwind CSS only (no SCSS/Bootstrap/nxl) --}}
+    @vite(['resources/css/tailwind.css', 'resources/js/app.js'])
 
     <style>
         /* Override: the vendor CSS blurs the entire page when a Bootstrap modal opens.
@@ -40,20 +39,22 @@
     <main class="lg:ml-[var(--sidebar-w)] ml-0 bg-gray-100 pt-16 min-h-screen transition-all duration-300" data-global-datepicker="off">
         <div class="bg-gray-100">
 
-            <div class="main-content px-9 py-7">
+            <div class="main-content px-4 sm:px-7 lg:px-9 py-7">
                 @if (session('info'))
-                    <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-                        {{ session('info') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div id="flash-info" class="flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-sm font-medium bg-blue-50 border border-blue-200 text-blue-700" role="alert">
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+                        <span class="flex-1">{{ session('info') }}</span>
+                        <button type="button" onclick="this.parentElement.remove()" class="text-blue-500 hover:text-blue-700 cursor-pointer bg-transparent border-none p-0 leading-none">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
                 @endif
 
-                <div class="row">
+                <div class="w-full max-w-full">
                     @yield('content')
                 </div>
             </div>
 
-            @include('partials.footer')
         </div>
     </main>
 

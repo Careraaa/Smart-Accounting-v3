@@ -14,7 +14,7 @@ $pendingDeg = $lvTotal > 0 ? round(($pendingLeaves / $lvTotal) * 360) : 0;
 $rejectedDeg = max(0, 360 - $approvedDeg - $pendingDeg);
 @endphp
 
-<div class="bg-white border border-gray-200 rounded-xl shadow-sm mb-5 max-w-lg">
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm mb-5 w-full">
     <div class="p-4">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-xs font-semibold text-gray-800 tracking-tight">Attendance Trend</h3>
@@ -105,7 +105,7 @@ $rejectedDeg = max(0, 360 - $approvedDeg - $pendingDeg);
             <div class="relative shrink-0 w-[108px] h-[108px] rounded-full"
                  style="background: conic-gradient(#22c55e 0deg {{ $approvedDeg }}deg, #f59e0b {{ $approvedDeg }}deg {{ $approvedDeg + $pendingDeg }}deg, #f43f5e {{ $approvedDeg + $pendingDeg }}deg 360deg);">
                 <div class="absolute inset-[15px] bg-white rounded-full flex flex-col items-center justify-center">
-                    <span class="font-['DM_Mono',monospace] text-xl font-bold text-gray-900 leading-none" id="lvm-total-num">{{ $lvTotal }}</span>
+                    <span class="font-mono text-xl font-bold text-gray-900 leading-none" id="lvm-total-num">{{ $lvTotal }}</span>
                     <span class="text-[9px] font-semibold text-gray-400 uppercase tracking-wide">total</span>
                 </div>
             </div>
@@ -115,19 +115,19 @@ $rejectedDeg = max(0, 360 - $approvedDeg - $pendingDeg);
                 <a href="{{ route('leave.approved') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all bg-green-50 hover:bg-green-100 no-underline" data-key="approved">
                     <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-green-500"></span>
                     <span class="text-[12px] font-semibold text-gray-700 flex-1 truncate">Approved</span>
-                    <span class="font-['DM_Mono',monospace] text-[13px] font-bold text-gray-900">{{ $approvedLeaves }}</span>
+                    <span class="font-mono text-[13px] font-bold text-gray-900">{{ $approvedLeaves }}</span>
                     <span class="text-[10px] text-gray-400 font-semibold min-w-[28px] text-right">{{ $lvPct($approvedLeaves) }}%</span>
                 </a>
                 <a href="{{ route('leave.pending') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all hover:bg-amber-50 no-underline" data-key="pending">
                     <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-amber-500"></span>
                     <span class="text-[12px] font-semibold text-gray-700 flex-1 truncate">Pending</span>
-                    <span class="font-['DM_Mono',monospace] text-[13px] font-bold text-gray-900">{{ $pendingLeaves }}</span>
+                    <span class="font-mono text-[13px] font-bold text-gray-900">{{ $pendingLeaves }}</span>
                     <span class="text-[10px] text-gray-400 font-semibold min-w-[28px] text-right">{{ $lvPct($pendingLeaves) }}%</span>
                 </a>
                 <a href="{{ route('leave.rejected') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all hover:bg-rose-50 no-underline" data-key="rejected">
                     <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-rose-500"></span>
                     <span class="text-[12px] font-semibold text-gray-700 flex-1 truncate">Rejected</span>
-                    <span class="font-['DM_Mono',monospace] text-[13px] font-bold text-gray-900">{{ $rejectedLeaves }}</span>
+                    <span class="font-mono text-[13px] font-bold text-gray-900">{{ $rejectedLeaves }}</span>
                     <span class="text-[10px] text-gray-400 font-semibold min-w-[28px] text-right">{{ $lvPct($rejectedLeaves) }}%</span>
                 </a>
             </div>
@@ -143,11 +143,11 @@ $rejectedDeg = max(0, 360 - $approvedDeg - $pendingDeg);
 
         <div class="grid grid-cols-2 gap-3 mb-5">
             <div class="bg-gray-50 rounded-xl px-5 py-4">
-                <span class="font-['DM_Mono',monospace] text-2xl font-bold text-gray-900 leading-none">{{ $pendingOT }}</span>
+                <span class="font-mono text-2xl font-bold text-gray-900 leading-none">{{ $pendingOT }}</span>
                 <div class="text-[11px] text-gray-500 font-semibold mt-1">Pending OT</div>
             </div>
             <div class="bg-gray-50 rounded-xl px-5 py-4">
-                <span class="font-['DM_Mono',monospace] text-2xl font-bold text-gray-900 leading-none">{{ $pendingUT }}</span>
+                <span class="font-mono text-2xl font-bold text-gray-900 leading-none">{{ $pendingUT }}</span>
                 <div class="text-[11px] text-gray-500 font-semibold mt-1">Pending UT</div>
             </div>
         </div>
@@ -155,11 +155,11 @@ $rejectedDeg = max(0, 360 - $approvedDeg - $pendingDeg);
         <div class="border-t border-gray-100 pt-5 flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row">
             <div>
                 <div class="text-[11px] text-gray-400 font-medium">OT this week</div>
-                <span class="font-['DM_Mono',monospace] text-sm font-bold text-gray-800">{{ number_format($otHoursThisWeek, 1) }} hrs</span>
+                <span class="font-mono text-sm font-bold text-gray-800">{{ number_format($otHoursThisWeek, 1) }} hrs</span>
             </div>
             <div class="text-right">
                 <div class="text-[11px] text-gray-400 font-medium">Approved all-time</div>
-                <span class="font-['DM_Mono',monospace] text-sm font-bold text-gray-800">{{ $totalOTRecords }} records</span>
+                <span class="font-mono text-sm font-bold text-gray-800">{{ $totalOTRecords }} records</span>
             </div>
         </div>
     </div>

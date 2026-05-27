@@ -194,7 +194,7 @@
                     <div class="text-xs text-gray-400">
                         Showing <strong class="text-gray-700">{{ $requests->firstItem() }}</strong>–<strong class="text-gray-700">{{ $requests->lastItem() }}</strong> of <strong class="text-gray-700">{{ $requests->total() }}</strong>
                     </div>
-                    {{ $requests->links('pagination::bootstrap-4') }}
+                    {{ $requests->links('pagination::tailwind') }}
                 </div>
             @endif
         </div>

@@ -10,19 +10,12 @@
 
         {{-- Typewriter greeting --}}
         @php
-            $role = auth()->user()->role;
-            $roleLabel = match($role) {
-                'superadmin' => 'Superadmin',
-                'hr' => 'HR',
-                'accountant' => 'Accountant',
-                'remittance_clerk' => 'Remittance',
-                'employee' => 'Employee',
-                default => 'User'
-            };
+            $user = auth()->user();
+            $name = $user->first_name ?? $user->name ?? 'User';
             $greetings = [
-                "Welcome, $roleLabel",
-                "Hello, $roleLabel",
-                "Good to see you, $roleLabel!",
+                "Welcome, $name",
+                "Hello, $name",
+                "Good to see you, $name!",
             ];
             $greeting = $greetings[array_rand($greetings)];
         @endphp

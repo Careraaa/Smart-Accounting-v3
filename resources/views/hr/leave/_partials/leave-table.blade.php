@@ -29,7 +29,6 @@ $showRejectedDate = in_array('rejected_date', $columns);
             <tbody>
                 @forelse($leaves as $leave)
                 @php
-                    $initials = strtoupper(substr($leave->employee->first_name??'U',0,1).substr($leave->employee->last_name??'',0,1));
                     $days = $leave->start_date->diffInDays($leave->end_date) + 1;
                 @endphp
                 <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors cursor-pointer"
@@ -39,12 +38,7 @@ $showRejectedDate = in_array('rejected_date', $columns);
                     onclick="window.location='{{ route('leave.show', $leave) }}'">
                     @if($showEmployee)
                     <td class="px-4 py-3.5">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0">{{ $initials }}</div>
-                            <div>
-                                <div class="font-semibold text-gray-900 text-sm">{{ $leave->employee->first_name ?? 'N/A' }} {{ $leave->employee->last_name ?? '' }}</div>
-                            </div>
-                        </div>
+                        <div class="font-semibold text-gray-900 text-sm">{{ $leave->employee->first_name ?? 'N/A' }} {{ $leave->employee->last_name ?? '' }}</div>
                     </td>
                     @endif
                     @if($showDepartment)

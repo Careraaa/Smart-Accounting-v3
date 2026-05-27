@@ -1,66 +1,102 @@
 @extends('layouts.qr-monitor')
 
 @section('content')
-<div class="qrmon-page">
-    <div class="qrmon-wrap">
-        <header class="qrmon-top">
-            <p class="qrmon-eyebrow">Attendance</p>
-            <h1 class="qrmon-title">QR Monitor</h1>
-            <p class="qrmon-sub">Employees scan this code in the mobile app to record attendance.</p>
-        </header>
+<div class="w-full max-w-[1180px] mx-auto min-h-[calc(100vh-110px)] flex flex-col justify-center px-2">
 
-        <div class="qrmon-grid">
-            {{-- Instructions --}}
-            <section class="qrmon-card" aria-labelledby="qrmon-steps-title">
-                <div class="qrmon-card-head">
-                    <div class="qrmon-card-icon" aria-hidden="true">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 id="qrmon-steps-title" class="qrmon-card-title">How to log attendance</h2>
-                        <p class="qrmon-card-sub">Follow these steps on your phone</p>
-                    </div>
-                </div>
-                <div class="qrmon-card-body">
-                    <ol class="qrmon-steps">
-                        <li>Open <strong>Smart Accounting</strong> on your phone</li>
-                        <li>Sign in with your registered email</li>
-                        <li>Tap <strong>Scan QR</strong> from the main menu</li>
-                        <li>Point your camera at the code on the right</li>
-                        <li>Wait for the <strong>Attendance Recorded</strong> confirmation</li>
-                    </ol>
-                </div>
-            </section>
+    {{-- Header --}}
+    <div class="mb-4 animate-[fadeSlideUp_0.4s_cubic-bezier(0.16,1,0.3,1)_both]">
+        <p class="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-rose-500 mb-1">Attendance</p>
+        <h1 class="text-lg font-extrabold text-gray-900 tracking-tight">QR Monitor</h1>
+        <p class="text-xs text-gray-400 leading-relaxed mt-0.5">Employees scan this code on their mobile app to log attendance.</p>
+    </div>
 
-            {{-- QR --}}
-            <section class="qrmon-card qrmon-card--qr" aria-label="Attendance QR code">
-                <div class="qrmon-card-head">
-                    <div class="qrmon-card-icon qrmon-card-icon--live" aria-hidden="true">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h2 class="qrmon-card-title">Live code</h2>
-                        <p class="qrmon-card-sub">Refreshes automatically for security</p>
-                    </div>
+    {{-- Grid --}}
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-5 items-stretch">
+
+        {{-- Instructions --}}
+        <section class="animate-[scaleIn_0.4s_cubic-bezier(0.16,1,0.3,1)_0.05s_both] bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col shadow-sm">
+            <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                 </div>
-                <div class="qrmon-card-body qrmon-card-body--center">
-                    <p class="qrmon-qr-label">Scan to log attendance</p>
-                    <div class="qrmon-qr-frame" id="qr-wrapper">
-                        <div id="qrcode"></div>
-                        <div id="scan-success" class="qrmon-success-overlay d-none">
-                            <i class="feather-check-circle"></i>
-                            <span>Attendance Recorded</span>
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900">How to log attendance</h2>
+                    <p class="text-xs text-gray-400">Quick steps for your phone</p>
+                </div>
+            </div>
+            <div class="px-5 py-4 flex-1 flex flex-col gap-2">
+                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 border border-gray-100 text-sm text-gray-600">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-500 text-xs font-bold shrink-0">1</span>
+                    <span>Open <strong class="text-gray-900">Smart Accounting</strong> on your phone</span>
+                </div>
+                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 border border-gray-100 text-sm text-gray-600">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-500 text-xs font-bold shrink-0">2</span>
+                    <span>Sign in with your registered email</span>
+                </div>
+                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 border border-gray-100 text-sm text-gray-600">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-500 text-xs font-bold shrink-0">3</span>
+                    <span>Tap <strong class="text-gray-900">Scan QR</strong> from the main menu</span>
+                </div>
+                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 border border-gray-100 text-sm text-gray-600">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-500 text-xs font-bold shrink-0">4</span>
+                    <span>Point your camera at the QR code</span>
+                </div>
+                <div class="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 border border-gray-100 text-sm text-gray-600">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-50 text-rose-500 text-xs font-bold shrink-0">5</span>
+                    <span>Wait for <strong class="text-gray-900">Attendance Recorded</strong></span>
+                </div>
+            </div>
+        </section>
+
+        {{-- QR Code --}}
+        <section class="animate-[scaleIn_0.4s_cubic-bezier(0.16,1,0.3,1)_0.1s_both] bg-white border border-gray-200 rounded-2xl overflow-hidden flex flex-col shadow-sm">
+            <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+                <div class="w-9 h-9 rounded-xl bg-gray-100 text-gray-900 flex items-center justify-center shrink-0">
+                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900">Live code</h2>
+                    <p class="text-xs text-gray-400">Auto-refreshes every 60 seconds</p>
+                </div>
+            </div>
+            <div class="px-5 py-5 flex-1 flex flex-col items-center text-center">
+                <p class="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-gray-400 mb-4">Scan to log attendance</p>
+
+                {{-- QR container with refresh animation --}}
+                <div id="qr-wrapper" class="bg-white border border-gray-200 rounded-xl p-3.5 relative transition-all duration-300">
+                    <div id="qr-inner" class="transition-all duration-300">
+                        <div id="qrcode" class="w-[--qr-size] h-[--qr-size]" style="--qr-size: 180px;"></div>
+                    </div>
+
+                    {{-- Success overlay --}}
+                    <div id="scan-success"
+                         class="hidden absolute inset-0 bg-emerald-500 rounded-[10px] flex flex-col items-center justify-center text-white gap-2 z-10
+                                animate-[successPop_0.5s_cubic-bezier(0.34,1.56,0.64,1)_both]">
+                        <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center animate-[successRing_0.6s_ease-out_0.1s_both]">
+                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" class="animate-[drawCheck_0.4s_ease-out_0.2s_both]"/>
+                            </svg>
                         </div>
+                        <span class="text-sm font-bold tracking-wide">Attendance Recorded</span>
                     </div>
-                    <div class="qrmon-token" id="token-display">——</div>
-                    <div class="qrmon-timer" id="qr-timer">Generating…</div>
                 </div>
-            </section>
-        </div>
+
+                <div id="token-display" class="mt-4 text-lg font-bold tracking-[0.15em] text-gray-900 font-mono">——</div>
+
+                {{-- Timer with refresh indicator --}}
+                <div id="qr-timer" class="mt-2 flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-gray-400">
+                    <svg id="timer-spinner" class="w-3 h-3 hidden animate-[spin_1s_linear_infinite]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span id="timer-text">Generating…</span>
+                </div>
+            </div>
+        </section>
+
     </div>
 </div>
 
@@ -74,24 +110,16 @@
     let resizeDebounceTimer = null;
 
     function getResponsiveQRSize() {
-        const rootStyles = getComputedStyle(document.documentElement);
-        const cssSize = parseFloat(rootStyles.getPropertyValue('--qr-size'));
-
-        if (Number.isFinite(cssSize) && cssSize > 0) {
-            return Math.round(cssSize);
-        }
-
-        return 360;
+        const minDim = Math.min(window.innerWidth - 100, 360);
+        return Math.max(140, Math.min(360, minDim));
     }
 
     function renderQRCode(token) {
         if (!token || token === '——') return;
-
         const qrDiv = document.getElementById('qrcode');
         qrDiv.innerHTML = '';
-
         const qrSize = getResponsiveQRSize();
-
+        qrDiv.style.setProperty('--qr-size', qrSize + 'px');
         new QRCode(qrDiv, {
             text: token,
             width: qrSize,
@@ -102,26 +130,44 @@
         });
     }
 
+    function animateQRRefresh() {
+        const inner = document.getElementById('qr-inner');
+        inner.style.transform = 'scale(0.85)';
+        inner.style.opacity = '0';
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                inner.style.transition = 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease';
+                inner.style.transform = 'scale(1)';
+                inner.style.opacity = '1';
+            });
+        });
+        setTimeout(() => {
+            inner.style.transition = '';
+        }, 400);
+    }
+
     function loadQR() {
         reloadPending = false;
-        document.getElementById('qr-timer').textContent = 'Generating…';
-
+        document.getElementById('timer-text').textContent = 'Generating…';
+        document.getElementById('timer-spinner').classList.remove('hidden');
         fetch("{{ route('hr.qr.generate') }}", {
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
         })
         .then(r => r.json())
         .then(data => {
-            renderQRCode(data.token);
+            animateQRRefresh();
+            setTimeout(() => renderQRCode(data.token), 50);
             document.getElementById('token-display').textContent = data.token;
             qrCountdown = 60;
-
             stopAll();
             startQRRefresh();
             startTokenStatusCheck();
+            document.getElementById('timer-spinner').classList.add('hidden');
         })
         .catch(() => {
-            document.getElementById('qr-timer').textContent = 'Error generating QR — retrying…';
+            document.getElementById('timer-text').textContent = 'Error — retrying…';
+            document.getElementById('timer-spinner').classList.add('hidden');
             setTimeout(loadQR, 4000);
         });
     }
@@ -129,11 +175,12 @@
     function startQRRefresh() {
         qrRefreshInterval = setInterval(() => {
             if (reloadPending) return;
-
             qrCountdown--;
-            document.getElementById('qr-timer').textContent =
-                `${qrCountdown}s · refreshing soon`;
-
+            const txt = document.getElementById('timer-text');
+            txt.textContent = `${qrCountdown}s`;
+            if (qrCountdown <= 5 && qrCountdown > 0) {
+                txt.textContent = `${qrCountdown}s · refreshing`;
+            }
             if (qrCountdown <= 0) {
                 clearInterval(qrRefreshInterval);
                 loadQR();
@@ -152,7 +199,6 @@
 
     function checkTokenStatus() {
         if (reloadPending) return;
-
         fetch("{{ route('api.qr.token-status') }}")
             .then(r => r.json())
             .then(data => {
@@ -162,21 +208,16 @@
                     triggerSuccessThenReload();
                 }
             })
-            .catch(() => { /* silent */ });
+            .catch(() => {});
     }
 
     function triggerSuccessThenReload() {
         const overlay = document.getElementById('scan-success');
         const wrapper = document.getElementById('qr-wrapper');
-
-        wrapper.classList.add('success-active');
-        overlay.classList.remove('d-none');
-
-        document.getElementById('qr-timer').textContent = 'Reloading…';
-
-        setTimeout(() => {
-            location.reload();
-        }, 3000);
+        wrapper.classList.add('ring-4', 'ring-emerald-400/40');
+        overlay.classList.remove('hidden');
+        document.getElementById('timer-text').textContent = 'Reloading…';
+        setTimeout(() => { location.reload(); }, 3000);
     }
 
     function stopAll() {
@@ -188,7 +229,6 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         loadQR();
-
         window.addEventListener('resize', function () {
             clearTimeout(resizeDebounceTimer);
             resizeDebounceTimer = setTimeout(function () {
@@ -200,227 +240,6 @@
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-
-:root {
-    --qr-size: 180px;
-}
-
-.qrmon-page {
-    font-family: 'Sora', sans-serif;
-    width: 100%;
-    max-width: 1180px;
-    margin: 0 auto;
-    box-sizing: border-box;
-    min-height: calc(100vh - 110px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding-top: 0;
-    margin-top: 0;
-}
-
-.qrmon-wrap { 
-    padding: 8px 4px 0; 
-    width: 100%;
-}
-
-.qrmon-top { margin-bottom: 20px; }
-
-.qrmon-eyebrow {
-    font-size: 0.67rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #c8292a;
-    margin: 0 0 6px;
-}
-
-.qrmon-title {
-    font-size: 1.10rem;
-    font-weight: 800;
-    color: #111827;
-    letter-spacing: -0.02em;
-    margin: 0 0 4px;
-    line-height: 1.2;
-}
-
-.qrmon-sub {
-    font-size: 0.72rem;
-    color: #9ca3af;
-    margin: 0;
-    line-height: 1.45;
-}
-
-.qrmon-grid {
-    display: grid;
-    grid-template-columns: minmax(320px, 1fr) minmax(420px, 560px);
-    gap: 16px;
-    align-items: stretch;
-    justify-content: center;
-}
-
-@media (max-width: 900px) {
-    .qrmon-grid { grid-template-columns: 1fr; }
-}
-
-.qrmon-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    position: relative;
-}
-
-.qrmon-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    border-radius: 0 0 14px 14px;
-    background: #e5e7eb;
-}
-
-.qrmon-card--qr::after {
-    background: #c8292a;
-}
-
-.qrmon-card--qr {
-    width: 100%;
-    max-width: 560px;
-    justify-self: center;
-}
-
-.qrmon-card-head {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f3f4f6;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.qrmon-card-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: #fff0f0;
-    color: #c8292a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.qrmon-card-icon--live {
-    background: #f3f4f6;
-    color: #111827;
-}
-
-.qrmon-card-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 2px;
-    line-height: 1.25;
-}
-
-.qrmon-card-sub {
-    font-size: 0.82rem;
-    color: #9ca3af;
-    margin: 0;
-}
-
-.qrmon-card-body {
-    padding: 18px 20px 22px;
-    flex: 1;
-}
-
-.qrmon-card-body--center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.qrmon-steps {
-    padding-left: 0;
-    margin: 0;
-    list-style: none;
-    counter-reset: qrm;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.qrmon-steps li {
-    counter-increment: qrm;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1.02rem;
-    color: #374151;
-    line-height: 1.45;
-    padding: 12px 14px;
-    border-radius: 10px;
-    background: #f9fafb;
-    border: 1px solid #f3f4f6;
-}
-
-.qrmon-steps li::before {
-    content: counter(qrm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: #fff0f0;
-    color: #c8292a;
-    font-size: 0.82rem;
-    font-weight: 700;
-    flex-shrink: 0;
-}
-
-.qrmon-steps strong {
-    color: #111827;
-    font-weight: 600;
-}
-
-.qrmon-qr-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #9ca3af;
-    margin: 0 0 14px;
-}
-
-.qrmon-qr-frame {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 14px;
-    position: relative;
-    transition: box-shadow 0.25s ease, transform 0.25s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.qrmon-qr-frame.success-active {
-    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.35);
-    transform: scale(1.02);
-}
-
-#qrcode {
-    width: var(--qr-size);
-    height: var(--qr-size);
-}
-
 #qrcode > img,
 #qrcode > canvas {
     width: 100% !important;
@@ -428,60 +247,25 @@
     display: block;
 }
 
-.qrmon-success-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(22, 163, 74, 0.95);
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 0.9rem;
-    font-weight: 600;
-    gap: 8px;
-    z-index: 10;
+@keyframes successPop {
+    0%   { opacity:0; transform:scale(0.85); }
+    100% { opacity:1; transform:scale(1); }
 }
-
-.qrmon-success-overlay i {
-    font-size: 2rem;
+@keyframes successRing {
+    0%   { transform:scale(0.5); opacity:0; }
+    60%  { transform:scale(1.15); opacity:1; }
+    100% { transform:scale(1); opacity:1; }
 }
-
-.qrmon-token {
-    margin-top: 14px;
-    font-size: 1.35rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    color: #111827;
-    font-family: 'DM Mono', monospace;
-    font-variant-numeric: tabular-nums;
-}
-
-.qrmon-timer {
-    margin-top: 8px;
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #9ca3af;
+@keyframes drawCheck {
+    0%   { stroke-dashoffset:20; stroke-dasharray:20; }
+    100% { stroke-dashoffset:0; stroke-dasharray:20; }
 }
 
 @media (max-width: 1200px) {
-    :root {
-        --qr-size: 160px;
-    }
+    #qrcode { --qr-size: 160px; }
 }
-
 @media (max-width: 900px) {
-    :root {
-        --qr-size: 140px;
-    }
-
-    .qrmon-page {
-        min-height: auto;
-        align-items: center;
-    }
+    #qrcode { --qr-size: 140px; }
 }
 </style>
 @endsection

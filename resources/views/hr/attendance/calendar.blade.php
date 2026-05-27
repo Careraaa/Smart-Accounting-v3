@@ -150,11 +150,13 @@
                     <span class="flex-1 h-px bg-gray-100"></span>
                 </div>
 
-                <div class="grid grid-cols-7 gap-1.5 mb-2">
-                    @foreach(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $dow)
-                        <div class="text-center text-[10px] font-bold uppercase tracking-wider text-gray-400 py-1">{{ $dow }}</div>
-                    @endforeach
-                </div>
+                <div class="overflow-x-auto -mx-5 px-5">
+                    <div class="min-w-[490px]">
+                        <div class="grid grid-cols-7 gap-1.5 mb-2">
+                            @foreach(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $dow)
+                                <div class="text-center text-[10px] font-bold uppercase tracking-wider text-gray-400 py-1">{{ $dow }}</div>
+                            @endforeach
+                        </div>
 
                 @foreach(array_chunk($half['cells'], 7) as $week)
                 <div class="grid grid-cols-7 gap-1.5 mb-1.5">
@@ -272,6 +274,7 @@
                 </div>
                 @endforeach
             </div>
+        </div>
         @endforeach
 
     </div>

@@ -78,40 +78,28 @@
     {{-- Stat cards --}}
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {{-- Total --}}
-        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-indigo-200 transition-all duration-300">
-            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-200">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
+        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 hover:shadow-md hover:border-indigo-200 transition-all duration-300">
             <div>
                 <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Total</div>
                 <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5" id="statTotal">{{ $allEmployees->count() }}</div>
             </div>
         </div>
         {{-- Active --}}
-        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-emerald-200 transition-all duration-300">
-            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
+        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 hover:shadow-md hover:border-emerald-200 transition-all duration-300">
             <div>
                 <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Active</div>
                 <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5" id="statActive">{{ $allEmployees->where('status','active')->count() }}</div>
             </div>
         </div>
         {{-- Inactive --}}
-        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-gray-300 transition-all duration-300">
-            <div class="w-10 h-10 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center shrink-0 border border-gray-200">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-            </div>
+        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 hover:shadow-md hover:border-gray-300 transition-all duration-300">
             <div>
                 <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Inactive</div>
                 <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5" id="statInactive">{{ $allEmployees->where('status','inactive')->count() }}</div>
             </div>
         </div>
         {{-- Departments --}}
-        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-violet-200 transition-all duration-300">
-            <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 border border-violet-200">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-            </div>
+        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 hover:shadow-md hover:border-violet-200 transition-all duration-300">
             <div>
                 <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Departments</div>
                 <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ count($departments) }}</div>
@@ -169,12 +157,7 @@
                 </thead>
                 <tbody id="empTbody">
                     @forelse($employees as $employee)
-                        @php
-                            $initials = strtoupper(substr($employee->first_name??'U',0,1).substr($employee->last_name??'',0,1));
-                            $avatarColors = ['indigo','violet','sky','teal','rose','amber','orange','pink'];
-                            $colorIdx = crc32($employee->first_name??'') % count($avatarColors);
-                            $ac = $avatarColors[$colorIdx];
-                        @endphp
+
                         <tr class="em-row-hover border-b border-gray-100 cursor-pointer transition-colors duration-150"
                             data-name="{{ strtolower(($employee->first_name??'').' '.($employee->last_name??'')) }}"
                             data-status="{{ $employee->status }}"
@@ -182,12 +165,9 @@
                             data-href="{{ route('employees.show', $employee) }}"
                             onclick="if(!event.target.closest('a,button,form'))window.location=this.dataset.href">
                             <td class="px-5 py-3.5">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-{{ $ac }}-100 text-{{ $ac }}-700 border border-{{ $ac }}-200">{{ $initials }}</div>
-                                    <div>
-                                        <div class="font-semibold text-gray-900">{{ $employee->first_name }} {{ $employee->last_name }}</div>
-                                        <div class="text-xs text-gray-400 mt-0.5">{{ $employee->position ?? '—' }}</div>
-                                    </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900">{{ $employee->first_name }} {{ $employee->last_name }}</div>
+                                    <div class="text-xs text-gray-400 mt-0.5">{{ $employee->position ?? '—' }}</div>
                                 </div>
                             </td>
                             <td class="px-5 py-3.5 text-gray-500 text-sm hidden md:table-cell">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : '—' }}</td>
@@ -211,9 +191,6 @@
                         <tr>
                             <td colspan="100">
                                 <div class="flex flex-col items-center justify-center py-16 text-center">
-                                    <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
-                                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                    </div>
                                     <p class="text-sm font-semibold text-gray-700">No employees found</p>
                                     <p class="text-xs text-gray-400 mt-1">Add your first employee to get started.</p>
                                 </div>
@@ -227,9 +204,6 @@
         {{-- No-filter-results --}}
         <div id="empNoResults" class="hidden">
             <div class="flex flex-col items-center justify-center py-12 text-center">
-                <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-3">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-                </div>
                 <p class="text-sm font-semibold text-gray-700">No results found</p>
                 <p class="text-xs text-gray-400 mt-1">Try a different search or filter.</p>
             </div>
@@ -269,9 +243,6 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
     const PER     = 10;
     let page = 1, filtered = [];
 
-    const AVATAR_COLORS = ['indigo','violet','sky','teal','rose','amber','orange','pink'];
-    function hashColor(name){ let h=0; for(let c of name) h=(h*31+c.charCodeAt(0))&0xffffffff; return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length]; }
-
     const STATUS_BADGE = {
         active:   `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Active</span>`,
         inactive: `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200"><span class="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>Inactive</span>`,
@@ -299,14 +270,12 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
             if(filtered.length === 0 && window.allEmployeesData.length > 0){
                 noRes.classList.remove('hidden');
             } else if(window.allEmployeesData.length === 0){
-                tbody.innerHTML = `<tr><td colspan="100"><div class="flex flex-col items-center justify-center py-16 text-center"><div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4"><svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><p class="text-sm font-semibold text-gray-700">No employees found</p><p class="text-xs text-gray-400 mt-1">Add your first employee to get started.</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="100"><div class="flex flex-col items-center justify-center py-16 text-center"><p class="text-sm font-semibold text-gray-700">No employees found</p><p class="text-xs text-gray-400 mt-1">Add your first employee to get started.</p></div></td></tr>`;
             }
         } else {
             noRes.classList.add('hidden');
             const empRoute = '{{ route("employees.show", ["employee"=>"__ID__"]) }}';
             pageData.forEach(emp => {
-                const initials = ((emp.firstName||'').charAt(0)+(emp.lastName||'').charAt(0)).toUpperCase();
-                const ac = hashColor(emp.name);
                 const href = empRoute.replace('__ID__', emp.id);
                 const dept = emp.departmentDisplay ? emp.departmentDisplay : '—';
                 const gender = emp.gender ? emp.gender.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase()) : '—';
@@ -319,12 +288,9 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                 row.onclick = e => { if(!e.target.closest('a,button,form')) window.location = href; };
                 row.innerHTML = `
                     <td class="px-5 py-3.5">
-                        <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-${ac}-100 text-${ac}-700 border border-${ac}-200">${initials}</div>
-                            <div>
-                                <div class="font-semibold text-gray-900">${emp.firstName} ${emp.lastName}</div>
-                                <div class="text-xs text-gray-400 mt-0.5">${emp.position||'—'}</div>
-                            </div>
+                        <div>
+                            <div class="font-semibold text-gray-900">${emp.firstName} ${emp.lastName}</div>
+                            <div class="text-xs text-gray-400 mt-0.5">${emp.position||'—'}</div>
                         </div>
                     </td>
                     <td class="px-5 py-3.5 text-gray-500 text-sm">${gender}</td>

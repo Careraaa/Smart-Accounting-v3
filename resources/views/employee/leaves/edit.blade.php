@@ -1,99 +1,112 @@
 @extends('layouts.layout')
 
 @push('styles')
-    @include('employee._ui-styles')
+<style>
+@keyframes ll-form-in { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+.ll-form { animation:ll-form-in 0.35s ease-out; }
+</style>
 @endpush
 
 @section('content')
-<div class="container-fluid empui-page empui-wrap">
-    <div class="empui-backdrop"><div class="empui-grid"></div></div>
-    <div class="empui-content">
+<div class="min-h-screen bg-gray-50/60">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
 
-        <div class="empui-hero">
-            <div class="empui-hero-left">
-                <h1 class="empui-title">Edit Leave Request</h1>
-                <p class="empui-sub">Update your dates/reason while the request is still pending.</p>
-                <div class="d-flex flex-wrap gap-2 mt-2">
-                    <span class="empui-chip"><i class="feather-calendar"></i> {{ $leave->start_date->format('M d, Y') }} – {{ $leave->end_date->format('M d, Y') }}</span>
-                    <span class="empui-chip"><i class="feather-tag"></i> {{ $leave->leaveType?->name ?? 'N/A' }}</span>
+        {{-- Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-7">
+            <div>
+                <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-1">Employee Portal</p>
+                <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 leading-tight">Edit Leave Request</h1>
+                <p class="text-sm text-gray-500 mt-1">Update your dates/reason while the request is still pending.</p>
+                <div class="flex flex-wrap gap-2 mt-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-semibold text-gray-600 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                        {{ $leave->start_date->format('M d, Y') }} – {{ $leave->end_date->format('M d, Y') }}
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-semibold text-gray-600 shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                        {{ $leave->leaveType?->name ?? 'N/A' }}
+                    </span>
                 </div>
             </div>
-            <div class="empui-hero-right">
-                <a class="empui-btn-sec" href="{{ route('employee.leaves.show', $leave) }}">
-                    <i class="feather-arrow-left"></i>
+            <div>
+                <a href="{{ route('employee.leaves.show', $leave) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-xl transition-all shadow-sm">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7-7-7 7 7 7"/></svg>
                     Back to Details
                 </a>
             </div>
         </div>
 
-        <div class="empui-card" style="max-width: 980px; margin: 0 auto;">
-            <div class="empui-card-head">
-                <p class="empui-card-title"><span class="empui-dot"></span> Update Details</p>
-                <span class="empui-pill pending">Pending</span>
-            </div>
-            <div class="empui-card-body">
-                <form action="{{ route('employee.leaves.update', $leave) }}" method="POST" id="leaveForm">
-                    @csrf
-                    @method('PATCH')
+        {{-- Form card --}}
+        <div class="ll-form max-w-3xl mx-auto">
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2 h-2 rounded-full bg-gray-900"></span>
+                        <span class="text-sm font-bold text-gray-800">Update Details</span>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">Pending</span>
+                </div>
+                <div class="p-6">
+                    <form action="{{ route('employee.leaves.update', $leave) }}" method="POST" id="leaveForm">
+                        @csrf
+                        @method('PATCH')
 
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="leave_type_id" class="form-label">Leave Type <span class="text-danger">*</span></label>
-                            <select name="leave_type_id" id="leave_type_id" class="form-control @error('leave_type_id') is-invalid @enderror" required>
-                                <option value="">Select Leave Type</option>
-                                @foreach($leaveTypes as $typeId => $typeName)
-                                    <option value="{{ $typeId }}" {{ ($leave->leave_type_id ?? old('leave_type_id')) == $typeId ? 'selected' : '' }}>
-                                        {{ $typeName }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('leave_type_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="start_date" class="form-label">Start Date <span class="text-danger">*</span></label>
-                            <input type="date" name="start_date" id="start_date" class="form-control @error('start_date') is-invalid @enderror"
-                                   value="{{ old('start_date', $leave->start_date->format('Y-m-d')) }}" required>
-                            @error('start_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="end_date" class="form-label">End Date <span class="text-danger">*</span></label>
-                            <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror"
-                                   value="{{ old('end_date', $leave->end_date->format('Y-m-d')) }}" required>
-                            <div class="empui-muted mt-1">
-                                Duration: <span id="durationDays" class="empui-mono fw-bold">0</span> day(s)
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label for="leave_type_id" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Leave Type <span class="text-rose-500">*</span></label>
+                                <select name="leave_type_id" id="leave_type_id" class="block w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all @error('leave_type_id') border-rose-300 ring-1 ring-rose-300 @enderror" required>
+                                    <option value="">Select Leave Type</option>
+                                    @foreach($leaveTypes as $typeId => $typeName)
+                                        <option value="{{ $typeId }}" {{ ($leave->leave_type_id ?? old('leave_type_id')) == $typeId ? 'selected' : '' }}>
+                                            {{ $typeName }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('leave_type_id')
+                                    <p class="text-xs text-rose-500 mt-1 font-semibold">{{ $message }}</p>
+                                @enderror
                             </div>
-                            @error('end_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+
+                            <div>
+                                <label for="start_date" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Start Date <span class="text-rose-500">*</span></label>
+                                <input type="date" name="start_date" id="start_date" class="block w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all @error('start_date') border-rose-300 ring-1 ring-rose-300 @enderror" value="{{ old('start_date', $leave->start_date->format('Y-m-d')) }}" required>
+                                @error('start_date')
+                                    <p class="text-xs text-rose-500 mt-1 font-semibold">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="end_date" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">End Date <span class="text-rose-500">*</span></label>
+                                <input type="date" name="end_date" id="end_date" class="block w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all @error('end_date') border-rose-300 ring-1 ring-rose-300 @enderror" value="{{ old('end_date', $leave->end_date->format('Y-m-d')) }}" required>
+                                <div class="mt-1 text-xs text-gray-400">
+                                    Duration: <span id="durationDays" class="font-bold font-mono text-gray-600">0</span> day(s)
+                                </div>
+                                @error('end_date')
+                                    <p class="text-xs text-rose-500 mt-1 font-semibold">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="reason" class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Reason <span class="text-rose-500">*</span></label>
+                                <textarea name="reason" id="reason" rows="3" class="block w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all @error('reason') border-rose-300 ring-1 ring-rose-300 @enderror" required placeholder="Brief reason for your leave request...">{{ old('reason', $leave->reason) }}</textarea>
+                                @error('reason')
+                                    <p class="text-xs text-rose-500 mt-1 font-semibold">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <label for="reason" class="form-label">Reason <span class="text-danger">*</span></label>
-                            <textarea name="reason" id="reason" class="form-control @error('reason') is-invalid @enderror"
-                                      rows="3" required placeholder="Brief reason for your leave request...">{{ old('reason', $leave->reason) }}</textarea>
-                            @error('reason')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="flex items-center gap-3 mt-6 pt-5 border-t border-gray-100">
+                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-bold rounded-xl transition-all shadow-sm">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                Update Leave Request
+                            </button>
+                            <a href="{{ route('employee.leaves.show', $leave) }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-xl transition-all">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18M6 6l12 12"/></svg>
+                                Cancel
+                            </a>
                         </div>
-                    </div>
-
-                    <div class="d-flex gap-2 flex-wrap mt-4">
-                        <button type="submit" class="empui-btn">
-                            <i class="feather-save"></i>
-                            Update Leave Request
-                        </button>
-                        <a href="{{ route('employee.leaves.show', $leave) }}" class="empui-btn-sec">
-                            <i class="feather-x"></i>
-                            Cancel
-                        </a>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -117,8 +130,7 @@
 
     startDateInput.addEventListener('change', calculateDuration);
     endDateInput.addEventListener('change', calculateDuration);
-    
-    // Calculate on page load
+
     calculateDuration();
 </script>
 @endsection
