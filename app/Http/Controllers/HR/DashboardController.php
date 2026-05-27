@@ -3,67 +3,22 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
-use App\Models\Employee;
 use App\Models\Attendance;
 use App\Models\Leave;
 use App\Models\OvertimeUndertime;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Employee Statistics (exclude superadmin and qr_admin)
-        $totalEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->count();
-        $activeEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->where('status', 'active')->count();
-        $inactiveEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->where('status', 'inactive')->count();
-        $onLeaveEmployees = Leave::where('start_date', '<=', now())
-            ->where('end_date', '>=', now())
-            ->distinct('user_id')
-            ->count();
-        
-        // Attendance Statistics (Today)
-        $today = now()->startOfDay();
-        $presentToday = Attendance::whereDate('date', $today)
-            ->where('status', 'present')
-            ->count();
-        $absentToday = Attendance::whereDate('date', $today)
-            ->where('status', 'absent')
-            ->count();
-        $lateToday = Attendance::whereDate('date', $today)
-            ->where('status', 'late')
-            ->count();
-        
-        $attendanceRate = $totalEmployees > 0 
-            ? (($presentToday + $lateToday) / $totalEmployees) * 100 
-            : 0;
-        
-        // Leave Statistics
-        $totalLeaves = Leave::count();
-        $approvedLeaves = Leave::whereIn('status', ['approved', 'paid'])->count();
-        $pendingLeaves = Leave::where('status', 'pending')->count();
-        $rejectedLeaves = Leave::where('status', 'rejected')->count();
-        
-        // Overtime/Undertime Statistics (approved only)
-        $totalOvertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')
-            ->sum('hours') ?? 0;
-        $totalUndertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')
-            ->sum('hours') ?? 0;
-        $totalOvertimeRecords = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')->count();
-        
-        // Attendance trend (last 7 calendar days) — counts rows in `attendances` per status per day
+        // ── Attendance trend (last 7 days) ──
         $attendanceTrend = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->startOfDay();
-            $present = Attendance::whereDate('date', $date)
-                ->where('status', 'present')
-                ->count();
-            $absent = Attendance::whereDate('date', $date)
-                ->where('status', 'absent')
-                ->count();
-            $late = Attendance::whereDate('date', $date)
-                ->where('status', 'late')
-                ->count();
+            $present = Attendance::whereDate('date', $date)->where('status', 'present')->count();
+            $absent = Attendance::whereDate('date', $date)->where('status', 'absent')->count();
+            $late = Attendance::whereDate('date', $date)->where('status', 'late')->count();
 
             $attendanceTrend[] = [
                 'date_iso' => $date->toDateString(),
@@ -73,57 +28,35 @@ class DashboardController extends Controller
                 'late' => $late,
             ];
         }
-        
-        // Recent attendance records
-        $recentAttendance = Attendance::with('employee')
-            ->orderBy('date', 'desc')
-            ->limit(10)
-            ->get();
-        
-        // Pending To-Do Items
-        $pendingItems = [];
-        if ($pendingLeaves > 0) {
-            $pendingItems[] = [
-                'text' => 'Pending Leaves',
-                'count' => $pendingLeaves,
-                'url' => route('leave.pending'),
-                'icon' => 'feather-calendar',
-                'color' => '#fef9c3',
-                'iconColor' => '#ca8a04'
-            ];
-        }
-        
-        $pendingOvertimeRecords = OvertimeUndertime::where('status', 'pending')->count();
-        if ($pendingOvertimeRecords > 0) {
-            $pendingItems[] = [
-                'text' => 'Pending Overtime/Undertime',
-                'count' => $pendingOvertimeRecords,
-                'url' => route('overtime.pending'),
-                'icon' => 'feather-clock',
-                'color' => '#dbeafe',
-                'iconColor' => '#0284c7'
-            ];
-        }
-        
+
+        // ── Leave Stats ──
+        $approvedLeaves = Leave::whereIn('status', ['approved', 'paid'])->count();
+        $pendingLeaves = Leave::where('status', 'pending')->count();
+        $rejectedLeaves = Leave::where('status', 'rejected')->count();
+
+        // ── OT/UT Stats ──
+        $pendingOT = OvertimeUndertime::where('status', 'pending')->where('type', 'overtime')->count();
+        $pendingUT = OvertimeUndertime::where('status', 'pending')->where('type', 'undertime')->count();
+
+        $weekStart = now()->startOfWeek(Carbon::MONDAY);
+        $weekEnd = now()->endOfWeek(Carbon::SUNDAY);
+        $otHoursThisWeek = OvertimeUndertime::where('status', 'approved')
+            ->where('type', 'overtime')
+            ->whereBetween('date', [$weekStart, $weekEnd])
+            ->sum('hours') ?? 0;
+
+        $totalOTRecords = OvertimeUndertime::where('status', 'approved')
+            ->where('type', 'overtime')->count();
+
         return view('hr.index', compact(
-            'totalEmployees',
-            'activeEmployees',
-            'inactiveEmployees',
-            'onLeaveEmployees',
-            'presentToday',
-            'absentToday',
-            'lateToday',
-            'attendanceRate',
-            'totalLeaves',
+            'attendanceTrend',
             'approvedLeaves',
             'pendingLeaves',
             'rejectedLeaves',
-            'totalOvertimeHours',
-            'totalUndertimeHours',
-            'totalOvertimeRecords',
-            'attendanceTrend',
-            'recentAttendance',
-            'pendingItems'
+            'pendingOT',
+            'pendingUT',
+            'otHoursThisWeek',
+            'totalOTRecords',
         ));
     }
 }

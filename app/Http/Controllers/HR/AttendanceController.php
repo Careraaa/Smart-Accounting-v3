@@ -19,8 +19,9 @@ use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $tab = $request->query('tab', 'records');
         // All employees (excluding system roles) - paginated for display
         $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
             ->orderBy('department')
@@ -53,7 +54,19 @@ class AttendanceController extends Controller
             ->limit(15)
             ->get();
 
-        return view('hr.attendance.index', compact('employees', 'allEmployees', 'departments', 'todayAttendance', 'recentLogs'));
+        // OT/UT summary data
+        $pendingOT = OvertimeUndertime::where('status', 'pending')->where('type', 'overtime')->count();
+        $pendingUT = OvertimeUndertime::where('status', 'pending')->where('type', 'undertime')->count();
+        $recentOtUt = OvertimeUndertime::with('employee')
+            ->where('status', 'pending')
+            ->latest('created_at')
+            ->limit(8)
+            ->get();
+
+        return view('hr.attendance.combined', compact(
+            'tab', 'employees', 'allEmployees', 'departments', 'todayAttendance', 'recentLogs',
+            'pendingOT', 'pendingUT', 'recentOtUt'
+        ));
     }
 
     /**
@@ -73,10 +86,17 @@ class AttendanceController extends Controller
             ->get()
             ->keyBy(fn($a) => $a->date->format('Y-m-d'));
 
+        // Fetch OT/UT records for the same month, grouped by date
+        $otutRecords = OvertimeUndertime::where('user_id', $employeeId)
+            ->whereBetween('date', [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()])
+            ->where('status', 'approved')
+            ->get()
+            ->groupBy(fn($r) => $r->date->format('Y-m-d'));
+
         $prevMonth = $month->copy()->subMonth()->format('Y-m');
         $nextMonth = $month->copy()->addMonth()->format('Y-m');
 
-        return view('hr.attendance.calendar', compact('employee', 'month', 'attendances', 'prevMonth', 'nextMonth'));
+        return view('hr.attendance.calendar', compact('employee', 'month', 'attendances', 'otutRecords', 'prevMonth', 'nextMonth'));
     }
 
     public function generateQR()

@@ -195,16 +195,11 @@
                         </ul>
                     </li>
 
-                    <li class="sidebar-item has-sub">
-                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('attendance.*', 'overtime.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                    <li class="sidebar-item">
+                        <a href="{{ route('attendance.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('attendance.*', 'overtime.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center text-cyan-500"><i class="feather-clock" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Attendance</span>
-                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('attendance.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-camera" style="font-size:13px"></i></span><span>QR Time IN / OUT Records</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('overtime.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-clock" style="font-size:13px"></i></span><span>Overtime / Undertime</span></a></li>
-                        </ul>
                     </li>
 
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Operations</label></li>
@@ -369,16 +364,11 @@
                         </a>
                     </li>
 
-                    <li class="sidebar-item has-sub">
-                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('attendance.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                    <li class="sidebar-item">
+                        <a href="{{ route('attendance.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('attendance.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('attendance.*') ? 'text-cyan-500' : 'text-cyan-500' }}"><i class="feather-clock" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Attendance</span>
-                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('attendance.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-camera" style="font-size:13px"></i></span><span>QR Time IN / OUT Records</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('overtime.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-clock" style="font-size:13px"></i></span><span>Overtime / Undertime</span></a></li>
-                        </ul>
                     </li>
 
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Payroll</label></li>

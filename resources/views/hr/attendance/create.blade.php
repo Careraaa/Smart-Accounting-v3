@@ -2,144 +2,66 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.att-page { font-family: 'Sora', sans-serif; }
-
-/* ── Topbar ─────────────────────────────────────────────────── */
-.att-topbar { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
-.att-topbar-title { font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px; }
-.att-topbar-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
-
-.att-btn-sec {
-    display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;
-    border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;
-    font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;
+@keyframes fadeSlideUp {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
-.att-btn-sec:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
-
-/* ── Form card ──────────────────────────────────────────────── */
-.att-form-wrap { max-width:680px;margin:0 auto; }
-
-.att-card { background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden; }
-
-.att-card-header { padding:20px 24px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:12px; }
-.att-card-icon { width:38px;height:38px;border-radius:10px;background:#fff0f0;color:#c8292a;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.att-card-title { font-size:0.95rem;font-weight:800;color:#111827;margin:0 0 2px;letter-spacing:-0.01em; }
-.att-card-sub   { font-size:0.75rem;color:#9ca3af;margin:0; }
-
-.att-card-body  { padding:24px; }
-.att-card-footer { padding:16px 24px;border-top:1px solid #f3f4f6;background:#fafafa;display:flex;align-items:center;justify-content:flex-end;gap:10px; }
-
-/* ── Form field styles ──────────────────────────────────────── */
-.att-label {
-    display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:0.09em;color:#6b7280;margin-bottom:6px;
+@keyframes scaleIn {
+    0% { opacity: 0; transform: scale(0.92); }
+    100% { opacity: 1; transform: scale(1); }
 }
-.att-label .req { color:#c8292a; }
-
-.att-input, .att-select {
-    width:100%;border:1px solid #e5e7eb;border-radius:10px;
-    padding:10px 14px;font-size:0.845rem;font-family:'Sora',sans-serif;
-    color:#111827;background:#fff;outline:none;
-    transition:border-color 0.15s,box-shadow 0.15s;
-    appearance:none;-webkit-appearance:none;
-}
-.att-input:focus, .att-select:focus {
-    border-color:#c8292a;
-    box-shadow:0 0 0 3px rgba(200,41,42,0.08);
-}
-.att-input::placeholder { color:#9ca3af; }
-.att-input.is-invalid, .att-select.is-invalid { border-color:#ef4444 !important; }
-.att-invalid-feedback { display:block;font-size:0.75rem;color:#ef4444;margin-top:4px; }
-
-/* Select wrapper with chevron */
-.att-select-wrap { position:relative; }
-.att-select-wrap svg { position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none; }
-.att-select-wrap .att-select { padding-right:36px; }
-
-/* Two-column row */
-.att-row { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
-@media (max-width:560px) { .att-row { grid-template-columns:1fr; } }
-
-/* Field group */
-.att-field { margin-bottom:20px; }
-.att-field:last-of-type { margin-bottom:0; }
-
-/* Divider */
-.att-divider { font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#9ca3af;border-bottom:1px solid #f3f4f6;padding-bottom:10px;margin-bottom:20px; }
-
-/* ── Action buttons ─────────────────────────────────────────── */
-.att-btn-submit {
-    display:inline-flex;align-items:center;gap:8px;padding:11px 24px;
-    background:#111827;color:#fff;border:none;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;
-    cursor:pointer;transition:background 0.15s;
-}
-.att-btn-submit:hover { background:#000; }
-
-.att-btn-cancel {
-    display:inline-flex;align-items:center;gap:7px;padding:11px 18px;
-    background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:600;
-    text-decoration:none;cursor:pointer;transition:all 0.15s;
-}
-.att-btn-cancel:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
-
-/* ── Flash messages ─────────────────────────────────────────── */
-.att-flash { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:20px;animation:flashIn 0.3s ease; }
-.att-flash.error { background:#fff0f0;border:1px solid #fecaca;color:#c8292a; }
-@keyframes flashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
+.anim-header { animation: fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.anim-card { animation: scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
 </style>
 @endpush
 
 @section('content')
-<div class="att-page" data-global-datepicker="off">
+<div class="max-w-full" data-global-datepicker="off">
 
     {{-- Flash --}}
     @if(session('error'))
-    <div class="att-flash error">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+    <div class="flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-sm font-medium bg-red-50 border border-red-200 text-red-700" style="animation:fadeSlideUp 0.35s ease both;">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
         {{ session('error') }}
     </div>
     @endif
 
     {{-- Topbar --}}
-    <div class="att-topbar">
+    <div class="anim-header flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
-            <h1 class="att-topbar-title">Manual Attendance Log</h1>
-            <p class="att-topbar-sub">Record an attendance entry manually for an employee</p>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Manual Attendance Log</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Record an attendance entry manually for an employee</p>
         </div>
-        <a href="{{ url()->previous() }}" class="att-btn-sec">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <a href="{{ url()->previous() }}" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-rose-300 hover:text-rose-600 hover:bg-rose-50 transition-all duration-200">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back
         </a>
     </div>
 
     {{-- Form card --}}
-    <div class="att-form-wrap">
-        <div class="att-card">
+    <div class="anim-card max-w-[680px] mx-auto">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
 
-            <div class="att-card-header">
-                <div class="att-card-icon">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+            <div class="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-200">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
                 </div>
                 <div>
-                    <p class="att-card-title">Attendance Entry</p>
-                    <p class="att-card-sub">All fields marked <span style="color:#c8292a;">*</span> are required</p>
+                    <p class="text-sm font-bold text-gray-900">Attendance Entry</p>
+                    <p class="text-xs text-gray-400">All fields marked <span class="text-rose-500">*</span> are required</p>
                 </div>
             </div>
 
-            <div class="att-card-body">
+            <div class="px-6 py-6">
                 <form action="{{ route('attendance.store') }}" method="POST" id="attForm">
                     @csrf
 
                     {{-- Employee --}}
-                    <div class="att-field">
-                        <label for="user_id" class="att-label">Employee <span class="req">*</span></label>
-                        <div class="att-select-wrap">
+                    <div class="mb-5">
+                        <label for="user_id" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Employee <span class="text-rose-500">*</span></label>
+                        <div class="relative">
                             <select name="user_id" id="user_id"
-                                class="att-select @error('user_id') is-invalid @enderror"
-                                >
+                                class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none appearance-none transition-all duration-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200/50 @error('user_id') border-red-400 @enderror">
                                 <option value="">— Select an employee —</option>
                                 @foreach($employees as $employee)
                                     <option value="{{ $employee->id }}" @selected(old('user_id') == $employee->id)>
@@ -147,69 +69,69 @@
                                     </option>
                                 @endforeach
                             </select>
-                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                         @error('user_id')
-                            <span class="att-invalid-feedback">{{ $message }}</span>
+                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
                         @enderror
-                        <p class="att-card-sub" style="margin-top:8px;">You can also type the employee username below.</p>
+                        <p class="text-xs text-gray-400 mt-2">You can also type the employee username below.</p>
                     </div>
 
-                    <div class="att-field">
-                        <label for="employee_identifier" class="att-label">Employee Username <span style="text-transform:none;letter-spacing:0;color:#9ca3af;">(optional)</span></label>
+                    <div class="mb-5">
+                        <label for="employee_identifier" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Employee Username <span class="text-xs font-normal normal-case tracking-normal text-gray-400">(optional)</span></label>
                         <input type="text" name="employee_identifier" id="employee_identifier"
-                            class="att-input @error('employee_identifier') is-invalid @enderror"
+                            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200/50 placeholder:text-gray-400 @error('employee_identifier') border-red-400 @enderror"
                             value="{{ old('employee_identifier') }}"
                             placeholder="e.g. juan.delacruz">
                         @error('employee_identifier')
-                            <span class="att-invalid-feedback">{{ $message }}</span>
+                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
 
                     {{-- Date --}}
-                    <div class="att-field">
-                        <label for="date" class="att-label">Date <span class="req">*</span></label>
+                    <div class="mb-5">
+                        <label for="date" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Date <span class="text-rose-500">*</span></label>
                         <input type="date" name="date" id="date"
-                            class="att-input @error('date') is-invalid @enderror"
+                            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200/50 @error('date') border-red-400 @enderror"
                             value="{{ old('date', today()->toDateString()) }}"
                             required>
                         @error('date')
-                            <span class="att-invalid-feedback">{{ $message }}</span>
+                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
 
                     {{-- Time In / Out --}}
-                    <div class="att-divider">Time</div>
-                    <div class="att-row att-field">
+                    <div class="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2.5 mb-5">Time</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                         <div>
-                            <label for="time_in" class="att-label">Time In</label>
+                            <label for="time_in" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Time In</label>
                             <input type="time" name="time_in" id="time_in"
-                                class="att-input @error('time_in') is-invalid @enderror"
+                                class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200/50 @error('time_in') border-red-400 @enderror"
                                 value="{{ old('time_in') }}">
                             @error('time_in')
-                                <span class="att-invalid-feedback">{{ $message }}</span>
+                                <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
                         <div>
-                            <label for="time_out" class="att-label">Time Out</label>
+                            <label for="time_out" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Time Out</label>
                             <input type="time" name="time_out" id="time_out"
-                                class="att-input @error('time_out') is-invalid @enderror"
+                                class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200/50 @error('time_out') border-red-400 @enderror"
                                 value="{{ old('time_out') }}">
                             @error('time_out')
-                                <span class="att-invalid-feedback">{{ $message }}</span>
+                                <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
 
                     {{-- OT/UT preview hint --}}
-                    <div id="otut-hint" style="display:none;margin-top:4px;padding:12px 14px;border-radius:10px;font-size:0.8rem;font-weight:600;line-height:1.5;"></div>
+                    <div id="otut-hint" class="hidden text-sm font-semibold leading-relaxed"></div>
 
                 </form>
             </div>
 
-            <div class="att-card-footer">
-                <button type="submit" form="attForm" class="att-btn-submit">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <div class="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-gray-100 bg-gray-50">
+                <button type="submit" form="attForm" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 active:scale-[0.97] transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     Save Attendance
                 </button>
             </div>
@@ -223,18 +145,16 @@
 @push('scripts')
 <script>
 (function () {
-    // Standard 8 working hours
-    const STANDARD_MIN  = 480; // 8h × 60
+    const STANDARD_MIN  = 480;
 
     const timeIn  = document.getElementById('time_in');
     const timeOut = document.getElementById('time_out');
     const hint    = document.getElementById('otut-hint');
 
-    // Shift break times and settings (fetched via AJAX)
-    let breakStart = null;      // minutes from midnight
-    let breakEnd = null;        // minutes from midnight
-    let gracePeriodMin = {{ $gracePeriodMinutes }};     // Grace period in minutes from server
-    let shiftStart = null;      // Shift start time in minutes from midnight
+    let breakStart = null;
+    let breakEnd = null;
+    let gracePeriodMin = {{ $gracePeriodMinutes }};
+    let shiftStart = null;
 
     function toMinutes(hhmm) {
         if (!hhmm) return null;
@@ -256,28 +176,18 @@
         return `${m}m`;
     }
 
-    // Convert minutes to 0.5-hour increments (matches backend conversion)
-    // floor(minutes / 30) * 0.5
     function convertMinutesToHourIncrement(minutes) {
         return Math.floor(minutes / 30) * 0.5;
     }
 
-    // Convert hours (0.5 increments) back to minutes for display
     function hoursToMinutes(hours) {
         return Math.round(hours * 60);
     }
 
     function calculateBreakOverlap(inMin, outMin) {
         if (breakStart === null || breakEnd === null) return 0;
-
-        // Calculate overlap between [inMin, outMin] and [breakStart, breakEnd]
-        // overlapStart = max(inMin, breakStart)
-        // overlapEnd = min(outMin, breakEnd)
-        // overlap = max(0, overlapEnd - overlapStart)
-
         const overlapStart = Math.max(inMin, breakStart);
         const overlapEnd = Math.min(outMin, breakEnd);
-
         return Math.max(0, overlapEnd - overlapStart);
     }
 
@@ -286,56 +196,41 @@
         const outMin = toMinutes(timeOut.value);
 
         if (inMin === null || outMin === null || outMin <= inMin) {
-            hint.style.display = 'none';
+            hint.classList.add('hidden');
             return;
         }
 
-        // Apply grace period logic: if time in is within grace period, use shift start time
         if (shiftStart !== null) {
             const minutesLate = inMin - shiftStart;
             if (minutesLate >= 0 && minutesLate <= gracePeriodMin) {
-                // Employee is within grace period; use scheduled start time for OT/UT computation
                 inMin = shiftStart;
             }
         }
 
-        // Calculate break overlap instead of using fixed break
         const breakOverlapMin = calculateBreakOverlap(inMin, outMin);
         const workedMin = Math.max(0, (outMin - inMin) - breakOverlapMin);
         const diff      = workedMin - STANDARD_MIN;
 
-        // Convert to 0.5-hour increments (matching backend logic)
         const diffHours = convertMinutesToHourIncrement(Math.abs(diff));
-        
-        // Only show OT/UT if it converts to at least 0.5 hours (30 minutes)
+
         if (diffHours === 0) {
-            hint.style.display = 'none';
+            hint.classList.add('hidden');
             return;
         }
 
         const isOT = diff > 0;
         const displayMin = hoursToMinutes(diffHours);
 
-        hint.style.display = 'block';
+        hint.classList.remove('hidden');
+        hint.className = 'text-sm font-semibold leading-relaxed px-4 py-3 rounded-xl mt-1 border ' + (isOT
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+            : 'bg-amber-50 border-amber-200 text-amber-700');
 
-        if (isOT) {
-            hint.style.background  = '#f0fdf4';
-            hint.style.border      = '1px solid #bbf7d0';
-            hint.style.color       = '#15803d';
-            hint.innerHTML =
-                `<svg style="display:inline;vertical-align:-3px;margin-right:6px;" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg>` +
-                `<strong>Overtime detected:</strong> ${fmt(displayMin)} beyond the 8h schedule — an OT record will be auto-created and approved on save.`;
-        } else {
-            hint.style.background  = '#fffbeb';
-            hint.style.border      = '1px solid #fde68a';
-            hint.style.color       = '#b45309';
-            hint.innerHTML =
-                `<svg style="display:inline;vertical-align:-3px;margin-right:6px;" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>` +
-                `<strong>Undertime detected:</strong> ${fmt(displayMin)} short of the 8h schedule — a UT record will be auto-created and approved on save.`;
-        }
+        hint.innerHTML = isOT
+            ? `<svg class="inline align-middle mr-1.5" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z"/></svg> <strong>Overtime detected:</strong> ${fmt(displayMin)} beyond the 8h schedule — an OT record will be auto-created on save.`
+            : `<svg class="inline align-middle mr-1.5" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg> <strong>Undertime detected:</strong> ${fmt(displayMin)} short of the 8h schedule — a UT record will be auto-created on save.`;
     }
 
-    // Fetch shift break times and grace period from API
     fetch('{{ route("api.shift.break-times") }}')
         .then(res => res.json())
         .then(data => {
@@ -343,16 +238,13 @@
             breakEnd = timeStringToMinutes(data.break_end);
             shiftStart = timeStringToMinutes(data.start_time);
             gracePeriodMin = data.grace_period_minutes || 5;
-            // Re-calculate preview with fetched break times and grace period
             update();
         })
-        .catch(err => {
-            console.warn('Failed to fetch shift break times:', err);
-            // Fallback: use default 1 hour break (12:00-13:00 = 720-780 minutes)
+        .catch(() => {
             breakStart = 12 * 60;
             breakEnd = 13 * 60;
-            shiftStart = 8 * 60;  // Default 8:00 AM
-            gracePeriodMin = 5;   // Default grace period
+            shiftStart = 8 * 60;
+            gracePeriodMin = 5;
         });
 
     timeIn.addEventListener('change', update);

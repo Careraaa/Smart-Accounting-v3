@@ -14,7 +14,7 @@ final class SeedConfig
 
     public const RANGE_START = '2025-01-01';
 
-    public const RANGE_END = '2026-04-30';
+    public const RANGE_END = '2026-05-28';
 
     public const SEED_YEARS = [2025, 2026];
 
@@ -31,6 +31,7 @@ final class SeedConfig
         '2026-01-01', // New Year
         '2026-02-25', // EDSA
         '2026-04-09', // Araw ng Kagitingan
+        '2026-05-01', // Labor Day
     ];
 
     /**
@@ -42,7 +43,7 @@ final class SeedConfig
     {
         $periods = [];
         $cursor = Carbon::parse('2025-01-01')->startOfMonth();
-        $end = Carbon::parse('2026-04-30');
+        $end = Carbon::parse(self::RANGE_END);
 
         while ($cursor->lte($end)) {
             // First half: 1st – 15th
