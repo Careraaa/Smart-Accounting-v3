@@ -7,8 +7,9 @@
 .input-group.input-error input {
   border-color: #fca5a5 !important;
 }
-.input-group.input-error input:focus {
+.input-group.input-error input:focus-visible {
   border-color: #ef4444 !important;
+  ring-color: rgba(239, 68, 68, 0.08) !important;
 }
 .input-group.input-error label {
   color: #ef4444 !important;
@@ -36,32 +37,32 @@ input:-webkit-autofill:focus {
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
-            <div class="input-group w-full h-14 relative rounded-xl mb-5 @error('username') input-error @enderror">
+            <div class="relative flex flex-row items-center mb-5 @error('username') input-group input-error @enderror">
                 <input id="username" type="text" name="username" required autocomplete="username"
-                    value="{{ old('username') }}" autofocus
-                    class="peer w-full h-full bg-white outline-none px-4 pt-3 text-sm rounded-xl border border-gray-200 transition-colors focus:border-[#c8292a]">
+                    value="{{ old('username') }}" autofocus placeholder=""
+                    class="peer w-full h-[40px] px-3 text-sm border border-gray-200 rounded-xl bg-white outline-none focus-visible:border-[#c8292a] focus-visible:ring-4 focus-visible:ring-[rgba(200,41,42,0.08)] transition-colors">
                 <label for="username"
-                    class="absolute top-1/2 -translate-y-1/2 bg-white left-4 px-1.5 text-sm text-gray-400 peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:text-[#c8292a] peer-valid:-top-2.5 peer-valid:left-3 peer-valid:text-xs peer-valid:text-[#c8292a] duration-150 pointer-events-none">
+                    class="absolute left-3 text-sm text-gray-400 pointer-events-none duration-200 peer-focus-visible:-translate-y-8 peer-focus-visible:text-xs peer-focus-visible:text-[#c8292a] peer-[:not(:placeholder-shown)]:-translate-y-8 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-[#c8292a]">
                     Username
                 </label>
                 @error('username')
-                    <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+                    <p class="text-red-500 text-xs mt-1 ml-1 absolute -bottom-5 left-0">{{ $message }}</p>
                 @enderror
             </div>
 
-            <div class="input-group w-full h-14 relative rounded-xl mb-2 @error('password') input-error @enderror">
-                <input id="password" type="password" name="password" required autocomplete="current-password"
-                    class="peer w-full h-full bg-white outline-none px-4 pt-3 text-sm rounded-xl border border-gray-200 transition-colors focus:border-[#c8292a]">
+            <div class="relative flex flex-row items-center mb-2 @error('password') input-group input-error @enderror">
+                <input id="password" type="password" name="password" required autocomplete="current-password" placeholder=""
+                    class="peer w-full h-[40px] px-3 text-sm border border-gray-200 rounded-xl bg-white outline-none focus-visible:border-[#c8292a] focus-visible:ring-4 focus-visible:ring-[rgba(200,41,42,0.08)] transition-colors">
                 <label for="password"
-                    class="absolute top-1/2 -translate-y-1/2 bg-white left-4 px-1.5 text-sm text-gray-400 peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:text-[#c8292a] peer-valid:-top-2.5 peer-valid:left-3 peer-valid:text-xs peer-valid:text-[#c8292a] duration-150 pointer-events-none">
+                    class="absolute left-3 text-sm text-gray-400 pointer-events-none duration-200 peer-focus-visible:-translate-y-8 peer-focus-visible:text-xs peer-focus-visible:text-[#c8292a] peer-[:not(:placeholder-shown)]:-translate-y-8 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-[#c8292a]">
                     Password
                 </label>
                 @error('password')
-                    <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+                    <p class="text-red-500 text-xs mt-1 ml-1 absolute -bottom-5 left-0">{{ $message }}</p>
                 @enderror
             </div>
 
-            <div class="flex items-center justify-between mb-5 mt-5">
+            <div class="flex items-center justify-between mb-5 mt-6">
                 <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer select-none">
                     <input type="checkbox" id="remember" name="remember"
                         class="rounded border-gray-300 text-gray-900 focus:ring-gray-900">
