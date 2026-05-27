@@ -5,201 +5,65 @@
     <meta http-equiv="x-ua-compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="System Maintenance">
-    <title>System Under Maintenance - Smart Accounting</title>
+    <title>System Under Maintenance | Smart Accounting</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
-
-    <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">
-    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
-
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    @vite(['resources/css/tailwind.css', 'resources/js/app.js'])
     <style>
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #ffffff;
-            color: #111827;
-            font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            padding: 28px;
-        }
-
-        .maintenance-layout {
-            width: 100%;
-            max-width: 1160px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .maintenance-copy {
-            max-width: 560px;
-        }
-
-        .maintenance-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 0.76rem;
-            font-weight: 700;
-            letter-spacing: 0.4px;
-            color: #b91c1c;
-            background: #fee2e2;
-            margin-bottom: 14px;
-            text-transform: uppercase;
-        }
-
-        .maintenance-code {
-            margin: 0;
-            line-height: 0.9;
-            color: #c8292a;
-            font-size: clamp(4.3rem, 11vw, 8.2rem);
-            font-weight: 900;
-            letter-spacing: -2px;
-            text-shadow: 0 10px 24px rgba(200, 41, 42, 0.16);
-        }
-
-        .maintenance-title {
-            margin: 10px 0 12px;
-            font-size: clamp(1.4rem, 2.6vw, 2.1rem);
-            line-height: 1.2;
-            font-weight: 800;
-            letter-spacing: -0.4px;
-            color: #111827;
-        }
-
-        .maintenance-message {
-            margin: 0 0 20px;
-            color: #4b5563;
-            font-size: 0.98rem;
-            line-height: 1.7;
-            max-width: 520px;
-        }
-
-        .maintenance-notes {
-            margin: 0;
-            padding-left: 18px;
-            color: #6b7280;
-            font-size: 0.9rem;
-            line-height: 1.75;
-        }
-
-        .maintenance-notes li {
-            margin-bottom: 4px;
-        }
-
-        .maintenance-actions {
-            margin-top: 24px;
-        }
-
-        .logout-btn {
-            display: inline-block;
-            padding: 10px 24px;
-            background-color: #dc2626;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: background-color 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .logout-btn:hover {
-            background-color: #b91c1c;
-        }
-
-        @media (max-width: 900px) {
-            .maintenance-actions {
-                margin-top: 20px;
-            }
-        }
-
-        .maintenance-icon-wrap {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .maintenance-icon {
-            width: min(100%, 520px);
-            max-height: 72vh;
-            object-fit: contain;
-            filter: drop-shadow(0 22px 34px rgba(17, 24, 39, 0.18));
-        }
-
-        @media (max-width: 900px) {
-            .maintenance-layout {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 18px;
-            }
-
-            .maintenance-copy {
-                max-width: 100%;
-                order: 2;
-            }
-
-            .maintenance-icon-wrap {
-                order: 1;
-            }
-
-            .maintenance-chip {
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .maintenance-message {
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .maintenance-notes {
-                display: inline-block;
-                text-align: left;
-            }
-
-            .maintenance-icon {
-                width: min(100%, 380px);
-                max-height: 42vh;
-            }
-        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse-glow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+        @keyframes slide-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-float { animation: float 5s ease-in-out infinite; }
+        .animate-glow { animation: pulse-glow 3s ease-in-out infinite; }
+        .animate-slide { animation: slide-up 0.5s ease-out forwards; }
+        .animate-slide-delay { animation: slide-up 0.5s ease-out 0.1s forwards; opacity: 0; }
+        .animate-slide-delay-2 { animation: slide-up 0.5s ease-out 0.2s forwards; opacity: 0; }
     </style>
 </head>
-<body>
+<body class="font-[Sora,sans-serif] antialiased min-h-screen flex items-center justify-center bg-white p-7">
     @php
-        $maintenanceIcon = file_exists(public_path('images/504 icon.png'))
+        $icon = file_exists(public_path('images/504 icon.png'))
             ? url('images/504%20icon.png')
             : (file_exists(public_path('images/503 icon.png')) ? url('images/503%20icon.png') : asset('images/knights_logo_icon.png'));
     @endphp
 
-    <div class="maintenance-layout">
-        <div class="maintenance-copy">
-            <span class="maintenance-chip">System Notice</span>
-            <h1 class="maintenance-code">503</h1>
-            <h2 class="maintenance-title">The blacksmith is hard at work.</h2>
-            <p class="maintenance-message">
-                Smart Accounting is temporarily unavailable while we perform maintenance and reliability improvements.
-                Please check back shortly.
-            </p>
-            <ul class="maintenance-notes">
-                <li>Super admin access remains available for emergency work.</li>
-                <li>If this lasts unusually long, please contact your system administrator.</li>
-            </ul>
-            <div class="maintenance-actions">
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="logout-btn">Back to Login</button>
-                </form>
+    <div class="relative w-full max-w-[1160px]">
+        <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-8">
+            <div class="order-2 md:order-1 text-center md:text-left">
+                <div class="animate-slide inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[0.68rem] font-bold uppercase tracking-[1px] bg-blue-50 text-[#1d4ed8] border border-blue-100 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    System Notice
+                </div>
+                <h1 class="animate-slide-delay text-[clamp(4.5rem,14vw,9rem)] font-black leading-none text-[#2563eb] mb-2">503</h1>
+                <h2 class="animate-slide-delay text-lg md:text-xl font-bold text-gray-900 mb-3">The blacksmith is hard at work.</h2>
+                <p class="animate-slide-delay-2 text-gray-500 leading-relaxed max-w-[480px] text-sm md:text-base mb-2">
+                    We're strengthening the castle walls and improving our defenses. Smart Accounting will return shortly, stronger than before.
+                </p>
+                <div class="animate-slide-delay-2 flex items-center gap-2 justify-center md:justify-start text-gray-400 text-xs mb-5">
+                    <svg class="w-3.5 h-3.5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Super admin access remains available for emergency work
+                </div>
+                <div class="animate-slide-delay-2">
+                    @auth
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold text-sm bg-[#c8292a] text-white shadow-[0_4px_16px_rgba(200,41,42,0.3)] hover:bg-[#a81f20] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 border-none cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                Back to Login
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ url('/login') }}" class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold text-sm bg-[#c8292a] text-white shadow-[0_4px_16px_rgba(200,41,42,0.3)] hover:bg-[#a81f20] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 no-underline">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                            Back to Login
+                        </a>
+                    @endauth
+                </div>
             </div>
-        </div>
 
-        <div class="maintenance-icon-wrap">
-            <img src="{{ $maintenanceIcon }}" alt="Maintenance Icon" class="maintenance-icon">
+            <div class="order-1 md:order-2 flex justify-center items-center py-4">
+                <img src="{{ $icon }}" alt="Maintenance" class="w-[200px] h-[200px] md:w-[380px] md:h-[380px] object-contain animate-float">
+            </div>
         </div>
     </div>
 </body>

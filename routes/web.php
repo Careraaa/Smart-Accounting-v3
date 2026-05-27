@@ -512,4 +512,10 @@ Route::middleware(['auth', 'check-status', 'role:superadmin'])->group(function (
 //HOLIDAY ROUTES - API
 Route::get('/api/holidays', [HRHolidayController::class, 'indexApi']);
 
+// ===== TEMP: Error page previews =====
+Route::get('/error/403', fn() => view('errors.403'));
+Route::get('/error/404', fn() => view('errors.404'));
+Route::get('/error/account-in-use', fn() => view('errors.account-in-use'));
+Route::get('/error/maintenance', fn() => view('errors.maintenance'));
+
 require __DIR__ . '/auth.php';

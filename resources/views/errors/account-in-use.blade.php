@@ -7,194 +7,43 @@
     <meta name="description" content="Account In Use">
     <title>Account In Use | Smart Accounting</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
-
-    <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">
-    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
-
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    @vite(['resources/css/tailwind.css', 'resources/js/app.js'])
     <style>
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #ffffff;
-            font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            padding: 24px;
-        }
-
-        .error-layout {
-            width: 100%;
-            max-width: 1100px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: center;
-            gap: 34px;
-            position: relative;
-        }
-
-        .error-layout::before {
-            content: "";
-            position: absolute;
-            width: 340px;
-            height: 340px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(200, 41, 42, 0.14) 0%, rgba(200, 41, 42, 0) 70%);
-            top: -120px;
-            left: -140px;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .error-layout::after {
-            content: "";
-            position: absolute;
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(17, 24, 39, 0.07) 0%, rgba(17, 24, 39, 0) 70%);
-            bottom: -130px;
-            right: -120px;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .error-content {
-            text-align: left;
-            max-width: 560px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .error-icon-wrap {
-            width: 460px;
-            height: 460px;
-            margin: 0 auto;
-            border-radius: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            overflow: hidden;
-            position: relative;
-            z-index: 1;
-        }
-
-        .error-icon-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 20px 30px rgba(17, 24, 39, 0.16));
-        }
-
-        .error-code {
-            font-size: clamp(5rem, 13vw, 9rem);
-            font-weight: 900;
-            letter-spacing: -2px;
-            color: #c8292a;
-            margin: 0 0 8px;
-            line-height: 1;
-            text-shadow: 0 8px 20px rgba(200, 41, 42, 0.18);
-        }
-
-        .error-title {
-            margin: 8px 0 10px;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #111827;
-        }
-
-        .error-quote {
-            margin: 0 0 14px;
-            color: #1f2937;
-            font-weight: 800;
-            font-size: 1.15rem;
-        }
-
-        .error-description {
-            margin: 0 0 24px;
-            max-width: 560px;
-            color: #6b7280;
-            line-height: 1.6;
-            font-size: 0.95rem;
-        }
-
-        .error-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-start;
-            flex-wrap: wrap;
-            margin-bottom: 14px;
-        }
-
-        .error-actions .btn {
-            border-radius: 10px;
-            padding: 10px 16px;
-            font-weight: 700;
-        }
-
-        .error-footnote {
-            margin: 0;
-            color: #9ca3af;
-            font-size: 0.78rem;
-        }
-
-        @media (max-width: 768px) {
-            .error-layout {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .error-layout::before,
-            .error-layout::after {
-                display: none;
-            }
-
-            .error-content {
-                text-align: center;
-                max-width: 100%;
-            }
-
-            .error-icon-wrap {
-                width: 260px;
-                height: 260px;
-                order: -1;
-                margin-bottom: 16px;
-            }
-
-            .error-description {
-                margin: 0 auto 24px;
-            }
-
-            .error-actions {
-                justify-content: center;
-            }
-        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse-glow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
+        @keyframes slide-up { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-float { animation: float 5s ease-in-out infinite; }
+        .animate-glow { animation: pulse-glow 3s ease-in-out infinite; }
+        .animate-slide { animation: slide-up 0.5s ease-out forwards; }
+        .animate-slide-delay { animation: slide-up 0.5s ease-out 0.1s forwards; opacity: 0; }
+        .animate-slide-delay-2 { animation: slide-up 0.5s ease-out 0.2s forwards; opacity: 0; }
     </style>
 </head>
-<body>
-    <div class="error-layout">
-        <div class="error-content">
-            <h1 class="error-code">409</h1>
-            <p class="error-quote">This account is already in use.</p>
+<body class="font-[Sora,sans-serif] antialiased min-h-screen flex items-center justify-center bg-white p-6">
+    <div class="relative w-full max-w-[1100px]">
+        <div class="absolute w-[380px] h-[380px] rounded-full bg-[radial-gradient(circle,rgba(234,179,8,0.08)_0%,transparent_70%)] top-[-120px] right-[-120px] pointer-events-none z-0 hidden md:block animate-glow"></div>
+        <div class="absolute w-[320px] h-[320px] rounded-full bg-[radial-gradient(circle,rgba(17,24,39,0.04)_0%,transparent_70%)] bottom-[-100px] left-[-100px] pointer-events-none z-0 hidden md:block animate-glow" style="animation-delay: 1.5s;"></div>
 
-            <p class="error-description">
-                Someone else has logged into this account from another device or browser.
-                For security, only one active session is allowed per account at a time.
-                If this wasn't you, please contact your administrator immediately.
-            </p>
-
-            <div class="error-actions">
-                <a href="{{ url('/login') }}" class="btn btn-primary">
-                    Log In Again
-                </a>
+        <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-8 relative z-10">
+            <div class="order-2 md:order-1 text-center md:text-left">
+                <div class="animate-slide inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[0.68rem] font-bold uppercase tracking-[1px] bg-amber-50 text-[#b45309] border border-amber-100 mb-4">Session Conflict</div>
+                <h1 class="animate-slide-delay text-[clamp(4.5rem,14vw,9rem)] font-black leading-none text-[#c8292a] mb-2">409</h1>
+                <h2 class="animate-slide-delay text-lg md:text-xl font-bold text-gray-900 mb-3">A new challenger approaches.</h2>
+                <p class="animate-slide-delay-2 text-gray-500 leading-relaxed max-w-[480px] text-sm md:text-base mb-2">
+                    Another session has taken over this account from a different device. Only one active session is allowed at a time.
+                </p>
+                <p class="animate-slide-delay-2 text-gray-400 text-xs max-w-[480px] mb-5">Contact your system administrator immediately if you believe this is a mistake.</p>
+                <div class="animate-slide-delay-2 flex gap-3 flex-wrap justify-center md:justify-start">
+                    <a href="{{ url('/login') }}" class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold text-sm bg-[#c8292a] text-white shadow-[0_4px_16px_rgba(200,41,42,0.3)] hover:bg-[#a81f20] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 no-underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                        Log In Again
+                    </a>
+                </div>
             </div>
-
-            <p class="error-footnote">If you believe this is a mistake, report it to your system administrator.</p>
-        </div>
-
-        <div class="error-icon-wrap">
-            <img src="{{ url('images/InuseAcc%20icon.png') }}" alt="Account In Use">
+            <div class="order-1 md:order-2 flex justify-center items-center py-4">
+                <img src="{{ url('images/InuseAcc%20icon.png') }}" alt="Account In Use" class="w-[200px] h-[200px] md:w-[380px] md:h-[380px] object-contain animate-float">
+            </div>
         </div>
     </div>
 </body>
