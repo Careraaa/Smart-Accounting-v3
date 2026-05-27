@@ -12,6 +12,7 @@
     use App\Models\OvertimeUndertime;
     use App\Services\AttendanceService;
     use App\Services\PayrollService;
+    use App\Services\LeaveService;
     use App\Services\PayrollDeductionService;
     use App\Notifications\PayrollNotification;
     use Illuminate\Http\Request;
@@ -22,11 +23,13 @@
     {
         protected $attendanceService;
         protected $payrollService;
+        protected $leaveService;
 
-        public function __construct(AttendanceService $attendanceService, PayrollService $payrollService)
+        public function __construct(AttendanceService $attendanceService, PayrollService $payrollService, LeaveService $leaveService)
         {
             $this->attendanceService = $attendanceService;
             $this->payrollService = $payrollService;
+            $this->leaveService = $leaveService;
         }
 
         /* ══════════════════════════════════════════════════════════════
@@ -68,10 +71,10 @@
             $presentToday      = Attendance::whereDate('date', now())->where('status', 'present')->count();
             $absentToday       = Attendance::whereDate('date', now())->where('status', 'absent')->count();
             $lateToday         = Attendance::whereDate('date', now())->where('status', 'late')->count();
-            $onLeaveEmployees  = Leave::where('status', 'approved')->whereDate('start_date', '<=', now())->whereDate('end_date', '>=', now())->count();
+            $onLeaveEmployees  = Leave::whereIn('status', ['approved', 'paid'])->whereDate('start_date', '<=', now())->whereDate('end_date', '>=', now())->count();
             $totalLeaves       = Leave::count();
             $pendingLeaves     = Leave::where('status', 'pending')->count();
-            $approvedLeaves    = Leave::where('status', 'approved')->count();
+            $approvedLeaves    = Leave::whereIn('status', ['approved', 'paid'])->count();
             $attendanceRate    = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
             $cutoffSchedules   = PayrollCutoffSchedule::orderBy('cutoff_day')->get();
             $cutoffInfo        = PayrollCutoffSchedule::getCurrentCutoffPeriod();
@@ -161,6 +164,12 @@
 
             $v = $this->payrollService->computePayroll($employee, $periodStart, $periodEnd, $request->allowances ?? [], $request->deductions ?? []);
 
+            // Calculate leave pay separately (not included in computePayroll)
+            $dailyRate = (float) ($employee->salary_rate ?? 0);
+            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances($employee->id, $periodStart, $periodEnd, $dailyRate);
+            $leavePay = collect($leaveAllowances)->sum('amount');
+            $leavePayDays = collect($leaveAllowances)->sum('paid_days');
+
             // BUG FIX: return overtime_hours, undertime_hours, and adjusted_gross
             // so payroll-form.js can display OT/UT rows and the adjusted gross line.
             return response()->json([
@@ -182,14 +191,16 @@
                     'label'  => $this->payrollService->buildHolidayLabel($hb),
                     'amount' => round($hb['amount'], 2),
                 ], $v['holidayBreakdown']),
+                'leave_pay' => round($leavePay, 2),
+                'leave_paid_days' => $leavePayDays,
                 'sss' => round($v['sss'], 2),
                 'pagibig' => round($v['pagibig'], 2),
                 'phil_health' => round($v['philhealth'] ?? 0, 2),
                 'withholding_tax' => round($v['withholdingTax'] ?? 0, 2),
-                'adjusted_gross' => round($v['adjustedGross'], 2),
-                'gross_pay' => round($v['grossPay'], 2),
+                'adjusted_gross' => round($v['adjustedGross'] + $leavePay, 2),
+                'gross_pay' => round($v['grossPay'] + $leavePay, 2),
                 'total_deductions' => round($v['totalDeductions'], 2),
-                'net_pay' => round($v['netPay'], 2),
+                'net_pay' => round($v['netPay'] + $leavePay, 2),
             ]);
         }
 

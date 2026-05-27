@@ -170,7 +170,13 @@
                             @php $days = $leave->start_date->diffInDays($leave->end_date) + 1; @endphp
                             <span class="lv-days-tag">{{ $days }}d</span>
                         </td>
-                        <td><span class="lv-badge paid">Paid</span></td>
+                        <td>
+                            @if($leave->status === 'paid')
+                                <span class="lv-badge paid">Paid</span>
+                            @else
+                                <span class="lv-badge approved">Approved</span>
+                            @endif
+                        </td>
 
                         <td><span class="lv-muted">{{ $leave->updated_at->format('M d, Y') }}</span></td>
                     </tr>

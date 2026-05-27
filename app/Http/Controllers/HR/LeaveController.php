@@ -8,11 +8,18 @@ use App\Models\Employee;
 use App\Models\LeaveType;
 use App\Models\EmployeeLeaveBalance;
 use App\Notifications\LeaveNotification;
+use App\Services\LeaveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
 {
+    protected $leaveService;
+
+    public function __construct(LeaveService $leaveService)
+    {
+        $this->leaveService = $leaveService;
+    }
     public function index(Request $request)
     {
         $baseQuery = Leave::query()->with('employee', 'approvedBy');
@@ -44,7 +51,12 @@ class LeaveController extends Controller
 
         // Filter current table list by status
         if ($status) {
-            $query->where('status', $status);
+            if ($status === 'approved') {
+                // Show both 'approved' and 'paid' leaves in the approved tab
+                $query->whereIn('status', ['approved', 'paid']);
+            } else {
+                $query->where('status', $status);
+            }
         }
 
         // Sort options
@@ -57,7 +69,7 @@ class LeaveController extends Controller
         // Statistics (aligned to current filters: search/department/leave_type)
         $totalLeaves = (clone $baseQuery)->count();
         $pendingLeaves = (clone $baseQuery)->where('status', 'pending')->count();
-        $approvedLeaves = (clone $baseQuery)->where('status', 'approved')->count();
+        $approvedLeaves = (clone $baseQuery)->whereIn('status', ['approved', 'paid'])->count();
         $rejectedLeaves = (clone $baseQuery)->where('status', 'rejected')->count();
 
         // Leave types - fetch from leave_types table
@@ -90,10 +102,10 @@ class LeaveController extends Controller
                 ->whereBetween('created_at', [$thisMonthStart, $thisMonthEnd])
                 ->count();
         } elseif ($status === 'approved') {
-            $thisWeekLeaves = (clone $baseQuery)->where('status', 'approved')
+            $thisWeekLeaves = (clone $baseQuery)->whereIn('status', ['approved', 'paid'])
                 ->whereBetween('updated_at', [$thisWeekStart, $thisWeekEnd])
                 ->count();
-            $thisMonthLeaves = (clone $baseQuery)->where('status', 'approved')
+            $thisMonthLeaves = (clone $baseQuery)->whereIn('status', ['approved', 'paid'])
                 ->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])
                 ->count();
         } elseif ($status === 'rejected') {
@@ -207,16 +219,19 @@ class LeaveController extends Controller
 
     public function approve(Request $request, Leave $leave)
     {
-        $leave->update([
-            'status' => 'approved',
-            'approved_by' => auth()->id() ?? null,
-        ]);
+        // Use LeaveService to approve leave with credit validation and attendance creation
+        $result = $this->leaveService->approveLeave($leave, auth()->id() ?? null);
+
+        if (!$result['success']) {
+            return redirect()->back()->with('error', $result['message']);
+        }
+
         $leave->load('employee', 'leaveType');
 
         // Send notification
         LeaveNotification::leaveApproved($leave);
 
-        return redirect()->route('leave.pending')->with('success', 'Leave request approved successfully.');
+        return redirect()->route('leave.approved')->with('success', $result['message']);
     }
 
     public function reject(Request $request, Leave $leave)
@@ -225,17 +240,19 @@ class LeaveController extends Controller
             'rejection_reason' => 'required|string|max:500',
         ]);
 
-        $leave->update([
-            'status' => 'rejected',
-            'approved_by' => auth()->id() ?? null,
-            'rejection_reason' => $request->rejection_reason,
-        ]);
+        // Use LeaveService to reject leave
+        $result = $this->leaveService->rejectLeave($leave, auth()->id() ?? null, $request->rejection_reason);
+
+        if (!$result['success']) {
+            return redirect()->back()->with('error', $result['message']);
+        }
+
         $leave->load('employee');
 
         // Send notification
         LeaveNotification::leaveRejected($leave);
 
-        return redirect()->route('leave.pending')->with('success', 'Leave request rejected successfully.');
+        return redirect()->route('leave.pending')->with('success', $result['message']);
     }
 
     public function getDetails(Leave $leave)

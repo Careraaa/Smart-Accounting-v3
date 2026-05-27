@@ -10,6 +10,13 @@ class Leave extends Model
 {
     use HasFactory;
 
+    /**
+     * Leave statuses:
+     * - 'pending': Submitted by employee, waiting for HR approval
+     * - 'approved': HR approved the leave, attendance marked as 'on leave'
+     * - 'rejected': HR rejected the leave request
+     * - 'paid': Leave processed through payroll (payroll created)
+     */
     protected $fillable = [
         'user_id',
         'leave_type_id',
@@ -20,6 +27,8 @@ class Leave extends Model
         'status',
         'approved_by',
         'rejection_reason',
+        'paid_days',
+        'unpaid_days',
     ];
 
     protected $casts = [

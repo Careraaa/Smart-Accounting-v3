@@ -6,11 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Payroll;
 use App\Models\PayrollBatch;
 use App\Notifications\PayrollNotification;
+use App\Services\LeaveService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class PayrollApprovalController extends Controller
 {
+    protected $leaveService;
+
+    public function __construct(LeaveService $leaveService)
+    {
+        $this->leaveService = $leaveService;
+    }
+
     /* ══════════════════════════════════════════════════════════════
      |  INDEX — list of submitted batches awaiting approval
      ══════════════════════════════════════════════════════════════ */
@@ -94,6 +102,13 @@ class PayrollApprovalController extends Controller
             'rejection_note' => null,
         ]);
 
+        // Mark approved leaves in this period as 'paid'
+        $periodStart = Carbon::parse($batch->period_start);
+        $periodEnd   = Carbon::parse($batch->period_end);
+        foreach ($batch->payrolls as $payroll) {
+            $this->leaveService->markLeavesAsPaid($payroll->user_id, $periodStart, $periodEnd);
+        }
+
         PayrollNotification::notifyHrPayrollApproved(
             $batch->period_start,
             $batch->period_end,
@@ -150,6 +165,11 @@ class PayrollApprovalController extends Controller
             return redirect()->back()->with('error', 'Payroll already processed.');
         }
         $payroll->update(['status' => 'approved']);
+        $this->leaveService->markLeavesAsPaid(
+            $payroll->user_id,
+            Carbon::parse($payroll->payroll_period_start),
+            Carbon::parse($payroll->payroll_period_end)
+        );
         PayrollNotification::notifyHrPayrollApproved($payroll->payroll_period_start, $payroll->payroll_period_end, 1);
         return redirect()->route('payroll-approval.index')->with('success', 'Payroll approved.');
     }

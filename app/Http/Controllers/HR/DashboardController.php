@@ -40,7 +40,7 @@ class DashboardController extends Controller
         
         // Leave Statistics
         $totalLeaves = Leave::count();
-        $approvedLeaves = Leave::where('status', 'approved')->count();
+        $approvedLeaves = Leave::whereIn('status', ['approved', 'paid'])->count();
         $pendingLeaves = Leave::where('status', 'pending')->count();
         $rejectedLeaves = Leave::where('status', 'rejected')->count();
         

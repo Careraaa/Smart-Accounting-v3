@@ -36,13 +36,14 @@ class EmployeeLeaveBalance extends Model
     }
 
     /**
-     * Calculate used days by counting all approved leaves for this employee, leave type, and year
+     * Calculate used days by counting all approved and paid leaves for this employee, leave type, and year.
+     * Both 'approved' and 'paid' leaves are counted as used since they represent leaves taken.
      */
     public function calculateUsedDays()
     {
         $approvedLeaves = Leave::where('user_id', $this->user_id)
             ->where('leave_type_id', $this->leave_type_id)
-            ->where('status', 'approved')
+            ->whereIn('status', ['approved', 'paid'])
             ->whereYear('start_date', (int)$this->year)
             ->get();
 

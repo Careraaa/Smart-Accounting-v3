@@ -9,6 +9,7 @@ use App\Models\WithholdingTax;
 use App\Models\Holiday;
 use App\Services\AttendanceService;
 use App\Services\HolidayWageService;
+use App\Services\LeaveService;
 use Carbon\Carbon;
 use App\Models\StatutoryDeduction;
 
@@ -16,16 +17,22 @@ class PayrollService
 {
     protected $attendanceService;
     protected $holidayWageService;
+    protected $leaveService;
 
-    public function __construct(AttendanceService $attendanceService, HolidayWageService $holidayWageService)
+    public function __construct(AttendanceService $attendanceService, HolidayWageService $holidayWageService, LeaveService $leaveService = null)
     {
         $this->attendanceService = $attendanceService;
         $this->holidayWageService = $holidayWageService;
+        $this->leaveService = $leaveService ?? app(LeaveService::class);
     }
 
     /**
      * Generate and persist a brand-new payroll record for one employee.
      * NOTE: Does NOT apply loan deductions — the caller must do that separately.
+     * 
+     * LEAVE PAY INTEGRATION:
+     * Calculates approved leave pay separately and includes it in the computed values.
+     * Leave pay is displayed in Salary Computation, not in manual allowances.
      */
     public function generatePayrollForEmployee(
         User $employee,
@@ -35,8 +42,21 @@ class PayrollService
         array $manualDeductions = [],
         array $manualBonuses = []
     ): Payroll {
-        // Run all the math first, then save everything to the DB.
+        // ── Step 1: Calculate leave pay separately ──────────────────────────
+        // Retrieve approved leaves for this payroll period
+        $dailyRate = (float) ($employee->salary_rate ?? 0);
+        $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances($employee->id, $start, $end, $dailyRate);
+        
+        // Sum up total leave pay (may be multiple leaves in period)
+        $totalLeavePay = collect($leaveAllowances)->sum('amount');
+        
+        // Run all the math first (leave pay NOT in manualAllowances yet)
         $values = $this->computePayroll($employee, $start, $end, $manualAllowances, $manualDeductions);
+        
+        // Add leave pay to the computed values for display
+        $values['leavePay'] = $totalLeavePay;
+        // Update gross pay to include leave pay
+        $values['grossPay'] = $values['grossPay'] + $totalLeavePay;
 
         $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
@@ -48,11 +68,11 @@ class PayrollService
             'gross_pay'            => round($values['grossPay'] + $totalBonuses, 2),
             'days_worked'          => $values['daysWorked'],
             'hours_worked'         => round($values['hoursWorked'], 2),
-            // total_allowances = everything on top of basic salary (OT + holiday + manual)
+            // total_allowances = everything on top of basic salary (OT + holiday + leave + manual)
             'total_allowances'     => round($values['grossPay'] - $values['basicSalary'], 2),
             'total_bonuses'        => round($totalBonuses, 2),
             'total_deductions'     => $values['totalDeductions'],
-            'net_pay'              => round($values['netPay'] + $totalBonuses, 2),
+            'net_pay'              => round($values['netPay'] + $totalLeavePay + $totalBonuses, 2),
             'sss'                  => round($values['sss'], 2),
             'pagibig'              => round($values['pagibig'], 2),
             'philhealth'           => round($values['philhealth'], 2),
@@ -60,7 +80,8 @@ class PayrollService
             'status'               => 'pending',
         ]);
 
-        $this->saveAllowances($payroll, $values, $manualAllowances);
+        // Save allowances (leave pay is added here as a calculated allowance)
+        $this->saveAllowances($payroll, $values, $manualAllowances, $leaveAllowances);
         $this->saveDeductions($payroll, $values, $manualDeductions);
         $this->saveBonuses($payroll, $manualBonuses);
 
@@ -271,6 +292,10 @@ class PayrollService
      * Recompute and persist an existing payroll record (edit / batch-edit).
      * Wipes and rebuilds all allowance, deduction, and bonus line items from scratch.
      * NOTE: Does NOT apply loan deductions — the caller must do that separately.
+     * 
+     * LEAVE PAY INTEGRATION:
+     * Automatically retrieves approved leaves for the payroll period and adds
+     * their pay to the manualAllowances array before calculation.
      */
     public function updatePayroll(
         Payroll $payroll,
@@ -282,7 +307,21 @@ class PayrollService
         array $extraData = [],
         array $manualBonuses = [],
     ): Payroll {
+        // ── Step 1: Calculate leave pay separately ──────────────────────────
+        // Retrieve approved leaves for this payroll period
+        $dailyRate = (float) ($employee->salary_rate ?? 0);
+        $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances($employee->id, $start, $end, $dailyRate);
+        
+        // Sum up total leave pay
+        $totalLeavePay = collect($leaveAllowances)->sum('amount');
+        
+        // Compute without leave pay in manualAllowances
         $values       = $this->computePayroll($employee, $start, $end, $manualAllowances, $manualDeductions);
+        
+        // Add leave pay to the computed values
+        $values['leavePay'] = $totalLeavePay;
+        $values['grossPay'] = $values['grossPay'] + $totalLeavePay;
+        
         $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
         $payroll->update([
@@ -296,7 +335,7 @@ class PayrollService
             'total_allowances'     => round($values['grossPay'] - $values['basicSalary'], 2),
             'total_bonuses'        => round($totalBonuses, 2),
             'total_deductions'     => $values['totalDeductions'],
-            'net_pay'              => round($values['netPay'] + $totalBonuses, 2),
+            'net_pay'              => round($values['netPay'] + $totalLeavePay + $totalBonuses, 2),
             'sss'                  => round($values['sss'], 2),
             'pagibig'              => round($values['pagibig'], 2),
             'philhealth'           => round($values['philhealth'], 2),
@@ -309,7 +348,7 @@ class PayrollService
         $payroll->deductions()->delete();
         $payroll->bonuses()->delete();
 
-        $this->saveAllowances($payroll, $values, $manualAllowances);
+        $this->saveAllowances($payroll, $values, $manualAllowances, $leaveAllowances);
         $this->saveDeductions($payroll, $values, $manualDeductions);
         $this->saveBonuses($payroll, $manualBonuses);
 
@@ -321,10 +360,13 @@ class PayrollService
     // =========================================================================
 
     /**
-     * Save all earning line items (OT, holiday breakdown, manual allowances).
+     * Save all earning line items (OT, holiday breakdown, leave pay, manual allowances).
      * Extracted so generate and update share the same logic.
+     * 
+     * Leave pay is saved separately from manual allowances so it appears in the
+     * Salary Computation section of the payroll view, not in the manual allowances section.
      */
-    private function saveAllowances(Payroll $payroll, array $values, array $manualAllowances): void
+    private function saveAllowances(Payroll $payroll, array $values, array $manualAllowances, array $leaveAllowances = []): void
     {
         // Overtime pay — one line showing hours and amount.
         if (!empty($values['otPay']) && $values['otPay'] > 0) {
@@ -355,7 +397,21 @@ class PayrollService
             }
         }
 
+        // Leave Pay — sum all approved leaves with paid days for the period.
+        // Displayed in Salary Computation section, not in manual allowances.
+        // paid_days is stored in the 'hours' column for display purposes.
+        foreach ($leaveAllowances as $leave) {
+            if ($leave['amount'] > 0) {
+                $payroll->allowances()->create([
+                    'allowance_type' => 'Leave Pay',
+                    'hours'          => $leave['paid_days'] ?? 0,
+                    'amount'         => round($leave['amount'], 2),
+                ]);
+            }
+        }
+
         // HR-entered manual allowances (transportation, meal, etc.).
+        // These appear in the Allowances (optional) section of the edit view.
         foreach ($manualAllowances as $allow) {
             $payroll->allowances()->create([
                 'allowance_type' => $allow['name'],

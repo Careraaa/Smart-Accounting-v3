@@ -184,6 +184,24 @@
                             </div>
                             @endforeach
                         </div>
+                        <div class="ep-row" id="ep_leave_pay_row" style="display:none;">
+                            <span class="ep-row-lbl green">Leave Pay <span class="ep-badge" id="ep_leave_pay_badge">0 days</span></span>
+                            <span class="ep-row-val green" id="ep_leave_pay_display">+&#8369;0.00</span>
+                        </div>
+                        @php
+                            $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
+                            $existingLeavePay = $leavePayAllowances->sum('amount');
+                            $existingLeavePayDays = (int) $leavePayAllowances->sum('hours');
+                        @endphp
+                        @if($existingLeavePay > 0)
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                document.getElementById('ep_leave_pay_row').style.display = '';
+                                document.getElementById('ep_leave_pay_display').textContent = '+&#8369;{{ number_format($existingLeavePay, 2) }}';
+                                document.getElementById('ep_leave_pay_badge').textContent = '{{ $existingLeavePayDays }} day{{ $existingLeavePayDays !== 1 ? "s" : "" }}';
+                            });
+                        </script>
+                        @endif
                         <div class="ep-row" id="ep_ot_row" style="display:none;">
                             <span class="ep-row-lbl green">Overtime Pay <span class="ep-badge" id="ep_ot_hrs_badge"></span></span>
                             <span class="ep-row-val green" id="ep_ot_display">+&#8369;0.00</span>
@@ -314,7 +332,8 @@
 @php
     $manualAllowances = $payroll->allowances
         ->filter(fn($a) => !str_starts_with((string)($a->allowance_type ?? $a->name ?? ''), 'Overtime Pay')
-                        && !str_starts_with((string)($a->allowance_type ?? $a->name ?? ''), 'Holiday Pay'))
+                        && !str_starts_with((string)($a->allowance_type ?? $a->name ?? ''), 'Holiday Pay')
+                        && !str_starts_with((string)($a->allowance_type ?? $a->name ?? ''), 'Leave Pay'))
         ->map(fn($a) => ['name' => $a->allowance_type ?? $a->name, 'amount' => $a->amount])
         ->values();
     $manualDeductions = $payroll->deductions
@@ -332,10 +351,14 @@
     $manualAllowTotal = $manualAllowances->sum('amount');
     $holidayOTPay = (float)($payroll->allowances->where('allowance_type', 'Holiday Overtime Pay')->sum('amount') ?? 0);
     $holidayOTHours = (float)($payroll->allowances->where('allowance_type', 'Holiday Overtime Pay')->sum('hours') ?? 0);
+    $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
+    $leavePay = (float)($leavePayAllowances->sum('amount') ?? 0);
+    $leavePayDays = (int) $leavePayAllowances->sum('hours');
     $holidayPay = max(0, (float)($payroll->gross_pay ?? 0)
         - (float)($payroll->basic_salary ?? 0)
         - (float)($payroll->overtime_pay ?? 0)
         - $holidayOTPay
+        - $leavePay
         - $manualAllowTotal);
 @endphp
 <script>
@@ -358,6 +381,8 @@ window._ep = {
                 ->map(fn($a) => ['label' => $a->allowance_type, 'amount' => (float)$a->amount])
                 ->values()
         ),
+        leavePay:       {{ round($leavePay, 2) }},
+        leavePayDays:   {{ $leavePayDays }},
         netPay:         {{ (float)($payroll->net_pay ?? 0) }},
         otPay:          {{ (float)($payroll->overtime_pay ?? 0) }},
         otHours:        {{ (float)($payroll->allowances->where('allowance_type', 'like', 'Overtime Pay%')->sum('hours') ?? 0) }},
@@ -408,8 +433,8 @@ window._ep = {
             basicBadge.textContent = '\u20B1' + Number(rate).toLocaleString('en-PH', {minimumFractionDigits:2,maximumFractionDigits:2})
                 + ' \u00D7 ' + days + (days === 1 ? ' day' : ' days');
         }
-        // Compute adjusted total: Basic + Holiday + Holiday OT + OT - Undertime - Late - System Deductions
-        const adjustedTotal = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.holidayOTPay ?? 0) + (c.otPay ?? 0) - (c.utDeduction ?? 0) - (c.late_deduction ?? 0) - (c.sss ?? 0) - (c.pagibig ?? 0) - (c.philhealth ?? 0) - (c.withholdingTax ?? 0);
+        // Compute adjusted total: Basic + Holiday + Holiday OT + Leave Pay + OT - Undertime - Late - System Deductions
+        const adjustedTotal = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.holidayOTPay ?? 0) + (c.leavePay ?? 0) + (c.otPay ?? 0) - (c.utDeduction ?? 0) - (c.late_deduction ?? 0) - (c.sss ?? 0) - (c.pagibig ?? 0) - (c.philhealth ?? 0) - (c.withholdingTax ?? 0);
         $('ep_adjusted').textContent      = fmt(Math.max(0, adjustedTotal));
 
         // Render one row per holiday using the breakdown array
@@ -445,6 +470,13 @@ window._ep = {
             $('ep_holiday_ot_hrs_badge').textContent = c.holidayOTHours + ' hrs';
             holidayOtRow.style.display = '';
         } else { holidayOtRow.style.display = 'none'; }
+        const leavePayRow = $('ep_leave_pay_row');
+        if (c.leavePay > 0) {
+            $('ep_leave_pay_display').textContent = '+' + fmt(c.leavePay);
+            const days = c.leavePayDays ?? 0;
+            $('ep_leave_pay_badge').textContent = days + ' day' + (days !== 1 ? 's' : '');
+            leavePayRow.style.display = '';
+        } else { leavePayRow.style.display = 'none'; }
         const utRow = $('ep_ut_row');
         if (c.utDeduction > 0) {
             $('ep_ut_display').textContent   = '-' + fmt(c.utDeduction);
@@ -485,7 +517,7 @@ window._ep = {
         const allowTotal = allowances.reduce((s,a) => s + a.amount, 0);
         const deductTotal = deductions.reduce((s,d) => s + d.amount, 0);
         const bonusTotal = bonuses.reduce((s,b) => s + b.amount, 0);
-        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.late_deduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
+        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.leavePay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.late_deduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
         const finalNetPay = Math.max(0, adjustedTotal + allowTotal - deductTotal + bonusTotal);
         computed.netPay = finalNetPay;
         $('ep_net_salary').textContent = fmt(finalNetPay);
@@ -597,6 +629,8 @@ window._ep = {
                 holidayOTPay:data.holiday_overtime_pay??0,
                 holidayOTHours:data.holiday_overtime_hours??0,
                 holidayBreakdown:data.holiday_breakdown??[],
+                leavePay:data.leave_pay??0,
+                leavePayDays:data.leave_paid_days??0,
                 otPay:data.overtime_pay??0, otHours:data.overtime_hours??0,
                 utDeduction:data.undertime_deduction??0, utHours:data.undertime_hours??0,
                 late_deduction:data.late_deduction??0, late_minutes:data.late_minutes??0,

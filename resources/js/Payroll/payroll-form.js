@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Salary
         basicSalary: 0,
         dailyRate: 0,
+        leavePay: 0,
         // Holiday
         holidayBreakdown: [],
         // OT / UT
@@ -65,6 +66,10 @@ document.addEventListener("DOMContentLoaded", function () {
         basicInput: g("prl_basic_input"),
 
         holidayRows: g("prl_holiday_rows"),
+
+        leavePayRow: g("prl_leave_pay_row"),
+        leavePayVal: g("prl_leave_pay_val"),
+        leavePayBadge: g("prl_leave_pay_badge"),
 
         otRow: g("prl_ot_row"),
         otHrs: g("prl_ot_hrs"),
@@ -167,6 +172,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 row.append(lbl, val);
                 EL.holidayRows.appendChild(row);
             });
+        }
+
+        // Leave Pay
+        if (EL.leavePayRow) EL.leavePayRow.style.display = S.leavePay > 0 ? "flex" : "none";
+        if (S.leavePay > 0 && EL.leavePayVal) EL.leavePayVal.textContent = fmt(S.leavePay);
+        if (EL.leavePayBadge) {
+            const days = S.leavePayDays ?? 0;
+            EL.leavePayBadge.textContent = days + " day" + (days !== 1 ? "s" : "");
         }
 
         // OT
@@ -378,6 +391,8 @@ document.addEventListener("DOMContentLoaded", function () {
             S.basicSalary = data.basic_salary ?? 0;
             S.dailyRate = data.daily_rate ?? 0;
             S.holidayBreakdown = data.holiday_breakdown ?? [];
+            S.leavePay = data.leave_pay ?? 0;
+            S.leavePayDays = data.leave_paid_days ?? 0;
             S.otHours = data.overtime_hours ?? 0;
             S.utHours = data.undertime_hours ?? 0;
             S.otPay = data.overtime_pay ?? 0;
@@ -491,6 +506,8 @@ document.addEventListener("DOMContentLoaded", function () {
         S.basicSalary = Number(c.basicSalary ?? 0);
         S.adjustedGross = Number(c.adjustedGross ?? 0);
         S.netPay = Number(c.netPay ?? 0);
+        S.leavePay = Number(c.leavePay ?? 0);
+        S.leavePayDays = Number(c.leavePayDays ?? 0);
     }
 
     // Initial render from current state
