@@ -49,30 +49,30 @@
     </div>
 
     {{-- Mobile: centered card layout --}}
-    <div class="md:hidden min-h-screen flex flex-col bg-white">
-        <div class="flex-1 flex flex-col justify-center px-6 py-8">
+    <div class="md:hidden min-h-screen flex flex-col relative bg-[#020617] bg-cover bg-center" style="background-image: url('{{ asset('images/login_bg.png') }}')">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-[#020617]/50 to-[#020617]/40"></div>
+        <div class="relative z-10 flex-1 flex flex-col justify-center px-5 py-6">
             <div class="w-full max-w-sm mx-auto">
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#020617] mb-4">
-                        <span class="text-white font-extrabold text-lg">KT</span>
-                    </div>
-                    <h1 class="text-xl font-extrabold text-gray-900">Knights Transport</h1>
-                    <p class="text-xs text-gray-400 mt-0.5">Smart Accounting System</p>
+                <div class="text-center mb-5">
+                    <h1 class="text-xl font-extrabold text-white">Knights Transport</h1>
+                    <p class="text-xs text-white/50 mt-0.5">Smart Accounting System</p>
                 </div>
 
-                @if ($errors->any())
-                    <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm p-4 mb-4" role="alert">
-                        @foreach ($errors->all() as $error)
-                            <div>{{ $error }}</div>
-                        @endforeach
-                    </div>
-                @endif
-                @if (session('status'))
-                    <div class="bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm p-4 mb-4" role="alert">
-                        {{ session('status') }}
-                    </div>
-                @endif
-                @yield('content')
+                <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl px-5 py-6 md:px-6 md:py-7">
+                    @if ($errors->any())
+                        <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm p-4 mb-4" role="alert">
+                            @foreach ($errors->all() as $error)
+                                <div>{{ $error }}</div>
+                            @endforeach
+                        </div>
+                    @endif
+                    @if (session('status'))
+                        <div class="bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm p-4 mb-4" role="alert">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+                    @yield('content')
+                </div>
             </div>
         </div>
     </div>
