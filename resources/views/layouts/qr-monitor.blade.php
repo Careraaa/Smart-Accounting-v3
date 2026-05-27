@@ -7,7 +7,7 @@
     <title>QR Attendance Monitor - Smart Accounting</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
 
-    @vite(['resources/css/tailwind.css', 'resources/scss/app.scss', 'resources/js/app.js'])
+    @vite(['resources/css/tailwind.css', 'resources/js/app.js'])
 
     <style>
         html, body { width: 100%; height: 100vh; margin: 0; padding: 0; overflow: hidden; }
