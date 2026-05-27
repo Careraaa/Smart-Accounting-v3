@@ -145,25 +145,48 @@
 
                 {{-- ── SUPERADMIN ── --}}
 @if (auth()->user()->role === 'superadmin')
-                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Menu</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">System Administration</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('superadmin.accounts.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('superadmin.accounts.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-pink-500"><i class="feather-shield" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Manage Accounts</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('configuration.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('configuration.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-slate-500"><i class="feather-settings" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">System Configuration</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('admin.dashboard') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('admin.dashboard') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-rose-500"><i class="feather-monitor" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">QR Monitor</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">HR Management</label></li>
 
                     <li class="sidebar-item">
                         <a href="{{ route('employees.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employees.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employees.*') ? 'text-emerald-500' : 'text-emerald-500' }}"><i class="feather-user-plus" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-emerald-500"><i class="feather-user-plus" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Employee Management</span>
                         </a>
                     </li>
 
                     <li class="sidebar-item">
                         <a href="{{ route('leave.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('leave.*', 'leave-type.*') ? 'text-violet-500' : 'text-violet-500' }}"><i class="feather-calendar" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-violet-500"><i class="feather-calendar" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Leave Management</span>
                         </a>
                     </li>
 
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('holiday.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('holiday.*') ? 'text-rose-500' : 'text-rose-500' }}"><i class="feather-gift" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-rose-500"><i class="feather-gift" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Holiday Management</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
@@ -174,7 +197,7 @@
 
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('attendance.*', 'overtime.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('attendance.*', 'overtime.*') ? 'text-cyan-500' : 'text-cyan-500' }}"><i class="feather-clock" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-cyan-500"><i class="feather-clock" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Attendance</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
@@ -184,9 +207,40 @@
                         </ul>
                     </li>
 
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Operations</label></li>
+
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-orange-500"><i class="feather-truck" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Operational Records</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
+                        </a>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('drivers.*') ? 'active' : 'text-gray-500' }}" href="{{ route('drivers.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-user" style="font-size:13px"></i></span><span>List of Drivers</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('paos.*') ? 'active' : 'text-gray-500' }}" href="{{ route('paos.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-users" style="font-size:13px"></i></span><span>List of PAO / Conductors</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('routes.*') ? 'active' : 'text-gray-500' }}" href="{{ route('routes.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-map-pin" style="font-size:13px"></i></span><span>Manage Routes</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('vehicles.*') ? 'active' : 'text-gray-500' }}" href="{{ route('vehicles.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-truck" style="font-size:13px"></i></span><span>Manage Vehicles</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-teal-500"><i class="feather-activity" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Daily Remittance</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
+                        </a>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-edit" style="font-size:13px"></i></span><span>Record Remittance</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('short-remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-triangle" style="font-size:13px"></i></span><span>Short Remittance</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Report</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Financials &amp; Controls</label></li>
+
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll.*') ? 'text-green-600' : 'text-green-600' }}"><i class="feather-dollar-sign" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-green-600"><i class="feather-dollar-sign" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Payroll Processing</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
@@ -201,41 +255,14 @@
 
                     <li class="sidebar-item">
                         <a href="{{ route('bonuses.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'text-yellow-500' : 'text-yellow-500' }}"><i class="feather-award" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-yellow-500"><i class="feather-award" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Bonuses</span>
                         </a>
                     </li>
 
                     <li class="sidebar-item has-sub">
-                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'text-orange-500' : 'text-orange-500' }}"><i class="feather-users" style="font-size:15px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Operational Records</span>
-                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
-                        </a>
-                        <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('drivers.*') ? 'active' : 'text-gray-500' }}" href="{{ route('drivers.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-user" style="font-size:13px"></i></span><span>List of Drivers</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('paos.*') ? 'active' : 'text-gray-500' }}" href="{{ route('paos.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-users" style="font-size:13px"></i></span><span>List of PAO / Conductors</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('routes.*') ? 'active' : 'text-gray-500' }}" href="{{ route('routes.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-map-pin" style="font-size:13px"></i></span><span>Manage Routes</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('vehicles.*') ? 'active' : 'text-gray-500' }}" href="{{ route('vehicles.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-truck" style="font-size:13px"></i></span><span>Manage Vehicles</span></a></li>
-                        </ul>
-                    </li>
-
-                    <li class="sidebar-item has-sub">
-                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'text-teal-500' : 'text-teal-500' }}"><i class="feather-activity" style="font-size:15px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Daily Remittance</span>
-                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
-                        </a>
-                        <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-edit" style="font-size:13px"></i></span><span>Record Remittance</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('short-remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-triangle" style="font-size:13px"></i></span><span>Short Remittance</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Report</span></a></li>
-                        </ul>
-                    </li>
-
-                    <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'text-indigo-500' : 'text-indigo-500' }}"><i class="feather-check-circle" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-indigo-500"><i class="feather-check-circle" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Approvals</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
@@ -247,7 +274,7 @@
 
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('reports.remittance', 'reports.payroll') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('reports.remittance', 'reports.payroll') ? 'text-sky-500' : 'text-sky-500' }}"><i class="feather-file-text" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-sky-500"><i class="feather-file-text" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Accountant Reports</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
@@ -255,13 +282,6 @@
                             <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.remittance') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Reports</span></a></li>
                             <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.payroll') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Payroll Reports</span></a></li>
                         </ul>
-                    </li>
-
-                    <li class="sidebar-item">
-                        <a href="{{ route('admin.dashboard') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('admin.dashboard') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('admin.dashboard') ? 'text-pink-500' : 'text-pink-500' }}"><i class="feather-camera" style="font-size:15px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">QR Monitor</span>
-                        </a>
                     </li>
                 @endif
 
@@ -286,11 +306,11 @@
 
                 {{-- ── Remittance Clerk ── --}}
                 @if (auth()->user()->role === 'remittance_clerk')
-                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Operations</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Operations</label></li>
 
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'text-orange-500' : 'text-orange-500' }}"><i class="feather-users" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-orange-500"><i class="feather-truck" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Operational Records</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
@@ -304,7 +324,7 @@
 
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'text-teal-500' : 'text-teal-500' }}"><i class="feather-activity" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-teal-500"><i class="feather-activity" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Daily Remittance</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
@@ -314,9 +334,11 @@
                         </ul>
                     </li>
 
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Reports</label></li>
+
                     <li class="sidebar-item">
                         <a href="{{ route('reports.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('reports.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('reports.*') ? 'text-sky-500' : 'text-sky-500' }}"><i class="feather-file-text" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-sky-500"><i class="feather-file-text" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Remittance Report</span>
                         </a>
                     </li>
@@ -408,14 +430,14 @@
 
                     <li class="sidebar-item">
                         <a href="{{ route('employee.cash-advances.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.cash-advances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.cash-advances.*') ? 'text-emerald-500' : 'text-emerald-500' }}"><i class="feather-credit-card" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-emerald-500"><i class="feather-credit-card" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Cash Advances</span>
                         </a>
                     </li>
 
                     <li class="sidebar-item">
                         <a href="{{ route('employee.salary-loans.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.salary-loans.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.salary-loans.*') ? 'text-amber-500' : 'text-amber-500' }}"><i class="feather-briefcase" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-briefcase" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Salary Loans</span>
                         </a>
                     </li>
@@ -424,33 +446,49 @@
 
                     <li class="sidebar-item">
                         <a href="{{ route('employee.leaves.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.leaves.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.leaves.*') ? 'text-violet-500' : 'text-violet-500' }}"><i class="feather-calendar" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-violet-500"><i class="feather-calendar" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">My Leaves</span>
                         </a>
                     </li>
 
                     <li class="sidebar-item">
                         <a href="{{ route('employee.overtime-undertime.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.overtime-undertime.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.overtime-undertime.*') ? 'text-cyan-500' : 'text-cyan-500' }}"><i class="feather-clock" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-cyan-500"><i class="feather-clock" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">OT / UT Requests</span>
                         </a>
                     </li>
 
                     <li class="sidebar-item">
                         <a href="{{ route('employee.attendance.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attendance.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.attendance.*') ? 'text-violet-500' : 'text-violet-500' }}"><i class="feather-calendar" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-blue-500"><i class="feather-check-square" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">My Attendance</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">My Account</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('profile.details') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('profile.details') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-indigo-500"><i class="feather-user" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Profile</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.attachments.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attachments.index') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-sky-500"><i class="feather-folder" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Documents</span>
                         </a>
                     </li>
                 @endif
 
                 {{-- ── Accountant ── --}}
                 @if (auth()->user()->role === 'accountant')
-                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Approvals &amp; Reports</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Approvals &amp; Receivables</label></li>
 
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'text-indigo-500' : 'text-indigo-500' }}"><i class="feather-check-circle" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-indigo-500"><i class="feather-check-circle" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Approvals</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
@@ -462,14 +500,16 @@
 
                     <li class="sidebar-item">
                         <a href="{{ route('payroll.receivables.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll.receivables.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll.receivables.*') ? 'text-indigo-500' : 'text-indigo-500' }}"><i class="feather-inbox" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-emerald-500"><i class="feather-inbox" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Receivables &amp; Loans</span>
                         </a>
                     </li>
 
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Reports</label></li>
+
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('reports.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('reports.*') ? 'text-sky-500' : 'text-sky-500' }}"><i class="feather-file-text" style="font-size:15px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-sky-500"><i class="feather-file-text" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Reports</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
