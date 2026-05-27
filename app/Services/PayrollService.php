@@ -142,14 +142,14 @@ class PayrollService
         $grossPay         = $basicSalary + $otPay + $holidayPay + $manualAllowTotal;
 
         // ── Step 6: Statutory deductions (SSS, Pag-IBIG, PhilHealth) ─────────
-        // These are contributions based on actual earnings this period.
-        // Bracket lookup uses basicSalary (not hypothetical monthly), as employees
-        // contribute based on what they actually earned, not a full-month projection.
+        // Bracket lookup is based on basic salary for this period × 2 (annualized).
+        // This excludes OT and holiday pay, which are temporary/irregular and should
+        // not inflate the permanent bracket classification.
         // Gate: employee must have income this period (worked days OR holiday pay).
         $contributionBasis = $basicSalary + $holidayPay + $otPay;
 
         $hasIncome = $contributionBasis > 0;
-        $monthlySalaryForBracket = $contributionBasis * 2;
+        $monthlySalaryForBracket = $basicSalary * 2; // Annualize basic salary (excludes OT, holiday)
 
         $sss = ($employee->has_sss && $hasIncome)
             ? $this->getStatutoryDeduction('SSS', $monthlySalaryForBracket)
