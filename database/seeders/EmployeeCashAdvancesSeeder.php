@@ -20,6 +20,10 @@ class EmployeeCashAdvancesSeeder extends Seeder
         $rows = [];
 
         $samples = [
+            ['amount' => 5000, 'request' => '2025-03-05', 'approval' => '2025-03-06', 'status' => 'approved', 'notes' => 'Tuition installment for dependent.'],
+            ['amount' => 3000, 'request' => '2025-06-12', 'approval' => '2025-06-13', 'status' => 'approved', 'notes' => 'Medical checkup and prescribed medication.'],
+            ['amount' => 2500, 'request' => '2025-09-08', 'approval' => null, 'status' => 'pending', 'notes' => 'Home appliance repair after power surge.'],
+            ['amount' => 4000, 'request' => '2025-11-20', 'approval' => '2025-11-21', 'status' => 'rejected', 'notes' => 'Urgent travel expense.', 'rejection' => 'Please attach itinerary or supporting receipt before approval.'],
             ['amount' => 5000, 'request' => '2026-02-05', 'approval' => '2026-02-06', 'status' => 'approved', 'notes' => 'Tuition installment for dependent.'],
             ['amount' => 3000, 'request' => '2026-03-12', 'approval' => '2026-03-13', 'status' => 'approved', 'notes' => 'Medical checkup and prescribed medication.'],
             ['amount' => 2500, 'request' => '2026-04-08', 'approval' => null, 'status' => 'pending', 'notes' => 'Home appliance repair after power surge.'],

@@ -56,7 +56,6 @@ class AttendanceController extends Controller
             'presentCount',
             'lateCount',
             'absentCount',
-            'earlyCount',
             'otHours',
             'utHours'
         ));

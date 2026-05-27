@@ -29,14 +29,14 @@ class Users_Seeder extends Seeder
     private function systemAndStaffUsers(): array
     {
         $pw = SeedConfig::PASSWORD_HASH;
-        $ts = '2026-02-06 12:11:11';
+        $ts = '2025-01-01 08:00:00';
 
         return [
             [
                 'id' => 1, 'name' => 'Super Admin', 'username' => 'super_admin', 'password' => $pw,
                 'role' => 'superadmin', 'profile_picture' => null, 'remember_token' => 'SuperAdminToken01',
                 'first_name' => 'Super', 'middle_name' => null, 'last_name' => 'Admin',
-                'email' => 'superadmin@smartaccounting.ph', 'phone' => null, 'address' => null,
+                'email' => 'superadmin@gmail.com', 'phone' => null, 'address' => null,
                 'civil_status' => null, 'spouse_name' => null, 'date_of_birth' => null, 'place_of_birth' => null,
                 'educational_attainment' => null, 'driver_license_number' => null, 'driver_license_validity' => null,
                 'date_of_hire' => null, 'position' => null, 'department' => null, 'status' => 'active',
@@ -48,7 +48,7 @@ class Users_Seeder extends Seeder
                 'id' => 2, 'name' => 'QR Attendance Admin', 'username' => 'qr_admin', 'password' => $pw,
                 'role' => 'qr_admin', 'profile_picture' => null, 'remember_token' => 'QRAdminTkn01',
                 'first_name' => 'Rica', 'middle_name' => null, 'last_name' => 'Navarro',
-                'email' => 'qr.admin@smartaccounting.ph', 'phone' => '09131234567',
+                'email' => 'qr.admin@gmail.com', 'phone' => '09131234567',
                 'address' => json_encode(['street' => '50 EDSA', 'barangay' => 'Brgy. Highway Hills', 'city' => 'Mandaluyong City', 'province' => 'Metro Manila']),
                 'civil_status' => 'single', 'spouse_name' => null, 'date_of_birth' => '1991-04-02', 'place_of_birth' => 'Mandaluyong City',
                 'educational_attainment' => "College (Bachelor's)", 'driver_license_number' => null, 'driver_license_validity' => null,
@@ -61,7 +61,7 @@ class Users_Seeder extends Seeder
                 'id' => 3, 'name' => 'Juan Dela Cruz', 'username' => 'juan.delacruz', 'password' => $pw,
                 'role' => 'hr', 'profile_picture' => null, 'remember_token' => 'PD8ffT4qLQ',
                 'first_name' => 'Juan', 'middle_name' => 'Rizal', 'last_name' => 'Dela Cruz',
-                'email' => 'juan.delacruz@smartaccounting.ph', 'phone' => '09101234567',
+                'email' => 'juan.delacruz@gmail.com', 'phone' => '09101234567',
                 'address' => json_encode(['street' => '100 Admin Street', 'barangay' => 'Brgy. Central', 'city' => 'Quezon City', 'province' => 'Metro Manila']),
                 'civil_status' => 'married', 'spouse_name' => 'Maria Dela Cruz', 'date_of_birth' => '1985-02-10', 'place_of_birth' => 'Manila',
                 'educational_attainment' => "College (Bachelor's)", 'driver_license_number' => null, 'driver_license_validity' => null,
@@ -74,7 +74,7 @@ class Users_Seeder extends Seeder
                 'id' => 4, 'name' => 'Mark Santos', 'username' => 'mark.santos', 'password' => $pw,
                 'role' => 'remittance_clerk', 'profile_picture' => null, 'remember_token' => '26TRckTpBv',
                 'first_name' => 'Mark', 'middle_name' => 'Anthony', 'last_name' => 'Santos',
-                'email' => 'mark.santos@smartaccounting.ph', 'phone' => '09111234567',
+                'email' => 'mark.santos@gmail.com', 'phone' => '09111234567',
                 'address' => json_encode(['street' => '200 Clerk Street', 'barangay' => 'Brgy. Poblacion', 'city' => 'Manila', 'province' => 'Metro Manila']),
                 'civil_status' => 'single', 'spouse_name' => null, 'date_of_birth' => '1993-06-15', 'place_of_birth' => 'Manila',
                 'educational_attainment' => "College (Bachelor's)", 'driver_license_number' => 'N03-24-987654', 'driver_license_validity' => '2028-06-15',
@@ -87,7 +87,7 @@ class Users_Seeder extends Seeder
                 'id' => 5, 'name' => 'Mary Grace Piattos', 'username' => 'mary.grace', 'password' => $pw,
                 'role' => 'accountant', 'profile_picture' => null, 'remember_token' => 'K0ve6RLqfM',
                 'first_name' => 'Mary Grace', 'middle_name' => 'Luna', 'last_name' => 'Piattos',
-                'email' => 'mary.grace@smartaccounting.ph', 'phone' => '09121234567',
+                'email' => 'mary.grace@gmail.com', 'phone' => '09121234567',
                 'address' => json_encode(['street' => '300 Accounting Street', 'barangay' => 'Brgy. San Antonio', 'city' => 'Makati City', 'province' => 'Metro Manila']),
                 'civil_status' => 'married', 'spouse_name' => 'Luis Piattos', 'date_of_birth' => '1990-09-20', 'place_of_birth' => 'Cebu City',
                 'educational_attainment' => "College (Bachelor's)", 'driver_license_number' => null, 'driver_license_validity' => null,
@@ -156,8 +156,8 @@ class Users_Seeder extends Seeder
                 'philhealth_number' => $hasStat ? SeedConfig::formatPhilhealth($seq) : null,
                 'signature_path' => null,
                 'attachments' => null,
-                'created_at' => '2026-02-06 12:11:12',
-                'updated_at' => '2026-02-06 12:11:12',
+                'created_at' => '2025-01-01 08:00:01',
+                'updated_at' => '2025-01-01 08:00:01',
             ];
             $id++;
         }

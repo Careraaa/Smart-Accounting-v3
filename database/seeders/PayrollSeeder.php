@@ -82,7 +82,7 @@ class PayrollSeeder extends Seeder
             }
         }
 
-        $this->command?->info("PayrollSeeder: {$totalPayrolls} payroll records across " . count($periods) . ' periods (Feb–Apr 2026).');
+        $this->command?->info("PayrollSeeder: {$totalPayrolls} payroll records across " . count($periods) . ' periods (Jan 2025 – Apr 2026).');
     }
 
     /**

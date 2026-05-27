@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Database\Seeders\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -45,11 +46,12 @@ class AttendanceSeeder extends Seeder
                 $existingKeys[$key] = true;
             }
 
-            // One planned absence per employee in March (leave overlap)
-            $marchAbsent = collect($workDays)->first(fn ($d) => str_starts_with($d, '2026-03') && SeedConfig::hashFloat($userId, 'absent-' . $d) > 0.92);
-            if ($marchAbsent && !isset($existingKeys[$userId . '|' . $marchAbsent])) {
-                $records[] = $this->createAttendanceRecord($userId, $marchAbsent, 'absent', noTimes: true);
-                $existingKeys[$userId . '|' . $marchAbsent] = true;
+            // One planned absence per employee in the 9th month of the range (leave overlap)
+            $targetPrefix = Carbon::parse(SeedConfig::RANGE_START)->addMonths(8)->format('Y-m');
+            $plannedAbsent = collect($workDays)->first(fn ($d) => str_starts_with($d, $targetPrefix) && SeedConfig::hashFloat($userId, 'absent-' . $d) > 0.92);
+            if ($plannedAbsent && !isset($existingKeys[$userId . '|' . $plannedAbsent])) {
+                $records[] = $this->createAttendanceRecord($userId, $plannedAbsent, 'absent', noTimes: true);
+                $existingKeys[$userId . '|' . $plannedAbsent] = true;
             }
         }
 

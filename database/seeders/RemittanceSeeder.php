@@ -26,7 +26,7 @@ class RemittanceSeeder extends Seeder
                 'name' => 'Ramon Villanueva',
                 'contact_number' => '09171234567',
                 'gender' => 'male',
-                'email' => 'ramon.villanueva@smartaccounting.ph',
+                'email' => 'ramon.villanueva@gmail.com',
                 'address' => '123 Rizal St., Brgy. Commonwealth, Quezon City, Metro Manila',
                 'date_of_hire' => '2022-03-15',
                 'status' => 'active',
@@ -39,7 +39,7 @@ class RemittanceSeeder extends Seeder
                 'name' => 'Pedro Santos',
                 'contact_number' => '09987654321',
                 'gender' => 'male',
-                'email' => 'pedro.santos@smartaccounting.ph',
+                'email' => 'pedro.santos@gmail.com',
                 'address' => '45 Bonifacio Ave., Brgy. 289, Manila, Metro Manila',
                 'date_of_hire' => '2023-01-10',
                 'status' => 'active',
@@ -52,7 +52,7 @@ class RemittanceSeeder extends Seeder
                 'name' => 'Gilbert Cruz',
                 'contact_number' => '09181239876',
                 'gender' => 'male',
-                'email' => 'gilbert.cruz@smartaccounting.ph',
+                'email' => 'gilbert.cruz@gmail.com',
                 'address' => '12 MacArthur Hwy., Guiguinto, Bulacan',
                 'date_of_hire' => '2024-06-01',
                 'status' => 'active',
@@ -66,7 +66,7 @@ class RemittanceSeeder extends Seeder
         */
 
         $pao1 = PAO::updateOrCreate(
-            ['email' => 'maria.lopez@smartaccounting.ph'],
+            ['email' => 'maria.lopez@gmail.com'],
             [
                 'name' => 'Maria Lopez',
                 'contact_number' => '09170000001',
@@ -78,7 +78,7 @@ class RemittanceSeeder extends Seeder
         );
 
         $pao2 = PAO::updateOrCreate(
-            ['email' => 'ana.reyes@smartaccounting.ph'],
+            ['email' => 'ana.reyes@gmail.com'],
             [
                 'name' => 'Ana Reyes',
                 'contact_number' => '09171111112',

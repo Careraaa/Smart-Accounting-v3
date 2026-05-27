@@ -29,7 +29,15 @@ class EmployeeLeavesSeeder extends Seeder
         $hasRejection = Schema::hasColumn('leaves', 'rejection_reason');
 
         $templates = [
-            ['type' => 'Vacation Leave', 'start' => '2026-02-10', 'end' => '2026-02-12', 'reason' => 'Family visit to province; tasks endorsed to team lead.', 'status' => 'approved'],
+            ['type' => 'Vacation Leave', 'start' => '2025-01-20', 'end' => '2025-01-22', 'reason' => 'Family visit to province; tasks endorsed to team lead.', 'status' => 'approved'],
+            ['type' => 'Sick Leave', 'start' => '2025-02-24', 'end' => '2025-02-24', 'reason' => 'Fever and body pain; rest advised by clinic.', 'status' => 'approved'],
+            ['type' => 'Vacation Leave', 'start' => '2025-03-17', 'end' => '2025-03-19', 'reason' => 'Scheduled VL; son\'s school recognition day.', 'status' => 'approved'],
+            ['type' => 'Sick Leave', 'start' => '2025-04-24', 'end' => '2025-04-25', 'reason' => 'Dental procedure and recovery.', 'status' => 'approved'],
+            ['type' => 'Emergency Leave', 'start' => '2025-06-02', 'end' => '2025-06-02', 'reason' => 'Urgent home repair (flooding after heavy rain).', 'status' => 'approved'],
+            ['type' => 'Vacation Leave', 'start' => '2025-08-14', 'end' => '2025-08-15', 'reason' => 'Personal errands and government ID renewal.', 'status' => 'pending'],
+            ['type' => 'Bereavement Leave', 'start' => '2025-09-06', 'end' => '2025-09-07', 'reason' => 'Death of close relative; travel to hometown.', 'status' => 'rejected', 'rejection' => 'Please submit death certificate or obituary for HR records.'],
+            ['type' => 'Emergency Leave', 'start' => '2025-11-22', 'end' => '2025-11-22', 'reason' => 'Child picked up from school due to illness.', 'status' => 'pending'],
+            ['type' => 'Vacation Leave', 'start' => '2026-02-10', 'end' => '2026-02-12', 'reason' => 'Family trip during off-peak season.', 'status' => 'approved'],
             ['type' => 'Sick Leave', 'start' => '2026-02-24', 'end' => '2026-02-24', 'reason' => 'Fever and body pain; rest advised by clinic.', 'status' => 'approved'],
             ['type' => 'Vacation Leave', 'start' => '2026-03-17', 'end' => '2026-03-19', 'reason' => 'Scheduled VL; son\'s school recognition day.', 'status' => 'approved'],
             ['type' => 'Sick Leave', 'start' => '2026-03-24', 'end' => '2026-03-25', 'reason' => 'Dental procedure and recovery.', 'status' => 'approved'],
@@ -65,6 +73,6 @@ class EmployeeLeavesSeeder extends Seeder
         }
 
         DB::table('leaves')->insert($rows);
-        $this->command?->info('EmployeeLeavesSeeder: ' . count($rows) . ' leave requests (Feb–Apr 2026).');
+        $this->command?->info('EmployeeLeavesSeeder: ' . count($rows) . ' leave requests (2025–2026).');
     }
 }

@@ -93,7 +93,7 @@ class OvertimeUndertimeSeeder extends Seeder
             DB::table('overtime_undertimes')->insert($chunk);
         }
 
-        $this->command?->info('OvertimeUndertimeSeeder: ' . count($records) . ' records (Feb–Apr 2026, all employees).');
+        $this->command?->info('OvertimeUndertimeSeeder: ' . count($records) . ' records (Jan 2025 – Apr 2026, all employees).');
     }
 
     /**
