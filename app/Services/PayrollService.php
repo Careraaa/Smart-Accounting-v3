@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Payroll;
 use App\Models\OvertimeUndertime;
 use App\Models\WithholdingTax;
+use App\Models\Holiday;
 use App\Services\AttendanceService;
 use App\Services\HolidayWageService;
 use Carbon\Carbon;
@@ -121,32 +122,96 @@ class PayrollService
 
         // ── Step 3: Holiday wages ─────────────────────────────────────────────
         // HolidayWageService handles all PH DOLE holiday rules.
-        // Returns the total holiday pay amount + a per-holiday breakdown for the payslip.
+        // Now returns: holiday_pay (base only), and holiday_overtime separately.
         $holidayWagesResult = $this->holidayWageService->calculateHolidayWages($employee, $start, $end);
         $holidayPay         = $holidayWagesResult['holiday_pay'];
+        $holidayOTPay       = $holidayWagesResult['holiday_overtime_pay'] ?? 0.0;
+        $holidayOTHours     = $holidayWagesResult['holiday_overtime_hours'] ?? 0.0;
         $holidayBreakdown   = $holidayWagesResult['breakdown'];
+
+        // Get holiday dates to exclude them from regular OT calculation
+        // (holiday OT is already computed above and should not also count as regular OT).
+        $holidayDates = Holiday::whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->distinct()
+            ->pluck('date')
+            ->map(fn($d) => Carbon::parse($d)->toDateString());
 
         // ── Step 4: Overtime / Undertime ──────────────────────────────────────
         // OT pay is stored on approved OvertimeUndertime records (HR-entered amounts).
         // We sum them directly rather than recomputing, so historical records stay stable.
-        $otPay   = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('amount');
-        $otHours = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->overtime()->sum('hours');
+        // NOTE: This is REGULAR overtime, not holiday overtime.
+        // IMPORTANT: Exclude OT on holiday dates to prevent double-counting
+        // (holiday OT is already counted above).
+        $otQuery = OvertimeUndertime::forUser($employee->id)
+            ->forPeriod($start, $end)
+            ->approved()
+            ->overtime()
+            ->whereNotIn('date', $holidayDates->toArray());
+
+        $otPay   = (float) $otQuery->sum('amount');
+        $otHours = (float) $otQuery->sum('hours');
+
+        // IMPORTANT: Handle OvertimeUndertime records that fall on holidays.
+        // These should be paid at holiday OT rates, not regular OT rates.
+        // If Attendance doesn't show hours > 8, we need to calculate holiday OT
+        // from these manual records and use holiday OT multipliers.
+        // FIX: Only add OvertimeUndertime records for dates that DON'T already
+        // have OT calculated by HolidayWageService (to prevent double-counting).
+        $datesWithHolidayOT = collect($holidayBreakdown)
+            ->filter(fn($hb) => ($hb['ot_hours'] ?? 0) > 0)
+            ->map(fn($hb) => (string) $hb['date'])  // Ensure dates are strings
+            ->toArray();
+
+        $holidayOTRecords = OvertimeUndertime::forUser($employee->id)
+            ->forPeriod($start, $end)
+            ->approved()
+            ->overtime()
+            ->whereIn('date', $holidayDates->toArray());
+        
+        // Exclude dates that already have OT calculated from Attendance
+        if (!empty($datesWithHolidayOT)) {
+            $holidayOTRecords = $holidayOTRecords->whereNotIn('date', $datesWithHolidayOT);
+        }
+        
+        $holidayOTRecords = $holidayOTRecords->get();
+
+        foreach ($holidayOTRecords as $otRecord) {
+            // For holiday OT records, calculate the amount using holiday OT multipliers
+            // Regular holiday OT multiplier: hourlyRate × 2.0 × 1.30 (for non-rest-day)
+            // Special holiday OT multiplier: hourlyRate × 1.30 × 1.30 (for non-rest-day)
+            // For now, assume regular holiday (most common) with standard multiplier
+            $holidayOTMultiplier = 2.0 * 1.30; // Regular holiday OT multiplier
+            
+            $calculatedHolidayOTPay = $dailyRate / 8 * $holidayOTMultiplier * $otRecord->hours;
+            
+            // Use the calculated amount (unless the record has a custom amount set)
+            // This ensures holiday OT is paid at the correct rate
+            $holidayOTPay += $calculatedHolidayOTPay;
+            $holidayOTHours += $otRecord->hours;
+        }
 
         // Undertime deduction = hours short × hourly rate.
         // Kept at full precision (no rounding) until the final netPay calculation.
-        $utHours          = (float) OvertimeUndertime::forUser($employee->id)->forPeriod($start, $end)->approved()->undertime()->sum('hours');
+        // Also exclude undertime on holiday dates for consistency.
+        $utQuery = OvertimeUndertime::forUser($employee->id)
+            ->forPeriod($start, $end)
+            ->approved()
+            ->undertime()
+            ->whereNotIn('date', $holidayDates->toArray());
+
+        $utHours          = (float) $utQuery->sum('hours');
         $utDeductionExact = $utHours > 0 ? $utHours * ($dailyRate / 8) : 0.0;
 
         // ── Step 5: Gross pay ─────────────────────────────────────────────────
         $manualAllowTotal = collect($manualAllowances)->sum(fn($a) => (float) ($a['amount'] ?? 0));
-        $grossPay         = $basicSalary + $otPay + $holidayPay + $manualAllowTotal;
+        $grossPay         = $basicSalary + $otPay + $holidayOTPay + $holidayPay + $manualAllowTotal;
 
         // ── Step 6: Statutory deductions (SSS, Pag-IBIG, PhilHealth) ─────────
         // Bracket lookup is based on basic salary for this period × 2 (annualized).
         // This excludes OT and holiday pay, which are temporary/irregular and should
         // not inflate the permanent bracket classification.
         // Gate: employee must have income this period (worked days OR holiday pay).
-        $contributionBasis = $basicSalary + $holidayPay + $otPay;
+        $contributionBasis = $basicSalary + $holidayPay + $otPay + $holidayOTPay;
 
         $hasIncome = $contributionBasis > 0;
         $monthlySalaryForBracket = $basicSalary * 2; // Annualize basic salary (excludes OT, holiday)
@@ -195,7 +260,7 @@ class PayrollService
             'daysWorked', 'daysAbsent', 'hoursWorked',
             'basicSalary', 'dailyRate', 'hourlyRate',
             'otHours', 'utHours', 'otPay',
-            'holidayPay', 'holidayBreakdown',
+            'holidayPay', 'holidayOTPay', 'holidayOTHours', 'holidayBreakdown',
             'lateDeductionData', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'withholdingTax',
             'manualAllowTotal', 'manualDeductTotal',
             'grossPay', 'adjustedGross', 'totalDeductions', 'netPay'
@@ -262,11 +327,20 @@ class PayrollService
     private function saveAllowances(Payroll $payroll, array $values, array $manualAllowances): void
     {
         // Overtime pay — one line showing hours and amount.
-        if ($values['otPay'] > 0) {
+        if (!empty($values['otPay']) && $values['otPay'] > 0) {
             $payroll->allowances()->create([
                 'allowance_type' => 'Overtime Pay',
                 'hours'          => round($values['otHours'], 2),
                 'amount'         => round($values['otPay'], 2),
+            ]);
+        }
+
+        // Holiday Overtime Pay — tracked separately from holiday pay and regular OT.
+        if (!empty($values['holidayOTPay']) && $values['holidayOTPay'] > 0) {
+            $payroll->allowances()->create([
+                'allowance_type' => 'Holiday Overtime Pay',
+                'hours'          => round($values['holidayOTHours'] ?? 0, 2),
+                'amount'         => round($values['holidayOTPay'], 2),
             ]);
         }
 

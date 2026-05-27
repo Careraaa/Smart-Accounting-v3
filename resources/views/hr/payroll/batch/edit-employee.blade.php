@@ -188,6 +188,10 @@
                             <span class="ep-row-lbl green">Overtime Pay <span class="ep-badge" id="ep_ot_hrs_badge"></span></span>
                             <span class="ep-row-val green" id="ep_ot_display">+&#8369;0.00</span>
                         </div>
+                        <div class="ep-row" id="ep_holiday_ot_row" style="display:none;">
+                            <span class="ep-row-lbl green">Holiday Overtime Pay <span class="ep-badge" id="ep_holiday_ot_hrs_badge"></span></span>
+                            <span class="ep-row-val green" id="ep_holiday_ot_display">+&#8369;0.00</span>
+                        </div>
                         <div class="ep-row" id="ep_ut_row" style="display:none;">
                             <span class="ep-row-lbl red">Undertime Deduction <span class="ep-badge" id="ep_ut_hrs_badge"></span></span>
                             <span class="ep-row-val red" id="ep_ut_display">-&#8369;0.00</span>
@@ -326,9 +330,12 @@
         ->map(fn($b) => ['type' => $b->bonus_type, 'description' => $b->description ?? '', 'amount' => $b->amount])
         ->values();
     $manualAllowTotal = $manualAllowances->sum('amount');
+    $holidayOTPay = (float)($payroll->allowances->where('allowance_type', 'Holiday Overtime Pay')->sum('amount') ?? 0);
+    $holidayOTHours = (float)($payroll->allowances->where('allowance_type', 'Holiday Overtime Pay')->sum('hours') ?? 0);
     $holidayPay = max(0, (float)($payroll->gross_pay ?? 0)
         - (float)($payroll->basic_salary ?? 0)
         - (float)($payroll->overtime_pay ?? 0)
+        - $holidayOTPay
         - $manualAllowTotal);
 @endphp
 <script>
@@ -401,8 +408,8 @@ window._ep = {
             basicBadge.textContent = '\u20B1' + Number(rate).toLocaleString('en-PH', {minimumFractionDigits:2,maximumFractionDigits:2})
                 + ' \u00D7 ' + days + (days === 1 ? ' day' : ' days');
         }
-        // Compute adjusted total: Basic + Holiday + OT - Undertime - Late - System Deductions
-        const adjustedTotal = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.otPay ?? 0) - (c.utDeduction ?? 0) - (c.late_deduction ?? 0) - (c.sss ?? 0) - (c.pagibig ?? 0) - (c.philhealth ?? 0) - (c.withholdingTax ?? 0);
+        // Compute adjusted total: Basic + Holiday + Holiday OT + OT - Undertime - Late - System Deductions
+        const adjustedTotal = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.holidayOTPay ?? 0) + (c.otPay ?? 0) - (c.utDeduction ?? 0) - (c.late_deduction ?? 0) - (c.sss ?? 0) - (c.pagibig ?? 0) - (c.philhealth ?? 0) - (c.withholdingTax ?? 0);
         $('ep_adjusted').textContent      = fmt(Math.max(0, adjustedTotal));
 
         // Render one row per holiday using the breakdown array
@@ -432,6 +439,12 @@ window._ep = {
             $('ep_ot_hrs_badge').textContent = c.otHours + ' hrs';
             otRow.style.display = '';
         } else { otRow.style.display = 'none'; }
+        const holidayOtRow = $('ep_holiday_ot_row');
+        if (c.holidayOTPay > 0) {
+            $('ep_holiday_ot_display').textContent   = '+' + fmt(c.holidayOTPay);
+            $('ep_holiday_ot_hrs_badge').textContent = c.holidayOTHours + ' hrs';
+            holidayOtRow.style.display = '';
+        } else { holidayOtRow.style.display = 'none'; }
         const utRow = $('ep_ut_row');
         if (c.utDeduction > 0) {
             $('ep_ut_display').textContent   = '-' + fmt(c.utDeduction);
@@ -581,6 +594,8 @@ window._ep = {
                 basicSalary:data.basic_salary, adjustedGross:data.adjusted_gross??data.gross_pay,
                 dailyRate:data.daily_rate??0,
                 holidayPay:data.holiday_pay??0,
+                holidayOTPay:data.holiday_overtime_pay??0,
+                holidayOTHours:data.holiday_overtime_hours??0,
                 holidayBreakdown:data.holiday_breakdown??[],
                 otPay:data.overtime_pay??0, otHours:data.overtime_hours??0,
                 utDeduction:data.undertime_deduction??0, utHours:data.undertime_hours??0,

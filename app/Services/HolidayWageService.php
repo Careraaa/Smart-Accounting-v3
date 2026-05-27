@@ -84,6 +84,11 @@ class HolidayWageService
      * FIX: Attendance records are now loaded in ONE query before the loop
      * (previously it was one DB query per holiday = N+1 problem).
      * We build a date-keyed map so each holiday lookup is just an array access.
+     *
+     * CHANGE: Now returns holiday_pay (base only) and holiday_overtime separately.
+     * When an employee works overtime on a holiday:
+     * - holiday_pay contains only the base holiday multiplier (no OT)
+     * - holiday_overtime_hours and holiday_overtime_pay are returned separately
      */
     public function calculateHolidayWages(User $employee, Carbon $start, Carbon $end): array
     {
@@ -111,8 +116,10 @@ class HolidayWageService
             ->get()
             ->keyBy(fn($a) => Carbon::parse($a->date)->toDateString());
 
-        $totalHolidayPay = 0.0;
-        $breakdown       = [];
+        $totalHolidayPay           = 0.0;
+        $totalHolidayOvertimePay   = 0.0;
+        $totalHolidayOvertimeHours = 0.0;
+        $breakdown                 = [];
 
         foreach ($byDate as $dateStr => $dayHolidays) {
             $date       = Carbon::parse($dateStr);
@@ -129,16 +136,15 @@ class HolidayWageService
             // Pick the right pay rule based on holiday type.
             if ($isDouble) {
                 // Two holidays on the same day — highest multiplier applies.
-                $pay             = $this->computeDoubleHoliday($dailyRate, $isWorked);
-                $type            = 'double';
-                $computationType = $isWorked ? 'double_worked' : 'double_not_worked';
+                $result = $this->computeDoubleHoliday($dailyRate, $isWorked);
+                $type   = 'double';
             } elseif ($hasRegular) {
-                [$pay, $computationType] = $this->computeRegularHoliday(
+                $result = $this->computeRegularHoliday(
                     $dailyRate, $hourlyRate, $hoursWorked, $isWorked, $isRestDay
                 );
                 $type = 'regular';
             } elseif ($hasSpecial) {
-                [$pay, $computationType] = $this->computeSpecialHoliday(
+                $result = $this->computeSpecialHoliday(
                     $dailyRate, $hourlyRate, $hoursWorked, $isWorked, $isRestDay
                 );
                 $type = 'special';
@@ -146,9 +152,14 @@ class HolidayWageService
                 continue; // Unknown holiday type — skip safely
             }
 
-            // Only record holidays that result in actual pay.
-            if ($pay > 0) {
-                $totalHolidayPay += $pay;
+            $basePay           = $result['base_pay'];
+            $otHours           = $result['ot_hours'] ?? 0.0;
+            $otPay             = $result['ot_pay'] ?? 0.0;
+            $computationType   = $result['computation_type'];
+
+            // Record base holiday pay (without OT).
+            if ($basePay > 0) {
+                $totalHolidayPay += $basePay;
 
                 $breakdown[] = [
                     'holiday'          => $dayHolidays->pluck('name')->implode(' + '),
@@ -157,15 +168,38 @@ class HolidayWageService
                     'is_rest_day'      => $isRestDay,
                     'is_worked'        => $isWorked,
                     'hours_worked'     => $hoursWorked,
+                    'ot_hours'         => $otHours,  // Track OT hours for each date
                     'computation_type' => $computationType,
-                    'amount'           => round($pay, 2),
+                    'amount'           => round($basePay, 2),
                 ];
+            } elseif ($otHours > 0) {
+                // If there's OT but no base pay, still record the date+OT hours
+                // so PayrollService can exclude it from manual OvertimeUndertime
+                $breakdown[] = [
+                    'holiday'          => $dayHolidays->pluck('name')->implode(' + '),
+                    'date'             => $dateStr,
+                    'type'             => $type,
+                    'is_rest_day'      => $isRestDay,
+                    'is_worked'        => $isWorked,
+                    'hours_worked'     => $hoursWorked,
+                    'ot_hours'         => $otHours,
+                    'computation_type' => $computationType,
+                    'amount'           => 0.0,
+                ];
+            }
+
+            // Track holiday overtime separately.
+            if ($otPay > 0) {
+                $totalHolidayOvertimePay += $otPay;
+                $totalHolidayOvertimeHours += $otHours;
             }
         }
 
         return [
-            'holiday_pay' => round($totalHolidayPay, 2),
-            'breakdown'   => $breakdown,
+            'holiday_pay'              => round($totalHolidayPay, 2),
+            'holiday_overtime_pay'     => round($totalHolidayOvertimePay, 2),
+            'holiday_overtime_hours'   => round($totalHolidayOvertimeHours, 2),
+            'breakdown'                => $breakdown,
         ];
     }
 
@@ -214,7 +248,12 @@ class HolidayWageService
         // Since no basic pay may exist for non-worked days,
         // return the full daily rate.
         if (!$isWorked) {
-            return [$dailyRate + $cola, 'regular_not_worked'];
+            return [
+                'base_pay'           => $dailyRate + $cola,
+                'ot_hours'           => 0.0,
+                'ot_pay'             => 0.0,
+                'computation_type'   => 'regular_not_worked'
+            ];
         }
 
         $overtimeHours = max(0.0, $hoursWorked - 8);
@@ -223,8 +262,9 @@ class HolidayWageService
         // REST DAY + REGULAR HOLIDAY
         // ============================================================
         // Total legal pay = 260%
-        // Basic pay already exists = 100%
-        // Holiday premium only = 160%
+        // Base pay (already exists) = 100%
+        // Holiday premium base only = 160%
+        // OT is calculated separately from the base
         if ($isRestDay) {
 
             $premiumPay = $dailyRate * 1.60;
@@ -234,14 +274,18 @@ class HolidayWageService
                 $otPay = $hourlyRate * 2.0 * 1.30 * 1.30 * $overtimeHours;
 
                 return [
-                    $premiumPay + $otPay + $cola,
-                    'regular_rest_day_worked_ot'
+                    'base_pay'           => $premiumPay + $cola,
+                    'ot_hours'           => $overtimeHours,
+                    'ot_pay'             => $otPay,
+                    'computation_type'   => 'regular_rest_day_worked_ot'
                 ];
             }
 
             return [
-                $premiumPay + $cola,
-                'regular_rest_day_worked'
+                'base_pay'           => $premiumPay + $cola,
+                'ot_hours'           => 0.0,
+                'ot_pay'             => 0.0,
+                'computation_type'   => 'regular_rest_day_worked'
             ];
         }
 
@@ -250,7 +294,8 @@ class HolidayWageService
         // ============================================================
         // Total legal pay = 200%
         // Basic pay already exists = 100%
-        // Holiday premium only = 100%
+        // Holiday premium base only = 100%
+        // OT is calculated separately from the base
         $premiumPay = $dailyRate;
 
         if ($overtimeHours > 0) {
@@ -258,14 +303,18 @@ class HolidayWageService
             $otPay = $hourlyRate * 2.0 * 1.30 * $overtimeHours;
 
             return [
-                $premiumPay + $otPay + $cola,
-                'regular_worked_ot'
+                'base_pay'           => $premiumPay + $cola,
+                'ot_hours'           => $overtimeHours,
+                'ot_pay'             => $otPay,
+                'computation_type'   => 'regular_worked_ot'
             ];
         }
 
         return [
-            $premiumPay + $cola,
-            'regular_worked'
+            'base_pay'           => $premiumPay + $cola,
+            'ot_hours'           => 0.0,
+            'ot_pay'             => 0.0,
+            'computation_type'   => 'regular_worked'
         ];
     }
 
@@ -306,7 +355,12 @@ class HolidayWageService
         // ============================================================
         // No work, no pay.
         if (!$isWorked) {
-            return [0.0, 'special_not_worked'];
+            return [
+                'base_pay'           => 0.0,
+                'ot_hours'           => 0.0,
+                'ot_pay'             => 0.0,
+                'computation_type'   => 'special_not_worked'
+            ];
         }
 
         $overtimeHours = max(0.0, $hoursWorked - 8);
@@ -316,7 +370,8 @@ class HolidayWageService
         // ============================================================
         // Total legal pay = 150%
         // Basic pay already exists = 100%
-        // Holiday premium only = 50%
+        // Holiday premium base only = 50%
+        // OT is calculated separately from the base
         if ($isRestDay) {
 
             $premiumPay = $dailyRate * 0.50;
@@ -326,14 +381,18 @@ class HolidayWageService
                 $otPay = $hourlyRate * 1.30 * 1.30 * $overtimeHours;
 
                 return [
-                    $premiumPay + $otPay + $cola,
-                    'special_rest_day_worked_ot'
+                    'base_pay'           => $premiumPay + $cola,
+                    'ot_hours'           => $overtimeHours,
+                    'ot_pay'             => $otPay,
+                    'computation_type'   => 'special_rest_day_worked_ot'
                 ];
             }
 
             return [
-                $premiumPay + $cola,
-                'special_rest_day_worked'
+                'base_pay'           => $premiumPay + $cola,
+                'ot_hours'           => 0.0,
+                'ot_pay'             => 0.0,
+                'computation_type'   => 'special_rest_day_worked'
             ];
         }
 
@@ -342,7 +401,8 @@ class HolidayWageService
         // ============================================================
         // Total legal pay = 130%
         // Basic pay already exists = 100%
-        // Holiday premium only = 30%
+        // Holiday premium base only = 30%
+        // OT is calculated separately from the base
         $premiumPay = $dailyRate * 0.30;
 
         if ($overtimeHours > 0) {
@@ -350,14 +410,18 @@ class HolidayWageService
             $otPay = $hourlyRate * 1.30 * 1.30 * $overtimeHours;
 
             return [
-                $premiumPay + $otPay + $cola,
-                'special_worked_ot'
+                'base_pay'           => $premiumPay + $cola,
+                'ot_hours'           => $overtimeHours,
+                'ot_pay'             => $otPay,
+                'computation_type'   => 'special_worked_ot'
             ];
         }
 
         return [
-            $premiumPay + $cola,
-            'special_worked'
+            'base_pay'           => $premiumPay + $cola,
+            'ot_hours'           => 0.0,
+            'ot_pay'             => 0.0,
+            'computation_type'   => 'special_worked'
         ];
     }
 
@@ -373,7 +437,7 @@ class HolidayWageService
      *  Worked → 300% daily_rate
      *    Highest multiplier in PH labor law.
      */
-    private function computeDoubleHoliday(float $dailyRate, bool $isWorked): float
+    private function computeDoubleHoliday(float $dailyRate, bool $isWorked): array
     {
         // ============================================================
         // DOUBLE HOLIDAY NOT WORKED
@@ -381,7 +445,12 @@ class HolidayWageService
         // At least one regular holiday exists,
         // therefore employee still earns 100%.
         if (!$isWorked) {
-            return $dailyRate;
+            return [
+                'base_pay'           => $dailyRate,
+                'ot_hours'           => 0.0,
+                'ot_pay'             => 0.0,
+                'computation_type'   => 'double_not_worked'
+            ];
         }
 
         // ============================================================
@@ -389,8 +458,14 @@ class HolidayWageService
         // ============================================================
         // Total legal pay = 300%
         // Basic pay already exists = 100%
-        // Holiday premium only = 200%
-        return $dailyRate * 2.0;
+        // Holiday premium base only = 200%
+        // NOTE: Double holiday does not have OT component per DOLE rules
+        return [
+            'base_pay'           => $dailyRate * 2.0,
+            'ot_hours'           => 0.0,
+            'ot_pay'             => 0.0,
+            'computation_type'   => 'double_worked'
+        ];
     }
 
     // ================================================================
