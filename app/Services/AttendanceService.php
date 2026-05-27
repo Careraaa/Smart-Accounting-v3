@@ -338,10 +338,14 @@ class AttendanceService
 
         // ── Overtime Calculation ──
         // Overtime only starts if employee renders at least 30 minutes beyond scheduled timeout
-        $minutesBeyondSchedule = max(0, $actualEnd->diffInMinutes($expectedEnd));
+        // IMPORTANT: Check if actualEnd is AFTER expectedEnd (not just absolute difference)
+        $minutesBeyondSchedule = 0;
+        if ($actualEnd->isAfter($expectedEnd)) {
+            $minutesBeyondSchedule = abs($actualEnd->diffInMinutes($expectedEnd));
+        }
 
         if ($minutesBeyondSchedule >= 30) {
-            // Only count minutes beyond the 30-minute threshold
+            // Count all minutes beyond scheduled timeout (not just beyond the 30-minute threshold)
             $overtimeMinutes = $minutesBeyondSchedule;
             $overtimeHours = $this->convertMinutesToHourIncrement($overtimeMinutes);
             $result['overtime_hours'] = $overtimeHours;
@@ -350,7 +354,8 @@ class AttendanceService
         // ── Undertime Calculation ──
         // Undertime is only applied if actual hours < scheduled hours AND no overtime
         // Overtime and undertime must NOT offset each other
-        if ($result['overtime_hours'] === 0.0 && $actualWorkHours < $scheduledWorkHours) {
+        // IMPORTANT: Only apply undertime if employee left early (actualEnd is BEFORE expectedEnd)
+        if ($result['overtime_hours'] === 0.0 && $actualWorkHours < $scheduledWorkHours && $actualEnd->isBefore($expectedEnd)) {
             $undertimeMinutes = $scheduledWorkMinutes - $actualWorkMinutes;
             $undertimeHours = $this->convertMinutesToHourIncrement($undertimeMinutes);
             $result['undertime_hours'] = $undertimeHours;
