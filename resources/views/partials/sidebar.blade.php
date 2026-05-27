@@ -1,420 +1,495 @@
-<nav class="nxl-navigation">
-    <div class="navbar-wrapper">
+<nav class="sidebar fixed top-0 left-0 z-40 h-screen bg-white border-r border-gray-200 flex flex-col">
+    <style>
+        /* ── Submenu slide animation ── */
+        .sidebar-sub {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height .55s ease, opacity .4s ease;
+        }
+        .has-sub.open > .sidebar-sub {
+            max-height: 300px;
+            opacity: 1;
+        }
 
-        {{-- ── Logo Header ── --}}
-        <div class="m-header">
-            <a href="{{ route('dashboard') }}" class="b-brand kt-brand-text">
-                <span class="kt-logo-icon">
-                    <img src="{{ asset('images/bus.png') }}" alt="Bus Logo" width="24" height="24" class="kt-sidebar-logo-img" style="filter: brightness(0) invert(1); object-fit: contain; display: block;">
+        .has-sub.open > .sidebar-link .sidebar-arrow {
+            transform: rotate(90deg);
+        }
+        .sidebar-arrow {
+            transition: transform .35s ease;
+        }
+
+        /* ── Submenu dot indicators ── */
+        .sidebar-sub .sidebar-link {
+            position: relative;
+            transition: color .2s ease;
+        }
+        .sidebar-sub .sidebar-link::before {
+            content: '';
+            position: absolute;
+            left: 1.1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: transparent;
+            transition: background .2s ease, transform .2s ease;
+        }
+        .sidebar-sub .sidebar-link:hover { color: #374151; }
+        .sidebar-sub .sidebar-link:hover::before { background: #9ca3af; }
+        .sidebar-sub .sidebar-link.active { color: #111827; font-weight: 500; }
+        .sidebar-sub .sidebar-link.active::before { background: #c8292a; transform: translateY(-50%) scale(1.35); }
+
+        /* ── Link transitions ── */
+        .sidebar-link { transition: background .18s ease, color .18s ease; }
+
+        /* ── Icon glow on hover/active ── */
+        .sidebar-link:hover .sidebar-icon i,
+        .sidebar-link.active .sidebar-icon i { text-shadow: 0 0 8px currentColor, 0 0 16px currentColor; }
+        .sidebar-icon i { transition: text-shadow .25s ease, color .25s ease; }
+
+        /* ── Submenu icons ── */
+        .sidebar-sub .sidebar-link .submenu-icon i { color: #d1d5db; transition: color .2s ease; }
+        .sidebar-sub .sidebar-link:hover .submenu-icon i { color: #9ca3af; }
+        .sidebar-sub .sidebar-link.active .submenu-icon i { color: #6b7280; }
+
+        /* ── Hide scrollbar while keeping scrollable ── */
+        .sidebar .overflow-y-auto { scrollbar-width: none; -ms-overflow-style: none; }
+        .sidebar .overflow-y-auto::-webkit-scrollbar { display: none; }
+
+        /* ── Search border on focus ── */
+        #kt-nav-search:focus-within { border-color: #d1d5db; box-shadow: 0 0 0 2px rgba(0,0,0,.06); }
+
+        /* ── White theme link overrides ── */
+        .sidebar .sidebar-link { color: #6b7280; }
+        .sidebar .sidebar-link:hover { color: #111827; background: rgba(0,0,0,.04); }
+        .sidebar .sidebar-link.active { color: #111827; font-weight: 600; }
+        .sidebar .sidebar-caption label { color: #9ca3af; }
+
+        /* ── Sidebar collapse ── */
+        :root { --sidebar-w: 240px; }
+        body.sidebar-collapsed { --sidebar-w: 64px; }
+        .sidebar,
+        body.sidebar-collapsed .sidebar { width: var(--sidebar-w); transition: width .3s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1); }
+        body.sidebar-collapsed .sidebar-text,
+        body.sidebar-collapsed .sidebar-caption,
+        body.sidebar-collapsed .sidebar-arrow,
+        body.sidebar-collapsed .b-brand span:not(.flex-shrink-0),
+        body.sidebar-collapsed #kt-nav-search,
+        body.sidebar-collapsed #kt-search-popup,
+        body.sidebar-collapsed .sidebar-sub { display: none; }
+        body.sidebar-collapsed .sidebar .sidebar-link { justify-content: center; padding: 10px 0; gap: 0; }
+        body.sidebar-collapsed .sidebar .sidebar-icon { margin: 0; }
+        body.sidebar-collapsed .sidebar .sidebar-logo { justify-content: center; padding-left: 0; padding-right: 0; }
+        @media (max-width: 1023px) {
+            .sidebar { transform: translateX(-100%); }
+            body.sidebar-open .sidebar { transform: translateX(0); }
+            body.sidebar-collapsed .sidebar { --sidebar-w: 240px; transform: translateX(-100%); }
+            body.sidebar-collapsed.sidebar-open .sidebar { transform: translateX(0); }
+        }
+
+        /* ── Mobile sidebar backdrop ── */
+        body.sidebar-open::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 35;
+            background: rgba(0,0,0,.5);
+            opacity: 0;
+            transition: opacity .3s ease;
+            pointer-events: none;
+        }
+        body.sidebar-open::before {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        @media (min-width: 1024px) {
+            body.sidebar-open::before { display: none; }
+        }
+    </style>
+    <button id="sidebar-collapse-btn" class="fixed top-[12px] z-50 w-8 h-8 rounded-full bg-white border-2 border-gray-200 shadow-sm text-gray-400 hover:text-gray-700 hover:border-gray-300 hover:shadow-md transition-all duration-200 hidden lg:flex lg:items-center lg:justify-center" style="left: calc(var(--sidebar-w, 240px) - 16px)" type="button">
+        <svg class="w-3.5 h-3.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.5 19l-7-7 7-7"/>
+        </svg>
+    </button>
+    <div class="flex flex-col h-full">
+
+        {{-- ── Logo / Brand ── --}}
+        <div class="sidebar-logo shrink-0 flex items-center px-3 h-14 border-b border-gray-100">
+            <a href="{{ route('dashboard') }}" class="b-brand flex items-center gap-2.5 no-underline min-w-0">
+                <span class="flex-shrink-0">
+                    <img src="{{ asset('images/bus.png') }}" alt="Bus Logo" width="22" height="22" class="block">
                 </span>
-                <span class="kt-logo-full">Knights Transport</span>
+                <span class="text-sm font-bold text-gray-900 truncate">Knights Transport</span>
             </a>
         </div>
 
-        {{-- ── Scrollable Nav Body ── --}}
-        <div class="navbar-content">
-            <ul class="nxl-navbar">
+        {{-- ── Search ── --}}
+        <div id="kt-nav-search" class="mx-3 mt-3 mb-1 flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-lg px-2.5 h-8 cursor-text transition-colors">
+            <svg class="w-3.5 h-3.5 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input id="kt-search-input" type="text" placeholder="Search" autocomplete="off" spellcheck="false" class="flex-1 border-none bg-transparent outline-none text-xs text-gray-600 min-w-0 p-0 leading-none placeholder:text-gray-500">
+        </div>
+
+        {{-- ── Search results popup ── --}}
+        <div id="kt-search-popup" class="hidden fixed z-[9999] w-[224px] bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden" style="font-family:inherit">
+            <div class="max-h-[360px] overflow-y-auto py-1">
+                <div id="kt-sp-state" class="px-3 py-4 text-center text-xs text-gray-400">Type to search</div>
+                <ul id="kt-sp-list" class="list-none m-0 p-0"></ul>
+            </div>
+        </div>
+
+        {{-- ── Scrollable Nav ── --}}
+        <div class="flex-1 overflow-y-auto px-3 py-2">
+            <ul class="sidebar-list space-y-0.5 p-0 list-none">
+
                 {{-- ── SUPERADMIN ── --}}
-                @if (auth()->user()->role === 'superadmin')
-                    <li class="nxl-item nxl-caption"><label>Superadmin Modules</label></li>
+@if (auth()->user()->role === 'superadmin')
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Menu</label></li>
 
-                    <li class="nxl-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                        <a href="{{ route('dashboard') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-airplay"></i></span>
-                            <span class="nxl-mtext">Dashboard</span>
-                        </a>
-                    </li>
-
-                    <li class="nxl-item {{ request()->routeIs('superadmin.accounts.*') ? 'active' : '' }}">
-                        <a href="{{ route('superadmin.accounts.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-briefcase"></i></span>
-                            <span class="nxl-mtext">Accounts</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('employees.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employees.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employees.*') ? 'text-emerald-500' : 'text-emerald-500' }}"><i class="feather-user-plus" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Employee Management</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('configuration.*') ? 'active' : '' }}">
-                        <a href="{{ route('configuration.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-settings"></i></span>
-                            <span class="nxl-mtext">Configuration</span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('leave.*', 'leave-type.*') ? 'text-violet-500' : 'text-violet-500' }}"><i class="feather-calendar" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Leave Management</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                    </li>
-
-                    <li class="nxl-item nxl-caption"><label>Menu</label></li>
-
-                    {{-- HR Modules --}}
-                    <li class="nxl-item {{ request()->routeIs('employees.*') ? 'active' : '' }}">
-                        <a href="{{ route('employees.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-user-plus"></i></span>
-                            <span class="nxl-mtext">Employee Management</span>
-                        </a>
-                    </li>
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-calendar"></i></span>
-                            <span class="nxl-mtext">Leave Management</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                        </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave-type.index') }}">Leave Types</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.pending') }}">Pending Leaves</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.approved') }}">Approved Leaves</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.rejected') }}">Rejected Leaves</a></li>
-                        </ul>
-                    </li>
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('holiday.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-gift"></i></span>
-                            <span class="nxl-mtext">Holiday Management</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                        </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('holiday.index') }}">All Holidays</a></li>
-                        </ul>
-                    </li>
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('attendance.*', 'overtime.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-clock"></i></span>
-                            <span class="nxl-mtext">Attendance</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                        </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">QR Time IN / OUT Records</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('overtime.index') }}">Overtime / Undertime</a></li>
-                        </ul>
-                    </li>
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('payroll.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-dollar-sign"></i></span>
-                            <span class="nxl-mtext">Payroll Processing</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                        </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item {{ request()->routeIs('payroll.salary-computation.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.salary-computation.index') }}">Payroll Management</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('payroll.statutory-deductions.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.statutory-deductions.index') }}">Statutory Deductions</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('payroll.receivables.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.receivables.index') }}">Payroll Receivables</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('payroll.generate-payslip.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.generate-payslip.index') }}">Pay Slips</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('payroll.history.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.history.index') }}">Payroll Summary</a>
-                            </li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave-type.*') ? 'active' : 'text-gray-500' }}" href="{{ route('leave-type.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-list" style="font-size:13px"></i></span><span>Leave Types</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.pending') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.pending') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-circle" style="font-size:13px"></i></span><span>Pending Leaves</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.approved') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.approved') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check" style="font-size:13px"></i></span><span>Approved Leaves</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.rejected') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.rejected') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-x" style="font-size:13px"></i></span><span>Rejected Leaves</span></a></li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'active' : '' }}">
-                        <a href="{{ route('bonuses.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-award"></i></span>
-                            <span class="nxl-mtext">Bonuses</span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('holiday.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('holiday.*') ? 'text-rose-500' : 'text-rose-500' }}"><i class="feather-gift" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Holiday Management</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                    </li>
-
-                    {{-- Remittance Modules --}}
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-users"></i></span>
-                            <span class="nxl-mtext">Operational Records</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                        </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item {{ request()->routeIs('drivers.*') ? 'active' : '' }}"><a class="nxl-link" href="{{ route('drivers.index') }}">List of Drivers</a></li>
-                            <li class="nxl-item {{ request()->routeIs('paos.*') ? 'active' : '' }}"><a class="nxl-link" href="{{ route('paos.index') }}">List of PAO / Conductors</a></li>
-                            <li class="nxl-item {{ request()->routeIs('routes.*') ? 'active' : '' }}"><a class="nxl-link" href="{{ route('routes.index') }}">Manage Routes</a></li>
-                            <li class="nxl-item {{ request()->routeIs('vehicles.*') ? 'active' : '' }}"><a class="nxl-link" href="{{ route('vehicles.index') }}">Manage Vehicles</a></li>
-                        </ul>
-                    </li>
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-activity"></i></span>
-                            <span class="nxl-mtext">Daily Remittance</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                        </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittances.index') }}">Record Remittance</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('short-remittances.index') }}">Short Remittance</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.index') }}">Remittance Report</a></li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('holiday.index') ? 'active' : 'text-gray-500' }}" href="{{ route('holiday.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-list" style="font-size:13px"></i></span><span>All Holidays</span></a></li>
                         </ul>
                     </li>
 
-                    {{-- Accountant Modules --}}
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-check-circle"></i></span>
-                            <span class="nxl-mtext">Approvals</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('attendance.*', 'overtime.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('attendance.*', 'overtime.*') ? 'text-cyan-500' : 'text-cyan-500' }}"><i class="feather-clock" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Attendance</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll-approval.index') }}">Payroll Release Approval</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittance-approval.index') }}">Remittance Approval</a></li>
-                        </ul>
-                    </li>
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.remittance', 'reports.payroll') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-file-text"></i></span>
-                            <span class="nxl-mtext">Accountant Reports</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
-                        </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance') }}">Remittance Reports</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.payroll') }}">Payroll Reports</a></li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('attendance.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-camera" style="font-size:13px"></i></span><span>QR Time IN / OUT Records</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('overtime.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-clock" style="font-size:13px"></i></span><span>Overtime / Undertime</span></a></li>
                         </ul>
                     </li>
 
-                    {{-- QR Admin Module --}}
-                    <li class="nxl-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <a href="{{ route('admin.dashboard') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-camera"></i></span>
-                            <span class="nxl-mtext">QR Monitor</span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll.*') ? 'text-green-600' : 'text-green-600' }}"><i class="feather-dollar-sign" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Payroll Processing</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
+                        </a>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.salary-computation.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.salary-computation.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-settings" style="font-size:13px"></i></span><span>Payroll Management</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.statutory-deductions.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.statutory-deductions.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-shield" style="font-size:13px"></i></span><span>Statutory Deductions</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.receivables.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.receivables.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-inbox" style="font-size:13px"></i></span><span>Payroll Receivables</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.generate-payslip.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.generate-payslip.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file" style="font-size:13px"></i></span><span>Pay Slips</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.history.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.history.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-bar-chart-2" style="font-size:13px"></i></span><span>Payroll Summary</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('bonuses.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'text-yellow-500' : 'text-yellow-500' }}"><i class="feather-award" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Bonuses</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'text-orange-500' : 'text-orange-500' }}"><i class="feather-users" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Operational Records</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
+                        </a>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('drivers.*') ? 'active' : 'text-gray-500' }}" href="{{ route('drivers.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-user" style="font-size:13px"></i></span><span>List of Drivers</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('paos.*') ? 'active' : 'text-gray-500' }}" href="{{ route('paos.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-users" style="font-size:13px"></i></span><span>List of PAO / Conductors</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('routes.*') ? 'active' : 'text-gray-500' }}" href="{{ route('routes.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-map-pin" style="font-size:13px"></i></span><span>Manage Routes</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('vehicles.*') ? 'active' : 'text-gray-500' }}" href="{{ route('vehicles.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-truck" style="font-size:13px"></i></span><span>Manage Vehicles</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'text-teal-500' : 'text-teal-500' }}"><i class="feather-activity" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Daily Remittance</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
+                        </a>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-edit" style="font-size:13px"></i></span><span>Record Remittance</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('short-remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-triangle" style="font-size:13px"></i></span><span>Short Remittance</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Report</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'text-indigo-500' : 'text-indigo-500' }}"><i class="feather-check-circle" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Approvals</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
+                        </a>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('payroll-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Payroll Release Approval</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittance-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Remittance Approval</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('reports.remittance', 'reports.payroll') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('reports.remittance', 'reports.payroll') ? 'text-sky-500' : 'text-sky-500' }}"><i class="feather-file-text" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Accountant Reports</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
+                        </a>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.remittance') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Reports</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.payroll') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Payroll Reports</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('admin.dashboard') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('admin.dashboard') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('admin.dashboard') ? 'text-pink-500' : 'text-pink-500' }}"><i class="feather-camera" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">QR Monitor</span>
                         </a>
                     </li>
                 @endif
 
+                {{-- non-superadmin base items --}}
                 @if (auth()->user()->role !== 'superadmin')
-                    <li class="nxl-item nxl-caption"><label>Menu</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Menu</label></li>
 
-                    <li class="nxl-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                        <a href="{{ route('dashboard') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-airplay"></i></span>
-                            <span class="nxl-mtext">Dashboard</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('dashboard') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('dashboard') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('dashboard') ? 'text-blue-500' : 'text-blue-500' }}"><i class="feather-airplay" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Dashboard</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('attendance.scan') ? 'active' : '' }}">
-                        <a href="{{ route('attendance.scan') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-camera"></i></span>
-                            <span class="nxl-mtext">Scan QR Attendance</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('attendance.scan') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('attendance.scan') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('attendance.scan') ? 'text-cyan-500' : 'text-cyan-500' }}"><i class="feather-camera" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Scan QR Attendance</span>
                         </a>
                     </li>
                 @endif
 
                 {{-- ── Remittance Clerk ── --}}
                 @if (auth()->user()->role === 'remittance_clerk')
-                    <li class="nxl-item nxl-caption"><label>Operations</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Operations</label></li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-users"></i></span>
-                            <span class="nxl-mtext">Operational Records</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'text-orange-500' : 'text-orange-500' }}"><i class="feather-users" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Operational Records</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item {{ request()->routeIs('drivers.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('drivers.index') }}">List of Drivers</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('paos.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('paos.index') }}">List of PAO / Conductors</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('routes.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('routes.index') }}">Manage Routes</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('vehicles.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('vehicles.index') }}">Manage Vehicles</a>
-                            </li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('drivers.*') ? 'active' : 'text-gray-500' }}" href="{{ route('drivers.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-user" style="font-size:13px"></i></span><span>List of Drivers</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('paos.*') ? 'active' : 'text-gray-500' }}" href="{{ route('paos.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-users" style="font-size:13px"></i></span><span>List of PAO / Conductors</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('routes.*') ? 'active' : 'text-gray-500' }}" href="{{ route('routes.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-map-pin" style="font-size:13px"></i></span><span>Manage Routes</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('vehicles.*') ? 'active' : 'text-gray-500' }}" href="{{ route('vehicles.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-truck" style="font-size:13px"></i></span><span>Manage Vehicles</span></a></li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-activity"></i></span>
-                            <span class="nxl-mtext">Daily Remittance</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('remittances.*', 'short-remittances.*') ? 'text-teal-500' : 'text-teal-500' }}"><i class="feather-activity" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Daily Remittance</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item">
-                                <a class="nxl-link" href="{{ route('remittances.index') }}">Record Remittance</a>
-                            </li>
-                            <li class="nxl-item">
-                                <a class="nxl-link" href="{{ route('short-remittances.index') }}">Short Remittance</a>
-                            </li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-edit" style="font-size:13px"></i></span><span>Record Remittance</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('short-remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-triangle" style="font-size:13px"></i></span><span>Short Remittance</span></a></li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.*') ? 'active' : '' }}">
-                        <a href="{{ route('reports.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-file-text"></i></span>
-                            <span class="nxl-mtext">Remittance Report</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('reports.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('reports.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('reports.*') ? 'text-sky-500' : 'text-sky-500' }}"><i class="feather-file-text" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Remittance Report</span>
                         </a>
                     </li>
                 @endif
 
                 {{-- ── HR ── --}}
                 @if (auth()->user()->role === 'hr')
-                    <li class="nxl-item nxl-caption"><label>HR Management</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">HR Management</label></li>
 
-                    <li class="nxl-item {{ request()->routeIs('employees.*') ? 'active' : '' }}">
-                        <a href="{{ route('employees.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-user-plus"></i></span>
-                            <span class="nxl-mtext">Employee Management</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('employees.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employees.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employees.*') ? 'text-emerald-500' : 'text-emerald-500' }}"><i class="feather-user-plus" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Employee Management</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-calendar"></i></span>
-                            <span class="nxl-mtext">Leave Management</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('leave.*', 'leave-type.*') ? 'text-violet-500' : 'text-violet-500' }}"><i class="feather-calendar" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Leave Management</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave-type.index') }}">Leave Types</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.pending') }}">Pending Leaves</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.approved') }}">Approved Leaves</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('leave.rejected') }}">Rejected Leaves</a></li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave-type.*') ? 'active' : 'text-gray-500' }}" href="{{ route('leave-type.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-list" style="font-size:13px"></i></span><span>Leave Types</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.pending') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.pending') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-circle" style="font-size:13px"></i></span><span>Pending Leaves</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.approved') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.approved') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check" style="font-size:13px"></i></span><span>Approved Leaves</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.rejected') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.rejected') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-x" style="font-size:13px"></i></span><span>Rejected Leaves</span></a></li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('holiday.*') ? 'active' : '' }}">
-                        <a href="{{ route('holiday.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-gift"></i></span>
-                            <span class="nxl-mtext">Holiday Management</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('holiday.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('holiday.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('holiday.*') ? 'text-rose-500' : 'text-rose-500' }}"><i class="feather-gift" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Holiday Management</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-clock"></i></span>
-                            <span class="nxl-mtext">Attendance</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('attendance.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('attendance.*') ? 'text-cyan-500' : 'text-cyan-500' }}"><i class="feather-clock" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Attendance</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('attendance.index') }}">QR Time IN / OUT Records</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('overtime.index') }}">Overtime / Undertime</a></li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('attendance.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-camera" style="font-size:13px"></i></span><span>QR Time IN / OUT Records</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('overtime.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-clock" style="font-size:13px"></i></span><span>Overtime / Undertime</span></a></li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item nxl-caption"><label>Payroll</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Payroll</label></li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('payroll.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-dollar-sign"></i></span>
-                            <span class="nxl-mtext">Payroll Processing</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll.*') ? 'text-green-600' : 'text-green-600' }}"><i class="feather-dollar-sign" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Payroll Processing</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item {{ request()->routeIs('payroll.salary-computation.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.salary-computation.index') }}">Payroll Management</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('payroll.statutory-deductions.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.statutory-deductions.index') }}">Statutory Deductions</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('payroll.receivables.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.receivables.index') }}">Employee Receivables</a>
-                            </li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.salary-computation.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.salary-computation.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-settings" style="font-size:13px"></i></span><span>Payroll Management</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.statutory-deductions.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.statutory-deductions.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-shield" style="font-size:13px"></i></span><span>Statutory Deductions</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.receivables.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.receivables.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-inbox" style="font-size:13px"></i></span><span>Employee Receivables</span></a></li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'active' : '' }}">
-                        <a href="{{ route('bonuses.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-award"></i></span>
-                            <span class="nxl-mtext">Bonuses</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('bonuses.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'text-yellow-500' : 'text-yellow-500' }}"><i class="feather-award" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Bonuses</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.payslips', 'reports.payroll*', 'reports.deduction*', 'reports.government*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-bar-chart-2"></i></span>
-                            <span class="nxl-mtext">Reports</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('reports.payslips', 'reports.payroll*', 'reports.deduction*', 'reports.government*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('reports.payslips', 'reports.payroll*', 'reports.deduction*', 'reports.government*') ? 'text-sky-500' : 'text-sky-500' }}"><i class="feather-bar-chart-2" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Reports</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item {{ request()->routeIs('payroll.generate-payslip.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.generate-payslip.index') }}">Payslips</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('payroll.history.*') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('payroll.history.index') }}">Payroll Summary</a>
-                            </li>
-                            <li class="nxl-item {{ request()->routeIs('reports.government-contribution') ? 'active' : '' }}">
-                                <a class="nxl-link" href="{{ route('reports.government-contribution') }}">Government Contribution Summary</a>
-                            </li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.generate-payslip.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.generate-payslip.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file" style="font-size:13px"></i></span><span>Payslips</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.history.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.history.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-bar-chart-2" style="font-size:13px"></i></span><span>Payroll Summary</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('reports.government-contribution') ? 'active' : 'text-gray-500' }}" href="{{ route('reports.government-contribution') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Government Contribution Summary</span></a></li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('settings.*') ? 'active' : '' }}">
-                        <a href="{{ route('settings.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-settings"></i></span>
-                            <span class="nxl-mtext">Settings</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('settings.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('settings.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('settings.*') ? 'text-slate-500' : 'text-slate-500' }}"><i class="feather-settings" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Settings</span>
                         </a>
                     </li>
                 @endif
 
                 {{-- ── Employee ── --}}
                 @if (auth()->user()->role === 'employee')
-                    <li class="nxl-item nxl-caption"><label>My Finances</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">My Finances</label></li>
 
-                    <li class="nxl-item {{ request()->routeIs('employee.cash-advances.*') ? 'active' : '' }}">
-                        <a href="{{ route('employee.cash-advances.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-credit-card"></i></span>
-                            <span class="nxl-mtext">Cash Advances</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.cash-advances.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.cash-advances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.cash-advances.*') ? 'text-emerald-500' : 'text-emerald-500' }}"><i class="feather-credit-card" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Cash Advances</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('employee.salary-loans.*') ? 'active' : '' }}">
-                        <a href="{{ route('employee.salary-loans.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-briefcase"></i></span>
-                            <span class="nxl-mtext">Salary Loans</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.salary-loans.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.salary-loans.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.salary-loans.*') ? 'text-amber-500' : 'text-amber-500' }}"><i class="feather-briefcase" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Salary Loans</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item nxl-caption"><label>Time Off</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Time Off</label></li>
 
-                    <li class="nxl-item {{ request()->routeIs('employee.leaves.*') ? 'active' : '' }}">
-                        <a href="{{ route('employee.leaves.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-calendar"></i></span>
-                            <span class="nxl-mtext">My Leaves</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.leaves.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.leaves.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.leaves.*') ? 'text-violet-500' : 'text-violet-500' }}"><i class="feather-calendar" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Leaves</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('employee.overtime-undertime.*') ? 'active' : '' }}">
-                        <a href="{{ route('employee.overtime-undertime.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-clock"></i></span>
-                            <span class="nxl-mtext">OT / UT Requests</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.overtime-undertime.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.overtime-undertime.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.overtime-undertime.*') ? 'text-cyan-500' : 'text-cyan-500' }}"><i class="feather-clock" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">OT / UT Requests</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('employee.attendance.*') ? 'active' : '' }}">
-                        <a href="{{ route('employee.attendance.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-calendar"></i></span>
-                            <span class="nxl-mtext">My Attendance</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.attendance.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attendance.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('employee.attendance.*') ? 'text-violet-500' : 'text-violet-500' }}"><i class="feather-calendar" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Attendance</span>
                         </a>
                     </li>
                 @endif
 
                 {{-- ── Accountant ── --}}
                 @if (auth()->user()->role === 'accountant')
-                    <li class="nxl-item nxl-caption"><label>Approvals &amp; Reports</label></li>
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Approvals &amp; Reports</label></li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-check-circle"></i></span>
-                            <span class="nxl-mtext">Approvals</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'text-indigo-500' : 'text-indigo-500' }}"><i class="feather-check-circle" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Approvals</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('payroll-approval.index') }}">Payroll Release Approval</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('remittance-approval.index') }}">Remittance Approval</a></li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('payroll-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Payroll Release Approval</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittance-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Remittance Approval</span></a></li>
                         </ul>
                     </li>
 
-                    <li class="nxl-item {{ request()->routeIs('payroll.receivables.*') ? 'active' : '' }}">
-                        <a href="{{ route('payroll.receivables.index') }}" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-inbox"></i></span>
-                            <span class="nxl-mtext">Receivables &amp; Loans</span>
+                    <li class="sidebar-item">
+                        <a href="{{ route('payroll.receivables.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll.receivables.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll.receivables.*') ? 'text-indigo-500' : 'text-indigo-500' }}"><i class="feather-inbox" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Receivables &amp; Loans</span>
                         </a>
                     </li>
 
-                    <li class="nxl-item nxl-hasmenu {{ request()->routeIs('reports.*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);" class="nxl-link">
-                            <span class="nxl-micon"><i class="feather-file-text"></i></span>
-                            <span class="nxl-mtext">Reports</span>
-                            <span class="nxl-arrow"><i class="feather-chevron-right"></i></span>
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('reports.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('reports.*') ? 'text-sky-500' : 'text-sky-500' }}"><i class="feather-file-text" style="font-size:15px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Reports</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="nxl-submenu">
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.remittance') }}">Remittance Reports</a></li>
-                            <li class="nxl-item"><a class="nxl-link" href="{{ route('reports.payroll') }}">Payroll Reports</a></li>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.remittance') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Reports</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.payroll') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Payroll Reports</span></a></li>
                         </ul>
                     </li>
                 @endif
@@ -422,21 +497,6 @@
             </ul>
         </div>
 
-        {{-- ── User Footer (hidden via CSS) ── --}}
-        <div class="kt-sidebar-user">
-            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white kt-sidebar-user-avatar" style="width: 45px; height: 45px; font-size: 20px; font-weight: normal; min-width: 45px;">
-                {{ auth()->user()->getFirstLetter() }}
-            </div>
-            <div class="kt-sidebar-user-info">
-                <div class="kt-sidebar-user-name">{{ auth()->user()->name }}</div>
-                <div class="kt-sidebar-user-role">{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</div>
-            </div>
-            <a href="javascript:void(0);" class="kt-sidebar-user-logout"
-                onclick="document.getElementById('logout-form-sidebar').submit();" title="Logout">
-                <i class="feather-log-out"></i>
-            </a>
-            <form method="POST" action="{{ route('logout') }}" id="logout-form-sidebar" style="display:none;">@csrf</form>
-        </div>
-
     </div>
 </nav>
+<form method="POST" action="{{ route('logout') }}" id="logout-form" style="display:none;">@csrf</form>

@@ -1,146 +1,119 @@
-<header class="nxl-header">
-    <div class="header-wrapper">
+<header class="fixed top-0 lg:left-[var(--sidebar-w)] left-0 right-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center transition-all duration-300">
+    <div class="flex items-center w-full h-full px-4 sm:px-6">
 
-        {{-- ── Left ── --}}
-        <div class="header-left d-flex align-items-center gap-3">
+        {{-- Mobile menu toggle (hidden on desktop) --}}
+        <button class="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors" id="mobile-menu-btn" type="button" aria-label="Toggle menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
 
-            {{-- Mobile hamburger (shown only on mobile via d-xl-none) --}}
-            <a href="javascript:void(0);" class="kt-header-btn nxl-head-mobile-toggler d-xl-none" id="mobile-collapse">
-                <i class="feather-menu fs-18"></i>
-            </a>
-
-            {{-- Desktop toggle buttons: JS controls which one is visible --}}
-            {{-- Both use the SAME hamburger icon so it always looks the same --}}
-            <a href="javascript:void(0);" class="kt-header-btn d-none d-xl-flex" id="menu-mini-button">
-                <i class="feather-menu fs-18"></i>
-            </a>
-            <a href="javascript:void(0);" class="kt-header-btn d-none d-xl-flex" id="menu-expend-button"
-                style="display:none !important;">
-                <i class="feather-menu fs-18"></i>
-            </a>
+        {{-- Typewriter greeting --}}
+        @php
+            $role = auth()->user()->role;
+            $roleLabel = match($role) {
+                'superadmin' => 'Superadmin',
+                'hr' => 'HR',
+                'accountant' => 'Accountant',
+                'remittance_clerk' => 'Remittance',
+                'employee' => 'Employee',
+                default => 'User'
+            };
+            $greetings = [
+                "Welcome, $roleLabel",
+                "Hello, $roleLabel",
+                "Good to see you, $roleLabel!",
+            ];
+            $greeting = $greetings[array_rand($greetings)];
+        @endphp
+        <div class="flex-1 min-w-0 flex items-center h-full ml-2 sm:ml-4">
+            <span id="typewriter" class="text-sm sm:text-base font-semibold text-gray-700 truncate"></span>
+            <span class="inline-block w-[2px] h-4 bg-gray-700 ml-0.5 animate-pulse" id="typewriter-cursor"></span>
         </div>
 
-        {{-- ── Centre: Global Search ── --}}
-        <div id="kt-nav-search" style="
-            width: 420px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #f4f6f8;
-            border: 1px solid #e5e7eb;
-            border-radius: 999px;
-            padding: 0 16px;
-            height: 40px;
-            transition: border-color .15s, box-shadow .15s, background .15s;
-            cursor: text;
-            z-index: 10;
-        ">
-            <i class="feather-search" style="color:#b0b7c3;font-size:14px;flex-shrink:0;pointer-events:none;"></i>
-            <input
-                id="kt-search-input"
-                type="text"
-                placeholder="Search employees, pages…"
-                autocomplete="off"
-                spellcheck="false"
-                style="
-                    flex:1;border:none;background:transparent;outline:none;
-                    font-size:0.85rem;color:#111827;min-width:0;padding:0;line-height:1;
-                "
-            >
-        </div>
+        {{-- Right side icons --}}
+        <div class="flex items-center gap-0.5 ml-auto">
 
-        {{-- ── Right ── --}}
-        <div class="header-right ms-auto d-flex align-items-center gap-1">
-
-            {{-- Fullscreen: single button, icon swapped by JS --}}
-            <a href="javascript:void(0);" class="kt-header-btn d-none d-sm-flex" id="kt-fullscreen-btn">
-                <i class="feather-maximize fs-17"></i>
+            {{-- Fullscreen --}}
+            <a href="javascript:void(0);" class="hidden sm:flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors" id="kt-fullscreen-btn">
+                <i class="feather-maximize" style="font-size:16px"></i>
             </a>
 
             {{-- Notifications --}}
-            <div class="dropdown">
-                <a class="kt-header-btn position-relative" id="notification-btn" data-bs-toggle="dropdown" href="#" role="button"
-                    data-bs-auto-close="outside" data-bs-display="static">
-                    <i class="feather-bell fs-17"></i>
-                    @php
-                        $unread_count = auth()->user()->notifications()->unread()->count();
-                    @endphp
+            @php
+                $unread_count = auth()->user()->notifications()->unread()->count();
+            @endphp
+            <div class="relative" data-dropdown>
+                <button class="relative flex items-center justify-center w-9 h-9 rounded-lg transition-colors hover:bg-gray-100" id="notification-btn" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" height="20" width="20" xmlns="http://www.w3.org/2000/svg" class="text-gray-500">
+                        <path d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke="currentColor"></path>
+                    </svg>
                     @if($unread_count > 0)
-                        <span class="kt-notif-dot" id="notif-count">{{ $unread_count > 99 ? '99+' : $unread_count }}</span>
+                        <span class="notif-blip"></span>
                     @endif
-                </a>
-                <div class="dropdown-menu dropdown-menu-end kt-notif-dropdown kt-notif-dropdown-under-navbar" id="notification-dropdown" style="width:680px !important; min-width:680px !important; max-width:min(96vw,680px) !important;">
-                    <div class="kt-notif-header">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="kt-notif-header-icon"><i class="feather-bell"></i></span>
+                </button>
+                <div id="notification-dropdown" class="dropdown-closed sm:absolute sm:top-full sm:right-[-8px] sm:left-auto sm:mt-3 sm:w-[780px] sm:max-w-[96vw] fixed top-16 right-4 left-4 w-auto bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50" data-dropdown-menu>
+                    <div class="flex items-center justify-between px-4 py-3.5 border-b border-gray-100">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center"><i class="feather-bell" style="font-size:15px"></i></span>
                             <div>
-                                <div class="fw-bold">Notifications</div>
-                                <small class="text-muted">Latest updates</small>
+                                <div class="text-sm font-bold text-gray-900">Notifications</div>
+                                <div class="text-xs text-gray-500">Latest updates</div>
                             </div>
                         </div>
-                        <span class="kt-notif-badge" id="notif-badge">
-                            @if($unread_count > 0)
-                                {{ $unread_count }} New
-                            @else
-                                0 New
-                            @endif
-                        </span>
+                        @if($unread_count > 0)
+                            <span class="inline-block text-[11px] font-bold text-white uppercase tracking-wide px-2.5 py-1 rounded-full bg-red-500" id="notif-badge">{{ $unread_count }} New</span>
+                        @endif
                     </div>
-                    <div class="kt-notif-body">
+                    <div class="max-h-[420px] overflow-y-auto p-1.5">
                         <div id="notification-list">
                             @forelse(auth()->user()->notifications()->unread()->recent()->limit(3)->get() as $notification)
-                                <div class="kt-notif-item {{ $notification->isUnread() ? 'unread' : '' }}" data-notif-id="{{ $notification->id }}" data-action-url="{{ $notification->getActionUrl() }}">
-                                    <span class="kt-notif-accent"></span>
-                                    <div class="kt-notif-content">
-                                        <div class="kt-notif-title">{{ $notification->title }}</div>
-                                        <p class="kt-notif-message">{{ $notification->message }}</p>
-                                        <small class="kt-notif-time">{{ $notification->created_at->diffForHumans() }}</small>
+                                <div class="flex items-start gap-3 px-4 py-3.5 rounded-lg cursor-pointer transition-colors duration-100 hover:bg-red-50 {{ $notification->isUnread() ? 'bg-gray-50/80 font-medium' : '' }}" data-notif-id="{{ $notification->id }}" data-action-url="{{ $notification->getActionUrl() }}">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-bold text-gray-900 mb-1">{{ $notification->title }}</div>
+                                        <p class="text-sm text-gray-600 mb-1.5 leading-relaxed">{{ $notification->message }}</p>
+                                        <small class="text-xs text-gray-400">{{ $notification->created_at->diffForHumans() }}</small>
                                     </div>
                                 </div>
                             @empty
-                                <div class="kt-notif-empty">
-                                    <i class="feather-bell-off"></i>
-                                    <p>No new notifications</p>
+                                <div class="flex flex-col items-center justify-center py-10 text-gray-400">
+                                    <i class="feather-bell-off" style="font-size:40px;opacity:0.4"></i>
+                                    <p class="text-sm mt-2">No new notifications</p>
                                 </div>
                             @endforelse
                         </div>
                     </div>
-                    <div class="kt-notif-footer d-flex align-items-center justify-content-between gap-2">
-                        <a class="btn btn-sm btn-link" href="{{ route('notifications.index') }}">View all</a>
-                        <button class="btn btn-sm btn-link" id="mark-all-read" style="{{ $unread_count > 0 ? '' : 'display:none;' }}">Mark all as read</button>
+                    <div class="flex items-center justify-between px-4 py-3 bg-gray-50/80 border-t border-gray-100">
+                        <a class="text-sm font-bold text-red-500 no-underline hover:underline" href="{{ route('notifications.index') }}">View all</a>
+                        <button class="text-sm font-bold text-red-500 no-underline hover:underline bg-transparent border-none cursor-pointer {{ $unread_count > 0 ? '' : 'hidden' }}" id="mark-all-read">Mark all as read</button>
                     </div>
                 </div>
             </div>
 
-            {{-- Divider --}}
-            <div class="kt-header-divider d-none d-sm-block"></div>
-
             {{-- User Profile Dropdown --}}
-            <div class="dropdown">
-                <a href="javascript:void(0);" class="kt-user-trigger d-flex align-items-center gap-2 text-decoration-none"
-                    data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-display="static">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary text-white kt-user-avatar" style="width: 40px; height: 40px; font-size: 18px; font-weight: normal; min-width: 40px;">
+            <div class="relative" data-dropdown>
+                <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-colors hover:bg-gray-100" id="user-dropdown-btn" type="button">
+                    <div class="inline-flex items-center justify-center rounded-full text-white font-semibold" style="width:32px;height:32px;min-width:32px;font-size:14px;background:#c8292a;">
                         {{ auth()->user()->getFirstLetter() }}
                     </div>
-                    <div class="d-none d-md-block text-start lh-sm">
-                        <div class="kt-user-name">{{ auth()->user()->name }}</div>
-                        <div class="kt-user-email">{{ auth()->user()->email }}</div>
-                    </div>
-                </a>
-                <div class="dropdown-menu dropdown-menu-end kt-user-dropdown kt-user-dropdown-under-navbar">
-                    <div class="kt-user-dropdown-body">
-                        <a href="{{ route('profile.details') }}" class="kt-user-dropdown-item">
-                            <i class="feather-user"></i> My Profile
+                    <svg class="hidden md:block text-gray-500" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                    </svg>
+                </button>
+                <div id="user-dropdown" class="dropdown-closed sm:absolute sm:top-full sm:right-0 sm:mt-2 sm:w-56 sm:left-auto fixed top-16 right-4 left-4 w-auto bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50" data-dropdown-menu>
+                    <div class="py-1.5">
+                        <a href="{{ route('profile.details') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group">
+                            <i class="feather-user w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i> My Profile
                         </a>
-                        <a href="{{ route('employee.attachments.index') }}" class="kt-user-dropdown-item">
-                            <i class="feather-user"></i> My Documents
+                        <a href="{{ route('employee.attachments.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group">
+                            <i class="feather-folder w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i> Documents
                         </a>
-                        <div class="kt-user-dropdown-divider"></div>
-                        <a href="javascript:void(0);" class="kt-user-dropdown-item kt-logout-item"
+                        <div class="border-t border-gray-100 my-1 mx-4"></div>
+                        <a href="javascript:void(0);" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 no-underline transition-colors duration-100 hover:bg-red-50 group"
                             onclick="document.getElementById('logout-form').submit();">
-                            <i class="feather-log-out"></i> Logout
+                            <i class="feather-log-out w-4 text-center text-red-400 group-hover:text-red-500 transition-colors"></i> Logout
                         </a>
-                        <form method="POST" action="{{ route('logout') }}" id="logout-form" style="display:none;">
+                        <form method="POST" action="{{ route('logout') }}" id="logout-form" class="hidden">
                             @csrf
                         </form>
                     </div>
@@ -151,186 +124,46 @@
     </div>
 </header>
 
-@push('styles')
-    <style>
-        .kt-user-dropdown-under-navbar {
-            position: absolute !important;
-            top: calc(100% + 18px) !important;
-            right: 12px !important;
-            left: auto !important;
-            inset: auto !important;
-            transform: none !important;
-            margin-top: 0 !important;
-        }
+<style>
+    /* ── Dropdown animation ── */
+    [data-dropdown-menu] {
+        transition: opacity .15s ease-out, transform .15s ease-out, visibility .15s ease-out;
+    }
+    .dropdown-closed {
+        visibility: hidden !important;
+        opacity: 0 !important;
+        transform: translateY(-4px) scale(.98) !important;
+        pointer-events: none !important;
+    }
 
-        .kt-notif-dropdown-under-navbar {
-            position: absolute !important;
-            top: calc(100% + 18px) !important;
-            right: 12px !important;
-            left: auto !important;
-            inset: auto !important;
-            transform: none !important;
-            margin-top: 0 !important;
-            width: 680px !important;
-            min-width: 680px !important;
-            max-width: min(96vw, 680px) !important;
-        }
-
-        /* Replace old template dropdown look with custom popup */
-        .nxl-header #notification-dropdown.kt-notif-dropdown {
-            width: 680px !important;
-            min-width: 680px !important;
-            max-width: min(96vw, 680px) !important;
-            right: 12px !important;
-            left: auto !important;
-            border: 1px solid #f1d0d0 !important;
-            border-radius: 18px !important;
-            box-shadow: 0 20px 45px rgba(17, 24, 39, 0.18), 0 8px 22px rgba(200, 41, 42, 0.14) !important;
-            overflow: hidden !important;
-            padding: 0 !important;
-            background: #fff !important;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-header {
-            padding: 14px 16px !important;
-            border-bottom: 1px solid #f3f4f6 !important;
-            background: linear-gradient(135deg, #fff6f6 0%, #ffffff 72%) !important;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-header-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #ffe9e9;
-            color: #c8292a;
-            font-size: 14px;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-badge {
-            background: #c8292a !important;
-            color: #fff !important;
-            border-radius: 999px;
-            font-weight: 800;
-            font-size: 0.66rem;
-            padding: 4px 10px;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-body {
-            max-height: 470px;
-            overflow-y: auto;
-            padding: 10px;
-            background: #ffffff;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-item {
-            position: relative;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 11px 12px;
-            margin: 0 0 8px;
-            border-radius: 12px;
-            border: 1px solid #f1f5f9;
-            background: #fff;
-            transition: all 0.16s ease;
-            cursor: pointer;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-item:hover {
-            background: #fff7f7;
-            border-color: #f8d3d3;
-            transform: translateY(-1px);
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-item.unread {
-            border-color: #ffd7d7;
-            background: #fffafb;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-accent {
-            width: 4px;
-            align-self: stretch;
-            border-radius: 999px;
-            background: transparent;
-            margin-right: 2px;
-            flex-shrink: 0;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-item.unread .kt-notif-accent {
-            background: #c8292a;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-title {
-            font-size: 0.87rem;
-            font-weight: 800;
-            color: #111827;
-            margin-bottom: 2px;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-message {
-            font-size: 0.79rem;
-            line-height: 1.4;
-            color: #6b7280;
-            margin: 0 0 4px;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-time {
-            font-size: 0.72rem;
-            color: #9ca3af;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-footer {
-            border-top: 1px solid #f3f4f6;
-            background: #fcfcfd;
-            padding: 10px 14px !important;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-footer .btn-link {
-            text-decoration: none;
-            color: #c8292a;
-            font-weight: 700;
-            font-size: 0.79rem;
-        }
-
-        .nxl-header #notification-dropdown .kt-notif-footer .btn-link:hover {
-            color: #a81f20;
-        }
-
-        @media (max-width: 767px) {
-            .kt-notif-dropdown-under-navbar,
-            .kt-user-dropdown-under-navbar {
-                right: 12px !important;
-                left: 12px !important;
-            }
-
-            .kt-notif-dropdown-under-navbar {
-                width: auto !important;
-                min-width: auto !important;
-                max-width: none !important;
-            }
-
-            .nxl-header #notification-dropdown.kt-notif-dropdown {
-                width: auto !important;
-                min-width: auto !important;
-                max-width: none !important;
-            }
-        }
-    </style>
-@endpush
+    /* ── Notification blinking dot ── */
+    .notif-blip {
+        position: absolute;
+        bottom: 6px;
+        left: 6px;
+        width: 8px;
+        height: 8px;
+        background: #22c55e;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 4px rgba(34,197,94,.4);
+    }
+    .notif-blip::before {
+        content: '';
+        position: absolute;
+        inset: 50%;
+        translate: -50% -50%;
+        width: 2px;
+        height: 2px;
+        background: #22c55e;
+        border-radius: 50%;
+        animation: notif-pulse 1.2s ease-in-out infinite;
+    }
+    @keyframes notif-pulse {
+        0%   { width: 2px; height: 2px; opacity: 1; }
+        100% { width: 28px; height: 28px; opacity: 0; }
+    }
+</style>
 
 @push('scripts')
     <script>
@@ -339,82 +172,44 @@
 
             var SEARCH_URL = @json(route('search'));
             var input = document.getElementById('kt-search-input');
-            if (!input) { console.warn('[Search] #kt-search-input not found'); return; }
-
-            /* ── Build popup and inject into <body> ── */
-            var popup = document.createElement('div');
-            popup.id = 'kt-search-popup';
-            popup.style.cssText = [
-                'display:none',
-                'position:fixed',
-                'z-index:99999',
-                'width:520px',
-                'background:#fff',
-                'border:1px solid #f1d0d0',
-                'border-radius:18px',
-                'box-shadow:0 24px 60px rgba(17,24,39,.18),0 8px 24px rgba(200,41,42,.10)',
-                'overflow:hidden',
-                'font-family:inherit',
-            ].join(';');
-
-            popup.innerHTML = [
-                '<div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #f3f4f6;background:linear-gradient(135deg,#fff6f6 0%,#fff 65%)">',
-                  '<span style="width:34px;height:34px;border-radius:10px;background:#ffe9e9;color:#c8292a;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="feather-search"></i></span>',
-                  '<div>',
-                    '<div style="font-size:.85rem;font-weight:700;color:#111827">Search</div>',
-                    '<div id="kt-sp-sub" style="font-size:.72rem;color:#9ca3af">Start typing…</div>',
-                  '</div>',
-                  '<span style="margin-left:auto;font-size:.62rem;font-weight:700;color:#9ca3af;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:4px;padding:2px 6px;text-transform:uppercase;flex-shrink:0">Esc</span>',
-                '</div>',
-                '<div style="max-height:460px;overflow-y:auto;padding:8px 8px 10px">',
-                  '<div id="kt-sp-state" style="padding:28px 16px;text-align:center;color:#9ca3af;font-size:.83rem"><i class="feather-search" style="display:block;font-size:24px;margin-bottom:8px;opacity:.28"></i>Type to search</div>',
-                  '<ul id="kt-sp-list" style="list-style:none;margin:0;padding:0"></ul>',
-                '</div>',
-            ].join('');
-
-            document.body.appendChild(popup);
+            var popup = document.getElementById('kt-search-popup');
+            if (!input || !popup) { console.warn('[Search] input/popup not found'); return; }
 
             var spState = document.getElementById('kt-sp-state');
             var spList  = document.getElementById('kt-sp-list');
-            var spSub   = document.getElementById('kt-sp-sub');
 
             var timer     = null;
             var lastQ     = '';
             var activeIdx = -1;
             var isOpen    = false;
 
-            /* ── Position popup centred under the search pill ── */
             function reposition() {
                 var pill = document.getElementById('kt-nav-search');
                 if (!pill) return;
-                var r   = pill.getBoundingClientRect();
-                var w   = 520;
-                var left = r.left + r.width / 2 - w / 2;
-                left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
-                popup.style.top  = (r.bottom + 8) + 'px';
-                popup.style.left = left + 'px';
+                var r = pill.getBoundingClientRect();
+                popup.style.top  = (r.bottom + 4) + 'px';
+                popup.style.left = r.left + 'px';
+                popup.style.width = r.width + 'px';
             }
 
             function openPopup() {
                 reposition();
-                popup.style.display = 'block';
+                popup.classList.remove('hidden');
                 isOpen = true;
             }
 
             function closePopup() {
-                popup.style.display = 'none';
+                popup.classList.add('hidden');
                 isOpen    = false;
                 activeIdx = -1;
             }
 
             function resetState() {
                 spList.innerHTML = '';
-                spState.style.display = '';
-                spState.innerHTML = '<i class="feather-search" style="display:block;font-size:20px;margin-bottom:6px;opacity:.28"></i>Type to search';
-                spSub.textContent = 'Start typing…';
+                spState.classList.remove('hidden');
+                spState.textContent = 'Type to search';
             }
 
-            /* ── Helpers ── */
             function escHtml(s) {
                 return String(s)
                     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -424,85 +219,63 @@
                 if (!q) return escHtml(text);
                 return escHtml(text).replace(
                     new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi'),
-                    '<strong style="color:#c8292a;font-weight:800">$1</strong>'
+                    '<strong class="text-gray-900 font-extrabold">$1</strong>'
                 );
             }
             function setActive(idx) {
                 var links = spList.querySelectorAll('li a');
                 links.forEach(function(a, i) {
-                    a.style.background   = i === idx ? '#fff7f7' : '';
-                    a.style.borderColor  = i === idx ? '#ffd7d7' : 'transparent';
+                    a.classList.toggle('bg-gray-100', i === idx);
+                    a.classList.toggle('bg-transparent', i !== idx);
                 });
                 activeIdx = idx;
                 if (links[idx]) links[idx].scrollIntoView({ block: 'nearest' });
             }
 
-            /* ── Render results ── */
             function render(results, q) {
                 spList.innerHTML = '';
                 activeIdx = -1;
 
                 if (!results.length) {
-                    spState.style.display = '';
-                    spState.innerHTML = '<i class="feather-search" style="display:block;font-size:20px;margin-bottom:6px;opacity:.28"></i>No results for <strong>"' + escHtml(q) + '"</strong>';
-                    spSub.textContent = '0 results';
+                    spState.classList.remove('hidden');
+                    spState.innerHTML = 'No results for <span class="font-semibold text-gray-700">"' + escHtml(q) + '"</span>';
                     return;
                 }
 
-                spState.style.display = 'none';
-                spSub.textContent = results.length + ' result' + (results.length !== 1 ? 's' : '');
-
-                // Split into pages and employees
-                var pages = results.filter(function(r){ return r.type === 'page'; });
-                var emps  = results.filter(function(r){ return r.type === 'employee'; });
-
-                function addSection(label, items, renderFn) {
-                    if (!items.length) return;
-                    var lbl = document.createElement('div');
-                    lbl.style.cssText = 'padding:8px 10px 3px;font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#b0b7c3';
-                    lbl.textContent = label;
-                    spList.appendChild(lbl);
-                    items.forEach(renderFn);
-                }
+                spState.classList.add('hidden');
 
                 function makeRow(href, left, nameHtml, subHtml) {
                     var li = document.createElement('li');
                     var a  = document.createElement('a');
                     a.href = href;
-                    a.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;text-decoration:none;color:#111827;border:1px solid transparent;transition:background .1s,border-color .1s';
+                    a.className = 'flex items-center gap-2 px-2.5 py-1.5 rounded-lg no-underline text-gray-900 transition-colors duration-100 hover:bg-gray-100';
                     a.innerHTML =
                         left +
-                        '<span style="min-width:0">' +
-                            '<div style="font-size:.88rem;font-weight:600;color:#111827;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + nameHtml + '</div>' +
-                            (subHtml ? '<div style="font-size:.74rem;color:#6b7280;margin-top:2px">' + subHtml + '</div>' : '') +
+                        '<span class="min-w-0">' +
+                            '<div class="text-xs font-semibold text-gray-900 leading-tight truncate">' + nameHtml + '</div>' +
+                            (subHtml ? '<div class="text-[11px] text-gray-500 mt-0.5">' + subHtml + '</div>' : '') +
                         '</span>';
-                    a.addEventListener('mouseenter', function(){ this.style.background='#fff7f7'; this.style.borderColor='#ffd7d7'; });
-                    a.addEventListener('mouseleave', function(){ this.style.background=''; this.style.borderColor='transparent'; });
                     li.appendChild(a);
                     spList.appendChild(li);
                 }
 
-                // Pages section
-                addSection('Pages', pages, function(item) {
-                    var iconBox = '<span style="width:36px;height:36px;min-width:36px;border-radius:9px;background:#f4f6f8;color:#6b7280;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="' + escHtml(item.icon) + '"></i></span>';
-                    makeRow(escHtml(item.url), iconBox, markText(item.label, q), '');
-                });
-
-                // Employees section
-                addSection('Employees', emps, function(item) {
-                    var avatar = '<span style="width:36px;height:36px;min-width:36px;border-radius:50%;background:#c8292a;color:#fff;font-size:.70rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + escHtml(item.initials) + '</span>';
-                    makeRow(escHtml(item.url), avatar, markText(item.label, q), item.subtitle ? escHtml(item.subtitle) : '');
+                results.forEach(function(item) {
+                    if (item.type === 'page') {
+                        var iconBox = '<span class="w-7 h-7 min-w-[28px] rounded-lg bg-gray-100 text-gray-500 text-xs flex items-center justify-center shrink-0"><i class="' + escHtml(item.icon) + '"></i></span>';
+                        makeRow(escHtml(item.url), iconBox, markText(item.label, q), '');
+                    } else {
+                        var avatar = '<span class="w-7 h-7 min-w-[28px] rounded-full bg-gray-700 text-white text-[10px] font-bold flex items-center justify-center shrink-0">' + escHtml(item.initials) + '</span>';
+                        makeRow(escHtml(item.url), avatar, markText(item.label, q), item.subtitle ? escHtml(item.subtitle) : '');
+                    }
                 });
             }
 
-            /* ── Fetch ── */
             function doSearch(q) {
                 if (q === lastQ) return;
                 lastQ = q;
-                spState.style.display = '';
-                spState.innerHTML = '<span style="display:inline-block;width:18px;height:18px;border:2px solid #f0f0f0;border-top-color:#c8292a;border-radius:50%;animation:ktSpin .5s linear infinite"></span>';
+                spState.classList.remove('hidden');
+                spState.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-500 rounded-full animate-spin"></span>';
                 spList.innerHTML = '';
-                spSub.textContent = 'Searching…';
                 openPopup();
 
                 fetch(SEARCH_URL + '?q=' + encodeURIComponent(q), {
@@ -512,18 +285,9 @@
                 .then(function (d) { render(d.results || [], q); })
                 .catch(function (err) {
                     console.error('[Search] fetch error', err);
-                    spState.style.display = '';
-                    spState.innerHTML = '<i class="feather-alert-circle" style="display:block;font-size:20px;margin-bottom:6px;opacity:.28"></i>Search unavailable';
-                    spSub.textContent = 'Error';
+                    spState.classList.remove('hidden');
+                    spState.innerHTML = 'Search unavailable';
                 });
-            }
-
-            /* ── Inject spinner keyframe once ── */
-            if (!document.getElementById('kt-search-style')) {
-                var s = document.createElement('style');
-                s.id = 'kt-search-style';
-                s.textContent = '@keyframes ktSpin{to{transform:rotate(360deg)}}';
-                document.head.appendChild(s);
             }
 
             /* ── Events ── */
@@ -573,17 +337,87 @@
             }
 
             // Refresh list when dropdown opens
-            const dropdownBtn = document.getElementById('notification-btn');
-            if (dropdownBtn) {
-                dropdownBtn.addEventListener('show.bs.dropdown', function() {
+            const notifBtn = document.getElementById('notification-btn');
+            if (notifBtn) {
+                notifBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleDropdown('notification-dropdown', notifBtn);
                     refreshNotificationList();
                 });
             }
         });
 
-        // Attach click-to-read listeners on notification items
+        // ── Dropdown helpers ───────────────────────────────────────────────
+        function toggleDropdown(id, btn) {
+            var menu = document.getElementById(id);
+            if (!menu) return;
+            var isOpen = !menu.classList.contains('dropdown-closed');
+            document.querySelectorAll('[data-dropdown-menu]').forEach(function(el) {
+                el.classList.add('dropdown-closed');
+            });
+            if (!isOpen) {
+                menu.classList.remove('dropdown-closed');
+            }
+        }
+
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            document.querySelectorAll('[data-dropdown-menu]:not(.dropdown-closed)').forEach(function(menu) {
+                var parent = menu.closest('[data-dropdown]');
+                if (parent && !parent.contains(e.target)) {
+                    menu.classList.add('dropdown-closed');
+                }
+            });
+        });
+
+        // User dropdown toggle
+        var userBtn = document.getElementById('user-dropdown-btn');
+        if (userBtn) {
+            userBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleDropdown('user-dropdown', userBtn);
+            });
+        }
+
+        // Mobile menu toggle
+        var mobBtn = document.getElementById('mobile-menu-btn');
+        if (mobBtn) {
+            mobBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.body.classList.toggle('sidebar-open');
+            });
+        }
+
+        // Close mobile sidebar on backdrop click / Escape key
+        document.addEventListener('click', function(e) {
+            if (document.body.classList.contains('sidebar-open')) {
+                var sidebar = document.querySelector('.sidebar');
+                if (sidebar && !sidebar.contains(e.target) && e.target !== mobBtn && !mobBtn?.contains(e.target)) {
+                    document.body.classList.remove('sidebar-open');
+                }
+            }
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.body.classList.contains('sidebar-open')) {
+                document.body.classList.remove('sidebar-open');
+            }
+        });
+
+        // ── Typewriter effect (single line, no loop) ──────────────────────
+        (function() {
+            var el = document.getElementById('typewriter');
+            if (!el) return;
+            var text = @json($greeting);
+            var j = 0;
+            (function type() {
+                el.textContent = text.substring(0, j + 1);
+                j++;
+                if (j < text.length) { setTimeout(type, 100); }
+            })();
+        })();
+
         function attachNotificationClickListeners() {
-            document.querySelectorAll('.kt-notif-item').forEach(item => {
+            document.querySelectorAll('#notification-list > div').forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -600,11 +434,8 @@
                     })
                     .then(r => r.json())
                     .then(() => {
-                        const dropdownBtn = document.getElementById('notification-btn');
-                        if (dropdownBtn) {
-                            const dd = bootstrap.Dropdown.getInstance(dropdownBtn) || new bootstrap.Dropdown(dropdownBtn);
-                            dd.hide();
-                        }
+                        var menu = document.getElementById('notification-dropdown');
+                        if (menu) { menu.classList.add('dropdown-closed'); }
                         if (actionUrl && actionUrl !== 'null') {
                             window.location.href = actionUrl;
                         } else {
@@ -645,24 +476,27 @@
                 const count = data.unread_count || 0;
                 const dot   = document.getElementById('notif-count');
                 const badge = document.getElementById('notif-badge');
+                let   blip  = document.querySelector('#notification-btn .notif-blip');
                 if (count > 0) {
                     if (dot) {
                         dot.textContent = count > 99 ? '99+' : count;
-                        dot.style.display = '';
+                        dot.classList.remove('hidden');
                     } else {
                         const span = document.createElement('span');
                         span.id = 'notif-count';
-                        span.className = 'kt-notif-dot';
+                        span.className = 'absolute top-1 right-1 bg-red-500 text-white text-[9px] font-bold min-w-[15px] h-[15px] rounded-full flex items-center justify-center border-2 border-white leading-none';
                         span.textContent = count > 99 ? '99+' : count;
                         document.getElementById('notification-btn').appendChild(span);
                     }
                     if (badge) badge.textContent = count + ' New';
+                    if (blip) { blip.classList.remove('hidden'); }
                 } else {
-                    if (dot) dot.style.display = 'none';
+                    if (dot) dot.classList.add('hidden');
                     if (badge) badge.textContent = '0 New';
+                    if (blip) blip.classList.add('hidden');
                 }
                 const markAllBtn = document.getElementById('mark-all-read');
-                if (markAllBtn) markAllBtn.style.display = count > 0 ? '' : 'none';
+                if (markAllBtn) markAllBtn.classList.toggle('hidden', count === 0);
             })
             .catch(err => console.error('Error updating count:', err));
         }
@@ -688,20 +522,19 @@
                             : mins + ' min ago';
                         const actionUrl = n.action_url || '';
                         return `
-                            <div class="kt-notif-item ${n.read_at ? '' : 'unread'}" data-notif-id="${n.id}" data-action-url="${actionUrl}">
-                                <span class="kt-notif-accent"></span>
-                                <div class="kt-notif-content">
-                                    <div class="kt-notif-title">${n.title}</div>
-                                    <p class="kt-notif-message">${n.message}</p>
-                                    <small class="kt-notif-time">${timeText}</small>
+                            <div class="flex items-start gap-2.5 px-3.5 py-2.5 rounded-lg cursor-pointer transition-colors duration-100 hover:bg-red-50 ${n.read_at ? '' : 'bg-gray-50/80 font-medium'}" data-notif-id="${n.id}" data-action-url="${actionUrl}">
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-sm font-bold text-gray-900 mb-1">${n.title}</div>
+                                    <p class="text-sm text-gray-600 mb-1 leading-snug">${n.message}</p>
+                                    <small class="text-xs text-gray-400">${timeText}</small>
                                 </div>
                             </div>`;
                     }).join('');
                 } else {
                     list.innerHTML = `
-                        <div class="kt-notif-empty">
-                            <i class="feather-bell-off"></i>
-                            <p>No new notifications</p>
+                        <div class="flex flex-col items-center justify-center py-10 text-gray-400">
+                            <i class="feather-bell-off" style="font-size:40px;opacity:0.4"></i>
+                            <p class="text-sm mt-2">No new notifications</p>
                         </div>`;
                 }
 
