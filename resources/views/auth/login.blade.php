@@ -13,6 +13,13 @@
 .input-group.input-error label {
   color: #ef4444 !important;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: #111827 !important;
+}
 </style>
 @endpush
 
@@ -32,7 +39,7 @@
             <div class="input-group w-full h-14 relative rounded-xl mb-5 @error('username') input-error @enderror">
                 <input id="username" type="text" name="username" required autocomplete="username"
                     value="{{ old('username') }}" autofocus
-                    class="peer w-full h-full bg-transparent outline-none px-4 pt-3 text-sm rounded-xl border border-gray-200 transition-colors focus:border-[#c8292a]">
+                    class="peer w-full h-full bg-white outline-none px-4 pt-3 text-sm rounded-xl border border-gray-200 transition-colors focus:border-[#c8292a]">
                 <label for="username"
                     class="absolute top-1/2 -translate-y-1/2 bg-white left-4 px-1.5 text-sm text-gray-400 peer-focus:top-2 peer-focus:left-3 peer-focus:text-xs peer-focus:text-[#c8292a] peer-valid:top-2 peer-valid:left-3 peer-valid:text-xs peer-valid:text-[#c8292a] duration-150 pointer-events-none">
                     Username
@@ -44,7 +51,7 @@
 
             <div class="input-group w-full h-14 relative rounded-xl mb-2 @error('password') input-error @enderror">
                 <input id="password" type="password" name="password" required autocomplete="current-password"
-                    class="peer w-full h-full bg-transparent outline-none px-4 pt-3 text-sm rounded-xl border border-gray-200 transition-colors focus:border-[#c8292a]">
+                    class="peer w-full h-full bg-white outline-none px-4 pt-3 text-sm rounded-xl border border-gray-200 transition-colors focus:border-[#c8292a]">
                 <label for="password"
                     class="absolute top-1/2 -translate-y-1/2 bg-white left-4 px-1.5 text-sm text-gray-400 peer-focus:top-2 peer-focus:left-3 peer-focus:text-xs peer-focus:text-[#c8292a] peer-valid:top-2 peer-valid:left-3 peer-valid:text-xs peer-valid:text-[#c8292a] duration-150 pointer-events-none">
                     Password
