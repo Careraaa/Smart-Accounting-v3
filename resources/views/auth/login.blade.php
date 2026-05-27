@@ -50,7 +50,7 @@ input:-webkit-autofill:focus {
                 @enderror
             </div>
 
-            <div class="relative flex flex-row items-center mb-2 @error('password') input-group input-error @enderror">
+            <div class="relative flex flex-row items-center mb-5 @error('password') input-group input-error @enderror">
                 <input id="password" type="password" name="password" required autocomplete="current-password" placeholder=""
                     class="peer w-full h-[40px] px-3 text-sm border border-gray-200 rounded-xl bg-white outline-none focus-visible:border-[#c8292a] focus-visible:ring-4 focus-visible:ring-[rgba(200,41,42,0.08)] transition-colors">
                 <label for="password"
