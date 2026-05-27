@@ -32,11 +32,23 @@
         <div class="flex flex-col justify-center p-12 relative bg-white">
             <div class="w-full max-w-[420px] mx-auto">
                 @if ($errors->any())
-                    <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm p-4 mb-4" role="alert">
-                        @foreach ($errors->all() as $error)
-                            <div>{{ $error }}</div>
-                        @endforeach
-                    </div>
+                <div class="relative w-full flex flex-wrap items-center justify-center py-3 pl-4 pr-14 rounded-lg text-base font-medium transition-all duration-500 ease-linear border border-[#f85149] text-[#b22b2b] bg-[linear-gradient(#f851491a,#f851491a)] mb-4">
+                    <button type="button" aria-label="close-error" onclick="this.parentElement.remove()"
+                        class="absolute right-4 p-1 rounded-md transition-opacity text-[#f85149] border border-[#f85149] opacity-40 hover:opacity-100">
+                        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="16" width="16" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6 6 18"></path>
+                            <path d="m6 6 12 12"></path>
+                        </svg>
+                    </button>
+                    <p class="flex flex-row items-center mr-auto gap-x-2">
+                        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="28" width="28" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                            <path d="M12 9v4"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                        {{ $errors->first() }}
+                    </p>
+                </div>
                 @endif
                 @if (session('status'))
                     <div class="bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm p-4 mb-4" role="alert">
@@ -62,11 +74,23 @@
 
                 <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl px-5 py-6 md:px-6 md:py-7">
                     @if ($errors->any())
-                        <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm p-4 mb-4" role="alert">
-                            @foreach ($errors->all() as $error)
-                                <div>{{ $error }}</div>
-                            @endforeach
-                        </div>
+                    <div class="relative w-full flex flex-wrap items-center justify-center py-3 pl-4 pr-14 rounded-lg text-base font-medium transition-all duration-500 ease-linear border border-[#f85149] text-[#b22b2b] bg-[linear-gradient(#f851491a,#f851491a)] mb-4">
+                        <button type="button" aria-label="close-error" onclick="this.parentElement.remove()"
+                            class="absolute right-4 p-1 rounded-md transition-opacity text-[#f85149] border border-[#f85149] opacity-40 hover:opacity-100">
+                            <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="16" width="16" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6 6 18"></path>
+                                <path d="m6 6 12 12"></path>
+                            </svg>
+                        </button>
+                        <p class="flex flex-row items-center mr-auto gap-x-2">
+                            <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="28" width="28" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg">
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                                <path d="M12 9v4"></path>
+                                <path d="M12 17h.01"></path>
+                            </svg>
+                            {{ $errors->first() }}
+                        </p>
+                    </div>
                     @endif
                     @if (session('status'))
                         <div class="bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm p-4 mb-4" role="alert">
