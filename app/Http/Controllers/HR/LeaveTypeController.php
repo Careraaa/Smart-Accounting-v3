@@ -14,27 +14,7 @@ class LeaveTypeController extends Controller
      */
     public function index(Request $request)
     {
-        $status = $request->get('status', 'all');
-        $query = LeaveType::query();
-
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
-
-        $leaveTypes = $query->orderBy('name', 'asc')->paginate(10);
-
-        // Get statistics
-        $totalTypes = LeaveType::count();
-        $activeTypes = LeaveType::where('status', 'active')->count();
-        $inactiveTypes = LeaveType::where('status', 'inactive')->count();
-
-        return view('hr.leavetype.index', compact(
-            'leaveTypes',
-            'totalTypes',
-            'activeTypes',
-            'inactiveTypes',
-            'status'
-        ));
+        return redirect()->route('leave.index', ['tab' => 'types']);
     }
 
     /**
@@ -69,7 +49,7 @@ class LeaveTypeController extends Controller
      */
     public function show(LeaveType $leaveType)
     {
-        return view('hr.leavetype.show', compact('leaveType'));
+        return redirect()->route('leave.index', ['tab' => 'types']);
     }
 
     /**

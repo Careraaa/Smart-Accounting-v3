@@ -22,124 +22,77 @@ class LeaveController extends Controller
     }
     public function index(Request $request)
     {
-        $baseQuery = Leave::query()->with('employee', 'approvedBy');
+        $tab = $request->get('tab', $request->route()->parameter('status', 'types'));
 
-        // Search by employee name or ID
-        if ($request->search) {
-            $baseQuery->whereHas('employee', function ($q) use ($request) {
-                $q->where('first_name', 'like', '%' . $request->search . '%')
-                  ->orWhere('last_name', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        // Status for table view
-        $status = $request->status ?? 'pending';
-
-        // Filter by leave type
-        if ($request->leave_type && $request->leave_type !== 'all') {
-            $baseQuery->where('leave_type', $request->leave_type);
-        }
-
-        // Filter by department
-        if ($request->department) {
-            $baseQuery->whereHas('employee', function ($q) use ($request) {
-                $q->where('department', $request->department);
-            });
-        }
-
-        $query = clone $baseQuery;
-
-        // Filter current table list by status
-        if ($status) {
-            if ($status === 'approved') {
-                // Show both 'approved' and 'paid' leaves in the approved tab
-                $query->whereIn('status', ['approved', 'paid']);
-            } else {
-                $query->where('status', $status);
-            }
-        }
-
-        // Sort options
-        $sortBy = $request->sort_by ?? 'start_date';
-        $sortOrder = $request->sort_order ?? 'desc';
-        $query->orderBy($sortBy, $sortOrder);
-
-        $leaves = $query->paginate(10)->appends($request->query());
-
-        // Statistics (aligned to current filters: search/department/leave_type)
-        $totalLeaves = (clone $baseQuery)->count();
-        $pendingLeaves = (clone $baseQuery)->where('status', 'pending')->count();
-        $approvedLeaves = (clone $baseQuery)->whereIn('status', ['approved', 'paid'])->count();
-        $rejectedLeaves = (clone $baseQuery)->where('status', 'rejected')->count();
-
-        // Leave types - fetch from leave_types table
-        $leaveTypeStats = LeaveType::where('status', 'active')
-            ->select('name as leave_type')
-            ->get();
-
-        // Get unique departments
         $departments = Employee::whereNotNull('department')
             ->distinct()
             ->pluck('department')
             ->filter()
             ->all();
 
-        // Calculate statistics based on current status view
+        $leaveTypeNames = LeaveType::where('status', 'active')->pluck('name');
+
+        $totalTypes = LeaveType::count();
+        $activeTypes = LeaveType::where('status', 'active')->count();
+        $inactiveTypes = LeaveType::where('status', 'inactive')->count();
+
+        $pendingCount = Leave::where('status', 'pending')->count();
+        $approvedCount = Leave::whereIn('status', ['approved', 'paid'])->count();
+        $rejectedCount = Leave::where('status', 'rejected')->count();
+
+        $leaveTypes = LeaveType::orderBy('name')->get();
+
         $thisWeekStart = now()->startOfWeek();
         $thisWeekEnd = now()->endOfWeek();
         $thisMonthStart = now()->startOfMonth();
         $thisMonthEnd = now()->endOfMonth();
 
-        if ($status === 'pending') {
-            // Pending page:
-            // - This Week: pending requests created this week
-            // - This Month: total requests this month (all statuses), respecting active filters
-            $thisWeekLeaves = (clone $baseQuery)
-                ->where('status', 'pending')
-                ->whereBetween('created_at', [$thisWeekStart, $thisWeekEnd])
-                ->count();
-            $thisMonthLeaves = (clone $baseQuery)
-                ->whereBetween('created_at', [$thisMonthStart, $thisMonthEnd])
-                ->count();
-        } elseif ($status === 'approved') {
-            $thisWeekLeaves = (clone $baseQuery)->whereIn('status', ['approved', 'paid'])
-                ->whereBetween('updated_at', [$thisWeekStart, $thisWeekEnd])
-                ->count();
-            $thisMonthLeaves = (clone $baseQuery)->whereIn('status', ['approved', 'paid'])
-                ->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])
-                ->count();
-        } elseif ($status === 'rejected') {
-            $thisWeekLeaves = (clone $baseQuery)->where('status', 'rejected')
-                ->whereBetween('updated_at', [$thisWeekStart, $thisWeekEnd])
-                ->count();
-            $thisMonthLeaves = (clone $baseQuery)->where('status', 'rejected')
-                ->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])
-                ->count();
-        } else {
-            $thisWeekLeaves = (clone $baseQuery)->whereBetween('created_at', [$thisWeekStart, $thisWeekEnd])->count();
-            $thisMonthLeaves = (clone $baseQuery)->whereBetween('created_at', [$thisMonthStart, $thisMonthEnd])->count();
+        $leaves = collect();
+        $thisWeekLeaves = 0;
+        $thisMonthLeaves = 0;
+
+        if (in_array($tab, ['pending', 'approved', 'rejected'])) {
+            $query = Leave::with('employee', 'approvedBy');
+
+            if ($tab === 'pending') {
+                $query->where('status', 'pending');
+            } elseif ($tab === 'approved') {
+                $query->whereIn('status', ['approved', 'paid']);
+            } elseif ($tab === 'rejected') {
+                $query->where('status', 'rejected');
+            }
+
+            $leaves = $query->orderBy('created_at', 'desc')->paginate(10)->appends(['tab' => $tab]);
+
+            $timeColumn = $tab === 'pending' ? 'created_at' : 'updated_at';
+
+            $baseCount = Leave::query();
+            if ($tab === 'pending') {
+                $baseCount->where('status', 'pending');
+            } elseif ($tab === 'approved') {
+                $baseCount->whereIn('status', ['approved', 'paid']);
+            } elseif ($tab === 'rejected') {
+                $baseCount->where('status', 'rejected');
+            }
+
+            $thisWeekLeaves = (clone $baseCount)->whereBetween($timeColumn, [$thisWeekStart, $thisWeekEnd])->count();
+            $thisMonthLeaves = (clone $baseCount)->whereBetween($timeColumn, [$thisMonthStart, $thisMonthEnd])->count();
         }
 
-        // Determine which view to render
-        $view = match($status) {
-            'pending' => 'hr.leave.pending',
-            'approved' => 'hr.leave.approved',
-            'rejected' => 'hr.leave.rejected',
-        };
-
-        return view($view, compact(
+        return view('hr.leave.index', compact(
+            'tab',
+            'leaveTypes',
+            'totalTypes',
+            'activeTypes',
+            'inactiveTypes',
             'leaves',
-            'totalLeaves',
-            'pendingLeaves',
-            'approvedLeaves',
-            'rejectedLeaves',
-            'leaveTypeStats',
-            'sortBy',
-            'sortOrder',
-            'status',
+            'pendingCount',
+            'approvedCount',
+            'rejectedCount',
+            'departments',
+            'leaveTypeNames',
             'thisWeekLeaves',
-            'thisMonthLeaves',
-            'departments'
+            'thisMonthLeaves'
         ));
     }
 

@@ -154,18 +154,11 @@
                         </a>
                     </li>
 
-                    <li class="sidebar-item has-sub">
-                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                    <li class="sidebar-item">
+                        <a href="{{ route('leave.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('leave.*', 'leave-type.*') ? 'text-violet-500' : 'text-violet-500' }}"><i class="feather-calendar" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Leave Management</span>
-                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave-type.*') ? 'active' : 'text-gray-500' }}" href="{{ route('leave-type.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-list" style="font-size:13px"></i></span><span>Leave Types</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.pending') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.pending') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-circle" style="font-size:13px"></i></span><span>Pending Leaves</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.approved') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.approved') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check" style="font-size:13px"></i></span><span>Approved Leaves</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.rejected') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.rejected') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-x" style="font-size:13px"></i></span><span>Rejected Leaves</span></a></li>
-                        </ul>
                     </li>
 
                     <li class="sidebar-item has-sub">
@@ -340,18 +333,11 @@
                         </a>
                     </li>
 
-                    <li class="sidebar-item has-sub">
-                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                    <li class="sidebar-item">
+                        <a href="{{ route('leave.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('leave.*', 'leave-type.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('leave.*', 'leave-type.*') ? 'text-violet-500' : 'text-violet-500' }}"><i class="feather-calendar" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Leave Management</span>
-                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave-type.*') ? 'active' : 'text-gray-500' }}" href="{{ route('leave-type.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-list" style="font-size:13px"></i></span><span>Leave Types</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.pending') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.pending') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-circle" style="font-size:13px"></i></span><span>Pending Leaves</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.approved') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.approved') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check" style="font-size:13px"></i></span><span>Approved Leaves</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('leave.rejected') ? 'active' : 'text-gray-500' }}" href="{{ route('leave.rejected') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-x" style="font-size:13px"></i></span><span>Rejected Leaves</span></a></li>
-                        </ul>
                     </li>
 
                     <li class="sidebar-item">

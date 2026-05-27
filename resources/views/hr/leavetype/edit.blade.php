@@ -2,107 +2,28 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.lt-page { font-family: 'Sora', sans-serif; }
-
-.lt-topbar { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
-.lt-topbar-title { font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px; }
-.lt-topbar-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
-
-.lt-btn-sec {
-    display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;
-    border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;
-    font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;
+form input:focus-visible,
+form select:focus-visible,
+form textarea:focus-visible,
+form button:focus-visible,
+form a:focus-visible {
+    outline: none !important;
 }
-.lt-btn-sec:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
-
-.lt-form-wrap { max-width:680px;margin:0 auto; }
-
-.lt-card { background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden; }
-
-.lt-card-header { padding:20px 24px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:12px; }
-.lt-card-icon { width:38px;height:38px;border-radius:10px;background:#fff0f0;color:#c8292a;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.lt-card-title { font-size:0.95rem;font-weight:800;color:#111827;margin:0 0 2px;letter-spacing:-0.01em; }
-.lt-card-sub   { font-size:0.75rem;color:#9ca3af;margin:0; }
-
-.lt-card-body   { padding:24px; }
-.lt-card-footer { padding:16px 24px;border-top:1px solid #f3f4f6;background:#fafafa;display:flex;align-items:center;gap:10px; }
-
-.lt-label {
-    display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:0.09em;color:#6b7280;margin-bottom:6px;
-}
-.lt-label .req { color:#c8292a; }
-
-.lt-input, .lt-select, .lt-textarea {
-    width:100%;border:1px solid #e5e7eb;border-radius:10px;
-    padding:10px 14px;font-size:0.845rem;font-family:'Sora',sans-serif;
-    color:#111827;background:#fff;outline:none;
-    transition:border-color 0.15s,box-shadow 0.15s;
-    appearance:none;-webkit-appearance:none;
-}
-.lt-input:focus, .lt-select:focus, .lt-textarea:focus {
-    border-color:#c8292a;
-    box-shadow:0 0 0 3px rgba(200,41,42,0.08);
-}
-.lt-input::placeholder, .lt-textarea::placeholder { color:#9ca3af; }
-.lt-input.is-invalid, .lt-select.is-invalid, .lt-textarea.is-invalid { border-color:#ef4444 !important; }
-.lt-invalid-feedback { display:block;font-size:0.75rem;color:#ef4444;margin-top:4px; }
-
-.lt-select-wrap { position:relative; }
-.lt-select-wrap svg { position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none; }
-.lt-select-wrap .lt-select { padding-right:36px; }
-
-.lt-textarea { resize:vertical;min-height:100px; }
-
-.lt-row { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
-@media (max-width:560px) { .lt-row { grid-template-columns:1fr; } }
-
-.lt-field { margin-bottom:20px; }
-.lt-field:last-of-type { margin-bottom:0; }
-
-.lt-divider { font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#9ca3af;border-bottom:1px solid #f3f4f6;padding-bottom:10px;margin-bottom:20px; }
-
-.lt-toggle-wrap { display:flex;align-items:center;gap:12px;padding:12px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px; }
-.lt-toggle-label { font-size:0.845rem;color:#374151;font-weight:500; }
-.lt-toggle-sub   { font-size:0.72rem;color:#9ca3af;margin-top:2px; }
-
-.lt-btn-submit {
-    display:inline-flex;align-items:center;gap:8px;padding:11px 24px;
-    background:#111827;color:#fff;border:none;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;
-    cursor:pointer;transition:background 0.15s;
-}
-.lt-btn-submit:hover { background:#000; }
-
-.lt-btn-cancel {
-    display:inline-flex;align-items:center;gap:7px;padding:11px 18px;
-    background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:600;
-    text-decoration:none;cursor:pointer;transition:all 0.15s;
-}
-.lt-btn-cancel:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
-
-.lt-flash { display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:20px;animation:ltFlashIn 0.3s ease; }
-.lt-flash.error { background:#fff0f0;border:1px solid #fecaca;color:#c8292a; }
-.lt-flash ul { margin:6px 0 0 16px;padding:0; }
-.lt-flash ul li { font-size:0.78rem;margin-bottom:2px; }
-@keyframes ltFlashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
 </style>
 @endpush
 
 @section('content')
-<div class="lt-page">
+<div>
 
     {{-- Flash --}}
     @if($errors->any())
-    <div class="lt-flash error">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+    <div class="flex items-start gap-2.5 p-4 rounded-xl text-sm font-medium mb-5 bg-amber-50 border border-amber-200 text-amber-700">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
         <div>
             <strong>Please fix the errors:</strong>
-            <ul>
+            <ul class="mt-1.5 ml-4 m-0">
                 @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
+                    <li class="text-xs mb-0.5">{{ $error }}</li>
                 @endforeach
             </ul>
         </div>
@@ -110,129 +31,129 @@
     @endif
 
     {{-- Topbar --}}
-    <div class="lt-topbar">
+    <div class="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
-            <h1 class="lt-topbar-title">Edit Leave Type</h1>
-            <p class="lt-topbar-sub">Update the details for <strong>{{ $leaveType->name }}</strong></p>
+            <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight m-0">Edit Leave Type</h1>
+            <p class="text-xs text-gray-400 m-0 mt-0.5">Update the details for <strong>{{ $leaveType->name }}</strong></p>
         </div>
-        <a href="{{ route('leave-type.index') }}" class="lt-btn-sec">
+        <a href="{{ route('leave-type.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back to Leave Types
         </a>
     </div>
 
     {{-- Form card --}}
-    <div class="lt-form-wrap">
-        <div class="lt-card">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
 
-            <div class="lt-card-header">
-                <div class="lt-card-icon">
+            <div class="px-6 py-5 border-b border-gray-50 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center shrink-0">
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 </div>
                 <div>
-                    <p class="lt-card-title">Leave Type Details</p>
-                    <p class="lt-card-sub">All fields marked <span style="color:#c8292a;">*</span> are required</p>
+                    <p class="text-sm font-extrabold text-gray-900 m-0 leading-tight">Leave Type Details</p>
+                    <p class="text-xs text-gray-400 m-0">All fields marked <span class="text-amber-600">*</span> are required</p>
                 </div>
             </div>
 
-            <div class="lt-card-body">
+            <div class="p-6">
                 <form method="POST" action="{{ route('leave-type.update', $leaveType) }}" id="ltForm" novalidate>
                     @csrf
                     @method('PUT')
 
                     {{-- Name & Abbreviation --}}
-                    <div class="lt-row lt-field">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                         <div>
-                            <label for="name" class="lt-label">Leave Type Name <span class="req">*</span></label>
+                            <label for="name" class="block text-[0.7rem] font-bold uppercase tracking-wide text-gray-500 mb-1.5">Leave Type Name <span class="text-amber-600">*</span></label>
                             <input type="text" name="name" id="name"
-                                class="lt-input @error('name') is-invalid @enderror"
+                                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-colors focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 @error('name') border-amber-500 @enderror"
                                 placeholder="e.g., Vacation Leave"
                                 value="{{ old('name', $leaveType->name) }}" required>
                             @error('name')
-                                <span class="lt-invalid-feedback">{{ $message }}</span>
+                                <span class="text-xs text-amber-600 mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
                         <div>
-                            <label for="abbreviation" class="lt-label">Abbreviation</label>
+                            <label for="abbreviation" class="block text-[0.7rem] font-bold uppercase tracking-wide text-gray-500 mb-1.5">Abbreviation</label>
                             <input type="text" name="abbreviation" id="abbreviation"
-                                class="lt-input @error('abbreviation') is-invalid @enderror"
+                                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-colors focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 @error('abbreviation') border-amber-500 @enderror"
                                 placeholder="e.g., VL"
                                 value="{{ old('abbreviation', $leaveType->abbreviation) }}" maxlength="5">
                             @error('abbreviation')
-                                <span class="lt-invalid-feedback">{{ $message }}</span>
+                                <span class="text-xs text-amber-600 mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
 
                     {{-- Days & Status --}}
-                    <div class="lt-divider">Policy</div>
-                    <div class="lt-row lt-field">
+                    <div class="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-gray-400 border-b border-gray-50 pb-2.5 mb-5">Policy</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                         <div>
-                            <label for="days_allowed" class="lt-label">Days Allowed <span class="req">*</span></label>
+                            <label for="days_allowed" class="block text-[0.7rem] font-bold uppercase tracking-wide text-gray-500 mb-1.5">Days Allowed <span class="text-amber-600">*</span></label>
                             <input type="number" name="days_allowed" id="days_allowed"
-                                class="lt-input @error('days_allowed') is-invalid @enderror"
+                                class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-colors focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 @error('days_allowed') border-amber-500 @enderror"
                                 placeholder="0"
                                 value="{{ old('days_allowed', $leaveType->days_allowed) }}" min="0" required>
                             @error('days_allowed')
-                                <span class="lt-invalid-feedback">{{ $message }}</span>
+                                <span class="text-xs text-amber-600 mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
                         <div>
-                            <label for="status" class="lt-label">Status <span class="req">*</span></label>
-                            <div class="lt-select-wrap">
+                            <label for="status" class="block text-[0.7rem] font-bold uppercase tracking-wide text-gray-500 mb-1.5">Status <span class="text-amber-600">*</span></label>
+                            <div class="relative">
                                 <select name="status" id="status"
-                                    class="lt-select @error('status') is-invalid @enderror"
+                                    class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-9 text-sm text-gray-900 bg-white outline-none transition-colors focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 appearance-none @error('status') border-amber-500 @enderror"
                                     required>
                                     <option value="">— Select Status —</option>
                                     <option value="active"   @selected(old('status', $leaveType->status) === 'active')>Active</option>
                                     <option value="inactive" @selected(old('status', $leaveType->status) === 'inactive')>Inactive</option>
                                 </select>
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                             </div>
                             @error('status')
-                                <span class="lt-invalid-feedback">{{ $message }}</span>
+                                <span class="text-xs text-amber-600 mt-1 block">{{ $message }}</span>
                             @enderror
                         </div>
                     </div>
 
                     {{-- Carry over --}}
-                    <div class="lt-field">
-                        <label class="lt-label">Carry Over Settings</label>
-                        <label class="lt-toggle-wrap" style="cursor:pointer;">
+                    <div class="mb-5 last:mb-0">
+                        <label class="block text-[0.7rem] font-bold uppercase tracking-wide text-gray-500 mb-1.5">Carry Over Settings</label>
+                        <label class="flex items-center gap-3 p-3.5 bg-gray-50/50 border border-gray-200 rounded-lg cursor-pointer">
                             <input type="checkbox" name="carry_over" id="carry_over" value="1"
                                 {{ old('carry_over', $leaveType->carry_over) ? 'checked' : '' }}
-                                style="width:16px;height:16px;accent-color:#c8292a;flex-shrink:0;">
+                                class="w-4 h-4 accent-gray-600 shrink-0">
                             <div>
-                                <div class="lt-toggle-label">Allow carry over</div>
-                                <div class="lt-toggle-sub">Unused days roll over to the next period</div>
+                                <div class="text-sm text-gray-600 font-medium">Allow carry over</div>
+                                <div class="text-xs text-gray-400 mt-0.5">Unused days roll over to the next period</div>
                             </div>
                         </label>
                         @error('carry_over')
-                            <span class="lt-invalid-feedback">{{ $message }}</span>
+                            <span class="text-xs text-amber-600 mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
 
                     {{-- Description --}}
-                    <div class="lt-divider">Additional Info</div>
-                    <div class="lt-field">
-                        <label for="description" class="lt-label">Description</label>
+                    <div class="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-gray-400 border-b border-gray-50 pb-2.5 mb-5">Additional Info</div>
+                    <div class="mb-0 last:mb-0">
+                        <label for="description" class="block text-[0.7rem] font-bold uppercase tracking-wide text-gray-500 mb-1.5">Description</label>
                         <textarea name="description" id="description"
-                            class="lt-textarea @error('description') is-invalid @enderror"
+                            class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-colors focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 resize-y min-h-[100px] @error('description') border-amber-500 @enderror"
                             placeholder="Enter a brief description…">{{ old('description', $leaveType->description) }}</textarea>
                         @error('description')
-                            <span class="lt-invalid-feedback">{{ $message }}</span>
+                            <span class="text-xs text-amber-600 mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
 
                 </form>
             </div>
 
-            <div class="lt-card-footer">
-                <button type="submit" form="ltForm" class="lt-btn-submit">
+            <div class="px-6 py-4 border-t border-gray-50 bg-gray-50/50 flex items-center gap-2.5">
+                <button type="submit" form="ltForm" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white border-none rounded-xl text-xs font-bold cursor-pointer hover:bg-black transition-colors">
                     <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     Update Leave Type
                 </button>
-                <a href="{{ route('leave-type.index') }}" class="lt-btn-cancel">Cancel</a>
+                <a href="{{ route('leave-type.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">Cancel</a>
             </div>
 
         </div>
