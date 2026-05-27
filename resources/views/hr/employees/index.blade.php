@@ -2,230 +2,137 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.emp-page { font-family: 'Sora', sans-serif; }
-
-/* ── Topbar ─────────────────────────────────────────────────── */
-.emp-topbar { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
-.emp-topbar-title { font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px; }
-.emp-topbar-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
-.emp-topbar-actions { display:flex;gap:8px;flex-wrap:wrap;align-items:center; }
-
-.emp-btn-primary {
-    display:inline-flex;align-items:center;gap:7px;padding:9px 18px;
-    background:#111827;color:#fff;border:none;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;
-    text-decoration:none;cursor:pointer;transition:background 0.15s;white-space:nowrap;
+@keyframes fadeSlideUp {
+    0%  { opacity:0; transform:translateY(14px); }
+    100%{ opacity:1; transform:translateY(0); }
 }
-.emp-btn-primary:hover { background:#000;color:#fff; }
-
-.emp-btn-sec {
-    display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;
-    border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;
-    font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;
+@keyframes scaleIn {
+    0%  { opacity:0; transform:scale(0.93); }
+    100%{ opacity:1; transform:scale(1); }
 }
-.emp-btn-sec:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
-
-/* ── Flash messages ─────────────────────────────────────────── */
-.emp-flash { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:20px;animation:empFlashIn 0.3s ease; }
-.emp-flash.success { background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d; }
-.emp-flash.error   { background:#fff0f0;border:1px solid #fecaca;color:#c8292a; }
-.emp-flash.info    { background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8; }
-@keyframes empFlashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
-
-/* ── Filter bar ─────────────────────────────────────────────── */
-.emp-filter-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
-.emp-search-wrap { position:relative;flex:1;min-width:180px; }
-.emp-search-wrap svg { position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none; }
-.emp-search-input { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px 8px 34px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;transition:border-color 0.15s,background 0.15s; }
-.emp-search-input:focus { border-color:#c8292a;background:#fff;box-shadow:0 0 0 3px rgba(200,41,42,0.08); }
-.emp-filter-select { border:1px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#374151;background:#f9fafb;outline:none;cursor:pointer;transition:border-color 0.15s; }
-.emp-filter-select:focus { border-color:#c8292a; }
-
-/* ── Section header ─────────────────────────────────────────── */
-.emp-section-head  { display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px; }
-.emp-section-title { font-size:0.88rem;font-weight:700;color:#111827;margin:0;display:flex;align-items:center;gap:8px; }
-.emp-dot { width:8px;height:8px;border-radius:50%;background:#c8292a;display:inline-block; }
-
-/* ── Table ──────────────────────────────────────────────────── */
-.emp-table-card   { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
-.emp-table-scroll { overflow-x:auto; }
-.emp-table { width:100%;border-collapse:collapse;font-size:0.835rem; }
-.emp-table thead tr { background:#f8f9fb;border-bottom:1px solid #e5e7eb; }
-.emp-table thead th { padding:11px 16px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#6b7280;white-space:nowrap;font-family:'Sora',sans-serif; }
-.emp-table thead th a { color:#6b7280;text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:color 0.13s; }
-.emp-table thead th a:hover { color:#c8292a; }
-.emp-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.1s;cursor:pointer; }
-.emp-table tbody tr:last-child { border-bottom:none; }
-.emp-table tbody tr:hover { background:#fff5f5; }
-.emp-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
-
-/* Employee cell */
-.emp-cell   { display:flex;align-items:center;gap:10px; }
-.emp-avatar { width:34px;height:34px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#6b7280;flex-shrink:0;border:1.5px solid #e5e7eb;text-transform:uppercase; }
-.emp-name   { font-weight:600;color:#111827;font-size:0.845rem;line-height:1.2; }
-.emp-pos    { font-size:0.72rem;color:#9ca3af;margin-top:1px; }
-
-/* Department badge */
-.emp-dept { display:inline-block;padding:2px 9px;border-radius:20px;font-size:0.68rem;font-weight:700;background:#f3f4f6;color:#374151;white-space:nowrap; }
-
-/* Status badges */
-.emp-status { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
-.emp-status::before { content:'';width:5px;height:5px;border-radius:50%; }
-.emp-status.s-active   { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
-.emp-status.s-active::before { background:#16a34a; }
-.emp-status.s-inactive { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }
-.emp-status.s-inactive::before { background:#ef4444; }
-
-/* Action buttons */
-.emp-actions { display:flex;align-items:center;gap:5px;justify-content:flex-end; }
-.emp-action-btn { width:30px;height:30px;border-radius:7px;border:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;font-size:13px;transition:background 0.13s,color 0.13s;background:#f4f5f7;color:#6b7280;padding:0; }
-.emp-action-btn:hover         { background:#eff6ff;color:#3b82f6; }
-.emp-action-btn.edit:hover    { background:#fffbeb;color:#d97706; }
-.emp-action-btn.danger:hover  { background:#fff1f2;color:#e11d48; }
-
-/* Empty state */
-.emp-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 24px;text-align:center; }
-.emp-empty-icon  { width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#d1d5db; }
-.emp-empty-title { font-size:0.9rem;font-weight:700;color:#374151;margin:0 0 6px; }
-.emp-empty-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
-
-/* Pagination strip */
-.emp-pagination-strip {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px 16px;
-    border-top:1px solid #f3f4f6;
-    background:#fafafa;
-    flex-wrap:wrap;
-    gap:16px;
+@keyframes slideInLeft {
+    0%  { opacity:0; transform:translateX(-10px); }
+    100%{ opacity:1; transform:translateX(0); }
 }
+.em-page-in  { animation:fadeSlideUp 0.42s cubic-bezier(0.16,1,0.3,1) both; }
+.em-stats-in { animation:scaleIn   0.38s cubic-bezier(0.16,1,0.3,1) both; }
+.em-stats-in:nth-child(1){ animation-delay:.04s; }
+.em-stats-in:nth-child(2){ animation-delay:.09s; }
+.em-stats-in:nth-child(3){ animation-delay:.14s; }
+.em-stats-in:nth-child(4){ animation-delay:.19s; }
+.em-filter-in{ animation:slideInLeft 0.38s cubic-bezier(0.16,1,0.3,1) .1s both; }
+.em-table-in { animation:fadeSlideUp 0.48s cubic-bezier(0.16,1,0.3,1) .15s both; }
 
-.emp-pagination-info {
-    font-size:0.75rem;
-    color:#9ca3af;
-}
+/* avatar colour ring */
+.em-avatar { background:linear-gradient(135deg,#f3f4f6,#e5e7eb); }
 
-.emp-pagination-info strong {
-    color:#374151;
-}
+/* row hover glow */
+.em-row-hover:hover { background:rgba(99,102,241,0.03); }
 
-.emp-pagination-strip nav {
-    margin-left:auto;
-}
-
-.emp-pagination-strip .pagination {
-    display:flex;
-    align-items:center;
-    gap:4px;
-    margin:0;
-    padding:0;
-    list-style:none;
-}
-
-.emp-pagination-strip .page-item {
-    display:flex;
-}
-
-.emp-pagination-strip .page-item .page-link {
-    width:28px;
-    height:28px;
-
-    border-radius:7px !important;
-    border:1px solid #e5e7eb;
-
-    background:#fff;
-    color:#6b7280;
-
-    font-size:0.74rem;
-    font-weight:600;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    padding:0;
-    text-decoration:none;
-
-    transition:all .15s ease;
-}
-
-.emp-pagination-strip .page-item .page-link:hover {
-    background:#f3f4f6;
-    border-color:#d1d5db;
-    color:#111827;
-}
-
-.emp-pagination-strip .page-item.active .page-link {
-    background:#c8292a;
-    border-color:#c8292a;
-    color:#fff;
-}
-
-.emp-pagination-strip .page-item.disabled .page-link {
-    background:#f9fafb;
-    color:#d1d5db;
-    pointer-events:none;
-    cursor:not-allowed;
-}
-
-/* No results */
-#empNoResults { display:none; }
+/* Neutralise global focus overrides */
+[data-em] input:focus-visible,
+[data-em] select:focus-visible,
+[data-em] button:focus-visible { outline:none !important; }
 </style>
 @endpush
 
 @section('content')
-<div class="emp-page">
+<div class="max-w-full" data-em>
 
-    {{-- Flash messages --}}
-    @foreach(['success','error','info'] as $t)
-        @if(session($t))
-        <div class="emp-flash {{ $t }}">
-            @if($t==='success')
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    {{-- Flash --}}
+    @foreach(['success','error','info'] as $ft)
+        @if(session($ft))
+        <div class="flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-sm font-medium border
+            {{ $ft==='success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : ($ft==='error' ? 'bg-red-50 border-red-200 text-red-700' : 'bg-blue-50 border-blue-200 text-blue-700') }}"
+            style="animation:fadeSlideUp .35s ease both;">
+            @if($ft==='success')
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
             @else
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
             @endif
-            {{ session($t) }}
+            {{ session($ft) }}
         </div>
         @endif
     @endforeach
 
-    {{-- Topbar --}}
-    <div class="emp-topbar">
+    {{-- Page header --}}
+    <div class="flex items-start justify-between mb-7 flex-wrap gap-4 em-page-in">
         <div>
-            <h1 class="emp-topbar-title">Employees</h1>
-            <p class="emp-topbar-sub">Manage your workforce and employee records</p>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Employees</h1>
+            <p class="text-sm text-gray-400 mt-0.5">Manage your workforce and employee records</p>
         </div>
-        <div class="emp-topbar-actions">
-            <a href="{{ route('hr.reports.print.employee-report') }}" class="emp-btn-sec" target="_blank">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2m-10 0h8v4H8v-4z"/></svg>
+        <div class="flex items-center gap-2.5">
+            <a href="{{ route('hr.reports.print.employee-report') }}" target="_blank"
+               class="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 Print
             </a>
-            <a href="{{ route('employees.create') }}" class="emp-btn-primary">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            <a href="{{ route('employees.create') }}"
+               class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 active:scale-[0.97] transition-all duration-200">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 Add Employee
             </a>
         </div>
     </div>
 
-    {{-- Section head + filter --}}
-    <div class="emp-section-head">
-        <h2 class="emp-section-title"><span class="emp-dot"></span> All Employees</h2>
+    {{-- Stat cards --}}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        {{-- Total --}}
+        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-indigo-200 transition-all duration-300">
+            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 border border-indigo-200">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Total</div>
+                <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5" id="statTotal">{{ $allEmployees->count() }}</div>
+            </div>
+        </div>
+        {{-- Active --}}
+        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-emerald-200 transition-all duration-300">
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-200">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Active</div>
+                <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5" id="statActive">{{ $allEmployees->where('status','active')->count() }}</div>
+            </div>
+        </div>
+        {{-- Inactive --}}
+        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-gray-300 transition-all duration-300">
+            <div class="w-10 h-10 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center shrink-0 border border-gray-200">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+            </div>
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Inactive</div>
+                <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5" id="statInactive">{{ $allEmployees->where('status','inactive')->count() }}</div>
+            </div>
+        </div>
+        {{-- Departments --}}
+        <div class="em-stats-in bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-violet-200 transition-all duration-300">
+            <div class="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 border border-violet-200">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            </div>
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Departments</div>
+                <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ count($departments) }}</div>
+            </div>
+        </div>
     </div>
 
-    <div class="emp-filter-bar">
-        <div class="emp-search-wrap">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" class="emp-search-input" id="empSearch" placeholder="Search by name">
+    {{-- Filter bar --}}
+    <div class="em-filter-in flex items-center gap-2.5 mb-4 flex-wrap">
+        <div class="relative flex-1 min-w-[200px]">
+            <input type="text" id="empSearch" placeholder="Search by name…"
+                class="w-full pl-4 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/50 hover:border-gray-300">
         </div>
-        <select class="emp-filter-select" id="empStatusFilter">
+        <select id="empStatusFilter"
+            class="px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-700 outline-none transition-all duration-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/50 hover:border-gray-300 cursor-pointer">
             <option value="">All Statuses</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
         </select>
-        <select class="emp-filter-select" id="empDeptFilter">
+        <select id="empDeptFilter"
+            class="px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-700 outline-none transition-all duration-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/50 hover:border-gray-300 cursor-pointer">
             <option value="">All Departments</option>
             @foreach($departments as $dept)
                 <option value="{{ strtolower($dept) }}">{{ $dept }}</option>
@@ -234,269 +141,232 @@
     </div>
 
     {{-- Table --}}
-    <div class="emp-table-card">
-        <div class="emp-table-scroll">
-            <table class="emp-table">
+    <div class="em-table-in bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
                 <thead>
-                    <tr>
-                        <th>
-                            <a href="{{ route('employees.index', ['sort_by' => 'first_name', 'sort_order' => ($sortBy === 'first_name' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}">
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <a href="{{ route('employees.index', ['sort_by'=>'first_name','sort_order'=>($sortBy==='first_name'&&$sortOrder==='asc')?'desc':'asc']) }}"
+                               class="inline-flex items-center gap-1 hover:text-indigo-600 transition-colors">
                                 Employee
-                                @if($sortBy === 'first_name')
-                                    @if($sortOrder === 'asc')
-                                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+                                @if($sortBy==='first_name')
+                                    @if($sortOrder==='asc')
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
                                     @else
-                                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                                     @endif
                                 @else
-                                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="opacity:0.3"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                                    <svg class="w-3 h-3 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
                                 @endif
                             </a>
                         </th>
-                        <th>Gender</th>
-                        <th>Department</th>
-                        <th>Contact Number</th>
-                        <th class="text-center">Status</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Gender</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Contact</th>
+                        <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
                     </tr>
                 </thead>
                 <tbody id="empTbody">
                     @forelse($employees as $employee)
                         @php
-                            $initials = strtoupper(substr($employee->first_name ?? 'U', 0, 1) . substr($employee->last_name ?? '', 0, 1));
-                            $sc = $employee->status === 'active' ? 's-active' : 's-inactive';
+                            $initials = strtoupper(substr($employee->first_name??'U',0,1).substr($employee->last_name??'',0,1));
+                            $avatarColors = ['indigo','violet','sky','teal','rose','amber','orange','pink'];
+                            $colorIdx = crc32($employee->first_name??'') % count($avatarColors);
+                            $ac = $avatarColors[$colorIdx];
                         @endphp
-                        
-                        <tr data-name="{{ strtolower(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? '')) }}"
+                        <tr class="em-row-hover border-b border-gray-100 cursor-pointer transition-colors duration-150"
+                            data-name="{{ strtolower(($employee->first_name??'').' '.($employee->last_name??'')) }}"
                             data-status="{{ $employee->status }}"
-                            data-dept="{{ strtolower($employee->department ?? '') }}"
+                            data-dept="{{ strtolower($employee->department??'') }}"
                             data-href="{{ route('employees.show', $employee) }}"
                             onclick="if(!event.target.closest('a,button,form'))window.location=this.dataset.href">
-                            <td>
-                                <div class="emp-cell">
-                                    <div class="emp-avatar">{{ $initials }}</div>
+                            <td class="px-5 py-3.5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-{{ $ac }}-100 text-{{ $ac }}-700 border border-{{ $ac }}-200">{{ $initials }}</div>
                                     <div>
-                                        <div class="emp-name">{{ $employee->first_name }} {{ $employee->last_name }}</div>
-                                        <div class="emp-pos">{{ $employee->position ?? '—' }}</div>
+                                        <div class="font-semibold text-gray-900">{{ $employee->first_name }} {{ $employee->last_name }}</div>
+                                        <div class="text-xs text-gray-400 mt-0.5">{{ $employee->position ?? '—' }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td><span style="font-size:0.835rem;color:#6b7280;">{{ $employee->gender ? ucwords(str_replace('_', ' ', $employee->gender)) : '—' }}</span></td>
-                            <td><span class="emp-dept">{{ $employee->department ?? '—' }}</span></td>
-                            <td><span style="font-family:'DM Mono',monospace;font-size:0.835rem;color:#374151;">{{ $employee->phone ?? '—' }}</span></td>
-                            <td class="text-center">
-                                <span class="emp-status {{ $sc }}">{{ ucfirst($employee->status) }}</span>
+                            <td class="px-5 py-3.5 text-gray-500 text-sm">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : '—' }}</td>
+                            <td class="px-5 py-3.5">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ $employee->department ?? '—' }}</span>
+                            </td>
+                            <td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">{{ $employee->phone ?? '—' }}</td>
+                            <td class="px-5 py-3.5 text-center">
+                                @if($employee->status === 'active')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Active
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>Inactive
+                                    </span>
+                                @endif
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5">
-                            <div class="emp-empty">
-                                <div class="emp-empty-icon">
-                                    <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <tr>
+                            <td colspan="5">
+                                <div class="flex flex-col items-center justify-center py-16 text-center">
+                                    <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
+                                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    </div>
+                                    <p class="text-sm font-semibold text-gray-700">No employees found</p>
+                                    <p class="text-xs text-gray-400 mt-1">Add your first employee to get started.</p>
                                 </div>
-                                <p class="emp-empty-title">No employees found</p>
-                                <p class="emp-empty-sub">Add your first employee to get started.</p>
-                            </div>
-                        </td></tr>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        <div id="empNoResults">
-            <div class="emp-empty" style="padding:32px;">
-                <p class="emp-empty-title">No results found</p>
-                <p class="emp-empty-sub">Try a different search or filter.</p>
+        {{-- No-filter-results --}}
+        <div id="empNoResults" class="hidden">
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-3">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">No results found</p>
+                <p class="text-xs text-gray-400 mt-1">Try a different search or filter.</p>
             </div>
         </div>
-    </div>
-    {{-- Pagination --}}
-    <div class="emp-pagination-strip">
-        <div class="emp-pagination-info" id="empPaginationInfo">
-            Showing <strong>1</strong>–<strong>10</strong> of <strong>0</strong> employees
-        </div>
 
-        <nav id="empPaginationNav"></nav>
+        {{-- Pagination strip --}}
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
+            <div class="text-xs text-gray-400" id="empPaginationInfo">Showing <strong class="text-gray-700">0</strong> employees</div>
+            <nav id="empPaginationNav" class="flex items-center gap-1"></nav>
+        </div>
     </div>
+
 </div>
 @endsection
 
 @push('scripts')
 <script>
-// ── Build complete employee data ──────────────────────────────────
 window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
-    'id' => $e->id,
-    'firstName' => $e->first_name,
-    'lastName' => $e->last_name,
-    'name' => strtolower(($e->first_name ?? '') . ' ' . ($e->last_name ?? '')),
-    'gender' => $e->gender,
-    'position' => $e->position,
-    'department' => strtolower($e->department ?? ''),
+    'id'         => $e->id,
+    'firstName'  => $e->first_name,
+    'lastName'   => $e->last_name,
+    'name'       => strtolower(($e->first_name??'').' '.($e->last_name??'')),
+    'gender'     => $e->gender,
+    'position'   => $e->position,
+    'department' => strtolower($e->department??''),
     'departmentDisplay' => $e->department,
-    'phone' => $e->phone,
-    'status' => $e->status,
+    'phone'      => $e->phone,
+    'status'     => $e->status,
 ])) !!};
 
-// ── Client-side filter and pagination ─────────────────────────────
-(function () {
-    const search = document.getElementById('empSearch');
+(function(){
+    const search  = document.getElementById('empSearch');
     const statusF = document.getElementById('empStatusFilter');
     const deptF   = document.getElementById('empDeptFilter');
     const tbody   = document.getElementById('empTbody');
     const noRes   = document.getElementById('empNoResults');
-    const paginationStrip = document.querySelector('.emp-pagination-strip');
-    
-    let currentPage = 1;
-    const itemsPerPage = 10;
-    let filteredData = [];
+    const PER     = 10;
+    let page = 1, filtered = [];
 
-    function applyFilters() {
-        const q = search.value.toLowerCase().trim();
+    const AVATAR_COLORS = ['indigo','violet','sky','teal','rose','amber','orange','pink'];
+    function hashColor(name){ let h=0; for(let c of name) h=(h*31+c.charCodeAt(0))&0xffffffff; return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length]; }
+
+    const STATUS_BADGE = {
+        active:   `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Active</span>`,
+        inactive: `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200"><span class="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>Inactive</span>`,
+    };
+
+    function applyFilters(){
+        const q  = search.value.toLowerCase().trim();
         const st = statusF.value;
         const dt = deptF.value;
-
-        filteredData = window.allEmployeesData.filter(emp => {
-            const matchesSearch = !q || emp.name.includes(q);
-            const matchesStatus = !st || emp.status === st;
-            const matchesDept = !dt || emp.department === dt;
-            return matchesSearch && matchesStatus && matchesDept;
-        });
-
-        currentPage = 1;
-        renderTable();
+        filtered = window.allEmployeesData.filter(e =>
+            (!q  || e.name.includes(q)) &&
+            (!st || e.status === st) &&
+            (!dt || e.department === dt)
+        );
+        page = 1;
+        render();
     }
 
-    function renderTable() {
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        const pageData = filteredData.slice(start, end);
-        
+    function render(){
+        const start   = (page-1)*PER;
+        const pageData= filtered.slice(start, start+PER);
         tbody.innerHTML = '';
 
-        if (pageData.length === 0) {
-            if (filteredData.length === 0 && window.allEmployeesData.length > 0) {
-                noRes.style.display = 'block';
-            } else if (window.allEmployeesData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5"><div class="emp-empty"><div class="emp-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><p class="emp-empty-title">No employees found</p><p class="emp-empty-sub">Add your first employee to get started.</p></div></td></tr>';
+        if(!pageData.length){
+            if(filtered.length === 0 && window.allEmployeesData.length > 0){
+                noRes.classList.remove('hidden');
+            } else if(window.allEmployeesData.length === 0){
+                tbody.innerHTML = `<tr><td colspan="5"><div class="flex flex-col items-center justify-center py-16 text-center"><div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4"><svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><p class="text-sm font-semibold text-gray-700">No employees found</p><p class="text-xs text-gray-400 mt-1">Add your first employee to get started.</p></div></td></tr>`;
             }
         } else {
-            noRes.style.display = 'none';
+            noRes.classList.add('hidden');
+            const empRoute = '{{ route("employees.show", ["employee"=>"__ID__"]) }}';
             pageData.forEach(emp => {
-                const initials = (emp.firstName.charAt(0) + emp.lastName.charAt(0)).toUpperCase();
-                const sc = emp.status === 'active' ? 's-active' : 's-inactive';
-                const empRoute = '{{ route('employees.show', ['employee' => '__ID__']) }}'.replace('__ID__', emp.id);
-
+                const initials = ((emp.firstName||'').charAt(0)+(emp.lastName||'').charAt(0)).toUpperCase();
+                const ac = hashColor(emp.name);
+                const href = empRoute.replace('__ID__', emp.id);
+                const dept = emp.departmentDisplay ? emp.departmentDisplay : '—';
+                const gender = emp.gender ? emp.gender.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase()) : '—';
                 const row = document.createElement('tr');
-                row.dataset.name = emp.name;
+                row.className = 'em-row-hover border-b border-gray-100 cursor-pointer transition-colors duration-150';
+                row.dataset.name   = emp.name;
                 row.dataset.status = emp.status;
-                row.dataset.dept = emp.department;
-                row.dataset.href = empRoute;
-                row.style.cursor = 'pointer';
-                row.onclick = (e) => {
-                    if (!e.target.closest('a,button,form')) {
-                        window.location = empRoute;
-                    }
-                };
-
+                row.dataset.dept   = emp.department;
+                row.dataset.href   = href;
+                row.onclick = e => { if(!e.target.closest('a,button,form')) window.location = href; };
                 row.innerHTML = `
-                    <td>
-                        <div class="emp-cell">
-                            <div class="emp-avatar">${initials}</div>
+                    <td class="px-5 py-3.5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-${ac}-100 text-${ac}-700 border border-${ac}-200">${initials}</div>
                             <div>
-                                <div class="emp-name">${emp.firstName} ${emp.lastName}</div>
-                                <div class="emp-pos">${emp.position ?? '—'}</div>
+                                <div class="font-semibold text-gray-900">${emp.firstName} ${emp.lastName}</div>
+                                <div class="text-xs text-gray-400 mt-0.5">${emp.position||'—'}</div>
                             </div>
                         </div>
                     </td>
-                    <td><span style="font-size:0.835rem;color:#6b7280;">${emp.gender ? emp.gender.charAt(0).toUpperCase() + emp.gender.slice(1).replace('_', ' ') : '—'}</span></td>
-                    <td><span class="emp-dept">${emp.departmentDisplay ? emp.departmentDisplay.charAt(0).toUpperCase() + emp.departmentDisplay.slice(1) : '—'}</span></td>
-                    <td><span style="font-family:'DM Mono',monospace;font-size:0.835rem;color:#374151;">${emp.phone ?? '—'}</span></td>
-                    <td class="text-center">
-                        <span class="emp-status ${sc}">${emp.status.charAt(0).toUpperCase() + emp.status.slice(1)}</span>
-                    </td>
+                    <td class="px-5 py-3.5 text-gray-500 text-sm">${gender}</td>
+                    <td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">${dept}</span></td>
+                    <td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">${emp.phone||'—'}</td>
+                    <td class="px-5 py-3.5 text-center">${STATUS_BADGE[emp.status]||STATUS_BADGE.inactive}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
-
         updatePagination();
     }
 
-    function updatePagination() {
-        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    function updatePagination(){
+        const total = filtered.length;
+        const pages = Math.ceil(total/PER);
+        const info  = document.getElementById('empPaginationInfo');
+        const nav   = document.getElementById('empPaginationNav');
+        if(!info||!nav) return;
+        if(total === 0){ info.innerHTML='No employees to display'; nav.innerHTML=''; return; }
+        const s = (page-1)*PER+1, e = Math.min(page*PER, total);
+        info.innerHTML = `Showing <strong class="text-gray-700">${s}</strong>–<strong class="text-gray-700">${e}</strong> of <strong class="text-gray-700">${total}</strong>`;
+        if(pages<=1){ nav.innerHTML=''; return; }
 
-        const info = document.getElementById('empPaginationInfo');
-        const nav = document.getElementById('empPaginationNav');
+        const btnClass = `flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150`;
+        const activeClass = `${btnClass} bg-gray-900 text-white border-gray-900`;
+        const defClass    = `${btnClass} bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300`;
+        const disClass    = `${btnClass} bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none`;
 
-        if (!info || !nav) return;
-
-        // No results
-        if (filteredData.length === 0) {
-            info.innerHTML = 'No employees to display';
-            nav.innerHTML = '';
-            return;
+        let html = '';
+        html += `<button data-p="${page-1}" class="${page===1?disClass:defClass}">‹</button>`;
+        for(let i=1;i<=pages;i++){
+            html += `<button data-p="${i}" class="${i===page?activeClass:defClass}">${i}</button>`;
         }
-
-        const start = (currentPage - 1) * itemsPerPage + 1;
-        const end = Math.min(currentPage * itemsPerPage, filteredData.length);
-
-        info.innerHTML = `
-            Showing <strong>${start}</strong>–<strong>${end}</strong>
-            of <strong>${filteredData.length}</strong>
-            employee${filteredData.length > 1 ? 's' : ''}
-        `;
-
-        // Hide pagination if only 1 page
-        if (totalPages <= 1) {
-            nav.innerHTML = '';
-            return;
-        }
-
-        let html = `<ul class="pagination mb-0">`;
-
-        // Previous button
-        html += `
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage - 1}">
-                    ‹
-                </a>
-            </li>
-        `;
-
-        // Page numbers
-        for (let i = 1; i <= totalPages; i++) {
-            html += `
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">
-                        ${i}
-                    </a>
-                </li>
-            `;
-        }
-
-        // Next button
-        html += `
-            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage + 1}">
-                    ›
-                </a>
-            </li>
-        `;
-
-        html += `</ul>`;
-
+        html += `<button data-p="${page+1}" class="${page===pages?disClass:defClass}">›</button>`;
         nav.innerHTML = html;
-
-        // Click handlers
-        nav.querySelectorAll('a[data-page]').forEach(link => {
-            link.addEventListener('click', e => {
+        nav.querySelectorAll('button[data-p]').forEach(btn => {
+            btn.addEventListener('click', e => {
                 e.preventDefault();
-
-                const page = parseInt(link.dataset.page);
-
-                if (page < 1 || page > totalPages) return;
-
-                currentPage = page;
-                renderTable();
+                const p = parseInt(btn.dataset.p);
+                if(p<1||p>pages) return;
+                page = p; render();
             });
         });
     }
@@ -504,8 +374,6 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
     search.addEventListener('input', applyFilters);
     statusF.addEventListener('change', applyFilters);
     deptF.addEventListener('change', applyFilters);
-
-    // Initial render
     applyFilters();
 })();
 </script>

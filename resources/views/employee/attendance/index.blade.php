@@ -1,118 +1,9 @@
 @extends('layouts.layout')
 
 @push('styles')
-    @include('employee._ui-styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
-*, *::before, *::after { box-sizing: border-box; }
-
-/* ── Month nav ──────────────────────────────────────────────── */
-.empcal-month-nav {
-    display:flex;align-items:center;justify-content:space-between;
-    background:#fff;border:1px solid #e5e7eb;border-radius:14px;
-    padding:14px 20px;margin-bottom:20px;
-}
-.empcal-month-label { font-size:1.05rem;font-weight:800;color:#111827;letter-spacing:-0.02em; }
-.empcal-month-sub   { font-size:0.72rem;color:#9ca3af;margin-top:2px; }
-.empcal-nav-btn {
-    display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
-    background:#f9fafb;border:1px solid #e5e7eb;border-radius:9px;
-    font-family:'Sora',sans-serif;font-size:0.78rem;font-weight:600;color:#374151;
-    text-decoration:none;transition:all 0.12s;
-}
-.empcal-nav-btn:hover { background:#fff0f0;border-color:#fecaca;color:#c8292a; }
-
-/* ── Legend ─────────────────────────────────────────────────── */
-.empcal-legend { display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px; }
-.empcal-legend-item { display:flex;align-items:center;gap:6px;font-size:0.72rem;font-weight:600;color:#6b7280; }
-.empcal-legend-dot { width:12px;height:12px;border-radius:4px; }
-.empcal-legend-dot.present { background:#dcfce7;border:1.5px solid #86efac; }
-.empcal-legend-dot.late    { background:#fef9c3;border:1.5px solid #fde047; }
-.empcal-legend-dot.absent  { background:#fee2e2;border:1.5px solid #fca5a5; }
-.empcal-legend-dot.early   { background:#ede9fe;border:1.5px solid #c4b5fd; }
-.empcal-legend-dot.ot      { background:#dbeafe;border:1.5px solid #93c5fd; }
-.empcal-legend-dot.ut      { background:#fef9c3;border:1.5px solid #fde047; }
-.empcal-legend-dot.nodata  { background:#fff;border:1.5px solid #e5e7eb; }
-
-/* ── Calendar grid ──────────────────────────────────────────── */
-.empcal-grid-wrap { background:#fff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;margin-bottom:20px; }
-
-.empcal-half { padding:20px 20px 16px; }
-.empcal-half:first-child { border-bottom:2px dashed #f3f4f6; }
-
-.empcal-half-label {
-    font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;
-    color:#9ca3af;margin-bottom:14px;display:flex;align-items:center;gap:8px;
-}
-.empcal-half-label::after { content:'';flex:1;height:1px;background:#f3f4f6; }
-.empcal-half-label span { background:#fff;padding-right:8px; }
-
-.empcal-dow-row { display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px; }
-.empcal-dow { text-align:center;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;padding:4px 0; }
-
-.empcal-days-row { display:grid;grid-template-columns:repeat(5,1fr);gap:6px; }
-
-.empcal-day {
-    border-radius:10px;padding:9px 8px 7px;min-height:82px;
-    border:1.5px solid #e5e7eb;background:#fff;
-    display:flex;flex-direction:column;gap:3px;
-    transition:transform 0.1s,box-shadow 0.1s;
-    position:relative;
-}
-.empcal-day:hover { transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.07); }
-
-.empcal-day.is-today { border-color:#c8292a !important;box-shadow:0 0 0 2px rgba(200,41,42,0.12); }
-.empcal-day.is-today .empcal-day-num { color:#c8292a; }
-.empcal-day.is-future { background:#fafafa;border-color:#f3f4f6; }
-.empcal-day.is-future .empcal-day-num { color:#d1d5db; }
-
-/* Attendance status fills */
-.empcal-day.s-present { background:#f0fdf4;border-color:#86efac; }
-.empcal-day.s-late    { background:#fefce8;border-color:#fde047; }
-.empcal-day.s-absent  { background:#fef2f2;border-color:#fca5a5; }
-
-/* OT/UT overlay stripe on top-right corner */
-.empcal-day.has-ot::after  { content:'OT';position:absolute;top:5px;right:5px;font-size:0.52rem;font-weight:800;background:#dbeafe;color:#1d4ed8;padding:1px 4px;border-radius:3px;line-height:1.4; }
-.empcal-day.has-ut::after  { content:'UT';position:absolute;top:5px;right:5px;font-size:0.52rem;font-weight:800;background:#fef9c3;color:#92400e;padding:1px 4px;border-radius:3px;line-height:1.4; }
-.empcal-day.has-ot.has-ut::after { content:'OT·UT';position:absolute;top:5px;right:5px;font-size:0.48rem;font-weight:800;background:linear-gradient(90deg,#dbeafe,#fef9c3);color:#374151;padding:1px 4px;border-radius:3px;line-height:1.4; }
-
-.empcal-day-num { font-size:0.78rem;font-weight:800;color:#374151;line-height:1; }
-
-.empcal-day-status {
-    font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
-    padding:2px 5px;border-radius:4px;display:inline-block;width:fit-content;
-}
-.empcal-day-status.s-present { background:#dcfce7;color:#16a34a; }
-.empcal-day-status.s-late    { background:#fef9c3;color:#ca8a04; }
-.empcal-day-status.s-absent  { background:#fee2e2;color:#dc2626; }
-
-.empcal-day-times { font-family:'DM Mono',monospace;font-size:0.58rem;color:#6b7280;line-height:1.5; }
-.empcal-day-times span { display:block; }
-
-.empcal-otut-row { display:flex;gap:3px;flex-wrap:wrap;margin-top:1px; }
-.empcal-otut-tag {
-    font-size:0.55rem;font-weight:700;padding:1px 4px;border-radius:3px;line-height:1.4;
-}
-.empcal-otut-tag.ot { background:#dbeafe;color:#1d4ed8; }
-.empcal-otut-tag.ut { background:#fef9c3;color:#92400e; }
-
-.empcal-day-empty { border-radius:10px;min-height:82px;background:transparent;border:1.5px dashed #f3f4f6; }
-
-/* ── Summary strip ──────────────────────────────────────────── */
-.empcal-summary { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px; }
-@media (max-width:700px) { .empcal-summary { grid-template-columns:repeat(2,1fr); } }
-@media (max-width:480px) { .empcal-summary { grid-template-columns:1fr; } }
-
-.empcal-stat { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px; }
-.empcal-stat-icon { width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.empcal-stat-icon.green  { background:#f0fdf4;color:#16a34a; }
-.empcal-stat-icon.yellow { background:#fefce8;color:#ca8a04; }
-.empcal-stat-icon.red    { background:#fef2f2;color:#dc2626; }
-.empcal-stat-icon.purple { background:#f5f3ff;color:#7c3aed; }
-.empcal-stat-icon.blue   { background:#eff6ff;color:#0284c7; }
-.empcal-stat-icon.amber  { background:#fffbeb;color:#d97706; }
-.empcal-stat-val { font-size:1.3rem;font-weight:800;color:#111827;line-height:1;font-family:'DM Mono',monospace; }
-.empcal-stat-lbl { font-size:0.68rem;color:#9ca3af;margin-top:2px; }
+.font-mono-dm { font-family: 'DM Mono', monospace; }
 </style>
 @endpush
 
@@ -124,7 +15,6 @@
     $monthStart = $month->copy()->startOfMonth();
     $monthEnd   = $month->copy()->endOfMonth();
 
-    // Build weekday-only day lists for each half
     $firstHalfDays  = collect();
     $secondHalfDays = collect();
 
@@ -138,71 +28,156 @@
     }
 @endphp
 
-<div class="container-fluid empui-page empui-wrap">
-    <div class="empui-backdrop"><div class="empui-grid"></div></div>
-    <div class="empui-content">
+<div class="min-h-screen bg-gray-50/60">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
 
-        {{-- Hero --}}
-        <div class="empui-hero">
-            <div class="empui-hero-left">
-                <h1 class="empui-title">My Attendance</h1>
-                <p class="empui-sub">Your monthly attendance calendar — present, late, absent, and OT/UT at a glance.</p>
-                <div class="d-flex flex-wrap gap-2 mt-2">
-                    <span class="empui-chip">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                        {{ $month->format('F Y') }}
-                    </span>
-                    <span class="empui-chip">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        {{ $presentCount + $lateCount }} days in
-                    </span>
+        {{-- Page Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-7">
+            <div>
+                <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-1">Employee Portal</p>
+                <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 leading-tight">Time &amp; Attendance</h1>
+                <p class="text-sm text-gray-500 mt-1">Your monthly attendance calendar — present, late, absent, and OT/UT at a glance.</p>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-semibold text-gray-600 shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    {{ $month->format('F Y') }}
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-semibold text-gray-600 shadow-sm">
+                    <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    {{ $presentCount + $lateCount }} days in
+                </span>
+            </div>
+        </div>
+
+        {{-- Tab Navigation --}}
+        <div class="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm mb-6 w-fit">
+            <a href="{{ route('employee.attendance.index') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gray-900 text-white shadow-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                Attendance Calendar
+            </a>
+            <a href="{{ route('employee.overtime-undertime.index') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-50">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+                OT / UT Requests
+            </a>
+        </div>
+
+        {{-- Month Navigation --}}
+        <div class="flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-5 py-4 mb-5 shadow-sm">
+            <a href="{{ route('employee.attendance.index', ['month' => $prevMonth]) }}"
+               class="inline-flex items-center gap-2 px-3.5 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:text-gray-900 transition-all">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Prev
+            </a>
+            <div class="text-center">
+                <div class="text-base font-extrabold tracking-tight text-gray-900">{{ $month->format('F Y') }}</div>
+                <div class="text-xs text-gray-400 mt-0.5">Cutoff: 1–15 &amp; 16–{{ $monthEnd->day }}</div>
+            </div>
+            <a href="{{ route('employee.attendance.index', ['month' => $nextMonth]) }}"
+               class="inline-flex items-center gap-2 px-3.5 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:text-gray-900 transition-all">
+                Next
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+
+        {{-- Summary Stats --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
+            <div class="bg-white border border-gray-200 rounded-xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4.5 h-4.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <div>
+                    <div class="font-mono-dm text-lg font-bold text-gray-900 leading-none">{{ $presentCount }}</div>
+                    <div class="text-xs text-gray-400 mt-0.5">Present</div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4.5 h-4.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+                </div>
+                <div>
+                    <div class="font-mono-dm text-lg font-bold text-gray-900 leading-none">{{ $lateCount }}</div>
+                    <div class="text-xs text-gray-400 mt-0.5">Late</div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4.5 h-4.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <div class="font-mono-dm text-lg font-bold text-gray-900 leading-none">{{ $absentCount }}</div>
+                    <div class="text-xs text-gray-400 mt-0.5">Absent</div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4.5 h-4.5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <div class="font-mono-dm text-lg font-bold text-gray-900 leading-none">{{ number_format($otHours, 1) }}h</div>
+                    <div class="text-xs text-gray-400 mt-0.5">OT Hours</div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4.5 h-4.5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <div class="font-mono-dm text-lg font-bold text-gray-900 leading-none">{{ number_format($utHours, 1) }}h</div>
+                    <div class="text-xs text-gray-400 mt-0.5">UT Hours</div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4.5 h-4.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </div>
+                <div>
+                    <div class="font-mono-dm text-lg font-bold text-gray-900 leading-none">{{ $firstHalfDays->count() + $secondHalfDays->count() }}</div>
+                    <div class="text-xs text-gray-400 mt-0.5">Work Days</div>
                 </div>
             </div>
         </div>
 
-        {{-- Month navigation --}}
-        <div class="empcal-month-nav">
-            <a href="{{ route('employee.attendance.index', ['month' => $prevMonth]) }}" class="empcal-nav-btn">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                Prev
-            </a>
-            <div class="text-center">
-                <div class="empcal-month-label">{{ $month->format('F Y') }}</div>
-                <div class="empcal-month-sub">Cutoff: 1–15 &amp; 16–{{ $monthEnd->day }}</div>
-            </div>
-            <a href="{{ route('employee.attendance.index', ['month' => $nextMonth]) }}" class="empcal-nav-btn">
-                Next
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
-        </div>
-
         {{-- Legend --}}
-        <div class="empcal-legend">
-            <div class="empcal-legend-item"><div class="empcal-legend-dot present"></div> Present</div>
-            <div class="empcal-legend-item"><div class="empcal-legend-dot late"></div> Late</div>
-            <div class="empcal-legend-item"><div class="empcal-legend-dot absent"></div> Absent</div>
-            <div class="empcal-legend-item"><div class="empcal-legend-dot early"></div> Early Leave</div>
-            <div class="empcal-legend-item"><div class="empcal-legend-dot ot"></div> Overtime</div>
-            <div class="empcal-legend-item"><div class="empcal-legend-dot ut"></div> Undertime</div>
-            <div class="empcal-legend-item"><div class="empcal-legend-dot nodata"></div> No Record</div>
+        <div class="flex flex-wrap items-center gap-4 mb-5 px-1">
+            @foreach([
+                ['label' => 'Present',     'bg' => 'bg-emerald-100', 'border' => 'border-emerald-300'],
+                ['label' => 'Late',        'bg' => 'bg-amber-100',   'border' => 'border-amber-300'],
+                ['label' => 'Absent',      'bg' => 'bg-rose-100',    'border' => 'border-rose-300'],
+                ['label' => 'Overtime',    'bg' => 'bg-blue-100',    'border' => 'border-blue-300'],
+                ['label' => 'Undertime',   'bg' => 'bg-yellow-100',  'border' => 'border-yellow-400'],
+                ['label' => 'No Record',   'bg' => 'bg-white',       'border' => 'border-gray-300'],
+            ] as $item)
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-sm {{ $item['bg'] }} border {{ $item['border'] }}"></div>
+                <span class="text-xs font-semibold text-gray-500">{{ $item['label'] }}</span>
+            </div>
+            @endforeach
         </div>
 
-        {{-- Calendar --}}
-        <div class="empcal-grid-wrap">
+        {{-- Calendar Grid --}}
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mb-6">
 
             {{-- First half: 1–15 --}}
-            <div class="empcal-half">
-                <div class="empcal-half-label"><span>1st Cutoff &nbsp;·&nbsp; {{ $monthStart->format('M 1') }} – {{ $monthStart->copy()->setDay(15)->format('M 15') }}</span></div>
+            <div class="p-5 border-b-2 border-dashed border-gray-100">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-xs font-bold uppercase tracking-widest text-gray-400">1st Cutoff</span>
+                    <span class="text-xs font-semibold text-gray-500">{{ $monthStart->format('M 1') }} – {{ $monthStart->copy()->setDay(15)->format('M 15') }}</span>
+                    <div class="flex-1 h-px bg-gray-100"></div>
+                </div>
 
-                <div class="empcal-dow-row">
+                {{-- Day-of-week header --}}
+                <div class="grid grid-cols-5 gap-2 mb-2">
                     @foreach(['Mon','Tue','Wed','Thu','Fri'] as $dow)
-                        <div class="empcal-dow">{{ $dow }}</div>
+                        <div class="text-center text-xs font-bold uppercase tracking-widest text-gray-400 py-1">{{ $dow }}</div>
                     @endforeach
                 </div>
 
                 @php
-                    $firstDay  = $firstHalfDays->first();
-                    $padStart  = $firstDay ? ($firstDay->dayOfWeekIso - 1) : 0;
+                    $firstDay   = $firstHalfDays->first();
+                    $padStart   = $firstDay ? ($firstDay->dayOfWeekIso - 1) : 0;
                     $firstCells = [];
                     for ($p = 0; $p < $padStart; $p++) $firstCells[] = null;
                     foreach ($firstHalfDays as $d) $firstCells[] = $d;
@@ -211,10 +186,10 @@
                 @endphp
 
                 @foreach(array_chunk($firstCells, 5) as $week)
-                <div class="empcal-days-row" style="margin-bottom:6px;">
+                <div class="grid grid-cols-5 gap-2 mb-2">
                     @foreach($week as $day)
                         @if($day === null)
-                            <div class="empcal-day-empty"></div>
+                            <div class="min-h-[88px] rounded-xl border-2 border-dashed border-gray-100 bg-transparent"></div>
                         @else
                             @php
                                 $key      = $day->format('Y-m-d');
@@ -225,51 +200,71 @@
                                 $hasOt    = $dayOtut->where('type','overtime')->count() > 0;
                                 $hasUt    = $dayOtut->where('type','undertime')->count() > 0;
 
-                                $dayClass = '';
+                                $cellBg = 'bg-white';
+                                $cellBorder = 'border-gray-200';
                                 $statusLabel = '';
-                                $statusBadge = '';
-                                if ($att) {
-                                    $dayClass = match($att->status) {
-                                        'present'     => 's-present',
-                                        'late'        => 's-late',
-                                        'absent'      => 's-absent',
-                                        default       => '',
-                                    };
-                                    $statusLabel = match($att->status) {
-                                        'present'     => 'Present',
-                                        'late'        => 'Late',
-                                        'absent'      => 'Absent',
-                                        default       => ucfirst($att->status),
-                                    };
-                                    $statusBadge = $dayClass;
+                                $statusClasses = '';
+
+                                if ($att && !$isFuture) {
+                                    switch ($att->status) {
+                                        case 'present':
+                                            $cellBg = 'bg-emerald-50';
+                                            $cellBorder = 'border-emerald-200';
+                                            $statusLabel = 'Present';
+                                            $statusClasses = 'bg-emerald-100 text-emerald-700';
+                                            break;
+                                        case 'late':
+                                            $cellBg = 'bg-amber-50';
+                                            $cellBorder = 'border-amber-200';
+                                            $statusLabel = 'Late';
+                                            $statusClasses = 'bg-amber-100 text-amber-700';
+                                            break;
+                                        case 'absent':
+                                            $cellBg = 'bg-rose-50';
+                                            $cellBorder = 'border-rose-200';
+                                            $statusLabel = 'Absent';
+                                            $statusClasses = 'bg-rose-100 text-rose-700';
+                                            break;
+                                        default:
+                                            $statusLabel = ucfirst($att->status);
+                                            $statusClasses = 'bg-gray-100 text-gray-600';
+                                    }
                                 }
-                                $otutClass = ($hasOt && $hasUt) ? 'has-ot has-ut' : ($hasOt ? 'has-ot' : ($hasUt ? 'has-ut' : ''));
                             @endphp
-                            <div class="empcal-day {{ $dayClass }} {{ $otutClass }} {{ $isToday ? 'is-today' : '' }} {{ $isFuture ? 'is-future' : '' }}">
-                                <div class="empcal-day-num">{{ $day->day }}</div>
+                            <div class="relative min-h-[88px] rounded-xl border-2 {{ $cellBorder }} {{ $cellBg }} p-2 flex flex-col gap-1 transition-all duration-100 hover:-translate-y-0.5 hover:shadow-md {{ $isToday ? 'ring-2 ring-gray-900 ring-offset-1' : '' }} {{ $isFuture ? 'opacity-50' : '' }}">
+                                <div class="flex items-start justify-between">
+                                    <span class="text-xs font-extrabold {{ $isToday ? 'text-gray-900' : 'text-gray-500' }} leading-none">{{ $day->day }}</span>
+                                    @if($hasOt && $hasUt)
+                                        <span class="text-[0.52rem] font-bold bg-gradient-to-r from-blue-100 to-yellow-100 text-gray-700 px-1.5 py-0.5 rounded leading-none">OT·UT</span>
+                                    @elseif($hasOt)
+                                        <span class="text-[0.52rem] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded leading-none">OT</span>
+                                    @elseif($hasUt)
+                                        <span class="text-[0.52rem] font-bold bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded leading-none">UT</span>
+                                    @endif
+                                </div>
                                 @if($att && !$isFuture)
-                                    <div class="empcal-day-status {{ $statusBadge }}">{{ $statusLabel }}</div>
+                                    <span class="text-[0.58rem] font-bold {{ $statusClasses }} px-1.5 py-0.5 rounded w-fit leading-none">{{ $statusLabel }}</span>
                                     @if($att->time_in || $att->time_out)
-                                    <div class="empcal-day-times">
+                                    <div class="font-mono-dm text-[0.55rem] text-gray-500 leading-relaxed mt-auto">
                                         @if($att->time_in)
-                                            <span>▶ {{ \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:i A') }}</span>
+                                            <div>▶ {{ \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:i A') }}</div>
                                         @endif
                                         @if($att->time_out)
-                                            <span>◀ {{ \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:i A') }}</span>
+                                            <div>◀ {{ \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:i A') }}</div>
                                         @endif
                                     </div>
                                     @endif
                                     @if($dayOtut->count())
-                                    <div class="empcal-otut-row">
+                                    <div class="flex gap-1 flex-wrap">
                                         @foreach($dayOtut as $rec)
-                                            <span class="empcal-otut-tag {{ $rec->type === 'overtime' ? 'ot' : 'ut' }}">
+                                            <span class="text-[0.52rem] font-bold px-1.5 py-0.5 rounded leading-none {{ $rec->type === 'overtime' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700' }}">
                                                 {{ $rec->type === 'overtime' ? 'OT' : 'UT' }} {{ number_format($rec->hours, 1) }}h
                                             </span>
                                         @endforeach
                                     </div>
                                     @endif
                                 @elseif(!$isFuture)
-                                    <div style="font-size:0.6rem;color:#d1d5db;margin-top:2px;">No record</div>
+                                    <span class="text-[0.58rem] text-gray-300 mt-auto">No record</span>
                                 @endif
                             </div>
                         @endif
@@ -279,12 +274,16 @@
             </div>
 
             {{-- Second half: 16–end --}}
-            <div class="empcal-half">
-                <div class="empcal-half-label"><span>2nd Cutoff &nbsp;·&nbsp; {{ $monthStart->copy()->setDay(16)->format('M 16') }} – {{ $monthEnd->format('M j') }}</span></div>
+            <div class="p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-xs font-bold uppercase tracking-widest text-gray-400">2nd Cutoff</span>
+                    <span class="text-xs font-semibold text-gray-500">{{ $monthStart->copy()->setDay(16)->format('M 16') }} – {{ $monthEnd->format('M j') }}</span>
+                    <div class="flex-1 h-px bg-gray-100"></div>
+                </div>
 
-                <div class="empcal-dow-row">
+                <div class="grid grid-cols-5 gap-2 mb-2">
                     @foreach(['Mon','Tue','Wed','Thu','Fri'] as $dow)
-                        <div class="empcal-dow">{{ $dow }}</div>
+                        <div class="text-center text-xs font-bold uppercase tracking-widest text-gray-400 py-1">{{ $dow }}</div>
                     @endforeach
                 </div>
 
@@ -299,10 +298,10 @@
                 @endphp
 
                 @foreach(array_chunk($secondCells, 5) as $week)
-                <div class="empcal-days-row" style="margin-bottom:6px;">
+                <div class="grid grid-cols-5 gap-2 mb-2">
                     @foreach($week as $day)
                         @if($day === null)
-                            <div class="empcal-day-empty"></div>
+                            <div class="min-h-[88px] rounded-xl border-2 border-dashed border-gray-100 bg-transparent"></div>
                         @else
                             @php
                                 $key      = $day->format('Y-m-d');
@@ -313,51 +312,71 @@
                                 $hasOt    = $dayOtut->where('type','overtime')->count() > 0;
                                 $hasUt    = $dayOtut->where('type','undertime')->count() > 0;
 
-                                $dayClass = '';
+                                $cellBg = 'bg-white';
+                                $cellBorder = 'border-gray-200';
                                 $statusLabel = '';
-                                $statusBadge = '';
-                                if ($att) {
-                                    $dayClass = match($att->status) {
-                                        'present'     => 's-present',
-                                        'late'        => 's-late',
-                                        'absent'      => 's-absent',
-                                        default       => '',
-                                    };
-                                    $statusLabel = match($att->status) {
-                                        'present'     => 'Present',
-                                        'late'        => 'Late',
-                                        'absent'      => 'Absent',
-                                        default       => ucfirst($att->status),
-                                    };
-                                    $statusBadge = $dayClass;
+                                $statusClasses = '';
+
+                                if ($att && !$isFuture) {
+                                    switch ($att->status) {
+                                        case 'present':
+                                            $cellBg = 'bg-emerald-50';
+                                            $cellBorder = 'border-emerald-200';
+                                            $statusLabel = 'Present';
+                                            $statusClasses = 'bg-emerald-100 text-emerald-700';
+                                            break;
+                                        case 'late':
+                                            $cellBg = 'bg-amber-50';
+                                            $cellBorder = 'border-amber-200';
+                                            $statusLabel = 'Late';
+                                            $statusClasses = 'bg-amber-100 text-amber-700';
+                                            break;
+                                        case 'absent':
+                                            $cellBg = 'bg-rose-50';
+                                            $cellBorder = 'border-rose-200';
+                                            $statusLabel = 'Absent';
+                                            $statusClasses = 'bg-rose-100 text-rose-700';
+                                            break;
+                                        default:
+                                            $statusLabel = ucfirst($att->status);
+                                            $statusClasses = 'bg-gray-100 text-gray-600';
+                                    }
                                 }
-                                $otutClass = ($hasOt && $hasUt) ? 'has-ot has-ut' : ($hasOt ? 'has-ot' : ($hasUt ? 'has-ut' : ''));
                             @endphp
-                            <div class="empcal-day {{ $dayClass }} {{ $otutClass }} {{ $isToday ? 'is-today' : '' }} {{ $isFuture ? 'is-future' : '' }}">
-                                <div class="empcal-day-num">{{ $day->day }}</div>
+                            <div class="relative min-h-[88px] rounded-xl border-2 {{ $cellBorder }} {{ $cellBg }} p-2 flex flex-col gap-1 transition-all duration-100 hover:-translate-y-0.5 hover:shadow-md {{ $isToday ? 'ring-2 ring-gray-900 ring-offset-1' : '' }} {{ $isFuture ? 'opacity-50' : '' }}">
+                                <div class="flex items-start justify-between">
+                                    <span class="text-xs font-extrabold {{ $isToday ? 'text-gray-900' : 'text-gray-500' }} leading-none">{{ $day->day }}</span>
+                                    @if($hasOt && $hasUt)
+                                        <span class="text-[0.52rem] font-bold bg-gradient-to-r from-blue-100 to-yellow-100 text-gray-700 px-1.5 py-0.5 rounded leading-none">OT·UT</span>
+                                    @elseif($hasOt)
+                                        <span class="text-[0.52rem] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded leading-none">OT</span>
+                                    @elseif($hasUt)
+                                        <span class="text-[0.52rem] font-bold bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded leading-none">UT</span>
+                                    @endif
+                                </div>
                                 @if($att && !$isFuture)
-                                    <div class="empcal-day-status {{ $statusBadge }}">{{ $statusLabel }}</div>
+                                    <span class="text-[0.58rem] font-bold {{ $statusClasses }} px-1.5 py-0.5 rounded w-fit leading-none">{{ $statusLabel }}</span>
                                     @if($att->time_in || $att->time_out)
-                                    <div class="empcal-day-times">
+                                    <div class="font-mono-dm text-[0.55rem] text-gray-500 leading-relaxed mt-auto">
                                         @if($att->time_in)
-                                            <span>▶ {{ \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:i A') }}</span>
+                                            <div>▶ {{ \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:i A') }}</div>
                                         @endif
                                         @if($att->time_out)
-                                            <span>◀ {{ \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:i A') }}</span>
+                                            <div>◀ {{ \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:i A') }}</div>
                                         @endif
                                     </div>
                                     @endif
                                     @if($dayOtut->count())
-                                    <div class="empcal-otut-row">
+                                    <div class="flex gap-1 flex-wrap">
                                         @foreach($dayOtut as $rec)
-                                            <span class="empcal-otut-tag {{ $rec->type === 'overtime' ? 'ot' : 'ut' }}">
+                                            <span class="text-[0.52rem] font-bold px-1.5 py-0.5 rounded leading-none {{ $rec->type === 'overtime' ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700' }}">
                                                 {{ $rec->type === 'overtime' ? 'OT' : 'UT' }} {{ number_format($rec->hours, 1) }}h
                                             </span>
                                         @endforeach
                                     </div>
                                     @endif
                                 @elseif(!$isFuture)
-                                    <div style="font-size:0.6rem;color:#d1d5db;margin-top:2px;">No record</div>
+                                    <span class="text-[0.58rem] text-gray-300 mt-auto">No record</span>
                                 @endif
                             </div>
                         @endif
@@ -365,8 +384,7 @@
                 </div>
                 @endforeach
             </div>
-
-        </div>{{-- /.empcal-grid-wrap --}}
+        </div>
 
     </div>
 </div>

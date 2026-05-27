@@ -1,77 +1,104 @@
 @extends('layouts.layout')
 
-@push('styles')
-    @include('employee._ui-styles')
-@endpush
-
 @section('content')
-<div class="container-fluid empui-page empui-wrap">
-    <div class="empui-backdrop"><div class="empui-grid"></div></div>
-    <div class="empui-content">
+<div class="min-h-screen bg-gray-50/60">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
 
-        <div class="empui-hero">
-            <div class="empui-hero-left">
-                <h1 class="empui-title">New OT / UT Request</h1>
-                <p class="empui-sub">Create an overtime or undertime entry for HR review.</p>
-                <div class="d-flex flex-wrap gap-2 mt-2">
-                    <span class="empui-chip"><i class="feather-calendar"></i> {{ now()->format('l, F d, Y') }}</span>
-                    <span class="empui-chip"><i class="feather-info"></i> Keep it concise</span>
-                </div>
+        {{-- Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-7">
+            <div>
+                <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-1">Employee Portal</p>
+                <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 leading-tight">New OT / UT Request</h1>
+                <p class="text-sm text-gray-500 mt-1">Create an overtime or undertime entry for HR review.</p>
             </div>
-            <div class="empui-hero-right">
-                <a class="empui-btn-sec" href="{{ route('employee.overtime-undertime.index') }}">
-                    <i class="feather-arrow-left"></i>
-                    Back to Requests
-                </a>
-            </div>
+            <a href="{{ route('employee.overtime-undertime.index') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 transition-all shadow-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Back to Requests
+            </a>
         </div>
 
-        <div class="empui-card" style="max-width: 980px; margin: 0 auto;">
-            <div class="empui-card-head">
-                <p class="empui-card-title"><span class="empui-dot"></span> Record Details</p>
+        {{-- Form Card --}}
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+            <div class="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
+                <div class="w-2 h-2 rounded-full bg-gray-900"></div>
+                <span class="text-sm font-bold text-gray-900">Record Details</span>
             </div>
-            <div class="empui-card-body">
+            <div class="p-6">
                 <form action="{{ route('employee.overtime-undertime.store') }}" method="POST" id="overtimeForm">
                     @csrf
 
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Type <span class="text-danger">*</span></label>
-                            <select name="type" class="form-control @error('type') is-invalid @enderror" required>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+                        {{-- Type --}}
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Type <span class="text-red-500">*</span>
+                            </label>
+                            <select name="type"
+                                class="w-full bg-gray-50 border @error('type') border-red-400 @else border-gray-200 @enderror rounded-xl px-4 py-2.5 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-700 transition appearance-none"
+                                required>
                                 <option value="">Select Type</option>
                                 <option value="overtime"  {{ old('type') === 'overtime'  ? 'selected' : '' }}>Overtime</option>
                                 <option value="undertime" {{ old('type') === 'undertime' ? 'selected' : '' }}>Undertime</option>
                             </select>
-                            @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            @error('type')
+                                <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p>
+                            @enderror
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Date <span class="text-danger">*</span></label>
-                            <input type="date" name="date" class="form-control @error('date') is-invalid @enderror"
-                                   value="{{ old('date') }}" required>
-                            @error('date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+
+                        {{-- Date --}}
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Date <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" name="date"
+                                value="{{ old('date') }}"
+                                class="w-full bg-gray-50 border @error('date') border-red-400 @else border-gray-200 @enderror rounded-xl px-4 py-2.5 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-700 transition"
+                                required>
+                            @error('date')
+                                <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p>
+                            @enderror
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Hours <span class="text-danger">*</span></label>
-                            <input type="number" name="hours" class="form-control @error('hours') is-invalid @enderror"
-                                   value="{{ old('hours') }}" placeholder="0.5" step="0.5" min="0.5" max="24" required>
-                            <div class="empui-muted mt-1">Between 0.5 and 24 hours</div>
-                            @error('hours')<div class="invalid-feedback">{{ $message }}</div>@enderror
+
+                        {{-- Hours --}}
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Hours <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" name="hours"
+                                value="{{ old('hours') }}" placeholder="0.5" step="0.5" min="0.5" max="24"
+                                class="w-full bg-gray-50 border @error('hours') border-red-400 @else border-gray-200 @enderror rounded-xl px-4 py-2.5 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-700 transition"
+                                required>
+                            <p class="text-xs text-gray-400">Between 0.5 and 24 hours</p>
+                            @error('hours')
+                                <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p>
+                            @enderror
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Reason <span class="text-danger">*</span></label>
-                            <textarea name="reason" class="form-control @error('reason') is-invalid @enderror"
-                                      rows="4" required>{{ old('reason') }}</textarea>
-                            @error('reason')<div class="invalid-feedback">{{ $message }}</div>@enderror
+
+                        {{-- Reason --}}
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                Reason <span class="text-red-500">*</span>
+                            </label>
+                            <textarea name="reason" rows="4"
+                                class="w-full bg-gray-50 border @error('reason') border-red-400 @else border-gray-200 @enderror rounded-xl px-4 py-2.5 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-700 transition resize-none"
+                                required>{{ old('reason') }}</textarea>
+                            @error('reason')
+                                <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
-                    <div class="d-flex gap-2 flex-wrap mt-4">
-                        <button type="submit" class="empui-btn">
-                            <i class="feather-plus"></i>
+                    <div class="flex items-center gap-3 mt-6 pt-5 border-t border-gray-100">
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-semibold rounded-xl transition-all shadow-sm">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                             Create Record
                         </button>
-                        <a href="{{ route('employee.overtime-undertime.index') }}" class="empui-btn-sec">
-                            <i class="feather-x"></i>
+                        <a href="{{ route('employee.overtime-undertime.index') }}"
+                           class="inline-flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 border border-gray-200 text-sm font-semibold text-gray-600 rounded-xl transition-all">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                             Cancel
                         </a>
                     </div>

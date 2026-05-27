@@ -2,544 +2,144 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-
-:root {
-    --qr-scan-size: 220px;
-}
-
-.scn-page {
-    font-family: 'Sora', sans-serif;
-    width: 100%;
-    max-width: 1180px;
-    margin: 0 auto;
-    box-sizing: border-box;
-    min-height: calc(100dvh - 110px);
-}
-
-.scn-wrap {
-    width: 100%;
-    padding: 8px 4px 0;
-}
-
-.scn-content {
-    width: 100%;
-}
-
-.scn-topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    padding: 18px 20px;
-    border-radius: 16px;
-    background: #111827;
-    border: 1px solid rgba(17,24,39,0.2);
-    box-shadow: 0 14px 38px rgba(15,23,42,0.16);
-    position: relative;
-    overflow: hidden;
-}
-
-.scn-topbar::before {
-    content: '';
-    position: absolute;
-    top: -56px;
-    right: -46px;
-    width: 190px;
-    height: 190px;
-    border-radius: 50%;
-    background: rgba(200,41,42,0.13);
-    pointer-events: none;
-}
-
-.scn-topbar::after {
-    content: '';
-    position: absolute;
-    bottom: -68px;
-    left: 26%;
-    width: 170px;
-    height: 170px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.045);
-    pointer-events: none;
-}
-
-.scn-eyebrow {
-    font-size: 1.35rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: #ffffff;
-    margin: 0 0 2px;
-    position: relative;
-    z-index: 1;
-}
-
-.scn-title {
-    font-size: 0.78rem;
-    color: #9ca3af;
-    margin: 0;
-    position: relative;
-    z-index: 1;
-}
-
-.scn-sub {
-    font-size: 0.65rem;
-    color: #6b7280;
-    margin: 0;
-    line-height: 1.45;
-}
-
-.scn-clock {
-    font-family: 'DM Mono', monospace;
-    font-variant-numeric: tabular-nums;
-    font-size: 0.9rem;
-    font-weight: 800;
-    color: #ffffff;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.16);
-    border-radius: 12px;
-    padding: 10px 14px;
-    box-shadow: 0 10px 30px rgba(17,24,39,0.06);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    position: relative;
-    z-index: 1;
-}
-
-.scn-clock-container {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    align-items: flex-end;
-}
-
-.scn-clock-date {
-    font-size: 0.6rem;
-    color: #cbd5e1;
-    font-weight: 600;
-    font-family: 'Sora', sans-serif;
-}
-
-.scn-grid-layout {
-    display: grid;
-    grid-template-columns: minmax(320px, 1fr) minmax(420px, 560px);
-    gap: 16px;
-    align-items: stretch;
-    justify-content: center;
-}
-
-@media (max-width: 900px) {
-    .scn-grid-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
-.scn-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    position: relative;
-}
-
-.scn-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    border-radius: 0 0 14px 14px;
-    background: #e5e7eb;
-}
-
-.scn-card--scanner::after {
-    background: #c8292a;
-}
-
-.scn-card--scanner {
-    width: 100%;
-    max-width: 560px;
-    justify-self: center;
-}
-
-.scn-card-head {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f3f4f6;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-}
-
-.scn-card-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: #fff0f0;
-    color: #c8292a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.scn-card-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 2px;
-    line-height: 1.25;
-}
-
-.scn-card-sub {
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin: 0;
-}
-
-.scn-card-body {
-    padding: 18px 20px 22px;
-    flex: 1;
-}
-
-.scn-card-body--center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.scn-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #c8292a;
-    display: inline-block;
-}
-
-.att-steps {
-    padding-left: 0;
-    margin: 0;
-    list-style: none;
-    counter-reset: scn;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.att-steps li {
-    counter-increment: scn;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.9rem;
-    color: #374151;
-    line-height: 1.45;
-    padding: 10px 12px;
-    border-radius: 10px;
-    background: #f9fafb;
-    border: 1px solid #f3f4f6;
-}
-
-.att-steps li::before {
-    content: counter(scn);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: #fff0f0;
-    color: #c8292a;
-    font-size: 0.82rem;
-    font-weight: 700;
-    flex-shrink: 0;
-}
-
-.att-steps strong {
-    color: #111827;
-    font-weight: 600;
-}
-
-.scn-section-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #6b7280;
-}
-
-.scan-ios-note {
-    background: #f4f5f7;
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 0.75rem;
-    color: #374151;
-    line-height: 1.6;
-}
-
-/* Scanner specific styles */
-.scan-panel-label {
-    font-size: 0.62rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #6b7280;
-    align-self: flex-start;
-    width: 100%;
-}
-
-.scan-start-btn {
-    width: 100%;
-    padding: 11px 0;
-    background: rgba(0,0,0,0.05);
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    color: #111827;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-}
-
-.scan-start-btn:hover {
-    background: rgba(0,0,0,0.08);
-    border-color: #d1d5db;
-}
-
-.scan-start-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.scan-hint {
-    text-align: center;
-    font-size: 0.65rem;
-    color: #6b7280;
-    margin-top: 6px;
-}
-
-.scan-status {
-    width: 100%;
-    padding: 9px 14px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-}
-
-.scan-status-idle {
-    background: rgba(0,0,0,0.03);
-    color: #374151;
-}
-
-.scan-status-success {
-    background: rgba(22,163,74,0.15);
-    color: #16a34a;
-}
-
-.scan-status-danger {
-    background: rgba(200,41,42,0.15);
-    color: #c8292a;
-}
-
-.scan-divider {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #9ca3af;
-    text-align: center;
-    margin: 10px 0;
-}
-
-.scan-token-input {
-    flex: 1;
-    background: rgba(0,0,0,0.03) !important;
-    border: 1px solid #9ca3af !important;
-    border-radius: 8px !important;
-    color: #111827 !important;
-    font-size: 0.8rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 2px !important;
-    padding: 9px 14px !important;
-}
-
-.scan-token-input::placeholder {
-    color: #9ca3af !important;
-}
-
-.scan-token-input:focus {
-    background: rgba(0,0,0,0.05) !important;
-    border-color: #bfdbfe !important;
-    box-shadow: 0 0 0 3px rgba(200,41,42,0.08) !important;
-    outline: none !important;
-}
-
-.scan-submit-btn {
-    padding: 9px 16px;
-    background: #c8292a;
-    border: none;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: background 0.15s;
-    flex-shrink: 0;
-}
-
-.scan-submit-btn:hover {
-    background: #a81f20;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.spin-icon {
-    animation: spin 1s linear infinite;
-    display: inline-block;
-}
-
-@media (max-width: 1200px) {
-    :root {
-        --qr-scan-size: 180px;
-    }
-}
-
-@media (max-width: 900px) {
-    :root {
-        --qr-scan-size: 160px;
-    }
-
-    .scn-page {
-        min-height: calc(100dvh - 110px);
-        align-items: stretch;
-    }
-
-    .scn-topbar {
-        padding: 14px 16px;
-    }
-}
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&display=swap');
+#digital-clock, #time-display, #current-date { font-family: 'DM Mono', monospace; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spin-icon { display: inline-block; animation: spin 1s linear infinite; }
 </style>
 @endpush
 
 @section('content')
-<div class="scn-page">
-    <div class="scn-wrap">
-        <div class="scn-content">
 
-        <div class="scn-topbar">
-            <div>
-                <p class="scn-eyebrow">Attendance</p>
-                <h1 class="scn-title">Scan QR Code</h1>
+<div class="min-h-screen bg-gray-50/60">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+
+        {{-- Top Bar --}}
+        <div class="flex items-center justify-between gap-4 bg-gray-900 rounded-2xl px-6 py-5 mb-6 shadow-xl relative overflow-hidden">
+            {{-- Decorative blobs --}}
+            <div class="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-red-700/10 pointer-events-none"></div>
+            <div class="absolute -bottom-12 left-1/4 w-40 h-40 rounded-full bg-white/4 pointer-events-none"></div>
+
+            <div class="relative z-10">
+                <p class="text-xs font-bold tracking-widest text-gray-500 uppercase mb-0.5">Attendance</p>
+                <h1 class="text-xl font-extrabold tracking-tight text-white leading-tight">Scan QR Code</h1>
             </div>
-            <div class="scn-clock-container">
-                <div class="scn-clock" id="digital-clock">
-                    <div class="scn-clock-date" id="current-date"></div>
-                    <div id="time-display"></div>
+
+            <div class="relative z-10 flex flex-col items-end gap-1">
+                <div id="digital-clock" class="flex flex-col items-end bg-white/8 border border-white/14 rounded-xl px-4 py-2.5 shadow">
+                    <div id="current-date" class="text-[0.6rem] font-semibold text-gray-400 leading-none mb-1"></div>
+                    <div id="time-display" class="text-sm font-bold text-white tabular-nums leading-none"></div>
                 </div>
             </div>
         </div>
 
-        <div class="scn-grid-layout">
+        {{-- Two-column grid --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
             {{-- Left — Instructions --}}
-            <section class="scn-card" aria-labelledby="scn-steps-title">
-                <div class="scn-card-head">
-                    <div class="scn-card-icon" aria-hidden="true">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <section class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm flex flex-col">
+                <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+                    <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4.5 h-4.5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                     <div>
-                        <h2 id="scn-steps-title" class="scn-card-title">How to log attendance</h2>
-                        <p class="scn-card-sub">Follow these steps on your device</p>
+                        <h2 class="text-sm font-bold text-gray-900 leading-none mb-0.5">How to log attendance</h2>
+                        <p class="text-xs text-gray-400">Follow these steps on your device</p>
                     </div>
                 </div>
-                <div class="scn-card-body">
-                    <ol class="att-steps">
-                        <li>Allow <strong>camera access</strong> when prompted</li>
-                        <li>Align your camera with the scanner</li>
-                        <li>Hold steady — detection is automatic</li>
-                        <li>Wait for <strong>"Attendance Recorded"</strong> confirmation</li>
+                <div class="p-5 flex-1">
+                    <ol class="flex flex-col gap-3 list-none p-0 m-0" style="counter-reset: scn;">
+                        @foreach([
+                            ['Allow <strong class="text-gray-800">camera access</strong> when prompted', ''],
+                            ['Align your camera with the scanner', ''],
+                            ['Hold steady — detection is <strong class="text-gray-800">automatic</strong>', ''],
+                            ['Wait for <strong class="text-gray-800">"Attendance Recorded"</strong> confirmation', ''],
+                        ] as $step)
+                        <li class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 text-sm text-gray-600 leading-snug" style="counter-increment: scn;">
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-50 text-red-600 text-xs font-bold flex-shrink-0" style="content: counter(scn);">
+                                {{ $loop->index + 1 }}
+                            </span>
+                            <span>{!! $step[0] !!}</span>
+                        </li>
+                        @endforeach
                     </ol>
 
-                    {{-- iOS note --}}
-                    <div class="scan-ios-note mt-4">
-                        <strong>iOS:</strong>
-                        If camera is blocked, go to <strong>Settings → Privacy → Camera</strong>, enable Safari, then reload.
+                    <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs text-gray-600 leading-relaxed">
+                        <strong class="text-gray-800">iOS:</strong> If camera is blocked, go to
+                        <strong class="text-gray-800">Settings → Privacy → Camera</strong>, enable Safari, then reload.
                     </div>
                 </div>
             </section>
 
             {{-- Right — Scanner --}}
-            <section class="scn-card scn-card--scanner" aria-label="QR Code Scanner">
-                <div class="scn-card-head">
-                    <div class="scn-card-icon" aria-hidden="true">
-                        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <section class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm flex flex-col">
+                <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+                    <div class="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4.5 h-4.5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                         </svg>
                     </div>
                     <div>
-                        <h2 class="scn-card-title">Start scanning</h2>
-                        <p class="scn-card-sub">Use your device camera</p>
+                        <h2 class="text-sm font-bold text-gray-900 leading-none mb-0.5">Start scanning</h2>
+                        <p class="text-xs text-gray-400">Use your device camera</p>
                     </div>
                 </div>
-                <div class="scn-card-body scn-card-body--center">
-                    <p class="scn-section-label mb-3">Scan QR Code</p>
+                <div class="p-5 flex-1 flex flex-col items-center gap-3">
+
+                    <p class="text-xs font-bold uppercase tracking-widest text-gray-400 self-start">Scan QR Code</p>
 
                     {{-- Camera button --}}
-                    <div id="camera-controls" class="w-100 mb-3">
-                        <button type="button" class="scan-start-btn" id="start-camera-btn">
-                            <i class="fa fa-camera me-2"></i>Start Camera
+                    <div id="camera-controls" class="w-full">
+                        <button type="button" id="start-camera-btn"
+                            class="w-full py-3 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa fa-camera mr-2"></i>Start Camera
                         </button>
-                        <div class="scan-hint">Tap to request camera access</div>
+                        <p class="text-center text-xs text-gray-400 mt-2">Tap to request camera access</p>
                     </div>
 
                     {{-- Video stream --}}
-                    <div id="video-container" style="display:none; position:relative; overflow:hidden; border-radius:12px; background:#000; width:100%; aspect-ratio:4/3; margin-bottom:12px;">
+                    <div id="video-container" style="display:none; position:relative; overflow:hidden; border-radius:14px; background:#000; width:100%; aspect-ratio:4/3; margin-bottom:4px;">
                         <video id="camera-stream" playsinline autoplay muted webkit-playsinline
                             style="width:100%; height:100%; object-fit:contain; display:block;"></video>
                         <canvas id="canvas" style="display:none;"></canvas>
                         <div id="no-camera-message" class="text-white text-center"
                             style="display:none; width:100%; height:100%; flex-direction:column; align-items:center; justify-content:center; position:absolute; top:0; left:0; background:#111;">
                             <i class="fa fa-camera-slash" style="font-size:40px; margin-bottom:10px; opacity:.5;"></i>
-                            <p class="mb-0 small fw-semibold">Camera Unavailable</p>
-                            <p class="small opacity-50">Use manual token entry</p>
+                            <p class="mb-0 text-sm font-semibold">Camera Unavailable</p>
+                            <p class="text-xs opacity-50">Use manual token entry</p>
                         </div>
                     </div>
 
-                    {{-- Status --}}
-                    <div id="scanner-status" class="scan-status scan-status-idle w-100 mb-3">
-                        <i class="fa fa-spinner me-2 spin-icon"></i>
+                    {{-- Status indicator --}}
+                    <div id="scanner-status" class="w-full px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 bg-gray-50 border border-gray-200 text-gray-500">
+                        <i class="fa fa-spinner spin-icon"></i>
                         <span id="status-text">Initializing camera…</span>
                     </div>
 
                     {{-- Scan result --}}
-                    <div id="scan-result" style="display:none;" class="scan-status w-100 mb-3"></div>
+                    <div id="scan-result" style="display:none;" class="w-full px-4 py-2.5 rounded-xl text-sm flex items-center gap-2"></div>
 
                     {{-- Manual token --}}
-                    <div class="mt-auto w-100">
-                        <div class="scan-divider">or enter token manually</div>
-                        <form id="manual-form" class="d-flex gap-2">
-                            <input type="text" class="scan-token-input" id="manual-token"
-                                placeholder="8-char token" required maxlength="8">
-                            <button class="scan-submit-btn" type="submit">
+                    <div class="mt-auto w-full">
+                        <div class="flex items-center gap-3 my-3">
+                            <div class="flex-1 h-px bg-gray-100"></div>
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">or enter token</span>
+                            <div class="flex-1 h-px bg-gray-100"></div>
+                        </div>
+                        <form id="manual-form" class="flex gap-2">
+                            <input type="text" id="manual-token"
+                                placeholder="8-char token" required maxlength="8"
+                                class="flex-1 bg-gray-50 border border-gray-300 rounded-xl text-sm font-semibold text-gray-900 tracking-widest px-4 py-2.5 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-700 transition">
+                            <button type="submit"
+                                class="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 border-none rounded-xl text-white text-sm font-semibold cursor-pointer transition-all flex-shrink-0">
                                 <i class="fa fa-arrow-right"></i>
                             </button>
                         </form>
                     </div>
                 </div>
             </section>
-        </div>
 
         </div>
     </div>
@@ -551,9 +151,15 @@
 let video = null;
 let canvas = null;
 let ctx = null;
-
 let scanner_running = false;
 let scanFrameId = null;
+
+// Status class mappings
+const statusClasses = {
+    idle:    'bg-gray-50 border border-gray-200 text-gray-500',
+    success: 'bg-emerald-50 border border-emerald-200 text-emerald-700',
+    danger:  'bg-rose-50 border border-rose-200 text-rose-700',
+};
 
 function isIOS() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -561,672 +167,186 @@ function isIOS() {
 
 function updateClock() {
     const now = new Date();
-
     document.getElementById('time-display').textContent =
-        now.toLocaleTimeString([], {
-            hour: 'numeric',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-        });
-
+        now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
     document.getElementById('current-date').textContent =
-        now.toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-        });
+        now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 }
 
 setInterval(updateClock, 1000);
 updateClock();
 
 window.addEventListener('load', () => {
-
-    if (
-        !navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia
-    ) {
-        updateScannerStatus(
-            'Browser does not support camera access',
-            'danger'
-        );
-
-        document.getElementById(
-            'start-camera-btn'
-        ).disabled = true;
-
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        updateScannerStatus('Browser does not support camera access', 'danger');
+        document.getElementById('start-camera-btn').disabled = true;
         return;
     }
-
     fetchLastLog();
-
-    const btn =
-        document.getElementById(
-            'start-camera-btn'
-        );
-
-    btn.addEventListener(
-        'click',
-        startCamera
-    );
+    document.getElementById('start-camera-btn').addEventListener('click', startCamera);
 });
 
-
-
 async function startCamera() {
-
-    const btn =
-        document.getElementById(
-            'start-camera-btn'
-        );
-
+    const btn = document.getElementById('start-camera-btn');
     btn.disabled = true;
-
-    btn.innerHTML =
-        '<i class="fa fa-spinner spin-icon me-2"></i>Starting...';
-
-    updateScannerStatus(
-        'Requesting camera access...',
-        'idle'
-    );
-
+    btn.innerHTML = '<i class="fa fa-spinner spin-icon mr-2"></i>Starting...';
+    updateScannerStatus('Requesting camera access...', 'idle');
     await initializeCamera();
-
     if (!scanner_running) {
-
         btn.disabled = false;
-
-        btn.innerHTML =
-            '<i class="fa fa-camera me-2"></i>Start Camera';
+        btn.innerHTML = '<i class="fa fa-camera mr-2"></i>Start Camera';
     }
 }
 
-
 async function fetchLastLog() {
-
     try {
-
-        const response =
-            await fetch(
-                "{{ route('attendance.lastlog') }}",
-                {
-                    headers: {
-                        Accept:
-                            'application/json'
-                    }
-                }
-            );
-
+        const response = await fetch("{{ route('attendance.lastlog') }}", {
+            headers: { Accept: 'application/json' }
+        });
         if (!response.ok) return;
-
-        const data =
-            await response.json();
-
-        if (
-            data?.type &&
-            document.getElementById(
-                'last-log'
-            )
-        ) {
+        const data = await response.json();
+        if (data?.type && document.getElementById('last-log')) {
             displayLastLog(data);
         }
-
     } catch (e) {
-        console.log(
-            'Last log unavailable'
-        );
+        console.log('Last log unavailable');
     }
 }
 
 function displayLastLog(data) {
-
-    const log =
-        document.getElementById(
-            'last-log'
-        );
-
-    const type =
-        document.getElementById(
-            'last-log-type'
-        );
-
-    const time =
-        document.getElementById(
-            'last-log-time'
-        );
-
-    if (
-        !log ||
-        !type ||
-        !time
-    ) return;
-
-    log.style.display =
-        'block';
-
-    type.textContent =
-        data.type
-            .replace(
-                '_',
-                ' '
-            )
-            .toUpperCase();
-
-    type.className =
-        'badge bg-' +
-        (
-            data.type ===
-            'time_in'
-                ? 'success'
-                : 'warning'
-        );
-
-    time.textContent =
-        data.time;
+    const log  = document.getElementById('last-log');
+    const type = document.getElementById('last-log-type');
+    const time = document.getElementById('last-log-time');
+    if (!log || !type || !time) return;
+    log.style.display = 'block';
+    type.textContent  = data.type.replace('_', ' ').toUpperCase();
+    type.className    = 'badge bg-' + (data.type === 'time_in' ? 'success' : 'warning');
+    time.textContent  = data.time;
 }
 
 async function initializeCamera() {
-
-    video =
-        document.getElementById(
-            'camera-stream'
-        );
-
-    canvas =
-        document.getElementById(
-            'canvas'
-        );
-
-    ctx =
-        canvas.getContext(
-            '2d',
-            {
-                willReadFrequently:
-                    true
-            }
-        );
-
+    video  = document.getElementById('camera-stream');
+    canvas = document.getElementById('canvas');
+    ctx    = canvas.getContext('2d', { willReadFrequently: true });
     try {
-
-        const stream =
-            await navigator
-                .mediaDevices
-                .getUserMedia({
-                    video: {
-                        facingMode:
-                            'environment'
-                    },
-                    audio: false
-                });
-
-        video.srcObject =
-            stream;
-
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }, audio: false
+        });
+        video.srcObject = stream;
         await video.play();
-
-        video.onloadedmetadata =
-            () => {
-
-                requestAnimationFrame(
-                    startScanning
-                );
-
-            };
-
+        video.onloadedmetadata = () => { requestAnimationFrame(startScanning); };
     } catch (error) {
-
-        handleCameraError(
-            error
-        );
-
+        handleCameraError(error);
     }
 }
 
-
 function startScanning() {
-
-    if (
-        !video ||
-        !video.videoWidth
-    ) {
-        setTimeout(
-            startScanning,
-            300
-        );
-        return;
-    }
-
+    if (!video || !video.videoWidth) { setTimeout(startScanning, 300); return; }
     scanner_running = true;
-
-    document.getElementById(
-        'camera-controls'
-    ).style.display =
-        'none';
-
-    document.getElementById(
-        'video-container'
-    ).style.display =
-        'block';
-
-    canvas.width =
-        video.videoWidth;
-
-    canvas.height =
-        video.videoHeight;
-
-    updateScannerStatus(
-        'Camera ready — scanning...',
-        'idle'
-    );
-
+    document.getElementById('camera-controls').style.display = 'none';
+    document.getElementById('video-container').style.display = 'block';
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    updateScannerStatus('Camera ready — scanning...', 'idle');
     scanQRCode();
 }
 
 function scanQRCode() {
-
-    if (
-        !scanner_running
-    ) return;
-
-    if (
-        video.readyState <
-        2
-    ) {
-
-        scanFrameId =
-            requestAnimationFrame(
-                scanQRCode
-            );
-
-        return;
-    }
-
+    if (!scanner_running) return;
+    if (video.readyState < 2) { scanFrameId = requestAnimationFrame(scanQRCode); return; }
     try {
-
-        ctx.drawImage(
-            video,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
-
-        const image =
-            ctx.getImageData(
-                0,
-                0,
-                canvas.width,
-                canvas.height
-            );
-
-        const code =
-            jsQR(
-                image.data,
-                canvas.width,
-                canvas.height
-            );
-
-        if (
-            code &&
-            code.data
-        ) {
-            handleQRCode(
-                code.data
-            );
-            return;
-        }
-
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code  = jsQR(image.data, canvas.width, canvas.height);
+        if (code && code.data) { handleQRCode(code.data); return; }
     } catch {}
-
-    scanFrameId =
-        requestAnimationFrame(
-            scanQRCode
-        );
+    scanFrameId = requestAnimationFrame(scanQRCode);
 }
 
-
 function handleQRCode(data) {
-
-    scanner_running =
-        false;
-
-    cancelAnimationFrame(
-        scanFrameId
-    );
-
-    submitAttendance(
-        data
-    );
+    scanner_running = false;
+    cancelAnimationFrame(scanFrameId);
+    submitAttendance(data);
 }
 
 async function submitAttendance(token) {
     try {
-
-        updateScannerStatus(
-            'Submitting attendance…',
-            'idle'
-        );
-
-        const response = await fetch(
-            "{{ route('hr.qr.submit') }}",
-            {
-                method: 'POST',
-
-                headers: {
-                    'X-CSRF-TOKEN':
-                        '{{ csrf_token() }}',
-
-                    'Content-Type':
-                        'application/json',
-
-                    'Accept':
-                        'application/json'
-                },
-
-                body: JSON.stringify({
-                    token
-                })
-            }
-        );
-
-        const data =
-            await response.json();
-
+        updateScannerStatus('Submitting attendance…', 'idle');
+        const response = await fetch("{{ route('hr.qr.submit') }}", {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN':  '{{ csrf_token() }}',
+                'Content-Type':  'application/json',
+                'Accept':        'application/json'
+            },
+            body: JSON.stringify({ token })
+        });
+        const data = await response.json();
         if (response.ok) {
-
-            const logType =
-                data.message
-                    .toLowerCase()
-                    .includes('time in')
-                    ? 'time_in'
-                    : 'time_out';
-
-            showResult(
-                data.message,
-                'success'
-            );
-
-            updateScannerStatus(
-                'Attendance recorded!',
-                'success'
-            );
-
-            displayLastLog({
-                type: logType,
-                time:
-                    new Date()
-                    .toLocaleTimeString()
-            });
-
-            setTimeout(
-                async () => {
-
-                    // Hide result message
-                    const result =
-                        document.getElementById(
-                            'scan-result'
-                        );
-
-                    result.style.display =
-                        'none';
-
-                    // Reset scanner status
-                    updateScannerStatus(
-                        'Camera ready — scanning…',
-                        'idle'
-                    );
-
-                    await fetchLastLog();
-
-                    resumeScanning();
-
-                },
-                3000
-            );
-
-        } else {
-
-            showResult(
-                data.message ||
-                'Failed to record attendance',
-                'danger'
-            );
-
-            updateScannerStatus(
-                'Scan failed — try again',
-                'danger'
-            );
-
-            setTimeout(
-                () => {
-
-                    updateScannerStatus(
-                        'Camera ready — scanning…',
-                        'idle'
-                    );
-
-                    resumeScanning();
-
-                },
-                3000
-            );
-        }
-
-    } catch {
-
-        showResult(
-            'Network error. Check connection.',
-            'danger'
-        );
-
-        updateScannerStatus(
-            'Error — try again',
-            'danger'
-        );
-
-        setTimeout(
-            () => {
-
-                updateScannerStatus(
-                    'Camera ready — scanning…',
-                    'idle'
-                );
-
+            const logType = data.message.toLowerCase().includes('time in') ? 'time_in' : 'time_out';
+            showResult(data.message, 'success');
+            updateScannerStatus('Attendance recorded!', 'success');
+            displayLastLog({ type: logType, time: new Date().toLocaleTimeString() });
+            setTimeout(async () => {
+                document.getElementById('scan-result').style.display = 'none';
+                updateScannerStatus('Camera ready — scanning…', 'idle');
+                await fetchLastLog();
                 resumeScanning();
-
-            },
-            3000
-        );
+            }, 3000);
+        } else {
+            showResult(data.message || 'Failed to record attendance', 'danger');
+            updateScannerStatus('Scan failed — try again', 'danger');
+            setTimeout(() => { updateScannerStatus('Camera ready — scanning…', 'idle'); resumeScanning(); }, 3000);
+        }
+    } catch {
+        showResult('Network error. Check connection.', 'danger');
+        updateScannerStatus('Error — try again', 'danger');
+        setTimeout(() => { updateScannerStatus('Camera ready — scanning…', 'idle'); resumeScanning(); }, 3000);
     }
 }
 
-function resumeScanning() {
+function resumeScanning() { scanner_running = true; scanQRCode(); }
 
-    scanner_running =
-        true;
-
-    scanQRCode();
+function updateScannerStatus(text, type) {
+    const el = document.getElementById('scanner-status');
+    el.className = 'w-full px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 ' + statusClasses[type];
+    document.getElementById('status-text').textContent = text;
 }
 
-
-function updateScannerStatus(
-    text,
-    type
-) {
-
-    const el =
-        document.getElementById(
-            'scanner-status'
-        );
-
-    el.className =
-        'scan-status scan-status-' +
-        type;
-
-    document.getElementById(
-        'status-text'
-    ).textContent =
-        text;
+function showResult(message, type) {
+    const el = document.getElementById('scan-result');
+    clearTimeout(el.hideTimer);
+    el.className = 'w-full px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 ' + statusClasses[type];
+    el.style.display = 'flex';
+    el.innerHTML = `<i class="fa fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i><strong>${message}</strong>`;
+    el.hideTimer = setTimeout(() => {
+        el.style.display = 'none';
+        if (scanner_running) updateScannerStatus('Camera ready — scanning…', 'idle');
+    }, 3000);
 }
 
-
-function showResult(
-    message,
-    type
-) {
-
-    const el =
-        document.getElementById(
-            'scan-result'
-        );
-
-    clearTimeout(
-        el.hideTimer
-    );
-
-    el.className =
-        'scan-status scan-status-' +
-        type +
-        ' w-100 mb-3';
-
-    el.style.display =
-        'flex';
-
-    el.innerHTML = `
-        <i class="fa fa-${
-            type === 'success'
-                ? 'check-circle'
-                : 'exclamation-circle'
-        } me-2"></i>
-
-        <strong>
-            ${message}
-        </strong>
-    `;
-
-    // Auto hide result
-    el.hideTimer =
-        setTimeout(
-            () => {
-
-                el.style.display =
-                    'none';
-
-                if (
-                    scanner_running
-                ) {
-
-                    updateScannerStatus(
-                        'Camera ready — scanning…',
-                        'idle'
-                    );
-
-                }
-
-            },
-            3000
-        );
-}
-
-
-function handleCameraError(
-    error
-) {
-
+function handleCameraError(error) {
     console.log(error);
-
-    updateScannerStatus(
-        error.message ||
-        'Camera unavailable',
-        'danger'
-    );
-
-    document.getElementById(
-        'start-camera-btn'
-    ).disabled =
-        false;
-
-    document.getElementById(
-        'start-camera-btn'
-    ).innerHTML =
-        '<i class="fa fa-camera me-2"></i>Start Camera';
+    updateScannerStatus(error.message || 'Camera unavailable', 'danger');
+    const btn = document.getElementById('start-camera-btn');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa fa-camera mr-2"></i>Start Camera';
 }
 
+document.getElementById('manual-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const input = document.getElementById('manual-token');
+    const token = input.value.trim();
+    if (token.length !== 8) { showResult('Token must be 8 characters', 'danger'); return; }
+    input.value = '';
+    await submitAttendance(token);
+});
 
-
-document
-.getElementById(
-    'manual-form'
-)
-.addEventListener(
-    'submit',
-    async function (
-        e
-    ) {
-
-        e.preventDefault();
-
-        const input =
-            document.getElementById(
-                'manual-token'
-            );
-
-        const token =
-            input.value
-                .trim();
-
-        if (
-            token.length !==
-            8
-        ) {
-            showResult(
-                'Token must be 8 characters',
-                'danger'
-            );
-            return;
-        }
-
-        input.value =
-            '';
-
-        await submitAttendance(
-            token
-        );
-
-    }
-);
-
-window.addEventListener(
-    'beforeunload',
-    () => {
-
-        scanner_running =
-            false;
-
-        if (
-            scanFrameId
-        ) {
-            cancelAnimationFrame(
-                scanFrameId
-            );
-        }
-
-        if (
-            video?.srcObject
-        ) {
-
-            video.srcObject
-                .getTracks()
-                .forEach(
-                    t =>
-                        t.stop()
-                );
-        }
-    }
-);
-
+window.addEventListener('beforeunload', () => {
+    scanner_running = false;
+    if (scanFrameId) cancelAnimationFrame(scanFrameId);
+    if (video?.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+});
 </script>
 
 @endsection
