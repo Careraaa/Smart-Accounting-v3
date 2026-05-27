@@ -10,7 +10,7 @@
     <meta name="author" content="flexilecode">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Smart Accounting v3</title>
+    <title>Knights TSC</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
 
     <!-- Template CSS -->
