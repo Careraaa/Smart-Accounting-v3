@@ -37,6 +37,26 @@ input:-webkit-autofill:focus {
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
+            @if ($errors->any())
+            <div class="relative w-full flex flex-wrap items-center justify-center py-3 pl-4 pr-14 rounded-lg text-base font-medium transition-all duration-500 ease-linear border border-[#f85149] text-[#b22b2b] bg-[linear-gradient(#f851491a,#f851491a)] mb-3">
+                <button type="button" aria-label="close-error" onclick="this.parentElement.remove()"
+                    class="absolute right-4 p-1 rounded-md transition-opacity text-[#f85149] border border-[#f85149] opacity-40 hover:opacity-100">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="16" width="16" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6 6 18"></path>
+                        <path d="m6 6 12 12"></path>
+                    </svg>
+                </button>
+                <p class="flex flex-row items-center mr-auto gap-x-2">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="28" width="28" class="h-7 w-7" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                        <path d="M12 9v4"></path>
+                        <path d="M12 17h.01"></path>
+                    </svg>
+                    {{ $errors->first() }}
+                </p>
+            </div>
+            @endif
+
             <div class="relative flex flex-row items-center mb-8 @error('username') input-group input-error @enderror">
                 <input id="username" type="text" name="username" required autocomplete="username"
                     value="{{ old('username') }}" autofocus placeholder=""
@@ -45,9 +65,6 @@ input:-webkit-autofill:focus {
                     class="absolute left-3 text-sm text-gray-400 pointer-events-none duration-200 peer-focus-visible:-translate-y-8 peer-focus-visible:text-xs peer-focus-visible:text-[#c8292a] peer-[:not(:placeholder-shown)]:-translate-y-8 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-[#c8292a]">
                     Username
                 </label>
-                @error('username')
-                    <p class="text-red-500 text-xs mt-1 ml-1 absolute -bottom-5 left-0">{{ $message }}</p>
-                @enderror
             </div>
 
             <div class="relative flex flex-row items-center mb-5 @error('password') input-group input-error @enderror">
@@ -57,9 +74,6 @@ input:-webkit-autofill:focus {
                     class="absolute left-3 text-sm text-gray-400 pointer-events-none duration-200 peer-focus-visible:-translate-y-8 peer-focus-visible:text-xs peer-focus-visible:text-[#c8292a] peer-[:not(:placeholder-shown)]:-translate-y-8 peer-[:not(:placeholder-shown)]:text-xs peer-[:not(:placeholder-shown)]:text-[#c8292a]">
                     Password
                 </label>
-                @error('password')
-                    <p class="text-red-500 text-xs mt-1 ml-1 absolute -bottom-5 left-0">{{ $message }}</p>
-                @enderror
             </div>
 
             <div class="flex items-center justify-between mb-5 mt-6">
