@@ -53,7 +53,9 @@
         <div class="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-[#020617]/50 to-[#020617]/40"></div>
         <div class="relative z-10 flex-1 flex flex-col justify-center px-5 py-6">
             <div class="w-full max-w-sm mx-auto">
-                <div class="text-center mb-5">
+                <div class="text-center mb-8">
+                    <img src="{{ asset('images/knights_white-bg.png') }}" alt=""
+                        class="mx-auto w-20 h-20 object-contain rounded-xl mb-4">
                     <h1 class="text-xl font-extrabold text-white">Knights Transport</h1>
                     <p class="text-xs text-white/50 mt-0.5">Smart Accounting System</p>
                 </div>

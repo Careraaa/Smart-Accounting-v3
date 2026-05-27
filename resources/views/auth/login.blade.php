@@ -7,7 +7,7 @@
 
         <div class="text-center mb-6">
             <img src="{{ asset('images/knights_white-bg.png') }}" alt="Knights Transport"
-                class="mx-auto w-14 h-14 md:w-16 md:h-16 object-contain rounded-xl mb-4">
+                class="hidden md:block mx-auto w-14 h-14 object-contain rounded-xl mb-5">
             <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Welcome</h1>
             <p class="text-sm text-gray-400 mt-1">Sign in to your account to continue.</p>
         </div>
