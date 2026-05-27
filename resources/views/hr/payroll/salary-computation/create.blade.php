@@ -374,6 +374,13 @@
                 {{-- Holiday pay breakdown rows (injected by JS from preview response) --}}
                 <div id="prl_holiday_rows"></div>
 
+                <div class="prl-brow" id="prl_leave_pay_row" style="display:none;">
+                    <span class="prl-brow-lbl c-green">
+                        Leave Pay <span class="prl-badge" id="prl_leave_pay_badge">0 days</span>
+                    </span>
+                    <span class="prl-brow-val c-green" id="prl_leave_pay_val">₱0.00</span>
+                </div>
+
                 <div class="prl-brow" id="prl_ot_row" style="display:none;">
                     <span class="prl-brow-lbl c-green">
                         + Overtime Pay <span class="prl-badge" id="prl_ot_hrs"></span>

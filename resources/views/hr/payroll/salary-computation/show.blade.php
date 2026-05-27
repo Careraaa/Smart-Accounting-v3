@@ -127,12 +127,15 @@
         };
         $overtimeAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay'));
         $holidayAllowances  = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Holiday Pay'));
-        $regularAllowances  = $payroll->allowances->reject(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay') || str_starts_with($a->allowance_type, 'Holiday Pay'));
+        $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Leave Pay'));
+        $regularAllowances  = $payroll->allowances->reject(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay') || str_starts_with($a->allowance_type, 'Holiday Pay') || str_starts_with($a->allowance_type, 'Leave Pay'));
         $undertimeDeductions= $payroll->deductions->filter(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
         $regularDeductions  = $payroll->deductions->reject(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
         $otAllowanceTotal = $overtimeAllowances->sum('amount');
+        $leavePayTotal = $leavePayAllowances->sum('amount');
+        $leavePayDays = (int) $leavePayAllowances->sum('hours');
         $regularAllowanceTotal = $regularAllowances->sum('amount');
-        $holidayPay = max(0, (float)($payroll->gross_pay ?? 0) - (float)($payroll->basic_salary ?? 0) - $otAllowanceTotal - $regularAllowanceTotal);
+        $holidayPay = max(0, (float)($payroll->gross_pay ?? 0) - (float)($payroll->basic_salary ?? 0) - $otAllowanceTotal - $leavePayTotal - $regularAllowanceTotal);
 
         // For old records stored as generic "Holiday Pay" (before per-holiday labels),
         // look up the actual holidays in the period so we can display their names.
@@ -237,6 +240,16 @@
                     <span class="prl-brow-val c-green">+₱{{ number_format($ot->amount, 2) }}</span>
                 </div>
                 @endforeach
+
+                @if($leavePayTotal > 0)
+                <div class="prl-brow">
+                    <span class="prl-brow-lbl c-green">
+                        Leave Pay
+                        <span class="prl-badge">{{ $leavePayDays }} day{{ $leavePayDays !== 1 ? 's' : '' }}</span>
+                    </span>
+                    <span class="prl-brow-val c-green">+₱{{ number_format($leavePayTotal, 2) }}</span>
+                </div>
+                @endif
 
                 @foreach($regularAllowances as $allow)
                 <div class="prl-brow">
