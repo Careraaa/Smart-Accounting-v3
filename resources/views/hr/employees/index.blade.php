@@ -161,9 +161,9 @@
                                 @endif
                             </a>
                         </th>
-                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Gender</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
                         <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
-                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Contact</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
                         <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
                     </tr>
                 </thead>
@@ -190,11 +190,11 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-5 py-3.5 text-gray-500 text-sm">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : '—' }}</td>
+                            <td class="px-5 py-3.5 text-gray-500 text-sm hidden md:table-cell">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : '—' }}</td>
                             <td class="px-5 py-3.5">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ $employee->department ?? '—' }}</span>
                             </td>
-                            <td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">{{ $employee->phone ?? '—' }}</td>
+                            <td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums hidden sm:table-cell">{{ $employee->phone ?? '—' }}</td>
                             <td class="px-5 py-3.5 text-center">
                                 @if($employee->status === 'active')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -209,7 +209,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5">
+                            <td colspan="100">
                                 <div class="flex flex-col items-center justify-center py-16 text-center">
                                     <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
                                         <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -299,7 +299,7 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
             if(filtered.length === 0 && window.allEmployeesData.length > 0){
                 noRes.classList.remove('hidden');
             } else if(window.allEmployeesData.length === 0){
-                tbody.innerHTML = `<tr><td colspan="5"><div class="flex flex-col items-center justify-center py-16 text-center"><div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4"><svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><p class="text-sm font-semibold text-gray-700">No employees found</p><p class="text-xs text-gray-400 mt-1">Add your first employee to get started.</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="100"><div class="flex flex-col items-center justify-center py-16 text-center"><div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4"><svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div><p class="text-sm font-semibold text-gray-700">No employees found</p><p class="text-xs text-gray-400 mt-1">Add your first employee to get started.</p></div></td></tr>`;
             }
         } else {
             noRes.classList.add('hidden');

@@ -14,7 +14,7 @@ $pendingDeg = $lvTotal > 0 ? round(($pendingLeaves / $lvTotal) * 360) : 0;
 $rejectedDeg = max(0, 360 - $approvedDeg - $pendingDeg);
 @endphp
 
-<div class="bg-white border border-gray-200 rounded-xl shadow-sm mb-5 max-w-sm">
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm mb-5 max-w-lg">
     <div class="p-4">
         <div class="flex items-center justify-between mb-3">
             <h3 class="text-xs font-semibold text-gray-800 tracking-tight">Attendance Trend</h3>
@@ -100,7 +100,7 @@ $rejectedDeg = max(0, 360 - $approvedDeg - $pendingDeg);
             <span class="text-[10px] font-medium text-gray-400 tracking-widest uppercase">All-time totals</span>
         </div>
 
-        <div class="flex items-center gap-7">
+        <div class="flex flex-col sm:flex-row items-center gap-7">
             {{-- Donut --}}
             <div class="relative shrink-0 w-[108px] h-[108px] rounded-full"
                  style="background: conic-gradient(#22c55e 0deg {{ $approvedDeg }}deg, #f59e0b {{ $approvedDeg }}deg {{ $approvedDeg + $pendingDeg }}deg, #f43f5e {{ $approvedDeg + $pendingDeg }}deg 360deg);">
@@ -141,18 +141,18 @@ $rejectedDeg = max(0, 360 - $approvedDeg - $pendingDeg);
             <span class="text-[10px] font-medium text-gray-400 tracking-widest uppercase">Pending requests</span>
         </div>
 
-        <div class="flex gap-5 mb-5">
-            <div class="flex-1 bg-gray-50 rounded-xl px-5 py-4">
+        <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="bg-gray-50 rounded-xl px-5 py-4">
                 <span class="font-['DM_Mono',monospace] text-2xl font-bold text-gray-900 leading-none">{{ $pendingOT }}</span>
                 <div class="text-[11px] text-gray-500 font-semibold mt-1">Pending OT</div>
             </div>
-            <div class="flex-1 bg-gray-50 rounded-xl px-5 py-4">
+            <div class="bg-gray-50 rounded-xl px-5 py-4">
                 <span class="font-['DM_Mono',monospace] text-2xl font-bold text-gray-900 leading-none">{{ $pendingUT }}</span>
                 <div class="text-[11px] text-gray-500 font-semibold mt-1">Pending UT</div>
             </div>
         </div>
 
-        <div class="border-t border-gray-100 pt-5 flex items-center justify-between">
+        <div class="border-t border-gray-100 pt-5 flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row">
             <div>
                 <div class="text-[11px] text-gray-400 font-medium">OT this week</div>
                 <span class="font-['DM_Mono',monospace] text-sm font-bold text-gray-800">{{ number_format($otHoursThisWeek, 1) }} hrs</span>

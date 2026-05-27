@@ -2,72 +2,29 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
-.hld-page { font-family: 'Sora', sans-serif; }
-
-.hld-topbar { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
-.hld-topbar-title { font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px; }
-.hld-topbar-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
-
-.hld-btn-sec {
-    display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;
-    border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;
-    font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap;
+@keyframes fadeSlideUp {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
-.hld-btn-sec:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
-
-.hld-flash.error { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:20px;background:#fff0f0;border:1px solid #fecaca;color:#c8292a;animation:hldFlashIn 0.3s ease; }
-@keyframes hldFlashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
-
-.hld-form-wrap { max-width:600px;margin:0 auto; }
-.hld-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
-.hld-card-header { padding:18px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:flex-start;gap:14px; }
-.hld-card-icon { width:40px;height:40px;border-radius:10px;background:#fff5f5;display:flex;align-items:center;justify-content:center;color:#c8292a;flex-shrink:0; }
-.hld-card-title { font-size:0.88rem;font-weight:700;color:#111827;margin:0 0 2px; }
-.hld-card-sub { font-size:0.72rem;color:#9ca3af;margin:0; }
-.hld-card-body { padding:24px 20px; }
-
-.hld-field { margin-bottom:20px; }
-.hld-label { display:block;font-size:0.82rem;font-weight:600;color:#111827;margin-bottom:8px; }
-.hld-label .req { color:#c8292a; }
-
-.hld-input { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:0.84rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;transition:border-color 0.15s,background 0.15s; }
-.hld-input:focus { border-color:#c8292a;background:#fff;box-shadow:0 0 0 3px rgba(200,41,42,0.08); }
-.hld-input.is-invalid { border-color:#ef4444;background:#fff5f5; }
-
-.hld-select-wrap { position:relative; }
-.hld-select-wrap svg { position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:#9ca3af; }
-.hld-select { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:10px 36px 10px 12px;font-size:0.84rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;cursor:pointer;appearance:none;transition:border-color 0.15s; }
-.hld-select:focus { border-color:#c8292a; }
-
-.hld-textarea { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:0.84rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;resize:vertical;min-height:100px;transition:border-color 0.15s; }
-.hld-textarea:focus { border-color:#c8292a;background:#fff; }
-
-.hld-invalid-feedback { display:block;font-size:0.75rem;color:#ef4444;margin-top:6px; }
-
-.hld-divider { font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#9ca3af;margin:24px 0 16px;padding-bottom:8px;border-bottom:1px solid #f3f4f6; }
-
-.hld-row { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
-@media(max-width:500px) { .hld-row { grid-template-columns:1fr; } }
-
-.hld-form-actions { display:flex;gap:10px;justify-content:flex-end;padding-top:16px;border-top:1px solid #f3f4f6;margin-top:24px; }
-.hld-btn-cancel { display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s; }
-.hld-btn-cancel:hover { border-color:#d1d5db;color:#111827;background:#f9fafb; }
-.hld-btn-submit { display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:#c8292a;color:#fff;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:background 0.15s; }
-.hld-btn-submit:hover { background:#a81f20; }
+@keyframes scaleIn {
+    0% { opacity: 0; transform: scale(0.92); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.anim-header { animation: fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.anim-card { animation: scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
 </style>
 @endpush
 
 @section('content')
-<div class="hld-page">
+<div class="max-w-full">
 
     {{-- Error flash --}}
     @if($errors->any())
-    <div class="hld-flash error">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+    <div class="flex items-start gap-2.5 px-4 py-3 mb-5 rounded-xl text-sm font-medium bg-red-50 border border-red-200 text-red-700" style="animation:fadeSlideUp 0.35s ease both;">
+        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
         <div>
             <strong>Please fix the errors:</strong>
-            <ul>
+            <ul class="mt-1 list-disc list-inside">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -76,95 +33,98 @@
     </div>
     @endif
 
-    {{-- Topbar --}}
-    <div class="hld-topbar">
+    {{-- Header --}}
+    <div class="anim-header flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
-            <h1 class="hld-topbar-title">Add Holiday</h1>
-            <p class="hld-topbar-sub">Create a new company holiday for payroll processing</p>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Add Holiday</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Create a new company holiday for payroll processing</p>
         </div>
-        <a href="{{ route('holiday.index') }}" class="hld-btn-sec">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <a href="{{ route('holiday.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm transition-all duration-200">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back
         </a>
     </div>
 
     {{-- Form card --}}
-    <div class="hld-form-wrap">
-        <div class="hld-card">
+    <div class="anim-card max-w-[600px] mx-auto">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
 
-            <div class="hld-card-header">
-                <div class="hld-card-icon">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <div class="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
+                <div class="w-10 h-10 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center shrink-0 border border-gray-200">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
                 </div>
                 <div>
-                    <p class="hld-card-title">Holiday Details</p>
-                    <p class="hld-card-sub">All fields marked <span style="color:#c8292a;">*</span> are required</p>
+                    <p class="text-sm font-bold text-gray-900">Holiday Details</p>
+                    <p class="text-xs text-gray-400">All fields marked <span class="text-rose-500">*</span> are required</p>
                 </div>
             </div>
 
-            <div class="hld-card-body">
+            <div class="px-6 py-6">
                 <form method="POST" action="{{ route('holiday.store') }}" id="hldForm" novalidate>
                     @csrf
 
-                    {{-- Holiday Name --}}
-                    <div class="hld-field">
-                        <label for="name" class="hld-label">Holiday Name <span class="req">*</span></label>
+                    {{-- Name --}}
+                    <div class="mb-5">
+                        <label for="name" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Holiday Name <span class="text-rose-500">*</span></label>
                         <input type="text" name="name" id="name"
-                            class="hld-input @error('name') is-invalid @enderror"
+                            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 placeholder:text-gray-400 @error('name') border-red-400 @enderror"
                             placeholder="e.g., Christmas Day"
                             value="{{ old('name') }}" required>
                         @error('name')
-                            <span class="hld-invalid-feedback">{{ $message }}</span>
+                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    {{-- Holiday Date --}}
-                    <div class="hld-field">
-                        <label for="date" class="hld-label">Holiday Date <span class="req">*</span></label>
+                    {{-- Date --}}
+                    <div class="mb-5">
+                        <label for="date" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Holiday Date <span class="text-rose-500">*</span></label>
                         <input type="date" name="date" id="date"
-                            class="hld-input @error('date') is-invalid @enderror"
+                            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 @error('date') border-red-400 @enderror"
                             value="{{ old('date') }}" required>
                         @error('date')
-                            <span class="hld-invalid-feedback">{{ $message }}</span>
+                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    {{-- Holiday Type --}}
-                    <div class="hld-divider">Classification</div>
-                    <div class="hld-field">
-                        <label for="type" class="hld-label">Holiday Type <span class="req">*</span></label>
-                        <div class="hld-select-wrap">
+                    {{-- Divider --}}
+                    <div class="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2.5 mb-5">Classification</div>
+
+                    {{-- Type --}}
+                    <div class="mb-5">
+                        <label for="type" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Holiday Type <span class="text-rose-500">*</span></label>
+                        <div class="relative">
                             <select name="type" id="type"
-                                class="hld-select @error('type') is-invalid @enderror"
+                                class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none appearance-none transition-all duration-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 @error('type') border-red-400 @enderror"
                                 required>
                                 <option value="">— Select Type —</option>
-                                <option value="regular"   @selected(old('type') === 'regular')>Regular Holiday (Full pay when worked)</option>
+                                <option value="regular" @selected(old('type') === 'regular')>Regular Holiday (Full pay when worked)</option>
                                 <option value="special" @selected(old('type') === 'special')>Special Non-Working (No work, no pay)</option>
                             </select>
-                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                         @error('type')
-                            <span class="hld-invalid-feedback">{{ $message }}</span>
+                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
                         @enderror
-                        <div style="font-size:0.72rem;color:#9ca3af;margin-top:8px;line-height:1.4;">
+                        <div class="text-xs text-gray-400 mt-2 leading-relaxed">
                             <strong>Regular:</strong> Employees receive full pay even if not worked (if worked previous day).<br>
                             <strong>Special:</strong> Only paid if worked on that day.
                         </div>
                     </div>
 
-                    {{-- Form actions --}}
-                    <div class="hld-form-actions">
-                        <a href="{{ route('holiday.index') }}" class="hld-btn-cancel">
-                            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                            Cancel
-                        </a>
-                        <button type="submit" class="hld-btn-submit">
-                            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                            Create Holiday
-                        </button>
-                    </div>
                 </form>
             </div>
+
+            <div class="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-gray-100 bg-gray-50">
+                <a href="{{ route('holiday.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Cancel
+                </a>
+                <button type="submit" form="hldForm" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 active:scale-[0.97] transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    Create Holiday
+                </button>
+            </div>
+
         </div>
     </div>
 

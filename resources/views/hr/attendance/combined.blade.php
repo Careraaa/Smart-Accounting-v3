@@ -90,27 +90,27 @@
     <div id="tab-records" class="tab-panel {{ ($tab && $tab !== 'records') ? 'hidden' : '' }} active-panel">
 
         {{-- Filter bar --}}
-        <div class="filter-bar flex items-center gap-2.5 mb-4 flex-wrap">
-            <div class="flex-1 min-w-[200px]">
-                <input type="text" id="empSearch" placeholder="Search employee…"
-                    class="w-full pl-4 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200/50 focus:shadow-md focus:shadow-cyan-100 hover:border-gray-300">
+        <div class="filter-bar grid grid-cols-1 sm:flex items-center gap-2.5 mb-4">
+            <input type="text" id="empSearch" placeholder="Search employee…"
+                class="w-full sm:flex-1 px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200/50 focus:shadow-md focus:shadow-cyan-100 hover:border-gray-300">
+            <div class="grid grid-cols-2 sm:flex gap-2.5">
+                <select id="deptFilter"
+                    class="px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-700 outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200/50 focus:shadow-md focus:shadow-cyan-100 hover:border-gray-300 cursor-pointer">
+                    <option value="">All Departments</option>
+                    @foreach($departments as $dept)
+                        <option value="{{ strtolower($dept) }}">{{ $dept }}</option>
+                    @endforeach
+                </select>
+                <select id="statusFilter"
+                    class="px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-700 outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200/50 focus:shadow-md focus:shadow-cyan-100 hover:border-gray-300 cursor-pointer">
+                    <option value="">All Statuses</option>
+                    <option value="in">Timed In</option>
+                    <option value="out">Timed Out</option>
+                    <option value="late">Late</option>
+                    <option value="absent">Not Yet In</option>
+                </select>
             </div>
-            <select id="deptFilter"
-                class="px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-700 outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200/50 focus:shadow-md focus:shadow-cyan-100 hover:border-gray-300 cursor-pointer">
-                <option value="">All Departments</option>
-                @foreach($departments as $dept)
-                    <option value="{{ strtolower($dept) }}">{{ $dept }}</option>
-                @endforeach
-            </select>
-            <select id="statusFilter"
-                class="px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-700 outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200/50 focus:shadow-md focus:shadow-cyan-100 hover:border-gray-300 cursor-pointer">
-                <option value="">All Statuses</option>
-                <option value="in">Timed In</option>
-                <option value="out">Timed Out</option>
-                <option value="late">Late</option>
-                <option value="absent">Not Yet In</option>
-            </select>
-            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5 hidden sm:inline-flex items-center gap-1">
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1.5 hidden sm:inline-flex items-center gap-1 shrink-0">
                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
                 {{ now()->format('l, F j, Y') }}
             </span>
@@ -123,10 +123,10 @@
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Department</th>
                             <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Today's Status</th>
                             <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Time In</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Time Out</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Time Out</th>
                         </tr>
                     </thead>
                     <tbody id="empTbody">
@@ -174,7 +174,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3.5">
+                                <td class="px-4 py-3.5 hidden md:table-cell">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">{{ $emp->department ?? '—' }}</span>
                                 </td>
                                 <td class="px-4 py-3.5 text-center">
@@ -186,13 +186,13 @@
                                 <td class="px-4 py-3.5 font-mono text-sm text-gray-700">
                                     {{ $att && $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:i A') : '—' }}
                                 </td>
-                                <td class="px-4 py-3.5 font-mono text-sm text-gray-700">
+                                <td class="px-4 py-3.5 font-mono text-sm text-gray-700 hidden sm:table-cell">
                                     {{ $att && $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:i A') : '—' }}
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5">
+                                <td colspan="100">
                                     <div class="flex flex-col items-center justify-center py-16 text-center">
                                         <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
                                             <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
@@ -316,7 +316,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5">
+                                <td colspan="100">
                                     <div class="flex flex-col items-center justify-center py-16 text-center">
                                         <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
                                             <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>
@@ -422,7 +422,7 @@ window.todayAttendance = {!! json_encode($todayAttendance->map(fn($a) => [
                 if (filteredData.length === 0 && window.allEmployeesData.length > 0) {
                     noRes.style.display = 'block';
                 } else if (window.allEmployeesData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5"><div class="flex flex-col items-center justify-center py-16 text-center"><div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4"><svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg></div><p class="text-sm font-semibold text-gray-700">No employees found</p><p class="text-xs text-gray-400 mt-1">Add employees to start tracking attendance.</p></div></td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="100"><div class="flex flex-col items-center justify-center py-16 text-center"><div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4"><svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg></div><p class="text-sm font-semibold text-gray-700">No employees found</p><p class="text-xs text-gray-400 mt-1">Add employees to start tracking attendance.</p></div></td></tr>';
                 }
             } else {
                 noRes.style.display = 'none';
@@ -462,7 +462,7 @@ window.todayAttendance = {!! json_encode($todayAttendance->map(fn($a) => [
                                 </div>
                             </div>
                         </td>
-                        <td class="px-4 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">${emp.department || '—'}</span></td>
+                        <td class="px-4 py-3.5 hidden md:table-cell"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">${emp.department || '—'}</span></td>
                         <td class="px-4 py-3.5 text-center">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusBg}">
                                 <span class="w-1.5 h-1.5 rounded-full ${statusDot}"></span>
@@ -470,7 +470,7 @@ window.todayAttendance = {!! json_encode($todayAttendance->map(fn($a) => [
                             </span>
                         </td>
                         <td class="px-4 py-3.5 font-mono text-sm text-gray-700">${timeIn}</td>
-                        <td class="px-4 py-3.5 font-mono text-sm text-gray-700">${timeOut}</td>
+                        <td class="px-4 py-3.5 font-mono text-sm text-gray-700 hidden sm:table-cell">${timeOut}</td>
                     `;
                     tbody.appendChild(row);
                 });
