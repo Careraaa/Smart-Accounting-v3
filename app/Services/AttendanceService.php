@@ -257,7 +257,7 @@ class AttendanceService
      */
     public function convertMinutesToHourIncrement($minutes)
     {
-        return floor($minutes / 30) * 0.5;
+        return round($minutes / 30) * 0.5;
     }
 
     /**

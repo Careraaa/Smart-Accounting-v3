@@ -526,7 +526,7 @@ window._ep = {
         const allowTotal = allowances.reduce((s,a) => s + a.amount, 0);
         const deductTotal = deductions.reduce((s,d) => s + d.amount, 0);
         const bonusTotal = bonuses.reduce((s,b) => s + b.amount, 0);
-        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.leavePay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.late_deduction ?? 0) - (computed.caDeduction ?? 0) - (computed.slDeduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
+        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.holidayOTPay ?? 0) + (computed.leavePay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.late_deduction ?? 0) - (computed.caDeduction ?? 0) - (computed.slDeduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
         const finalNetPay = Math.max(0, adjustedTotal + allowTotal - deductTotal + bonusTotal);
         computed.netPay = finalNetPay;
         $('ep_net_salary').textContent = fmt(finalNetPay);
