@@ -41,7 +41,7 @@ input:-webkit-autofill:focus {
                     value="{{ old('username') }}" autofocus
                     class="peer w-full h-full bg-white outline-none px-4 pt-3 text-sm rounded-xl border border-gray-200 transition-colors focus:border-[#c8292a]">
                 <label for="username"
-                    class="absolute top-1/2 -translate-y-1/2 bg-white left-4 px-1.5 text-sm text-gray-400 peer-focus:top-2 peer-focus:left-3 peer-focus:text-xs peer-focus:text-[#c8292a] peer-valid:top-2 peer-valid:left-3 peer-valid:text-xs peer-valid:text-[#c8292a] duration-150 pointer-events-none">
+                    class="absolute top-1/2 -translate-y-1/2 bg-white left-4 px-1.5 text-sm text-gray-400 peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:text-[#c8292a] peer-valid:-top-2.5 peer-valid:left-3 peer-valid:text-xs peer-valid:text-[#c8292a] duration-150 pointer-events-none">
                     Username
                 </label>
                 @error('username')
@@ -53,7 +53,7 @@ input:-webkit-autofill:focus {
                 <input id="password" type="password" name="password" required autocomplete="current-password"
                     class="peer w-full h-full bg-white outline-none px-4 pt-3 text-sm rounded-xl border border-gray-200 transition-colors focus:border-[#c8292a]">
                 <label for="password"
-                    class="absolute top-1/2 -translate-y-1/2 bg-white left-4 px-1.5 text-sm text-gray-400 peer-focus:top-2 peer-focus:left-3 peer-focus:text-xs peer-focus:text-[#c8292a] peer-valid:top-2 peer-valid:left-3 peer-valid:text-xs peer-valid:text-[#c8292a] duration-150 pointer-events-none">
+                    class="absolute top-1/2 -translate-y-1/2 bg-white left-4 px-1.5 text-sm text-gray-400 peer-focus:-top-2.5 peer-focus:left-3 peer-focus:text-xs peer-focus:text-[#c8292a] peer-valid:-top-2.5 peer-valid:left-3 peer-valid:text-xs peer-valid:text-[#c8292a] duration-150 pointer-events-none">
                     Password
                 </label>
                 @error('password')
