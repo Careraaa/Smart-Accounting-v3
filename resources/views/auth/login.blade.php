@@ -2,6 +2,73 @@
 
 @section('title', 'Sign In - Smart Accounting')
 
+@push('styles')
+<style>
+.input-group {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.input-group input {
+  border: 1.5px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background: none;
+  padding: 1.25rem 1rem 0.5rem;
+  font-size: 0.875rem;
+  color: #111827;
+  width: 100%;
+  transition: border-color 150ms cubic-bezier(0.4,0,0.2,1);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  border-color: #c8292a;
+}
+
+.input-group.input-error input {
+  border-color: #fca5a5;
+}
+
+.input-group label {
+  position: absolute;
+  left: 1rem;
+  top: 0;
+  color: #9ca3af;
+  pointer-events: none;
+  transform: translateY(1rem);
+  font-size: 0.875rem;
+  transition: 150ms cubic-bezier(0.4,0,0.2,1);
+  background: transparent;
+  padding: 0;
+}
+
+.input-group input:focus ~ label,
+.input-group input:not(:placeholder-shown) ~ label {
+  transform: translateY(0.35rem) scale(0.8);
+  background-color: #fff;
+  padding: 0 0.3em;
+  color: #c8292a;
+}
+
+.input-group.input-error label {
+  color: #ef4444;
+}
+
+.input-group.input-error input:focus ~ label,
+.input-group.input-error input:not(:placeholder-shown) ~ label {
+  color: #ef4444;
+}
+
+.input-group .error-text {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  margin-left: 0.25rem;
+}
+</style>
+@endpush
+
 @section('content')
     @if (!Auth::check())
 
@@ -15,24 +82,20 @@
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
-            <div class="mb-4">
-                <label for="username" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Username</label>
+            <div class="input-group @error('username') input-error @enderror">
                 <input id="username" type="text" name="username" required autocomplete="username"
-                    value="{{ old('username') }}" autofocus
-                    class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl outline-none transition-colors focus:border-gray-400 focus:bg-gray-50/50 @error('username') border-red-300 bg-red-50/50 @enderror"
-                    placeholder="Enter your username">
+                    value="{{ old('username') }}" autofocus placeholder=" ">
+                <label for="username">Username</label>
                 @error('username')
-                    <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+                    <div class="error-text">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="mb-5">
-                <label for="password" class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Password</label>
-                <input id="password" type="password" name="password" required autocomplete="current-password"
-                    class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl outline-none transition-colors focus:border-gray-400 focus:bg-gray-50/50 @error('password') border-red-300 bg-red-50/50 @enderror"
-                    placeholder="Enter your password">
+            <div class="input-group @error('password') input-error @enderror">
+                <input id="password" type="password" name="password" required autocomplete="current-password" placeholder=" ">
+                <label for="password">Password</label>
                 @error('password')
-                    <p class="text-red-500 text-xs mt-1 ml-1">{{ $message }}</p>
+                    <div class="error-text">{{ $message }}</div>
                 @enderror
             </div>
 
