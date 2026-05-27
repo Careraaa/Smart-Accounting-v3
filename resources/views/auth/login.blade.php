@@ -37,7 +37,7 @@ input:-webkit-autofill:focus {
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
-            <div class="relative flex flex-row items-center mb-5 @error('username') input-group input-error @enderror">
+            <div class="relative flex flex-row items-center mb-8 @error('username') input-group input-error @enderror">
                 <input id="username" type="text" name="username" required autocomplete="username"
                     value="{{ old('username') }}" autofocus placeholder=""
                     class="peer w-full h-[40px] px-3 text-sm border border-gray-200 rounded-xl bg-white outline-none focus-visible:border-[#c8292a] focus-visible:ring-4 focus-visible:ring-[rgba(200,41,42,0.08)] transition-colors">
@@ -50,7 +50,7 @@ input:-webkit-autofill:focus {
                 @enderror
             </div>
 
-            <div class="relative flex flex-row items-center mb-8 @error('password') input-group input-error @enderror">
+            <div class="relative flex flex-row items-center mb-5 @error('password') input-group input-error @enderror">
                 <input id="password" type="password" name="password" required autocomplete="current-password" placeholder=""
                     class="peer w-full h-[40px] px-3 text-sm border border-gray-200 rounded-xl bg-white outline-none focus-visible:border-[#c8292a] focus-visible:ring-4 focus-visible:ring-[rgba(200,41,42,0.08)] transition-colors">
                 <label for="password"
