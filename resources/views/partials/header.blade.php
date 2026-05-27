@@ -85,11 +85,11 @@
 
             {{-- User Profile Dropdown --}}
             <div class="relative" data-dropdown>
-                <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-colors hover:bg-gray-100" id="user-dropdown-btn" type="button">
-                    <div class="inline-flex items-center justify-center rounded-full text-white font-semibold" style="width:32px;height:32px;min-width:32px;font-size:14px;background:#c8292a;">
+                <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-colors hover:bg-rose-50" id="user-dropdown-btn" type="button">
+                    <div class="w-8 h-8 min-w-[32px] rounded-full bg-gradient-to-br from-rose-800 to-rose-900 flex items-center justify-center text-white text-sm font-bold shadow-sm">
                         {{ auth()->user()->getFirstLetter() }}
                     </div>
-                    <svg class="hidden md:block text-gray-500" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg class="hidden md:block text-gray-400" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                     </svg>
                 </button>
