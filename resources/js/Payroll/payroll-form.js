@@ -34,6 +34,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Statutory
         sss: 0,
         pagibig: 0,
+        // Loan deductions
+        caDeduction: 0,
+        slDeduction: 0,
         // Computed totals (from server — fully resolved, including manual items)
         adjustedGross: 0,
         netPay: 0,
@@ -88,6 +91,11 @@ document.addEventListener("DOMContentLoaded", function () {
         loadingRow: g("prl_loading_row"),
         adjusted: g("prl_adjusted"),
         netSalary: g("prl_net_salary"),
+
+        caDeductRow: g("prl_ca_deduct_row"),
+        caDeductVal: g("prl_ca_deduct_val"),
+        slDeductRow: g("prl_sl_deduct_row"),
+        slDeductVal: g("prl_sl_deduct_val"),
 
         allowName: g("prl_allow_name"),
         allowAmount: g("prl_allow_amount"),
@@ -205,6 +213,16 @@ document.addEventListener("DOMContentLoaded", function () {
             EL.pagibigRow.style.display = S.pagibig > 0 ? "flex" : "none";
         if (S.pagibig > 0 && EL.pagibigVal)
             EL.pagibigVal.textContent = fmt(S.pagibig);
+
+        // Cash Advance deduction
+        if (EL.caDeductRow) EL.caDeductRow.style.display = S.caDeduction > 0 ? "flex" : "none";
+        if (S.caDeduction > 0 && EL.caDeductVal)
+            EL.caDeductVal.textContent = fmt(S.caDeduction);
+
+        // Salary Loan deduction
+        if (EL.slDeductRow) EL.slDeductRow.style.display = S.slDeduction > 0 ? "flex" : "none";
+        if (S.slDeduction > 0 && EL.slDeductVal)
+            EL.slDeductVal.textContent = fmt(S.slDeduction);
 
         // Adjusted gross
         if (EL.adjusted) EL.adjusted.textContent = fmt(S.adjustedGross);
@@ -402,6 +420,8 @@ document.addEventListener("DOMContentLoaded", function () {
             S.adjustedGross = data.adjusted_gross ?? 0;
             // ✅ net_pay is fully computed by the server (includes manual items)
             S.netPay = data.net_pay ?? 0;
+            S.caDeduction = data.cash_advance_deduction ?? 0;
+            S.slDeduction = data.salary_loan_deduction ?? 0;
         } catch (err) {
             if (myId !== fetchId) return;
             console.error("[payroll-form] Preview fetch failed:", err.message);

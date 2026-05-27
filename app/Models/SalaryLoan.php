@@ -12,6 +12,7 @@ class SalaryLoan extends Model
     protected $fillable = [
         'user_id',
         'loan_amount',
+        'total_months',
         'monthly_deduction',
         'remaining_balance',
         'months_paid',

@@ -153,34 +153,24 @@
                         </div>
                         <div id="ep_holiday_rows">
                             {{-- One row per holiday, populated on page load and on preview refresh --}}
+                            @php $holidayBreakdown = $payroll->holiday_breakdown ?? []; @endphp
+                            @foreach($holidayBreakdown as $hb)
                             @php
-                                $holidayAllowances = $payroll->allowances
-                                    ->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Holiday Pay'));
-                                // For old "Holiday Pay" records, look up names from the period
-                                $batchPeriodHolidayNames = \App\Models\Holiday::whereBetween('date', [
-                                    $payroll->payroll_period_start->toDateString(),
-                                    $payroll->payroll_period_end->toDateString(),
-                                ])->orderBy('date')->pluck('name');
-                            @endphp
-                            @foreach($holidayAllowances as $ha)
-                            @php
-                                $haLabel = $ha->allowance_type ?? '';
-                                $haBadge = 'holiday';
-                                if (preg_match('/^Holiday Pay\s*[—\-]+\s*(.+?)\s*\((.+)\)$/', $haLabel, $hm)) {
-                                    $haName  = 'Holiday Pay — ' . $hm[1];
-                                    $haBadge = $hm[2];
+                                $hbLabel = $hb['label'] ?? 'Holiday Pay';
+                                $hbBadge = 'holiday';
+                                if (preg_match('/^Holiday Pay\s*[—\-]+\s*(.+?)\s*\((.+)\)$/', $hbLabel, $hm)) {
+                                    $hbName  = 'Holiday Pay — ' . $hm[1];
+                                    $hbBadge = $hm[2];
                                 } else {
-                                    $haName = 'Holiday Pay — ' . ($batchPeriodHolidayNames->isNotEmpty()
-                                        ? $batchPeriodHolidayNames->implode(' + ')
-                                        : 'Holiday');
+                                    $hbName = 'Holiday Pay — Holiday';
                                 }
                             @endphp
                             <div class="ep-row ep-holiday-item">
                                 <span class="ep-row-lbl green">
-                                    {{ $haName }}
-                                    <span class="ep-badge">{{ $haBadge }}</span>
+                                    {{ $hbName }}
+                                    <span class="ep-badge">{{ $hbBadge }}</span>
                                 </span>
-                                <span class="ep-row-val green">+&#8369;{{ number_format($ha->amount, 2) }}</span>
+                                <span class="ep-row-val green">+&#8369;{{ number_format($hb['amount'], 2) }}</span>
                             </div>
                             @endforeach
                         </div>
@@ -220,6 +210,18 @@
                         </div>
                         <div id="ep_gov_contrib_rows">
                             {{-- Individual government contribution rows populated on page load and preview refresh --}}
+                        </div>
+                        @php
+                            $caDeduction = (float)($payroll->cash_advance_deduction ?? 0);
+                            $slDeduction = (float)($payroll->salary_loan_deduction ?? 0);
+                        @endphp
+                        <div class="ep-row" id="ep_ca_deduct_row" style="display:{{ $caDeduction > 0 ? '' : 'none' }};">
+                            <span class="ep-row-lbl red">Cash Advance <span class="ep-badge">loan deduction</span></span>
+                            <span class="ep-row-val red" id="ep_ca_deduct_display">-&#8369;{{ number_format($caDeduction, 2) }}</span>
+                        </div>
+                        <div class="ep-row" id="ep_sl_deduct_row" style="display:{{ $slDeduction > 0 ? '' : 'none' }};">
+                            <span class="ep-row-lbl red">Salary Loan <span class="ep-badge">loan deduction</span></span>
+                            <span class="ep-row-val red" id="ep_sl_deduct_display">-&#8369;{{ number_format($slDeduction, 2) }}</span>
                         </div>
                         <div class="ep-row">
                             <span class="ep-row-lbl bold">Initial Net Pay</span>
@@ -332,7 +334,6 @@
 @php
     $manualAllowances = $payroll->allowances
         ->filter(fn($a) => !str_starts_with((string)($a->allowance_type ?? $a->name ?? ''), 'Overtime Pay')
-                        && !str_starts_with((string)($a->allowance_type ?? $a->name ?? ''), 'Holiday Pay')
                         && !str_starts_with((string)($a->allowance_type ?? $a->name ?? ''), 'Leave Pay'))
         ->map(fn($a) => ['name' => $a->allowance_type ?? $a->name, 'amount' => $a->amount])
         ->values();
@@ -349,17 +350,14 @@
         ->map(fn($b) => ['type' => $b->bonus_type, 'description' => $b->description ?? '', 'amount' => $b->amount])
         ->values();
     $manualAllowTotal = $manualAllowances->sum('amount');
-    $holidayOTPay = (float)($payroll->allowances->where('allowance_type', 'Holiday Overtime Pay')->sum('amount') ?? 0);
-    $holidayOTHours = (float)($payroll->allowances->where('allowance_type', 'Holiday Overtime Pay')->sum('hours') ?? 0);
+    $holidayOTPay = (float)($payroll->holiday_ot_pay ?? 0);
+    $holidayOTHours = (float)($payroll->holiday_ot_hours ?? 0);
     $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
     $leavePay = (float)($leavePayAllowances->sum('amount') ?? 0);
     $leavePayDays = (int) $leavePayAllowances->sum('hours');
-    $holidayPay = max(0, (float)($payroll->gross_pay ?? 0)
-        - (float)($payroll->basic_salary ?? 0)
-        - (float)($payroll->overtime_pay ?? 0)
-        - $holidayOTPay
-        - $leavePay
-        - $manualAllowTotal);
+    $holidayPay = (float)($payroll->holiday_pay ?? 0);
+    $caDeduction = (float)($payroll->cash_advance_deduction ?? 0);
+    $slDeduction = (float)($payroll->salary_loan_deduction ?? 0);
 @endphp
 <script>
 window._ep = {
@@ -375,12 +373,7 @@ window._ep = {
         basicSalary:    {{ (float)($payroll->basic_salary ?? 0) }},
         adjustedGross:  {{ (float)($payroll->gross_pay ?? 0) }},
         holidayPay:     {{ round($holidayPay, 2) }},
-        holidayBreakdown: @json(
-            $payroll->allowances
-                ->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Holiday Pay'))
-                ->map(fn($a) => ['label' => $a->allowance_type, 'amount' => (float)$a->amount])
-                ->values()
-        ),
+        holidayBreakdown: @json($payroll->holiday_breakdown ?? []),
         leavePay:       {{ round($leavePay, 2) }},
         leavePayDays:   {{ $leavePayDays }},
         netPay:         {{ (float)($payroll->net_pay ?? 0) }},
@@ -390,6 +383,8 @@ window._ep = {
         utHours:        {{ (float)($payroll->deductions->where('deduction_type', 'like', 'Undertime Deduction%')->sum('hours') ?? 0) }},
         late_deduction:  {{ (float)($payroll->deductions->where('deduction_type', 'Late Deduction')->sum('amount') ?? 0) }},
         late_minutes:    {{ (int)($payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description ? preg_match('/^(\\d+)/', $payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description, $m) ? $m[1] : 0 : 0) }},
+        caDeduction:    {{ round($caDeduction, 2) }},
+        slDeduction:    {{ round($slDeduction, 2) }},
         sss:            {{ (float)($payroll->sss ?? 0) }},
         pagibig:        {{ (float)($payroll->pagibig ?? 0) }},
         philhealth:     {{ (float)($payroll->phil_health ?? $payroll->philhealth ?? 0) }},
@@ -511,13 +506,27 @@ window._ep = {
                 }
             });
         }
+
+        // Cash Advance deduction
+        const caRow = $('ep_ca_deduct_row');
+        if (c.caDeduction > 0) {
+            $('ep_ca_deduct_display').textContent = '-' + fmt(c.caDeduction);
+            caRow.style.display = '';
+        } else { caRow.style.display = 'none'; }
+
+        // Salary Loan deduction
+        const slRow = $('ep_sl_deduct_row');
+        if (c.slDeduction > 0) {
+            $('ep_sl_deduct_display').textContent = '-' + fmt(c.slDeduction);
+            slRow.style.display = '';
+        } else { slRow.style.display = 'none'; }
     }
 
     function recalcNet() {
         const allowTotal = allowances.reduce((s,a) => s + a.amount, 0);
         const deductTotal = deductions.reduce((s,d) => s + d.amount, 0);
         const bonusTotal = bonuses.reduce((s,b) => s + b.amount, 0);
-        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.leavePay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.late_deduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
+        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.leavePay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.late_deduction ?? 0) - (computed.caDeduction ?? 0) - (computed.slDeduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
         const finalNetPay = Math.max(0, adjustedTotal + allowTotal - deductTotal + bonusTotal);
         computed.netPay = finalNetPay;
         $('ep_net_salary').textContent = fmt(finalNetPay);
@@ -634,6 +643,8 @@ window._ep = {
                 otPay:data.overtime_pay??0, otHours:data.overtime_hours??0,
                 utDeduction:data.undertime_deduction??0, utHours:data.undertime_hours??0,
                 late_deduction:data.late_deduction??0, late_minutes:data.late_minutes??0,
+                caDeduction:data.cash_advance_deduction??0,
+                slDeduction:data.salary_loan_deduction??0,
                 sss:data.sss??0, pagibig:data.pagibig??0, philhealth:data.phil_health??data.philhealth??0, withholdingTax:data.withholding_tax??0,
             };
             render();

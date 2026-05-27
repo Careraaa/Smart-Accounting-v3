@@ -80,19 +80,19 @@
                                        {{ $hasActive ? 'disabled' : '' }} required>
                             </div>
                             <div class="mb-3">
-                                <label class="empui-field-label">Monthly Deduction (₱)</label>
-                                <input type="number" name="monthly_deduction" id="monthlyDeduction" class="empui-input"
-                                       placeholder="e.g. 2,000" min="1" step="0.01"
-                                       value="{{ old('monthly_deduction') }}"
-                                       {{ $hasActive ? 'disabled' : '' }} required>
-                                <div class="empui-field-hint highlight" id="payoffHint">—</div>
+                                <label class="empui-field-label">Payment Term <span class="opt">(months)</span></label>
+                                <select name="total_months" id="loanMonths" class="empui-input" {{ $hasActive ? 'disabled' : '' }} required>
+                                    <option value="3" {{ old('total_months') == 3 ? 'selected' : '' }}>3 months</option>
+                                    <option value="6" {{ old('total_months') == 6 ? 'selected' : '' }}>6 months</option>
+                                    <option value="9" {{ old('total_months') == 9 ? 'selected' : '' }}>9 months</option>
+                                    <option value="12" {{ old('total_months') == 12 ? 'selected' : '' }}>12 months</option>
+                                    <option value="18" {{ old('total_months') == 18 ? 'selected' : '' }}>18 months</option>
+                                    <option value="24" {{ old('total_months') == 24 ? 'selected' : '' }}>24 months</option>
+                                    <option value="36" {{ old('total_months') == 36 ? 'selected' : '' }}>36 months</option>
+                                </select>
+                                <div class="empui-field-hint highlight" id="loanMonthlyHint">—</div>
                             </div>
-                            <div class="mb-3">
-                                <label class="empui-field-label">Preferred Start Date</label>
-                                <input type="date" name="start_date" class="empui-input"
-                                       value="{{ old('start_date', date('Y-m-d')) }}"
-                                       {{ $hasActive ? 'disabled' : '' }} required>
-                            </div>
+
                             <div class="mb-4">
                                 <label class="empui-field-label">Notes <span class="opt">(optional)</span></label>
                                 <textarea name="notes" class="empui-textarea" rows="2"
@@ -202,22 +202,23 @@
 @push('scripts')
 <script>
 const loanAmountInput = document.getElementById('loanAmount');
-const monthlyInput    = document.getElementById('monthlyDeduction');
-const payoffHint      = document.getElementById('payoffHint');
+const loanMonthsInput = document.getElementById('loanMonths');
+const loanMonthlyHint = document.getElementById('loanMonthlyHint');
 
-function updateHint() {
-    const amount  = parseFloat(loanAmountInput?.value) || 0;
-    const monthly = parseFloat(monthlyInput?.value)    || 0;
-    if (amount > 0 && monthly > 0) {
-        const months = Math.ceil(amount / monthly);
-        payoffHint.textContent = `≈ ${months} month${months !== 1 ? 's' : ''} to pay off`;
+function updateLoanHint() {
+    const amount = parseFloat(loanAmountInput?.value) || 0;
+    const months = parseInt(loanMonthsInput?.value)   || 0;
+    if (amount > 0 && months > 0) {
+        const monthly = amount / months;
+        loanMonthlyHint.textContent = `₱${monthly.toFixed(2)} per month for ${months} month${months !== 1 ? 's' : ''}`;
     } else {
-        payoffHint.textContent = '—';
+        loanMonthlyHint.textContent = '—';
     }
 }
 
-loanAmountInput?.addEventListener('input', updateHint);
-monthlyInput?.addEventListener('input', updateHint);
+loanAmountInput?.addEventListener('input', updateLoanHint);
+loanMonthsInput?.addEventListener('change', updateLoanHint);
+updateLoanHint();
 </script>
 @endpush
 @endsection

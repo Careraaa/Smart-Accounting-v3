@@ -211,6 +211,8 @@
                 <thead><tr>
                     <th>Employee</th>
                     <th class="text-start">Amount</th>
+                    <th class="text-start">Term</th>
+                    <th class="text-start">Monthly</th>
                     <th class="text-start">Requested</th>
                     <th class="text-center">Status</th>
                     <th>Deducted On</th>
@@ -254,6 +256,8 @@
                             </div>
                         </td>
                         <td class="text-start"><span class="prl-mono c-bold">₱{{ number_format($advance->amount, 2) }}</span></td>
+                        <td><span style="font-size:.82rem;color:#374151;">{{ $advance->repayment_months ?? 1 }}mo</span></td>
+                        <td><span class="prl-mono" style="color:#6b7280;">₱{{ number_format($advance->monthly_deduction ?? $advance->amount, 2) }}</span></td>
                         <td><span style="font-size:.82rem;color:#374151;">{{ $advance->request_date ? \Carbon\Carbon::parse($advance->request_date)->format('M d, Y') : '—' }}</span></td>
                         <td class="text-center"><span class="prl-status {{ $statusCls }}">{{ ucfirst($advance->status) }}</span></td>
                         <td>
@@ -268,7 +272,7 @@
                     </tr>
                     @if($advance->rejection_reason)
                     <tr class="prl-reason-row" id="ca-reason-{{ $advance->id }}">
-                        <td colspan="{{ auth()->user()->role === 'accountant' ? 7 : 6 }}">
+                        <td colspan="{{ auth()->user()->role === 'accountant' ? 9 : 8 }}">
                             <div class="prl-reason-text">
                                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4v2m0-6a4 4 0 110 8 4 4 0 010-8z"/></svg>
                                 <strong>Rejection Reason:</strong> {{ $advance->rejection_reason }}
@@ -277,7 +281,7 @@
                     </tr>
                     @endif
                 @empty
-                    <tr><td colspan="{{ auth()->user()->role === 'accountant' ? 7 : 6 }}">
+                    <tr><td colspan="{{ auth()->user()->role === 'accountant' ? 9 : 8 }}">
                         <div class="prl-empty">
                             <div class="prl-empty-icon"><svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg></div>
                             <p class="prl-empty-title">No cash advance requests</p>
@@ -337,8 +341,7 @@
                 <tbody id="loanTbody">
                 @forelse($salaryLoans as $loan)
                     @php
-                        $totalMonths = $loan->monthly_deduction > 0
-                            ? ceil($loan->loan_amount / $loan->monthly_deduction) : 0;
+                        $totalMonths = $loan->total_months ?? 12;
                         $progress = $totalMonths > 0
                             ? min(100, round(($loan->months_paid / $totalMonths) * 100)) : 0;
                         $initials = strtoupper(substr($loan->user->first_name ?? ($loan->user->name ?? 'U'), 0, 1) . substr($loan->user->last_name ?? '', 0, 1));

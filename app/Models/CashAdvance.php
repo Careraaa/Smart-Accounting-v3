@@ -12,6 +12,9 @@ class CashAdvance extends Model
     protected $fillable = [
         'user_id',
         'amount',
+        'repayment_months',
+        'monthly_deduction',
+        'amount_deducted',
         'request_date',
         'approval_date',
         'approved_by',
@@ -23,10 +26,12 @@ class CashAdvance extends Model
     ];
 
     protected $casts = [
-        'request_date'  => 'date',
-        'approval_date' => 'date',
-        'approved_at'   => 'datetime',
-        'amount'        => 'decimal:2',
+        'request_date'      => 'date',
+        'approval_date'     => 'date',
+        'approved_at'       => 'datetime',
+        'amount'            => 'decimal:2',
+        'monthly_deduction' => 'decimal:2',
+        'amount_deducted'   => 'decimal:2',
     ];
 
     // ── Relationships ─────────────────────────────────────────────────
@@ -61,7 +66,7 @@ class CashAdvance extends Model
     public function scopeNotYetDeducted($query)
     {
         return $query->where('status', 'approved')
-                     ->whereNull('deducted_payroll_id');
+                     ->whereColumn('amount_deducted', '<', 'amount');
     }
 
     // ── Helpers ───────────────────────────────────────────────────────

@@ -21,10 +21,9 @@ class SalaryLoanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'loan_amount'       => 'required|numeric|min:1',
-            'monthly_deduction' => 'required|numeric|min:1',
-            'start_date'        => 'required|date',
-            'notes'             => 'nullable|string|max:500',
+            'loan_amount'  => 'required|numeric|min:1',
+            'total_months' => 'required|integer|min:1|max:48',
+            'notes'        => 'nullable|string|max:500',
         ]);
 
         $hasActive = SalaryLoan::where('user_id', auth()->id())
@@ -36,12 +35,15 @@ class SalaryLoanController extends Controller
                 ->withErrors(['error' => 'You already have an active or pending salary loan.']);
         }
 
+        $monthlyDeduction = round($request->loan_amount / $request->total_months, 2);
+
         $salaryLoan = SalaryLoan::create([
             'user_id'           => auth()->id(),
             'loan_amount'       => $request->loan_amount,
-            'monthly_deduction' => $request->monthly_deduction,
+            'total_months'      => $request->total_months,
+            'monthly_deduction' => $monthlyDeduction,
             'remaining_balance' => $request->loan_amount,
-            'start_date'        => $request->start_date,
+            'start_date'        => now()->toDateString(),
             'notes'             => $request->notes,
             'status'            => 'pending',
         ]);

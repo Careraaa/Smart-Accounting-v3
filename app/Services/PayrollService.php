@@ -60,6 +60,15 @@ class PayrollService
 
         $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
+        // Holiday pay is stored as its own column (not part of allowances)
+        $holidayPay    = round($values['holidayPay'], 2);
+        $holidayOTPay  = round($values['holidayOTPay'] ?? 0, 2);
+        $holidayOTHours = round($values['holidayOTHours'] ?? 0, 2);
+        $holidayBreakdown = array_map(fn($hb) => [
+            'label'  => $this->buildHolidayLabel($hb),
+            'amount' => round($hb['amount'], 2),
+        ], $values['holidayBreakdown'] ?? []);
+
         $payroll = Payroll::create([
             'user_id'              => $employee->id,
             'payroll_period_start' => $start,
@@ -68,11 +77,15 @@ class PayrollService
             'gross_pay'            => round($values['grossPay'] + $totalBonuses, 2),
             'days_worked'          => $values['daysWorked'],
             'hours_worked'         => round($values['hoursWorked'], 2),
-            // total_allowances = everything on top of basic salary (OT + holiday + leave + manual)
-            'total_allowances'     => round($values['grossPay'] - $values['basicSalary'], 2),
+            // total_allowances = OT + manual allowances (holiday pay excluded)
+            'total_allowances'     => round($values['grossPay'] - $values['basicSalary'] - $holidayPay - $holidayOTPay, 2),
             'total_bonuses'        => round($totalBonuses, 2),
             'total_deductions'     => $values['totalDeductions'],
             'net_pay'              => round($values['netPay'] + $totalLeavePay + $totalBonuses, 2),
+            'holiday_pay'          => $holidayPay,
+            'holiday_ot_pay'       => $holidayOTPay,
+            'holiday_ot_hours'     => $holidayOTHours,
+            'holiday_breakdown'    => $holidayBreakdown,
             'sss'                  => round($values['sss'], 2),
             'pagibig'              => round($values['pagibig'], 2),
             'philhealth'           => round($values['philhealth'], 2),
@@ -324,18 +337,40 @@ class PayrollService
         
         $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
+        // Holiday pay is stored as its own column (not part of allowances)
+        $holidayPay    = round($values['holidayPay'], 2);
+        $holidayOTPay  = round($values['holidayOTPay'] ?? 0, 2);
+        $holidayOTHours = round($values['holidayOTHours'] ?? 0, 2);
+        $holidayBreakdown = array_map(fn($hb) => [
+            'label'  => $this->buildHolidayLabel($hb),
+            'amount' => round($hb['amount'], 2),
+        ], $values['holidayBreakdown'] ?? []);
+
+        // Preserve existing loan deduction columns (set by applyLoanDeductions)
+        // so that subsequent updatePayroll calls don't lose them.
+        $existingCa = (float) $payroll->cash_advance_deduction;
+        $existingSl = (float) $payroll->salary_loan_deduction;
+        $loanTotal  = $existingCa + $existingSl;
+
         $payroll->update([
-            'user_id'              => $employee->id,
-            'payroll_period_start' => $start,
-            'payroll_period_end'   => $end,
-            'basic_salary'         => round($values['basicSalary'], 2),
-            'gross_pay'            => round($values['grossPay'] + $totalBonuses, 2),
-            'days_worked'          => $values['daysWorked'],
-            'hours_worked'         => round($values['hoursWorked'], 2),
-            'total_allowances'     => round($values['grossPay'] - $values['basicSalary'], 2),
-            'total_bonuses'        => round($totalBonuses, 2),
-            'total_deductions'     => $values['totalDeductions'],
-            'net_pay'              => round($values['netPay'] + $totalLeavePay + $totalBonuses, 2),
+            'user_id'                 => $employee->id,
+            'payroll_period_start'    => $start,
+            'payroll_period_end'      => $end,
+            'basic_salary'            => round($values['basicSalary'], 2),
+            'gross_pay'               => round($values['grossPay'] + $totalBonuses, 2),
+            'days_worked'             => $values['daysWorked'],
+            'hours_worked'            => round($values['hoursWorked'], 2),
+            'cash_advance_deduction'  => $existingCa,
+            'salary_loan_deduction'   => $existingSl,
+            // total_allowances = OT + manual allowances (holiday pay excluded)
+            'total_allowances'        => round($values['grossPay'] - $values['basicSalary'] - $holidayPay - $holidayOTPay, 2),
+            'total_bonuses'           => round($totalBonuses, 2),
+            'total_deductions'        => $values['totalDeductions'] + $loanTotal,
+            'net_pay'                 => round($values['netPay'] + $totalLeavePay + $totalBonuses - $loanTotal, 2),
+            'holiday_pay'          => $holidayPay,
+            'holiday_ot_pay'       => $holidayOTPay,
+            'holiday_ot_hours'     => $holidayOTHours,
+            'holiday_breakdown'    => $holidayBreakdown,
             'sss'                  => round($values['sss'], 2),
             'pagibig'              => round($values['pagibig'], 2),
             'philhealth'           => round($values['philhealth'], 2),
@@ -375,26 +410,6 @@ class PayrollService
                 'hours'          => round($values['otHours'], 2),
                 'amount'         => round($values['otPay'], 2),
             ]);
-        }
-
-        // Holiday Overtime Pay — tracked separately from holiday pay and regular OT.
-        if (!empty($values['holidayOTPay']) && $values['holidayOTPay'] > 0) {
-            $payroll->allowances()->create([
-                'allowance_type' => 'Holiday Overtime Pay',
-                'hours'          => round($values['holidayOTHours'] ?? 0, 2),
-                'amount'         => round($values['holidayOTPay'], 2),
-            ]);
-        }
-
-        // Holiday pay — one line per holiday so the payslip shows each holiday name.
-        // e.g. "Holiday Pay — Christmas Day (Regular, worked)"
-        foreach ($values['holidayBreakdown'] as $hb) {
-            if ($hb['amount'] > 0) {
-                $payroll->allowances()->create([
-                    'allowance_type' => $this->buildHolidayLabel($hb),
-                    'amount'         => round($hb['amount'], 2),
-                ]);
-            }
         }
 
         // Leave Pay — sum all approved leaves with paid days for the period.

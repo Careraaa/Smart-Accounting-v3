@@ -21,9 +21,9 @@ class CashAdvanceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'amount'       => 'required|numeric|min:1',
-            'request_date' => 'required|date',
-            'notes'        => 'nullable|string|max:500',
+            'amount'            => 'required|numeric|min:1',
+            'repayment_months'  => 'required|integer|min:1|max:12',
+            'notes'             => 'nullable|string|max:500',
         ]);
 
         $hasPending = CashAdvance::where('user_id', auth()->id())
@@ -35,12 +35,16 @@ class CashAdvanceController extends Controller
                 ->withErrors(['error' => 'You already have a pending cash advance request.']);
         }
 
+        $monthlyDeduction = round($request->amount / $request->repayment_months, 2);
+
         $cashAdvance = CashAdvance::create([
-            'user_id'      => auth()->id(),
-            'amount'       => $request->amount,
-            'request_date' => $request->request_date,
-            'notes'        => $request->notes,
-            'status'       => 'pending',
+            'user_id'           => auth()->id(),
+            'amount'            => $request->amount,
+            'repayment_months'  => $request->repayment_months,
+            'monthly_deduction' => $monthlyDeduction,
+            'request_date'      => now()->toDateString(),
+            'notes'             => $request->notes,
+            'status'            => 'pending',
         ]);
 
         CashAdvanceNotification::submitted($cashAdvance);

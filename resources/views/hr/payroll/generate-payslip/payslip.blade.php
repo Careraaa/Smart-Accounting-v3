@@ -379,6 +379,14 @@
                                     <td class="mono">₱{{ number_format($payroll->basic_salary, 2) }}</td>
                                 </tr>
 
+                                @foreach (($payroll->holiday_breakdown ?? []) as $hb)
+                                    <tr>
+                                        <td>{{ $hb['label'] ?? 'Holiday Pay' }}</td>
+                                        <td class="mono right">—</td>
+                                        <td class="mono">₱{{ number_format($hb['amount'], 2) }}</td>
+                                    </tr>
+                                @endforeach
+
                                 @forelse ($payroll->allowances as $allow)
                                     <tr>
                                         <td>{{ $allow->allowance_type }}</td>

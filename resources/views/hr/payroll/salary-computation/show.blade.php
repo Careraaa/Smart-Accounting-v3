@@ -126,23 +126,18 @@
             default     => 's-pending',
         };
         $overtimeAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay'));
-        $holidayAllowances  = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Holiday Pay'));
         $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Leave Pay'));
-        $regularAllowances  = $payroll->allowances->reject(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay') || str_starts_with($a->allowance_type, 'Holiday Pay') || str_starts_with($a->allowance_type, 'Leave Pay'));
+        $regularAllowances  = $payroll->allowances->reject(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay') || str_starts_with($a->allowance_type, 'Leave Pay'));
         $undertimeDeductions= $payroll->deductions->filter(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
         $regularDeductions  = $payroll->deductions->reject(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
+        $caDeduction  = (float) ($payroll->cash_advance_deduction ?? 0);
+        $slDeduction  = (float) ($payroll->salary_loan_deduction ?? 0);
         $otAllowanceTotal = $overtimeAllowances->sum('amount');
         $leavePayTotal = $leavePayAllowances->sum('amount');
         $leavePayDays = (int) $leavePayAllowances->sum('hours');
         $regularAllowanceTotal = $regularAllowances->sum('amount');
-        $holidayPay = max(0, (float)($payroll->gross_pay ?? 0) - (float)($payroll->basic_salary ?? 0) - $otAllowanceTotal - $leavePayTotal - $regularAllowanceTotal);
-
-        // For old records stored as generic "Holiday Pay" (before per-holiday labels),
-        // look up the actual holidays in the period so we can display their names.
-        $periodHolidayNames = \App\Models\Holiday::whereBetween('date', [
-            $payroll->payroll_period_start->toDateString(),
-            $payroll->payroll_period_end->toDateString(),
-        ])->orderBy('date')->pluck('name');
+        $holidayBreakdown = $payroll->holiday_breakdown ?? [];
+        $holidayPay = $payroll->holiday_pay;
     @endphp
 
     {{-- Hero ──────────────────────────────────────────────────────── --}}
@@ -208,29 +203,23 @@
                     <span class="prl-brow-val">₱{{ number_format($payroll->basic_salary, 2) }}</span>
                 </div>
 
-                @foreach($holidayAllowances as $hol)
+                @foreach($holidayBreakdown as $hb)
                 @php
-                    // allowance_type format (new): "Holiday Pay — {Name} ({Type}, {worked_label})"
-                    // allowance_type format (old): "Holiday Pay"
-                    $holLabel = $hol->allowance_type;
-                    $holBadge = 'holiday';
-                    if (preg_match('/^Holiday Pay\s*[—\-]+\s*(.+?)\s*\((.+)\)$/', $holLabel, $m)) {
-                        // New format — name and detail are embedded in the label
-                        $holName  = $m[1];
-                        $holBadge = $m[2];
+                    $hbLabel = $hb['label'] ?? 'Holiday Pay';
+                    $hbBadge = 'holiday';
+                    if (preg_match('/^Holiday Pay\s*[—\-]+\s*(.+?)\s*\((.+)\)$/', $hbLabel, $m)) {
+                        $hbName  = $m[1];
+                        $hbBadge = $m[2];
                     } else {
-                        // Old format — look up holiday names from the period
-                        $holName = $periodHolidayNames->isNotEmpty()
-                            ? $periodHolidayNames->implode(' + ')
-                            : 'Holiday';
+                        $hbName = 'Holiday';
                     }
                 @endphp
                 <div class="prl-brow">
                     <span class="prl-brow-lbl c-green">
-                        + Holiday Pay — {{ $holName }}
-                        <span class="prl-badge">{{ $holBadge }}</span>
+                        + Holiday Pay — {{ $hbName }}
+                        <span class="prl-badge">{{ $hbBadge }}</span>
                     </span>
-                    <span class="prl-brow-val c-green">+₱{{ number_format($hol->amount, 2) }}</span>
+                    <span class="prl-brow-val c-green">+₱{{ number_format($hb['amount'], 2) }}</span>
                 </div>
                 @endforeach
 
@@ -307,7 +296,25 @@
                 </div>
                 @endforeach
 
-                @if($payroll->deductions->isEmpty())
+                @if($caDeduction > 0)
+                <div class="prl-brow">
+                    <span class="prl-brow-lbl c-red">
+                        − Cash Advance <span class="prl-badge">loan deduction</span>
+                    </span>
+                    <span class="prl-brow-val c-red">₱{{ number_format($caDeduction, 2) }}</span>
+                </div>
+                @endif
+
+                @if($slDeduction > 0)
+                <div class="prl-brow">
+                    <span class="prl-brow-lbl c-red">
+                        − Salary Loan <span class="prl-badge">loan deduction</span>
+                    </span>
+                    <span class="prl-brow-val c-red">₱{{ number_format($slDeduction, 2) }}</span>
+                </div>
+                @endif
+
+                @if($payroll->deductions->isEmpty() && $caDeduction <= 0 && $slDeduction <= 0)
                 <div class="prl-brow">
                     <span style="font-size:0.82rem;color:#d1d5db;font-style:italic;">No deductions</span>
                     <span></span>

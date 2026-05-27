@@ -455,10 +455,8 @@
                         $sc          = $payroll->status === 'prepared' ? 's-prepared' : ($payroll->status === 'submitted' ? 's-submitted' : 's-pending');
                         $otAllowances = $payroll->total_allowances;
                         $editUrl     = route('payroll.batch.edit-employee', [$batch, $payroll]);
-                        // Calculate breakdown
-                        $overtimeTotal = $payroll->allowances->where('allowance_type', 'like', 'Overtime Pay%')->sum('amount');
-                        $regularAllowances = $payroll->allowances->sum('amount') - $overtimeTotal;
-                        $holidayPay = max(0, $otAllowances - $overtimeTotal - $regularAllowances);
+                        // Holiday pay is stored in its own column (not in allowances)
+                        $holidayPay = (float)($payroll->holiday_pay ?? 0);
                     @endphp
                     <tr class="{{ $batch->isEditable() ? 'clickable' : '' }}"
                         @if($batch->isEditable()) data-href="{{ $editUrl }}" @endif

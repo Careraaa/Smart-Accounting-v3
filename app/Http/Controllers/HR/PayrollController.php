@@ -172,6 +172,36 @@
 
             // BUG FIX: return overtime_hours, undertime_hours, and adjusted_gross
             // so payroll-form.js can display OT/UT rows and the adjusted gross line.
+
+            // If a payroll already exists (edit flow), return its loan deduction values.
+            // Otherwise (create flow), compute pending deductions from source records.
+            $existingPayroll = \App\Models\Payroll::where('user_id', $employee->id)
+                ->where('payroll_period_start', $periodStart)
+                ->where('payroll_period_end', $periodEnd)
+                ->first();
+
+            if ($existingPayroll) {
+                $previewCaDeduction = (float)($existingPayroll->cash_advance_deduction ?? 0);
+                $previewSlDeduction = (float)($existingPayroll->salary_loan_deduction ?? 0);
+            } else {
+                $previewCaDeduction = 0;
+                $previewSlDeduction = 0;
+                $previewAdvances = \App\Models\CashAdvance::where('user_id', $employee->id)
+                    ->whereIn('status', ['released', 'approved'])
+                    ->whereColumn('amount_deducted', '<', 'amount')
+                    ->get();
+                foreach ($previewAdvances as $adv) {
+                    $previewCaDeduction += $adv->monthly_deduction > 0 ? $adv->monthly_deduction : $adv->amount;
+                }
+                $previewLoans = \App\Models\SalaryLoan::where('user_id', $employee->id)
+                    ->whereIn('status', ['released', 'approved'])
+                    ->where('remaining_balance', '>', 0)
+                    ->get();
+                foreach ($previewLoans as $ln) {
+                    $previewSlDeduction += min($ln->monthly_deduction, $ln->remaining_balance);
+                }
+            }
+
             return response()->json([
                 'days_worked' => $v['daysWorked'],
                 'days_absent' => $v['daysAbsent'],
@@ -199,8 +229,10 @@
                 'withholding_tax' => round($v['withholdingTax'] ?? 0, 2),
                 'adjusted_gross' => round($v['adjustedGross'] + $leavePay, 2),
                 'gross_pay' => round($v['grossPay'] + $leavePay, 2),
-                'total_deductions' => round($v['totalDeductions'], 2),
-                'net_pay' => round($v['netPay'] + $leavePay, 2),
+                'total_deductions' => round($v['totalDeductions'] + $previewCaDeduction + $previewSlDeduction, 2),
+                'net_pay' => round($v['netPay'] + $leavePay - $previewCaDeduction - $previewSlDeduction, 2),
+                'cash_advance_deduction' => round($previewCaDeduction, 2),
+                'salary_loan_deduction' => round($previewSlDeduction, 2),
             ]);
         }
 

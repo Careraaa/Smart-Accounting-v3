@@ -74,16 +74,22 @@
                             @csrf
                             <div class="mb-3">
                                 <label class="empui-field-label">Amount (₱)</label>
-                                <input type="number" name="amount" class="empui-input"
+                                <input type="number" name="amount" id="caAmount" class="empui-input"
                                        placeholder="e.g. 5,000" min="1" step="0.01"
                                        value="{{ old('amount') }}"
                                        {{ $hasPending ? 'disabled' : '' }} required>
                             </div>
                             <div class="mb-3">
-                                <label class="empui-field-label">Request Date</label>
-                                <input type="date" name="request_date" class="empui-input"
-                                       value="{{ old('request_date', date('Y-m-d')) }}"
-                                       {{ $hasPending ? 'disabled' : '' }} required>
+                                <label class="empui-field-label">Pay Over <span class="opt">(months)</span></label>
+                                <select name="repayment_months" id="caMonths" class="empui-input" {{ $hasPending ? 'disabled' : '' }} required>
+                                    <option value="1" {{ old('repayment_months') == 1 ? 'selected' : '' }}>1 month</option>
+                                    <option value="2" {{ old('repayment_months') == 2 ? 'selected' : '' }}>2 months</option>
+                                    <option value="3" {{ old('repayment_months') == 3 ? 'selected' : '' }}>3 months</option>
+                                    <option value="4" {{ old('repayment_months') == 4 ? 'selected' : '' }}>4 months</option>
+                                    <option value="5" {{ old('repayment_months') == 5 ? 'selected' : '' }}>5 months</option>
+                                    <option value="6" {{ old('repayment_months') == 6 ? 'selected' : '' }}>6 months</option>
+                                </select>
+                                <div class="empui-field-hint highlight" id="caMonthlyHint">—</div>
                             </div>
                             <div class="mb-4">
                                 <label class="empui-field-label">Notes <span class="opt">(optional)</span></label>
@@ -184,4 +190,26 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+const caAmountInput = document.getElementById('caAmount');
+const caMonthsInput = document.getElementById('caMonths');
+const caMonthlyHint = document.getElementById('caMonthlyHint');
+
+function updateCAHint() {
+    const amount = parseFloat(caAmountInput?.value) || 0;
+    const months = parseInt(caMonthsInput?.value)   || 0;
+    if (amount > 0 && months > 0) {
+        const monthly = amount / months;
+        caMonthlyHint.textContent = `₱${monthly.toFixed(2)} per month for ${months} month${months !== 1 ? 's' : ''}`;
+    } else {
+        caMonthlyHint.textContent = '—';
+    }
+}
+
+caAmountInput?.addEventListener('input', updateCAHint);
+caMonthsInput?.addEventListener('change', updateCAHint);
+updateCAHint();
+</script>
+@endpush
 @endsection

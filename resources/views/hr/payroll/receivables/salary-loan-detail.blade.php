@@ -125,6 +125,11 @@
             </div>
 
             <div class="detail-field">
+                <div class="detail-label">Total Months</div>
+                <div class="detail-value">{{ $salaryLoan->total_months ?? 12 }} months</div>
+            </div>
+
+            <div class="detail-field">
                 <div class="detail-label">Remaining Balance</div>
                 <div class="detail-value mono" style="color: #dc2626; font-weight: 600;">₱{{ number_format($salaryLoan->remaining_balance, 2) }}</div>
             </div>

@@ -119,6 +119,16 @@
                 <div class="detail-value">{{ $cashAdvance->request_date ? \Carbon\Carbon::parse($cashAdvance->request_date)->format('F d, Y') : '—' }}</div>
             </div>
 
+            <div class="detail-field">
+                <div class="detail-label">Repayment Term</div>
+                <div class="detail-value">{{ $cashAdvance->repayment_months ?? 1 }} month{{ ($cashAdvance->repayment_months ?? 1) > 1 ? 's' : '' }}</div>
+            </div>
+
+            <div class="detail-field">
+                <div class="detail-label">Monthly Deduction</div>
+                <div class="detail-value mono">₱{{ number_format($cashAdvance->monthly_deduction ?? $cashAdvance->amount, 2) }}</div>
+            </div>
+
             @if ($cashAdvance->rejection_reason)
                 <div class="detail-field">
                     <div class="detail-label">Rejection Reason</div>
