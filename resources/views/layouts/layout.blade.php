@@ -13,27 +13,15 @@
     <title>Knights TSC</title>
     <link rel="icon" type="image/png" href="{{ asset('images/knights_white-bg.png') }}">
 
-    {{-- Vendors CSS (feather icons, Bootstrap for non-converted pages) --}}
-    <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">
+    {{-- Feather icons only (vendors.min.css replaced — all other vendor CSS was unused) --}}
+    <link rel="stylesheet" href="{{ asset('vendors/css/feather.min.css') }}">
     @stack('head_scripts')
 
-    {{-- Vite — Tailwind CSS only (no SCSS/Bootstrap/nxl) --}}
-    @vite(['resources/css/tailwind.css', 'resources/js/app.js'])
+    {{-- Vite — Tailwind + custom overrides --}}
+    @vite(['resources/css/tailwind.css', 'resources/css/overrides.css', 'resources/js/app.js'])
 
     <style>
-        /* Override: the vendor CSS blurs the entire page when a Bootstrap modal opens.
-           This breaks our custom modals (reject, batch reject, etc.) — remove the blur. */
-        body.modal-open .sidebar,
-        body.modal-open main {
-            filter: none !important;
-        }
-
-        /* Hide Pace.js progress bar — we have our own loader */
-        .pace,
-        .pace .pace-progress,
-        .pace .pace-activity {
-            display: none !important;
-        }
+        /* Bootstrap CSS no longer loaded — vendors.min.css replaced with feather.min.css alone */
     </style>
 
     @stack('styles')
@@ -106,14 +94,9 @@
         </div>
     </main>
 
-    {{-- Template Vendors JS (order matters, vendors first) --}}
-    <script src="{{ asset('vendors/js/vendors.min.js') }}"></script>
+    {{-- jQuery only (all other vendor JS was unused — DataTables, Select2, SweetAlert2, nxlNavigation, etc.) --}}
+    <script src="{{ asset('vendors/js/jquery.min.js') }}"></script>
     <script>if(typeof jQuery!=='undefined'){jQuery(".sidebar-list li").off("click");}</script>
-    {{-- daterangepicker was removed; keep layout clean --}}
-    <script src="{{ asset('vendors/js/apexcharts.min.js') }}"></script>
-    {{-- circle-progress vendor removed (no longer used) --}}
-
-    {{-- Template Init JS --}}
 
     {{-- Sidebar Collapse / Mobile Toggle --}}
     <script>

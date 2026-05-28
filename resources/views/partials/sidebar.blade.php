@@ -184,15 +184,11 @@
                         </a>
                     </li>
 
-                    <li class="sidebar-item has-sub">
-                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('holiday.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                    <li class="sidebar-item">
+                        <a href="{{ route('holiday.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('holiday.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center text-rose-500"><i class="feather-gift" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Holiday Management</span>
-                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
-                        <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('holiday.index') ? 'active' : 'text-gray-500' }}" href="{{ route('holiday.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-list" style="font-size:13px"></i></span><span>All Holidays</span></a></li>
-                        </ul>
                     </li>
 
                     <li class="sidebar-item">
@@ -225,9 +221,9 @@
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
                         <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-edit" style="font-size:13px"></i></span><span>Record Remittance</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('short-remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-triangle" style="font-size:13px"></i></span><span>Short Remittance</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Report</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('remittances.index') ? 'active' : 'text-gray-500' }}" href="{{ route('remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-edit" style="font-size:13px"></i></span><span>Record Remittance</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('short-remittances.index') ? 'active' : 'text-gray-500' }}" href="{{ route('short-remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-triangle" style="font-size:13px"></i></span><span>Short Remittance</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('reports.index') ? 'active' : 'text-gray-500' }}" href="{{ route('reports.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Report</span></a></li>
                         </ul>
                     </li>
 
@@ -262,8 +258,8 @@
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
                         <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('payroll-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Payroll Release Approval</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittance-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Remittance Approval</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll-approval.index') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Payroll Release Approval</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('remittance-approval.index') ? 'active' : 'text-gray-500' }}" href="{{ route('remittance-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Remittance Approval</span></a></li>
                         </ul>
                     </li>
 
@@ -274,8 +270,8 @@
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
                         <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.remittance') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Reports</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.payroll') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Payroll Reports</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('reports.remittance') ? 'active' : 'text-gray-500' }}" href="{{ route('reports.remittance') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Reports</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('reports.payroll') ? 'active' : 'text-gray-500' }}" href="{{ route('reports.payroll') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Payroll Reports</span></a></li>
                         </ul>
                     </li>
                 @endif
@@ -324,8 +320,8 @@
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
                         <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-edit" style="font-size:13px"></i></span><span>Record Remittance</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('short-remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-triangle" style="font-size:13px"></i></span><span>Short Remittance</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('remittances.index') ? 'active' : 'text-gray-500' }}" href="{{ route('remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-edit" style="font-size:13px"></i></span><span>Record Remittance</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('short-remittances.index') ? 'active' : 'text-gray-500' }}" href="{{ route('short-remittances.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-alert-triangle" style="font-size:13px"></i></span><span>Short Remittance</span></a></li>
                         </ul>
                     </li>
 
@@ -483,8 +479,8 @@
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
                         <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('payroll-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Payroll Release Approval</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('remittance-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Remittance Approval</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll-approval.index') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Payroll Release Approval</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('remittance-approval.index') ? 'active' : 'text-gray-500' }}" href="{{ route('remittance-approval.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-check-circle" style="font-size:13px"></i></span><span>Remittance Approval</span></a></li>
                         </ul>
                     </li>
 
@@ -504,8 +500,8 @@
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
                         <ul class="sidebar-sub">
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.remittance') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Reports</span></a></li>
-                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline text-gray-500" href="{{ route('reports.payroll') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Payroll Reports</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('reports.remittance') ? 'active' : 'text-gray-500' }}" href="{{ route('reports.remittance') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Reports</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('reports.payroll') ? 'active' : 'text-gray-500' }}" href="{{ route('reports.payroll') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center"><i class="feather-file-text" style="font-size:13px"></i></span><span>Payroll Reports</span></a></li>
                         </ul>
                     </li>
                 @endif

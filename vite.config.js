@@ -8,7 +8,7 @@ export default defineConfig({
         laravel({
             input: [
                 "resources/css/tailwind.css",
-                "resources/scss/app.scss",
+                "resources/css/overrides.css",
                 "resources/js/app.js",
             ],
             refresh: true,

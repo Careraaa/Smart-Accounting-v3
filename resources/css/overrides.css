@@ -650,6 +650,16 @@ body {
 }
 
 /* -- Pagination ------------------------------------------------ */
+.pagination {
+    display: flex;
+    padding-left: 0;
+    list-style: none;
+}
+.page-link {
+    position: relative;
+    display: block;
+    text-decoration: none;
+}
 .page-item .page-link {
     color: var(--kt-body) !important;
     border-color: var(--kt-border) !important;
