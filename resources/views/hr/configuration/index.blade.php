@@ -4,13 +4,6 @@
 <style>
 @keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
 @keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
-@keyframes modalBackdrop { 0%{opacity:0} 100%{opacity:1} }
-@keyframes modalIn { 0%{opacity:0;transform:scale(0.95) translateY(8px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
-.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
-.filter-bar { animation:fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-.table-wrap { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
-.modal-bg { animation:modalBackdrop 0.15s ease both; }
-.modal-content { animation:modalIn 0.2s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 @endpush
 
@@ -18,27 +11,27 @@
 <div class="space-y-6">
 
     {{-- Topbar --}}
-    <div class="fade-up">
+    <div style="animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;">
         <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">HR Configuration</h1>
         <p class="text-xs text-gray-400 font-semibold mt-0.5">Manage shifts, payroll cutoffs, and attendance settings</p>
     </div>
 
     {{-- Flash Messages --}}
     @if ($errors->any())
-    <div class="fade-up flex items-center gap-3 px-5 py-3.5 rounded-xl border border-red-200 bg-red-50 text-red-800 text-sm font-semibold">
+    <div class="flex items-center gap-3 px-5 py-3.5 rounded-xl border border-red-200 bg-red-50 text-red-800 text-sm font-semibold" style="animation:fadeSlideUp 0.35s ease both;">
         <svg class="w-4 h-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <span>{{ $errors->first() }}</span>
     </div>
     @endif
     @if (session('success'))
-    <div class="fade-up flex items-center gap-3 px-5 py-3.5 rounded-xl border border-green-200 bg-green-50 text-green-800 text-sm font-semibold">
+    <div class="flex items-center gap-3 px-5 py-3.5 rounded-xl border border-green-200 bg-green-50 text-green-800 text-sm font-semibold" style="animation:fadeSlideUp 0.35s ease both;">
         <svg class="w-4 h-4 shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         <span>{{ session('success') }}</span>
     </div>
     @endif
 
     {{-- Tabs --}}
-    <div class="filter-bar border-b border-gray-100 flex gap-0 -mb-px">
+    <div class="border-b border-gray-100" style="animation:fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both;">
         <button type="button" class="tab-btn px-5 py-3 text-xs font-bold text-gray-900 border-b-2 border-gray-900 transition-colors hover:text-gray-900" data-tab="shifts">Shifts</button>
         <button type="button" class="tab-btn px-5 py-3 text-xs font-bold text-gray-400 border-b-2 border-transparent transition-colors hover:text-gray-600" data-tab="payroll">Payroll Cutoff</button>
         <button type="button" class="tab-btn px-5 py-3 text-xs font-bold text-gray-400 border-b-2 border-transparent transition-colors hover:text-gray-600" data-tab="attendance">Attendance Rules</button>
@@ -48,7 +41,7 @@
     {{-- SHIFTS TAB --}}
     {{-- ════════════════════════════════ --}}
     <div id="tab-shifts" class="tab-panel space-y-4">
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5" style="animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;">
             <div class="flex items-center justify-between gap-3 mb-5">
                 <div class="flex items-center gap-2.5">
                     <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M12 1v6m0 6v6"/><path d="M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24"/><path d="M1 12h6m6 0h6"/><path d="M4.22 19.78l4.24-4.24m2.12-2.12l4.24-4.24"/></svg>
@@ -130,7 +123,7 @@
     {{-- PAYROLL CUTOFF TAB --}}
     {{-- ════════════════════════════════ --}}
     <div id="tab-payroll" class="tab-panel hidden space-y-4">
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5" style="animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;">
             <div class="flex items-center gap-2.5 mb-5">
                 <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 <h3 class="text-sm font-bold text-gray-900">Payroll Cutoff Settings</h3>
@@ -193,7 +186,7 @@
     {{-- ATTENDANCE RULES TAB --}}
     {{-- ════════════════════════════════ --}}
     <div id="tab-attendance" class="tab-panel hidden space-y-4">
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5" style="animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;">
             <div class="flex items-center gap-2.5 mb-5">
                 <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <h3 class="text-sm font-bold text-gray-900">Attendance Rules</h3>
@@ -222,8 +215,8 @@
 {{-- ════════════════════════════════ --}}
 {{-- ADD SHIFT MODAL --}}
 {{-- ════════════════════════════════ --}}
-<div id="addShiftModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-bg" style="background:rgba(0,0,0,0.4)">
-    <div class="modal-content bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+<div id="addShiftModal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,0.4)">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden" style="animation:scaleIn 0.2s cubic-bezier(0.16,1,0.3,1) both;">
         <div class="px-5 py-4 border-b border-gray-50">
             <h5 class="text-sm font-bold text-gray-900">Add New Shift</h5>
         </div>
@@ -267,8 +260,8 @@
 {{-- EDIT SHIFT MODALS --}}
 {{-- ════════════════════════════════ --}}
 @foreach($shifts as $shift)
-<div id="editShiftModal{{ $shift->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-bg" style="background:rgba(0,0,0,0.4)">
-    <div class="modal-content bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+<div id="editShiftModal{{ $shift->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,0.4)">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden" style="animation:scaleIn 0.2s cubic-bezier(0.16,1,0.3,1) both;">
         <div class="px-5 py-4 border-b border-gray-50">
             <h5 class="text-sm font-bold text-gray-900">Edit Shift: {{ $shift->name }}</h5>
         </div>
@@ -377,18 +370,20 @@ function openEditShiftModal(id) {
     openModal('editShiftModal' + id);
 }
 // Close modals on backdrop click
-document.querySelectorAll('.modal-bg').forEach(function(bg) {
-    bg.addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-    });
+document.querySelectorAll('[id$="Modal"]').forEach(function(el) {
+    if (el.id === 'addShiftModal' || el.id.startsWith('editShiftModal')) {
+        el.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+    }
 });
 // Close on Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-bg:not(.hidden)').forEach(function(m) {
+        document.querySelectorAll('.fixed.inset-0.z-50:not(.hidden)').forEach(function(m) {
             m.classList.add('hidden');
         });
         document.body.style.overflow = '';

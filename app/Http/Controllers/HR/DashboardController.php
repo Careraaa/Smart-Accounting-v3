@@ -7,6 +7,8 @@ use App\Models\Attendance;
 use App\Models\CashAdvance;
 use App\Models\Leave;
 use App\Models\OvertimeUndertime;
+use App\Models\PayrollBatch;
+use App\Models\Payroll;
 use App\Models\SalaryLoan;
 use Carbon\Carbon;
 
@@ -54,6 +56,26 @@ class DashboardController extends Controller
         $pendingCashAdvances = CashAdvance::where('status', 'pending')->count();
         $pendingSalaryLoans  = SalaryLoan::where('status', 'pending')->count();
 
+        // ── Payroll Batch Stats ──
+        $totalBatches = PayrollBatch::count();
+        $batchSubmitted = PayrollBatch::where('status', 'submitted')->count();
+        $batchApproved = PayrollBatch::where('status', 'approved')->count();
+        $batchPaid = PayrollBatch::where('status', 'paid')->count();
+        $batchRejected = PayrollBatch::where('status', 'rejected')->count();
+
+        $currentInProgress = PayrollBatch::inProgressForCurrentPeriod();
+
+        $totalReleasedPayroll = PayrollBatch::where('status', 'paid')
+            ->withSum('payrolls', 'net_pay')
+            ->get()
+            ->sum('payrolls_sum_net_pay') ?? 0;
+
+        // ── Receivables Totals ──
+        $totalApprovedCA = CashAdvance::where('status', 'approved')->sum('amount') ?? 0;
+        $totalApprovedLoans = SalaryLoan::where('status', 'approved')->sum('loan_amount') ?? 0;
+        $totalPaidCA = CashAdvance::where('status', 'paid')->sum('amount') ?? 0;
+        $totalPaidLoans = SalaryLoan::where('status', 'paid')->sum('loan_amount') ?? 0;
+
         return view('hr.index', compact(
             'attendanceTrend',
             'approvedLeaves',
@@ -65,6 +87,17 @@ class DashboardController extends Controller
             'totalOTRecords',
             'pendingCashAdvances',
             'pendingSalaryLoans',
+            'totalBatches',
+            'batchSubmitted',
+            'batchApproved',
+            'batchPaid',
+            'batchRejected',
+            'currentInProgress',
+            'totalReleasedPayroll',
+            'totalApprovedCA',
+            'totalApprovedLoans',
+            'totalPaidCA',
+            'totalPaidLoans',
         ));
     }
 }

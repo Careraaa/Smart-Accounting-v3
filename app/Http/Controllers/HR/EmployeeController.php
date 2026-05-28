@@ -13,6 +13,7 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
+        $tab = $request->get('tab', 'all');
         $sortBy = $request->get('sort_by', 'first_name');
         $sortOrder = $request->get('sort_order', 'asc');
 
@@ -24,11 +25,31 @@ class EmployeeController extends Controller
             $sortOrder = 'asc';
         }
 
-        // Paginated employees for display
-        $employees = User::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy($sortBy, $sortOrder)->paginate(10);
+        // Base query
+        $baseQuery = User::whereNotIn('role', ['superadmin', 'qr_admin']);
+
+        // Tab-specific counts
+        $allCount = (clone $baseQuery)->count();
+        $activeCount = (clone $baseQuery)->where('status', 'active')->count();
+        $inactiveCount = (clone $baseQuery)->where('status', 'inactive')->count();
+
+        // Paginated employees for display (filtered by tab)
+        $query = clone $baseQuery;
+        if ($tab === 'active') {
+            $query->where('status', 'active');
+        } elseif ($tab === 'inactive') {
+            $query->where('status', 'inactive');
+        }
+        $employees = $query->orderBy($sortBy, $sortOrder)->paginate(10);
 
         // All employees for client-side filtering
-        $allEmployees = User::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy($sortBy, $sortOrder)->get();
+        $allQuery = clone $baseQuery;
+        if ($tab === 'active') {
+            $allQuery->where('status', 'active');
+        } elseif ($tab === 'inactive') {
+            $allQuery->where('status', 'inactive');
+        }
+        $allEmployees = $allQuery->orderBy($sortBy, $sortOrder)->get();
 
         // Get unique departments for filter
         $departments = User::whereNotIn('role', ['superadmin', 'qr_admin'])
@@ -38,7 +59,7 @@ class EmployeeController extends Controller
             ->sort()
             ->values();
 
-        return view('hr.employees.index', compact('employees', 'allEmployees', 'departments', 'sortBy', 'sortOrder'));
+        return view('hr.employees.index', compact('employees', 'allEmployees', 'departments', 'sortBy', 'sortOrder', 'tab', 'allCount', 'activeCount', 'inactiveCount'));
     }
 
     public function create()

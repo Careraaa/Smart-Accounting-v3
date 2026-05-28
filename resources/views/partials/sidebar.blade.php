@@ -374,8 +374,8 @@
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Payroll</label></li>
 
                     <li class="sidebar-item has-sub">
-                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll.*') ? 'text-green-600' : 'text-green-600' }}"><i class="feather-dollar-sign" style="font-size:15px"></i></span>
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll.salary-computation.*', 'payroll.statutory-deductions.*', 'payroll.receivables.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('payroll.salary-computation.*', 'payroll.statutory-deductions.*', 'payroll.receivables.*') ? 'text-green-600' : 'text-green-600' }}"><i class="feather-dollar-sign" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Payroll Processing</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
@@ -394,8 +394,8 @@
                     </li>
 
                     <li class="sidebar-item has-sub">
-                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('reports.payslips', 'reports.payroll*', 'reports.deduction*', 'reports.government*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('reports.payslips', 'reports.payroll*', 'reports.deduction*', 'reports.government*') ? 'text-sky-500' : 'text-sky-500' }}"><i class="feather-bar-chart-2" style="font-size:15px"></i></span>
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('reports.payslips', 'reports.payroll*', 'reports.deduction*', 'reports.government*', 'payroll.generate-payslip.*', 'payroll.history.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('reports.payslips', 'reports.payroll*', 'reports.deduction*', 'reports.government*', 'payroll.generate-payslip.*', 'payroll.history.*') ? 'text-sky-500' : 'text-sky-500' }}"><i class="feather-bar-chart-2" style="font-size:15px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Reports</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>

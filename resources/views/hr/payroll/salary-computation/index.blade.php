@@ -203,14 +203,10 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
             noRes.classList.add('hidden');
             pageData.forEach(b => {
                 const si = STATUS_MAP[b.status] || STATUS_MAP.submitted;
-                const iconSvg = b.is_first
-                    ? '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'
-                    : '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
 
                 const div = document.createElement('div');
                 div.innerHTML = `
                     <a href="${b.url}" class="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/60 group">
-                        <div class="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:text-gray-600 transition-colors shrink-0">${iconSvg}</div>
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-semibold text-gray-900">${b.month_year} &mdash; ${b.half}</span>

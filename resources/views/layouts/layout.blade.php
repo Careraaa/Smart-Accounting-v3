@@ -444,8 +444,9 @@
                 }
             };
 
-            // Disabled forced pageshow reload to prevent unexpected page refresh loops.
-            // If stale back/forward cache handling is needed later, re-introduce with per-page opt-in.
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) { window.location.reload(); }
+            });
         })();
     </script>
 </body>

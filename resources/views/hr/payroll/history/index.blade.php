@@ -215,17 +215,12 @@ window.allHistoryBatches = {!! json_encode($allBatches->map(fn($b) => [
             noRes.classList.add('hidden');
             pageData.forEach(b => {
                 const si = S_COLORS[b.status] || S_COLORS.submitted;
-                const iconSvg = b.is_first
-                    ? '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'
-                    : '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-                const gradient = b.is_first ? 'bg-gradient-to-br from-red-600 to-red-800' : 'bg-gradient-to-br from-sky-600 to-blue-800';
                 const halfLabel = b.is_first ? '1st' : '2nd';
 
                 const card = document.createElement('div');
                 card.innerHTML = `
                     <a href="${b.url}" class="block no-underline text-inherit">
                         <div class="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50/60">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${gradient} text-white">${iconSvg}</div>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-semibold text-gray-900">${b.month_year} — ${halfLabel} half</p>
                                 <p class="text-[0.55rem] font-mono text-gray-400 mt-0.5">${b.period_start_display} – ${b.period_end_display}</p>
