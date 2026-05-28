@@ -3,123 +3,194 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.bn-page { font-family: 'Sora', sans-serif; }
-.bn-topbar { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
-.bn-topbar-title { font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px; }
-.bn-topbar-sub { font-size:0.78rem;color:#9ca3af;margin:0; }
-.bn-topbar-actions { display:flex;gap:8px;flex-wrap:wrap;align-items:center; }
-.bn-btn-primary { display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#111827;color:#fff;border:none;border-radius:10px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s;white-space:nowrap; }
-.bn-btn-primary:hover { background:#000;color:#fff; }
-.bn-flash { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:20px; }
-.bn-flash.success { background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d; }
-.bn-flash.error { background:#fff0f0;border:1px solid #fecaca;color:#c8292a; }
-.bn-toolbar { display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
-.bn-search { display:flex;align-items:center;gap:8px;flex:1;min-width:220px;max-width:360px; }
-.bn-search input { width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:9px 14px;font-size:0.82rem;font-family:'Sora',sans-serif;outline:none; }
-.bn-search input:focus { border-color:#c8292a;box-shadow:0 0 0 3px rgba(200,41,42,0.08); }
-.bn-filter-btn { display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:0.78rem;font-weight:600;text-decoration:none;border:1px solid #e5e7eb;background:#fff;color:#6b7280; }
-.bn-filter-btn.active { background:#111827;border-color:#111827;color:#fff; }
-.bn-table-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
-.bn-table { width:100%;border-collapse:collapse;font-size:0.835rem; }
-.bn-table thead tr { background:#f8f9fb;border-bottom:1px solid #e5e7eb; }
-.bn-table thead th { padding:11px 16px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#6b7280;white-space:nowrap; }
-.bn-table tbody tr { border-bottom:1px solid #f3f4f6; }
-.bn-table tbody tr.bn-row-clickable { cursor:pointer;transition:background 0.1s; }
-.bn-table tbody tr.bn-row-clickable:hover { background:#f3f4f6; }
-.bn-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
-.bn-name { font-weight:600;color:#111827; }
-.bn-mandatory { display:inline-block;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle; }
-.bn-formula { font-family:'DM Mono',monospace;font-size:0.75rem;color:#6b7280;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-.bn-badge { display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:700; }
-.bn-badge.active { background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0; }
-.bn-badge.inactive { background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb; }
-.bn-empty { padding:56px 24px;text-align:center;color:#9ca3af; }
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+.stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.table-wrap { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.filter-bar { animation:fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 @endpush
 
 @section('content')
-<div class="bn-page">
+<div class="space-y-6">
+
+    {{-- Flash messages --}}
     @if(session('success'))
-    <div class="bn-flash success">{{ session('success') }}</div>
+    <div class="fade-up flex items-center gap-3 px-5 py-3.5 rounded-xl border border-green-200 bg-green-50 text-green-800 text-sm font-semibold">
+        <svg class="w-4 h-4 shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        {{ session('success') }}
+    </div>
     @endif
     @if(session('error'))
-    <div class="bn-flash error">{{ session('error') }}</div>
+    <div class="fade-up flex items-center gap-3 px-5 py-3.5 rounded-xl border border-red-200 bg-red-50 text-red-800 text-sm font-semibold">
+        <svg class="w-4 h-4 shrink-0 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {{ session('error') }}
+    </div>
     @endif
 
-    <div class="bn-topbar">
+    {{-- Topbar --}}
+    <div class="flex items-start justify-between gap-4 flex-wrap">
         <div>
-            <h1 class="bn-topbar-title">Bonuses</h1>
-            <p class="bn-topbar-sub">Manage employee bonus types and computation rules</p>
+            <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">Bonuses</h1>
+            <p class="text-xs text-gray-400 font-semibold mt-0.5">Manage employee bonus types and computation rules</p>
         </div>
-        <div class="bn-topbar-actions">
-            <a href="{{ route('bonuses.create') }}" class="bn-btn-primary">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                Create Bonus
-            </a>
+        <a href="{{ route('bonuses.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold transition-all hover:bg-black active:scale-[0.97] no-underline">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Create Bonus
+        </a>
+    </div>
+
+    {{-- Filter bar --}}
+    <div class="filter-bar flex items-center gap-3 flex-wrap">
+        <div class="flex-1 min-w-[200px] max-w-sm">
+            <input type="text" id="bnSearch" placeholder="Search bonuses…" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-900 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+        </div>
+        <div class="flex items-center gap-1.5">
+            <button data-status="all" class="bn-stat px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer bg-gray-900 text-white">All</button>
+            <button data-status="active" class="bn-stat px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">Active</button>
+            <button data-status="inactive" class="bn-stat px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer bg-white text-gray-600 border border-gray-200 hover:bg-gray-50">Inactive</button>
         </div>
     </div>
 
-    <div class="bn-toolbar">
-        <form method="GET" action="{{ route('bonuses.index') }}" class="bn-search">
-            <input type="hidden" name="status" value="{{ $status }}">
-            <input type="search" name="search" value="{{ $search }}" placeholder="Search bonuses…">
-        </form>
-        <a href="{{ route('bonuses.index', ['status' => 'all', 'search' => $search]) }}" class="bn-filter-btn {{ $status === 'all' ? 'active' : '' }}">All</a>
-        <a href="{{ route('bonuses.index', ['status' => 'active', 'search' => $search]) }}" class="bn-filter-btn {{ $status === 'active' ? 'active' : '' }}">Active</a>
-        <a href="{{ route('bonuses.index', ['status' => 'inactive', 'search' => $search]) }}" class="bn-filter-btn {{ $status === 'inactive' ? 'active' : '' }}">Inactive</a>
+    {{-- Table --}}
+    <div class="table-wrap bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Bonus Name</th>
+                        <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Bonus Type</th>
+                        <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="bnTbody"></tbody>
+            </table>
+        </div>
+        <div id="bnNoResults" class="hidden">
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <p class="text-sm font-semibold text-gray-700">No bonuses found</p>
+                <p class="text-xs text-gray-400 mt-1">Create one to get started.</p>
+            </div>
+        </div>
+        {{-- Pagination --}}
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
+            <div class="text-xs text-gray-400" id="bnPaginationInfo">Showing <strong class="text-gray-700">0</strong> bonuses</div>
+            <nav id="bnPaginationNav" class="flex items-center gap-1"></nav>
+        </div>
     </div>
-
-    <div class="bn-table-card">
-        <table class="bn-table">
-            <thead>
-                <tr>
-                    <th>Bonus Name</th>
-                    <th>Bonus Type</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($bonuses as $bonus)
-                <tr class="bn-row-clickable" data-href="{{ $bonus->rowUrl() }}" tabindex="0" role="link" aria-label="Open {{ $bonus->name }}">
-                    <td>
-                        <div class="bn-name">
-                            {{ $bonus->name }}
-                        </div>
-                    </td>
-                    <td>{{ $bonus->type_label }}</td>
-                    <td>
-                        <span class="bn-badge {{ $bonus->status }}">{{ ucfirst($bonus->status) }}</span>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="bn-empty">No bonuses found. Create one to get started.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    @if($bonuses->hasPages())
-    <div style="margin-top:16px;">{{ $bonuses->links() }}</div>
-    @endif
 </div>
+@endsection
 
 @push('scripts')
 <script>
-document.querySelectorAll('tr.bn-row-clickable').forEach(function (row) {
-    row.addEventListener('click', function () {
-        window.location.href = row.dataset.href;
-    });
-    row.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            window.location.href = row.dataset.href;
+window.allBonuses = {!! json_encode($allBonuses->map(fn($b) => [
+    'id' => $b->id,
+    'name' => $b->name,
+    'name_lower' => strtolower($b->name),
+    'type_label' => $b->type_label,
+    'status' => $b->status,
+    'rowUrl' => $b->rowUrl(),
+])) !!};
+
+(function () {
+    const search  = document.getElementById('bnSearch');
+    const tbody   = document.getElementById('bnTbody');
+    const noRes   = document.getElementById('bnNoResults');
+    const PER     = 10;
+    let page = 1, filtered = [];
+    let curStatus = 'all';
+
+    function switchStatus(status) {
+        curStatus = status;
+        document.querySelectorAll('.bn-stat').forEach(btn => {
+            const s = btn.dataset.status;
+            const isActive = s === status;
+            btn.className = `px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer` +
+                (isActive ? ` bg-gray-900 text-white` : ` bg-white text-gray-600 border border-gray-200 hover:bg-gray-50`);
+        });
+        page = 1;
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const q = search.value.toLowerCase().trim();
+        filtered = window.allBonuses.filter(b => {
+            if (curStatus !== 'all' && b.status !== curStatus) return false;
+            if (q && !b.name_lower.includes(q)) return false;
+            return true;
+        });
+        page = 1;
+        render();
+    }
+
+    function render() {
+        const start = (page - 1) * PER;
+        const end = Math.min(start + PER, filtered.length);
+        const pageData = filtered.slice(start, end);
+        tbody.innerHTML = '';
+
+        if (pageData.length === 0) {
+            noRes.classList.remove('hidden');
+        } else {
+            noRes.classList.add('hidden');
+            pageData.forEach(b => {
+                const statusHtml = b.status === 'active'
+                    ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 text-[0.6rem] font-bold uppercase tracking-wide">Active</span>'
+                    : '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 border border-gray-200 text-gray-500 text-[0.6rem] font-bold uppercase tracking-wide">Inactive</span>';
+                const row = document.createElement('tr');
+                row.className = 'cursor-pointer transition-colors hover:bg-gray-50';
+                row.onclick = () => window.location.href = b.rowUrl;
+                row.innerHTML = `
+                    <td class="px-5 py-3.5"><span class="font-semibold text-gray-900 text-sm">${b.name}</span></td>
+                    <td class="px-5 py-3.5 text-sm text-gray-600">${b.type_label}</td>
+                    <td class="px-5 py-3.5">${statusHtml}</td>
+                `;
+                tbody.appendChild(row);
+            });
         }
+        updatePagination();
+    }
+
+    function updatePagination() {
+        const total = filtered.length;
+        const pages = Math.ceil(total / PER);
+        const info  = document.getElementById('bnPaginationInfo');
+        const nav   = document.getElementById('bnPaginationNav');
+        if (!info || !nav) return;
+        if (total === 0) { info.innerHTML = 'No bonuses to display'; nav.innerHTML = ''; return; }
+        const s = (page - 1) * PER + 1, e = Math.min(page * PER, total);
+        info.innerHTML = `Showing <strong class="text-gray-700">${s}</strong>–<strong class="text-gray-700">${e}</strong> of <strong class="text-gray-700">${total}</strong>`;
+        if (pages <= 1) { nav.innerHTML = ''; return; }
+
+        const base = `flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150`;
+        const act  = `${base} bg-gray-900 text-white border-gray-900`;
+        const def  = `${base} bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300`;
+        const dis  = `${base} bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none`;
+
+        let html = '';
+        html += `<button data-p="${page - 1}" class="${page === 1 ? dis : def}">‹</button>`;
+        for (let i = 1; i <= pages; i++) {
+            html += `<button data-p="${i}" class="${i === page ? act : def}">${i}</button>`;
+        }
+        html += `<button data-p="${page + 1}" class="${page === pages ? dis : def}">›</button>`;
+        nav.innerHTML = html;
+        nav.querySelectorAll('button[data-p]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                const p = parseInt(btn.dataset.p);
+                if (p < 1 || p > pages) return;
+                page = p;
+                render();
+            });
+        });
+    }
+
+    search.addEventListener('input', applyFilters);
+    document.querySelectorAll('.bn-stat').forEach(btn => {
+        btn.addEventListener('click', function () { switchStatus(this.dataset.status); });
     });
-});
+    applyFilters();
+})();
 </script>
 @endpush
-@endsection
-

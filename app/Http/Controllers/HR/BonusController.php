@@ -20,29 +20,12 @@ class BonusController extends Controller
 
     public function index(Request $request)
     {
-        $status = $request->get('status', 'all');
-        $search = trim((string) $request->get('search', ''));
-
-        $query = Bonus::query()->with('creator');
-
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
-
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('formula', 'like', "%{$search}%");
-            });
-        }
-
-        $bonuses = $query->orderByDesc('is_mandatory')
+        $allBonuses = Bonus::query()->with('creator')
+            ->orderByDesc('is_mandatory')
             ->orderBy('name')
-            ->paginate(15)
-            ->withQueryString();
+            ->get();
 
-        return view('hr.bonuses.index', compact('bonuses', 'status', 'search'));
+        return view('hr.bonuses.index', compact('allBonuses'));
     }
 
     public function create()

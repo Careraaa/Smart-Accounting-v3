@@ -22,24 +22,11 @@ class PayrollHistoryController extends Controller
     // ====================== INDEX ======================
     public function index(Request $request)
     {
-        $filterMonth = $request->get('filter_month');
-        $filterYear  = $request->get('filter_year');
-
-        // Get batches with relationships
-        $query = PayrollBatch::with([
+        $allBatches = PayrollBatch::with([
             'payrolls.user', 
             'payrolls.allowances', 
             'payrolls.deductions'
-        ])->orderBy('period_start', 'desc');
-
-        if ($filterYear) {
-            $query->whereYear('period_start', $filterYear);
-        }
-        if ($filterMonth) {
-            $query->whereMonth('period_start', $filterMonth);
-        }
-
-        $batches = $query->paginate(12);
+        ])->orderBy('period_start', 'desc')->get();
 
         // Statistics
         $totalBatches = PayrollBatch::count();
@@ -58,14 +45,12 @@ class PayrollHistoryController extends Controller
         $nextCutoffDate = PayrollCutoffSchedule::getNextCutoffDate();
 
         return view('hr.payroll.history.index', compact(
-            'batches',
+            'allBatches',
             'totalBatches',
             'totalPayroll',
             'totalReleased',
             'activeEmployees',
-            'nextCutoffDate',
-            'filterMonth',
-            'filterYear'
+            'nextCutoffDate'
         ));
     }
 

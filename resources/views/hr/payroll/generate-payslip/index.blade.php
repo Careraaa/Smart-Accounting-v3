@@ -6,6 +6,8 @@
 @keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
 .stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.filter-bar { animation:fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.table-wrap { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
 </style>
 @endpush
 
@@ -20,87 +22,37 @@
     </div>
 
     {{-- Filter bar --}}
-    <div class="fade-up flex items-center gap-3 flex-wrap">
+    <div class="filter-bar flex items-center gap-3 flex-wrap">
         <div class="flex-1 min-w-[200px]">
-            <input type="text" id="batchSearch" placeholder="Search batch…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+            <input type="text" id="psSearch" placeholder="Search batch…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
         </div>
-        <select id="statusFilter" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
+        <select id="psStatusFilter" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
             <option value="">All Statuses</option>
-            <option value="submitted" @selected(request('status') === 'submitted')>Submitted</option>
-            <option value="approved" @selected(request('status') === 'approved')>Approved</option>
-            <option value="rejected" @selected(request('status') === 'rejected')>Rejected</option>
-            <option value="paid" @selected(request('status') === 'paid')>Paid</option>
+            <option value="submitted">Submitted</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="paid">Paid</option>
         </select>
+        <span class="text-xs text-gray-400 ml-auto" id="psCount">0 batches</span>
     </div>
 
     {{-- Batch cards --}}
-    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="divide-y divide-gray-50" id="batchGrid">
-            @forelse($batches as $batch)
-                @php
-                    $startDate = $batch->period_start;
-                    $endDate   = $batch->period_end;
-                    $isFirst   = $startDate->format('d') <= 15;
-                    $statusColors = [
-                        'submitted' => ['bg' => 'bg-violet-50', 'text' => 'text-violet-700', 'border' => 'border-violet-200', 'dot' => 'bg-violet-500'],
-                        'approved'  => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-200', 'dot' => 'bg-emerald-500'],
-                        'rejected'  => ['bg' => 'bg-red-50', 'text' => 'text-red-700', 'border' => 'border-red-200', 'dot' => 'bg-red-500'],
-                        'paid'      => ['bg' => 'bg-blue-50', 'text' => 'text-blue-700', 'border' => 'border-blue-200', 'dot' => 'bg-blue-500'],
-                    ];
-                    $si = $statusColors[$batch->status] ?? $statusColors['submitted'];
-                    $payslipsUrl = route('payroll.batch.payslips', $batch);
-                @endphp
-                <div data-status="{{ $batch->status }}" class="batch-col">
-                    <a href="{{ $payslipsUrl }}" class="block no-underline text-inherit">
-                        <div class="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50/60">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {{ $isFirst ? 'bg-gradient-to-br from-red-600 to-red-800' : 'bg-gradient-to-br from-sky-600 to-blue-800' }} text-white">
-                                @if($isFirst)
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                @else
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                @endif
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-semibold text-gray-900">{{ $startDate->format('F Y') }} — {{ $isFirst ? '1st' : '2nd' }} half</p>
-                                <p class="text-[0.55rem] font-mono text-gray-400 mt-0.5">{{ $startDate->format('M d') }} – {{ $endDate->format('M d, Y') }}</p>
-                            </div>
-                            <div class="flex items-center gap-5 shrink-0">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.55rem] font-semibold border {{ $si['bg'] }} {{ $si['text'] }} {{ $si['border'] }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $si['dot'] }}"></span>
-                                    {{ $si['text'] === 'text-violet-700' ? 'Submitted' : ucfirst($batch->status) }}
-                                </span>
-                                <div class="text-center">
-                                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Employees</p>
-                                    <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">{{ $batch->payrolls_count ?? $batch->payrolls->count() }}</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Net Pay</p>
-                                    <p class="text-sm font-bold text-emerald-600 tabular-nums mt-0.5">₱{{ number_format($batch->total_net_pay, 2) }}</p>
-                                </div>
-                                <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                            </div>
-                        </div>
-                    </a>
+    <div class="table-wrap bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="divide-y divide-gray-50" id="psGrid"></div>
+        <div id="psNoResults" class="hidden">
+            <div class="flex flex-col items-center py-12 text-center">
+                <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
-            @empty
-                <div class="flex flex-col items-center py-12 text-center">
-                    <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    </div>
-                    <p class="text-sm font-semibold text-gray-500">No payroll batches yet</p>
-                    <p class="text-xs text-gray-400 mt-0.5">Generate a payroll batch first to view payslips.</p>
-                </div>
-            @endforelse
-        </div>
-        <div id="batchNoResults" class="hidden">
-            <div class="flex flex-col items-center py-8 text-center">
-                <p class="text-sm font-semibold text-gray-500">No results</p>
-                <p class="text-xs text-gray-400 mt-0.5">Try adjusting your search or filters.</p>
+                <p class="text-sm font-semibold text-gray-500">No payroll batches yet</p>
+                <p class="text-xs text-gray-400 mt-0.5">Generate a payroll batch first to view payslips.</p>
             </div>
         </div>
-        @if($batches->hasPages())
-        <div class="px-5 py-3 border-t border-gray-50 flex justify-end text-xs">{{ $batches->withQueryString()->links() }}</div>
-        @endif
+        {{-- Pagination --}}
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
+            <div class="text-xs text-gray-400" id="psPaginationInfo">Showing <strong class="text-gray-700">0</strong> batches</div>
+            <nav id="psPaginationNav" class="flex items-center gap-1"></nav>
+        </div>
     </div>
 
 </div>
@@ -108,27 +60,138 @@
 
 @push('scripts')
 <script>
-(function(){
-    var search=document.getElementById('batchSearch'),statusF=document.getElementById('statusFilter');
-    var grid=document.getElementById('batchGrid'),noRes=document.getElementById('batchNoResults');
-    if(!grid) return;
-    function run(){
-        var q=(search?.value||'').toLowerCase().trim(),st=statusF?.value||'';
-        var visible=0;
-        grid.querySelectorAll('.batch-col').forEach(function(col){
-            var match=(!q||col.textContent.toLowerCase().includes(q))&&(!st||col.dataset.status===st);
-            col.style.display=match?'':'none';
-            if(match) visible++;
+window.allBatches = {!! json_encode($allBatches->map(fn($b) => [
+    'id' => $b->id,
+    'period_start' => $b->period_start->format('Y-m-d'),
+    'period_end' => $b->period_end->format('Y-m-d'),
+    'period_start_display' => $b->period_start->format('M d'),
+    'period_end_display' => $b->period_end->format('M d, Y'),
+    'month_year' => $b->period_start->format('F Y'),
+    'is_first' => (int) $b->period_start->format('d') <= 15,
+    'status' => $b->status,
+    'payrolls_count' => (int) ($b->payrolls_count ?? $b->payrolls->count()),
+    'total_net_pay' => (float) ($b->total_net_pay ?? $b->payrolls->sum('net_pay')),
+    'url' => route('payroll.batch.payslips', $b),
+])) !!};
+
+(function () {
+    const search  = document.getElementById('psSearch');
+    const statusF = document.getElementById('psStatusFilter');
+    const grid    = document.getElementById('psGrid');
+    const noRes   = document.getElementById('psNoResults');
+    const count   = document.getElementById('psCount');
+    const PER     = 10;
+    let page = 1, filtered = [];
+
+    const STATUS_MAP = {
+        submitted: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', dot: 'bg-violet-500', label: 'Submitted' },
+        approved:  { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Approved' },
+        rejected:  { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', dot: 'bg-red-500', label: 'Rejected' },
+        paid:      { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500', label: 'Paid' },
+    };
+
+    function applyFilters() {
+        const q = search.value.toLowerCase().trim();
+        const st = statusF.value;
+        filtered = window.allBatches.filter(b => {
+            if (st && b.status !== st) return false;
+            const haystack = (b.month_year + ' ' + b.status).toLowerCase();
+            if (q && !haystack.includes(q)) return false;
+            return true;
         });
-        if(noRes)noRes.style.display=visible===0?'':'none';
+        page = 1;
+        render();
     }
-    statusF?.addEventListener('change',function(){
-        var url=new URL(window.location.href);
-        if(this.value)url.searchParams.set('status',this.value);else url.searchParams.delete('status');
-        window.location=url.toString();
-    });
-    search?.addEventListener('input',run);
-    run();
+
+    function render() {
+        const start = (page - 1) * PER;
+        const end = Math.min(start + PER, filtered.length);
+        const pageData = filtered.slice(start, end);
+        grid.innerHTML = '';
+
+        if (pageData.length === 0) {
+            noRes.classList.remove('hidden');
+        } else {
+            noRes.classList.add('hidden');
+            pageData.forEach(b => {
+                const si = STATUS_MAP[b.status] || STATUS_MAP.submitted;
+                const iconSvg = b.is_first
+                    ? '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'
+                    : '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                const gradient = b.is_first ? 'bg-gradient-to-br from-red-600 to-red-800' : 'bg-gradient-to-br from-sky-600 to-blue-800';
+                const halfLabel = b.is_first ? '1st' : '2nd';
+
+                const card = document.createElement('div');
+                card.innerHTML = `
+                    <a href="${b.url}" class="block no-underline text-inherit">
+                        <div class="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50/60">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${gradient} text-white">${iconSvg}</div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-semibold text-gray-900">${b.month_year} — ${halfLabel} half</p>
+                                <p class="text-[0.55rem] font-mono text-gray-400 mt-0.5">${b.period_start_display} – ${b.period_end_display}</p>
+                            </div>
+                            <div class="flex items-center gap-5 shrink-0">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.55rem] font-semibold border ${si.bg} ${si.text} ${si.border}">
+                                    <span class="w-1.5 h-1.5 rounded-full ${si.dot}"></span>
+                                    ${si.label}
+                                </span>
+                                <div class="text-center">
+                                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Employees</p>
+                                    <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">${b.payrolls_count}</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Net Pay</p>
+                                    <p class="text-sm font-bold text-emerald-600 tabular-nums mt-0.5">₱${b.total_net_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+                                </div>
+                                <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </div>
+                        </div>
+                    </a>
+                `;
+                grid.appendChild(card);
+            });
+        }
+        updatePagination();
+    }
+
+    function updatePagination() {
+        const total = filtered.length;
+        const pages = Math.ceil(total / PER);
+        const info  = document.getElementById('psPaginationInfo');
+        const nav   = document.getElementById('psPaginationNav');
+        count.textContent = `${total} ${total === 1 ? 'batch' : 'batches'}`;
+        if (!info || !nav) return;
+        if (total === 0) { info.innerHTML = 'No batches to display'; nav.innerHTML = ''; return; }
+        const s = (page - 1) * PER + 1, e = Math.min(page * PER, total);
+        info.innerHTML = `Showing <strong class="text-gray-700">${s}</strong>–<strong class="text-gray-700">${e}</strong> of <strong class="text-gray-700">${total}</strong>`;
+        if (pages <= 1) { nav.innerHTML = ''; return; }
+
+        const base = `flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150`;
+        const act  = `${base} bg-gray-900 text-white border-gray-900`;
+        const def  = `${base} bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300`;
+        const dis  = `${base} bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none`;
+
+        let html = '';
+        html += `<button data-p="${page - 1}" class="${page === 1 ? dis : def}">‹</button>`;
+        for (let i = 1; i <= pages; i++) {
+            html += `<button data-p="${i}" class="${i === page ? act : def}">${i}</button>`;
+        }
+        html += `<button data-p="${page + 1}" class="${page === pages ? dis : def}">›</button>`;
+        nav.innerHTML = html;
+        nav.querySelectorAll('button[data-p]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                const p = parseInt(btn.dataset.p);
+                if (p < 1 || p > pages) return;
+                page = p;
+                render();
+            });
+        });
+    }
+
+    search.addEventListener('input', applyFilters);
+    statusF.addEventListener('change', applyFilters);
+    applyFilters();
 })();
 </script>
 @endpush

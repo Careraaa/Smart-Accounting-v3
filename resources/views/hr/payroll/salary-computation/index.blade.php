@@ -92,72 +92,22 @@
     <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
             <span class="text-sm font-semibold text-gray-900">Batches</span>
-            <span class="text-xs text-gray-400 tabular-nums">{{ $batches->total() }} total</span>
+            <span class="text-xs text-gray-400 tabular-nums">{{ $allBatches->count() }} total</span>
         </div>
-        <div class="divide-y divide-gray-50">
-            @forelse($batches as $batch)
-                @php
-                    $start = $batch->period_start;
-                    $end   = $batch->period_end;
-                    $isFirst = $start->format('d') <= 15;
-                    $statusInfo = match($batch->status) {
-                        'submitted' => ['label'=>'Submitted','dot'=>'bg-violet-400','text'=>'text-violet-600','bg'=>'bg-violet-50'],
-                        'approved' => ['label'=>'Approved','dot'=>'bg-emerald-400','text'=>'text-emerald-600','bg'=>'bg-emerald-50'],
-                        'rejected' => ['label'=>'Rejected','dot'=>'bg-red-400','text'=>'text-red-600','bg'=>'bg-red-50'],
-                        default => ['label'=>'Submitted','dot'=>'bg-violet-400','text'=>'text-violet-600','bg'=>'bg-violet-50'],
-                    };
-                @endphp
-                <a href="{{ route('payroll.batch.details', $batch) }}" class="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/60 group">
-                    <div class="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:text-gray-600 transition-colors shrink-0">
-                        @if($isFirst)
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        @else
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        @endif
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-semibold text-gray-900">{{ $start->format('F Y') }} &mdash; {{ $isFirst ? '1st' : '2nd' }}</span>
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ $statusInfo['dot'] }}"></span>
-                                {{ $statusInfo['label'] }}
-                            </span>
-                        </div>
-                        <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $start->format('M d') }} &ndash; {{ $end->format('M d, Y') }}</p>
-                    </div>
-                    <div class="hidden sm:flex items-center gap-6 shrink-0">
-                        <div class="text-right min-w-[44px]">
-                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Count</p>
-                            <p class="text-sm font-semibold text-gray-900 tabular-nums">{{ $batch->payrolls_count }}</p>
-                        </div>
-                        <div class="text-right min-w-[88px]">
-                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Gross</p>
-                            <p class="text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($batch->payrolls_sum_gross_pay ?? 0, 2) }}</p>
-                        </div>
-                        <div class="text-right min-w-[88px]">
-                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
-                            <p class="text-sm font-semibold text-red-500 tabular-nums">₱{{ number_format($batch->payrolls_sum_total_deductions ?? 0, 2) }}</p>
-                        </div>
-                        <div class="text-right min-w-[88px]">
-                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net</p>
-                            <p class="text-sm font-bold text-emerald-600 tabular-nums">₱{{ number_format($batch->payrolls_sum_net_pay ?? 0, 2) }}</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </a>
-            @empty
-                <div class="flex flex-col items-center py-12 text-center">
-                    <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    </div>
-                    <p class="text-sm font-semibold text-gray-500">No batches</p>
-                    <p class="text-xs text-gray-400 mt-0.5">Generate your first batch above</p>
+        <div class="divide-y divide-gray-50" id="salaryBatchesGrid"></div>
+        <div id="salaryBatchesNoResults" class="hidden">
+            <div class="flex flex-col items-center py-12 text-center">
+                <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
-            @endforelse
+                <p class="text-sm font-semibold text-gray-500" id="salaryBatchesEmptyTitle">No batches</p>
+                <p class="text-xs text-gray-400 mt-0.5" id="salaryBatchesEmptySub">Generate your first batch above</p>
+            </div>
         </div>
-        @if($batches->hasPages())
-        <div class="px-5 py-3 border-t border-gray-50">{{ $batches->links() }}</div>
-        @endif
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
+            <div class="text-xs text-gray-400" id="salaryBatchesInfo">Showing <strong class="text-gray-700">0</strong> batches</div>
+            <nav id="salaryBatchesNav" class="flex items-center gap-1"></nav>
+        </div>
     </div>
 
 </div>
@@ -206,6 +156,135 @@
 
 @push('scripts')
 <script>
+window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
+    'id' => $b->id,
+    'period_start' => $b->period_start->format('Y-m-d'),
+    'period_end' => $b->period_end->format('Y-m-d'),
+    'period_start_display' => $b->period_start->format('M d'),
+    'period_end_display' => $b->period_end->format('M d, Y'),
+    'month_year' => $b->period_start->format('F Y'),
+    'half' => (int) $b->period_start->format('d') <= 15 ? '1st' : '2nd',
+    'is_first' => (int) $b->period_start->format('d') <= 15,
+    'status' => $b->status ?? 'submitted',
+    'payrolls_count' => $b->payrolls_count ?? 0,
+    'gross_pay' => (float) ($b->payrolls_sum_gross_pay ?? 0),
+    'total_deductions' => (float) ($b->payrolls_sum_total_deductions ?? 0),
+    'net_pay' => (float) ($b->payrolls_sum_net_pay ?? 0),
+    'url' => route('payroll.batch.details', $b),
+])) !!};
+
+(function () {
+    const grid     = document.getElementById('salaryBatchesGrid');
+    const noRes    = document.getElementById('salaryBatchesNoResults');
+    const emptyT   = document.getElementById('salaryBatchesEmptyTitle');
+    const emptyS   = document.getElementById('salaryBatchesEmptySub');
+    const PER = 5;
+    let page = 1;
+
+    const STATUS_MAP = {
+        submitted: { label: 'Submitted', dot: 'bg-violet-400', text: 'text-violet-600', bg: 'bg-violet-50' },
+        approved:  { label: 'Approved',  dot: 'bg-emerald-400', text: 'text-emerald-600', bg: 'bg-emerald-50' },
+        rejected:  { label: 'Rejected',  dot: 'bg-red-400', text: 'text-red-600', bg: 'bg-red-50' },
+    };
+
+    function render() {
+        const total = window.allPayrollBatches.length;
+        const pages = Math.ceil(total / PER);
+        const start = (page - 1) * PER;
+        const end = Math.min(start + PER, total);
+        const pageData = window.allPayrollBatches.slice(start, end);
+        grid.innerHTML = '';
+
+        if (pageData.length === 0) {
+            noRes.classList.remove('hidden');
+            emptyT.textContent = total === 0 ? 'No batches' : 'No results found';
+            emptyS.textContent = total === 0 ? 'Generate your first batch above' : 'Try a different filter.';
+        } else {
+            noRes.classList.add('hidden');
+            pageData.forEach(b => {
+                const si = STATUS_MAP[b.status] || STATUS_MAP.submitted;
+                const iconSvg = b.is_first
+                    ? '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'
+                    : '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <a href="${b.url}" class="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/60 group">
+                        <div class="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:text-gray-600 transition-colors shrink-0">${iconSvg}</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-gray-900">${b.month_year} &mdash; ${b.half}</span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide ${si.bg} ${si.text}">
+                                    <span class="w-1.5 h-1.5 rounded-full ${si.dot}"></span>
+                                    ${si.label}
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-0.5 font-mono">${b.period_start_display} &ndash; ${b.period_end_display}</p>
+                        </div>
+                        <div class="hidden sm:flex items-center gap-6 shrink-0">
+                            <div class="text-right min-w-[44px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Count</p>
+                                <p class="text-sm font-semibold text-gray-900 tabular-nums">${b.payrolls_count}</p>
+                            </div>
+                            <div class="text-right min-w-[88px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Gross</p>
+                                <p class="text-sm font-semibold text-gray-900 tabular-nums">₱${b.gross_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+                            </div>
+                            <div class="text-right min-w-[88px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
+                                <p class="text-sm font-semibold text-red-500 tabular-nums">₱${b.total_deductions.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+                            </div>
+                            <div class="text-right min-w-[88px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net</p>
+                                <p class="text-sm font-bold text-emerald-600 tabular-nums">₱${b.net_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+                            </div>
+                        </div>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                `;
+                grid.appendChild(div);
+            });
+        }
+        updatePagination();
+    }
+
+    function updatePagination() {
+        const total = window.allPayrollBatches.length;
+        const pages = Math.ceil(total / PER);
+        const info  = document.getElementById('salaryBatchesInfo');
+        const nav   = document.getElementById('salaryBatchesNav');
+        if (!info || !nav) return;
+        if (total === 0) { info.innerHTML = 'No batches to display'; nav.innerHTML = ''; return; }
+        const s = (page - 1) * PER + 1, e = Math.min(page * PER, total);
+        info.innerHTML = `Showing <strong class="text-gray-700">${s}</strong>–<strong class="text-gray-700">${e}</strong> of <strong class="text-gray-700">${total}</strong>`;
+        if (pages <= 1) { nav.innerHTML = ''; return; }
+
+        const base = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+        const act  = base + ' bg-gray-900 text-white border-gray-900';
+        const def  = base + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+        const dis  = base + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+
+        let html = '';
+        html += `<button data-p="${page - 1}" class="${page === 1 ? dis : def}">‹</button>`;
+        for (let i = 1; i <= pages; i++) {
+            html += `<button data-p="${i}" class="${i === page ? act : def}">${i}</button>`;
+        }
+        html += `<button data-p="${page + 1}" class="${page === pages ? dis : def}">›</button>`;
+        nav.innerHTML = html;
+        nav.querySelectorAll('button[data-p]').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                const p = parseInt(btn.dataset.p);
+                if (p < 1 || p > pages) return;
+                page = p;
+                render();
+            });
+        });
+    }
+
+    render();
+})();
+
 function openGenerateModal() { openModal('generateModal'); }
 function openModal(id) {
     document.querySelectorAll('[id$="Modal"]').forEach(function(el) { el.classList.add('hidden'); });

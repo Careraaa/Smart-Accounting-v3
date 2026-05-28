@@ -62,7 +62,7 @@ class LeaveController extends Controller
                 $query->where('status', 'rejected');
             }
 
-            $leaves = $query->orderBy('created_at', 'desc')->paginate(10)->appends(['tab' => $tab]);
+            $allLeaves = $query->orderBy('created_at', 'desc')->get();
 
             $timeColumn = $tab === 'pending' ? 'created_at' : 'updated_at';
 
@@ -85,7 +85,7 @@ class LeaveController extends Controller
             'totalTypes',
             'activeTypes',
             'inactiveTypes',
-            'leaves',
+            'allLeaves',
             'pendingCount',
             'approvedCount',
             'rejectedCount',

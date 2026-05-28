@@ -13,6 +13,37 @@ use Carbon\Carbon;
 
 class HrReportController extends Controller
 {
+    /**
+     * Compute employer statutory contribution using the same bracket-based
+     * logic as PayrollService, for consistent government contribution reporting.
+     * Returns the semi-monthly employer share.
+     */
+    private function getEmployerContribution(string $name, float $salary): float
+    {
+        $row = StatutoryDeduction::where('name', $name)
+            ->where('min_salary', '<=', $salary)
+            ->where(function ($q) use ($salary) {
+                $q->where('max_salary', '>=', $salary)
+                  ->orWhereNull('max_salary');
+            })
+            ->orderByDesc('min_salary')
+            ->first();
+
+        if (!$row) return 0;
+
+        if (!is_null($row->employer_share)) {
+            return round($row->employer_share / 2, 2);
+        }
+
+        if (!is_null($row->percentage_employer)) {
+            $monthly = $salary * ($row->percentage_employer / 100);
+            if ($name === 'Pag-IBIG') $monthly = min($monthly, 200.0);
+            if ($name === 'PhilHealth') $monthly = min($monthly, 2500.0);
+            return round($monthly / 2, 2);
+        }
+
+        return 0;
+    }
     public function printEmployeeReport()
     {
         $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy('last_name')->get();
@@ -83,11 +114,6 @@ class HrReportController extends Controller
             ->orderByDesc('payroll_period_start')
             ->get();
 
-        // Get statutory deductions for employer calculations
-        $sssDeduction = StatutoryDeduction::where('name', 'SSS')->first();
-        $pagibigDeduction = StatutoryDeduction::where('name', 'Pag-IBIG')->first();
-        $philhealthDeduction = StatutoryDeduction::where('name', 'PhilHealth')->first();
-
         // Build contributions array
         $contributions = [];
         $summary = [
@@ -157,7 +183,7 @@ class HrReportController extends Controller
                 }
             }
 
-            $contribution = [
+            $contributions[] = [
                 'employee_name' => $payroll->user->name ?? 'Unknown',
                 'period_start' => $payroll->payroll_period_start,
                 'period_end' => $payroll->payroll_period_end,
@@ -169,30 +195,13 @@ class HrReportController extends Controller
                 'employer_philhealth' => round($empPhilhealthShare, 2),
             ];
 
-            $contributions[] = $contribution;
-
-            // Add to summary totals
-            $summary['employee_sss'] += $contribution['employee_sss'];
-            $summary['employer_sss'] += $contribution['employer_sss'];
-            $summary['employee_pagibig'] += $contribution['employee_pagibig'];
-            $summary['employer_pagibig'] += $contribution['employer_pagibig'];
-            $summary['employee_philhealth'] += $contribution['employee_philhealth'];
-            $summary['employer_philhealth'] += $contribution['employer_philhealth'];
+            $summary['employee_sss'] += $empSss;
+            $summary['employer_sss'] += $empSssShare;
+            $summary['employee_pagibig'] += $empPagibig;
+            $summary['employer_pagibig'] += $empPagibigShare;
+            $summary['employee_philhealth'] += $empPhilhealth;
+            $summary['employer_philhealth'] += $empPhilhealthShare;
         }
-
-        // Paginate contributions (15 items per page)
-        $perPage = 10;
-        $page = request()->get('page', 1);
-        $contributions = new \Illuminate\Pagination\LengthAwarePaginator(
-            array_slice($contributions, ($page - 1) * $perPage, $perPage),
-            count($contributions),
-            $perPage,
-            $page,
-            [
-                'path' => route('reports.government-contribution'),
-                'query' => request()->query(),
-            ]
-        );
 
         return view('hr.reports.government-contribution', compact(
             'employees',
@@ -227,11 +236,6 @@ class HrReportController extends Controller
             ->orderByDesc('payroll_period_start')
             ->get();
 
-        // Get statutory deductions for employer calculations
-        $sssDeduction = StatutoryDeduction::where('name', 'SSS')->first();
-        $pagibigDeduction = StatutoryDeduction::where('name', 'Pag-IBIG')->first();
-        $philhealthDeduction = StatutoryDeduction::where('name', 'PhilHealth')->first();
-
         // Build contributions array
         $contributions = [];
         $summary = [
@@ -301,7 +305,7 @@ class HrReportController extends Controller
                 }
             }
 
-            $contribution = [
+            $contributions[] = [
                 'employee_name' => $payroll->user->name ?? 'Unknown',
                 'period_start' => $payroll->payroll_period_start,
                 'period_end' => $payroll->payroll_period_end,
@@ -313,15 +317,12 @@ class HrReportController extends Controller
                 'employer_philhealth' => round($empPhilhealthShare, 2),
             ];
 
-            $contributions[] = $contribution;
-
-            // Add to summary totals
-            $summary['employee_sss'] += $contribution['employee_sss'];
-            $summary['employer_sss'] += $contribution['employer_sss'];
-            $summary['employee_pagibig'] += $contribution['employee_pagibig'];
-            $summary['employer_pagibig'] += $contribution['employer_pagibig'];
-            $summary['employee_philhealth'] += $contribution['employee_philhealth'];
-            $summary['employer_philhealth'] += $contribution['employer_philhealth'];
+            $summary['employee_sss'] += $empSss;
+            $summary['employer_sss'] += $empSssShare;
+            $summary['employee_pagibig'] += $empPagibig;
+            $summary['employer_pagibig'] += $empPagibigShare;
+            $summary['employee_philhealth'] += $empPhilhealth;
+            $summary['employer_philhealth'] += $empPhilhealthShare;
         }
 
         return view('hr.reports.government-contribution-print', compact(
