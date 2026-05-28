@@ -42,10 +42,12 @@ class Employee extends Model
         'salary_rate',
         'has_sss',
         'has_pagibig',
+        'has_philhealth',
         'has_tin',
         'sss_number',
         'tin_number',
         'pagibig_number',
+        'philhealth_number',
         'signature_path',
         'attachments',
     ];

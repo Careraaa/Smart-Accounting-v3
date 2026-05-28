@@ -100,22 +100,62 @@ class HrReportController extends Controller
         ];
 
         foreach ($payrolls as $payroll) {
+            // Get employee data
+            $employee = $payroll->user;
+            
             // Get employee contribution amounts (from payroll record)
             $empSss = $payroll->sss ?? 0;
             $empPagibig = $payroll->pagibig ?? 0;
             $empPhilhealth = $payroll->philhealth ?? 0;
 
-            // Calculate employer contributions based on employee salary
+            // Calculate employer contributions based on salary bracket lookup
             $baseSalary = $payroll->basic_salary ?? 0;
             
-            // SSS Employer: 10.4% of salary (standard rate)
-            $empSssShare = $baseSalary * 0.104;
+            // SSS Employer: Only calculate if employee has enrolled for SSS
+            $empSssShare = 0;
+            if ($employee->has_sss) {
+                $sssRecord = StatutoryDeduction::where('name', 'SSS')
+                    ->where('min_salary', '<=', $baseSalary)
+                    ->where('max_salary', '>=', $baseSalary)
+                    ->first();
+                if ($sssRecord) {
+                    $empSssShare = $sssRecord->employer_share ?? 0;
+                }
+            }
             
-            // Pag-IBIG Employer: 2% of salary (standard rate)
-            $empPagibigShare = $baseSalary * 0.02;
+            // Pag-IBIG Employer: Only calculate if employee has enrolled for Pag-IBIG
+            $empPagibigShare = 0;
+            if ($employee->has_pagibig) {
+                $pagibigRecord = StatutoryDeduction::where('name', 'Pag-IBIG')
+                    ->where('min_salary', '<=', $baseSalary)
+                    ->where('max_salary', '>=', $baseSalary)
+                    ->first();
+                if ($pagibigRecord) {
+                    // Use percentage if available, otherwise use fixed share
+                    if ($pagibigRecord->percentage_employer) {
+                        $empPagibigShare = $baseSalary * ($pagibigRecord->percentage_employer / 100);
+                    } else {
+                        $empPagibigShare = $pagibigRecord->employer_share ?? 0;
+                    }
+                }
+            }
             
-            // PhilHealth Employer: 2.75% of salary (standard rate)
-            $empPhilhealthShare = $baseSalary * 0.0275;
+            // PhilHealth Employer: Only calculate if employee has enrolled for PhilHealth
+            $empPhilhealthShare = 0;
+            if ($employee->has_philhealth) {
+                $philhealthRecord = StatutoryDeduction::where('name', 'PhilHealth')
+                    ->where('min_salary', '<=', $baseSalary)
+                    ->where('max_salary', '>=', $baseSalary)
+                    ->first();
+                if ($philhealthRecord) {
+                    // Use fixed share if available, otherwise use percentage
+                    if ($philhealthRecord->employer_share) {
+                        $empPhilhealthShare = $philhealthRecord->employer_share;
+                    } else if ($philhealthRecord->percentage_employer) {
+                        $empPhilhealthShare = $baseSalary * ($philhealthRecord->percentage_employer / 100);
+                    }
+                }
+            }
 
             $contribution = [
                 'employee_name' => $payroll->user->name ?? 'Unknown',
@@ -204,22 +244,62 @@ class HrReportController extends Controller
         ];
 
         foreach ($payrolls as $payroll) {
+            // Get employee data
+            $employee = $payroll->user;
+            
             // Get employee contribution amounts (from payroll record)
             $empSss = $payroll->sss ?? 0;
             $empPagibig = $payroll->pagibig ?? 0;
             $empPhilhealth = $payroll->philhealth ?? 0;
 
-            // Calculate employer contributions based on employee salary
+            // Calculate employer contributions based on salary bracket lookup
             $baseSalary = $payroll->basic_salary ?? 0;
             
-            // SSS Employer: 10.4% of salary (standard rate)
-            $empSssShare = $baseSalary * 0.104;
+            // SSS Employer: Only calculate if employee has enrolled for SSS
+            $empSssShare = 0;
+            if ($employee->has_sss) {
+                $sssRecord = StatutoryDeduction::where('name', 'SSS')
+                    ->where('min_salary', '<=', $baseSalary)
+                    ->where('max_salary', '>=', $baseSalary)
+                    ->first();
+                if ($sssRecord) {
+                    $empSssShare = $sssRecord->employer_share ?? 0;
+                }
+            }
             
-            // Pag-IBIG Employer: 2% of salary (standard rate)
-            $empPagibigShare = $baseSalary * 0.02;
+            // Pag-IBIG Employer: Only calculate if employee has enrolled for Pag-IBIG
+            $empPagibigShare = 0;
+            if ($employee->has_pagibig) {
+                $pagibigRecord = StatutoryDeduction::where('name', 'Pag-IBIG')
+                    ->where('min_salary', '<=', $baseSalary)
+                    ->where('max_salary', '>=', $baseSalary)
+                    ->first();
+                if ($pagibigRecord) {
+                    // Use percentage if available, otherwise use fixed share
+                    if ($pagibigRecord->percentage_employer) {
+                        $empPagibigShare = $baseSalary * ($pagibigRecord->percentage_employer / 100);
+                    } else {
+                        $empPagibigShare = $pagibigRecord->employer_share ?? 0;
+                    }
+                }
+            }
             
-            // PhilHealth Employer: 2.75% of salary (standard rate)
-            $empPhilhealthShare = $baseSalary * 0.0275;
+            // PhilHealth Employer: Only calculate if employee has enrolled for PhilHealth
+            $empPhilhealthShare = 0;
+            if ($employee->has_philhealth) {
+                $philhealthRecord = StatutoryDeduction::where('name', 'PhilHealth')
+                    ->where('min_salary', '<=', $baseSalary)
+                    ->where('max_salary', '>=', $baseSalary)
+                    ->first();
+                if ($philhealthRecord) {
+                    // Use fixed share if available, otherwise use percentage
+                    if ($philhealthRecord->employer_share) {
+                        $empPhilhealthShare = $philhealthRecord->employer_share;
+                    } else if ($philhealthRecord->percentage_employer) {
+                        $empPhilhealthShare = $baseSalary * ($philhealthRecord->percentage_employer / 100);
+                    }
+                }
+            }
 
             $contribution = [
                 'employee_name' => $payroll->user->name ?? 'Unknown',
