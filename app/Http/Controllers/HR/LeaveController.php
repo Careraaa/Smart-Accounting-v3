@@ -47,38 +47,34 @@ class LeaveController extends Controller
         $thisMonthStart = now()->startOfMonth();
         $thisMonthEnd = now()->endOfMonth();
 
-        $leaves = collect();
-        $allLeaves = collect();
-        $thisWeekLeaves = 0;
-        $thisMonthLeaves = 0;
+        // Load ALL leave data upfront so tabs can switch client-side
+        $pendingLeaves = Leave::with('employee', 'approvedBy')
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')->get();
 
-        if (in_array($tab, ['pending', 'approved', 'rejected'])) {
-            $query = Leave::with('employee', 'approvedBy');
+        $approvedLeaves = Leave::with('employee', 'approvedBy')
+            ->whereIn('status', ['approved', 'paid'])
+            ->orderBy('created_at', 'desc')->get();
 
-            if ($tab === 'pending') {
-                $query->where('status', 'pending');
-            } elseif ($tab === 'approved') {
-                $query->whereIn('status', ['approved', 'paid']);
-            } elseif ($tab === 'rejected') {
-                $query->where('status', 'rejected');
-            }
+        $rejectedLeaves = Leave::with('employee', 'approvedBy')
+            ->where('status', 'rejected')
+            ->orderBy('created_at', 'desc')->get();
 
-            $allLeaves = $query->orderBy('created_at', 'desc')->get();
+        // Per-tab week/month stats
+        $pendingWeekLeaves = Leave::where('status', 'pending')
+            ->whereBetween('created_at', [$thisWeekStart, $thisWeekEnd])->count();
+        $pendingMonthLeaves = Leave::where('status', 'pending')
+            ->whereBetween('created_at', [$thisMonthStart, $thisMonthEnd])->count();
 
-            $timeColumn = $tab === 'pending' ? 'created_at' : 'updated_at';
+        $approvedWeekLeaves = Leave::whereIn('status', ['approved', 'paid'])
+            ->whereBetween('updated_at', [$thisWeekStart, $thisWeekEnd])->count();
+        $approvedMonthLeaves = Leave::whereIn('status', ['approved', 'paid'])
+            ->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])->count();
 
-            $baseCount = Leave::query();
-            if ($tab === 'pending') {
-                $baseCount->where('status', 'pending');
-            } elseif ($tab === 'approved') {
-                $baseCount->whereIn('status', ['approved', 'paid']);
-            } elseif ($tab === 'rejected') {
-                $baseCount->where('status', 'rejected');
-            }
-
-            $thisWeekLeaves = (clone $baseCount)->whereBetween($timeColumn, [$thisWeekStart, $thisWeekEnd])->count();
-            $thisMonthLeaves = (clone $baseCount)->whereBetween($timeColumn, [$thisMonthStart, $thisMonthEnd])->count();
-        }
+        $rejectedWeekLeaves = Leave::where('status', 'rejected')
+            ->whereBetween('updated_at', [$thisWeekStart, $thisWeekEnd])->count();
+        $rejectedMonthLeaves = Leave::where('status', 'rejected')
+            ->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])->count();
 
         return view('hr.leave.index', compact(
             'tab',
@@ -86,14 +82,20 @@ class LeaveController extends Controller
             'totalTypes',
             'activeTypes',
             'inactiveTypes',
-            'allLeaves',
+            'pendingLeaves',
+            'approvedLeaves',
+            'rejectedLeaves',
             'pendingCount',
             'approvedCount',
             'rejectedCount',
             'departments',
             'leaveTypeNames',
-            'thisWeekLeaves',
-            'thisMonthLeaves'
+            'pendingWeekLeaves',
+            'pendingMonthLeaves',
+            'approvedWeekLeaves',
+            'approvedMonthLeaves',
+            'rejectedWeekLeaves',
+            'rejectedMonthLeaves'
         ));
     }
 

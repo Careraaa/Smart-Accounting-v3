@@ -14,23 +14,8 @@ class HolidayController extends Controller
      */
     public function index(Request $request)
     {
-        $status = $request->query('status', 'all');
+        $tab = $request->query('tab', 'all');
         $year = $request->query('year', now()->year);
-
-        $query = Holiday::query();
-
-        // Filter by year
-        $query->whereYear('date', $year);
-
-        // Filter by status (active = future + current, inactive = past)
-        if ($status === 'active') {
-            $query->where('date', '>=', now()->startOfDay());
-        } elseif ($status === 'inactive') {
-            $query->where('date', '<', now()->startOfDay());
-        }
-
-        // Sort by date
-        $holidays = $query->orderBy('date')->paginate(10)->appends($request->query());
 
         // Get available years for filter
         $availableYears = Holiday::selectRaw('YEAR(date) as year')
@@ -42,7 +27,22 @@ class HolidayController extends Controller
             $availableYears = collect([now()->year]);
         }
 
-        return view('hr.holiday.index', compact('holidays', 'status', 'year', 'availableYears'));
+        // Load ALL holidays for the selected year (small dataset, no pagination needed)
+        $yearHolidays = Holiday::whereYear('date', $year)->orderBy('date')->get();
+
+        $allHolidays = $yearHolidays;
+        $activeHolidays = $yearHolidays->where('date', '>=', now()->startOfDay());
+
+        $totalCount = $allHolidays->count();
+        $regularCount = $allHolidays->where('type', 'regular')->count();
+        $specialCount = $allHolidays->where('type', 'special')->count();
+        $upcomingCount = $activeHolidays->count();
+
+        return view('hr.holiday.index', compact(
+            'tab', 'year', 'availableYears',
+            'allHolidays', 'activeHolidays',
+            'totalCount', 'regularCount', 'specialCount', 'upcomingCount'
+        ));
     }
 
     /**

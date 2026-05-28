@@ -26,15 +26,19 @@ class PayrollDeductionService
 
         // ── Cash Advances ─────────────────────────────────────────
         // Status flow: pending → approved (HR) → released (accountant).
-        // Deductible once released, or while still approved if not yet released.
+        // Only deductible once released (funds disbursed).
         $advances = CashAdvance::where('user_id', $userId)
-            ->whereIn('status', ['released', 'approved'])
+            ->where('status', 'released')
             ->whereColumn('amount_deducted', '<', 'amount')
             ->get();
 
         foreach ($advances as $advance) {
+            // Payroll is semi-monthly, so monthly deduction is divided by 2
+            $semiMonthlyDeduction = $advance->monthly_deduction > 0
+                ? $advance->monthly_deduction / 2
+                : 0;
             $instalment = $advance->monthly_deduction > 0
-                ? min($advance->monthly_deduction, $advance->amount - $advance->amount_deducted)
+                ? min($semiMonthlyDeduction, $advance->amount - $advance->amount_deducted)
                 : $advance->amount;
 
             $caTotal += $instalment;
@@ -55,16 +59,18 @@ class PayrollDeductionService
 
         // ── Salary Loans ──────────────────────────────────────────
         // Status flow: pending → approved (HR) → released (accountant).
-        // Deductible once released (funds have been disbursed).
+        // Only deductible once released (funds have been disbursed).
         $loans = SalaryLoan::where('user_id', $userId)
-            ->whereIn('status', ['released', 'approved'])
+            ->where('status', 'released')
             ->where('remaining_balance', '>', 0)
             ->get();
 
         foreach ($loans as $loan) {
-            $instalment = min($loan->monthly_deduction, $loan->remaining_balance);
+            // Payroll is semi-monthly, so monthly deduction is divided by 2
+            $semiMonthlyDeduction = $loan->monthly_deduction / 2;
+            $instalment = min($semiMonthlyDeduction, $loan->remaining_balance);
             $slTotal   += $instalment;
-            $loan->deductInstalment();
+            $loan->deductInstalment($instalment);
         }
 
         $totalDeducted = $caTotal + $slTotal;

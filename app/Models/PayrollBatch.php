@@ -247,56 +247,107 @@ class PayrollBatch extends Model
     }
 
     /**
-     * Get all available payroll periods from the database.
-     * Returns existing periods from PayrollBatch records plus the current period.
+     * Get all available payroll periods.
+     * Returns existing periods from PayrollBatch records plus all possible periods
+     * derived from the active cutoff schedule (going back 24 months).
      * Sorted newest first.
      */
     public static function getAvailablePeriods(): array
     {
         $periods = [];
-        $currentPeriod = self::resolvePeriod();
-        
-        // Get all unique periods from existing batches, ordered by period_start descending
+        $seen = [];
+
+        // Collect existing batch periods first
         $batches = self::select('period_start', 'period_end')
             ->distinct()
             ->orderByDesc('period_start')
             ->get();
-        
-        $seen = [];
-        
-        // Add existing batch periods
+
         foreach ($batches as $batch) {
             $key = $batch->period_start->toDateString() . '|' . $batch->period_end->toDateString();
             if (!isset($seen[$key])) {
                 $seen[$key] = true;
-                $startDate = $batch->period_start;
-                $endDate = $batch->period_end;
-                $isFirst = $startDate->format('d') <= 15;
-                
-                $periods[] = [
-                    'start' => $startDate->toDateString(),
-                    'end' => $endDate->toDateString(),
-                    'display' => $startDate->format('F Y') . ' — ' . ($isFirst ? '1st' : '2nd') . ' Half',
-                ];
+                $periods[] = self::formatPeriodOption($batch->period_start, $batch->period_end);
             }
         }
-        
-        // Add current period if not already in database
-        $currentKey = $currentPeriod['start'] . '|' . $currentPeriod['end'];
-        if (!isset($seen[$currentKey])) {
-            $startCarbon = Carbon::parse($currentPeriod['start']);
-            $isFirst = $startCarbon->format('d') <= 15;
-            
-            $periods[] = [
-                'start' => $currentPeriod['start'],
-                'end' => $currentPeriod['end'],
-                'display' => $startCarbon->format('F Y') . ' — ' . ($isFirst ? '1st' : '2nd') . ' Half',
-            ];
+
+        // Get active cutoff days
+        $cutoffDays = PayrollCutoffSchedule::where('is_active', true)
+            ->orderBy('cutoff_day')
+            ->pluck('cutoff_day')
+            ->map(fn($day) => (int) $day)
+            ->toArray();
+
+        if (empty($cutoffDays)) {
+            $cutoffDays = [15];
         }
-        
+
+        // Determine range for generating periods
+        $currentPeriod = self::resolvePeriod();
+        $earliestBatch = self::select('period_start')->orderBy('period_start')->first();
+
+        $rangeStart = Carbon::today()->startOfMonth()->subMonths(24);
+        if ($earliestBatch && Carbon::parse($earliestBatch->period_start)->startOfMonth()->lt($rangeStart)) {
+            $rangeStart = Carbon::parse($earliestBatch->period_start)->startOfMonth()->subMonth();
+        }
+
+        $rangeEnd = Carbon::parse($currentPeriod['end'])->startOfMonth()->addMonth();
+
+        // Generate all possible periods within the range
+        $cursor = $rangeStart->copy();
+        while ($cursor->lte($rangeEnd)) {
+            $daysInMonth = $cursor->daysInMonth;
+            $prevDay = 0;
+
+            foreach ($cutoffDays as $cutoffDay) {
+                $actualCutoffDay = min($cutoffDay, $daysInMonth);
+                $periodStart = $cursor->copy()->day($prevDay + 1);
+                $periodEnd = $cursor->copy()->day($actualCutoffDay);
+
+                $key = $periodStart->toDateString() . '|' . $periodEnd->toDateString();
+                if (!isset($seen[$key])) {
+                    $seen[$key] = true;
+                    $periods[] = self::formatPeriodOption($periodStart, $periodEnd);
+                }
+
+                $prevDay = $actualCutoffDay;
+            }
+
+            // If last cutoff is not the end of month, add remaining days as a period
+            if ($prevDay < $daysInMonth) {
+                $periodStart = $cursor->copy()->day($prevDay + 1);
+                $periodEnd = $cursor->copy()->day($daysInMonth);
+
+                $key = $periodStart->toDateString() . '|' . $periodEnd->toDateString();
+                if (!isset($seen[$key])) {
+                    $seen[$key] = true;
+                    $periods[] = self::formatPeriodOption($periodStart, $periodEnd);
+                }
+            }
+
+            $cursor->addMonth();
+        }
+
         // Sort by start date descending (newest first)
         usort($periods, fn($a, $b) => strtotime($b['start']) - strtotime($a['start']));
-        
+
         return array_values($periods);
+    }
+
+    /**
+     * Format a period start/end into the option array used by the dropdown.
+     */
+    private static function formatPeriodOption($startDate, $endDate): array
+    {
+        $startCarbon = $startDate instanceof Carbon ? $startDate : Carbon::parse($startDate);
+        $endCarbon = $endDate instanceof Carbon ? $endDate : Carbon::parse($endDate);
+
+        $isFirst = $startCarbon->format('d') <= 15;
+
+        return [
+            'start' => $startCarbon->toDateString(),
+            'end'   => $endCarbon->toDateString(),
+            'display' => $startCarbon->format('F Y') . ' — ' . ($isFirst ? '1st' : '2nd') . ' Half',
+        ];
     }
 }

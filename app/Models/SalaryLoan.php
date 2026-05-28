@@ -76,13 +76,16 @@ class SalaryLoan extends Model
     }
 
     /**
-     * Deduct one monthly instalment.
+     * Deduct one instalment.
      * Called automatically when a payroll is generated for this employee.
+     * If $amount is provided, uses that; otherwise uses monthly_deduction.
      * Returns the actual amount deducted.
      */
-    public function deductInstalment(): float
+    public function deductInstalment(?float $amount = null): float
     {
-        $deduct = min((float) $this->monthly_deduction, (float) $this->remaining_balance);
+        $deduct = $amount !== null
+            ? min($amount, (float) $this->remaining_balance)
+            : min((float) $this->monthly_deduction, (float) $this->remaining_balance);
 
         $this->remaining_balance = max(0, $this->remaining_balance - $deduct);
         $this->months_paid      += 1;

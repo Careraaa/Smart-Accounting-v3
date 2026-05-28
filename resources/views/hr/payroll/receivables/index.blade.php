@@ -50,8 +50,8 @@
     {{-- Color-Coded Tabs --}}
     <div class="border-b border-gray-200" style="animation:fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) 0.05s both;">
         <nav class="flex gap-1 -mb-px" role="tablist">
-            <a role="tab" href="{{ route('payroll.receivables.index') }}?tab=cash_advances"
-               class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group no-underline
+            <button role="tab" data-tab="cash_advances"
+               class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group
                {{ $tab === 'cash_advances'
                    ? 'border-blue-500 text-blue-700 bg-blue-50/60'
                    : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
@@ -59,9 +59,9 @@
                     <svg class="w-4 h-4 {{ $tab === 'cash_advances' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
                     Cash Advances
                 </span>
-            </a>
-            <a role="tab" href="{{ route('payroll.receivables.index') }}?tab=salary_loans"
-               class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group no-underline
+            </button>
+            <button role="tab" data-tab="salary_loans"
+               class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group
                {{ $tab === 'salary_loans'
                    ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60'
                    : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
@@ -69,7 +69,7 @@
                     <svg class="w-4 h-4 {{ $tab === 'salary_loans' ? 'text-emerald-500' : 'text-gray-400 group-hover:text-gray-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                     Salary Loans
                 </span>
-            </a>
+            </button>
         </nav>
     </div>
 
@@ -82,7 +82,7 @@
                 </div>
                 <div class="min-w-0">
                     <p class="text-xs text-gray-400 font-medium">Pending</p>
-                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">{{ $tab === 'cash_advances' ? $caPendingCount : $loanPendingCount }}</p>
+                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">{{ $caPendingCount + $loanPendingCount }}</p>
                     <p class="text-[0.55rem] text-gray-400 font-mono mt-0.5">awaiting approval</p>
                 </div>
             </div>
@@ -94,7 +94,7 @@
                 </div>
                 <div class="min-w-0">
                     <p class="text-xs text-gray-400 font-medium">Approved</p>
-                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">{{ $tab === 'cash_advances' ? $caApprovedCount : $loanApprovedCount }}</p>
+                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">{{ $caApprovedCount + $loanApprovedCount }}</p>
                     <p class="text-[0.55rem] text-gray-400 font-mono mt-0.5">ready for release</p>
                 </div>
             </div>
@@ -106,8 +106,8 @@
                 </div>
                 <div class="min-w-0">
                     <p class="text-xs text-gray-400 font-medium">Released Total</p>
-                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($tab === 'cash_advances' ? ($caReleasedTotal ?? 0) : ($loanReleasedTotal ?? 0), 2) }}</p>
-                    <p class="text-[0.55rem] text-gray-400 font-mono mt-0.5">{{ $tab === 'cash_advances' ? $totalCashAdvances : $totalSalaryLoans }} total {{ $tab === 'cash_advances' ? 'advances' : 'loans' }}</p>
+                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format(($caReleasedTotal ?? 0) + ($loanReleasedTotal ?? 0), 2) }}</p>
+                    <p class="text-[0.55rem] text-gray-400 font-mono mt-0.5">{{ $totalCashAdvances + $totalSalaryLoans }} total requests</p>
                 </div>
             </div>
         </div>
@@ -128,7 +128,7 @@
     {{-- ══════════════════════════════════════════
          CASH ADVANCES TAB
     ══════════════════════════════════════════ --}}
-    @if($tab === 'cash_advances')
+    <div id="tab-cash_advances" class="tab-panel {{ $tab !== 'cash_advances' ? 'hidden' : '' }} active-panel">
 
     {{-- Filter bar --}}
     <div class="filter-bar flex items-center gap-3 flex-wrap">
@@ -179,12 +179,12 @@
             <nav id="caPaginationNav" class="flex items-center gap-1"></nav>
         </div>
     </div>
-    @endif
+    </div>
 
     {{-- ══════════════════════════════════════════
          SALARY LOANS TAB
     ══════════════════════════════════════════ --}}
-    @if($tab === 'salary_loans')
+    <div id="tab-salary_loans" class="tab-panel {{ $tab !== 'salary_loans' ? 'hidden' : '' }} active-panel">
 
     {{-- Filter bar --}}
     <div class="filter-bar flex items-center gap-3 flex-wrap">
@@ -236,7 +236,7 @@
             <nav id="loanPaginationNav" class="flex items-center gap-1"></nav>
         </div>
     </div>
-    @endif
+    </div>
 
 </div>
 
@@ -288,7 +288,7 @@ window.allCashAdvances = {!! json_encode($allCashAdvances?->map(fn($a) => [
     'rejection_reason' => $a->rejection_reason,
     'url' => route('payroll.receivables.cash-advances.show', $a),
     'role' => auth()->user()->role,
-]) : []) !!};
+]) ?? []) !!};
 
 window.allSalaryLoans = {!! json_encode($allSalaryLoans?->map(fn($l) => [
     'id' => $l->id,
@@ -307,9 +307,61 @@ window.allSalaryLoans = {!! json_encode($allSalaryLoans?->map(fn($l) => [
     'rejection_reason' => $l->rejection_reason,
     'url' => route('payroll.receivables.salary-loans.show', $l),
     'role' => auth()->user()->role,
-]) : []) !!};
+]) ?? []) !!};
 
 (function () {
+    // Tab switching — client-side
+    var activeTab = '{{ $tab }}';
+    var tabBtns = document.querySelectorAll('.tab-btn');
+    var panels  = document.querySelectorAll('.tab-panel');
+    var tabStyles = {
+        cash_advances: { border: 'border-blue-500', text: 'text-blue-700', bg: 'bg-blue-50/60', icon: 'text-blue-500' },
+        salary_loans:  { border: 'border-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50/60', icon: 'text-emerald-500' },
+    };
+    var inactiveBtn = ['border-transparent', 'text-gray-400', 'hover:text-gray-600', 'hover:border-gray-300', 'hover:bg-gray-50/50'];
+    var inactiveSvg = ['text-gray-400', 'group-hover:text-gray-500'];
+
+    tabBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var tab = this.dataset.tab;
+            if (tab === activeTab) return;
+
+            var prev = document.getElementById('tab-' + activeTab);
+            if (prev) { prev.classList.add('hidden'); prev.classList.remove('active-panel'); }
+
+            var next = document.getElementById('tab-' + tab);
+            if (next) { next.classList.remove('hidden'); next.classList.add('active-panel'); }
+
+            tabBtns.forEach(function(b) {
+                b.classList.remove('border-blue-500','text-blue-700','bg-blue-50/60',
+                    'border-emerald-500','text-emerald-700','bg-emerald-50/60');
+                b.classList.add.apply(b.classList, inactiveBtn);
+                var svg = b.querySelector('svg');
+                if (svg) {
+                    svg.classList.remove('text-blue-500','text-emerald-500');
+                    svg.classList.add.apply(svg.classList, inactiveSvg);
+                }
+            });
+
+            var s = tabStyles[tab];
+            this.classList.remove.apply(this.classList, inactiveBtn);
+            this.classList.add(s.border, s.text, s.bg);
+
+            var svg = this.querySelector('svg');
+            if (svg) {
+                svg.classList.remove.apply(svg.classList, inactiveSvg);
+                svg.classList.add(s.icon);
+            }
+
+            var url = new URL(window.location);
+            url.searchParams.set('tab', tab);
+            url.searchParams.delete('page');
+            history.replaceState(null, '', url.toString());
+
+            activeTab = tab;
+        });
+    });
+
     const isAcc = {{ auth()->user()->role === 'accountant' ? 'true' : 'false' }};
     const caColspan = isAcc ? 8 : 7;
 

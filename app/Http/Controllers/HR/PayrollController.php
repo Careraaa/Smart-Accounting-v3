@@ -184,18 +184,21 @@
                 $previewCaDeduction = 0;
                 $previewSlDeduction = 0;
                 $previewAdvances = \App\Models\CashAdvance::where('user_id', $employee->id)
-                    ->whereIn('status', ['released', 'approved'])
+                    ->where('status', 'released')
                     ->whereColumn('amount_deducted', '<', 'amount')
                     ->get();
                 foreach ($previewAdvances as $adv) {
-                    $previewCaDeduction += $adv->monthly_deduction > 0 ? $adv->monthly_deduction : $adv->amount;
+                    $semiMonthly = $adv->monthly_deduction > 0 ? $adv->monthly_deduction / 2 : 0;
+                    $previewCaDeduction += $adv->monthly_deduction > 0
+                        ? min($semiMonthly, $adv->amount - $adv->amount_deducted)
+                        : $adv->amount;
                 }
                 $previewLoans = \App\Models\SalaryLoan::where('user_id', $employee->id)
-                    ->whereIn('status', ['released', 'approved'])
+                    ->where('status', 'released')
                     ->where('remaining_balance', '>', 0)
                     ->get();
                 foreach ($previewLoans as $ln) {
-                    $previewSlDeduction += min($ln->monthly_deduction, $ln->remaining_balance);
+                    $previewSlDeduction += min($ln->monthly_deduction / 2, $ln->remaining_balance);
                 }
             }
 

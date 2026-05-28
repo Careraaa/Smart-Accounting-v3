@@ -14,20 +14,14 @@ class PayrollReceivablesController extends Controller
     {
         $tab = $request->get('tab', 'cash_advances');
 
-        $cashAdvances = collect();
-        $salaryLoans  = collect();
+        // Load ALL data upfront so tabs can switch client-side
+        $allCashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        if ($tab === 'cash_advances') {
-            $allCashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
-
-        if ($tab === 'salary_loans') {
-            $allSalaryLoans = SalaryLoan::with('user')
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
+        $allSalaryLoans = SalaryLoan::with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Stats: count by status
         $caPendingCount    = CashAdvance::where('status', 'pending')->count();
@@ -38,10 +32,9 @@ class PayrollReceivablesController extends Controller
         $loanApprovedCount  = SalaryLoan::where('status', 'approved')->count();
         $loanReleasedTotal  = SalaryLoan::where('status', 'released')->sum('loan_amount') ?? 0;
 
-        // Stat cards data
         $totalCashAdvances = CashAdvance::count();
         $totalSalaryLoans = SalaryLoan::count();
-        
+
         // Outstanding amount = approved and released remaining balances + approved and released cash advances
         $approvedLoanRemaining = SalaryLoan::whereIn('status', ['approved', 'released'])->sum('remaining_balance') ?? 0;
         $approvedCashNotReleased = CashAdvance::where('status', 'approved')->sum('amount') ?? 0;

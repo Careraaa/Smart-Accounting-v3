@@ -263,7 +263,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">This Week</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $thisWeekLeaves }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $pendingWeekLeaves }}</div>
                     <div class="text-xs text-gray-400 mt-1">Pending requests</div>
                 </div>
             </div>
@@ -273,7 +273,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">This Month</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $thisMonthLeaves }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $pendingMonthLeaves }}</div>
                     <div class="text-xs text-gray-400 mt-1">Total requests</div>
                 </div>
             </div>
@@ -304,7 +304,7 @@
         {{-- Table --}}
         <div class="table-wrap">
             @include('hr.leave._partials.leave-table', [
-                'leaves' => $allLeaves,
+                'leaves' => $pendingLeaves,
                 'columns' => ['employee', 'department', 'leave_type', 'dates', 'days', 'applied'],
                 'status' => 'pending',
                 'emptyTitle' => 'No pending leave requests',
@@ -333,7 +333,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">This Week</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $thisWeekLeaves }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $approvedWeekLeaves }}</div>
                     <div class="text-xs text-gray-400 mt-1">Approved this week</div>
                 </div>
             </div>
@@ -343,7 +343,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">This Month</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $thisMonthLeaves }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $approvedMonthLeaves }}</div>
                     <div class="text-xs text-gray-400 mt-1">Approved this month</div>
                 </div>
             </div>
@@ -378,7 +378,7 @@
         {{-- Table --}}
         <div class="table-wrap">
             @include('hr.leave._partials.leave-table', [
-                'leaves' => $allLeaves,
+                'leaves' => $approvedLeaves,
                 'columns' => ['employee', 'department', 'leave_type', 'dates', 'days', 'pay_status', 'approved_date'],
                 'status' => 'approved',
                 'emptyTitle' => 'No approved leave requests',
@@ -407,7 +407,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">This Week</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $thisWeekLeaves }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $rejectedWeekLeaves }}</div>
                     <div class="text-xs text-gray-400 mt-1">Rejected this week</div>
                 </div>
             </div>
@@ -417,7 +417,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">This Month</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $thisMonthLeaves }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $rejectedMonthLeaves }}</div>
                     <div class="text-xs text-gray-400 mt-1">Rejected this month</div>
                 </div>
             </div>
@@ -448,7 +448,7 @@
         {{-- Table --}}
         <div class="table-wrap">
             @include('hr.leave._partials.leave-table', [
-                'leaves' => $allLeaves,
+                'leaves' => $rejectedLeaves,
                 'columns' => ['employee', 'department', 'leave_type', 'dates', 'days', 'rejected_date'],
                 'status' => 'rejected',
                 'emptyTitle' => 'No rejected leave requests',
@@ -462,164 +462,232 @@
 @push('scripts')
 <script>
 (function(){
-    // Tab switching
-    const tabs = document.querySelectorAll('.tab-btn');
-    tabs.forEach(btn => {
+    var activeTab = '{{ $tab }}';
+
+    // Tab switching — client-side, no page reload
+    var tabBtns = document.querySelectorAll('.tab-btn');
+    var panels  = document.querySelectorAll('.tab-panel');
+
+    var tabStyles = {
+        types:    { border: 'border-violet-600',  text: 'text-violet-700',  bg: 'bg-violet-50/60',  icon: 'text-violet-600',  badge: { bg: '',                  text: '' } },
+        pending:  { border: 'border-amber-500',   text: 'text-amber-700',  bg: 'bg-amber-50/60',  icon: 'text-amber-500',  badge: { bg: 'bg-amber-100',      text: 'text-amber-800' } },
+        approved: { border: 'border-emerald-500', text: 'text-emerald-700',bg: 'bg-emerald-50/60', icon: 'text-emerald-500', badge: { bg: 'bg-emerald-100',    text: 'text-emerald-800' } },
+        rejected: { border: 'border-red-500',     text: 'text-red-700',    bg: 'bg-red-50/60',    icon: 'text-red-500',    badge: { bg: '',                  text: '' } }
+    };
+
+    var inactiveBtn = ['border-transparent', 'text-gray-400', 'hover:text-gray-600', 'hover:border-gray-300', 'hover:bg-gray-50/50'];
+    var inactiveSvg = ['text-gray-400', 'group-hover:text-gray-500'];
+    var inactiveBadge = ['bg-gray-200', 'text-gray-600'];
+
+    tabBtns.forEach(function(btn) {
         btn.addEventListener('click', function() {
-            const tab = this.dataset.tab;
-            const url = new URL(window.location);
+            var tab = this.dataset.tab;
+            if (tab === activeTab) return;
+
+            // Hide previous panel
+            var prev = document.getElementById('tab-' + activeTab);
+            if (prev) { prev.classList.add('hidden'); prev.classList.remove('active-panel'); }
+
+            // Show target panel
+            var next = document.getElementById('tab-' + tab);
+            if (next) { next.classList.remove('hidden'); next.classList.add('active-panel'); }
+
+            // Deactivate all buttons
+            tabBtns.forEach(function(b) {
+                b.classList.remove('border-violet-600','text-violet-700','bg-violet-50/60',
+                    'border-amber-500','text-amber-700','bg-amber-50/60',
+                    'border-emerald-500','text-emerald-700','bg-emerald-50/60',
+                    'border-red-500','text-red-700','bg-red-50/60');
+                b.classList.add.apply(b.classList, inactiveBtn);
+
+                var svg = b.querySelector('svg');
+                if (svg) {
+                    svg.classList.remove('text-violet-600','text-amber-500','text-emerald-500','text-red-500');
+                    svg.classList.add.apply(svg.classList, inactiveSvg);
+                }
+
+                var badge = b.querySelector('[class*="ml-1"]');
+                if (badge) {
+                    badge.classList.remove('bg-amber-100','text-amber-800','bg-emerald-100','text-emerald-800');
+                    badge.classList.add.apply(badge.classList, inactiveBadge);
+                }
+            });
+
+            // Activate target button
+            var s = tabStyles[tab];
+            this.classList.remove.apply(this.classList, inactiveBtn);
+            this.classList.add(s.border, s.text, s.bg);
+
+            var svg = this.querySelector('svg');
+            if (svg) {
+                svg.classList.remove.apply(svg.classList, inactiveSvg);
+                svg.classList.add(s.icon);
+            }
+
+            var badge = this.querySelector('[class*="ml-1"]');
+            if (badge && s.badge.bg) {
+                badge.classList.remove.apply(badge.classList, inactiveBadge);
+                badge.classList.add(s.badge.bg, s.badge.text);
+            }
+
+            // Update URL without reload
+            var url = new URL(window.location);
             url.searchParams.set('tab', tab);
             url.searchParams.delete('page');
-            window.location.href = url.toString();
+            history.replaceState(null, '', url.toString());
+
+            activeTab = tab;
+
+            if (['pending','approved','rejected'].indexOf(tab) !== -1) initTable(tab);
         });
     });
 
-    var currentTab = '{{ $tab }}';
-    if (['pending','approved','rejected'].indexOf(currentTab) === -1) return;
-
+    // === Table initializer (shared for pending/approved/rejected) ===
+    var initialized = {};
     var columnConfig = {
         pending:  { show: ['employee','department','leave_type','dates','days','applied'] },
         approved: { show: ['employee','department','leave_type','dates','days','pay_status','approved_date'] },
         rejected: { show: ['employee','department','leave_type','dates','days','rejected_date'] },
     };
 
-    var cols = columnConfig[currentTab].show;
-    var data = window['leaveData_' + currentTab] || [];
-    var PER = 10;
-    var page = 1, filtered = [];
+    function initTable(tab) {
+        if (initialized[tab]) return;
+        initialized[tab] = true;
 
-    var search = document.querySelector('#tab-' + currentTab + ' #lvSearch');
-    var deptF  = document.querySelector('#tab-' + currentTab + ' #lvDeptFilter');
-    var typeF  = document.querySelector('#tab-' + currentTab + ' #lvTypeFilter');
+        var cols = columnConfig[tab] ? columnConfig[tab].show : [];
+        if (!cols.length) return;
 
-    function applyFilters() {
-        var q = search ? search.value.toLowerCase().trim() : '';
-        var dt = deptF ? deptF.value : '';
-        var ty = typeF ? typeF.value : '';
-        filtered = data.filter(function(r) {
-            if (q && !r.name_lower.includes(q)) return false;
-            if (dt && r.dept !== dt) return false;
-            if (ty && r.type !== ty) return false;
-            return true;
-        });
-        page = 1;
-        render();
-    }
+        var data = window['leaveData_' + tab] || [];
+        var PER = 10;
+        var page = 1, filtered = [];
 
-    function render() {
-        var tbody = document.getElementById('lvTbody_' + currentTab);
-        var noRes = document.getElementById('lvNoRes_' + currentTab);
-        var emptyT = document.getElementById('lvEmptyTitle_' + currentTab);
-        var emptyS = document.getElementById('lvEmptySub_' + currentTab);
-        if (!tbody) return;
+        var search = document.querySelector('#tab-' + tab + ' #lvSearch');
+        var deptF  = document.querySelector('#tab-' + tab + ' #lvDeptFilter');
+        var typeF  = document.querySelector('#tab-' + tab + ' #lvTypeFilter');
 
-        var start = (page - 1) * PER;
-        var end = Math.min(start + PER, filtered.length);
-        var pageData = filtered.slice(start, end);
-        tbody.innerHTML = '';
+        function applyFilters() {
+            var q = search ? search.value.toLowerCase().trim() : '';
+            var dt = deptF ? deptF.value : '';
+            var ty = typeF ? typeF.value : '';
+            filtered = data.filter(function(r) {
+                if (q && !r.name_lower.includes(q)) return false;
+                if (dt && r.dept !== dt) return false;
+                if (ty && r.type !== ty) return false;
+                return true;
+            });
+            page = 1;
+            render();
+        }
 
-        if (pageData.length === 0) {
-            if (noRes) noRes.classList.remove('hidden');
-            if (emptyT && filtered.length === 0) { /* keep original text */ }
-            else if (emptyT) emptyT.textContent = 'No results found';
-            if (emptyS && filtered.length === 0) { /* keep original text */ }
-            else if (emptyS) emptyS.textContent = 'Try a different search or filter.';
-        } else {
-            if (noRes) noRes.classList.add('hidden');
-            pageData.forEach(function(r) {
-                var tr = document.createElement('tr');
-                tr.className = 'border-b border-gray-100 hover:bg-gray-50/50 transition-colors cursor-pointer';
-                tr.dataset.name = r.name_lower;
-                tr.dataset.dept = r.dept;
-                tr.dataset.type = r.type;
-                tr.onclick = function() { window.location = r.url; };
+        function render() {
+            var tbody = document.getElementById('lvTbody_' + tab);
+            var noRes = document.getElementById('lvNoRes_' + tab);
+            var emptyT = document.getElementById('lvEmptyTitle_' + tab);
+            var emptyS = document.getElementById('lvEmptySub_' + tab);
+            if (!tbody) return;
 
-                var html = '';
+            var start = (page - 1) * PER;
+            var end = Math.min(start + PER, filtered.length);
+            var pageData = filtered.slice(start, end);
+            tbody.innerHTML = '';
 
-                // Employee column
-                if (cols.indexOf('employee') !== -1) {
-                    html += '<td class="px-4 py-3.5"><div class="font-semibold text-gray-900 text-sm">' + r.name + '</div></td>';
-                }
-                // Department column
-                if (cols.indexOf('department') !== -1) {
-                    html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.department_display + '</span></td>';
-                }
-                // Leave type column
-                if (cols.indexOf('leave_type') !== -1) {
-                    var tCls = currentTab === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' : (currentTab === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200');
-                    html += '<td class="px-4 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ' + tCls + '">' + r.type_display + '</span></td>';
-                }
-                // Dates column
-                if (cols.indexOf('dates') !== -1) {
-                    html += '<td class="px-4 py-3.5"><span class="text-sm text-gray-700 font-mono">' + r.start_date + ' – ' + r.end_date + '</span></td>';
-                }
-                // Days column
-                if (cols.indexOf('days') !== -1) {
-                    html += '<td class="px-4 py-3.5"><span class="font-bold text-gray-900">' + r.days + '<span class="text-gray-400 font-normal text-xs">d</span></span></td>';
-                }
-                // Pay status column
-                if (cols.indexOf('pay_status') !== -1) {
-                    var psCls = r.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                    html += '<td class="px-4 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ' + psCls + '">' + (r.status === 'paid' ? 'Paid' : 'Approved') + '</span></td>';
-                }
-                // Applied column
-                if (cols.indexOf('applied') !== -1) {
-                    html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.created_at + '</span></td>';
-                }
-                // Approved date column
-                if (cols.indexOf('approved_date') !== -1) {
-                    html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.updated_at + '</span></td>';
-                }
-                // Rejected date column
-                if (cols.indexOf('rejected_date') !== -1) {
-                    html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.updated_at + '</span></td>';
-                }
+            if (pageData.length === 0) {
+                if (noRes) noRes.classList.remove('hidden');
+                if (emptyT && filtered.length === 0) { /* keep */ }
+                else if (emptyT) emptyT.textContent = 'No results found';
+                if (emptyS && filtered.length === 0) { /* keep */ }
+                else if (emptyS) emptyS.textContent = 'Try a different search or filter.';
+            } else {
+                if (noRes) noRes.classList.add('hidden');
+                pageData.forEach(function(r) {
+                    var tr = document.createElement('tr');
+                    tr.className = 'border-b border-gray-100 hover:bg-gray-50/50 transition-colors cursor-pointer';
+                    tr.dataset.name = r.name_lower;
+                    tr.dataset.dept = r.dept;
+                    tr.dataset.type = r.type;
+                    tr.onclick = function() { window.location = r.url; };
 
-                tr.innerHTML = html;
-                tbody.appendChild(tr);
+                    var html = '';
+
+                    if (cols.indexOf('employee') !== -1) {
+                        html += '<td class="px-4 py-3.5"><div class="font-semibold text-gray-900 text-sm">' + r.name + '</div></td>';
+                    }
+                    if (cols.indexOf('department') !== -1) {
+                        html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.department_display + '</span></td>';
+                    }
+                    if (cols.indexOf('leave_type') !== -1) {
+                        var tCls = tab === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' : (tab === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200');
+                        html += '<td class="px-4 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ' + tCls + '">' + r.type_display + '</span></td>';
+                    }
+                    if (cols.indexOf('dates') !== -1) {
+                        html += '<td class="px-4 py-3.5"><span class="text-sm text-gray-700 font-mono">' + r.start_date + ' – ' + r.end_date + '</span></td>';
+                    }
+                    if (cols.indexOf('days') !== -1) {
+                        html += '<td class="px-4 py-3.5"><span class="font-bold text-gray-900">' + r.days + '<span class="text-gray-400 font-normal text-xs">d</span></span></td>';
+                    }
+                    if (cols.indexOf('pay_status') !== -1) {
+                        var psCls = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                        html += '<td class="px-4 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ' + psCls + '">' + (r.status === 'paid' ? 'Paid' : 'Approved') + '</span></td>';
+                    }
+                    if (cols.indexOf('applied') !== -1) {
+                        html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.created_at + '</span></td>';
+                    }
+                    if (cols.indexOf('approved_date') !== -1) {
+                        html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.updated_at + '</span></td>';
+                    }
+                    if (cols.indexOf('rejected_date') !== -1) {
+                        html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.updated_at + '</span></td>';
+                    }
+
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                });
+            }
+            updatePagination();
+        }
+
+        function updatePagination() {
+            var total = filtered.length;
+            var pages = Math.ceil(total / PER);
+            var info  = document.getElementById('lvInfo_' + tab);
+            var nav   = document.getElementById('lvNav_' + tab);
+            if (!info || !nav) return;
+            if (total === 0) { info.innerHTML = 'No records to display'; nav.innerHTML = ''; return; }
+            var s = (page - 1) * PER + 1, e = Math.min(page * PER, total);
+            info.innerHTML = 'Showing <strong class="text-gray-700">' + s + '</strong>&ndash;<strong class="text-gray-700">' + e + '</strong> of <strong class="text-gray-700">' + total + '</strong>';
+            if (pages <= 1) { nav.innerHTML = ''; return; }
+
+            var base = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+            var act  = base + ' bg-gray-900 text-white border-gray-900';
+            var def  = base + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+            var dis  = base + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+
+            var h = '';
+            h += '<button data-p="' + (page - 1) + '" class="' + (page === 1 ? dis : def) + '">‹</button>';
+            for (var i = 1; i <= pages; i++) {
+                h += '<button data-p="' + i + '" class="' + (i === page ? act : def) + '">' + i + '</button>';
+            }
+            h += '<button data-p="' + (page + 1) + '" class="' + (page === pages ? dis : def) + '">›</button>';
+            nav.innerHTML = h;
+            nav.querySelectorAll('button[data-p]').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var p = parseInt(btn.dataset.p);
+                    if (p < 1 || p > pages) return;
+                    page = p;
+                    render();
+                });
             });
         }
-        updatePagination();
+
+        if (search) search.addEventListener('input', applyFilters);
+        if (deptF) deptF.addEventListener('change', applyFilters);
+        if (typeF) typeF.addEventListener('change', applyFilters);
+        applyFilters();
     }
 
-    function updatePagination() {
-        var total = filtered.length;
-        var pages = Math.ceil(total / PER);
-        var info  = document.getElementById('lvInfo_' + currentTab);
-        var nav   = document.getElementById('lvNav_' + currentTab);
-        if (!info || !nav) return;
-        if (total === 0) { info.innerHTML = 'No records to display'; nav.innerHTML = ''; return; }
-        var s = (page - 1) * PER + 1, e = Math.min(page * PER, total);
-        info.innerHTML = 'Showing <strong class="text-gray-700">' + s + '</strong>&ndash;<strong class="text-gray-700">' + e + '</strong> of <strong class="text-gray-700">' + total + '</strong>';
-        if (pages <= 1) { nav.innerHTML = ''; return; }
-
-        var base = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
-        var act  = base + ' bg-gray-900 text-white border-gray-900';
-        var def  = base + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
-        var dis  = base + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
-
-        var html = '';
-        html += '<button data-p="' + (page - 1) + '" class="' + (page === 1 ? dis : def) + '">‹</button>';
-        for (var i = 1; i <= pages; i++) {
-            html += '<button data-p="' + i + '" class="' + (i === page ? act : def) + '">' + i + '</button>';
-        }
-        html += '<button data-p="' + (page + 1) + '" class="' + (page === pages ? dis : def) + '">›</button>';
-        nav.innerHTML = html;
-        nav.querySelectorAll('button[data-p]').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                var p = parseInt(btn.dataset.p);
-                if (p < 1 || p > pages) return;
-                page = p;
-                render();
-            });
-        });
-    }
-
-    if (search) search.addEventListener('input', applyFilters);
-    if (deptF) deptF.addEventListener('change', applyFilters);
-    if (typeF) typeF.addEventListener('change', applyFilters);
-    applyFilters();
+    // Initialize all three data tabs on page load
+    ['pending','approved','rejected'].forEach(initTable);
 })();
 </script>
 @endpush

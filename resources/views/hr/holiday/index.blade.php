@@ -60,22 +60,22 @@
             {{-- All Holidays --}}
             <button role="tab" data-tab="all"
                 class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group
-                {{ $status === 'all'
+                {{ $tab === 'all'
                     ? 'border-cyan-600 text-cyan-700 bg-cyan-50/60'
                     : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
                 <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 {{ $status === 'all' ? 'text-cyan-600' : 'text-gray-400 group-hover:text-gray-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <svg class="w-4 h-4 {{ $tab === 'all' ? 'text-cyan-600' : 'text-gray-400 group-hover:text-gray-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     All Holidays
                 </span>
             </button>
             {{-- Active & Upcoming --}}
             <button role="tab" data-tab="active"
                 class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group
-                {{ $status === 'active'
+                {{ $tab === 'active'
                     ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60'
                     : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
                 <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 {{ $status === 'active' ? 'text-emerald-500' : 'text-gray-400 group-hover:text-gray-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <svg class="w-4 h-4 {{ $tab === 'active' ? 'text-emerald-500' : 'text-gray-400 group-hover:text-gray-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     Active &amp; Upcoming
                 </span>
             </button>
@@ -83,7 +83,7 @@
     </div>
 
     {{-- ===== TAB: ALL HOLIDAYS ===== --}}
-    <div id="tab-all" class="tab-panel {{ $status !== 'all' ? 'hidden' : '' }} active-panel">
+    <div id="tab-all" class="tab-panel {{ $tab !== 'all' ? 'hidden' : '' }} active-panel">
 
         {{-- Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
@@ -93,7 +93,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Total Holidays</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $holidays->total() }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $totalCount }}</div>
                 </div>
             </div>
             <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-emerald-200 transition-all duration-300">
@@ -102,7 +102,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Regular</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $holidays->where('type','regular')->count() }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $regularCount }}</div>
                 </div>
             </div>
             <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-start gap-3.5 hover:shadow-md hover:border-amber-200 transition-all duration-300">
@@ -111,7 +111,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Special</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $holidays->where('type','special')->count() }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $specialCount }}</div>
                 </div>
             </div>
         </div>
@@ -119,7 +119,7 @@
         {{-- Filter bar --}}
         <div class="filter-bar flex items-center gap-2.5 mb-4 flex-wrap">
             <span class="text-xs font-semibold text-gray-500">Year:</span>
-            <select onchange="window.location='{{ route('holiday.index') }}?status=all&year=' + this.value"
+            <select onchange="window.location='{{ route('holiday.index') }}?tab=all&year=' + this.value"
                 class="px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white text-gray-700 outline-none transition-all duration-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200/50 hover:border-gray-300 cursor-pointer">
                 @foreach($availableYears as $yr)
                     <option value="{{ $yr }}" @selected($year == $yr)>{{ $yr }}</option>
@@ -140,7 +140,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($holidays as $holiday)
+                        @forelse($allHolidays as $holiday)
                         <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors duration-150 cursor-pointer"
                             onclick="window.location='{{ route('holiday.edit', $holiday) }}'">
                             <td class="px-5 py-3.5">
@@ -188,43 +188,11 @@
                 </table>
             </div>
 
-            {{-- Pagination --}}
-            @if(method_exists($holidays, 'hasPages') && $holidays->hasPages())
-            <div class="flex flex-wrap items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 gap-3">
-                <div class="text-xs text-gray-400">
-                    Showing
-                    <strong class="text-gray-600">{{ $holidays->firstItem() }}</strong>&ndash;<strong class="text-gray-600">{{ $holidays->lastItem() }}</strong>
-                    of
-                    <strong class="text-gray-600">{{ $holidays->total() }}</strong> holidays
-                </div>
-                <nav class="flex items-center gap-1">
-                    @if($holidays->onFirstPage())
-                        <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed">‹</span>
-                    @else
-                        <a href="{{ $holidays->previousPageUrl() }}" class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold bg-white text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors no-underline">‹</a>
-                    @endif
-
-                    @foreach($holidays->getUrlRange(max(1, $holidays->currentPage() - 2), min($holidays->lastPage(), $holidays->currentPage() + 2)) as $page => $url)
-                        <a href="{{ $url }}"
-                           class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold transition-colors no-underline
-                            {{ $page === $holidays->currentPage() ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100' }}">
-                            {{ $page }}
-                        </a>
-                    @endforeach
-
-                    @if($holidays->hasMorePages())
-                        <a href="{{ $holidays->nextPageUrl() }}" class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold bg-white text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors no-underline">›</a>
-                    @else
-                        <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed">›</span>
-                    @endif
-                </nav>
-            </div>
-            @endif
         </div>
     </div>
 
     {{-- ===== TAB: ACTIVE & UPCOMING ===== --}}
-    <div id="tab-active" class="tab-panel {{ $status !== 'active' ? 'hidden' : '' }} active-panel">
+    <div id="tab-active" class="tab-panel {{ $tab !== 'active' ? 'hidden' : '' }} active-panel">
 
         {{-- Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
@@ -234,7 +202,7 @@
                 </div>
                 <div>
                     <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Upcoming Holidays</div>
-                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $holidays->total() }}</div>
+                    <div class="text-2xl font-bold text-gray-900 tabular-nums mt-0.5">{{ $upcomingCount }}</div>
                     <div class="text-xs text-gray-400 mt-1">In {{ $year }}</div>
                 </div>
             </div>
@@ -253,7 +221,7 @@
         {{-- Filter bar --}}
         <div class="filter-bar flex items-center gap-2.5 mb-4 flex-wrap">
             <span class="text-xs font-semibold text-gray-500">Year:</span>
-            <select onchange="window.location='{{ route('holiday.index') }}?status=active&year=' + this.value"
+            <select onchange="window.location='{{ route('holiday.index') }}?tab=active&year=' + this.value"
                 class="px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white text-gray-700 outline-none transition-all duration-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200/50 hover:border-gray-300 cursor-pointer">
                 @foreach($availableYears as $yr)
                     <option value="{{ $yr }}" @selected($year == $yr)>{{ $yr }}</option>
@@ -274,7 +242,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($holidays as $holiday)
+                        @forelse($activeHolidays as $holiday)
                         <tr class="border-b border-gray-100 hover:bg-emerald-50/30 transition-colors duration-150 cursor-pointer"
                             onclick="window.location='{{ route('holiday.edit', $holiday) }}'">
                             <td class="px-5 py-3.5">
@@ -322,38 +290,6 @@
                 </table>
             </div>
 
-            {{-- Pagination --}}
-            @if(method_exists($holidays, 'hasPages') && $holidays->hasPages())
-            <div class="flex flex-wrap items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 gap-3">
-                <div class="text-xs text-gray-400">
-                    Showing
-                    <strong class="text-gray-600">{{ $holidays->firstItem() }}</strong>&ndash;<strong class="text-gray-600">{{ $holidays->lastItem() }}</strong>
-                    of
-                    <strong class="text-gray-600">{{ $holidays->total() }}</strong> upcoming holidays
-                </div>
-                <nav class="flex items-center gap-1">
-                    @if($holidays->onFirstPage())
-                        <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed">‹</span>
-                    @else
-                        <a href="{{ $holidays->previousPageUrl() }}" class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold bg-white text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors no-underline">‹</a>
-                    @endif
-
-                    @foreach($holidays->getUrlRange(max(1, $holidays->currentPage() - 2), min($holidays->lastPage(), $holidays->currentPage() + 2)) as $page => $url)
-                        <a href="{{ $url }}"
-                           class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold transition-colors no-underline
-                            {{ $page === $holidays->currentPage() ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100' }}">
-                            {{ $page }}
-                        </a>
-                    @endforeach
-
-                    @if($holidays->hasMorePages())
-                        <a href="{{ $holidays->nextPageUrl() }}" class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold bg-white text-gray-600 border border-gray-200 hover:bg-gray-100 transition-colors no-underline">›</a>
-                    @else
-                        <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed">›</span>
-                    @endif
-                </nav>
-            </div>
-            @endif
         </div>
     </div>
 
@@ -362,14 +298,58 @@
 @push('scripts')
 <script>
 (function(){
-    const tabs = document.querySelectorAll('.tab-btn');
-    tabs.forEach(btn => {
+    var activeTab = '{{ $tab }}';
+
+    var tabBtns = document.querySelectorAll('.tab-btn');
+    var panels  = document.querySelectorAll('.tab-panel');
+
+    var tabStyles = {
+        all:    { border: 'border-cyan-600',  text: 'text-cyan-700',  bg: 'bg-cyan-50/60',  icon: 'text-cyan-600' },
+        active: { border: 'border-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50/60', icon: 'text-emerald-500' },
+    };
+
+    var inactiveBtn = ['border-transparent', 'text-gray-400', 'hover:text-gray-600', 'hover:border-gray-300', 'hover:bg-gray-50/50'];
+    var inactiveSvg = ['text-gray-400', 'group-hover:text-gray-500'];
+
+    tabBtns.forEach(function(btn) {
         btn.addEventListener('click', function() {
-            const tab = this.dataset.tab;
-            const url = new URL(window.location);
-            url.searchParams.set('status', tab);
+            var tab = this.dataset.tab;
+            if (tab === activeTab) return;
+
+            var prev = document.getElementById('tab-' + activeTab);
+            if (prev) { prev.classList.add('hidden'); prev.classList.remove('active-panel'); }
+
+            var next = document.getElementById('tab-' + tab);
+            if (next) { next.classList.remove('hidden'); next.classList.add('active-panel'); }
+
+            tabBtns.forEach(function(b) {
+                b.classList.remove('border-cyan-600','text-cyan-700','bg-cyan-50/60',
+                    'border-emerald-500','text-emerald-700','bg-emerald-50/60');
+                b.classList.add.apply(b.classList, inactiveBtn);
+
+                var svg = b.querySelector('svg');
+                if (svg) {
+                    svg.classList.remove('text-cyan-600','text-emerald-500');
+                    svg.classList.add.apply(svg.classList, inactiveSvg);
+                }
+            });
+
+            var s = tabStyles[tab];
+            this.classList.remove.apply(this.classList, inactiveBtn);
+            this.classList.add(s.border, s.text, s.bg);
+
+            var svg = this.querySelector('svg');
+            if (svg) {
+                svg.classList.remove.apply(svg.classList, inactiveSvg);
+                svg.classList.add(s.icon);
+            }
+
+            var url = new URL(window.location);
+            url.searchParams.set('tab', tab);
             url.searchParams.delete('page');
-            window.location.href = url.toString();
+            history.replaceState(null, '', url.toString());
+
+            activeTab = tab;
         });
     });
 })();
