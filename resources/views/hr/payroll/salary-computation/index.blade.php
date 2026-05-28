@@ -2,406 +2,224 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-*, *::before, *::after { box-sizing: border-box; }
-.prl-page { font-family: 'Sora', sans-serif; }
-
-/* ── Topbar ─────────────────────────────────────────────────── */
-.prl-topbar { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
-.prl-topbar-title { font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px; }
-.prl-topbar-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
-
-/* ── Flash ──────────────────────────────────────────────────── */
-.prl-flash { display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:0.82rem;font-weight:500;margin-bottom:20px;animation:flashIn 0.3s ease; }
-.prl-flash.success { background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d; }
-.prl-flash.error   { background:#fff0f0;border:1px solid #fecaca;color:#c8292a; }
-.prl-flash.info    { background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8; }
-@keyframes flashIn { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
-
-/* ── Stats ──────────────────────────────────────────────────── */
-.prl-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px; }
-@media (max-width:1100px) { .prl-stats { grid-template-columns:repeat(2,1fr); } }
-@media (max-width:600px)  { .prl-stats { grid-template-columns:1fr; } }
-.prl-stat { background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px 20px;display:flex;align-items:flex-start;gap:14px;position:relative;overflow:hidden;transition:box-shadow 0.15s; }
-.prl-stat:hover { box-shadow:0 4px 20px rgba(0,0,0,0.07); }
-.prl-stat::after { content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 14px 14px; }
-.prl-stat.s-red::after   { background:#c8292a; }
-.prl-stat.s-green::after { background:#16a34a; }
-.prl-stat.s-amber::after { background:#d97706; }
-.prl-stat.s-blue::after  { background:#0284c7; }
-.prl-stat-icon { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.prl-stat.s-red   .prl-stat-icon { background:#fff0f0;color:#c8292a; }
-.prl-stat.s-green .prl-stat-icon { background:#f0fdf4;color:#16a34a; }
-.prl-stat.s-amber .prl-stat-icon { background:#fffbeb;color:#d97706; }
-.prl-stat.s-blue  .prl-stat-icon { background:#f0f9ff;color:#0284c7; }
-.prl-stat-label { font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#9ca3af;margin-bottom:4px; }
-.prl-stat-value { font-size:1.6rem;font-weight:800;color:#111827;line-height:1;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace; }
-.prl-stat-sub   { font-size:0.73rem;color:#9ca3af;margin-top:4px; }
-
-/* ── Generate hero ──────────────────────────────────────────── */
-.prl-generate-card {
-    background:#111827;border-radius:16px;padding:28px 32px;
-    display:flex;align-items:center;justify-content:space-between;gap:24px;
-    margin-bottom:28px;flex-wrap:wrap;position:relative;overflow:hidden;
-}
-.prl-generate-card::before { content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(200,41,42,0.15);pointer-events:none; }
-.prl-generate-left { position:relative;z-index:1; }
-.prl-generate-eyebrow { font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#c8292a;margin-bottom:6px; }
-.prl-generate-title  { font-size:1.15rem;font-weight:800;color:#fff;margin:0 0 6px;letter-spacing:-0.02em; }
-.prl-generate-period { font-size:0.82rem;color:#6b7280;font-family:'DM Mono',monospace; }
-.prl-generate-right  { position:relative;z-index:1; }
-
-.prl-btn-generate {
-    display:inline-flex;align-items:center;gap:10px;padding:13px 28px;background:#c8292a;color:#fff;
-    border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:0.9rem;font-weight:700;
-    cursor:pointer;transition:background 0.15s,box-shadow 0.15s;
-    box-shadow:0 4px 20px rgba(200,41,42,0.5);white-space:nowrap;text-decoration:none;
-}
-.prl-btn-generate:hover { background:#a81f20;color:#fff;box-shadow:0 8px 28px rgba(200,41,42,0.6); }
-
-/* ── Filter bar ─────────────────────────────────────────────── */
-.prl-filter-bar { background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap; }
-.prl-search-wrap { position:relative;flex:1;min-width:180px; }
-.prl-search-wrap svg { position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none; }
-.prl-search-input { width:100%;border:1px solid #e5e7eb;border-radius:8px;padding:7px 12px 7px 32px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#111827;background:#f9fafb;outline:none;transition:border-color 0.15s; }
-.prl-search-input:focus { border-color:#c8292a;background:#fff;box-shadow:0 0 0 3px rgba(200,41,42,0.08); }
-.prl-filter-select { border:1px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-size:0.82rem;font-family:'Sora',sans-serif;color:#374151;background:#f9fafb;outline:none;cursor:pointer; }
-.prl-filter-select:focus { border-color:#c8292a; }
-
-/* ── Period selector ────────────────────────────────────────── */
-.prl-period-selector { margin-bottom: 16px; }
-.prl-period-label { display: block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #6b7280; margin-bottom: 8px; }
-.prl-period-select { width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; font-family: 'Sora', sans-serif; color: #111827; background: #f9fafb; outline: none; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
-.prl-period-select:focus { border-color: #c8292a; background: #fff; box-shadow: 0 0 0 3px rgba(200,41,42,0.08); }
-
-/* ── Batch table ─────────────────────────────────────────────── */
-.prl-table-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
-.prl-table-scroll { overflow-x:auto; }
-.prl-table { width:100%;border-collapse:collapse;font-size:0.835rem; }
-.prl-table thead tr { background:#f8f9fb;border-bottom:1px solid #e5e7eb; }
-.prl-table thead th { padding:11px 16px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#6b7280;white-space:nowrap; }
-.prl-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.12s;cursor:pointer; }
-.prl-table tbody tr:last-child { border-bottom:none; }
-.prl-table tbody tr:hover { background:#fdf4f4; }
-.prl-table tbody td { padding:13px 16px;color:#374151;vertical-align:middle; }
-
-.prl-batch-name { font-weight:700;color:#111827;font-size:0.845rem;line-height:1.2; }
-.prl-batch-sub  { font-size:0.72rem;color:#9ca3af;margin-top:2px;font-family:'DM Mono',monospace; }
-.prl-mono { font-family:'DM Mono',monospace;font-size:0.82rem;font-variant-numeric:tabular-nums; }
-.prl-mono.bold { color:#111827;font-weight:700; }
-.prl-period-tag { display:inline-block;font-family:'DM Mono',monospace;font-size:0.72rem;color:#6b7280;background:#f3f4f6;padding:2px 8px;border-radius:4px; }
-
-/* Status badges */
-.prl-status { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
-.prl-status::before { content:'';width:5px;height:5px;border-radius:50%; }
-.prl-status.s-submitted { background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe; }
-.prl-status.s-submitted::before { background:#8b5cf6; }
-.prl-status.s-approved  { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
-.prl-status.s-approved::before { background:#16a34a; }
-.prl-status.s-rejected  { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }
-.prl-status.s-rejected::before { background:#ef4444; }
-
-/* Action buttons */
-.prl-actions { display:flex;align-items:center;gap:6px;justify-content:flex-end; }
-.prl-action-btn {
-    display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;
-    font-family:'Sora',sans-serif;font-size:0.72rem;font-weight:700;
-    text-decoration:none;border:none;cursor:pointer;transition:all 0.12s;white-space:nowrap;
-}
-.prl-action-btn.edit    { background:#fffbeb;color:#d97706;border:1px solid #fde68a; }
-.prl-action-btn.edit:hover { background:#d97706;color:#fff;border-color:#d97706; }
-.prl-action-btn.reopen  { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }
-.prl-action-btn.reopen:hover { background:#c8292a;color:#fff;border-color:#c8292a; }
-.prl-action-btn.view    { background:#f3f4f6;color:#374151;border:1px solid #e5e7eb; }
-.prl-action-btn.view:hover { background:#111827;color:#fff;border-color:#111827; }
-
-/* ── Batch cards ────────────────────────────────────────────── */
-.prl-pending-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
-.prl-pending-header { padding:14px 18px;border-bottom:1px solid #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px; }
-.prl-pending-title { font-size:0.85rem;font-weight:700;color:#111827;display:flex;align-items:center;gap:8px;margin:0; }
-.prl-pending-sub { font-size:0.75rem;color:#9ca3af;margin:0; }
-.prl-pending-body { padding:0; }
-.prl-batch-grid { display:flex;flex-direction:column;gap:0; }
-@media (max-width:900px) { .prl-batch-grid { flex-direction:column; } }
-.prl-batch-col { width:100%;border-bottom:1px solid #f3f4f6; }
-.prl-batch-col:last-child { border-bottom:none; }
-.prl-batch-col-full { width:100%; }
-.prl-batch-card-link { text-decoration:none;color:inherit;display:block; }
-.prl-batch-card { background:#fff;border:none;border-radius:0;padding:0;transition:background 0.15s;cursor:pointer; }
-.prl-batch-card:hover { background:#fafafa; }
-.prl-batch-card-inner { display:flex;align-items:center;gap:18px;padding:18px 20px;flex-wrap:nowrap;justify-content:flex-start; }
-.prl-batch-card-icon { width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:1.35rem; }
-.prl-batch-card-icon.a { background:linear-gradient(135deg, #c8292a, #9f1e1f); }
-.prl-batch-card-icon.b { background:linear-gradient(135deg, #0284c7, #0369a1); }
-.prl-batch-card-content { flex:0 1 auto;min-width:200px; }
-.prl-batch-card-title { font-size:0.9rem;font-weight:700;color:#111827;margin:0 0 4px;line-height:1.2; }
-.prl-batch-card-date { font-size:0.75rem;color:#9ca3af;font-family:'DM Mono',monospace;margin:0; }
-.prl-batch-card-stats { display:flex;align-items:center;gap:18px;margin-left:auto;flex-shrink:0;flex-wrap:nowrap;justify-content:flex-end; }
-.prl-batch-status { display:inline-flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;flex-shrink:0;height:24px;min-width:100px; }
-.prl-batch-stat { display:flex;flex-direction:column;align-items:center;text-align:center;flex-shrink:0;min-width:80px;justify-content:center; }
-.prl-batch-stat small { font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;margin-bottom:4px;display:block; }
-.prl-batch-stat strong { font-family:'DM Mono',monospace;font-size:0.92rem;color:#111827;line-height:1.2;white-space:nowrap; }
-.prl-batch-card-arrow { width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:#d1d5db;flex-shrink:0;font-size:1.1rem;margin-left:12px; }
-
-/* Empty state */
-.prl-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 24px;text-align:center; }
-.prl-empty-icon  { width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#d1d5db; }
-.prl-empty-title { font-size:0.9rem;font-weight:700;color:#374151;margin:0 0 6px; }
-.prl-empty-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
-
-/* ── Confirmation modal ─────────────────────────────────────── */
-.prl-modal-overlay {
-    position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;
-    display:flex;align-items:center;justify-content:center;padding:20px;
-    opacity:0;pointer-events:none;transition:opacity 0.2s;
-}
-.prl-modal-overlay.open { opacity:1;pointer-events:all; }
-.prl-modal {
-    background:#fff;border-radius:18px;padding:32px;max-width:440px;width:100%;
-    box-shadow:0 20px 60px rgba(0,0,0,0.2);transform:translateY(12px);transition:transform 0.2s;
-}
-.prl-modal-overlay.open .prl-modal { transform:translateY(0); }
-.prl-modal-icon { width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px; }
-.prl-modal-icon.generate { background:#fff0f0;color:#c8292a; }
-.prl-modal-icon.resubmit { background:#fffbeb;color:#d97706; }
-.prl-modal-title { font-size:1.05rem;font-weight:800;color:#111827;text-align:center;margin:0 0 8px;letter-spacing:-0.01em; }
-.prl-modal-body  { font-size:0.82rem;color:#6b7280;text-align:center;margin:0 0 24px;line-height:1.6; }
-.prl-modal-period { display:inline-block;font-family:'DM Mono',monospace;font-size:0.78rem;background:#f3f4f6;padding:4px 12px;border-radius:6px;color:#374151;margin-bottom:16px; }
-.prl-modal-actions { display:flex;gap:10px; }
-.prl-modal-cancel {
-    flex:1;padding:11px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:600;cursor:pointer;transition:all 0.12s;
-}
-.prl-modal-cancel:hover { border-color:#c8292a;color:#c8292a; }
-.prl-modal-confirm {
-    flex:1;padding:11px;border:none;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;cursor:pointer;transition:all 0.12s;
-}
-.prl-modal-confirm.generate { background:#c8292a;color:#fff; }
-.prl-modal-confirm.generate:hover { background:#a81f20; }
-.prl-modal-confirm.resubmit { background:#d97706;color:#fff; }
-.prl-modal-confirm.resubmit:hover { background:#b45309; }
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+.stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(1) { animation-delay:0.05s; }
+.stat-card:nth-child(2) { animation-delay:0.1s; }
+.stat-card:nth-child(3) { animation-delay:0.15s; }
+.stat-card:nth-child(4) { animation-delay:0.2s; }
+.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.modal-card { animation:scaleIn 0.25s cubic-bezier(0.16,1,0.3,1) both; }
+.modal-overlay { animation:fadeSlideUp 0.2s ease-out both; }
 </style>
 @endpush
 
 @section('content')
-<div class="prl-page">
+<div class="space-y-5">
 
-    {{-- Flash messages --}}
+    {{-- Flash --}}
     @foreach(['success','error','info'] as $t)
         @if(session($t))
-        <div class="prl-flash {{ $t }}">
-            @if($t==='success')<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-            @else<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>@endif
-            {{ session($t) }}
+        <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium animate-[fadeSlideUp_0.3s_ease] @switch($t) @case('success') bg-green-50 text-green-700 @break @case('error') bg-red-50 text-red-700 @break @case('info') bg-blue-50 text-blue-700 @break @endswitch">
+            <span>{{ session($t) }}</span>
         </div>
         @endif
     @endforeach
 
-    {{-- Topbar --}}
-    <div class="prl-topbar">
-        <div>
-            <h1 class="prl-topbar-title">Payroll Management</h1>
-            <p class="prl-topbar-sub">Generate, review, and submit payroll batches for accounting approval</p>
-        </div>
+    <div class="fade-up">
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Payroll</h1>
+        <p class="text-sm text-gray-400 mt-0.5">Manage batches, review computations, and submit for approval</p>
     </div>
 
-    {{-- Generate hero --}}
-    <div class="prl-generate-card">
-        <div class="prl-generate-left">
-            <div class="prl-generate-eyebrow">
-                @if($currentInProgressBatch) Batch in progress @else Ready to generate @endif
-            </div>
-            <h2 class="prl-generate-title">
-                @if($currentInProgressBatch) Continue Batch @else Generate New Payroll Batch @endif
-            </h2>
-            <div class="prl-generate-period">
-                @if($currentInProgressBatch)
-                    Period: {{ \Carbon\Carbon::parse($currentInProgressBatch->period_start)->format('M d, Y') }} &mdash; {{ \Carbon\Carbon::parse($currentInProgressBatch->period_end)->format('M d, Y') }}
-                @else
-                    Select any period from the current or past 24 months to create a new batch
-                @endif
+    {{-- Metrics --}}
+    @php
+        $metrics = [
+            ['label'=>'Active Employees','value'=>$activeEmployees,'accent'=>'rose'],
+            ['label'=>'Pending Payrolls','value'=>$payrollCount,'accent'=>'amber'],
+            ['label'=>'Released','value'=>$releasedCount,'accent'=>'emerald'],
+            ['label'=>'Total Payroll','value'=>'₱'.number_format($totalPayroll,2),'accent'=>'blue'],
+        ];
+        $accentMap = ['rose'=>['icon'=>'bg-rose-50 text-rose-500','dot'=>'bg-rose-500'],'amber'=>['icon'=>'bg-amber-50 text-amber-500','dot'=>'bg-amber-500'],'emerald'=>['icon'=>'bg-emerald-50 text-emerald-500','dot'=>'bg-emerald-500'],'blue'=>['icon'=>'bg-blue-50 text-blue-500','dot'=>'bg-blue-500']];
+    @endphp
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        @foreach($metrics as $m)
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full {{ $accentMap[$m['accent']]['dot'] }} shrink-0"></span>
+                <div class="min-w-0">
+                    <p class="text-xs text-gray-400 font-medium">{{ $m['label'] }}</p>
+                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">{{ $m['value'] }}</p>
+                </div>
             </div>
         </div>
-        <div class="prl-generate-right">
+        @endforeach
+    </div>
+
+    {{-- Generate row --}}
+    <div class="fade-up flex items-center justify-between gap-4 bg-white rounded-xl shadow-sm border border-gray-100 px-5 py-4">
+        <div class="min-w-0">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                @if($currentInProgressBatch) Batch in progress @else Ready to generate @endif
+            </p>
+            <h2 class="text-base font-bold text-gray-900 mt-0.5">
+                @if($currentInProgressBatch) Continue Batch @else Generate New Batch @endif
+            </h2>
+            <p class="text-xs text-gray-400 mt-0.5 font-mono">
+                @if($currentInProgressBatch)
+                    {{ \Carbon\Carbon::parse($currentInProgressBatch->period_start)->format('M d, Y') }} &mdash; {{ \Carbon\Carbon::parse($currentInProgressBatch->period_end)->format('M d, Y') }}
+                @else
+                    Select a period from the current or past 24 months
+                @endif
+            </p>
+        </div>
+        <div class="shrink-0">
             @if($currentInProgressBatch)
-                <a href="{{ route('payroll.batch.confirm', $currentInProgressBatch) }}" class="prl-btn-generate">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    Continue Batch
+                <a href="{{ route('payroll.batch.confirm', $currentInProgressBatch) }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97]">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Continue
                 </a>
             @else
-                <button type="button" class="prl-btn-generate" onclick="openGenerateModal()">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                    Generate Payroll Batch
+                <button type="button" onclick="openGenerateModal()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97]">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    Generate
                 </button>
             @endif
         </div>
     </div>
 
-    {{-- Pending batches ────────────────────────────────────────── --}}
-    <div class="prl-pending-card">
-        <div class="prl-pending-header">
-            <span class="prl-pending-title">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:-2px;color:#c8292a;"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>Payroll Batches
-            </span>
+    {{-- Batches --}}
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+            <span class="text-sm font-semibold text-gray-900">Batches</span>
+            <span class="text-xs text-gray-400 tabular-nums">{{ $batches->total() }} total</span>
         </div>
-        <div class="prl-pending-body">
-            <div class="prl-batch-grid">
-                @forelse($batches as $batch)
-                    @php
-                        $startDate = $batch->period_start;
-                        $endDate   = $batch->period_end;
-                        $isFirst   = $startDate->format('d') <= 15;
-                        $variant   = $isFirst ? 'a' : 'b';
-                        $statusColors = [
-                            'pending' => ['bg' => '#fef3c7', 'color' => '#92400e', 'label' => 'Pending'],
-                            'submitted' => ['bg' => '#f5f3ff', 'color' => '#7c3aed', 'label' => 'Submitted'],
-                            'approved' => ['bg' => '#f0fdf4', 'color' => '#16a34a', 'label' => 'Approved'],
-                            'rejected' => ['bg' => '#fff0f0', 'color' => '#c8292a', 'label' => 'Rejected'],
-                        ];
-                        $statusInfo = $statusColors[$batch->status] ?? $statusColors['pending'];
-                    @endphp
-                    <div class="prl-batch-col">
-                        <a href="{{ route('payroll.batch.details', $batch) }}" class="prl-batch-card-link">
-                            <div class="prl-batch-card">
-                                <div class="prl-batch-card-inner">
-                                    <div class="prl-batch-card-icon {{ $variant }}">
-                                        @if($isFirst)
-                                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                        @else
-                                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        @endif
-                                    </div>
-                                    <div class="prl-batch-card-content">
-                                        <h6 class="prl-batch-card-title">
-                                            {{ $startDate->format('F Y') }} — {{ $isFirst ? '1st' : '2nd' }} half
-                                        </h6>
-                                        <div class="prl-batch-card-date">
-                                            {{ $startDate->format('M d') }} – {{ $endDate->format('M d, Y') }}
-                                        </div>
-                                    </div>
-                                    <div class="prl-batch-card-stats">
-                                        <span class="prl-batch-status" style="background:{{ $statusInfo['bg'] }};color:{{ $statusInfo['color'] }};">
-                                            {{ $statusInfo['label'] }}
-                                        </span>
-                                        <div class="prl-batch-stat">
-                                            <small>Employees</small>
-                                            <strong>{{ $batch->employee_count }}</strong>
-                                        </div>
-                                        <div class="prl-batch-stat">
-                                            <small>Gross</small>
-                                            <strong>₱{{ number_format($batch->total_gross_pay ?? 0, 2) }}</strong>
-                                        </div>
-                                        <div class="prl-batch-stat">
-                                            <small>Net</small>
-                                            <strong style="color:#16a34a;">₱{{ number_format($batch->total_net_pay, 2) }}</strong>
-                                        </div>
-                                        <div class="prl-batch-card-arrow">
-                                            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
+        <div class="divide-y divide-gray-50">
+            @forelse($batches as $batch)
+                @php
+                    $start = $batch->period_start;
+                    $end   = $batch->period_end;
+                    $isFirst = $start->format('d') <= 15;
+                    $statusInfo = match($batch->status) {
+                        'submitted' => ['label'=>'Submitted','dot'=>'bg-violet-400','text'=>'text-violet-600','bg'=>'bg-violet-50'],
+                        'approved' => ['label'=>'Approved','dot'=>'bg-emerald-400','text'=>'text-emerald-600','bg'=>'bg-emerald-50'],
+                        'rejected' => ['label'=>'Rejected','dot'=>'bg-red-400','text'=>'text-red-600','bg'=>'bg-red-50'],
+                        default => ['label'=>'Submitted','dot'=>'bg-violet-400','text'=>'text-violet-600','bg'=>'bg-violet-50'],
+                    };
+                @endphp
+                <a href="{{ route('payroll.batch.details', $batch) }}" class="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/60 group">
+                    <div class="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:text-gray-600 transition-colors shrink-0">
+                        @if($isFirst)
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        @else
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        @endif
                     </div>
-                @empty
-                    <div class="prl-batch-col-full">
-                        <div class="prl-empty" style="padding:40px 20px;">
-                            <div class="prl-empty-icon">
-                                <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            </div>
-                            <p class="prl-empty-title">No batches pending approval</p>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-gray-900">{{ $start->format('F Y') }} &mdash; {{ $isFirst ? '1st' : '2nd' }}</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $statusInfo['dot'] }}"></span>
+                                {{ $statusInfo['label'] }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $start->format('M d') }} &ndash; {{ $end->format('M d, Y') }}</p>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-6 shrink-0">
+                        <div class="text-right min-w-[44px]">
+                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Count</p>
+                            <p class="text-sm font-semibold text-gray-900 tabular-nums">{{ $batch->payrolls_count }}</p>
+                        </div>
+                        <div class="text-right min-w-[88px]">
+                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Gross</p>
+                            <p class="text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($batch->payrolls_sum_gross_pay ?? 0, 2) }}</p>
+                        </div>
+                        <div class="text-right min-w-[88px]">
+                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
+                            <p class="text-sm font-semibold text-red-500 tabular-nums">₱{{ number_format($batch->payrolls_sum_total_deductions ?? 0, 2) }}</p>
+                        </div>
+                        <div class="text-right min-w-[88px]">
+                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net</p>
+                            <p class="text-sm font-bold text-emerald-600 tabular-nums">₱{{ number_format($batch->payrolls_sum_net_pay ?? 0, 2) }}</p>
                         </div>
                     </div>
-                @endforelse
-            </div>
+                    <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </a>
+            @empty
+                <div class="flex flex-col items-center py-12 text-center">
+                    <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-500">No batches</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Generate your first batch above</p>
+                </div>
+            @endforelse
         </div>
+        @if($batches->hasPages())
+        <div class="px-5 py-3 border-t border-gray-50">{{ $batches->links() }}</div>
+        @endif
     </div>
 
 </div>
 
-{{-- ── Generate Batch Modal ──────────────────────────────────── --}}
-<div class="prl-modal-overlay" id="generateModal">
-    <div class="prl-modal">
-        <div class="prl-modal-icon generate">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-        </div>
-        <h3 class="prl-modal-title">Generate Payroll Batch</h3>
-        <p class="prl-modal-body">
-            Select a payroll period and create a new batch.<br>
-            You can add employees, review, and finalize before submitting to accounting.
-        </p>
+{{-- Generate modal --}}
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="generateModal">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('generateModal')"></div>
+    <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
+        <h3 class="text-base font-bold text-gray-900">Generate Batch</h3>
+        <p class="text-xs text-gray-400 mt-1 mb-4">Select a payroll period to create a new batch.</p>
         <form action="{{ route('payroll.batch.generate') }}" method="POST">
             @csrf
-            <div class="prl-period-selector">
-                <label class="prl-period-label">Payroll Period</label>
-                <select name="period" class="prl-period-select" id="periodSelect" required>
-                    <option value="">-- Select a period --</option>
-                    @foreach($availablePeriods as $period)
-                    <option value="{{ $period['start'] }}|{{ $period['end'] }}" 
-                            @if($period['start'] === $currentPeriod['start'] && $period['end'] === $currentPeriod['end']) selected @endif>
-                        {{ $period['display'] }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="prl-modal-actions">
-                <button type="button" class="prl-modal-cancel" onclick="closeModal('generateModal')">Cancel</button>
-                <button type="submit" class="prl-modal-confirm generate" style="width:100%;">
-                    Yes, Generate Batch
-                </button>
+            <select name="period" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
+                <option value="">Select a period&hellip;</option>
+                @foreach($availablePeriods as $period)
+                <option value="{{ $period['start'] }}|{{ $period['end'] }}"
+                        @if($period['start'] === $currentPeriod['start'] && $period['end'] === $currentPeriod['end']) selected @endif>
+                    {{ $period['display'] }}
+                </option>
+                @endforeach
+            </select>
+            <div class="flex gap-2 mt-4">
+                <button type="button" onclick="closeModal('generateModal')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Cancel</button>
+                <button type="submit" class="flex-1 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Generate</button>
             </div>
         </form>
     </div>
 </div>
 
-{{-- ── Edit / Resubmit Modal ────────────────────────────────── --}}
-<div class="prl-modal-overlay" id="resubmitModal">
-    <div class="prl-modal">
-        <div class="prl-modal-icon resubmit">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+{{-- Resubmit modal --}}
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="resubmitModal">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('resubmitModal')"></div>
+    <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
+        <h3 class="text-base font-bold text-gray-900" id="resubmitModalTitle">Reopen Batch?</h3>
+        <p class="text-xs text-gray-400 mt-1 mb-4" id="resubmitModalBody">This will reopen the batch for editing. You will need to finalize and resubmit afterward.</p>
+        <div class="text-center mb-4">
+            <span class="inline-block font-mono text-xs bg-gray-50 px-3 py-1.5 rounded-lg text-gray-600" id="resubmitModalPeriod"></span>
         </div>
-        <h3 class="prl-modal-title" id="resubmitModalTitle">Reopen Batch for Editing?</h3>
-        <p class="prl-modal-body" id="resubmitModalBody">
-            This will reopen the batch so you can make changes. After editing, you will need to finalize and resubmit it to accounting.
-        </p>
-        <div style="text-align:center;">
-            <span class="prl-modal-period" id="resubmitModalPeriod"></span>
-        </div>
-        <div class="prl-modal-actions">
-            <button type="button" class="prl-modal-cancel" onclick="closeModal('resubmitModal')">Cancel</button>
-            <button type="button" class="prl-modal-confirm resubmit" id="resubmitConfirmBtn" onclick="submitReopenForm()">
-                Yes, Reopen &amp; Edit
-            </button>
+        <div class="flex gap-2">
+            <button type="button" onclick="closeModal('resubmitModal')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Cancel</button>
+            <button type="button" class="flex-1 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-semibold transition-all hover:bg-amber-700 active:scale-[0.97] cursor-pointer" id="resubmitConfirmBtn" onclick="submitReopenForm()">Reopen</button>
         </div>
     </div>
 </div>
-
 @endsection
 
 @push('scripts')
 <script>
-// ── Modal helpers ────────────────────────────────────────────────
-function openGenerateModal() {
-    document.getElementById('generateModal').classList.add('open');
+function openGenerateModal() { openModal('generateModal'); }
+function openModal(id) {
+    document.querySelectorAll('[id$="Modal"]').forEach(function(el) { el.classList.add('hidden'); });
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('hidden');
 }
-
 function closeModal(id) {
-    document.getElementById(id).classList.remove('open');
+    var m = document.getElementById(id);
+    if (m) m.classList.add('hidden');
 }
-
-// Close on overlay click
-document.querySelectorAll('.prl-modal-overlay').forEach(function(overlay) {
-    overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) overlay.classList.remove('open');
-    });
-});
-
-// Close on Escape
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        document.querySelectorAll('.prl-modal-overlay.open').forEach(function(m) {
-            m.classList.remove('open');
+        document.querySelectorAll('[id$="Modal"]').forEach(function(m) {
+            if (!m.classList.contains('hidden')) closeModal(m.id);
         });
     }
 });

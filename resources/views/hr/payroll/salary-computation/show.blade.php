@@ -2,128 +2,34 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.prl-page { font-family: 'Sora', sans-serif; }
-.prl-wrap { max-width: 760px; margin: 0 auto; padding-bottom: 56px; }
-
-.prl-back-link { display:inline-flex;align-items:center;gap:8px;font-size:0.84rem;font-weight:700;color:#374151;text-decoration:none;margin-bottom:16px;padding:9px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;cursor:pointer;transition:all 0.13s; }
-.prl-back-link:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
-
-/* ── Hero ────────────────────────────────────────────────────── */
-.prl-hero {
-    background:#111827;border-radius:16px;padding:22px 26px;
-    display:flex;align-items:center;justify-content:space-between;
-    gap:20px;margin-bottom:20px;flex-wrap:wrap;
-    position:relative;overflow:hidden;
-}
-.prl-hero::before { content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(200,41,42,0.12);pointer-events:none; }
-.prl-hero-left { position:relative;z-index:1; }
-.prl-hero-name { font-size:1.1rem;font-weight:800;color:#fff;margin:0 0 3px;letter-spacing:-0.02em; }
-.prl-hero-role { font-size:0.78rem;color:#6b7280;margin:0 0 12px; }
-.prl-hero-period { font-family:'DM Mono',monospace;font-size:0.8rem;color:#9ca3af; }
-.prl-hero-right { position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:8px; }
-
-.prl-status { display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
-.prl-status::before { content:'';width:5px;height:5px;border-radius:50%; }
-.prl-status.s-pending   { background:rgba(217,119,6,0.15);color:#fbbf24;border:1px solid rgba(251,191,36,0.2); }
-.prl-status.s-pending::before { background:#fbbf24; }
-.prl-status.s-finalized { background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(96,165,250,0.2); }
-.prl-status.s-finalized::before { background:#60a5fa; }
-.prl-status.s-submitted { background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(167,139,250,0.2); }
-.prl-status.s-submitted::before { background:#a78bfa; }
-.prl-status.s-approved  { background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.2); }
-.prl-status.s-approved::before { background:#4ade80; }
-.prl-status.s-released  { background:rgba(34,197,94,0.2);color:#4ade80;border:1px solid rgba(74,222,128,0.25); }
-.prl-status.s-released::before { background:#22c55e; }
-.prl-status.s-rejected  { background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(248,113,113,0.2); }
-.prl-status.s-rejected::before { background:#ef4444; }
-
-.prl-hero-chips { display:flex;gap:10px;margin-top:14px;flex-wrap:wrap; }
-.prl-hero-chip { background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 14px;text-align:center; }
-.prl-hero-chip-lbl { font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#6b7280;display:block;margin-bottom:3px; }
-.prl-hero-chip-val { font-family:'DM Mono',monospace;font-size:0.95rem;font-weight:700;color:#fff;font-variant-numeric:tabular-nums; }
-
-/* ── Cards ───────────────────────────────────────────────────── */
-.prl-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:16px; }
-.prl-card-head { padding:14px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;gap:10px; }
-.prl-card-head-icon { width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.prl-card-head-icon.green { background:#f0fdf4;color:#16a34a; }
-.prl-card-head-icon.red   { background:#fff0f0;color:#c8292a; }
-.prl-card-head-icon.amber { background:#fffbeb;color:#d97706; }
-.prl-card-head-icon.blue  { background:#eff6ff;color:#2563eb; }
-.prl-card-head-title { font-size:0.845rem;font-weight:700;color:#111827;margin:0; }
-.prl-card-head-sub   { font-size:0.72rem;color:#9ca3af;margin:0; }
-.prl-card-body { padding:18px 20px; }
-
-/* ── Breakdown rows ──────────────────────────────────────────── */
-.prl-breakdown { display:flex;flex-direction:column; }
-.prl-brow { display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6;gap:10px; }
-.prl-brow:last-child { border-bottom:none;padding-bottom:0; }
-.prl-brow-lbl { font-size:0.845rem;color:#6b7280;display:flex;align-items:center;gap:7px;flex:1; }
-.prl-brow-lbl.c-green { color:#16a34a; }
-.prl-brow-lbl.c-red   { color:#dc2626; }
-.prl-brow-lbl.c-bold  { color:#111827;font-weight:700;font-size:.9rem; }
-.prl-badge { font-size:0.67rem;font-weight:600;background:#f3f4f6;color:#6b7280;border-radius:4px;padding:2px 6px;white-space:nowrap; }
-.prl-brow-val { font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace;color:#111827;white-space:nowrap; }
-.prl-brow-val.c-green { color:#16a34a; }
-.prl-brow-val.c-red   { color:#dc2626; }
-
-/* ── Stat chips ──────────────────────────────────────────────── */
-.prl-chips { display:flex;gap:10px;flex-wrap:wrap; }
-.prl-chip { flex:1;min-width:100px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;text-align:center; }
-.prl-chip-lbl { display:block;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9ca3af;margin-bottom:4px; }
-.prl-chip-val { font-size:1.1rem;font-weight:800;color:#111827;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace; }
-
-/* ── OT/UT table ─────────────────────────────────────────────── */
-.prl-mini-table { width:100%;border-collapse:collapse;font-size:0.82rem; }
-.prl-mini-table thead tr { background:#f8f9fb;border-bottom:1px solid #e5e7eb; }
-.prl-mini-table thead th { padding:9px 14px;font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#6b7280;white-space:nowrap; }
-.prl-mini-table tbody tr { border-bottom:1px solid #f3f4f6; }
-.prl-mini-table tbody tr:last-child { border-bottom:none; }
-.prl-mini-table tbody td { padding:10px 14px;color:#374151;vertical-align:middle; }
-
-/* ── Net box ─────────────────────────────────────────────────── */
-.prl-net { background:#111827;border-radius:12px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; }
-.prl-net-lbl { font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#6b7280; }
-.prl-net-val { font-size:1.55rem;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:-.02em;font-family:'DM Mono',monospace; }
-
-/* ── Footer ──────────────────────────────────────────────────── */
-.prl-footer { display:flex;gap:10px;padding-top:20px;border-top:1px solid #f3f4f6;flex-wrap:wrap; }
-.prl-btn-payslip {
-    display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
-    background:#c8292a;color:#fff;border:none;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:700;
-    text-decoration:none;transition:background 0.15s;
-}
-.prl-btn-payslip:hover { background:#a81f20;color:#fff; }
-.prl-btn-delete {
-    display:inline-flex;align-items:center;gap:7px;padding:10px 18px;
-    background:#fff;color:#dc2626;border:1px solid #fecaca;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.845rem;font-weight:600;cursor:pointer;
-    transition:background 0.13s,border-color 0.13s;
-}
-.prl-btn-delete:hover { background:#fff0f0;border-color:#fca5a5; }
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+.stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(1) { animation-delay:0.05s; }
+.stat-card:nth-child(2) { animation-delay:0.1s; }
+.stat-card:nth-child(3) { animation-delay:0.15s; }
+.stat-card:nth-child(4) { animation-delay:0.2s; }
+.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 @endpush
 
 @section('content')
-<div class="prl-page">
-<div class="prl-wrap">
+<div class="max-w-4xl mx-auto space-y-5">
 
-    <button type="button" onclick="history.back()" class="prl-back-link">
-        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    <button type="button" onclick="history.back()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-[0.97] mb-2 cursor-pointer">
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         Back
     </button>
 
     @php
         $sc = match($payroll->status) {
-            'pending'   => 's-pending',
-            'finalized' => 's-finalized',
-            'submitted' => 's-submitted',
-            'approved'  => 's-approved',
-            'released', 'paid' => 's-released',
-            'rejected'  => 's-rejected',
-            default     => 's-pending',
+            'pending' => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
+            'finalized' => ['label'=>'Finalized','dot'=>'bg-blue-400','text'=>'text-blue-600','bg'=>'bg-blue-50'],
+            'submitted' => ['label'=>'Submitted','dot'=>'bg-violet-400','text'=>'text-violet-600','bg'=>'bg-violet-50'],
+            'approved' => ['label'=>'Approved','dot'=>'bg-emerald-400','text'=>'text-emerald-600','bg'=>'bg-emerald-50'],
+            'released','paid' => ['label'=>'Released','dot'=>'bg-emerald-500','text'=>'text-emerald-700','bg'=>'bg-emerald-100'],
+            'rejected' => ['label'=>'Rejected','dot'=>'bg-red-400','text'=>'text-red-600','bg'=>'bg-red-50'],
+            default => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
         };
         $overtimeAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay'));
         $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Leave Pay'));
@@ -140,236 +46,234 @@
         $holidayPay = $payroll->holiday_pay;
     @endphp
 
-    {{-- Hero ──────────────────────────────────────────────────────── --}}
-    <div class="prl-hero">
-        <div class="prl-hero-left">
-            <h1 class="prl-hero-name">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</h1>
-            <p class="prl-hero-role">{{ $payroll->user->position ?? ($payroll->user->department ?? 'Employee') }}</p>
-            <div class="prl-hero-period">
-                {{ $payroll->payroll_period_start->format('F d, Y') }} — {{ $payroll->payroll_period_end->format('F d, Y') }}
-            </div>
-            <div class="prl-hero-chips">
-                <div class="prl-hero-chip">
-                    <span class="prl-hero-chip-lbl">Days Worked</span>
-                    <span class="prl-hero-chip-val">{{ $payroll->days_worked }}</span>
-                </div>
-                @php
-                    $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
-                        ->whereBetween('date', [$payroll->payroll_period_start, $payroll->payroll_period_end])
-                        ->where('status', 'absent')
-                        ->count();
-                @endphp
-                @if($daysAbsent > 0)
-                <div class="prl-hero-chip" style="border-color:#fecaca;">
-                    <span class="prl-hero-chip-lbl" style="color:#f87171;">Days Absent</span>
-                    <span class="prl-hero-chip-val" style="color:#f87171;">{{ $daysAbsent }}</span>
-                </div>
-                @endif
-                <div class="prl-hero-chip">
-                    <span class="prl-hero-chip-lbl">Daily Rate</span>
-                    <span class="prl-hero-chip-val">₱{{ number_format($payroll->per_day_rate, 2) }}</span>
-                </div>
-                <div class="prl-hero-chip">
-                    <span class="prl-hero-chip-lbl">Hourly Rate</span>
-                    <span class="prl-hero-chip-val">₱{{ number_format($payroll->hourly_rate, 2) }}</span>
-                </div>
-            </div>
+    {{-- Employee header --}}
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-5 flex items-center gap-4">
+        <span class="w-12 h-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center text-base font-extrabold text-gray-600 shrink-0 uppercase">{{ strtoupper(substr($payroll->user->first_name??'U',0,1).substr($payroll->user->last_name??'',0,1)) }}</span>
+        <div class="flex-1">
+            <h1 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</h1>
+            <p class="text-xs text-gray-400">{{ $payroll->user->position ?? ($payroll->user->department ?? 'Employee') }}</p>
+            <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $payroll->payroll_period_start->format('F d, Y') }} &mdash; {{ $payroll->payroll_period_end->format('F d, Y') }}</p>
         </div>
-        <div class="prl-hero-right">
-            <span class="prl-status {{ $sc }}">{{ in_array($payroll->status, ['released', 'paid'], true) ? 'Released' : ucfirst($payroll->status) }}</span>
+        <div class="flex flex-col items-end gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $sc['bg'] }} {{ $sc['text'] }}">
+                <span class="w-2 h-2 rounded-full {{ $sc['dot'] }}"></span>
+                {{ $sc['label'] }}
+            </span>
             @if($payroll->approvedBy)
-                <span style="font-size:0.72rem;color:#6b7280;font-family:'DM Mono',monospace;">
-                    Approved by {{ $payroll->approvedBy->first_name }} {{ $payroll->approvedBy->last_name }}
-                </span>
+                <span class="text-[0.55rem] font-mono text-gray-500">Approved by {{ $payroll->approvedBy->first_name }} {{ $payroll->approvedBy->last_name }}</span>
             @endif
         </div>
     </div>
 
-    {{-- Earnings ─────────────────────────────────────────────────────── --}}
-    <div class="prl-card">
-        <div class="prl-card-head">
-            <div class="prl-card-head-icon green">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div>
-                <p class="prl-card-head-title">Earnings</p>
-                <p class="prl-card-head-sub">Basic pay, overtime, and allowances</p>
-            </div>
+    {{-- Stat chips --}}
+    <div class="grid grid-cols-4 gap-3">
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Days Worked</p>
+            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">{{ $payroll->days_worked }}</p>
         </div>
-        <div class="prl-card-body">
-            <div class="prl-breakdown">
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl">Basic Pay <span class="prl-badge">daily rate × {{ $payroll->days_worked }} days</span></span>
-                    <span class="prl-brow-val">₱{{ number_format($payroll->basic_salary, 2) }}</span>
-                </div>
+        @php $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)->whereBetween('date', [$payroll->payroll_period_start, $payroll->payroll_period_end])->where('status', 'absent')->count(); @endphp
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Absent</p>
+            <p class="text-lg font-extrabold {{ $daysAbsent > 0 ? 'text-red-500' : 'text-gray-900' }} tabular-nums mt-1">{{ $daysAbsent }}</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Daily Rate</p>
+            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($payroll->per_day_rate, 2) }}</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Hourly Rate</p>
+            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($payroll->hourly_rate, 2) }}</p>
+        </div>
+    </div>
 
-                @foreach($holidayBreakdown as $hb)
-                @php
-                    $hbLabel = $hb['label'] ?? 'Holiday Pay';
-                    $hbBadge = 'holiday';
-                    if (preg_match('/^Holiday Pay\s*[—\-]+\s*(.+?)\s*\((.+)\)$/', $hbLabel, $m)) {
-                        $hbName  = $m[1];
-                        $hbBadge = $m[2];
-                    } else {
-                        $hbName = 'Holiday';
-                    }
-                @endphp
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-green">
-                        + Holiday Pay — {{ $hbName }}
-                        <span class="prl-badge">{{ $hbBadge }}</span>
-                    </span>
-                    <span class="prl-brow-val c-green">+₱{{ number_format($hb['amount'], 2) }}</span>
-                </div>
-                @endforeach
+    {{-- Earnings --}}
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div><p class="text-sm font-bold text-gray-900">Earnings</p><p class="text-xs text-gray-400">Basic pay, overtime, and allowances</p></div>
+        </div>
+        <div class="px-5 py-4 divide-y divide-gray-50">
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-gray-600">Basic Pay <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1.5">daily rate &times; {{ $payroll->days_worked }} days</span></span>
+                <span class="text-sm font-semibold text-gray-900 tabular-nums font-mono">₱{{ number_format($payroll->basic_salary, 2) }}</span>
+            </div>
 
-                @foreach($overtimeAllowances as $ot)
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-green">+ {{ $ot->allowance_type }}</span>
-                    <span class="prl-brow-val c-green">+₱{{ number_format($ot->amount, 2) }}</span>
-                </div>
-                @endforeach
+            @foreach($holidayBreakdown as $hb)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    {{ $hb['label'] ?? 'Holiday Pay' }}
+                </span>
+                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($hb['amount'], 2) }}</span>
+            </div>
+            @endforeach
 
-                @if($leavePayTotal > 0)
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-green">
-                        Leave Pay
-                        <span class="prl-badge">{{ $leavePayDays }} day{{ $leavePayDays !== 1 ? 's' : '' }}</span>
-                    </span>
-                    <span class="prl-brow-val c-green">+₱{{ number_format($leavePayTotal, 2) }}</span>
-                </div>
-                @endif
+            @php $holidayOTPay = (float)($payroll->holiday_ot_pay ?? 0); $holidayOTHours = (float)($payroll->holiday_ot_hours ?? 0); @endphp
+            @if($holidayOTPay > 0)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    Holiday Overtime Pay
+                    @if($holidayOTHours > 0)<span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ number_format($holidayOTHours, 2) }} hrs</span>@endif
+                </span>
+                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($holidayOTPay, 2) }}</span>
+            </div>
+            @endif
 
-                @foreach($regularAllowances as $allow)
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-green">+ {{ $allow->allowance_type }}</span>
-                    <span class="prl-brow-val c-green">+₱{{ number_format($allow->amount, 2) }}</span>
-                </div>
-                @endforeach
+            @foreach($overtimeAllowances as $ot)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    {{ $ot->allowance_type }}
+                    @if($ot->hours)<span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $ot->hours }} hrs</span>@endif
+                </span>
+                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($ot->amount, 2) }}</span>
+            </div>
+            @endforeach
 
-                @foreach($payroll->bonuses as $bonus)
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl" style="color:#9333ea;">
-                        + {{ $bonus->bonus_type }}
-                        @if($bonus->description)<span class="prl-badge">{{ $bonus->description }}</span>@endif
-                    </span>
-                    <span class="prl-brow-val" style="color:#9333ea;">+₱{{ number_format($bonus->amount, 2) }}</span>
-                </div>
-                @endforeach
+            @if($leavePayTotal > 0)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    Leave Pay
+                    <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $leavePayDays }} day{{ $leavePayDays !== 1 ? 's' : '' }}</span>
+                </span>
+                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($leavePayTotal, 2) }}</span>
+            </div>
+            @endif
 
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-bold">Gross Pay</span>
-                    <span class="prl-brow-val" style="font-size:1rem;">₱{{ number_format($payroll->gross_pay, 2) }}</span>
-                </div>
+            @foreach($regularAllowances as $allow)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    {{ $allow->allowance_type }}
+                </span>
+                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($allow->amount, 2) }}</span>
+            </div>
+            @endforeach
+
+            @foreach($payroll->bonuses as $bonus)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-purple-600 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                    {{ $bonus->bonus_type }}
+                    @if($bonus->description)<span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $bonus->description }}</span>@endif
+                </span>
+                <span class="text-sm font-semibold text-purple-600 tabular-nums font-mono">+₱{{ number_format($bonus->amount, 2) }}</span>
+            </div>
+            @endforeach
+
+            <div class="flex items-center justify-between py-3 mt-1 border-t-2 border-gray-100">
+                <span class="text-sm font-bold text-gray-900">Gross Pay</span>
+                <span class="text-base font-bold text-gray-900 tabular-nums font-mono">₱{{ number_format($payroll->gross_pay, 2) }}</span>
             </div>
         </div>
     </div>
 
-    {{-- Deductions ───────────────────────────────────────────────────── --}}
-    <div class="prl-card">
-        <div class="prl-card-head">
-            <div class="prl-card-head-icon red">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+    {{-- Deductions --}}
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
             </div>
-            <div>
-                <p class="prl-card-head-title">Deductions</p>
-                <p class="prl-card-head-sub">Statutory contributions and other deductions</p>
-            </div>
+            <div><p class="text-sm font-bold text-gray-900">Deductions</p><p class="text-xs text-gray-400">Statutory contributions and other deductions</p></div>
         </div>
-        <div class="prl-card-body">
-            <div class="prl-breakdown">
-                @forelse($regularDeductions as $d)
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-red">
-                        − {{ $d->deduction_type === 'Late Deduction' ? 'Tardiness' : $d->deduction_type }}
-                        @if($d->description)<span class="prl-badge">{{ $d->description }}</span>@endif
-                    </span>
-                    <span class="prl-brow-val c-red">₱{{ number_format($d->amount, 2) }}</span>
-                </div>
-                @empty
-                @endforelse
+        <div class="px-5 py-4 divide-y divide-gray-50">
+            @forelse($regularDeductions as $d)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-red-500 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                    {{ $d->deduction_type === 'Late Deduction' ? 'Tardiness' : $d->deduction_type }}
+                    @if($d->description)<span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $d->description }}</span>@endif
+                </span>
+                <span class="text-sm font-semibold text-red-500 tabular-nums font-mono">−₱{{ number_format($d->amount, 2) }}</span>
+            </div>
+            @empty
+            @endforelse
 
-                @foreach($undertimeDeductions as $ut)
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-red">− {{ $ut->deduction_type === 'Late Deduction' ? 'Tardiness' : $ut->deduction_type }} <span class="prl-badge">attendance-based</span></span>
-                    <span class="prl-brow-val c-red">₱{{ number_format($ut->amount, 2) }}</span>
-                </div>
-                @endforeach
+            @foreach($undertimeDeductions as $ut)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-red-500 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                    Undertime <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">attendance-based</span>
+                </span>
+                <span class="text-sm font-semibold text-red-500 tabular-nums font-mono">−₱{{ number_format($ut->amount, 2) }}</span>
+            </div>
+            @endforeach
 
-                @if($caDeduction > 0)
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-red">
-                        − Cash Advance <span class="prl-badge">loan deduction</span>
-                    </span>
-                    <span class="prl-brow-val c-red">₱{{ number_format($caDeduction, 2) }}</span>
-                </div>
-                @endif
+            @if($caDeduction > 0)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-red-500 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                    Cash Advance <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">loan</span>
+                </span>
+                <span class="text-sm font-semibold text-red-500 tabular-nums font-mono">−₱{{ number_format($caDeduction, 2) }}</span>
+            </div>
+            @endif
 
-                @if($slDeduction > 0)
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-red">
-                        − Salary Loan <span class="prl-badge">loan deduction</span>
-                    </span>
-                    <span class="prl-brow-val c-red">₱{{ number_format($slDeduction, 2) }}</span>
-                </div>
-                @endif
+            @if($slDeduction > 0)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-red-500 flex items-center gap-1.5">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                    Salary Loan <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">loan</span>
+                </span>
+                <span class="text-sm font-semibold text-red-500 tabular-nums font-mono">−₱{{ number_format($slDeduction, 2) }}</span>
+            </div>
+            @endif
 
-                @if($payroll->deductions->isEmpty() && $caDeduction <= 0 && $slDeduction <= 0)
-                <div class="prl-brow">
-                    <span style="font-size:0.82rem;color:#d1d5db;font-style:italic;">No deductions</span>
-                    <span></span>
-                </div>
-                @endif
+            @if($regularDeductions->isEmpty() && $undertimeDeductions->isEmpty() && $caDeduction <= 0 && $slDeduction <= 0)
+            <div class="flex items-center justify-between py-2.5">
+                <span class="text-sm text-gray-300 italic">No deductions</span>
+                <span></span>
+            </div>
+            @endif
 
-                <div class="prl-brow">
-                    <span class="prl-brow-lbl c-bold">Total Deductions</span>
-                    <span class="prl-brow-val c-red" style="font-size:1rem;">₱{{ number_format($payroll->total_deductions, 2) }}</span>
-                </div>
+            <div class="flex items-center justify-between py-3 mt-1 border-t-2 border-gray-100">
+                <span class="text-sm font-bold text-gray-900">Total Deductions</span>
+                <span class="text-base font-bold text-red-500 tabular-nums font-mono">₱{{ number_format($payroll->total_deductions, 2) }}</span>
             </div>
         </div>
     </div>
 
-    {{-- OT / UT Breakdown ────────────────────────────────────────────── --}}
+    {{-- OT / UT Breakdown --}}
     @if($overtimeUndertimeBreakdown->count())
-    <div class="prl-card">
-        <div class="prl-card-head">
-            <div class="prl-card-head-icon amber">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
             </div>
-            <div>
-                <p class="prl-card-head-title">Overtime & Undertime Records</p>
-                <p class="prl-card-head-sub">Approved records within this payroll period</p>
-            </div>
+            <div><p class="text-sm font-bold text-gray-900">Overtime & Undertime Records</p><p class="text-xs text-gray-400">Approved records within this payroll period</p></div>
         </div>
-        <div class="prl-card-body" style="padding:0;">
-            <table class="prl-mini-table">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Hours</th>
-                        <th>Reason</th>
-                        <th class="text-end">Amount</th>
+                    <tr class="border-b border-gray-50 bg-gray-50/50">
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Type</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Hours</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Reason</th>
+                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Amount</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-50">
                     @foreach($overtimeUndertimeBreakdown as $record)
                     @php
                         $isOT   = $record->type === 'overtime';
                         $amount = $record->amount !== null ? abs($record->amount) : round($payroll->hourly_rate * $record->hours, 2);
                     @endphp
-                    <tr>
-                        <td style="font-family:'DM Mono',monospace;font-size:0.78rem;">{{ $record->date->format('M d, Y') }}</td>
-                        <td>
-                            <span style="font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:20px;
-                                background:{{ $isOT ? '#f0fdf4' : '#fff0f0' }};
-                                color:{{ $isOT ? '#16a34a' : '#dc2626' }};">
+                    <tr class="hover:bg-gray-50/40 transition-colors">
+                        <td class="px-5 py-3 font-mono text-xs text-gray-500">{{ $record->date->format('M d, Y') }}</td>
+                        <td class="px-5 py-3">
+                            <span class="inline-flex items-center gap-1 text-[0.5rem] font-semibold uppercase tracking-wide px-2 py-1 rounded-full {{ $isOT ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500' }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $isOT ? 'bg-emerald-400' : 'bg-red-400' }}"></span>
                                 {{ ucfirst($record->type) }}
                             </span>
                         </td>
-                        <td style="font-family:'DM Mono',monospace;">{{ number_format($record->hours, 2) }} hrs</td>
-                        <td style="color:#9ca3af;font-size:0.78rem;">{{ $record->reason ?? '—' }}</td>
-                        <td class="text-end" style="font-family:'DM Mono',monospace;font-weight:600;color:{{ $isOT ? '#16a34a' : '#dc2626' }};">
+                        <td class="px-5 py-3 font-mono text-xs text-gray-700">{{ number_format($record->hours, 2) }} hrs</td>
+                        <td class="px-5 py-3 text-xs text-gray-400">{{ $record->reason ?? '—' }}</td>
+                        <td class="px-5 py-3 text-right font-mono text-xs font-semibold {{ $isOT ? 'text-emerald-600' : 'text-red-500' }}">
                             {{ $isOT ? '+' : '−' }}₱{{ number_format($amount, 2) }}
                         </td>
                     </tr>
@@ -380,27 +284,26 @@
     </div>
     @endif
 
-    {{-- Net Pay ──────────────────────────────────────────────────────── --}}
-    <div class="prl-net">
-        <span class="prl-net-lbl">Net Pay</span>
-        <span class="prl-net-val">₱{{ number_format($payroll->net_pay, 2) }}</span>
+    {{-- Net Pay --}}
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-5 flex items-center justify-between">
+        <span class="text-xs font-semibold uppercase tracking-widest text-gray-400">Net Pay</span>
+        <span class="text-2xl font-extrabold text-gray-900 tabular-nums font-mono">₱{{ number_format($payroll->net_pay, 2) }}</span>
     </div>
 
-    {{-- Actions ──────────────────────────────────────────────────────── --}}
-    <div class="prl-footer">
-        <a href="{{ route('payroll.generatePayslip', $payroll) }}" class="prl-btn-payslip">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+    {{-- Actions --}}
+    <div class="fade-up flex items-center gap-3 pt-2">
+        <a href="{{ route('payroll.generatePayslip', $payroll) }}" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97]">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Generate Payslip
         </a>
-        <form action="{{ route('payroll.salary-computation.destroy', $payroll) }}" method="POST" data-sa-confirm="Delete this payroll record?">
+        <form action="{{ route('payroll.salary-computation.destroy', $payroll) }}" method="POST" onsubmit="return confirm('Delete this payroll record?')">
             @csrf @method('DELETE')
-            <button type="submit" class="prl-btn-delete">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-red-500 border border-red-200 rounded-xl text-sm font-semibold transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 Delete
             </button>
         </form>
     </div>
 
-</div>
 </div>
 @endsection

@@ -92,6 +92,16 @@ class PayrollBatch extends Model
         return $this->payrolls->sum('gross_pay');
     }
 
+    public function getTotalDeductionsAttribute(): float
+    {
+        return $this->payrolls->sum('total_deductions');
+    }
+
+    public function getTotalAllowancesAttribute(): float
+    {
+        return $this->payrolls->sum('total_allowances');
+    }
+
     public function getEmployeeCountAttribute(): int
     {
         return $this->payrolls->count();

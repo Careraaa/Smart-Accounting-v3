@@ -2,249 +2,263 @@
 
 @section('title', 'Salary Loan Details')
 
-@section('content')
-
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-
-.detail-page { font-family: 'Sora', sans-serif; }
-.detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 20px; flex-wrap: wrap; }
-.detail-back { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; color: #6b7280; text-decoration: none; font-size: 0.82rem; font-weight: 600; border-radius: 8px; transition: all 0.15s; }
-.detail-back:hover { color: #111827; background: #f3f4f6; }
-.detail-title { font-size: 1.5rem; font-weight: 800; color: #111827; margin: 0; }
-.detail-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; }
-.detail-status-badge.s-pending { background: #fef3c7; color: #a16207; }
-.detail-status-badge.s-approved { background: #dcfce7; color: #166534; }
-.detail-status-badge.s-released { background: #cffafe; color: #0c4a6e; }
-.detail-status-badge.s-rejected { background: #fee2e2; color: #991b1b; }
-
-.detail-content { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-@media (max-width: 900px) { .detail-content { grid-template-columns: 1fr; } }
-
-.detail-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 24px; }
-.detail-card-title { font-size: 1rem; font-weight: 700; color: #111827; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb; }
-
-.detail-field { margin-bottom: 18px; }
-.detail-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 6px; }
-.detail-value { font-size: 0.95rem; color: #111827; line-height: 1.5; }
-.detail-value.mono { font-family: 'DM Mono', monospace; font-weight: 500; }
-.detail-value.emphasis { font-weight: 600; color: #1f2937; }
-
-.detail-section-divider { height: 1px; background: #e5e7eb; margin: 24px 0; }
-
-.detail-employee { display: flex; align-items: center; gap: 14px; }
-.detail-avatar { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.9rem; font-weight: 600; }
-
-.detail-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
-.detail-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px; border: none; border-radius: 10px; font-family: 'Sora', sans-serif; font-size: 0.82rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-.detail-btn-primary { background: #16a34a; color: #fff; }
-.detail-btn-primary:hover { background: #15803d; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); }
-.detail-btn-danger { background: #dc2626; color: #fff; }
-.detail-btn-danger:hover { background: #b91c1c; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
-.detail-btn-secondary { background: #fff; border: 1px solid #e5e7eb; color: #374151; }
-.detail-btn-secondary:hover { border-color: #c8292a; color: #c8292a; background: #fff5f5; }
-
-.progress-bar-wrapper { margin-top: 8px; }
-.progress-bar { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
-.progress-bar-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #1e40af); border-radius: 4px; transition: width 0.3s; }
-.progress-text { font-size: 0.82rem; color: #6b7280; margin-top: 4px; }
-
-.flash { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 500; margin-bottom: 20px; animation: flashIn 0.3s ease; }
-.flash.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
-.flash.error { background: #fff0f0; border: 1px solid #fecaca; color: #c8292a; }
-@keyframes flashIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.4); }
-.modal.show { display: flex; align-items: center; justify-content: center; }
-.modal-content { background-color: #fff; padding: 32px; border-radius: 14px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); max-width: 400px; width: 100%; animation: slideIn 0.3s ease; }
-@keyframes slideIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.modal-title { font-size: 1.2rem; font-weight: 700; color: #111827; margin-bottom: 12px; }
-.modal-desc { font-size: 0.9rem; color: #6b7280; margin-bottom: 20px; line-height: 1.5; }
-.modal-form { display: flex; flex-direction: column; gap: 12px; }
-.modal-textarea { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: 'Sora', sans-serif; font-size: 0.9rem; resize: vertical; min-height: 100px; }
-.modal-textarea:focus { outline: none; border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1); }
-.modal-buttons { display: flex; gap: 10px; margin-top: 16px; }
-.modal-btn { flex: 1; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: 'Sora', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-.modal-btn-cancel { background: #fff; color: #374151; }
-.modal-btn-cancel:hover { background: #f3f4f6; border-color: #d1d5db; }
-.modal-btn-confirm { background: #dc2626; color: #fff; border-color: #dc2626; }
-.modal-btn-confirm:hover { background: #b91c1c; border-color: #b91c1c; }
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+@keyframes slideInRight { 0%{opacity:0;transform:translateX(16px)} 100%{opacity:1;transform:translateX(0)} }
+.stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(1) { animation-delay:0.05s; }
+.stat-card:nth-child(2) { animation-delay:0.1s; }
+.stat-card:nth-child(3) { animation-delay:0.15s; }
+.stat-card:nth-child(4) { animation-delay:0.2s; }
+.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.slide-right { animation:slideInRight 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 @endpush
 
-<div class="detail-page px-5 py-4">
+@section('content')
+<div class="max-w-4xl mx-auto space-y-5">
+
+    {{-- Flash messages --}}
     @if ($message = Session::get('success'))
-        <div class="flash success">
-            <span>✓</span>
-            {{ $message }}
-        </div>
+    <div class="fade-up flex items-center gap-2.5 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-sm font-semibold text-emerald-700">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        {{ $message }}
+    </div>
     @endif
     @if ($message = Session::get('error'))
-        <div class="flash error">
-            <span>✗</span>
-            {{ $message }}
-        </div>
+    <div class="fade-up flex items-center gap-2.5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-sm font-semibold text-red-600">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        {{ $message }}
+    </div>
     @endif
 
-    <div class="detail-header">
+    {{-- Back button --}}
+    <button type="button" onclick="history.back()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Back to Receivables
+    </button>
+
+    {{-- Header --}}
+    @php
+        $badge = match($salaryLoan->status) {
+            'pending'  => ['dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
+            'approved' => ['dot'=>'bg-emerald-400','text'=>'text-emerald-600','bg'=>'bg-emerald-50'],
+            'released' => ['dot'=>'bg-sky-400','text'=>'text-sky-600','bg'=>'bg-sky-50'],
+            'rejected' => ['dot'=>'bg-red-400','text'=>'text-red-600','bg'=>'bg-red-50'],
+            default    => ['dot'=>'bg-gray-400','text'=>'text-gray-600','bg'=>'bg-gray-50'],
+        };
+        $totalMonths = $salaryLoan->total_months ?? 12;
+        $monthsPaid  = $salaryLoan->months_paid ?? 0;
+        $progress    = $totalMonths > 0 ? ($monthsPaid / $totalMonths) * 100 : 0;
+    @endphp
+
+    <div class="fade-up flex items-center justify-between">
         <div>
-            <a href="{{ route('payroll.receivables.index', ['tab' => 'salary_loans']) }}" class="detail-back">
-                ← Back to Receivables
-            </a>
-            <h1 class="detail-title">Salary Loan Request</h1>
+            <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">Salary Loan Request</h1>
+            <p class="text-xs text-gray-400 mt-0.5">Review and manage salary loan requests</p>
         </div>
-        <span class="detail-status-badge s-{{ $salaryLoan->status }}">{{ ucfirst($salaryLoan->status) }}</span>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $badge['bg'] }} {{ $badge['text'] }}">
+            <span class="w-2 h-2 rounded-full {{ $badge['dot'] }}"></span>
+            {{ ucfirst($salaryLoan->status) }}
+        </span>
     </div>
 
-    <div class="detail-content">
-        <!-- Main Details -->
-        <div class="detail-card">
-            <!-- Employee Information -->
-            <div class="detail-card-title">Employee Information</div>
-            <div class="detail-employee">
-                <div class="detail-avatar">{{ substr($salaryLoan->user->name ?? '', 0, 2) }}</div>
-                <div>
-                    <div style="font-weight: 600; color: #111827; margin-bottom: 2px;">{{ $salaryLoan->user->name ?? '—' }}</div>
-                    <div style="font-size: 0.82rem; color: #6b7280;">{{ $salaryLoan->user->position ?? '—' }}</div>
-                </div>
-            </div>
+    {{-- Stat cards --}}
+    <div class="grid grid-cols-3 gap-3">
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Months Paid</p>
+            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">{{ $monthsPaid }} / {{ $totalMonths }}</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Monthly Deduction</p>
+            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($salaryLoan->monthly_deduction, 2) }}</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Remaining Balance</p>
+            <p class="text-lg font-extrabold text-red-500 tabular-nums mt-1">₱{{ number_format($salaryLoan->remaining_balance, 2) }}</p>
+        </div>
+    </div>
 
-            <div class="detail-section-divider"></div>
+    {{-- 2-column layout --}}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {{-- Main column (2/3) --}}
+        <div class="lg:col-span-2 space-y-5">
 
-            <!-- Loan Details -->
-            <div class="detail-card-title">Loan Details</div>
-            <div class="detail-field">
-                <div class="detail-label">Loan Amount</div>
-                <div class="detail-value mono emphasis">₱{{ number_format($salaryLoan->loan_amount, 2) }}</div>
-            </div>
-
-            <div class="detail-field">
-                <div class="detail-label">Monthly Deduction</div>
-                <div class="detail-value mono">₱{{ number_format($salaryLoan->monthly_deduction, 2) }}</div>
-            </div>
-
-            <div class="detail-field">
-                <div class="detail-label">Total Months</div>
-                <div class="detail-value">{{ $salaryLoan->total_months ?? 12 }} months</div>
-            </div>
-
-            <div class="detail-field">
-                <div class="detail-label">Remaining Balance</div>
-                <div class="detail-value mono" style="color: #dc2626; font-weight: 600;">₱{{ number_format($salaryLoan->remaining_balance, 2) }}</div>
-            </div>
-
-            <div class="detail-field">
-                <div class="detail-label">Repayment Progress</div>
-                @php
-                    $totalMonths = $salaryLoan->total_months ?? 12;
-                    $monthsPaid = $salaryLoan->months_paid ?? 0;
-                    $progress = $totalMonths > 0 ? ($monthsPaid / $totalMonths) * 100 : 0;
-                @endphp
-                <div class="progress-bar-wrapper">
-                    <div class="progress-bar">
-                        <div class="progress-bar-fill" style="width: {{ $progress }}%;"></div>
+            {{-- Employee Information --}}
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     </div>
-                    <div class="progress-text">{{ $monthsPaid }} of {{ $totalMonths }} months paid</div>
+                    <div><p class="text-sm font-bold text-gray-900">Employee Information</p></div>
                 </div>
-            </div>
-
-            <div class="detail-field">
-                <div class="detail-label">Start Date</div>
-                <div class="detail-value">{{ $salaryLoan->start_date ? \Carbon\Carbon::parse($salaryLoan->start_date)->format('F d, Y') : '—' }}</div>
-            </div>
-
-            @if ($salaryLoan->rejection_reason)
-                <div class="detail-field">
-                    <div class="detail-label">Rejection Reason</div>
-                    <div class="detail-value" style="background: #fee2e2; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #dc2626;">
-                        {{ $salaryLoan->rejection_reason }}
+                <div class="px-5 py-4 flex items-center gap-4">
+                    <span class="w-12 h-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center text-base font-extrabold text-gray-600 shrink-0 uppercase">{{ strtoupper(substr($salaryLoan->user->name ?? 'U', 0, 2)) }}</span>
+                    <div>
+                        <p class="text-sm font-bold text-gray-900">{{ $salaryLoan->user->name ?? '—' }}</p>
+                        <p class="text-xs text-gray-400">{{ $salaryLoan->user->position ?? 'Employee' }}</p>
                     </div>
                 </div>
+            </div>
+
+            {{-- Loan Details --}}
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div><p class="text-sm font-bold text-gray-900">Loan Details</p></div>
+                </div>
+                <div class="px-5 py-4 divide-y divide-gray-50">
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-gray-600">Loan Amount</span>
+                        <span class="text-sm font-bold text-gray-900 font-mono tabular-nums">₱{{ number_format($salaryLoan->loan_amount, 2) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-gray-600">Monthly Deduction</span>
+                        <span class="text-sm font-semibold text-gray-900 font-mono tabular-nums">₱{{ number_format($salaryLoan->monthly_deduction, 2) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-gray-600">Total Months</span>
+                        <span class="text-sm text-gray-900">{{ $totalMonths }} months</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-gray-600">Remaining Balance</span>
+                        <span class="text-sm font-bold text-red-500 font-mono tabular-nums">₱{{ number_format($salaryLoan->remaining_balance, 2) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-gray-600">Start Date</span>
+                        <span class="text-sm text-gray-900">{{ $salaryLoan->start_date ? \Carbon\Carbon::parse($salaryLoan->start_date)->format('F d, Y') : '—' }}</span>
+                    </div>
+                    <div class="py-2.5">
+                        <span class="text-xs font-semibold uppercase tracking-wide text-gray-400">Repayment Progress</span>
+                        <div class="mt-2">
+                            <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-500" style="width: {{ $progress }}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1 font-mono">{{ $monthsPaid }} of {{ $totalMonths }} months paid</p>
+                        </div>
+                    </div>
+                    @if ($salaryLoan->rejection_reason)
+                    <div class="py-2.5">
+                        <span class="text-xs font-semibold uppercase tracking-wide text-red-500">Rejection Reason</span>
+                        <div class="mt-1.5 px-3.5 py-2.5 rounded-lg bg-red-50 border-l-2 border-red-400 text-xs text-red-700">{{ $salaryLoan->rejection_reason }}</div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Action Buttons --}}
+            @if (in_array(auth()->user()->role, ['hr', 'superadmin']) && $salaryLoan->status === 'pending')
+            <div class="fade-up flex items-center gap-3 pt-1">
+                <form action="{{ route('payroll.receivables.salary-loans.approve', $salaryLoan) }}" method="POST" class="flex-1">
+                    @csrf
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-all hover:bg-emerald-500 active:scale-[0.97] cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Approve Request
+                    </button>
+                </form>
+                <button type="button" onclick="openRejectModal()" class="flex-1 inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-white text-red-500 border border-red-200 rounded-xl text-sm font-semibold transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Reject Request
+                </button>
+            </div>
+            @elseif (in_array(auth()->user()->role, ['accountant', 'superadmin']) && $salaryLoan->status === 'approved')
+            <div class="fade-up flex items-center gap-3 pt-1">
+                <form action="{{ route('salary-loans.release', $salaryLoan) }}" method="POST" class="flex-1">
+                    @csrf
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-sky-600 text-white rounded-xl text-sm font-semibold transition-all hover:bg-sky-500 active:scale-[0.97] cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        Release Loan
+                    </button>
+                </form>
+                <button type="button" onclick="openRejectModal()" class="flex-1 inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-white text-red-500 border border-red-200 rounded-xl text-sm font-semibold transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Reject Request
+                </button>
+            </div>
             @endif
 
-            <!-- Action Buttons -->
-            @if (in_array(auth()->user()->role, ['hr', 'superadmin']))
-                @if ($salaryLoan->status === 'pending')
-                    <div class="detail-section-divider"></div>
-                    <div class="detail-actions">
-                        <form action="{{ route('payroll.receivables.salary-loans.approve', $salaryLoan) }}" method="POST" style="flex: 1;">
-                            @csrf
-                            <button type="submit" class="detail-btn detail-btn-primary" style="width: 100%;">
-                                ✓ Approve Request
-                            </button>
-                        </form>
-                        <button type="button" class="detail-btn detail-btn-danger" onclick="openRejectModal()" style="flex: 1;">
-                            ✗ Reject Request
-                        </button>
-                    </div>
-                @endif
-            @elseif (in_array(auth()->user()->role, ['accountant', 'superadmin']))
-                @if ($salaryLoan->status === 'approved')
-                    <div class="detail-section-divider"></div>
-                    <div class="detail-actions">
-                        <form action="{{ route('salary-loans.release', $salaryLoan) }}" method="POST" style="flex: 1;">
-                            @csrf
-                            <button type="submit" class="detail-btn detail-btn-primary" style="width: 100%;">
-                                ✓ Release Loan
-                            </button>
-                        </form>
-                        <button type="button" class="detail-btn detail-btn-danger" onclick="openRejectModal()" style="flex: 1;">
-                            ✗ Reject Request
-                        </button>
-                    </div>
-                @endif
-            @endif
         </div>
 
-        <!-- Sidebar: Approval Timeline -->
-        <div class="detail-card">
-            <div class="detail-card-title">Approval Timeline</div>
-
-            <div class="detail-field">
-                <div class="detail-label">Submitted By</div>
-                <div class="detail-value">{{ $salaryLoan->user->name ?? '—' }}</div>
+        {{-- Sidebar (1/3): Approval Timeline --}}
+        <div class="space-y-5">
+            <div class="slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-gray-50">
+                    <p class="text-sm font-bold text-gray-900">Approval Timeline</p>
+                </div>
+                <div class="px-5 py-4 space-y-4">
+                    <div>
+                        <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Submitted By</p>
+                        <p class="text-sm text-gray-900 mt-0.5">{{ $salaryLoan->user->name ?? '—' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Submitted On</p>
+                        <p class="text-sm text-gray-900 mt-0.5 font-mono">{{ $salaryLoan->created_at ? $salaryLoan->created_at->format('M d, Y g:i A') : '—' }}</p>
+                    </div>
+                    @if ($salaryLoan->approved_at)
+                    <div class="pt-3 border-t border-gray-50">
+                        <div class="flex items-center gap-2.5 mb-3">
+                            <span class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </span>
+                            <div>
+                                <p class="text-xs font-semibold text-emerald-600">Approved</p>
+                                <p class="text-[0.55rem] text-gray-400 font-mono">{{ $salaryLoan->approved_at->format('M d, Y g:i A') }}</p>
+                            </div>
+                        </div>
+                        <div class="ml-8">
+                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Approved By</p>
+                            <p class="text-xs text-gray-900">{{ optional($salaryLoan->approver)->name ?? '—' }}</p>
+                        </div>
+                    </div>
+                    @endif
+                    @if ($salaryLoan->status === 'rejected')
+                    <div class="pt-3 border-t border-gray-50">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <span class="w-6 h-6 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </span>
+                            <div>
+                                <p class="text-xs font-semibold text-red-500">Rejected</p>
+                            </div>
+                        </div>
+                        <div class="ml-8 px-3 py-2 rounded-lg bg-red-50 border-l-2 border-red-400">
+                            <p class="text-xs text-red-700">{{ $salaryLoan->rejection_reason ?? 'No reason provided' }}</p>
+                        </div>
+                    </div>
+                    @endif
+                </div>
             </div>
-
-            <div class="detail-field">
-                <div class="detail-label">Submitted On</div>
-                <div class="detail-value">{{ $salaryLoan->created_at ? $salaryLoan->created_at->format('F d, Y g:i A') : '—' }}</div>
-            </div>
-
-            @if ($salaryLoan->approved_at)
-                <div class="detail-field">
-                    <div class="detail-label">Approved By</div>
-                    <div class="detail-value">{{ optional($salaryLoan->approver)->name ?? '—' }}</div>
-                </div>
-
-                <div class="detail-field">
-                    <div class="detail-label">Approved On</div>
-                    <div class="detail-value">{{ $salaryLoan->approved_at->format('F d, Y g:i A') }}</div>
-                </div>
-            @endif
-
-            @if ($salaryLoan->status === 'rejected')
-                <div style="background: #fee2e2; padding: 12px; border-radius: 8px; margin-top: 16px; border-left: 3px solid #dc2626;">
-                    <div style="font-size: 0.75rem; font-weight: 700; color: #991b1b; text-transform: uppercase; margin-bottom: 4px;">Rejected</div>
-                    <div style="font-size: 0.85rem; color: #7f1d1d; line-height: 1.4;">{{ $salaryLoan->rejection_reason ?? 'No reason provided' }}</div>
-                </div>
-            @endif
         </div>
     </div>
 </div>
 
-<!-- Reject Modal -->
-<div id="rejectModal" class="modal">
-    <div class="modal-content">
-        <h3 class="modal-title">Reject Request</h3>
-        <p class="modal-desc">Are you sure you want to reject this salary loan request? Please provide a reason.</p>
-        
-        <form id="rejectForm" method="POST" class="modal-form">
+{{-- Reject Modal --}}
+<div id="rejectModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40" onclick="if(event.target===this)closeRejectModal()">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6 animate-[fadeSlideUp_0.25s_ease]">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-8 h-8 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-gray-900">Reject Request</h3>
+                <p class="text-xs text-gray-400">This action cannot be undone.</p>
+            </div>
+        </div>
+
+        <form id="rejectForm" method="POST">
             @csrf
-            <textarea name="rejection_reason" class="modal-textarea" placeholder="Enter rejection reason..." required></textarea>
-            <div class="modal-buttons">
-                <button type="button" class="modal-btn modal-btn-cancel" onclick="closeRejectModal()">Cancel</button>
-                <button type="submit" class="modal-btn modal-btn-confirm">Confirm Rejection</button>
+            <textarea name="rejection_reason" rows="3" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300 resize-none" placeholder="Enter rejection reason..." required></textarea>
+            <div class="flex items-center gap-3 mt-4">
+                <button type="button" onclick="closeRejectModal()" class="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-semibold transition-all hover:bg-red-600 active:scale-[0.97] cursor-pointer">
+                    Confirm Rejection
+                </button>
             </div>
         </form>
     </div>
@@ -257,17 +271,14 @@ function openRejectModal() {
     @else
         document.getElementById('rejectForm').action = '{{ route("salary-loans.reject", $salaryLoan) }}';
     @endif
-    document.getElementById('rejectModal').classList.add('show');
+    document.getElementById('rejectModal').classList.remove('hidden');
+    document.getElementById('rejectModal').classList.add('flex');
 }
 
 function closeRejectModal() {
-    document.getElementById('rejectModal').classList.remove('show');
+    document.getElementById('rejectModal').classList.add('hidden');
+    document.getElementById('rejectModal').classList.remove('flex');
     document.querySelector('#rejectForm textarea').value = '';
 }
-
-document.getElementById('rejectModal').addEventListener('click', function(e) {
-    if (e.target === this) closeRejectModal();
-});
 </script>
-
 @endsection

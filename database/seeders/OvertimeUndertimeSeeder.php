@@ -25,6 +25,20 @@ class OvertimeUndertimeSeeder extends Seeder
             ->whereIn('user_id', SeedConfig::employeeIds())
             ->delete();
 
+        // Preload attendance dates so OT/UT are only generated for days
+        // the employee actually showed up (prevents impossible scenarios
+        // like overtime with zero regular hours).
+        $attendanceLookup = [];
+        $allAttendance = DB::table('attendance')
+            ->whereIn('user_id', SeedConfig::employeeIds())
+            ->whereIn('status', ['present', 'late'])
+            ->select('user_id', 'date')
+            ->get();
+        foreach ($allAttendance as $a) {
+            $key = $a->user_id . '|' . Carbon::parse($a->date)->toDateString();
+            $attendanceLookup[$key] = true;
+        }
+
         $records = [];
         $otReasons = [
             'End-of-day dispatch backlog',
@@ -54,37 +68,42 @@ class OvertimeUndertimeSeeder extends Seeder
                 $dailyRate = (float) ($emp->salary_rate ?: 550);
                 $hourly = round($dailyRate / 8, 2);
 
-                foreach (array_slice($periodDays, 0, $otDays) as $i => $date) {
+                $otIdx = 0;
+                foreach (array_slice($periodDays, 0, $otDays) as $date) {
+                    if (!isset($attendanceLookup[$emp->id . '|' . $date])) continue;
                     $hours = round(1.5 + (SeedConfig::hashFloat($emp->id, 'oth-' . $date) * 2), 2);
                     $records[] = [
                         'user_id' => $emp->id,
                         'date' => $date,
                         'type' => 'overtime',
                         'hours' => $hours,
-                        'reason' => $otReasons[$i % count($otReasons)],
+                        'reason' => $otReasons[$otIdx % count($otReasons)],
                         'status' => 'approved',
                         'amount' => round($hours * $hourly, 2),
                         'hourly_rate_used' => $hourly,
                         'created_at' => $date . ' 18:30:00',
                         'updated_at' => $date . ' 18:30:00',
                     ];
+                    $otIdx++;
                 }
 
-                $utSlice = array_slice($periodDays, $otDays, $utDays);
-                foreach ($utSlice as $i => $date) {
+                $utIdx = 0;
+                foreach (array_slice($periodDays, $otDays, $utDays) as $date) {
+                    if (!isset($attendanceLookup[$emp->id . '|' . $date])) continue;
                     $hours = round(0.5 + (SeedConfig::hashFloat($emp->id, 'uth-' . $date) * 1.5), 2);
                     $records[] = [
                         'user_id' => $emp->id,
                         'date' => $date,
                         'type' => 'undertime',
                         'hours' => $hours,
-                        'reason' => $utReasons[$i % count($utReasons)],
+                        'reason' => $utReasons[$utIdx % count($utReasons)],
                         'status' => 'approved',
                         'amount' => round(-($hours * $hourly), 2),
                         'hourly_rate_used' => $hourly,
                         'created_at' => $date . ' 17:00:00',
                         'updated_at' => $date . ' 17:00:00',
                     ];
+                    $utIdx++;
                 }
             }
         }

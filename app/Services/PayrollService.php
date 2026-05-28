@@ -12,6 +12,8 @@ use App\Services\HolidayWageService;
 use App\Services\LeaveService;
 use Carbon\Carbon;
 use App\Models\StatutoryDeduction;
+use App\Models\Attendance;
+use App\Models\Shift;
 
 class PayrollService
 {
@@ -171,61 +173,112 @@ class PayrollService
             ->map(fn($d) => Carbon::parse($d)->toDateString());
 
         // ── Step 4: Overtime / Undertime ──────────────────────────────────────
-        // OT pay is stored on approved OvertimeUndertime records (HR-entered amounts).
-        // We sum them directly rather than recomputing, so historical records stay stable.
-        // NOTE: This is REGULAR overtime, not holiday overtime.
-        // IMPORTANT: Exclude OT on holiday dates to prevent double-counting
-        // (holiday OT is already counted above).
+        // REGULAR OT: Recalculate from approved hours × hourlyRate × 1.30.
+        // We do NOT use the stored `amount` column because HR may have left it
+        // as 0/null; recalculating guarantees alignment with the current salary rate.
+        // Holiday dates are excluded — those are handled separately below.
         $otQuery = OvertimeUndertime::forUser($employee->id)
             ->forPeriod($start, $end)
             ->approved()
             ->overtime()
             ->whereNotIn('date', $holidayDates->toArray());
 
-        $otPay   = (float) $otQuery->sum('amount');
         $otHours = (float) $otQuery->sum('hours');
+        $otPay   = $otHours > 0 ? round($otHours * $hourlyRate * 1.30, 2) : 0.0;
 
-        // IMPORTANT: Handle OvertimeUndertime records that fall on holidays.
-        // These should be paid at holiday OT rates, not regular OT rates.
-        // If Attendance doesn't show hours > 8, we need to calculate holiday OT
-        // from these manual records and use holiday OT multipliers.
-        // FIX: Only add OvertimeUndertime records for dates that DON'T already
-        // have OT calculated by HolidayWageService (to prevent double-counting).
-        $datesWithHolidayOT = collect($holidayBreakdown)
-            ->filter(fn($hb) => ($hb['ot_hours'] ?? 0) > 0)
-            ->map(fn($hb) => (string) $hb['date'])  // Ensure dates are strings
+        // ── Supplement OT from attendance for days with no approved OT record ──
+        // Calendar attendance may show OT (hours > 8) that HR hasn't entered
+        // as an OvertimeUndertime record yet. Include it so payroll is never
+        // missing OT that was actually worked. This aligns "calendar logic" with
+        // "payroll logic" — what the attendance calendar shows is what payroll uses.
+        $allAttendanceDays = Attendance::where('user_id', $employee->id)
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->whereIn('status', ['present', 'late'])
+            ->whereNotNull('time_in')
+            ->whereNotNull('time_out')
+            ->get();
+
+        $approvedOTDates = OvertimeUndertime::forUser($employee->id)
+            ->forPeriod($start, $end)
+            ->approved()
+            ->overtime()
+            ->whereNotIn('date', $holidayDates->toArray())
+            ->pluck('date')
+            ->map(fn($d) => $d instanceof Carbon ? $d->toDateString() : Carbon::parse($d)->toDateString())
             ->toArray();
+
+        $activeShift = Shift::where('is_active', true)->first()
+            ?: Shift::orderBy('created_at')->first();
+
+        $supplementOTHours = 0.0;
+        if ($activeShift) {
+            foreach ($allAttendanceDays as $day) {
+                $dateStr = $day->date instanceof Carbon ? $day->date->toDateString() : Carbon::parse($day->date)->toDateString();
+                if (in_array($dateStr, $approvedOTDates)) continue;
+
+                $otUt = $this->attendanceService->calculateOvertimeAndUndertime($day, $activeShift);
+                $dayOT = $otUt['overtime_hours'] ?? 0.0;
+                if ($dayOT > 0) {
+                    $supplementOTHours += $dayOT;
+                }
+            }
+        }
+
+        if ($supplementOTHours > 0) {
+            $supplementOTPay = round($supplementOTHours * $hourlyRate * 1.30, 2);
+            $otHours += $supplementOTHours;
+            $otPay   += $supplementOTPay;
+        }
+
+        // ── Holiday OT ─────────────────────────────────────────────────────────
+        // Holiday OT from HolidayWageService (computed from attendance hours > 8).
+        // Then check approved OvertimeUndertime records on holiday dates.
+        // For each date where the approved OT hours exceed the attendance-computed OT,
+        // add the shortfall at the holiday OT multiplier. This ensures payroll never
+        // under-pays holiday OT that HR has approved.
+        $holidayOTFromBreakdown = collect($holidayBreakdown)->keyBy('date');
 
         $holidayOTRecords = OvertimeUndertime::forUser($employee->id)
             ->forPeriod($start, $end)
             ->approved()
             ->overtime()
-            ->whereIn('date', $holidayDates->toArray());
-        
-        // Exclude dates that already have OT calculated from Attendance
-        if (!empty($datesWithHolidayOT)) {
-            $holidayOTRecords = $holidayOTRecords->whereNotIn('date', $datesWithHolidayOT);
-        }
-        
-        $holidayOTRecords = $holidayOTRecords->get();
+            ->whereIn('date', $holidayDates->toArray())
+            ->get();
 
         foreach ($holidayOTRecords as $otRecord) {
-            // For holiday OT records, calculate the amount using holiday OT multipliers
-            // Regular holiday OT multiplier: hourlyRate × 2.0 × 1.30 (for non-rest-day)
-            // Special holiday OT multiplier: hourlyRate × 1.30 × 1.30 (for non-rest-day)
-            // For now, assume regular holiday (most common) with standard multiplier
-            $holidayOTMultiplier = 2.0 * 1.30; // Regular holiday OT multiplier
-            
-            $calculatedHolidayOTPay = $dailyRate / 8 * $holidayOTMultiplier * $otRecord->hours;
-            
-            // Use the calculated amount (unless the record has a custom amount set)
-            // This ensures holiday OT is paid at the correct rate
-            $holidayOTPay += $calculatedHolidayOTPay;
-            $holidayOTHours += $otRecord->hours;
+            $dateStr = $otRecord->date instanceof Carbon ? $otRecord->date->toDateString() : Carbon::parse($otRecord->date)->toDateString();
+            $breakdownOTHours = (float) ($holidayOTFromBreakdown[$dateStr]['ot_hours'] ?? 0);
+
+            // Use the GREATER of attendance-based OT hours (from HolidayWageService)
+            // and the approved OT record hours. This prevents under-counting when
+            // HR-approved OT exceeds what attendance alone shows.
+            $effectiveOTHours = max($breakdownOTHours, (float) $otRecord->hours);
+
+            // Calculate the SUPPLEMENT: if the approved record has MORE hours than
+            // the breakdown already counted, add the difference at holiday OT multipliers.
+            $supplementHours = max(0.0, (float) $otRecord->hours - $breakdownOTHours);
+            if ($supplementHours > 0) {
+                // Use regular holiday OT multiplier (most common case):
+                // hourlyRate × 2.0 × 1.30 = 260% of hourly rate per OT hour
+                $holidayOTMultiplier = 2.0 * 1.30;
+                $supplementPay = round($supplementHours * $hourlyRate * $holidayOTMultiplier, 2);
+                $holidayOTPay   += $supplementPay;
+                $holidayOTHours += $supplementHours;
+            }
+
+            // Update the breakdown to reflect the effective OT hours
+            // (so the payslip shows the correct figure)
+            if (isset($holidayOTFromBreakdown[$dateStr])) {
+                $idx = array_search($holidayOTFromBreakdown[$dateStr], $holidayBreakdown);
+                if ($idx !== false && $effectiveOTHours > $breakdownOTHours) {
+                    $holidayBreakdown[$idx]['ot_hours'] = $effectiveOTHours;
+                }
+            }
         }
 
+        // ── Undertime ──────────────────────────────────────────────────────────
         // Undertime deduction = hours short × hourly rate.
-        // Kept at full precision (no rounding) until the final netPay calculation.
+        // Always recalculated from approved hours to stay consistent.
         // Also exclude undertime on holiday dates for consistency.
         $utQuery = OvertimeUndertime::forUser($employee->id)
             ->forPeriod($start, $end)
@@ -234,7 +287,7 @@ class PayrollService
             ->whereNotIn('date', $holidayDates->toArray());
 
         $utHours          = (float) $utQuery->sum('hours');
-        $utDeductionExact = $utHours > 0 ? $utHours * ($dailyRate / 8) : 0.0;
+        $utDeductionExact = $utHours > 0 ? $utHours * $hourlyRate : 0.0;
 
         // ── Step 5: Gross pay ─────────────────────────────────────────────────
         $manualAllowTotal = collect($manualAllowances)->sum(fn($a) => (float) ($a['amount'] ?? 0));

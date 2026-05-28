@@ -43,9 +43,12 @@
 
             // All batches, newest first — main list
             $batches = PayrollBatch::withCount('payrolls')
-                ->with(['payrolls', 'generatedBy'])
+                ->withSum('payrolls', 'gross_pay')
+                ->withSum('payrolls', 'total_deductions')
+                ->withSum('payrolls', 'net_pay')
+                ->with(['generatedBy'])
                 ->orderByDesc('created_at')
-                ->paginate(15);
+                ->paginate(5);
 
             // Sidebar: last 5 batches
             $recentBatches = PayrollBatch::with('payrolls')
@@ -324,6 +327,36 @@
         public function batchPayslips(PayrollBatch $batch)
         {
             $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
+
+            // Recompute each payroll so the list shows live values, not stale DB zeros
+            foreach ($batch->payrolls as $payroll) {
+                $manualAllowances = $payroll->allowances
+                    ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay')
+                        || str_starts_with((string) ($a->allowance_type ?? ''), 'Leave Pay'))
+                    ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                    ->values()
+                    ->toArray();
+
+                $manualDeductions = $payroll->deductions
+                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                        || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                    ->values()
+                    ->toArray();
+
+                $computed = $this->payrollService->computePayroll(
+                    $payroll->user,
+                    $payroll->payroll_period_start,
+                    $payroll->payroll_period_end,
+                    $manualAllowances,
+                    $manualDeductions,
+                );
+
+                $payroll->setAttribute('basic_salary', $computed['basicSalary']);
+                $payroll->setAttribute('gross_pay', $computed['grossPay']);
+                $payroll->setAttribute('total_deductions', $computed['totalDeductions']);
+                $payroll->setAttribute('net_pay', $computed['netPay']);
+            }
 
             return view('hr.payroll.batch.payslips', compact('batch'));
         }
@@ -813,11 +846,50 @@
         public function show(Payroll $payroll)
         {
             $payroll->load(['user', 'allowances', 'deductions', 'bonuses']);
+
             $overtimeUndertimeBreakdown = OvertimeUndertime::where('user_id', $payroll->user_id)
                 ->whereBetween('date', [$payroll->payroll_period_start, $payroll->payroll_period_end])
                 ->where('status', 'approved')
                 ->orderBy('date')
                 ->get();
+
+            // Recompute so the show page always reflects current attendance, holiday,
+            // and OT/UT data — matching what the edit preview endpoint returns.
+            $manualAllowances = $payroll->allowances
+                ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay')
+                    || str_starts_with((string) ($a->allowance_type ?? ''), 'Leave Pay'))
+                ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                ->values()
+                ->toArray();
+
+            $manualDeductions = $payroll->deductions
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                    || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->values()
+                ->toArray();
+
+            $computed = $this->payrollService->computePayroll(
+                $payroll->user,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $manualAllowances,
+                $manualDeductions,
+            );
+
+            // Override model attributes with live-computed values (in-memory only)
+            $payroll->setAttribute('days_worked', $computed['daysWorked']);
+            $payroll->setAttribute('basic_salary', $computed['basicSalary']);
+            $payroll->setAttribute('gross_pay', $computed['grossPay']);
+            $payroll->setAttribute('total_deductions', $computed['totalDeductions']);
+            $payroll->setAttribute('net_pay', $computed['netPay']);
+            $payroll->setAttribute('per_day_rate', $computed['dailyRate']);
+            $payroll->setAttribute('hourly_rate', $computed['hourlyRate']);
+            $payroll->setAttribute('holiday_pay', $computed['holidayPay']);
+            $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay']);
+            $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours']);
+            $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
+
             return view('hr.payroll.salary-computation.show', compact('payroll', 'overtimeUndertimeBreakdown'));
         }
 
@@ -888,6 +960,37 @@
         public function generatePayslip(Payroll $payroll)
         {
             $payroll->load(['user', 'allowances', 'deductions']);
+
+            $manualAllowances = $payroll->allowances
+                ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay')
+                    || str_starts_with((string) ($a->allowance_type ?? ''), 'Leave Pay'))
+                ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                ->values()
+                ->toArray();
+
+            $manualDeductions = $payroll->deductions
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                    || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->values()
+                ->toArray();
+
+            $computed = $this->payrollService->computePayroll(
+                $payroll->user,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $manualAllowances,
+                $manualDeductions,
+            );
+
+            $payroll->setAttribute('days_worked', $computed['daysWorked']);
+            $payroll->setAttribute('hours_worked', $computed['hoursWorked']);
+            $payroll->setAttribute('basic_salary', $computed['basicSalary']);
+            $payroll->setAttribute('gross_pay', $computed['grossPay']);
+            $payroll->setAttribute('total_deductions', $computed['totalDeductions']);
+            $payroll->setAttribute('net_pay', $computed['netPay']);
+            $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
+
             return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
         }
 

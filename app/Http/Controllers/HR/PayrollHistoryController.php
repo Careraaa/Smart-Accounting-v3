@@ -7,11 +7,18 @@ use App\Models\Payroll;
 use App\Models\PayrollBatch;
 use App\Models\User;
 use App\Models\PayrollCutoffSchedule;
+use App\Services\PayrollService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class PayrollHistoryController extends Controller
 {
+    protected $payrollService;
+
+    public function __construct(PayrollService $payrollService)
+    {
+        $this->payrollService = $payrollService;
+    }
     // ====================== INDEX ======================
     public function index(Request $request)
     {
@@ -91,18 +98,40 @@ class PayrollHistoryController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Calculate totals safely
-        $totalGross = $payrolls->sum(function ($payroll) {
-            return ($payroll->basic_salary ?? 0) + ($payroll->total_allowances ?? 0);
-        });
+        // Recompute each payroll so the list shows live values, not stale DB zeros
+        foreach ($payrolls as $payroll) {
+            $manualAllowances = $payroll->allowances
+                ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay')
+                    || str_starts_with((string) ($a->allowance_type ?? ''), 'Leave Pay'))
+                ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                ->values()
+                ->toArray();
 
-        $totalDeductions = $payrolls->sum('total_deductions') ?? 0;
+            $manualDeductions = $payroll->deductions
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                    || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->values()
+                ->toArray();
 
-        $totalNetPay = $payrolls->sum(function ($payroll) {
-            return ($payroll->basic_salary ?? 0) 
-                 + ($payroll->total_allowances ?? 0) 
-                 - ($payroll->total_deductions ?? 0);
-        });
+            $computed = $this->payrollService->computePayroll(
+                $payroll->user,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $manualAllowances,
+                $manualDeductions,
+            );
+
+            $payroll->setAttribute('basic_salary', $computed['basicSalary']);
+            $payroll->setAttribute('gross_pay', $computed['grossPay']);
+            $payroll->setAttribute('total_deductions', $computed['totalDeductions']);
+            $payroll->setAttribute('net_pay', $computed['netPay']);
+        }
+
+        // Calculate totals from recomputed values
+        $totalGross      = $payrolls->sum('gross_pay');
+        $totalDeductions = $payrolls->sum('total_deductions');
+        $totalNetPay     = $payrolls->sum('net_pay');
 
         $releasedCount = $payrolls->whereIn('status', ['released', 'paid'])->count();
         $pendingCount = $payrolls->whereNotIn('status', ['released', 'paid'])->count();

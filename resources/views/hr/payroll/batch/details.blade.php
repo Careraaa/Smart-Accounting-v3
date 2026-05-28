@@ -2,203 +2,170 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.prl-page { font-family:'Sora',sans-serif; }
-.bd-hero{background:#111827;border-radius:16px;padding:22px 26px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;position:relative;overflow:hidden;margin-bottom:18px;}
-.bd-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(200,41,42,.12);pointer-events:none;}
-.bd-title{color:#fff;font-weight:900;letter-spacing:-.02em;margin:0 0 6px;font-size:1.05rem;}
-.bd-sub{color:#6b7280;font-family:'DM Mono',monospace;font-size:.82rem;}
-.bd-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:.7rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;}
-.bd-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;z-index:1;}
-.bd-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid transparent;font-weight:800;font-size:.82rem;text-decoration:none;cursor:pointer;}
-.bd-btn.primary{background:#c8292a;color:#fff;border-color:#c8292a;box-shadow:0 10px 26px rgba(200,41,42,.22);}
-.bd-btn.ghost{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.12);}
-.bd-btn.warn{background:#fff1f2;color:#c8292a;border-color:#fecaca;}
-.bd-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;}
-.bd-head{padding:14px 16px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-.bd-head h2{margin:0;font-size:.88rem;font-weight:900;color:#111827;display:flex;align-items:center;gap:8px;}
-.bd-dot{width:8px;height:8px;border-radius:50%;background:#c8292a;display:inline-block;}
-.bd-meta{color:#6b7280;font-size:.78rem;}
-.bd-table{width:100%;border-collapse:collapse;font-size:.85rem;}
-.bd-table thead th{background:#f8f9fb;border-bottom:1px solid #e5e7eb;padding:11px 16px;font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.09em;color:#6b7280;white-space:nowrap;}
-.bd-table tbody tr { cursor:pointer; transition:background .12s; }
-.bd-table tbody tr:hover { background:#fdf4f4; }
-.bd-table tbody td { padding:13px 16px; border-bottom:1px solid #f3f4f6; vertical-align:middle; }
-.bd-table tbody tr:last-child td { border-bottom:none; }
-.bd-table tfoot td { padding:12px 16px; border-top:2px solid #e5e7eb; }
-.bd-mono{font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums;}
-.bd-row-actions{display:flex;gap:6px;justify-content:flex-end;}
-.bd-icon-btn{width:30px;height:30px;border-radius:8px;border:none;background:#f4f5f7;color:#6b7280;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;}
-.bd-icon-btn:hover{background:#eff6ff;color:#3b82f6;}
-.bd-btn.disabled{background:rgba(255,255,255,.04);color:rgba(255,255,255,.25);border-color:rgba(255,255,255,.08);cursor:not-allowed;pointer-events:none;}
-.bd-rejection-banner{background:#2d0a0a;border:1px solid rgba(200,41,42,.35);border-radius:14px;padding:18px 22px;margin-bottom:18px;display:flex;gap:14px;align-items:flex-start;}
-.bd-rejection-icon{width:36px;height:36px;border-radius:10px;background:rgba(200,41,42,.18);color:#f87171;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-.bd-rejection-title{font-size:.82rem;font-weight:900;color:#f87171;margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em;}
-.bd-rejection-meta{font-size:.78rem;color:#9ca3af;margin:0 0 10px;}
-.bd-rejection-note{background:rgba(200,41,42,.1);border:1px solid rgba(200,41,42,.25);border-radius:8px;padding:10px 14px;font-size:.82rem;color:#fca5a5;line-height:1.6;}
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(1) { animation-delay:0.05s; }
+.stat-card:nth-child(2) { animation-delay:0.1s; }
+.stat-card:nth-child(3) { animation-delay:0.15s; }
 </style>
 @endpush
 
 @section('content')
-<div class="prl-page">
-    <div class="bd-hero">
-        <div style="position:relative;z-index:1;">
-            <h1 class="bd-title">{{ $batch->display_name }}</h1>
-            <div class="bd-sub">
-                Period {{ $batch->period_start->format('M d, Y') }} – {{ $batch->period_end->format('M d, Y') }}
-            </div>
-            <div style="margin-top:10px;">
-                <span class="bd-badge">Status: {{ ucfirst($batch->status) }}</span>
-            </div>
-        </div>
-        <div class="bd-actions">
-            <button type="button" onclick="history.back()" class="bd-btn ghost">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                Back
-            </button>
-            
-            @if($batch->status === 'rejected')
-                <span class="bd-btn disabled">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Payslips
-                </span>
-            @else
-                <a href="{{ route('payroll.batch.payslips', $batch) }}" class="bd-btn ghost">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Payslips
-                </a>
-            @endif
+<div class="space-y-5">
 
-            @if(auth()->user()?->role === 'accountant' && $batch->status === 'submitted')
-                <form action="{{ route('payroll-approval.approve-batch') }}" method="POST" style="display:inline;">
-                    @csrf
-                    <input type="hidden" name="batch_id" value="{{ $batch->id }}">
-                    <button class="bd-btn primary" type="submit" data-sa-confirm="Approve this entire batch?">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        Approve Batch
-                    </button>
-                </form>
-                <form action="{{ route('payroll-approval.reject-batch') }}" method="POST" style="display:inline;">
-                    @csrf
-                    <input type="hidden" name="batch_id" value="{{ $batch->id }}">
-                    <input type="text" name="rejection_note" required minlength="3"
-                           placeholder="Rejection note (required)"
-                           style="padding:10px 12px;border-radius:12px;border:1px solid #e5e7eb;min-width:240px;font-size:.82rem;">
-                    <button class="bd-btn warn" type="submit" data-sa-confirm="Reject this entire batch?">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        Reject Batch
-                    </button>
-                </form>
-            @endif
+    @php
+        $start = $batch->period_start;
+        $end   = $batch->period_end;
+        $statusInfo = match($batch->status) {
+            'pending' => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
+            'submitted' => ['label'=>'Submitted','dot'=>'bg-violet-400','text'=>'text-violet-600','bg'=>'bg-violet-50'],
+            'approved' => ['label'=>'Approved','dot'=>'bg-emerald-400','text'=>'text-emerald-600','bg'=>'bg-emerald-50'],
+            'rejected' => ['label'=>'Rejected','dot'=>'bg-red-400','text'=>'text-red-600','bg'=>'bg-red-50'],
+            default => ['label'=>'Submitted','dot'=>'bg-violet-400','text'=>'text-violet-600','bg'=>'bg-violet-50'],
+        };
+        $payrolls = $batch->payrolls;
+        $totalGross = $payrolls->sum('gross_pay');
+        $totalDeductions = $payrolls->sum('total_deductions');
+        $totalNet = $payrolls->sum('net_pay');
+    @endphp
 
-            @if(in_array(auth()->user()?->role, ['hr','superadmin','qr_admin','accountant'], true) && $batch->status !== 'approved')
-                <a href="{{ route('payroll.batch.confirm', $batch) }}" class="bd-btn ghost">
-                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"/><path stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    Edit Batch
-                </a>
-            @endif
+    {{-- Rejection banner --}}
+    @if($batch->status === 'rejected' && $batch->rejection_note)
+    <div class="fade-up bg-red-50 border border-red-200 rounded-xl px-4 py-3.5 flex items-start gap-3">
+        <div class="w-8 h-8 rounded-lg bg-red-100 text-red-500 flex items-center justify-center shrink-0 mt-0.5">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </div>
-    </div>
-
-    @if($batch->status === 'rejected')
-    <div class="bd-rejection-banner">
-        <div class="bd-rejection-icon">
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </div>
-        <div style="flex:1;min-width:0;">
-            <p class="bd-rejection-title">Batch Rejected</p>
-            <p class="bd-rejection-meta">
-                Rejected by
-                <strong style="color:#e5e7eb;">{{ optional($batch->rejectedBy)->first_name }} {{ optional($batch->rejectedBy)->last_name }}</strong>
-                @if($batch->rejected_at)
-                    &nbsp;·&nbsp; {{ $batch->rejected_at->format('M d, Y \a\t h:i A') }}
-                @endif
+        <div class="min-w-0 flex-1">
+            <p class="text-sm font-bold text-red-700">Batch Rejected</p>
+            <p class="text-xs text-red-500 mt-0.5 font-mono">
+                by {{ optional($batch->rejectedBy)->first_name }} {{ optional($batch->rejectedBy)->last_name }}
+                @if($batch->rejected_at) &middot; {{ $batch->rejected_at->format('M d, Y \a\t h:i A') }} @endif
             </p>
-            @if($batch->rejection_note)
-                <div class="bd-rejection-note">
-                    <strong style="display:block;margin-bottom:4px;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#f87171;">Reason</strong>
-                    {{ $batch->rejection_note }}
-                </div>
-            @endif
+            <p class="text-xs text-red-600 mt-2 bg-red-100/60 rounded-lg px-3 py-2">{{ $batch->rejection_note }}</p>
         </div>
     </div>
     @endif
 
-    <div class="bd-card">
-        <div class="bd-head">
-            <h2><span class="bd-dot"></span> Employees in this batch</h2>
+    {{-- Header --}}
+    <div class="fade-up flex items-start justify-between gap-4">
+        <div class="min-w-0">
+            <a href="{{ route('payroll.salary-computation.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-[0.97] mb-2">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Back to batches
+            </a>
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">{{ $batch->display_name }}</h1>
+            <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $start->format('M d, Y') }} &ndash; {{ $end->format('M d, Y') }}</p>
         </div>
-        <div class="table-responsive">
-            <table class="bd-table">
+        <div class="flex items-center gap-2 shrink-0 flex-wrap">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
+                <span class="w-2 h-2 rounded-full {{ $statusInfo['dot'] }}"></span>
+                {{ $statusInfo['label'] }}
+            </span>
+            @if($batch->status !== 'rejected')
+                <a href="{{ route('payroll.batch.payslips', $batch) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-[0.97]">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Payslips
+                </a>
+            @endif
+            @if(in_array(auth()->user()?->role, ['hr','superadmin','qr_admin','accountant'], true) && $batch->status !== 'approved')
+                <a href="{{ route('payroll.batch.confirm', $batch) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-[0.97]">
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Edit Batch
+                </a>
+            @endif
+            @if(auth()->user()?->role === 'accountant' && $batch->status === 'submitted')
+                <form action="{{ route('payroll-approval.approve-batch') }}" method="POST" class="inline">
+                    @csrf
+                    <input type="hidden" name="batch_id" value="{{ $batch->id }}">
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97]">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Approve
+                    </button>
+                </form>
+                <form action="{{ route('payroll-approval.reject-batch') }}" method="POST" class="inline">
+                    @csrf
+                    <input type="hidden" name="batch_id" value="{{ $batch->id }}">
+                    <div class="flex items-center gap-1">
+                        <input type="text" name="rejection_note" required minlength="3" placeholder="Reason (required)" class="w-44 px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs outline-none focus:border-red-300 focus:ring-2 focus:ring-red-100">
+                        <button type="submit" class="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition-all hover:bg-red-100 active:scale-[0.97]">Reject</button>
+                    </div>
+                </form>
+            @endif
+        </div>
+    </div>
+
+    {{-- Stats --}}
+    <div class="grid grid-cols-3 gap-3">
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-400 font-medium">Employees</p>
+            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">{{ $payrolls->count() }}</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-400 font-medium">Gross Pay</p>
+            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($totalGross, 2) }}</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <p class="text-xs text-gray-400 font-medium">Net Pay</p>
+            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalNet, 2) }}</p>
+        </div>
+    </div>
+
+    {{-- Table --}}
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
                 <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Department</th>
-                        <th>Position</th>
-                        <th class="text-center">Days</th>
-                        <th class="text-start">Basic pay</th>
-                        <th class="text-start">Gross pay</th>
-                        <th class="text-start">Deductions</th>
-                        <th class="text-start">Net pay</th>
+                    <tr class="border-b border-gray-50">
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Department</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Position</th>
+                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Days</th>
+                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic</th>
+                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross</th>
+                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deductions</th>
+                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($batch->payrolls as $p)
-                        @php
-                            $user     = $p->user;
-                            $initials = strtoupper(substr($user->first_name ?? '', 0, 1) . substr($user->last_name ?? '', 0, 1));
-                        @endphp
-                        <tr onclick="window.location='{{ route('payroll.salary-computation.show', $p) }}'">
-                            <td class="fw-bold" style="font-size:0.88rem;color:#111827;">
-                                {{ $user->first_name }} {{ $user->last_name }}
-                            </td>
-                            <td style="font-size:0.82rem;color:#6b7280;">
-                                {{ $user->department ?? 'N/A' }}
-                            </td>
-                            <td style="font-size:0.82rem;color:#6b7280;">
-                                {{ $user->position ?? 'N/A' }}
-                            </td>
-                            <td class="text-center bd-mono" style="font-size:0.85rem;">
-                                {{ $p->days_worked ?? '—' }}
-                            </td>
-                            <td class="text-start bd-mono" style="font-size:0.85rem;">
-                                ₱{{ number_format($p->basic_salary, 2) }}
-                            </td>
-                            <td class="text-start bd-mono" style="font-size:0.85rem;">
-                                ₱{{ number_format($p->gross_pay, 2) }}
-                            </td>
-                            <td class="text-start bd-mono text-muted" style="font-size:0.85rem;">
-                                ₱{{ number_format($p->total_deductions, 2) }}
-                            </td>
-                            <td class="text-start bd-mono fw-bold" style="font-size:0.88rem;color:#15803d;">
-                                ₱{{ number_format($p->net_pay, 2) }}
-                            </td>
-                        </tr>
+                <tbody class="divide-y divide-gray-50">
+                    @forelse($payrolls as $p)
+                    @php $u = $p->user; @endphp
+                    <tr onclick="window.location='{{ route('payroll.salary-computation.show', $p) }}'" class="transition-colors hover:bg-gray-50/40 cursor-pointer">
+                        <td class="px-4 py-3">
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-gray-900 truncate">{{ $u->first_name }} {{ $u->last_name }}</p>
+                                <p class="text-[0.55rem] text-gray-400 font-mono truncate">{{ $u->employee_number ?? '—' }}</p>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-xs text-gray-500">{{ $u->department ?? 'N/A' }}</td>
+                        <td class="px-4 py-3 text-xs text-gray-500">{{ $u->position ?? 'N/A' }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">{{ $p->days_worked ?? '—' }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($p->basic_salary, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($p->gross_pay, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($p->total_deductions, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-emerald-600 tabular-nums">₱{{ number_format($p->net_pay, 2) }}</td>
+                    </tr>
                     @empty
-                        <tr><td colspan="8" style="text-center text-muted py-5">
-                            <i class="feather-inbox d-block mb-2" style="font-size:28px;opacity:.3;"></i>
-                            No employees in this batch.
-                        </td></tr>
+                    <tr>
+                        <td colspan="8" class="px-4 py-12 text-center text-xs text-gray-400">No employees in this batch.</td>
+                    </tr>
                     @endforelse
                 </tbody>
-                @if($batch->payrolls->isNotEmpty())
+                @if($payrolls->isNotEmpty())
                 <tfoot>
-                    <tr style="background:#f9fafb;font-size:0.85rem;">
-                        <td colspan="5" class="fw-bold" style="color:#111827;">Totals</td>
-                        <td class="text-start bd-mono fw-bold">
-                            ₱{{ number_format($batch->payrolls->sum('gross_pay'), 2) }}
-                        </td>
-                        <td class="text-start bd-mono text-muted">
-                            ₱{{ number_format($batch->payrolls->sum('total_deductions'), 2) }}
-                        </td>
-                        <td class="text-start bd-mono fw-bold" style="color:#15803d;">
-                            ₱{{ number_format($batch->total_net_pay, 2) }}
-                        </td>
+                    <tr class="border-t border-gray-100 bg-gray-50/50">
+                        <td colspan="4" class="px-4 py-3 text-xs font-bold text-gray-900">Totals</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payrolls->sum('basic_salary'), 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalGross, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-red-500 tabular-nums">₱{{ number_format($totalDeductions, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-emerald-600 tabular-nums">₱{{ number_format($totalNet, 2) }}</td>
                     </tr>
                 </tfoot>
                 @endif
             </table>
         </div>
     </div>
+
 </div>
 @endsection

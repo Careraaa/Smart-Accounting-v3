@@ -2,118 +2,92 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.prl-page { font-family: 'Sora', sans-serif; }
-
-.prl-topbar { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
-.prl-topbar-title { font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px; }
-.prl-topbar-sub   { font-size:0.78rem;color:#9ca3af;margin:0;font-family:'DM Mono',monospace; }
-
-.prl-back-link { display:inline-flex;align-items:center;gap:8px;font-size:0.84rem;font-weight:700;color:#374151;text-decoration:none;margin-bottom:16px;padding:9px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;cursor:pointer;transition:all 0.13s; }
-.prl-back-link:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
-
-.prl-table-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden; }
-.prl-table-scroll { overflow-x:auto; }
-.prl-table { width:100%;border-collapse:collapse;font-size:0.835rem; }
-.prl-table thead tr { background:#f8f9fb;border-bottom:1px solid #e5e7eb; }
-.prl-table thead th { padding:11px 16px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#6b7280;white-space:nowrap; }
-.prl-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.12s;cursor:pointer; }
-.prl-table tbody tr:last-child { border-bottom:none; }
-.prl-table tbody tr:hover { background:#fdf4f4; }
-.prl-table tbody td { padding:13px 16px;color:#374151;vertical-align:middle; }
-
-.prl-emp-cell { display:flex;align-items:center;gap:10px; }
-.prl-emp-avatar { width:32px;height:32px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#6b7280;flex-shrink:0;border:1.5px solid #e5e7eb;text-transform:uppercase; }
-.prl-emp-name { font-weight:600;color:#111827;font-size:0.845rem; }
-.prl-emp-dept { font-size:0.72rem;color:#9ca3af;margin-top:1px; }
-.prl-mono { font-family:'DM Mono',monospace;font-size:0.82rem;font-variant-numeric:tabular-nums; }
-.prl-mono.c-bold  { color:#111827;font-weight:700; }
-.prl-mono.c-green { color:#16a34a;font-weight:600; }
-.prl-mono.c-muted { color:#9ca3af; }
-
-.prl-status { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
-.prl-status::before { content:'';width:5px;height:5px;border-radius:50%; }
-.prl-status.s-approved { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
-.prl-status.s-approved::before { background:#16a34a; }
-.prl-status.s-released { background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe; }
-.prl-status.s-released::before { background:#3b82f6; }
-.prl-status.s-submitted { background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe; }
-.prl-status.s-submitted::before { background:#8b5cf6; }
-.prl-status.s-prepared { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
-.prl-status.s-prepared::before { background:#16a34a; }
-.prl-status.s-default  { background:#f3f4f6;color:#6b7280; }
-.prl-status.s-default::before { background:#9ca3af; }
-
-.prl-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 24px;text-align:center; }
-.prl-empty-title { font-size:0.9rem;font-weight:700;color:#374151;margin:0 0 6px; }
-.prl-empty-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 @endpush
 
 @section('content')
-<div class="prl-page">
+<div class="space-y-5">
 
-    <a href="{{ route('payroll.generate-payslip.index') }}" class="prl-back-link">
-        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        Back to Pay Slips
-    </a>
+    {{-- Back link --}}
+    <div class="fade-up">
+        <a href="{{ route('payroll.generate-payslip.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-gray-200 text-gray-600 transition-all hover:border-gray-400 hover:text-gray-900 active:scale-[0.97 no-underline">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to Pay Slips
+        </a>
+    </div>
 
-    <div class="prl-topbar">
+    {{-- Header --}}
+    <div class="fade-up flex items-start justify-between gap-4 flex-wrap">
         <div>
-            <h1 class="prl-topbar-title">{{ $batch->display_name }}</h1>
-            <p class="prl-topbar-sub">{{ $batch->period_start->format('M d, Y') }} – {{ $batch->period_end->format('M d, Y') }} · {{ $batch->payrolls->count() }} employees</p>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $batch->display_name }}</h1>
+            <p class="text-sm text-gray-400 mt-0.5 font-mono">{{ $batch->period_start->format('M d, Y') }} – {{ $batch->period_end->format('M d, Y') }} · {{ $batch->payrolls->count() }} employees</p>
         </div>
     </div>
 
-    <div class="prl-table-card">
-        <div class="prl-table-scroll">
-            <table class="prl-table">
+    {{-- Table --}}
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
                 <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th class="text-end">Basic Salary</th>
-                        <th class="text-end">Gross Pay</th>
-                        <th class="text-end">Net Pay</th>
-                        <th class="text-center">Status</th>
+                    <tr class="border-b border-gray-50 bg-gray-50/50">
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
+                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Salary</th>
+                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross Pay</th>
+                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net Pay</th>
+                        <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-50">
                 @forelse($batch->payrolls as $payroll)
                     @php
                         $initials = strtoupper(substr($payroll->user->first_name ?? 'U', 0, 1) . substr($payroll->user->last_name ?? '', 0, 1));
-                        $sc = match($payroll->status) {
-                            'approved' => 's-approved',
-                            'released', 'paid' => 's-released',
-                            'submitted' => 's-submitted',
-                            'prepared' => 's-prepared',
-                            default => 's-default',
+                        $badgeCls = match($payroll->status) {
+                            'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                            'released','paid' => 'bg-blue-50 text-blue-700 border-blue-200',
+                            'submitted' => 'bg-violet-50 text-violet-700 border-violet-200',
+                            'prepared' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                            default => 'bg-gray-50 text-gray-600 border-gray-200',
+                        };
+                        $dotCls = match($payroll->status) {
+                            'approved' => 'bg-emerald-500',
+                            'released','paid' => 'bg-blue-500',
+                            'submitted' => 'bg-violet-500',
+                            'prepared' => 'bg-emerald-500',
+                            default => 'bg-gray-400',
                         };
                         $payslipUrl = route('payroll.generatePayslip', $payroll);
                     @endphp
-                    <tr data-href="{{ $payslipUrl }}" onclick="rowClick(event, this)">
-                        <td>
-                            <div class="prl-emp-cell">
-                                <div class="prl-emp-avatar">{{ $initials }}</div>
+                    <tr onclick="window.location='{{ $payslipUrl }}'" class="hover:bg-gray-50/40 transition-colors cursor-pointer">
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">{{ $initials }}</span>
                                 <div>
-                                    <div class="prl-emp-name">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</div>
-                                    <div class="prl-emp-dept">{{ $payroll->user->position ?? '—' }} · {{ $payroll->user->department ?? '—' }}</div>
+                                    <div class="text-xs font-semibold text-gray-900">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</div>
+                                    <div class="text-[0.55rem] text-gray-400">{{ $payroll->user->position ?? '—' }} · {{ $payroll->user->department ?? '—' }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="text-end"><span class="prl-mono c-muted">&#8369;{{ number_format($payroll->basic_salary, 2) }}</span></td>
-                        <td class="text-end"><span class="prl-mono c-green">&#8369;{{ number_format($payroll->gross_pay, 2) }}</span></td>
-                        <td class="text-end"><span class="prl-mono c-bold">&#8369;{{ number_format($payroll->net_pay, 2) }}</span></td>
-                        <td class="text-center">
-                            <span class="prl-status {{ $sc }}">
+                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs text-gray-500">₱{{ number_format($payroll->basic_salary, 2) }}</span></td>
+                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-emerald-600">₱{{ number_format($payroll->gross_pay, 2) }}</span></td>
+                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border {{ $badgeCls }}">
+                                <span class="w-1 h-1 rounded-full {{ $dotCls }}"></span>
                                 {{ in_array($payroll->status, ['released', 'paid'], true) ? 'Released' : ucfirst($payroll->status) }}
                             </span>
                         </td>
                     </tr>
                 @empty
                     <tr><td colspan="5">
-                        <div class="prl-empty">
-                            <p class="prl-empty-title">No payroll records in this batch</p>
-                            <p class="prl-empty-sub">Add employees to the batch to generate payslips.</p>
+                        <div class="flex flex-col items-center py-12 text-center">
+                            <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <p class="text-sm font-semibold text-gray-500">No payroll records in this batch</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Add employees to the batch to generate payslips.</p>
                         </div>
                     </td></tr>
                 @endforelse
@@ -124,12 +98,3 @@
 
 </div>
 @endsection
-
-@push('scripts')
-<script>
-function rowClick(event, row) {
-    if (event.target.closest('a, button, form, input')) return;
-    window.location = row.dataset.href;
-}
-</script>
-@endpush

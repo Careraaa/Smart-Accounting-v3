@@ -27,12 +27,17 @@ class AttendanceSeeder extends Seeder
         foreach (SeedConfig::employeeIds() as $userId) {
             $attendanceRate = 0.82 + (SeedConfig::hashFloat($userId, 'attendance') * 0.16);
             $lateChance = 0.08 + (SeedConfig::hashFloat($userId, 'late') * 0.12);
-            $skip = (int) round((1 - $attendanceRate) * count($workDays));
+            $count = max(0, (int) round($attendanceRate * count($workDays)));
 
-            $presentDays = array_slice($workDays, 0, max(0, count($workDays) - $skip));
-            if (SeedConfig::hashFloat($userId, 'scatter') > 0.5) {
-                shuffle($presentDays);
+            // Distribute present days evenly across the full date range using
+            // deterministic hash sorting (not truncated from the beginning).
+            // This ensures recent dates aren't systematically excluded.
+            $hashKeyed = [];
+            foreach ($workDays as $date) {
+                $hashKeyed[$date] = SeedConfig::hashFloat($userId, 'present-' . $date);
             }
+            asort($hashKeyed);
+            $presentDays = array_keys(array_slice($hashKeyed, 0, $count, true));
 
             foreach ($presentDays as $date) {
                 $key = $userId . '|' . $date;
