@@ -60,7 +60,7 @@
                         };
                         $payslipUrl = route('payroll.generatePayslip', $payroll);
                     @endphp
-                    <tr onclick="window.location='{{ $payslipUrl }}'" class="hover:bg-gray-50/40 transition-colors cursor-pointer">
+                    <tr onclick="window.open('{{ $payslipUrl }}', '_blank')" class="hover:bg-gray-50/40 transition-colors cursor-pointer">
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2.5">
                                 <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">{{ $initials }}</span>

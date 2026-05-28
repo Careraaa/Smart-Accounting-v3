@@ -1006,7 +1006,14 @@
                 $manualDeductions,
             );
 
+            // Total weekdays in the period (excl. weekends) — for payslip display
+            $ps = Carbon::parse($payroll->payroll_period_start);
+            $pe = Carbon::parse($payroll->payroll_period_end);
+            $totalWeekdays = $ps->diffInDaysFiltered(fn (Carbon $d) => !$d->isWeekend(), $pe);
+            if (!$ps->isWeekend()) $totalWeekdays++;
+
             $payroll->setAttribute('days_worked', $computed['daysWorked']);
+            $payroll->setAttribute('total_weekdays', $totalWeekdays);
             $payroll->setAttribute('hours_worked', $computed['hoursWorked']);
             $payroll->setAttribute('basic_salary', $computed['basicSalary']);
             $payroll->setAttribute('gross_pay', $computed['grossPay']);

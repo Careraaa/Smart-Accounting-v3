@@ -351,7 +351,7 @@
             <!-- Employee Strip -->
             <div class="emp-strip">
                 <div><span class="emp-label">Employee :</span> {{ $payroll->user->name ?? 'N/A' }}</div>
-                <div><span class="emp-label">Days of Work :</span> <span style="font-family: var(--font-mono);">{{ $payroll->days_worked ?? 0 }}</span></div>
+                <div><span class="emp-label">Days of Work :</span> <span style="font-family: var(--font-mono);">{{ $payroll->total_weekdays ?? 0 }}</span></div>
                 <div><span class="emp-label">Pay Period :</span> {{ $payroll->payroll_period_start->format('m/d/Y') }} – {{ $payroll->payroll_period_end->format('m/d/Y') }}</div>
                 <div><span class="emp-label">Days Present :</span> <span style="font-family: var(--font-mono);">{{ $payroll->days_worked ?? 0 }}</span></div>
             </div>
