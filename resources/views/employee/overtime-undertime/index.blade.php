@@ -1,7 +1,21 @@
 @extends('layouts.layout')
 
+@push('styles')
+<style>
+@keyframes ouFadeUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes ouScaleIn { 0%{opacity:0;transform:scale(0.93)} 100%{opacity:1;transform:scale(1)} }
+.ou-page { animation:ouFadeUp 0.3s ease-out; }
+.ou-stat { animation:ouScaleIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+.ou-stat:nth-child(1) { animation-delay:0.05s; }
+.ou-stat:nth-child(2) { animation-delay:0.1s; }
+.ou-stat:nth-child(3) { animation-delay:0.15s; }
+.ou-stat:nth-child(4) { animation-delay:0.2s; }
+.ou-table { animation:ouFadeUp 0.4s ease-out 0.1s both; }
+</style>
+@endpush
+
 @section('content')
-<div class="min-h-screen bg-gray-50/60">
+<div class="ou-page min-h-screen bg-gray-50/60">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
 
         {{-- Page Header --}}
@@ -25,22 +39,30 @@
         </div>
 
         {{-- Tab Navigation --}}
-        <div class="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm mb-6 w-fit">
-            <a href="{{ route('employee.attendance.index') }}"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all text-gray-500 hover:text-gray-800 hover:bg-gray-50">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                Attendance Calendar
-            </a>
-            <a href="{{ route('employee.overtime-undertime.index') }}"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gray-900 text-white shadow-sm">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
-                OT / UT Requests
-            </a>
+        <div class="border-b border-gray-200 mb-6">
+            <nav class="flex gap-1 -mb-px" role="tablist">
+                <a href="{{ route('employee.attendance.index') }}" role="tab"
+                   class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group inline-flex items-center gap-2
+                   {{ request()->routeIs('employee.attendance.index')
+                       ? 'border-violet-600 text-violet-700 bg-violet-50/60'
+                       : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                    <svg class="w-4 h-4 transition-colors {{ request()->routeIs('employee.attendance.index') ? 'text-violet-600' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    Attendance Calendar
+                </a>
+                <a href="{{ route('employee.overtime-undertime.index') }}" role="tab"
+                   class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group inline-flex items-center gap-2
+                   {{ request()->routeIs('employee.overtime-undertime.index')
+                       ? 'border-amber-500 text-amber-700 bg-amber-50/60'
+                       : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                    <svg class="w-4 h-4 transition-colors {{ request()->routeIs('employee.overtime-undertime.index') ? 'text-amber-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+                    OT / UT Requests
+                </a>
+            </nav>
         </div>
 
         {{-- Stat cards --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
+            <div class="ou-stat bg-white border border-gray-200 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 </div>
@@ -50,7 +72,7 @@
                     <div class="text-xs text-gray-400 mt-0.5">submitted</div>
                 </div>
             </div>
-            <div class="bg-white border border-amber-200 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
+            <div class="ou-stat bg-white border border-amber-200 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
                 <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
                 </div>
@@ -60,7 +82,7 @@
                     <div class="text-xs text-gray-400 mt-0.5">awaiting review</div>
                 </div>
             </div>
-            <div class="bg-white border border-emerald-200 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
+            <div class="ou-stat bg-white border border-emerald-200 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
                 <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
@@ -70,7 +92,7 @@
                     <div class="text-xs text-gray-400 mt-0.5">granted</div>
                 </div>
             </div>
-            <div class="bg-white border border-rose-200 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
+            <div class="ou-stat bg-white border border-rose-200 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
                 <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center flex-shrink-0">
                     <svg class="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
@@ -83,7 +105,7 @@
         </div>
 
         {{-- Requests Table --}}
-        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+        <div class="ou-table bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <div class="flex items-center gap-2">
                     <div class="w-2 h-2 rounded-full bg-gray-900"></div>

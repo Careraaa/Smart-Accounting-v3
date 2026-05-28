@@ -131,7 +131,7 @@
     <div id="tab-cash_advances" class="tab-panel {{ $tab !== 'cash_advances' ? 'hidden' : '' }} active-panel">
 
     {{-- Filter bar --}}
-    <div class="filter-bar flex items-center gap-3 flex-wrap">
+    <div class="filter-bar flex items-center gap-3 flex-wrap mb-3">
         <div class="flex-1 min-w-[200px]">
             <input type="text" id="caSearch" placeholder="Search employee…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
         </div>
@@ -187,7 +187,7 @@
     <div id="tab-salary_loans" class="tab-panel {{ $tab !== 'salary_loans' ? 'hidden' : '' }} active-panel">
 
     {{-- Filter bar --}}
-    <div class="filter-bar flex items-center gap-3 flex-wrap">
+    <div class="filter-bar flex items-center gap-3 flex-wrap mb-3">
         <div class="flex-1 min-w-[200px]">
             <input type="text" id="loanSearch" placeholder="Search employee…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
         </div>

@@ -44,6 +44,10 @@ use App\Http\Controllers\HR\ThirteenthMonthPayController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use App\Models\Holiday;
+use App\Models\CashAdvance;
+use App\Models\SalaryLoan;
+use App\Models\Leave;
+use App\Models\OvertimeUndertime;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -201,7 +205,20 @@ Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])-
 
 // ===== EMPLOYEE ROUTES =====
 Route::middleware(['auth', 'check-status', 'role:employee,superadmin'])->group(function () {
-    Route::get('/employee', fn() => view('employee.dashboard'))->name('employee.index');
+    Route::get('/employee', function () {
+        $user = auth()->user();
+        return view('employee.dashboard', [
+            'pendingLeaves'       => Leave::where('user_id', $user->id)->where('status', 'pending')->count(),
+            'approvedLeaves'      => Leave::where('user_id', $user->id)->where('status', 'approved')->count(),
+            'totalLeaves'         => Leave::where('user_id', $user->id)->count(),
+            'pendingOT'           => OvertimeUndertime::where('user_id', $user->id)->where('type', 'overtime')->where('status', 'pending')->count(),
+            'pendingUT'           => OvertimeUndertime::where('user_id', $user->id)->where('type', 'undertime')->where('status', 'pending')->count(),
+            'pendingCashAdvances' => CashAdvance::where('user_id', $user->id)->where('status', 'pending')->count(),
+            'totalBorrowed'       => CashAdvance::where('user_id', $user->id)->whereIn('status', ['approved', 'deducted'])->sum('amount'),
+            'activeLoans'         => SalaryLoan::where('user_id', $user->id)->whereIn('status', ['pending', 'active'])->count(),
+            'totalLoanRemaining'  => SalaryLoan::where('user_id', $user->id)->where('status', 'active')->sum('remaining_balance'),
+        ]);
+    })->name('employee.index');
 
     // Cash Advances
     Route::get('/my/cash-advances', [EmployeeCashAdvanceController::class, 'index'])->name('employee.cash-advances.index');
@@ -235,7 +252,20 @@ Route::middleware(['auth', 'check-status', 'role:employee,superadmin'])->group(f
 
 // ===== SHARED ATTENDANCE ROUTES (all authenticated users) =====
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard/employee', fn() => view('employee.dashboard'))->name('employee.dashboard');
+    Route::get('/dashboard/employee', function () {
+        $user = auth()->user();
+        return view('employee.dashboard', [
+            'pendingLeaves'       => Leave::where('user_id', $user->id)->where('status', 'pending')->count(),
+            'approvedLeaves'      => Leave::where('user_id', $user->id)->where('status', 'approved')->count(),
+            'totalLeaves'         => Leave::where('user_id', $user->id)->count(),
+            'pendingOT'           => OvertimeUndertime::where('user_id', $user->id)->where('type', 'overtime')->where('status', 'pending')->count(),
+            'pendingUT'           => OvertimeUndertime::where('user_id', $user->id)->where('type', 'undertime')->where('status', 'pending')->count(),
+            'pendingCashAdvances' => CashAdvance::where('user_id', $user->id)->where('status', 'pending')->count(),
+            'totalBorrowed'       => CashAdvance::where('user_id', $user->id)->whereIn('status', ['approved', 'deducted'])->sum('amount'),
+            'activeLoans'         => SalaryLoan::where('user_id', $user->id)->whereIn('status', ['pending', 'active'])->count(),
+            'totalLoanRemaining'  => SalaryLoan::where('user_id', $user->id)->where('status', 'active')->sum('remaining_balance'),
+        ]);
+    })->name('employee.dashboard');
     Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])->name('attendance.scan');
     Route::get('/attendance/last-log', [AttendanceController::class, 'getLastLog'])->name('attendance.lastlog');
     Route::post('/hr/attendance/qr/submit', [AttendanceController::class, 'submit'])->name('hr.qr.submit');

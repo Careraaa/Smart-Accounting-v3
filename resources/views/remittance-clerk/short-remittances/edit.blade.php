@@ -1,270 +1,213 @@
 @extends('layouts.layout')
-
-@push('styles')
-    @include('remittance-clerk._ui-styles')
-@endpush
-
 @section('content')
-<div class="col-12">
-    <div class="remui-page">
-        <div class="remui-backdrop"></div>
-
-        <div class="remui-hero mb-3">
-            <div>
-                <h5 class="remui-title">Resolve Short Remittance</h5>
-                <p class="remui-subtitle mb-0">Record payments and mark driver/PAO liabilities as settled.</p>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{{ route('short-remittances.index') }}" class="emp-action-btn emp-action-back">
-                    <i class="feather-x"></i><span>Close</span>
-                </a>
-            </div>
+{{-- Header --}}
+    <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Resolve Short Remittance</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Record payments and mark driver/PAO liabilities as settled.</p>
         </div>
-
-        <div class="card remui-card">
-            <div class="card-header">
-                <span class="card-title mb-0">Resolution Details</span>
-            </div>
-            <div class="card-body">
-            {{-- Remittance Summary --}}
-            <div class="alert alert-warning mb-4">
-                <h6 class="mb-2">
-                    <i class="feather-alert-circle me-2"></i> Short Remittance on {{ $shortRemittance->remittance_date?->format('F d, Y') }}
-                </h6>
-                <p class="mb-1"><small>Vehicle: <strong>{{ $shortRemittance->vehicle->plate_number }}</strong></small></p>
-                <p class="mb-1"><small>Short Amount: <strong style="color: #dc2626;">₱{{ number_format($shortRemittance->short_amount, 2) }}</strong></small></p>
-                <p class="mb-0"><small>Driver & PAO each liable for: <strong>₱{{ number_format($shortRemittance->driver_share, 2) }}</strong></small></p>
-            </div>
-
-            <form action="{{ route('short-remittances.update', $shortRemittance) }}" method="POST">
-                @csrf
-                @method('PUT')
-
-                {{-- Driver Resolution Section --}}
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <h6 class="text-muted mb-3">
-                            <i class="feather-user me-2" style="color: #0369a1;"></i> Driver Resolution
-                        </h6>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="driver_name" class="form-label">Driver Name</label>
-                            <input type="text" class="form-control" id="driver_name" value="{{ $shortRemittance->driver->name ?? 'N/A' }}" disabled>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="driver_liability" class="form-label">Driver Liability</label>
-                            <input type="text" class="form-control" id="driver_liability" value="₱{{ number_format($shortRemittance->driver_share, 2) }}" disabled>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt-3">
-                        <div class="form-group">
-                            <label for="driver_amount_paid" class="form-label">Amount Paid <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text">₱</span>
-                                <input 
-                                    type="number" 
-                                    step="0.01" 
-                                    class="form-control @error('driver_amount_paid') is-invalid @enderror"
-                                    id="driver_amount_paid"
-                                    name="driver_amount_paid"
-                                    value="{{ old('driver_amount_paid', $shortRemittance->driver_amount_paid ?? 0) }}"
-                                    min="0"
-                                    max="{{ $shortRemittance->driver_share }}"
-                                >
-                            </div>
-                            @error('driver_amount_paid')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt-3">
-                        <div class="form-group">
-                            <label for="driver_remaining" class="form-label">Remaining Balance</label>
-                            <div class="input-group">
-                                <span class="input-group-text">₱</span>
-                                <input 
-                                    type="text" 
-                                    class="form-control"
-                                    id="driver_remaining"
-                                    value="0.00"
-                                    disabled
-                                >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt-3">
-                        <div class="form-group">
-                            <label for="driver_status" class="form-label">Status</label>
-                            <select class="form-select @error('driver_status') is-invalid @enderror" id="driver_status" name="driver_status">
-                                <option value="" selected>-- Select Status --</option>
-                                <option value="pending" @selected(old('driver_status', $shortRemittance->driver_status) === 'pending')>Pending</option>
-                                <option value="partial" @selected(old('driver_status', $shortRemittance->driver_status) === 'partial')>Partial Payment</option>
-                                <option value="paid" @selected(old('driver_status', $shortRemittance->driver_status) === 'paid')>Fully Paid</option>
-                            </select>
-                            @error('driver_status')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                {{-- PAO Resolution Section --}}
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <h6 class="text-muted mb-3">
-                            <i class="feather-users me-2" style="color: #16a34a;"></i> PAO Resolution
-                        </h6>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="pao_name" class="form-label">PAO Name</label>
-                            <input type="text" class="form-control" id="pao_name" value="{{ $shortRemittance->pao->name ?? 'N/A' }}" disabled>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="pao_liability" class="form-label">PAO Liability</label>
-                            <input type="text" class="form-control" id="pao_liability" value="₱{{ number_format($shortRemittance->pao_share, 2) }}" disabled>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt-3">
-                        <div class="form-group">
-                            <label for="pao_amount_paid" class="form-label">Amount Paid <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text">₱</span>
-                                <input 
-                                    type="number" 
-                                    step="0.01" 
-                                    class="form-control @error('pao_amount_paid') is-invalid @enderror"
-                                    id="pao_amount_paid"
-                                    name="pao_amount_paid"
-                                    value="{{ old('pao_amount_paid', $shortRemittance->pao_amount_paid ?? 0) }}"
-                                    placeholder="0.00"
-                                    min="0"
-                                    max="{{ $shortRemittance->pao_share }}"
-                                >
-                            </div>
-                            @error('pao_amount_paid')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt-3">
-                        <div class="form-group">
-                            <label for="pao_remaining" class="form-label">Remaining Balance</label>
-                            <div class="input-group">
-                                <span class="input-group-text">₱</span>
-                                <input 
-                                    type="text" 
-                                    class="form-control"
-                                    id="pao_remaining"
-                                    value="0.00"
-                                    disabled
-                                >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mt-3">
-                        <div class="form-group">
-                            <label for="pao_status" class="form-label">Status</label>
-                            <select class="form-select @error('pao_status') is-invalid @enderror" id="pao_status" name="pao_status">
-                                <option value="" selected>-- Select Status --</option>
-                                <option value="pending" @selected(old('pao_status', $shortRemittance->pao_status) === 'pending')>Pending</option>
-                                <option value="partial" @selected(old('pao_status', $shortRemittance->pao_status) === 'partial')>Partial Payment</option>
-                                <option value="paid" @selected(old('pao_status', $shortRemittance->pao_status) === 'paid')>Fully Paid</option>
-                            </select>
-                            @error('pao_status')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                {{-- Additional Notes --}}
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="notes" class="form-label">Resolution Notes</label>
-                            <textarea 
-                                class="form-control @error('notes') is-invalid @enderror"
-                                id="notes"
-                                name="notes"
-                                rows="4"
-                                placeholder="Add notes about short remittance resolution, payment arrangements, or follow-up actions..."
-                            >{{ old('notes', $shortRemittance->resolution_notes) }}</textarea>
-                            @error('notes')
-                                <small class="text-danger">{{ $message }}</small>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Form Buttons --}}
-                <div class="d-flex gap-2 pt-3 border-top">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="feather-save me-1"></i> Save Resolution
-                    </button>
-                    <a href="{{ route('short-remittances.index') }}" class="btn btn-secondary btn-sm">
-                        <i class="feather-x me-1"></i> Cancel
-                    </a>
-                </div>
-            </form>
-        </div>
+        <a href="{{ route('short-remittances.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 transition-all no-underline">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7-7-7 7 7 7"/></svg>
+            Close
+        </a>
     </div>
-</div>
 
-{{-- Liability Summary Sidebar --}}
-<div class="col-md-3">
-    <div class="card card-statistic">
-        <div class="card-body">
-            <h6 class="card-title mb-3">Liability Summary</h6>
-            
-            <div class="mb-3 pb-3 border-bottom">
-                <small class="text-muted d-block mb-2">Short Amount</small>
-                <p class="mb-0">
-                    <strong style="color: #dc2626; font-size: 1.15rem;">₱{{ number_format($shortRemittance->short_amount, 2) }}</strong>
-                </p>
+    {{-- Flash --}}
+    @foreach(['success','error','info'] as $t)
+        @if(session($t))
+        <div class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold mb-4
+            @if($t==='success') bg-emerald-500/15 border border-emerald-500/25 text-emerald-700
+            @elseif($t==='error') bg-red-500/15 border border-red-500/25 text-red-700
+            @else bg-blue-500/15 border border-blue-500/25 text-blue-700 @endif">
+            @if($t==='success')
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            @else
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+            @endif
+            {{ session($t) }}
+        </div>
+        @endif
+    @endforeach
+    @if($errors->any())
+    <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-500/15 border border-red-500/25 rounded-lg text-red-700 text-xs font-semibold mb-4">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+        Please fix the errors below.
+    </div>
+    @endif
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {{-- Main Form --}}
+        <div class="lg:col-span-3">
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+                <div class="px-5 py-3.5 border-b border-gray-50">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">Resolution Details</h2>
+                </div>
+                <div class="p-5">
+                    {{-- Alert summary --}}
+                    <div class="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 mb-5">
+                        <svg class="w-4 h-4 shrink-0 mt-0.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <div>
+                            <p class="text-xs font-bold text-amber-800 mb-1">Short Remittance on {{ $shortRemittance->remittance_date?->format('F d, Y') }}</p>
+                            <p class="text-[0.65rem] text-amber-700 mb-0.5">Vehicle: <strong>{{ $shortRemittance->vehicle->plate_number }}</strong></p>
+                            <p class="text-[0.65rem] text-amber-700 mb-0.5">Short Amount: <strong style="color: #dc2626;">₱{{ number_format($shortRemittance->short_amount, 2) }}</strong></p>
+                            <p class="text-[0.65rem] text-amber-700 mb-0">Driver & PAO each liable for: <strong>₱{{ number_format($shortRemittance->driver_share, 2) }}</strong></p>
+                        </div>
+                    </div>
+
+                    <form action="{{ route('short-remittances.update', $shortRemittance) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        {{-- Driver Resolution --}}
+                        <div class="mb-6">
+                            <h3 class="flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-wider text-gray-400 mb-4">
+                                <svg class="w-3.5 h-3.5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                Driver Resolution
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Driver Name</label>
+                                    <input type="text" value="{{ $shortRemittance->driver->name ?? 'N/A' }}" disabled class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-500 bg-gray-50 cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Driver Liability</label>
+                                    <input type="text" value="₱{{ number_format($shortRemittance->driver_share, 2) }}" disabled class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-500 bg-gray-50 cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Amount Paid <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">₱</span>
+                                        <input type="number" step="0.01" name="driver_amount_paid" id="driver_amount_paid" value="{{ old('driver_amount_paid', $shortRemittance->driver_amount_paid ?? 0) }}" min="0" max="{{ $shortRemittance->driver_share }}" class="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('driver_amount_paid') border-red-300 @enderror">
+                                    </div>
+                                    @error('driver_amount_paid') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Remaining Balance</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">₱</span>
+                                        <input type="text" id="driver_remaining" value="0.00" disabled class="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2.5 text-xs text-gray-500 bg-gray-50 cursor-not-allowed">
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Status</label>
+                                    <select name="driver_status" id="driver_status" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('driver_status') border-red-300 @enderror">
+                                        <option value="">-- Select Status --</option>
+                                        <option value="pending" @selected(old('driver_status', $shortRemittance->driver_status) === 'pending')>Pending</option>
+                                        <option value="partial" @selected(old('driver_status', $shortRemittance->driver_status) === 'partial')>Partial Payment</option>
+                                        <option value="paid" @selected(old('driver_status', $shortRemittance->driver_status) === 'paid')>Fully Paid</option>
+                                    </select>
+                                    @error('driver_status') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-100 my-6">
+
+                        {{-- PAO Resolution --}}
+                        <div class="mb-6">
+                            <h3 class="flex items-center gap-2 text-[0.65rem] font-bold uppercase tracking-wider text-gray-400 mb-4">
+                                <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                PAO Resolution
+                            </h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">PAO Name</label>
+                                    <input type="text" value="{{ $shortRemittance->pao->name ?? 'N/A' }}" disabled class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-500 bg-gray-50 cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">PAO Liability</label>
+                                    <input type="text" value="₱{{ number_format($shortRemittance->pao_share, 2) }}" disabled class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-500 bg-gray-50 cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Amount Paid <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">₱</span>
+                                        <input type="number" step="0.01" name="pao_amount_paid" id="pao_amount_paid" value="{{ old('pao_amount_paid', $shortRemittance->pao_amount_paid ?? 0) }}" min="0" max="{{ $shortRemittance->pao_share }}" class="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('pao_amount_paid') border-red-300 @enderror">
+                                    </div>
+                                    @error('pao_amount_paid') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Remaining Balance</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">₱</span>
+                                        <input type="text" id="pao_remaining" value="0.00" disabled class="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2.5 text-xs text-gray-500 bg-gray-50 cursor-not-allowed">
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Status</label>
+                                    <select name="pao_status" id="pao_status" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('pao_status') border-red-300 @enderror">
+                                        <option value="">-- Select Status --</option>
+                                        <option value="pending" @selected(old('pao_status', $shortRemittance->pao_status) === 'pending')>Pending</option>
+                                        <option value="partial" @selected(old('pao_status', $shortRemittance->pao_status) === 'partial')>Partial Payment</option>
+                                        <option value="paid" @selected(old('pao_status', $shortRemittance->pao_status) === 'paid')>Fully Paid</option>
+                                    </select>
+                                    @error('pao_status') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-100 my-6">
+
+                        {{-- Notes --}}
+                        <div class="mb-6">
+                            <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Resolution Notes</label>
+                            <textarea name="notes" rows="4" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('notes') border-red-300 @enderror" placeholder="Add notes about short remittance resolution, payment arrangements, or follow-up actions...">{{ old('notes', $shortRemittance->resolution_notes) }}</textarea>
+                            @error('notes') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Buttons --}}
+                        <div class="flex gap-2.5 justify-end pt-5 border-t border-gray-100">
+                            <button type="submit" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gray-900 transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer border-none inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                Save Resolution
+                            </button>
+                            <a href="{{ route('short-remittances.index') }}" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97] cursor-pointer no-underline inline-flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7-7-7 7 7 7"/></svg>
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
+        </div>
 
-            <div class="mb-3 pb-3 border-bottom">
-                <h6 class="text-muted mb-2">
-                    <i class="feather-user me-1" style="color: #0369a1;"></i> Driver
-                </h6>
-                <p class="mb-2">
-                    <strong>Liability:</strong> ₱{{ number_format($shortRemittance->driver_share, 2) }}
-                </p>
-                <p class="mb-2">
-                    <strong>Amount Paid:</strong> <span id="driver_paid_display">₱0.00</span>
-                </p>
-                <p class="mb-0">
-                    <strong>Remaining:</strong> <span id="driver_remaining_display" style="color: #dc2626;">₱{{ number_format($shortRemittance->driver_share, 2) }}</span>
-                </p>
-            </div>
-
-            <div class="mb-3">
-                <h6 class="text-muted mb-2">
-                    <i class="feather-users me-1" style="color: #16a34a;"></i> PAO
-                </h6>
-                <p class="mb-2">
-                    <strong>Liability:</strong> ₱{{ number_format($shortRemittance->pao_share, 2) }}
-                </p>
-                <p class="mb-2">
-                    <strong>Amount Paid:</strong> <span id="pao_paid_display">₱0.00</span>
-                </p>
-                <p class="mb-0">
-                    <strong>Remaining:</strong> <span id="pao_remaining_display" style="color: #dc2626;">₱{{ number_format($shortRemittance->pao_share, 2) }}</span>
-                </p>
+        {{-- Sidebar --}}
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+                <div class="px-4 py-3.5 border-b border-gray-50">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500">Liability Summary</h2>
+                </div>
+                <div class="p-4 space-y-4">
+                    <div class="pb-4 border-b border-gray-100">
+                        <span class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 block mb-1">Short Amount</span>
+                        <p class="text-base font-bold text-red-600">₱{{ number_format($shortRemittance->short_amount, 2) }}</p>
+                    </div>
+                    <div class="pb-4 border-b border-gray-100">
+                        <h4 class="flex items-center gap-1.5 text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                            <svg class="w-3 h-3 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            Driver
+                        </h4>
+                        <div class="space-y-1 text-xs">
+                            <p><span class="text-gray-400">Liability:</span> <strong>₱{{ number_format($shortRemittance->driver_share, 2) }}</strong></p>
+                            <p><span class="text-gray-400">Amount Paid:</span> <strong id="driver_paid_display">₱0.00</strong></p>
+                            <p><span class="text-gray-400">Remaining:</span> <strong id="driver_remaining_display" class="text-red-600">₱{{ number_format($shortRemittance->driver_share, 2) }}</strong></p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="flex items-center gap-1.5 text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                            <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            PAO
+                        </h4>
+                        <div class="space-y-1 text-xs">
+                            <p><span class="text-gray-400">Liability:</span> <strong>₱{{ number_format($shortRemittance->pao_share, 2) }}</strong></p>
+                            <p><span class="text-gray-400">Amount Paid:</span> <strong id="pao_paid_display">₱0.00</strong></p>
+                            <p><span class="text-gray-400">Remaining:</span> <strong id="pao_remaining_display" class="text-red-600">₱{{ number_format($shortRemittance->pao_share, 2) }}</strong></p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 
 @push('scripts')
@@ -275,12 +218,11 @@
     function updateDriverBalance() {
         const amountPaid = parseFloat(document.getElementById('driver_amount_paid').value) || 0;
         const remaining = Math.max(0, driverLiability - amountPaid);
-        
+
         document.getElementById('driver_remaining').value = remaining.toFixed(2);
         document.getElementById('driver_paid_display').textContent = '₱' + amountPaid.toFixed(2);
         document.getElementById('driver_remaining_display').textContent = '₱' + remaining.toFixed(2);
-        
-        // Auto-select status based on payment
+
         if (amountPaid === 0) {
             document.getElementById('driver_status').value = 'pending';
         } else if (amountPaid >= driverLiability) {
@@ -293,12 +235,11 @@
     function updatePaoBalance() {
         const amountPaid = parseFloat(document.getElementById('pao_amount_paid').value) || 0;
         const remaining = Math.max(0, paoLiability - amountPaid);
-        
+
         document.getElementById('pao_remaining').value = remaining.toFixed(2);
         document.getElementById('pao_paid_display').textContent = '₱' + amountPaid.toFixed(2);
         document.getElementById('pao_remaining_display').textContent = '₱' + remaining.toFixed(2);
-        
-        // Auto-select status based on payment
+
         if (amountPaid === 0) {
             document.getElementById('pao_status').value = 'pending';
         } else if (amountPaid >= paoLiability) {
@@ -308,11 +249,9 @@
         }
     }
 
-    // Event listeners
     document.getElementById('driver_amount_paid').addEventListener('input', updateDriverBalance);
     document.getElementById('pao_amount_paid').addEventListener('input', updatePaoBalance);
 
-    // Initialize on page load
     window.addEventListener('DOMContentLoaded', function() {
         updateDriverBalance();
         updatePaoBalance();

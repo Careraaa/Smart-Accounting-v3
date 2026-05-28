@@ -3,250 +3,12 @@
 @push('styles')
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.rr-page {
-    font-family: 'Sora', sans-serif;
-    padding-top: 12px;
-    margin-top: 8px;
-}
-
-.rr-topbar {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-.rr-topbar-title {
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: #111827;
-    letter-spacing: -0.02em;
-    margin: 0 0 2px;
-}
-.rr-topbar-sub {
-    font-size: 0.78rem;
-    color: #9ca3af;
-    margin: 0;
-    max-width: 520px;
-    line-height: 1.45;
-}
-.rr-topbar-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-.rr-btn-print {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: #c8292a;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-family: 'Sora', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-    white-space: nowrap;
-    box-shadow: 0 4px 14px rgba(200, 41, 42, 0.28);
-    transition: background 0.15s, box-shadow 0.15s, transform 0.12s;
-}
-.rr-btn-print:hover {
-    background: #a81f20;
-    color: #fff;
-    box-shadow: 0 8px 22px rgba(200, 41, 42, 0.34);
-    transform: translateY(-1px);
-}
-.rr-btn-print i { font-size: 15px; line-height: 1; }
-
-.rr-filter-bar {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: flex-end;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-.rr-filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    min-width: 130px;
-    flex: 1;
-}
-.rr-filter-group label {
-    font-size: 0.67rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #9ca3af;
-    margin: 0;
-}
-.rr-filter-group select {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 8px 10px;
-    font-size: 0.8rem;
-    font-family: 'Sora', sans-serif;
-    color: #111827;
-    background: #f9fafb;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-}
-.rr-filter-group select:focus {
-    border-color: #c8292a;
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(200, 41, 42, 0.08);
-}
-
-.rr-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 22px;
-}
-@media (max-width: 1100px) { .rr-stats { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px)  { .rr-stats { grid-template-columns: 1fr; } }
-.rr-stat {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 16px 18px;
-    position: relative;
-    overflow: hidden;
-}
-.rr-stat::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    border-radius: 0 0 14px 14px;
-}
-.rr-stat.s-col::after { background: #16a34a; }
-.rr-stat.s-exp::after { background: #c8292a; }
-.rr-stat.s-net::after { background: #0284c7; }
-.rr-stat.s-short::after { background: #d97706; }
-.rr-stat-label {
-    font-size: 0.67rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: #9ca3af;
-    margin-bottom: 6px;
-}
-.rr-stat-value {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #111827;
-    font-family: 'DM Mono', monospace;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-}
-.rr-stat-sub {
-    font-size: 0.72rem;
-    color: #9ca3af;
-    margin-top: 4px;
-}
-
-.rr-table-card {
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    overflow: hidden;
-}
-.rr-table-head {
-    padding: 14px 18px;
-    border-bottom: 1px solid #f3f4f6;
-}
-.rr-table-title {
-    margin: 0;
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: #111827;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.rr-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #c8292a;
-    flex-shrink: 0;
-}
-.rr-table-scroll { overflow-x: auto; }
-.rr-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.825rem;
-}
-.rr-table thead tr {
-    background: #f8f9fb;
-    border-bottom: 1px solid #e5e7eb;
-}
-.rr-table thead th {
-    padding: 10px 14px;
-    font-size: 0.66rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: #6b7280;
-    white-space: nowrap;
-}
-.rr-table tbody tr {
-    border-bottom: 1px solid #f3f4f6;
-    transition: background 0.1s;
-}
-.rr-table tbody tr:last-child { border-bottom: none; }
-.rr-table tbody tr:hover { background: #fafafa; }
-.rr-table tbody td {
-    padding: 10px 14px;
-    color: #374151;
-    vertical-align: middle;
-}
-.rr-mono {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    font-variant-numeric: tabular-nums;
-}
-.rr-mono.muted { color: #9ca3af; }
-.rr-mono.green { color: #15803d; font-weight: 700; }
-.rr-mono.red { color: #c8292a; font-weight: 700; }
-.rr-empty {
-    text-align: center;
-    padding: 48px 20px;
-    color: #9ca3af;
-    font-size: 0.84rem;
-}
-.rr-empty i {
-    display: block;
-    font-size: 28px;
-    opacity: 0.3;
-    margin-bottom: 8px;
-}
-.rr-chip {
-    display: inline-block;
-    font-size: 0.72rem;
-    color: #6b7280;
-    background: #f3f4f6;
-    padding: 2px 8px;
-    border-radius: 6px;
-    margin-top: 8px;
-}
-/* Pagination strip */
-.lv-pagination-strip { display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid #f3f4f6;background:#fafafa; }
-.lv-pagination-info  { font-size:0.75rem;color:#9ca3af; }
-.lv-pagination-info strong { color:#374151; }
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+@keyframes bounceIn { 0%{opacity:0;transform:scale(0.6)} 60%{transform:scale(1.05)} 80%{transform:scale(0.95)} 100%{opacity:1;transform:scale(1)} }
+.rc-fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.rc-scale-in { animation:scaleIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+.rc-bounce { animation:bounceIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 @endpush
 
@@ -267,48 +29,48 @@
     ]);
 @endphp
 
-<div class="rr-page">
-    <div class="rr-topbar">
+{{-- Top bar --}}
+    <div class="rc-fade-up flex items-start justify-between gap-4 mb-5 flex-wrap">
         <div>
-            <h1 class="rr-topbar-title">Remittance Report</h1>
-            <p class="rr-topbar-sub">Filter weekly, monthly, or yearly totals and print a summary for the selected period.</p>
-            <span class="rr-chip">{{ $periodLabel }}</span>
+            <h1 class="text-xl font-extrabold text-gray-900 tracking-tight m-0">Remittance Report</h1>
+            <p class="text-xs text-gray-400 max-w-[520px] leading-relaxed m-0 mt-0.5">Filter weekly, monthly, or yearly totals and print a summary for the selected period.</p>
+            <span class="inline-block text-[0.65rem] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md mt-2">{{ $periodLabel }}</span>
         </div>
-        <div class="rr-topbar-actions">
-            <a href="{{ $printUrl }}" class="rr-btn-print" target="_blank" rel="noopener">
-                <i class="feather-printer"></i> Print report
-            </a>
-        </div>
+        <a href="{{ $printUrl }}" target="_blank" rel="noopener" class="rc-bounce inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white no-underline cursor-pointer whitespace-nowrap bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all" style="animation-delay:0.2s">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            Print report
+        </a>
     </div>
 
-    <div class="rr-filter-bar">
-        <div class="rr-filter-group">
-            <label for="rr-period">Period</label>
-            <select id="period">
+    {{-- Filter bar --}}
+    <div class="rc-scale-in bg-white border border-gray-200 rounded-xl p-4 flex items-end gap-3 mb-5 flex-wrap" style="animation-delay:0.05s">
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Period</label>
+            <select id="period" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
                 <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
                 <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
                 <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
             </select>
         </div>
-        <div class="rr-filter-group" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }};">
-            <label for="rr-week">Week</label>
-            <select id="week">
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }};">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Week</label>
+            <select id="week" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
                 @for ($i = 1; $i <= 52; $i++)
                     <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
                 @endfor
             </select>
         </div>
-        <div class="rr-filter-group" id="monthSelect" style="display:{{ $period === 'monthly' ? 'flex' : 'none' }};">
-            <label for="rr-month">Month</label>
-            <select id="month">
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="monthSelect" style="display:{{ $period === 'monthly' ? 'flex' : 'none' }};">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Month</label>
+            <select id="month" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
                 @for ($i = 1; $i <= 12; $i++)
                     <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
                 @endfor
             </select>
         </div>
-        <div class="rr-filter-group">
-            <label for="rr-year">Year</label>
-            <select id="year">
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Year</label>
+            <select id="year" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
                 @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
                     <option value="{{ $i }}" {{ (int) $year === $i ? 'selected' : '' }}>{{ $i }}</option>
                 @endfor
@@ -316,59 +78,68 @@
         </div>
     </div>
 
-    <div class="rr-stats">
-        <div class="rr-stat s-col">
-            <div class="rr-stat-label">Total collection</div>
-            <div class="rr-stat-value">₱{{ number_format($totalCollection, 2) }}</div>
-            <div class="rr-stat-sub">For selected period</div>
+    {{-- Stats grid --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+        <div class="rc-bounce bg-white border border-gray-200 rounded-xl p-4 relative overflow-hidden" style="animation-delay:0.08s">
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 rounded-b-xl"></div>
+            <div class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Total collection</div>
+            <div class="text-lg font-extrabold text-gray-900 font-mono tracking-tight">₱{{ number_format($totalCollection, 2) }}</div>
+            <div class="text-[0.65rem] text-gray-400 mt-1">For selected period</div>
         </div>
-        <div class="rr-stat s-exp">
-            <div class="rr-stat-label">Total expenses</div>
-            <div class="rr-stat-value">₱{{ number_format($totalExpenses, 2) }}</div>
-            <div class="rr-stat-sub">Trip and operating costs</div>
+        <div class="rc-bounce bg-white border border-gray-200 rounded-xl p-4 relative overflow-hidden" style="animation-delay:0.12s">
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500 rounded-b-xl"></div>
+            <div class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Total expenses</div>
+            <div class="text-lg font-extrabold text-gray-900 font-mono tracking-tight">₱{{ number_format($totalExpenses, 2) }}</div>
+            <div class="text-[0.65rem] text-gray-400 mt-1">Trip and operating costs</div>
         </div>
-        <div class="rr-stat s-net">
-            <div class="rr-stat-label">Net remittance</div>
-            <div class="rr-stat-value">₱{{ number_format($totalNetRemittance, 2) }}</div>
-            <div class="rr-stat-sub">Collection minus expenses</div>
+        <div class="rc-bounce bg-white border border-gray-200 rounded-xl p-4 relative overflow-hidden" style="animation-delay:0.16s">
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-sky-500 rounded-b-xl"></div>
+            <div class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Net remittance</div>
+            <div class="text-lg font-extrabold text-gray-900 font-mono tracking-tight">₱{{ number_format($totalNetRemittance, 2) }}</div>
+            <div class="text-[0.65rem] text-gray-400 mt-1">Collection minus expenses</div>
         </div>
-        <div class="rr-stat s-short">
-            <div class="rr-stat-label">Short remittances</div>
-            <div class="rr-stat-value">{{ $shortRemittances }}</div>
-            <div class="rr-stat-sub">Shortages in period</div>
+        <div class="rc-bounce bg-white border border-gray-200 rounded-xl p-4 relative overflow-hidden" style="animation-delay:0.2s">
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500 rounded-b-xl"></div>
+            <div class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Short remittances</div>
+            <div class="text-lg font-extrabold text-gray-900 font-mono tracking-tight">{{ $shortRemittances }}</div>
+            <div class="text-[0.65rem] text-gray-400 mt-1">Shortages in period</div>
         </div>
     </div>
 
-    <div class="rr-table-card">
-        <div class="rr-table-head">
-            <h2 class="rr-table-title"><span class="rr-dot"></span> Daily totals</h2>
+    {{-- Table card --}}
+    <div class="rc-fade-up bg-white border border-gray-200 rounded-xl overflow-hidden" style="animation-delay:0.3s">
+        <div class="px-4 py-3.5 border-b border-gray-100">
+            <h2 class="flex items-center gap-2 text-sm font-bold text-gray-900 m-0">
+                <span class="w-2 h-2 rounded-full bg-red-600 inline-block"></span>
+                Daily totals
+            </h2>
         </div>
-        <div class="rr-table-scroll">
-            <table class="rr-table">
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
                 <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th class="text-end">Collection</th>
-                        <th class="text-end">Expenses</th>
-                        <th class="text-end">Net remittance</th>
+                    <tr class="bg-gray-50/80 border-b border-gray-200">
+                        <th class="text-left px-4 py-2.5 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Date</th>
+                        <th class="text-right px-4 py-2.5 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Collection</th>
+                        <th class="text-right px-4 py-2.5 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Expenses</th>
+                        <th class="text-right px-4 py-2.5 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Net remittance</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($groupedRemittances as $remittance)
-                        <tr>
-                            <td><strong>{{ $remittance['remittance_date']->format('M d, Y') }}</strong></td>
-                            <td class="text-end rr-mono green">₱{{ number_format($remittance['total_collection'], 2) }}</td>
-                            <td class="text-end rr-mono muted">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
-                            <td class="text-end rr-mono {{ $remittance['is_short_remittance'] ? 'red' : 'green' }}">
+                        <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">
+                            <td class="px-4 py-2.5 text-xs font-semibold text-gray-800">{{ $remittance['remittance_date']->format('M d, Y') }}</td>
+                            <td class="px-4 py-2.5 text-right text-xs font-mono font-bold text-emerald-600">₱{{ number_format($remittance['total_collection'], 2) }}</td>
+                            <td class="px-4 py-2.5 text-right text-xs font-mono text-gray-400">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
+                            <td class="px-4 py-2.5 text-right text-xs font-mono font-bold {{ $remittance['is_short_remittance'] ? 'text-red-600' : 'text-emerald-600' }}">
                                 ₱{{ number_format($remittance['net_remittance'], 2) }}
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4">
-                                <div class="rr-empty">
-                                    <i class="feather-file-text"></i>
-                                    No remittances found for this period. Try adjusting the filters.
+                            <td colspan="4" class="text-center py-12">
+                                <div class="flex flex-col items-center gap-2">
+                                    <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                    <p class="text-xs text-gray-400">No remittances found for this period. Try adjusting the filters.</p>
                                 </div>
                             </td>
                         </tr>
@@ -378,18 +149,17 @@
         </div>
         {{-- Pagination --}}
         @if(method_exists($groupedRemittances, 'hasPages') && $groupedRemittances->hasPages())
-        <div class="lv-pagination-strip">
-            <div class="lv-pagination-info">
+        <div class="flex justify-between items-center px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+            <div class="text-[0.65rem] text-gray-400">
                 Showing
-                <strong>{{ $groupedRemittances->firstItem() }}</strong>–<strong>{{ $groupedRemittances->lastItem() }}</strong>
+                <strong class="text-gray-700">{{ $groupedRemittances->firstItem() }}</strong>–<strong class="text-gray-700">{{ $groupedRemittances->lastItem() }}</strong>
                 of
-                <strong>{{ $groupedRemittances->total() }}</strong> daily totals
+                <strong class="text-gray-700">{{ $groupedRemittances->total() }}</strong> daily totals
             </div>
             {{ $groupedRemittances->withQueryString()->links('pagination::bootstrap-5') }}
         </div>
         @endif
     </div>
-</div>
 @endsection
 
 @push('scripts')

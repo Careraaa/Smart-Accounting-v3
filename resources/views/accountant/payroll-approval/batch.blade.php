@@ -1,371 +1,334 @@
 @extends('layouts.layout')
 
 @push('styles')
-    @include('accountant._ui-styles')
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-        .prl-page { font-family: 'Sora', sans-serif; }
-
-        /* ── Stat grid ── */
-        .prl-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
-        @media (max-width: 1100px) { .prl-stats { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px)  { .prl-stats { grid-template-columns: 1fr; } }
-        .prl-stat { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; display: flex; align-items: flex-start; gap: 14px; position: relative; overflow: hidden; }
-        .prl-stat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; border-radius: 0 0 14px 14px; }
-        .prl-stat.s-blue::after  { background: #0284c7; }
-        .prl-stat.s-green::after { background: #16a34a; }
-        .prl-stat.s-amber::after { background: #d97706; }
-        .prl-stat.s-red::after   { background: #c8292a; }
-        .prl-stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .prl-stat.s-blue  .prl-stat-icon { background: #f0f9ff; color: #0284c7; }
-        .prl-stat.s-green .prl-stat-icon { background: #f0fdf4; color: #16a34a; }
-        .prl-stat.s-amber .prl-stat-icon { background: #fffbeb; color: #d97706; }
-        .prl-stat.s-red   .prl-stat-icon { background: #fff0f0; color: #c8292a; }
-        .prl-stat-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #9ca3af; margin-bottom: 4px; }
-        .prl-stat-value { font-size: 1.15rem; font-weight: 800; color: #111827; line-height: 1.2; font-variant-numeric: tabular-nums; font-family: 'DM Mono', monospace; }
-        .prl-stat-sub   { font-size: 0.73rem; color: #9ca3af; margin-top: 4px; }
-
-        /* ── Batch info bar ── */
-        .prl-batch-info {
-            background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
-            padding: 14px 18px; margin-bottom: 20px;
-            display: flex; flex-wrap: wrap; gap: 20px; align-items: center;
-        }
-        .prl-batch-info-item { display: flex; flex-direction: column; gap: 2px; }
-        .prl-batch-info-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; }
-        .prl-batch-info-value { font-size: 0.84rem; font-weight: 600; color: #111827; }
-
-        /* ── Action buttons ── */
-        .prl-batch-btn {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 9px 16px; border-radius: 9px; font-size: 0.82rem; font-weight: 700;
-            font-family: 'Sora', sans-serif; border: 1px solid transparent; transition: all .15s ease; cursor: pointer;
-            min-width: 120px; justify-content: center;
-        }
-        .prl-batch-btn-danger  { background: #fff; border-color: #fecaca; color: #c8292a; }
-        .prl-batch-btn-danger:hover  { background: #fff1f2; border-color: #fda4af; color: #a81f20; }
-        .prl-batch-btn-primary { background: #c8292a; color: #fff; border-color: #c8292a; box-shadow: 0 4px 18px rgba(200,41,42,.28); }
-        .prl-batch-btn-primary:hover { background: #a81f20; border-color: #a81f20; color: #fff; }
-
-        /* ── Clickable rows ── */
-        .table-hover tbody tr { cursor: pointer; transition: background 0.12s; }
-        .table-hover tbody tr:hover { background: #fdf4f4 !important; }
-
-        /* ── Rejection note banner ── */
-        .prl-rejection-note {
-            background: #fff1f2; border: 1px solid #fecaca; border-radius: 10px;
-            padding: 12px 16px; margin-bottom: 18px; display: flex; gap: 10px; align-items: flex-start;
-        }
-        .prl-rejection-note i { color: #c8292a; flex-shrink: 0; margin-top: 1px; }
-        .prl-rejection-note-body { font-size: 0.84rem; color: #7f1d1d; }
-        .prl-rejection-note-body strong { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: #c8292a; margin-bottom: 3px; }
-    </style>
+<style>
+@keyframes fadeUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.93)} 100%{opacity:1;transform:scale(1)} }
+.fade-up { animation:fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.scale-in { animation:scaleIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(1) { animation-delay:0.05s; }
+.stat-card:nth-child(2) { animation-delay:0.1s; }
+.stat-card:nth-child(3) { animation-delay:0.15s; }
+.stat-card:nth-child(4) { animation-delay:0.2s; }
+</style>
 @endpush
 
 @section('content')
 @php
-    $status     = $batch->status;
-    $startDate  = $batch->period_start;
-    $endDate    = $batch->period_end;
-    $isFirst    = $startDate->format('d') <= 15;
+    $status    = $batch->status;
+    $startDate = $batch->period_start;
+    $endDate   = $batch->period_end;
+    $isFirst   = $startDate->format('d') <= 15;
 
     $statusLabel = match($status) {
-        'submitted' => 'Pending approval',
+        'submitted' => 'Pending',
         'approved'  => 'Approved',
         'rejected'  => 'Rejected',
-        default     => ucfirst($status),
+        default => ucfirst($status),
     };
-    $statusBg    = match($status) {
-        'submitted' => '#fffbeb', 'approved' => '#f0fdf4', 'rejected' => '#fff1f2', default => '#f3f4f6',
-    };
-    $statusColor = match($status) {
-        'submitted' => '#d97706', 'approved' => '#16a34a', 'rejected' => '#c8292a', default => '#6b7280',
+    list($statusColor, $statusBg) = match($status) {
+        'submitted' => ['amber-600', 'amber-50'],
+        'approved'  => ['emerald-600', 'emerald-50'],
+        'rejected'  => ['red-600', 'red-50'],
+        default     => ['gray-600', 'gray-50'],
     };
 @endphp
 
-<div class="col-12">
-    <div class="remui-page prl-page">
-        <div class="remui-backdrop"><div class="remui-grid"></div></div>
-
-        {{-- Hero ──────────────────────────────────────────────────── --}}
-        <div class="remui-hero mb-3">
-            <div>
-                <h5 class="remui-title">
-                    {{ $startDate->format('F Y') }} — {{ $isFirst ? '1st' : '2nd' }} half payroll
-                </h5>
-                <p class="remui-subtitle mb-0">
-                    {{ $startDate->format('F d, Y') }} – {{ $endDate->format('F d, Y') }}
-                    <span class="badge rounded-pill ms-2"
-                          style="background:{{ $statusBg }};color:{{ $statusColor }};font-size:0.65rem;">
-                        {{ $statusLabel }}
-                    </span>
-                </p>
-            </div>
-            <a href="{{ route('payroll-approval.index') }}" class="emp-action-btn emp-action-view">
-                <i class="feather-arrow-left"></i><span>Back</span>
-            </a>
+@if(session('success'))
+        <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-500/15 border border-emerald-500/25 rounded-lg text-emerald-700 text-xs font-semibold mb-4">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            {{ session('success') }}
         </div>
-
-        {{-- Flash ─────────────────────────────────────────────────── --}}
-        @if (session('success'))
-            <div class="acd-flash success"><i class="feather-check-circle"></i> {{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="acd-flash error"><i class="feather-alert-circle"></i> {{ session('error') }}</div>
-        @endif
-
-        {{-- Rejection note ─────────────────────────────────────────── --}}
-        @if($status === 'rejected' && $batch->rejection_note)
-            <div class="prl-rejection-note">
-                <i class="feather-alert-circle"></i>
-                <div class="prl-rejection-note-body">
-                    <strong>Rejection reason</strong>
-                    {{ $batch->rejection_note }}
-                </div>
-            </div>
-        @endif
-
-        {{-- Stats ─────────────────────────────────────────────────── --}}
-        <div class="prl-stats">
-            <div class="prl-stat s-blue">
-                <div class="prl-stat-icon"><i class="feather-users"></i></div>
-                <div>
-                    <div class="prl-stat-label">Employees</div>
-                    <div class="prl-stat-value">{{ $payrolls->count() }}</div>
-                    <div class="prl-stat-sub">In this batch</div>
-                </div>
-            </div>
-            <div class="prl-stat s-green">
-                <div class="prl-stat-icon"><i class="feather-dollar-sign"></i></div>
-                <div>
-                    <div class="prl-stat-label">Total gross</div>
-                    <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalGross, 2) }}</div>
-                    <div class="prl-stat-sub">Combined</div>
-                </div>
-            </div>
-            <div class="prl-stat s-amber">
-                <div class="prl-stat-icon"><i class="feather-minus-circle"></i></div>
-                <div>
-                    <div class="prl-stat-label">Total deductions</div>
-                    <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalDeductions, 2) }}</div>
-                    <div class="prl-stat-sub">Combined</div>
-                </div>
-            </div>
-            <div class="prl-stat s-red">
-                <div class="prl-stat-icon"><i class="feather-trending-up"></i></div>
-                <div>
-                    <div class="prl-stat-label">Total net pay</div>
-                    <div class="prl-stat-value" style="font-size:1rem;">₱{{ number_format($totalNet, 2) }}</div>
-                    <div class="prl-stat-sub">Take-home</div>
-                </div>
-            </div>
+    @elseif(session('error'))
+        <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-500/15 border border-red-500/25 rounded-lg text-red-700 text-xs font-semibold mb-4">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+            {{ session('error') }}
         </div>
+    @endif
 
-        {{-- Batch meta info ────────────────────────────────────────── --}}
-        <div class="prl-batch-info">
-            <div class="prl-batch-info-item">
-                <span class="prl-batch-info-label">Batch ID</span>
-                <span class="prl-batch-info-value font-monospace">#{{ str_pad($batch->id, 3, '0', STR_PAD_LEFT) }}</span>
+    {{-- Header --}}
+    <div class="flex items-start justify-between mb-6 flex-wrap gap-4 fade-up">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <a href="{{ route('payroll-approval.index') }}" class="inline-flex items-center gap-1 text-gray-400 hover:text-gray-600 text-xs transition-colors no-underline">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    Payroll Approval
+                </a>
+                <span class="text-gray-300 text-xs">/</span>
+                <span class="text-xs text-gray-400 font-mono">#{{ str_pad($batch->id, 3, '0', STR_PAD_LEFT) }}</span>
             </div>
-            @if($batch->generatedBy)
-            <div class="prl-batch-info-item">
-                <span class="prl-batch-info-label">Generated by</span>
-                <span class="prl-batch-info-value">{{ $batch->generatedBy->first_name }} {{ $batch->generatedBy->last_name }}</span>
-            </div>
-            @endif
-            @if($batch->finalizedBy)
-            <div class="prl-batch-info-item">
-                <span class="prl-batch-info-label">Submitted by</span>
-                <span class="prl-batch-info-value">{{ $batch->finalizedBy->first_name }} {{ $batch->finalizedBy->last_name }}</span>
-            </div>
-            @endif
-            @if($batch->finalized_at)
-            <div class="prl-batch-info-item">
-                <span class="prl-batch-info-label">Submitted on</span>
-                <span class="prl-batch-info-value">{{ $batch->finalized_at->format('M d, Y g:i A') }}</span>
-            </div>
-            @endif
-            @if($batch->approved_at)
-            <div class="prl-batch-info-item">
-                <span class="prl-batch-info-label">Approved on</span>
-                <span class="prl-batch-info-value" style="color:#16a34a;">{{ $batch->approved_at->format('M d, Y g:i A') }}</span>
-            </div>
-            @endif
-            @if($batch->rejected_at)
-            <div class="prl-batch-info-item">
-                <span class="prl-batch-info-label">Rejected on</span>
-                <span class="prl-batch-info-value" style="color:#c8292a;">{{ $batch->rejected_at->format('M d, Y g:i A') }}</span>
-            </div>
-            @endif
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $startDate->format('F Y') }} — {{ $isFirst ? '1st' : '2nd' }} Half</h1>
+            <p class="text-sm text-gray-500 mt-0.5">{{ $startDate->format('F d, Y') }} – {{ $endDate->format('F d, Y') }}</p>
         </div>
-
-        {{-- Employee table ─────────────────────────────────────────── --}}
-        <div class="card remui-card mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <span class="card-title mb-0">
-                    <i class="feather-users me-2" style="color:#0284c7;"></i>Employees in this batch
-                </span>
-                <span class="text-muted small">{{ $payrolls->count() }} record(s)</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover w-100 mb-0 remui-table">
-                        <thead>
-                            <tr>
-                                <th>Employee</th>
-                                <th>Department</th>
-                                <th>Position</th>
-                                <th class="text-center">Days</th>
-                                <th class="text-end">Basic pay</th>
-                                <th class="text-end">Gross pay</th>
-                                <th class="text-end">Deductions</th>
-                                <th class="text-end">Net pay</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($payrolls as $payroll)
-                                @php
-                                    $user     = $payroll->user;
-                                    $initials = strtoupper(substr($user->first_name ?? '', 0, 1) . substr($user->last_name ?? '', 0, 1));
-                                @endphp
-                                <tr onclick="window.location='{{ route('payroll-approval.show', $payroll) }}'">
-                                    <td class="fw-bold" style="font-size:0.88rem;color:#111827;">
-                                        {{ $user->first_name }} {{ $user->last_name }}
-                                    </td>
-                                    <td style="font-size:0.82rem;color:#6b7280;">
-                                        {{ $user->department ?? 'N/A' }}
-                                    </td>
-                                    <td>
-                                        <span class="text-muted" style="font-size:0.82rem;">
-                                            {{ $user->position ?? 'N/A' }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center font-monospace" style="font-size:0.85rem;">
-                                        {{ $payroll->days_worked ?? '—' }}
-                                    </td>
-                                    <td class="text-end font-monospace" style="font-size:0.85rem;">
-                                        ₱{{ number_format($payroll->basic_salary, 2) }}
-                                    </td>
-                                    <td class="text-end font-monospace" style="font-size:0.85rem;">
-                                        ₱{{ number_format($payroll->gross_pay, 2) }}
-                                    </td>
-                                    <td class="text-end font-monospace text-muted" style="font-size:0.85rem;">
-                                        ₱{{ number_format($payroll->total_deductions, 2) }}
-                                    </td>
-                                    <td class="text-end font-monospace fw-bold" style="font-size:0.88rem;color:#15803d;">
-                                        ₱{{ number_format($payroll->net_pay, 2) }}
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="8" class="text-center text-muted py-5">
-                                        <i class="feather-inbox d-block mb-2" style="font-size:28px;opacity:.3;"></i>
-                                        No payroll records in this batch.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                        @if($payrolls->isNotEmpty())
-                        <tfoot>
-                            <tr style="background:#f9fafb;font-size:0.85rem;">
-                                <td colspan="5" class="fw-bold" style="padding:12px 16px;color:#111827;">Totals</td>
-                                <td class="text-end font-monospace fw-bold" style="padding:12px 16px;">
-                                    ₱{{ number_format($totalGross, 2) }}
-                                </td>
-                                <td class="text-end font-monospace text-muted" style="padding:12px 16px;">
-                                    ₱{{ number_format($totalDeductions, 2) }}
-                                </td>
-                                <td class="text-end font-monospace fw-bold" style="padding:12px 16px;color:#15803d;">
-                                    ₱{{ number_format($totalNet, 2) }}
-                                </td>
-                            </tr>
-                        </tfoot>
-                        @endif
-                    </table>
-                </div>
-            </div>
-
-            {{-- Approve / Reject footer (only for submitted batches) ── --}}
-            @if($status === 'submitted' && $payrolls->isNotEmpty())
-                <div class="card-footer bg-white border-top" style="padding:16px 18px;">
-                    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                        <p class="text-muted mb-0" style="font-size:0.8rem;">
-                            <i class="feather-info me-1"></i>
-                            Approving will lock all {{ $payrolls->count() }} payroll record(s) and notify HR.
-                        </p>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="prl-batch-btn prl-batch-btn-danger"
-                                    onclick="openRejectModal({{ $batch->id }}, {{ $payrolls->count() }})">
-                                <i class="feather-x-circle"></i> Reject batch
-                            </button>
-                            <form action="{{ route('payroll-approval.approve-batch') }}" method="POST" class="d-inline"
-                                  data-sa-confirm="Approve this entire payroll batch? This will approve {{ $payrolls->count() }} payroll record(s).">
-                                @csrf
-                                <input type="hidden" name="batch_id" value="{{ $batch->id }}">
-                                <button type="submit" class="prl-batch-btn prl-batch-btn-primary">
-                                    <i class="feather-check-circle"></i> Approve batch
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            @endif
+        <div class="flex items-center gap-2">
+            @php
+                $badgeClasses = match($status) {
+                    'submitted' => 'bg-amber-50 text-amber-600 border-amber-200',
+                    'approved'  => 'bg-emerald-50 text-emerald-600 border-emerald-200',
+                    'rejected'  => 'bg-red-50 text-red-600 border-red-200',
+                    default     => 'bg-gray-50 text-gray-600 border-gray-200',
+                };
+                $dotClasses = match($status) {
+                    'submitted' => 'bg-amber-500',
+                    'approved'  => 'bg-emerald-600',
+                    'rejected'  => 'bg-red-600',
+                    default     => 'bg-gray-600',
+                };
+            @endphp
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.6rem] font-semibold border {{ $badgeClasses }}">
+                @if($status === 'submitted')
+                    <span class="w-1.5 h-1.5 rounded-full {{ $dotClasses }} animate-pulse"></span>
+                @else
+                    <span class="w-1.5 h-1.5 rounded-full {{ $dotClasses }}"></span>
+                @endif
+                {{ $statusLabel }}
+            </span>
         </div>
-
     </div>
-</div>
-@endsection
 
-{{-- ── Reject Modal ─────────────────────────────────────────────── --}}
-<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true" style="font-family:'Sora',sans-serif;">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
-        <div class="modal-content" style="border-radius:16px;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15);">
-            <form id="rejectForm" action="{{ route('payroll-approval.reject-batch') }}" method="POST">
+    {{-- Rejection note banner --}}
+    @if($status === 'rejected' && $batch->rejection_note)
+        <div class="fade-up bg-red-50 border border-red-200 rounded-xl p-4 mb-5 flex gap-3 items-start">
+            <div class="w-8 h-8 rounded-lg bg-red-100 text-red-500 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
+            </div>
+            <div>
+                <p class="text-[0.55rem] font-bold uppercase tracking-wider text-red-600 mb-0.5">Rejection reason</p>
+                <p class="text-xs text-red-800">{{ $batch->rejection_note }}</p>
+            </div>
+        </div>
+    @endif
+
+    {{-- Stats --}}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Employees</p>
+            <p class="text-xl font-bold text-gray-900 tabular-nums mt-1">{{ $payrolls->count() }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">In this batch</p>
+        </div>
+        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Gross pay</p>
+            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalGross, 0) }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Combined total</p>
+        </div>
+        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Deductions</p>
+            <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">₱{{ number_format($totalDeductions, 0) }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Combined total</p>
+        </div>
+        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net pay</p>
+            <p class="text-lg font-bold text-indigo-600 tabular-nums mt-1">₱{{ number_format($totalNet, 0) }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Take-home total</p>
+        </div>
+    </div>
+
+    {{-- Batch meta info --}}
+    <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-5 flex flex-wrap gap-x-8 gap-y-3 text-sm">
+        @if($batch->generatedBy)
+            <div>
+                <p class="text-[0.5rem] font-bold uppercase tracking-wider text-gray-400">Generated by</p>
+                <p class="text-xs font-semibold text-gray-700 mt-0.5">{{ $batch->generatedBy->first_name }} {{ $batch->generatedBy->last_name }}</p>
+            </div>
+        @endif
+        @if($batch->finalizedBy)
+            <div>
+                <p class="text-[0.5rem] font-bold uppercase tracking-wider text-gray-400">Submitted by</p>
+                <p class="text-xs font-semibold text-gray-700 mt-0.5">{{ $batch->finalizedBy->first_name }} {{ $batch->finalizedBy->last_name }}</p>
+            </div>
+        @endif
+        @if($batch->finalized_at)
+            <div>
+                <p class="text-[0.5rem] font-bold uppercase tracking-wider text-gray-400">Submitted on</p>
+                <p class="text-xs font-semibold text-gray-700 mt-0.5">{{ $batch->finalized_at->format('M d, Y g:i A') }}</p>
+            </div>
+        @endif
+        @if($batch->approved_at)
+            <div>
+                <p class="text-[0.5rem] font-bold uppercase tracking-wider text-gray-400">Approved on</p>
+                <p class="text-xs font-semibold text-emerald-600 mt-0.5">{{ $batch->approved_at->format('M d, Y g:i A') }}</p>
+            </div>
+        @endif
+        @if($batch->rejected_at)
+            <div>
+                <p class="text-[0.5rem] font-bold uppercase tracking-wider text-gray-400">Rejected on</p>
+                <p class="text-xs font-semibold text-red-600 mt-0.5">{{ $batch->rejected_at->format('M d, Y g:i A') }}</p>
+            </div>
+        @endif
+    </div>
+
+    {{-- Employee table --}}
+    <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </div>
+                <span class="text-sm font-semibold text-gray-900">Employees</span>
+            </div>
+            <span class="text-[0.55rem] text-gray-400 font-semibold">{{ $payrolls->count() }} record(s)</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-50 bg-gray-50/50">
+                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Employee</th>
+                        <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Department</th>
+                        <th class="text-center px-3 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Days</th>
+                        <th class="text-right px-3 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Basic</th>
+                        <th class="text-right px-3 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Gross</th>
+                        <th class="text-right px-3 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Deductions</th>
+                        <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @forelse($payrolls as $payroll)
+                        @php
+                            $user = $payroll->user;
+                            $initials = strtoupper(substr($user->first_name ?? '', 0, 1) . substr($user->last_name ?? '', 0, 1));
+                        @endphp
+                        <tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location='{{ route('payroll-approval.show', $payroll) }}'">
+                            <td class="px-5 py-3.5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center text-[0.55rem] font-bold shrink-0">{{ $initials }}</div>
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-900">{{ $user->first_name }} {{ $user->last_name }}</p>
+                                        <p class="text-[0.55rem] text-gray-400 mt-0.5">{{ $user->position ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3.5 text-xs text-gray-500">{{ $user->department ?? 'N/A' }}</td>
+                            <td class="px-3 py-3.5 text-center text-xs font-semibold text-gray-700 tabular-nums">{{ $payroll->days_worked ?? '—' }}</td>
+                            <td class="px-3 py-3.5 text-right text-xs tabular-nums text-gray-600">₱{{ number_format($payroll->basic_salary, 0) }}</td>
+                            <td class="px-3 py-3.5 text-right text-xs tabular-nums text-gray-600">₱{{ number_format($payroll->gross_pay, 0) }}</td>
+                            <td class="px-3 py-3.5 text-right text-xs tabular-nums text-gray-400">₱{{ number_format($payroll->total_deductions, 0) }}</td>
+                            <td class="px-5 py-3.5 text-right text-xs font-bold tabular-nums text-emerald-600">₱{{ number_format($payroll->net_pay, 0) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center py-12">
+                                <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                                <p class="text-xs text-gray-400">No payroll records in this batch.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                @if($payrolls->isNotEmpty())
+                    <tfoot>
+                        <tr class="border-t-2 border-gray-100 bg-gray-50/80">
+                            <td colspan="4" class="px-5 py-3 text-xs font-bold text-gray-900">Totals</td>
+                            <td class="px-3 py-3 text-right text-xs font-bold tabular-nums text-gray-900">₱{{ number_format($totalGross, 0) }}</td>
+                            <td class="px-3 py-3 text-right text-xs font-bold tabular-nums text-amber-600">₱{{ number_format($totalDeductions, 0) }}</td>
+                            <td class="px-5 py-3 text-right text-xs font-bold tabular-nums text-emerald-600">₱{{ number_format($totalNet, 0) }}</td>
+                        </tr>
+                    </tfoot>
+                @endif
+            </table>
+        </div>
+
+        {{-- Approve/Reject footer --}}
+        @if($status === 'submitted' && $payrolls->isNotEmpty())
+            <div class="px-5 py-4 border-t border-gray-50 bg-white flex flex-wrap items-center justify-between gap-3">
+                <p class="text-[0.6rem] text-gray-400 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Approving will lock all {{ $payrolls->count() }} payroll record(s) and notify HR.
+                </p>
+                <div class="flex gap-2">
+                    <button type="button" onclick="openRejectModal({{ $batch->id }}, {{ $payrolls->count() }})"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border border-red-200 text-red-600 bg-white hover:bg-red-50 hover:border-red-300 transition-all no-underline">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
+                        Reject batch
+                    </button>
+                    <button type="button" onclick="openApproveModal({{ $batch->id }}, {{ $payrolls->count() }})"
+                            class="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 shadow-sm hover:shadow transition-all border-0 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Approve batch
+                    </button>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    {{-- Reject Modal (HR-style) --}}
+    <div class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999] p-5" id="rejectModalOverlay">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-7">
+            <div class="mb-5">
+                <h3 class="text-lg font-bold text-gray-900 m-0 mb-1">Reject Payroll Batch</h3>
+                <p id="rejectDesc" class="text-xs text-gray-400 m-0">All employees in this batch will be notified.</p>
+            </div>
+            <form id="rejectForm" method="POST" action="{{ route('payroll-approval.reject-batch') }}">
                 @csrf
-                <input type="hidden" id="rejectBatchId" name="batch_id">
-                <div class="modal-header" style="border-bottom:1px solid #f3f4f6;padding:18px 22px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div style="width:36px;height:36px;border-radius:10px;background:#fff1f2;border:1px solid #fecaca;display:flex;align-items:center;justify-content:center;color:#c8292a;flex-shrink:0;">
-                            <i class="feather-x-circle" style="font-size:16px;"></i>
-                        </div>
-                        <div>
-                            <h6 class="modal-title" style="font-size:0.92rem;font-weight:800;color:#111827;margin:0;">Reject payroll batch</h6>
-                            <p id="rejectDesc" style="font-size:0.78rem;color:#9ca3af;margin:0;"></p>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" style="padding:20px 22px;">
-                    <label style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9ca3af;display:block;margin-bottom:6px;">
-                        Rejection reason <span style="color:#c8292a;">*</span>
+                <input type="hidden" name="batch_id" id="rejectBatchId" value="">
+                <div class="mb-6">
+                    <label for="rejection_reason" class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">
+                        Rejection Reason <span class="text-amber-600">*</span>
                     </label>
-                    <textarea name="rejection_note" id="rejectNote" class="form-control" rows="3" required minlength="3"
-                              placeholder="Explain why this batch is being rejected…"
-                              style="border:1px solid #e5e7eb;border-radius:8px;font-size:0.845rem;font-family:'Sora',sans-serif;color:#111827;padding:9px 12px;resize:vertical;"></textarea>
-                    <p style="font-size:0.75rem;color:#9ca3af;margin:6px 0 0;">HR will be notified and can reopen the batch for corrections.</p>
+                    <textarea name="rejection_reason" id="rejectNote" rows="3" required
+                              placeholder="Explain why this payroll batch is being rejected…"
+                              class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 resize-none focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300 transition-all"></textarea>
+                    <p class="text-[0.55rem] text-gray-400 mt-1.5">The HR team will be notified and can resubmit.</p>
                 </div>
-                <div class="modal-footer" style="border-top:1px solid #f3f4f6;padding:14px 22px;gap:8px;">
-                    <button type="button" data-bs-dismiss="modal"
-                            style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;border:1px solid #e5e7eb;background:#f3f4f6;color:#374151;cursor:pointer;">
+                <div class="flex gap-2.5 justify-end">
+                    <button type="button" onclick="closeRejectModal()"
+                            class="px-4 py-2.5 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97] cursor-pointer border-none">
                         Cancel
                     </button>
                     <button type="submit"
-                            style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:700;border:none;background:#c8292a;color:#fff;box-shadow:0 2px 8px rgba(200,41,42,.3);cursor:pointer;">
-                        <i class="feather-x-circle"></i> Reject batch
+                            class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-red-600/80 transition-all hover:bg-red-600 active:scale-[0.97] cursor-pointer border-none">
+                        Reject Request
                     </button>
                 </div>
             </form>
         </div>
     </div>
-</div>
+
+    {{-- Approve Modal (HR-style) --}}
+    <div class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999] p-5" id="approveModalOverlay">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-7">
+            <div class="mb-5">
+                <h3 class="text-lg font-bold text-gray-900 m-0 mb-1">Approve Payroll Batch</h3>
+                <p id="approveDesc" class="text-xs text-gray-400 m-0">Confirm approval of this payroll batch</p>
+            </div>
+            <form id="approveForm" method="POST" action="{{ route('payroll-approval.approve-batch') }}">
+                @csrf
+                <input type="hidden" name="batch_id" id="approveBatchId" value="">
+                <div class="flex gap-2.5 justify-end">
+                    <button type="button" onclick="closeApproveModal()"
+                            class="px-4 py-2.5 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97] cursor-pointer border-none">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600/80 transition-all hover:bg-emerald-600 active:scale-[0.97] cursor-pointer border-none">
+                        Confirm Approval
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endsection
 
 @push('scripts')
 <script>
 function openRejectModal(batchId, count) {
     document.getElementById('rejectBatchId').value = batchId;
-    document.getElementById('rejectDesc').textContent = count + ' payroll record(s) will be rejected.';
+    document.getElementById('rejectDesc').textContent = count + ' payroll record(s) will be rejected';
     document.getElementById('rejectNote').value = '';
-    new bootstrap.Modal(document.getElementById('rejectModal')).show();
+    document.getElementById('rejectModalOverlay').classList.remove('hidden');
+    document.getElementById('rejectModalOverlay').classList.add('flex');
+}
+function closeRejectModal() {
+    document.getElementById('rejectModalOverlay').classList.add('hidden');
+    document.getElementById('rejectModalOverlay').classList.remove('flex');
+}
+function openApproveModal(batchId, count) {
+    document.getElementById('approveBatchId').value = batchId;
+    document.getElementById('approveDesc').textContent = count + ' payroll record(s) will be approved and locked';
+    document.getElementById('approveModalOverlay').classList.remove('hidden');
+    document.getElementById('approveModalOverlay').classList.add('flex');
+}
+function closeApproveModal() {
+    document.getElementById('approveModalOverlay').classList.add('hidden');
+    document.getElementById('approveModalOverlay').classList.remove('flex');
 }
 </script>
 @endpush

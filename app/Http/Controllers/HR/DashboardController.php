@@ -4,18 +4,27 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\Bonus;
 use App\Models\CashAdvance;
+use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\OvertimeUndertime;
 use App\Models\PayrollBatch;
-use App\Models\Payroll;
 use App\Models\SalaryLoan;
+use App\Models\User;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        // ── Employee Stats ──
+        $totalEmployees = User::where('role', 'employee')->where('status', 'active')->count();
+        $newHiresThisMonth = User::where('role', 'employee')->where('status', 'active')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
         // ── Attendance trend (last 7 days) ──
         $attendanceTrend = [];
         for ($i = 6; $i >= 0; $i--) {
@@ -32,11 +41,30 @@ class DashboardController extends Controller
                 'late' => $late,
             ];
         }
+        $td = $attendanceTrend[array_key_last($attendanceTrend)];
+        $tdTotal = $td['present'] + $td['late'] + $td['absent'];
+        $tdRate = $tdTotal > 0 ? round(($td['present'] / $tdTotal) * 100) : 0;
 
         // ── Leave Stats ──
         $approvedLeaves = Leave::whereIn('status', ['approved', 'paid'])->count();
         $pendingLeaves = Leave::where('status', 'pending')->count();
         $rejectedLeaves = Leave::where('status', 'rejected')->count();
+
+        // ── Leave Trend (last 6 months) ──
+        $leaveTrend = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $start = (clone $month)->startOfMonth();
+            $end = (clone $month)->endOfMonth();
+            $total = Leave::whereBetween('created_at', [$start, $end])->count();
+            $approved = Leave::whereBetween('created_at', [$start, $end])
+                ->whereIn('status', ['approved', 'paid'])->count();
+            $leaveTrend[] = [
+                'label' => $month->format('M'),
+                'total' => $total,
+                'approved' => $approved,
+            ];
+        }
 
         // ── OT/UT Stats ──
         $pendingOT = OvertimeUndertime::where('status', 'pending')->where('type', 'overtime')->count();
@@ -76,11 +104,23 @@ class DashboardController extends Controller
         $totalPaidCA = CashAdvance::where('status', 'paid')->sum('amount') ?? 0;
         $totalPaidLoans = SalaryLoan::where('status', 'paid')->sum('loan_amount') ?? 0;
 
+        // ── Holiday Stats ──
+        $upcomingHolidays = Holiday::where('date', '>=', now())
+            ->where('date', '<=', now()->addDays(30))
+            ->count();
+
+        // ── Bonus Stats ──
+        $activeBonuses = Bonus::where('status', 'active')->count();
+
         return view('hr.index', compact(
+            'totalEmployees',
+            'newHiresThisMonth',
             'attendanceTrend',
+            'tdRate',
             'approvedLeaves',
             'pendingLeaves',
             'rejectedLeaves',
+            'leaveTrend',
             'pendingOT',
             'pendingUT',
             'otHoursThisWeek',
@@ -98,6 +138,8 @@ class DashboardController extends Controller
             'totalApprovedLoans',
             'totalPaidCA',
             'totalPaidLoans',
+            'upcomingHolidays',
+            'activeBonuses',
         ));
     }
 }

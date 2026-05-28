@@ -78,27 +78,41 @@
     </div>
 
     {{-- Tab bar --}}
-    <div class="flex items-center gap-1.5 bg-white border border-gray-200 rounded-xl p-1 mb-6 w-max max-w-full overflow-x-auto emp-tabs-in">
-        <a href="{{ route('employees.show', $employee) }}?tab=personal"
-           class="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-150 whitespace-nowrap {{ $tab === 'personal' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' }}">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            Personal Info
-        </a>
-        <a href="{{ route('employees.show', $employee) }}?tab=employment"
-           class="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-150 whitespace-nowrap {{ $tab === 'employment' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' }}">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-            Employment
-        </a>
-        <a href="{{ route('employees.show', $employee) }}?tab=documents"
-           class="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-150 whitespace-nowrap {{ $tab === 'documents' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' }}">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Documents
-        </a>
-        <a href="{{ route('employees.show', $employee) }}?tab=leaves"
-           class="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-150 whitespace-nowrap {{ $tab === 'leaves' ? 'bg-gray-900 text-white shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50' }}">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            Leaves
-        </a>
+    <div class="border-b border-gray-200 mb-6 emp-tabs-in">
+        <nav class="flex gap-1 -mb-px" role="tablist">
+            <a href="{{ route('employees.show', $employee) }}?tab=personal" role="tab"
+               class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group inline-flex items-center gap-2 whitespace-nowrap
+               {{ $tab === 'personal'
+                   ? 'border-indigo-600 text-indigo-700 bg-indigo-50/60'
+                   : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                <svg class="w-4 h-4 transition-colors {{ $tab === 'personal' ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                Personal Info
+            </a>
+            <a href="{{ route('employees.show', $employee) }}?tab=employment" role="tab"
+               class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group inline-flex items-center gap-2 whitespace-nowrap
+               {{ $tab === 'employment'
+                   ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60'
+                   : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                <svg class="w-4 h-4 transition-colors {{ $tab === 'employment' ? 'text-emerald-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                Employment
+            </a>
+            <a href="{{ route('employees.show', $employee) }}?tab=documents" role="tab"
+               class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group inline-flex items-center gap-2 whitespace-nowrap
+               {{ $tab === 'documents'
+                   ? 'border-blue-500 text-blue-700 bg-blue-50/60'
+                   : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                <svg class="w-4 h-4 transition-colors {{ $tab === 'documents' ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Documents
+            </a>
+            <a href="{{ route('employees.show', $employee) }}?tab=leaves" role="tab"
+               class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group inline-flex items-center gap-2 whitespace-nowrap
+               {{ $tab === 'leaves'
+                   ? 'border-violet-600 text-violet-700 bg-violet-50/60'
+                   : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                <svg class="w-4 h-4 transition-colors {{ $tab === 'leaves' ? 'text-violet-600' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Leaves
+            </a>
+        </nav>
     </div>
 
     {{-- PERSONAL INFO TAB --}}

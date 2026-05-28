@@ -126,13 +126,13 @@ class DashboardController extends Controller
         }
         
         // Pending Cash Advances
-        $pendingCashAdvances = CashAdvance::where('status', 'pending')->count();
-        if ($pendingCashAdvances > 0) {
+        $pendingCashAdvancesCount = CashAdvance::where('status', 'pending')->count();
+        if ($pendingCashAdvancesCount > 0) {
             $pendingItems[] = [
-                'text' => $pendingCashAdvances === 1
+                'text' => $pendingCashAdvancesCount === 1
                     ? '1 Cash Advance Needs Approval'
-                    : "{$pendingCashAdvances} Cash Advances Need Approval",
-                'count' => $pendingCashAdvances,
+                    : "{$pendingCashAdvancesCount} Cash Advances Need Approval",
+                'count' => $pendingCashAdvancesCount,
                 'url' => route('payroll.receivables.index', ['tab' => 'cash_advances']),
                 'icon' => 'feather-dollar-sign',
                 'color' => '#fef3c7',
@@ -141,19 +141,25 @@ class DashboardController extends Controller
         }
         
         // Pending Salary Loans
-        $pendingSalaryLoans = SalaryLoan::where('status', 'pending')->count();
-        if ($pendingSalaryLoans > 0) {
+        $pendingSalaryLoansCount = SalaryLoan::where('status', 'pending')->count();
+        if ($pendingSalaryLoansCount > 0) {
             $pendingItems[] = [
-                'text' => $pendingSalaryLoans === 1
+                'text' => $pendingSalaryLoansCount === 1
                     ? '1 Salary Loan Needs Approval'
-                    : "{$pendingSalaryLoans} Salary Loans Need Approval",
-                'count' => $pendingSalaryLoans,
+                    : "{$pendingSalaryLoansCount} Salary Loans Need Approval",
+                'count' => $pendingSalaryLoansCount,
                 'url' => route('payroll.receivables.index', ['tab' => 'salary_loans']),
                 'icon' => 'feather-credit-card',
                 'color' => '#e0f2fe',
                 'iconColor' => '#0284c7'
             ];
         }
+
+        // Calendar data
+        $calMonth = now()->month;
+        $calYear  = now()->year;
+
+        $totalPendingItems = count($pendingItems);
 
         return view('accountant.index', compact(
             'totalEmployees',
@@ -174,7 +180,13 @@ class DashboardController extends Controller
             'payrollStatusChartLabels',
             'payrollStatusChartSeries',
             'pipelineBar',
-            'pendingItems'
+            'pendingItems',
+            'pendingRemittances',
+            'pendingCashAdvancesCount',
+            'pendingSalaryLoansCount',
+            'calMonth',
+            'calYear',
+            'totalPendingItems'
         ));
     }
 }

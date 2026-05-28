@@ -11,7 +11,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Knights TSC</title>
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/knights_white-bg.png') }}">
 
     {{-- Vendors CSS (feather icons, Bootstrap for non-converted pages) --}}
     <link rel="stylesheet" href="{{ asset('vendors/css/vendors.min.css') }}">

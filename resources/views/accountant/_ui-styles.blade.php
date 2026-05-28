@@ -1,4 +1,3 @@
-@include('remittance-clerk._ui-styles')
 <style>
     /* Hero chips (dark bar) */
     .remui-hero-chip {

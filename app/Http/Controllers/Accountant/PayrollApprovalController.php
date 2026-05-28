@@ -24,12 +24,43 @@ class PayrollApprovalController extends Controller
      ══════════════════════════════════════════════════════════════ */
     public function index()
     {
-        $batches = PayrollBatch::with(['payrolls'])
-            ->whereIn('status', ['submitted', 'approved', 'rejected'])
+        // Stats across all submitted batches
+        $pendingCount = PayrollBatch::where('status', 'submitted')->count();
+
+        $allSubmitted = PayrollBatch::with(['payrolls'])
+            ->where('status', 'submitted')
+            ->get();
+
+        $totalEmpInPending = $allSubmitted->sum(fn ($b) => $b->payrolls->count());
+        $totalGrossAll     = $allSubmitted->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->gross_pay));
+        $totalNetAll       = $allSubmitted->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->net_pay));
+
+        // Paginated submitted batches for display
+        $batchData = PayrollBatch::with(['payrolls'])
+            ->where('status', 'submitted')
+            ->orderByDesc('period_start')
+            ->paginate(10)
+            ->through(function (PayrollBatch $b) {
+                $payrolls = $b->payrolls;
+                return [
+                    'batch_id'    => $b->id,
+                    'period_start'=> $b->period_start,
+                    'period_end'  => $b->period_end,
+                    'count'       => $payrolls->count(),
+                    'total_gross' => $payrolls->sum(fn ($p) => $p->gross_pay),
+                    'total_net'   => $payrolls->sum(fn ($p) => $p->net_pay),
+                    'status'      => $b->status,
+                    'batch'       => $b,
+                ];
+            });
+
+        // History — approved / rejected batches
+        $historyBatches = PayrollBatch::with(['payrolls'])
+            ->whereIn('status', ['approved', 'rejected'])
             ->orderByDesc('period_start')
             ->get();
 
-        $batchData = $batches->map(function (PayrollBatch $b) {
+        $historyData = $historyBatches->map(function (PayrollBatch $b) {
             $payrolls = $b->payrolls;
             return [
                 'batch_id'    => $b->id,
@@ -43,9 +74,9 @@ class PayrollApprovalController extends Controller
             ];
         })->values()->all();
 
-        $pendingCount = collect($batchData)->where('status', 'submitted')->count();
-
-        return view('accountant.payroll-approval.index', compact('batchData', 'pendingCount'));
+        return view('accountant.payroll-approval.index', compact(
+            'batchData', 'pendingCount', 'totalEmpInPending', 'totalGrossAll', 'totalNetAll', 'historyData'
+        ));
     }
 
     /* ══════════════════════════════════════════════════════════════

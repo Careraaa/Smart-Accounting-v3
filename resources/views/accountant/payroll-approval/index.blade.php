@@ -1,206 +1,220 @@
 @extends('layouts.layout')
 
 @push('styles')
-    @include('accountant._ui-styles')
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-        .prl-page { font-family: 'Sora', sans-serif; }
-
-        /* ── Stat grid ── */
-        .prl-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
-        @media (max-width: 1100px) { .prl-stats { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px)  { .prl-stats { grid-template-columns: 1fr; } }
-        .prl-stat { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; display: flex; align-items: flex-start; gap: 14px; position: relative; overflow: hidden; transition: box-shadow 0.15s; }
-        .prl-stat:hover { box-shadow: 0 4px 20px rgba(0,0,0,.07); }
-        .prl-stat::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; border-radius: 0 0 14px 14px; }
-        .prl-stat.s-red::after   { background: #c8292a; }
-        .prl-stat.s-green::after { background: #16a34a; }
-        .prl-stat.s-amber::after { background: #d97706; }
-        .prl-stat.s-blue::after  { background: #0284c7; }
-        .prl-stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .prl-stat.s-red   .prl-stat-icon { background: #fff0f0; color: #c8292a; }
-        .prl-stat.s-green .prl-stat-icon { background: #f0fdf4; color: #16a34a; }
-        .prl-stat.s-amber .prl-stat-icon { background: #fffbeb; color: #d97706; }
-        .prl-stat.s-blue  .prl-stat-icon { background: #f0f9ff; color: #0284c7; }
-        .prl-stat-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #9ca3af; margin-bottom: 4px; }
-        .prl-stat-value { font-size: 1.35rem; font-weight: 800; color: #111827; line-height: 1; font-variant-numeric: tabular-nums; font-family: 'DM Mono', monospace; }
-        .prl-stat-sub   { font-size: 0.73rem; color: #9ca3af; margin-top: 4px; }
-
-        /* ── Section label ── */
-        .prl-section-label {
-            font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em;
-            color: #9ca3af; margin: 0 0 10px; display: flex; align-items: center; gap: 8px;
-        }
-        .prl-section-label::after { content: ''; flex: 1; height: 1px; background: #f3f4f6; }
-    </style>
+<style>
+@keyframes fadeUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.93)} 100%{opacity:1;transform:scale(1)} }
+@keyframes slideRight { 0%{opacity:0;transform:translateX(-10px)} 100%{opacity:1;transform:translateX(0)} }
+.fade-up { animation:fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.scale-in { animation:scaleIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+.slide-right { animation:slideRight 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(1) { animation-delay:0.05s; }
+.stat-card:nth-child(2) { animation-delay:0.1s; }
+.stat-card:nth-child(3) { animation-delay:0.15s; }
+.stat-card:nth-child(4) { animation-delay:0.2s; }
+</style>
 @endpush
 
 @section('content')
 @php
-    $allBatches      = collect($batchData);
-    $submittedBatches= $allBatches->where('status', 'submitted');
-    $historyBatches  = $allBatches->whereIn('status', ['approved', 'rejected']);
-
-    $totalPending    = $pendingCount;
-    $totalEmployees  = $submittedBatches->sum('count');
-    $totalGrossAll   = $submittedBatches->sum('total_gross');
-    $totalNetAll     = $submittedBatches->sum('total_net');
+$totalPending  = $pendingCount;
+$historyBatches = collect($historyData);
+$histTab = request()->query('hist', 'approved');
 @endphp
 
-<div class="col-12">
-    <div class="remui-page prl-page">
-        <div class="remui-backdrop"><div class="remui-grid"></div></div>
-
-        {{-- Hero ──────────────────────────────────────────────────── --}}
-        <div class="remui-hero mb-3">
-            <div>
-                <h5 class="remui-title">Payroll batch approval</h5>
-                <p class="remui-subtitle mb-0">Review and approve payroll batches submitted by HR.</p>
-            </div>
+{{-- Header --}}
+    <div class="flex items-start justify-between mb-6 flex-wrap gap-4 fade-up">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Payroll Approval</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Review and approve payroll batches submitted by HR</p>
         </div>
-
-        {{-- Flash ─────────────────────────────────────────────────── --}}
-        @if (session('success'))
-            <div class="acd-flash success"><i class="feather-check-circle"></i> {{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="acd-flash error"><i class="feather-alert-circle"></i> {{ session('error') }}</div>
-        @endif
-
-        {{-- Pending batches ────────────────────────────────────────── --}}
-        <div class="card remui-card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <span class="card-title mb-0">
-                    <i class="feather-inbox me-2" style="color:#c8292a;"></i>Pending approval
-                </span>
-                <span class="text-muted small">Click a batch to review and approve</span>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    @forelse($submittedBatches as $batch)
-                        @php
-                            $startDate = $batch['period_start'];
-                            $endDate   = $batch['period_end'];
-                            $isFirst   = $startDate->format('d') <= 15;
-                            $variant   = $isFirst ? 'a' : 'b';
-                        @endphp
-                        <div class="col-12">
-                            <a href="{{ route('payroll-approval.batch', $batch['batch_id']) }}"
-                               class="text-decoration-none text-reset d-block">
-                                <div class="acd-batch-card">
-                                    <div class="acd-batch-inner">
-                                        <div class="acd-batch-icon {{ $variant }}">
-                                            <i class="feather-{{ $isFirst ? 'calendar' : 'check-circle' }}"></i>
-                                        </div>
-                                        <div class="flex-grow-1" style="min-width:200px;">
-                                            <h6 class="mb-1 fw-bold" style="color:#111827;font-size:0.95rem;">
-                                                {{ $startDate->format('F Y') }} — {{ $isFirst ? '1st' : '2nd' }} half
-                                            </h6>
-                                            <div class="text-muted small">
-                                                {{ $startDate->format('M d') }} – {{ $endDate->format('M d, Y') }}
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap gap-4 ms-auto justify-content-end align-items-center">
-                                            <span style="display:inline-block;background:#fffbeb;color:#d97706;font-size:0.65rem;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.06em;">
-                                                Pending
-                                            </span>
-                                            <div class="acd-batch-stat">
-                                                <small>Employees</small>
-                                                <strong>{{ $batch['count'] }}</strong>
-                                            </div>
-                                            <div class="acd-batch-stat">
-                                                <small>Gross</small>
-                                                <strong>₱{{ number_format($batch['total_gross'], 2) }}</strong>
-                                            </div>
-                                            <div class="acd-batch-stat">
-                                                <small>Net</small>
-                                                <strong style="color:#16a34a;">₱{{ number_format($batch['total_net'], 2) }}</strong>
-                                            </div>
-                                            <div style="color:#d1d5db;font-size:1.1rem;">
-                                                <i class="feather-chevron-right"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    @empty
-                        <div class="col-12">
-                            <div class="acd-empty border rounded-3" style="background:#fafafa;">
-                                <i class="feather-check-circle d-block mb-2" style="font-size:36px;opacity:.25;"></i>
-                                No batches pending approval.
-                            </div>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
+        <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 text-[0.6rem] font-semibold border border-amber-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                {{ $totalPending }} pending
+            </span>
         </div>
-
-        {{-- History ────────────────────────────────────────────────── --}}
-        @if($historyBatches->isNotEmpty())
-        <div class="card remui-card">
-            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <span class="card-title mb-0">
-                    <i class="feather-clock me-2" style="color:#9ca3af;"></i>History
-                </span>
-                <span class="text-muted small">Previously processed batches</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0 remui-table">
-                        <thead>
-                            <tr>
-                                <th>Period</th>
-                                <th class="text-center">Employees</th>
-                                <th class="text-end">Gross</th>
-                                <th class="text-end">Net</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($historyBatches as $batch)
-                                @php
-                                    $startDate   = $batch['period_start'];
-                                    $endDate     = $batch['period_end'];
-                                    $batchStatus = $batch['status'];
-                                    $isFirst     = $startDate->format('d') <= 15;
-                                    $statusLabel = $batchStatus === 'approved' ? 'Approved' : 'Rejected';
-                                    $statusBg    = $batchStatus === 'approved' ? '#f0fdf4' : '#fff1f2';
-                                    $statusColor = $batchStatus === 'approved' ? '#16a34a' : '#c8292a';
-                                @endphp
-                                <tr>
-                                    <td>
-                                        <div class="fw-bold" style="font-size:0.88rem;color:#111827;">
-                                            {{ $startDate->format('F Y') }} — {{ $isFirst ? '1st' : '2nd' }} half
-                                        </div>
-                                        <div class="text-muted" style="font-size:0.75rem;">
-                                            {{ $startDate->format('M d') }} – {{ $endDate->format('M d, Y') }}
-                                        </div>
-                                    </td>
-                                    <td class="text-center">{{ $batch['count'] }}</td>
-                                    <td class="text-end font-monospace" style="font-size:0.85rem;">₱{{ number_format($batch['total_gross'], 2) }}</td>
-                                    <td class="text-end font-monospace fw-bold" style="font-size:0.85rem;color:#15803d;">₱{{ number_format($batch['total_net'], 2) }}</td>
-                                    <td class="text-center">
-                                        <span style="display:inline-block;background:{{ $statusBg }};color:{{ $statusColor }};font-size:0.65rem;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.06em;">
-                                            {{ $statusLabel }}
-                                        </span>
-                                    </td>
-                                    <td class="text-end">
-                                        <a href="{{ route('payroll-approval.batch', $batch['batch_id']) }}"
-                                           class="emp-action-btn emp-action-view" style="padding:6px 10px;">
-                                            <i class="feather-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        @endif
-
     </div>
-</div>
+
+    @if(session('success'))
+        <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-500/15 border border-emerald-500/25 rounded-lg text-emerald-700 text-xs font-semibold mb-5">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            {{ session('success') }}
+        </div>
+    @elseif(session('error'))
+        <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-500/15 border border-red-500/25 rounded-lg text-red-700 text-xs font-semibold mb-5">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    {{-- Stats --}}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pending Batches</p>
+            <p class="text-xl font-bold text-amber-600 tabular-nums mt-1">{{ $totalPending }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Awaiting review</p>
+        </div>
+        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Employees</p>
+            <p class="text-xl font-bold text-gray-900 tabular-nums mt-1">{{ $totalEmpInPending }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">In pending batches</p>
+        </div>
+        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Gross</p>
+            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalGrossAll, 0) }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Across pending</p>
+        </div>
+        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Net</p>
+            <p class="text-lg font-bold text-indigo-600 tabular-nums mt-1">₱{{ number_format($totalNetAll, 0) }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Take-home total</p>
+        </div>
+    </div>
+
+    {{-- Pending Batches --}}
+    <div class="fade-up mb-6">
+        <div class="flex items-center gap-2 mb-4">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                </div>
+                <span class="text-sm font-semibold text-gray-900">Pending Approval</span>
+            </div>
+            @if($totalPending > 0)
+                <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-amber-100 text-amber-700 text-[0.55rem] font-bold">{{ $totalPending }}</span>
+            @endif
+        </div>
+        @forelse($batchData as $batch)
+            @php
+                $startDate = $batch['period_start'];
+                $endDate   = $batch['period_end'];
+                $isFirst   = $startDate->format('d') <= 15;
+            @endphp
+            <a href="{{ route('payroll-approval.batch', $batch['batch_id']) }}"
+               class="slide-right block bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-3 no-underline transition-all duration-200 hover:shadow-md hover:border-amber-200 hover:-translate-y-0.5 group"
+               style="animation-delay:{{ 0.05 * $loop->iteration }}s">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div class="min-w-0 flex-1">
+                        <h3 class="text-sm font-bold text-gray-900">{{ $startDate->format('F Y') }} — {{ $isFirst ? '1st' : '2nd' }} Half</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ $startDate->format('M d') }} – {{ $endDate->format('M d, Y') }}</p>
+                    </div>
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <div class="text-right">
+                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">{{ $batch['count'] }} employees</p>
+                            <p class="text-xs font-bold text-emerald-600 tabular-nums">₱{{ number_format($batch['total_net'], 0) }} net</p>
+                        </div>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-[0.55rem] font-semibold border border-amber-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
+                        </span>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </div>
+            </a>
+        @empty
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center">
+                <svg class="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-sm font-semibold text-gray-400">No batches pending approval</p>
+                <p class="text-xs text-gray-400 mt-1">All caught up!</p>
+            </div>
+        @endforelse
+
+        {{-- Pagination --}}
+        <div class="mt-4">
+            {{ $batchData->withQueryString()->links('pagination::tailwind') }}
+        </div>
+    </div>
+
+    {{-- History Tabs --}}
+    @if($historyBatches->isNotEmpty())
+    <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-gray-100 text-gray-500 flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <span class="text-sm font-semibold text-gray-900">History</span>
+            <span class="text-[0.55rem] text-gray-400">Previously processed batches</span>
+        </div>
+
+        @php
+            $approvedHistory = $historyBatches->where('status', 'approved');
+            $rejectedHistory = $historyBatches->where('status', 'rejected');
+            $histTab = request()->query('hist', 'approved');
+        @endphp
+
+        <div class="border-b border-gray-100">
+            <nav class="flex gap-1 -mb-px px-5" role="tablist">
+                <a href="{{ request()->fullUrlWithQuery(['hist' => 'approved']) }}" role="tab"
+                   class="relative px-4 py-2.5 text-xs font-medium border-b-2 transition-all duration-200 group inline-flex items-center gap-1.5
+                   {{ $histTab === 'approved'
+                       ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60'
+                       : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                    <svg class="w-3.5 h-3.5 transition-colors {{ $histTab === 'approved' ? 'text-emerald-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Approved
+                    <span class="ml-0.5 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[0.45rem] font-bold
+                        {{ $histTab === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600' }}">{{ $approvedHistory->count() }}</span>
+                </a>
+                <a href="{{ request()->fullUrlWithQuery(['hist' => 'rejected']) }}" role="tab"
+                   class="relative px-4 py-2.5 text-xs font-medium border-b-2 transition-all duration-200 group inline-flex items-center gap-1.5
+                   {{ $histTab === 'rejected'
+                       ? 'border-red-500 text-red-700 bg-red-50/60'
+                       : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                    <svg class="w-3.5 h-3.5 transition-colors {{ $histTab === 'rejected' ? 'text-red-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
+                    Rejected
+                    <span class="ml-0.5 inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[0.45rem] font-bold
+                        {{ $histTab === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-600' }}">{{ $rejectedHistory->count() }}</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-50 bg-gray-50/50">
+                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Period</th>
+                        <th class="text-center px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Employees</th>
+                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Gross</th>
+                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net</th>
+                        <th class="text-center px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
+                        <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @php $histSource = $histTab === 'rejected' ? $rejectedHistory : $approvedHistory; @endphp
+                    @foreach($histSource as $batch)
+                        @php
+                            $startDate   = $batch['period_start'];
+                            $endDate     = $batch['period_end'];
+                            $batchStatus = $batch['status'];
+                            $isFirst     = $startDate->format('d') <= 15;
+                            $isApproved  = $batchStatus === 'approved';
+                        @endphp
+                        <tr class="transition-colors hover:bg-gray-50/50">
+                            <td class="px-5 py-3.5">
+                                <p class="text-xs font-semibold text-gray-900">{{ $startDate->format('F Y') }} — {{ $isFirst ? '1st' : '2nd' }} Half</p>
+                                <p class="text-[0.6rem] text-gray-400 mt-0.5">{{ $startDate->format('M d') }} – {{ $endDate->format('M d, Y') }}</p>
+                            </td>
+                            <td class="px-4 py-3.5 text-center text-xs font-semibold text-gray-700 tabular-nums">{{ $batch['count'] }}</td>
+                            <td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-600">₱{{ number_format($batch['total_gross'], 0) }}</td>
+                            <td class="px-4 py-3.5 text-right text-xs font-bold tabular-nums {{ $isApproved ? 'text-emerald-600' : 'text-red-600' }}">₱{{ number_format($batch['total_net'], 0) }}</td>
+                            <td class="px-4 py-3.5 text-center">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.5rem] font-semibold {{ $isApproved ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $isApproved ? 'bg-emerald-500' : 'bg-red-500' }}"></span>
+                                    {{ $isApproved ? 'Approved' : 'Rejected' }}
+                                </span>
+                            </td>
+                            <td class="px-5 py-3.5 text-right">
+                                <a href="{{ route('payroll-approval.batch', $batch['batch_id']) }}"
+                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-50 text-gray-500 text-[0.55rem] font-bold transition-all hover:bg-indigo-50 hover:text-indigo-600 no-underline">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
 @endsection

@@ -2,413 +2,529 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.acd-dash { font-family: 'Sora', sans-serif; }
-
-/* ── Layout wrapper with sidebar ── */
-.acd-layout {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-}
-
-.acd-main {
-    flex: 1;
-    min-width: 0;
-}
-
-.acd-sidebar {
-    width: 280px;
-    flex-shrink: 0;
-    position: sticky;
-}
-
-@media (max-width: 1200px) {
-    .acd-layout {
-        flex-direction: column;
-    }
-    
-    .acd-sidebar {
-        width: 100%;
-        position: relative;
-        top: auto;
-    }
-}
-
-/* ── Knight mascot inside hero ── */
-.acd-hero-knight {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    height: 280px;
-    width: auto;
-    transform: translate(-50%, -50%);
-    object-fit: contain;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.12;
-    animation: heroKnightChargeAcd 4s ease-in-out infinite;
-    transform-origin: center center;
-}
-@keyframes heroKnightChargeAcd {
-    0%   { transform: translate(-50%, -50%) translateY(0)     rotate(0deg);    opacity: 0.12; }
-    30%  { transform: translate(-50%, -50%) translateY(-6px)  rotate(-1.5deg); opacity: 0.16; }
-    60%  { transform: translate(-50%, -50%) translateY(-10px) rotate(-0.8deg); opacity: 0.14; }
-    80%  { transform: translate(-50%, -50%) translateY(-4px)  rotate(-2deg);   opacity: 0.17; }
-    100% { transform: translate(-50%, -50%) translateY(0)     rotate(0deg);    opacity: 0.12; }
-}
-
-/* ── Hero ── */
-.acd-hero {
-    background: linear-gradient(135deg, #111827 0%, #0b1220 55%, #111827 100%);
-    border-radius: 18px; padding: 22px 24px; margin-bottom: 22px;
-    display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 18px; flex-wrap: wrap; position: relative; overflow: hidden;
-}
-.acd-hero::before { content:''; position:absolute; top:-70px; right:-70px; width:260px; height:260px; border-radius:50%; background:rgba(200,41,42,0.18); pointer-events:none; }
-.acd-hero::after  { content:''; position:absolute; bottom:-90px; left:-90px; width:260px; height:260px; border-radius:50%; background:rgba(2,132,199,0.14); pointer-events:none; }
-.acd-hero-left { position:relative; z-index:1; }
-.acd-hero h1 { font-size:1.25rem; font-weight:900; color:#fff; margin:0 0 6px; letter-spacing:-0.02em; }
-.acd-hero p  { margin:0; font-size:.82rem; color:#9ca3af; line-height:1.5; }
-.acd-hero-actions { position:relative; z-index:1; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-.acd-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid rgba(255,255,255,0.14); border-radius:999px; color:#e5e7eb; background:rgba(255,255,255,0.06); font-size:.75rem; }
-.acd-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; background:#c8292a; color:#fff; border:none; border-radius:12px; font-size:.84rem; font-weight:700; text-decoration:none; transition:background .15s,box-shadow .15s,transform .12s; box-shadow:0 4px 20px rgba(200,41,42,.5); white-space:nowrap; }
-.acd-btn:hover { background:#a81f20; color:#fff; box-shadow:0 10px 34px rgba(200,41,42,.62); transform:translateY(-1px); }
-.acd-btn-sec { display:inline-flex; align-items:center; gap:7px; padding:9px 14px; background:rgba(255,255,255,0.06); color:#e5e7eb; border:1px solid rgba(255,255,255,0.14); border-radius:10px; font-size:.82rem; font-weight:700; text-decoration:none; transition:background .15s; }
-.acd-btn-sec:hover { background:rgba(255,255,255,0.10); color:#fff; }
-
-/* ── Stat grid ── */
-.acd-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px; }
-@media(max-width:1100px) { .acd-stats { grid-template-columns:repeat(2,1fr); } }
-@media(max-width:560px)  { .acd-stats { grid-template-columns:1fr; } }
-
-.acd-stat { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:20px 22px; display:flex; align-items:flex-start; gap:14px; position:relative; overflow:hidden; transition:box-shadow .15s,transform .15s; }
-.acd-stat:hover { box-shadow:0 14px 36px rgba(17,24,39,0.10); transform:translateY(-2px); }
-.acd-stat::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; border-radius:0 0 16px 16px; }
-.acd-stat.s-green::after  { background:#16a34a; }
-.acd-stat.s-red::after    { background:#c8292a; }
-.acd-stat.s-blue::after   { background:#0284c7; }
-.acd-stat.s-amber::after  { background:#d97706; }
-.acd-stat.s-purple::after { background:#7c3aed; }
-.acd-stat.s-slate::after  { background:#64748b; }
-
-.acd-ico { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.acd-stat.s-green  .acd-ico { background:#f0fdf4; color:#16a34a; }
-.acd-stat.s-red    .acd-ico { background:#fff0f0; color:#c8292a; }
-.acd-stat.s-blue   .acd-ico { background:#f0f9ff; color:#0284c7; }
-.acd-stat.s-amber  .acd-ico { background:#fffbeb; color:#d97706; }
-.acd-stat.s-purple .acd-ico { background:#f5f3ff; color:#7c3aed; }
-.acd-stat.s-slate  .acd-ico { background:#f3f4f6; color:#64748b; }
-
-.acd-stat-lbl { font-size:.67rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:#9ca3af; margin-bottom:5px; }
-.acd-stat-val { font-size:1.35rem; font-weight:800; color:#111827; line-height:1.1; font-family:'DM Mono',monospace; font-variant-numeric:tabular-nums; }
-.acd-stat-sub { font-size:.72rem; color:#9ca3af; margin-top:5px; }
-
-/* ── Charts ── */
-.acd-two-col { display:grid; grid-template-columns:1.55fr 1fr; gap:16px; margin-bottom:18px; }
-.acd-two-col2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
-@media(max-width:1100px) { .acd-two-col { grid-template-columns:1fr; } }
-@media(max-width:900px)  { .acd-two-col2 { grid-template-columns:1fr; } }
-
-.acd-panel { background:#fff; border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; }
-.acd-panel-hd { padding:14px 18px; border-bottom:1px solid #f3f4f6; display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-.acd-panel-hd h2 { margin:0; font-size:.88rem; font-weight:700; color:#111827; letter-spacing:-.02em; }
-.acd-panel-hd span { font-size:.72rem; color:#9ca3af; font-weight:500; }
-.acd-panel-bd { padding:8px 12px 4px; }
-.acd-chart { min-height:260px; }
-
-/* ── Feed ── */
-.acd-feed { margin:0; padding:0; list-style:none; }
-.acd-feed li { border-top:1px solid #f3f4f6; }
-.acd-feed li:first-child { border-top:none; }
-.acd-feed a { display:flex; align-items:flex-start; gap:14px; padding:14px 18px; text-decoration:none; color:inherit; transition:background .12s; }
-.acd-feed a:hover { background:#fafafa; }
-.acd-av { width:40px; height:40px; border-radius:10px; background:#f4f4f6; color:#6b7280; font-size:.72rem; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid #ececec; }
-.acd-feed-body { flex:1; min-width:0; }
-.acd-feed-title { font-size:.84rem; font-weight:700; color:#111827; margin:0 0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.acd-feed-meta  { font-size:.74rem; color:#6b7280; margin:0; line-height:1.45; }
-.acd-feed-meta code { font-family:'DM Mono',monospace; font-size:.72rem; background:#f8fafc; padding:1px 6px; border-radius:4px; color:#64748b; }
-.acd-feed-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
-.acd-pill { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:4px 10px; border-radius:999px; border:1px solid transparent; }
-.acd-pill-paid     { background:#f0fdf4; border-color:#bbf7d0; color:#15803d; }
-.acd-pill-approved { background:#f0f9ff; border-color:#bae6fd; color:#0284c7; }
-.acd-pill-pending  { background:#fffbeb; border-color:#fde68a; color:#b45309; }
-.acd-pill-rejected { background:#fef2f2; border-color:#fecaca; color:#b91c1c; }
-.acd-chevron { color:#d1d5db; font-size:18px; margin-top:2px; }
-.acd-empty { text-align:center; padding:40px 20px; color:#9ca3af; font-size:.84rem; }
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+@keyframes slideInRight { 0%{opacity:0;transform:translateX(16px)} 100%{opacity:1;transform:translateX(0)} }
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+@keyframes fadeInDot { to { opacity: 1; } }
+@keyframes fillArea { to { opacity: 1; } }
+@keyframes bounceIn { 0%{opacity:0;transform:scale(0.6)} 60%{transform:scale(1.05)} 80%{transform:scale(0.95)} 100%{opacity:1;transform:scale(1)} }
+@keyframes pulseGlow { 0%,100%{box-shadow:0 0 0 0 rgba(200,41,42,0.4)} 50%{box-shadow:0 0 0 8px rgba(200,41,42,0)} }
+@keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+@keyframes countUp { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes slideUpBounce { 0%{opacity:0;transform:translateY(24px)} 60%{transform:translateY(-4px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes growBar { 0%{transform:scaleY(0);opacity:0} 100%{transform:scaleY(1);opacity:1} }
+@keyframes donutFill { 0%{stroke-dasharray:0 999} 100%{stroke-dasharray:var(--pct) 999} }
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes pulseDot { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
+.stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.slide-right { animation:slideInRight 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-chart-line { stroke-dasharray: 800; stroke-dashoffset: 800; animation: drawLine 1.2s cubic-bezier(0.16,1,0.3,1) 0.2s forwards; }
+.acd-chart-line-delay { stroke-dasharray: 600; stroke-dashoffset: 600; animation: drawLine 1s cubic-bezier(0.16,1,0.3,1) 0.6s forwards; }
+.acd-chart-dot { opacity: 0; animation: fadeInDot 0.3s ease both; }
+.acd-chart-dot:nth-child(1) { animation-delay: 0.4s; }
+.acd-chart-dot:nth-child(2) { animation-delay: 0.5s; }
+.acd-chart-dot:nth-child(3) { animation-delay: 0.6s; }
+.acd-chart-dot:nth-child(4) { animation-delay: 0.7s; }
+.acd-chart-dot:nth-child(5) { animation-delay: 0.8s; }
+.acd-chart-dot:nth-child(6) { animation-delay: 0.9s; }
+.acd-chart-dot:nth-child(7) { animation-delay: 1s; }
+.acd-chart-fill { opacity: 0; animation: fillArea 0.6s ease 1.1s forwards; }
+.acd-bounce { animation:bounceIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-float { animation:floatSlow 3s ease-in-out infinite; }
+.acd-pulse { animation:pulseGlow 2s ease-in-out infinite; }
+.acd-count-num { animation:countUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-slide-bounce { animation:slideUpBounce 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-bar { transform-origin:bottom; animation:growBar 0.7s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-donut-ring { fill:none;stroke-width:28;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center; }
+.acd-donut-seg { animation:donutFill 1s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 @endpush
 
 @section('content')
 @php
-    $initials = function ($name) {
-        $name = trim((string) $name);
-        if ($name === '') return '?';
-        $p = preg_split('/\s+/', $name);
-        $a = strtoupper(substr($p[0] ?? '', 0, 1));
-        $b = strtoupper(substr($p[1] ?? '', 0, 1));
-        return $b !== '' ? $a . $b : $a;
-    };
-    $pillClass = function ($status) {
-        return match ($status) {
-            'released', 'paid' => 'acd-pill-paid',
-            'approved' => 'acd-pill-approved',
-            'rejected' => 'acd-pill-rejected',
-            default => 'acd-pill-pending',
-        };
-    };
+$calMonth = now()->month;
+$calYear  = now()->year;
+$firstDay = \Carbon\Carbon::createFromDate($calYear, $calMonth, 1);
+$today = now()->format('Y-m-d');
+$totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvancesCount + $pendingSalaryLoansCount;
 @endphp
 
-<div class="col-12 acd-dash">
-    <div class="acd-layout">
-        <div class="acd-main">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-    {{-- Hero --}}
-    <div class="acd-hero">
-        <img src="{{ asset('images/landscape-knight.png') }}" alt="" class="acd-hero-knight" aria-hidden="true">
-        <div class="acd-hero-left">
-            <h1>Accountant Dashboard</h1>
-            <p>Payroll totals, pipeline status, and loan overview — live from approved records.</p>
-            <div class="d-flex flex-wrap gap-2 mt-2">
-                <span class="acd-chip"><i class="feather-calendar"></i> {{ now()->format('l, F d, Y') }}</span>
-                <span class="acd-chip"><i class="feather-users"></i> {{ $totalEmployees }} employees</span>
-                <span class="acd-chip"><i class="feather-percent"></i> {{ number_format($allowancePercentage, 1) }}% allowances / {{ number_format($deductionPercentage, 1) }}% deductions</span>
-            </div>
-        </div>
-        <div class="acd-hero-actions">
-            <a href="{{ route('reports.payroll') }}" class="acd-btn-sec"><i class="feather-file-text"></i> Reports</a>
-            <a href="{{ route('payroll-approval.index') }}" class="acd-btn"><i class="feather-check-square"></i> Payroll Approval</a>
-        </div>
-    </div>
+    {{-- LEFT COLUMN (2/3) --}}
+    <div class="lg:col-span-2 space-y-5">
 
-    {{-- Stat cards --}}
-    <div class="acd-stats">
-        <div class="acd-stat s-green">
-            <div class="acd-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div>
-                <div class="acd-stat-lbl">Net Payroll</div>
-                <div class="acd-stat-val" style="font-size:1.1rem;">₱{{ number_format($totalPayroll, 2) }}</div>
-                <div class="acd-stat-sub">Approved + released records</div>
-            </div>
-        </div>
-        <div class="acd-stat s-blue">
-            <div class="acd-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            </div>
-            <div>
-                <div class="acd-stat-lbl">Allowances</div>
-                <div class="acd-stat-val" style="font-size:1.1rem;">₱{{ number_format($totalAllowances, 2) }}</div>
-                <div class="acd-stat-sub">{{ number_format($allowancePercentage, 1) }}% of A+D total</div>
-            </div>
-        </div>
-        <div class="acd-stat s-red">
-            <div class="acd-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-            </div>
-            <div>
-                <div class="acd-stat-lbl">Deductions</div>
-                <div class="acd-stat-val" style="font-size:1.1rem;">₱{{ number_format($totalDeductions, 2) }}</div>
-                <div class="acd-stat-sub">{{ number_format($deductionPercentage, 1) }}% of A+D total</div>
-            </div>
-        </div>
-        <div class="acd-stat s-amber">
-            <div class="acd-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-            </div>
-            <div>
-                <div class="acd-stat-lbl">Avg. Basic Salary</div>
-                <div class="acd-stat-val" style="font-size:1.1rem;">₱{{ number_format($averageBasicSalary ?? 0, 2) }}</div>
-                <div class="acd-stat-sub">Across payroll rows</div>
-            </div>
-        </div>
-        <div class="acd-stat s-purple">
-            <div class="acd-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-            <div>
-                <div class="acd-stat-lbl">Outstanding Loans</div>
-                <div class="acd-stat-val" style="font-size:1.1rem;">₱{{ number_format($totalOutstandingLoans, 2) }}</div>
-                <div class="acd-stat-sub">{{ $activeSalaryLoans }} active loan(s)</div>
-            </div>
-        </div>
-        <div class="acd-stat s-slate">
-            <div class="acd-ico">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-            <div>
-                <div class="acd-stat-lbl">Headcount</div>
-                <div class="acd-stat-val">{{ $totalEmployees }}</div>
-                <div class="acd-stat-sub">Excl. admin roles</div>
-            </div>
-        </div>
-    </div>
 
-    {{-- Charts row 1 --}}
-    <div class="acd-two-col">
-        <div class="acd-panel">
-            <div class="acd-panel-hd">
-                <h2>Net payroll trend</h2>
-                <span>Last 6 months</span>
-            </div>
-            <div class="acd-panel-bd">
-                <div id="acd-chart-trend" class="acd-chart"></div>
-            </div>
-        </div>
-        <div class="acd-panel">
-            <div class="acd-panel-hd">
-                <h2>Payroll status mix</h2>
-                <span>By status count</span>
-            </div>
-            <div class="acd-panel-bd">
-                <div id="acd-chart-status" class="acd-chart" style="min-height:280px;"></div>
-            </div>
-        </div>
-    </div>
 
-    {{-- Charts row 2 --}}
-    <div class="acd-two-col2">
-        <div class="acd-panel">
-            <div class="acd-panel-hd">
-                <h2>Allowances vs Deductions</h2>
-                <span>Aggregate peso amounts</span>
+        {{-- Stat cards --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Payroll</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.15s">₱{{ number_format($totalPayroll, 0) }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Approved + released</span>
+                </div>
             </div>
-            <div class="acd-panel-bd">
-                <div id="acd-chart-ad" class="acd-chart"></div>
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-blue-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Allowances</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.2s">₱{{ number_format($totalAllowances, 0) }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span>{{ number_format($allowancePercentage, 1) }}% of A+D</span>
+                </div>
+            </div>
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-red-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Deductions</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.25s">₱{{ number_format($totalDeductions, 0) }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span>{{ number_format($deductionPercentage, 1) }}% of A+D</span>
+                </div>
+            </div>
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-purple-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.2s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Outstanding Loans</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.3s">₱{{ number_format($totalOutstandingLoans, 0) }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>{{ $activeSalaryLoans }} active loans</span>
+                </div>
+            </div>
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Avg. Basic</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.35s">₱{{ number_format($averageBasicSalary ?? 0, 0) }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span>Per payroll row</span>
+                </div>
+            </div>
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-slate-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Headcount</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.4s">{{ $totalEmployees }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-slate-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span>Excl. admin roles</span>
+                </div>
             </div>
         </div>
-        <div class="acd-panel">
-            <div class="acd-panel-hd">
-                <h2>Pipeline</h2>
-                <span>Awaiting · approved · released · rejected</span>
-            </div>
-            <div class="acd-panel-bd">
-                <div id="acd-chart-pipeline" class="acd-chart"></div>
-            </div>
-        </div>
-    </div>
 
-    {{-- Recent payroll feed --}}
-    <div class="acd-panel" style="margin-bottom:8px;">
-        <div class="acd-panel-hd">
-            <h2>Recent payroll records</h2>
-            <a href="{{ route('payroll-approval.index') }}" style="font-size:.78rem;font-weight:700;color:#c8292a;text-decoration:none;">Payroll approval →</a>
-        </div>
-        @if ($recentPayroll->isEmpty())
-            <div class="acd-empty">No payroll records yet.</div>
-        @else
-            <ul class="acd-feed">
-                @foreach ($recentPayroll as $payroll)
+        {{-- Charts row 1 --}}
+        @php
+            $trendPts = $monthlyPayrollTrend;
+            $trendCount = count($trendPts);
+            $stLabels = $payrollStatusChartLabels ?? [];
+            $stSeries = $payrollStatusChartSeries ?? [];
+            $stTotal = array_sum($stSeries);
+        @endphp
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {{-- Net Payroll Trend (SVG line chart — clerk style) --}}
+            @php
+            $chartMax = $trendCount > 0 ? max(array_column($trendPts, 'total')) : 1;
+            $chartH = 160;
+            $chartW = 600;
+            $padL = 0; $padR = 0; $padT = 8; $padB = 24;
+            $plotW = $chartW - $padL - $padR;
+            $plotH = $chartH - $padT - $padB;
+            $cnt = $trendCount;
+            $step = $cnt > 1 ? $plotW / ($cnt - 1) : 0;
+            $points = [];
+            foreach ($trendPts as $i => $pt) {
+                $x = $i * $step;
+                $y = $plotH - ($chartMax > 0 ? ($pt['total'] / $chartMax) * $plotH : 0);
+                $points[] = round($x + $padL, 1) . ',' . round($y + $padT, 1);
+            }
+            @endphp
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                    <h2 class="text-[11px] font-semibold text-gray-900">Net Payroll Trend</h2>
+                    <span class="text-[9px] text-gray-400 font-medium">Last 6 months</span>
+                </div>
+                <div class="p-4">
+                    @if($trendCount > 0)
+                    <svg viewBox="0 0 {{ $chartW }} {{ $chartH }}" class="w-full h-auto" style="max-height:180px">
+                        {{-- Grid lines --}}
+                        @for ($g = 0; $g <= 4; $g++)
+                        @php $gy = $padT + ($plotH / 4) * $g; @endphp
+                        <line x1="{{ $padL }}" y1="{{ $gy }}" x2="{{ $chartW - $padR }}" y2="{{ $gy }}" stroke="#f0f0f0" stroke-width="1"/>
+                        @endfor
+                        {{-- Area fill --}}
+                        <path d="M{{ $points[0] }} L{{ implode(' L', $points) }} L{{ $padL + ($cnt - 1) * $step }},{{ $padT + $plotH }} L{{ $padL }},{{ $padT + $plotH }} Z"
+                              fill="url(#acChartGrad)" opacity="0.15"/>
+                        {{-- Line --}}
+                        <polyline points="{{ implode(' ', $points) }}" fill="none" stroke="#c8292a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                  class="acd-chart-line"/>
+                        {{-- Dots --}}
+                        @foreach ($trendPts as $i => $pt)
+                        @php $dx = $i * $step + $padL; $dy = $plotH - ($chartMax > 0 ? ($pt['total'] / $chartMax) * $plotH : 0) + $padT; @endphp
+                        <circle cx="{{ $dx }}" cy="{{ $dy }}" r="3.5" fill="#c8292a" stroke="white" stroke-width="2" class="acd-chart-dot"
+                                style="animation-delay:{{ 0.1 + $i * 0.05 }}s"/>
+                        @endforeach
+                        {{-- X-axis labels --}}
+                        @foreach ($trendPts as $i => $pt)
+                        @php $lx = $i * $step + $padL; @endphp
+                        <text x="{{ $lx }}" y="{{ $chartH - 4 }}" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="monospace">{{ $pt['month'] ?? \Carbon\Carbon::parse($pt['label'])->format('M') }}</text>
+                        @endforeach
+                        <defs>
+                            <linearGradient id="acChartGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#c8292a"/>
+                                <stop offset="100%" stop-color="#c8292a" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="flex items-center justify-between mt-2 text-[10px] text-gray-400">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+                            Net pay trend
+                        </span>
+                        <span>
+                            Peak: <strong class="text-gray-700 font-mono">₱{{ number_format($chartMax, 0) }}</strong>
+                        </span>
+                    </div>
+                    @else
+                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No trend data yet.</div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Payroll Status Mix (CSS donut) --}}
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                    <h2 class="text-[11px] font-semibold text-gray-900">Payroll Status Mix</h2>
+                    <span class="text-[9px] text-gray-400 font-medium">By batch count</span>
+                </div>
+                <div class="px-4 py-4">
+                    @if($stTotal > 0)
                     @php
-                        $u = $payroll->employee;
-                        $name = $u ? trim(($u->first_name ?? '').' '.($u->last_name ?? '')) ?: ($u->name ?? 'Unknown') : 'Unknown';
-                        $st = $payroll->status ?? 'pending';
+                        $stColors = ['#f59e0b','#8b5cf6','#64748b','#2563eb','#22c55e','#15803d','#f43f5e'];
+                        $cumulPct = 0;
                     @endphp
-                    <li>
-                        <a href="{{ route('payroll-approval.show', $payroll) }}">
-                            <div class="acd-av">{{ $initials($name) }}</div>
-                            <div class="acd-feed-body">
-                                <p class="acd-feed-title">{{ $name }}</p>
-                                <p class="acd-feed-meta">
-                                    Net <code>₱{{ number_format($payroll->net_pay ?? 0, 2) }}</code>
-                                    · Gross <code>₱{{ number_format($payroll->gross_pay ?? 0, 2) }}</code>
-                                    · {{ $payroll->payroll_period_start?->format('M j') ?? '—' }} – {{ $payroll->payroll_period_end?->format('M j, Y') ?? '—' }}
-                                </p>
+                    <div class="flex flex-col sm:flex-row items-center gap-5">
+                        <div class="relative w-[120px] h-[120px] shrink-0">
+                            <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+                                @foreach($stSeries as $i => $val)
+                                @php
+                                    $pct = $val / $stTotal * 100;
+                                    $circ = 2 * pi() * 36;
+                                    $offset = $cumulPct / 100 * $circ;
+                                    $cumulPct += $pct;
+                                @endphp
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="{{ $stColors[$i % count($stColors)] }}" stroke-width="8" stroke-dasharray="{{ ($pct/100)*$circ }} {{ $circ }}" stroke-dashoffset="0" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ ($pct/100)*$circ }};animation-delay:{{ 0.1*$i }}s;transform-origin:center;transform:rotate({{ $offset }}deg)"/>
+                                @endforeach
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-xs font-bold text-gray-900 tabular-nums">{{ $stTotal }}</span>
                             </div>
-                            <div class="acd-feed-right">
-                                <span class="acd-pill {{ $pillClass($st) }}">{{ in_array($st, ['released','paid'],true) ? 'Released' : ucfirst($st) }}</span>
-                                <i class="feather-chevron-right acd-chevron"></i>
+                        </div>
+                        <div class="flex-1 grid grid-cols-2 gap-1.5 w-full">
+                            @foreach($stSeries as $i => $val)
+                            @php
+                                $pct = $stTotal > 0 ? round(($val/$stTotal)*100) : 0;
+                            @endphp
+                            <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+                                <span class="w-2 h-2 rounded-sm shrink-0" style="background:{{ $stColors[$i % count($stColors)] }}"></span>
+                                <span class="text-[10px] text-gray-600 flex-1 truncate">{{ $stLabels[$i] ?? '—' }}</span>
+                                <span class="text-[10px] font-bold text-gray-900 tabular-nums">{{ $val }}</span>
+                                <span class="text-[8px] text-gray-400 min-w-[24px] text-right">{{ $pct }}%</span>
                             </div>
-                        </a>
-                    </li>
+                            @endforeach
+                        </div>
+                    </div>
+                    @else
+                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No status data yet.</div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- Quick Actions / Shortcuts --}}
+        <div class="acd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
+            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm acd-float">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-900">Quick Actions</span>
+                </div>
+                <span class="text-[0.55rem] font-mono text-gray-400">Accountant modules</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
+                <a href="{{ route('payroll-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Payroll Approval</span>
+                    @if($processingPayroll > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $processingPayroll }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('remittance-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-violet-700 transition-colors text-center">Remittance Approval</span>
+                    @if($pendingRemittances > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.45rem] font-bold">{{ $pendingRemittances }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-blue-50 hover:border-blue-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center transition-all group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-blue-700 transition-colors text-center">Cash Advances</span>
+                    @if($pendingCashAdvancesCount > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-blue-100 text-blue-700 text-[0.45rem] font-bold">{{ $pendingCashAdvancesCount }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('payroll.receivables.index', ['tab' => 'salary_loans']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors text-center">Salary Loans</span>
+                    @if($pendingSalaryLoansCount > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-amber-100 text-amber-700 text-[0.45rem] font-bold">{{ $pendingSalaryLoansCount }}</span>
+                    @endif
+                </a>
+            </div>
+        </div>
+
+        {{-- Charts row 2 --}}
+        @php
+            $ta = (float) ($totalAllowances ?? 0);
+            $td = (float) ($totalDeductions ?? 0);
+            $adTotal = $ta + $td;
+            $adAllowPct = $adTotal > 0 ? round(($ta/$adTotal)*100) : 0;
+            $adDeducPct = $adTotal > 0 ? round(($td/$adTotal)*100) : 0;
+
+            $pipeVals = $pipelineBar['values'] ?? [];
+            $pipeLabels = $pipelineBar['labels'] ?? [];
+            $pipeMax = count($pipeVals) > 0 ? max($pipeVals) : 1;
+            $pipeColors = ['#f59e0b','#8b5cf6','#22c55e','#f43f5e'];
+        @endphp
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {{-- Allowances vs Deductions (CSS donut) --}}
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                    <h2 class="text-[11px] font-semibold text-gray-900">Allowances vs Deductions</h2>
+                    <span class="text-[9px] text-gray-400 font-medium">Aggregate amounts</span>
+                </div>
+                <div class="px-4 py-4">
+                    @if($adTotal > 0)
+                    @php
+                        $circ = 2 * pi() * 36;
+                        $allowOffset = $adAllowPct / 100 * $circ;
+                    @endphp
+                    <div class="flex flex-col sm:flex-row items-center gap-5">
+                        <div class="relative w-[120px] h-[120px] shrink-0">
+                            <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="#22c55e" stroke-width="8" stroke-dasharray="{{ $allowOffset }} {{ $circ }}" stroke-dashoffset="0" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ $allowOffset }}"/>
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="#f43f5e" stroke-width="8" stroke-dasharray="{{ $circ - $allowOffset }} {{ $circ }}" stroke-dashoffset="{{ -$allowOffset }}" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ $circ - $allowOffset }};animation-delay:0.3s"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">₱{{ number_format($adTotal/1000,0) }}k</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 space-y-2 w-full">
+                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-emerald-50 transition-colors">
+                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-emerald-500"></span>
+                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Allowances</span>
+                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">₱{{ number_format($ta,0) }}</span>
+                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adAllowPct }}%</span>
+                            </div>
+                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-rose-50 transition-colors">
+                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-rose-500"></span>
+                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Deductions</span>
+                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">₱{{ number_format($td,0) }}</span>
+                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adDeducPct }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No data yet.</div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Pipeline (horizontal bars) --}}
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                    <h2 class="text-[11px] font-semibold text-gray-900">Pipeline</h2>
+                    <span class="text-[9px] text-gray-400 font-medium">Awaiting · approved · released · rejected</span>
+                </div>
+                <div class="px-4 py-4 space-y-3">
+                    @forelse($pipeVals as $i => $val)
+                    @php $barW = $pipeMax > 0 ? ($val / $pipeMax) * 100 : 0; @endphp
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-semibold text-gray-600">{{ $pipeLabels[$i] ?? '—' }}</span>
+                            <span class="text-[10px] font-bold text-gray-900 tabular-nums">{{ $val }} <span class="text-[8px] text-gray-400 font-medium">batch{{ $val !== 1 ? 'es' : '' }}</span></span>
+                        </div>
+                        <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full acd-bar transition-all duration-700" style="width:{{ $barW }}%;background:{{ $pipeColors[$i % count($pipeColors)] }};animation-delay:{{ 0.1 * $i }}s"></div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="flex items-center justify-center h-[140px] text-xs text-gray-400">No pipeline data yet.</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {{-- RIGHT COLUMN (1/3): Calendar + To-Do --}}
+    <div class="space-y-5">
+
+        {{-- Calendar Card --}}
+        <div class="slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="cal-card">
+            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    <button class="p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600" id="cal-prev" title="Previous month">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <span class="text-xs font-semibold text-gray-900 min-w-[100px] text-center" id="cal-label">{{ $firstDay->format('F Y') }}</span>
+                    <button class="p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600" id="cal-next" title="Next month">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+                <span class="text-[0.55rem] font-mono text-gray-400">{{ now()->format('D, M j') }}</span>
+            </div>
+            <div class="px-4 py-3">
+                <div class="grid grid-cols-7 gap-0" id="cal-grid"></div>
+            </div>
+        </div>
+
+        {{-- To-Do Card --}}
+        <div class="slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.1s">
+            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    <span class="text-xs font-semibold text-gray-900">To Do</span>
+                </div>
+                @if($totalPendingTodo > 0)
+                    <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[0.5rem] font-bold px-1">{{ $totalPendingTodo }}</span>
+                @endif
+            </div>
+            @if($totalPendingTodo > 0)
+            <div class="divide-y divide-gray-50">
+                @foreach($pendingItems as $item)
+                <a href="{{ $item['url'] }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background:{{ $item['color'] }};color:{{ $item['iconColor'] }}">
+                        <i class="{{ $item['icon'] }}" style="font-size:14px"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold text-gray-900">{{ $item['text'] }}</p>
+                    </div>
+                    @if($item['count'] > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full text-[0.5rem] font-bold px-1.5" style="background:{{ $item['color'] }};color:{{ $item['iconColor'] }}">{{ $item['count'] }}</span>
+                    @endif
+                    <svg class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </a>
                 @endforeach
-            </ul>
-        @endif
+            </div>
+            @else
+            <div class="flex flex-col items-center justify-center py-8 text-center">
+                <svg class="w-8 h-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-sm font-semibold text-gray-400">No to do</p>
+                <p class="text-xs text-gray-400 mt-0.5">All caught up!</p>
+            </div>
+            @endif
         </div>
     </div>
 
-    {{-- Right Calendar Sidebar --}}
-    <aside class="acd-sidebar">
-        @include('partials.calendar')
-        @include('partials.todo')
-    </aside>
 </div>
 @endsection
 
 @push('scripts')
 <script>
 (function () {
-    if (typeof ApexCharts === 'undefined') return;
-    const font = 'Sora, sans-serif';
-    const mono = "'DM Mono', monospace";
-    const red  = '#c8292a';
-    const ink  = '#111827';
 
-    const monthly = @json($monthlyPayrollTrend);
-    const categories = monthly.map(function(m){ return m.label || m.month; });
+    /* Interactive calendar */
+    const calState = { month: {{ $calMonth }}, year: {{ $calYear }}, selected: '{{ $today }}' };
+    const todayStr = '{{ $today }}';
+    const calGrid = document.getElementById('cal-grid');
+    const calLabel = document.getElementById('cal-label');
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-    new ApexCharts(document.querySelector('#acd-chart-trend'), {
-        chart: { type: 'line', height: 280, fontFamily: font, toolbar: { show: false }, zoom: { enabled: false }, animations: { enabled: true, speed: 400 } },
-        series: [{ name: 'Net pay', data: monthly.map(function(m){ return m.total; }) }],
-        colors: [red],
-        stroke: { width: 2, curve: 'smooth' },
-        fill: { type: 'gradient', gradient: { shadeIntensity: 0.4, opacityFrom: 0.35, opacityTo: 0.02, stops: [0,90,100] } },
-        markers: { size: 3, strokeWidth: 0, hover: { size: 5 } },
-        dataLabels: { enabled: false },
-        xaxis: { categories: categories, labels: { style: { colors: '#64748b', fontSize: '11px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { style: { colors: '#64748b', fontSize: '11px' }, formatter: function(v){ return '₱'+(v>=1e6?(v/1e6).toFixed(1)+'M':(v>=1e3?(v/1e3).toFixed(0)+'k':v.toFixed(0))); } }, min: 0 },
-        grid: { borderColor: '#f1f5f9', strokeDashArray: 4, padding: { top: 8, right: 12, bottom: 0, left: 8 } },
-        tooltip: { y: { formatter: function(v){ return '₱'+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); } } }
-    }).render();
-
-    const stLabels = @json($payrollStatusChartLabels);
-    const stSeries = @json($payrollStatusChartSeries);
-    const stEl = document.querySelector('#acd-chart-status');
-    if (stSeries.length && stEl) {
-        new ApexCharts(stEl, {
-            chart: { type: 'donut', height: 280, fontFamily: font },
-            series: stSeries, labels: stLabels,
-            colors: ['#f59e0b','#8b5cf6','#64748b','#2563eb','#22c55e','#15803d','#f43f5e'],
-            stroke: { width: 1, colors: ['#fff'] },
-            plotOptions: { pie: { donut: { size: '78%', labels: { show: true, total: { show: true, label: 'Batches', fontSize: '10px', color: '#94a3b8', formatter: function(){ return String(stSeries.reduce(function(a,b){return a+b;},0)); } } } } } },
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom', fontSize: '11px', fontWeight: 600 }
-        }).render();
-    } else if (stEl) {
-        stEl.innerHTML = '<div class="acd-empty" style="min-height:240px;display:flex;align-items:center;justify-content:center;">No status data yet.</div>';
+    function renderCalendar() {
+        const firstDow = new Date(calState.year, calState.month - 1, 1).getDay();
+        const daysIn = new Date(calState.year, calState.month, 0).getDate();
+        calLabel.textContent = monthNames[calState.month - 1] + ' ' + calState.year;
+        let html = '';
+        ['S','M','T','W','T','F','S'].forEach(d => {
+            html += '<span class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-center py-1.5">' + d + '</span>';
+        });
+        for (let i = 0; i < firstDow; i++) {
+            html += '<span class="text-center py-1.5"></span>';
+        }
+        for (let d = 1; d <= daysIn; d++) {
+            const ds = calState.year + '-' + String(calState.month).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+            let cls = 'text-center py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ';
+            if (ds === todayStr) {
+                cls += 'bg-gray-900 text-white ';
+            } else if (ds === calState.selected) {
+                cls += 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300 ';
+            } else {
+                cls += 'text-gray-600 hover:bg-gray-100 ';
+            }
+            html += '<span class="' + cls + '" data-date="' + ds + '">' + d + '</span>';
+        }
+        calGrid.innerHTML = html;
+        calGrid.querySelectorAll('[data-date]').forEach(el => {
+            el.addEventListener('click', function () {
+                calState.selected = this.dataset.date;
+                renderCalendar();
+            });
+        });
     }
+    renderCalendar();
 
-    const ta = {{ (float) $totalAllowances }};
-    const td = {{ (float) $totalDeductions }};
-    const adEl = document.querySelector('#acd-chart-ad');
-    if (adEl && (ta > 0 || td > 0)) {
-        new ApexCharts(adEl, {
-            chart: { type: 'donut', height: 260, fontFamily: font },
-            series: [ta, td], labels: ['Allowances', 'Deductions'],
-            colors: ['#22c55e', '#f43f5e'],
-            stroke: { width: 1, colors: ['#fff'] },
-            plotOptions: { pie: { donut: { size: '78%', labels: { show: true, value: { fontSize: '16px', fontWeight: 700, color: ink, fontFamily: mono }, total: { show: true, label: 'A + D', fontSize: '10px', color: '#94a3b8', formatter: function(w){ return '₱'+w.globals.seriesTotals.reduce(function(a,b){return a+b;},0).toLocaleString(undefined,{maximumFractionDigits:0}); } } } } } },
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom', fontSize: '11px', fontWeight: 600 }
-        }).render();
-    } else if (adEl) {
-        adEl.innerHTML = '<div class="acd-empty" style="min-height:240px;display:flex;align-items:center;justify-content:center;">No data yet.</div>';
-    }
-
-    const pipe = @json($pipelineBar);
-    new ApexCharts(document.querySelector('#acd-chart-pipeline'), {
-        chart: { type: 'bar', height: 260, fontFamily: font, toolbar: { show: false } },
-        series: [{ name: 'Batches', data: pipe.values }],
-        colors: [red],
-        plotOptions: { bar: { borderRadius: 8, columnWidth: '42%' } },
-        xaxis: { categories: pipe.labels, labels: { style: { fontSize: '11px', fontWeight: 600, colors: '#64748b' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-        yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '11px' } }, min: 0, tickAmount: 4, forceNiceScale: true },
-        dataLabels: { enabled: true, offsetY: -18, style: { fontSize: '11px', fontWeight: 700, colors: ['#fff'], fontFamily: mono } },
-        grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
-        legend: { show: false },
-        tooltip: { y: { formatter: function(v){ return v+' batch(es)'; } } }
-    }).render();
+    document.getElementById('cal-prev').addEventListener('click', function () {
+        if (--calState.month < 1) { calState.month = 12; calState.year--; }
+        renderCalendar();
+    });
+    document.getElementById('cal-next').addEventListener('click', function () {
+        if (++calState.month > 12) { calState.month = 1; calState.year++; }
+        renderCalendar();
+    });
 })();
 </script>
 @endpush

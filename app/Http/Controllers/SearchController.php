@@ -125,7 +125,7 @@ class SearchController extends Controller
         }
 
         // ── 2. Employee suggestions (role-gated) ──────────────────────────
-        $canSearchEmployees = in_array($role, ['hr', 'superadmin', 'accountant', 'qr_admin', 'employee']);
+        $canSearchEmployees = in_array($role, ['hr', 'superadmin', 'qr_admin', 'employee']);
 
         if ($canSearchEmployees) {
             $empQuery = User::whereIn('role', ['employee', 'hr', 'accountant', 'remittance_clerk', 'superadmin', 'qr_admin'])
