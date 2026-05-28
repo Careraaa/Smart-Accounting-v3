@@ -91,7 +91,7 @@ class Users_Seeder extends Seeder
                 'address' => json_encode(['street' => '300 Accounting Street', 'barangay' => 'Brgy. San Antonio', 'city' => 'Makati City', 'province' => 'Metro Manila']),
                 'civil_status' => 'married', 'spouse_name' => 'Luis Piattos', 'date_of_birth' => '1990-09-20', 'place_of_birth' => 'Cebu City',
                 'educational_attainment' => "College (Bachelor's)", 'driver_license_number' => null, 'driver_license_validity' => null,
-                'date_of_hire' => '2019-06-01', 'position' => 'Chief Financial Officer', 'department' => 'accounting', 'status' => 'active',
+                'date_of_hire' => '2019-06-01', 'position' => 'Chief Financial Officer', 'department' => 'Accounting', 'status' => 'active',
                 'salary_rate' => 950.00, 'has_sss' => 1, 'sss_number' => '34-1000003-3', 'has_tin' => 1, 'tin_number' => '100-000-003',
                 'has_pagibig' => 1, 'pagibig_number' => '1000-0000-0003', 'has_philhealth' => 1, 'philhealth_number' => '12-0000000003-3',
                 'signature_path' => null, 'attachments' => null, 'created_at' => $ts, 'updated_at' => $ts,

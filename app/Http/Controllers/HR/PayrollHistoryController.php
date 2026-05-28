@@ -44,13 +44,18 @@ class PayrollHistoryController extends Controller
 
         $nextCutoffDate = PayrollCutoffSchedule::getNextCutoffDate();
 
+        $filterMonth = $request->get('month', '');
+        $filterYear  = $request->get('year', '');
+
         return view('hr.payroll.history.index', compact(
             'allBatches',
             'totalBatches',
             'totalPayroll',
             'totalReleased',
             'activeEmployees',
-            'nextCutoffDate'
+            'nextCutoffDate',
+            'filterMonth',
+            'filterYear'
         ));
     }
 

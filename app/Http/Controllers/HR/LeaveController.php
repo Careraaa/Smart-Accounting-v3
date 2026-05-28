@@ -48,6 +48,7 @@ class LeaveController extends Controller
         $thisMonthEnd = now()->endOfMonth();
 
         $leaves = collect();
+        $allLeaves = collect();
         $thisWeekLeaves = 0;
         $thisMonthLeaves = 0;
 
