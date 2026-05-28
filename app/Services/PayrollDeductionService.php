@@ -23,6 +23,8 @@ class PayrollDeductionService
         $userId    = $payroll->user_id;
         $caTotal   = 0;
         $slTotal   = 0;
+        $caDetails = [];
+        $slDetails = [];
 
         // ── Cash Advances ─────────────────────────────────────────
         // Status flow: pending → approved (HR) → released (accountant).
@@ -42,6 +44,7 @@ class PayrollDeductionService
                 : $advance->amount;
 
             $caTotal += $instalment;
+            $caDetails[] = ['id' => $advance->id, 'amount' => $instalment];
 
             $newDeducted = $advance->amount_deducted + $instalment;
 
@@ -70,21 +73,82 @@ class PayrollDeductionService
             $semiMonthlyDeduction = $loan->monthly_deduction / 2;
             $instalment = min($semiMonthlyDeduction, $loan->remaining_balance);
             $slTotal   += $instalment;
+            $slDetails[] = ['id' => $loan->id, 'amount' => $instalment];
             $loan->deductInstalment($instalment);
         }
 
-        $totalDeducted = $caTotal + $slTotal;
+        $totalDeducted = round($caTotal + $slTotal, 2);
 
         // ── Persist on payroll dedicated columns ──────────────────
         if ($totalDeducted > 0) {
-            $payroll->increment('cash_advance_deduction', $caTotal);
-            $payroll->increment('salary_loan_deduction', $slTotal);
+            $payroll->increment('cash_advance_deduction', round($caTotal, 2));
+            $payroll->increment('salary_loan_deduction', round($slTotal, 2));
             $payroll->increment('total_deductions', $totalDeducted);
 
             $payroll->refresh();
             $payroll->update([
                 'net_pay' => round($payroll->gross_pay - $payroll->total_deductions, 2),
+                'loan_deduction_data' => [
+                    'cash_advances' => $caDetails,
+                    'salary_loans'  => $slDetails,
+                ],
             ]);
+        }
+    }
+
+    /**
+     * Revert loan deductions when a payroll is deleted.
+     * Reads the stored loan_deduction_data and reverses the changes.
+     */
+    public static function revertLoanDeductions(Payroll $payroll): void
+    {
+        $data = $payroll->loan_deduction_data;
+        if (!$data || !is_array($data)) {
+            return;
+        }
+
+        // Revert cash advances
+        if (!empty($data['cash_advances'])) {
+            foreach ($data['cash_advances'] as $ca) {
+                $advance = CashAdvance::find($ca['id']);
+                if (!$advance) continue;
+
+                $newDeducted = max(0, $advance->amount_deducted - $ca['amount']);
+
+                $updateData = ['amount_deducted' => round($newDeducted, 2)];
+
+                // If it was marked as fully deducted by this payroll, revert status
+                if ($advance->status === 'deducted' && $advance->deducted_payroll_id === $payroll->id) {
+                    $updateData['status'] = 'released';
+                    $updateData['deducted_payroll_id'] = null;
+                }
+
+                $advance->update($updateData);
+            }
+        }
+
+        // Revert salary loans
+        if (!empty($data['salary_loans'])) {
+            foreach ($data['salary_loans'] as $sl) {
+                $loan = SalaryLoan::find($sl['id']);
+                if (!$loan) continue;
+
+                $newBalance = $loan->remaining_balance + $sl['amount'];
+                $newMonthsPaid = max(0, $loan->months_paid - 1);
+
+                $updateData = [
+                    'remaining_balance' => round($newBalance, 2),
+                    'months_paid'       => $newMonthsPaid,
+                ];
+
+                // If it was marked as settled by this deduction, revert
+                if ($loan->status === 'settled') {
+                    $updateData['status'] = 'released';
+                    $updateData['end_date'] = null;
+                }
+
+                $loan->update($updateData);
+            }
         }
     }
 }

@@ -387,6 +387,15 @@
                                     </tr>
                                 @endforeach
 
+                                @php $holidayOTPay = (float)($payroll->holiday_ot_pay ?? 0); $holidayOTHours = (float)($payroll->holiday_ot_hours ?? 0); @endphp
+                                @if ($holidayOTPay > 0)
+                                    <tr>
+                                        <td>Holiday Overtime Pay</td>
+                                        <td class="mono right">{{ $holidayOTHours }}</td>
+                                        <td class="mono">₱{{ number_format($holidayOTPay, 2) }}</td>
+                                    </tr>
+                                @endif
+
                                 @forelse ($payroll->allowances as $allow)
                                     <tr>
                                         <td>{{ $allow->allowance_type }}</td>
@@ -415,6 +424,24 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $caDed = (float)($payroll->cash_advance_deduction ?? 0);
+                                    $slDed = (float)($payroll->salary_loan_deduction ?? 0);
+                                @endphp
+                                @if ($caDed > 0)
+                                    <tr>
+                                        <td>Cash Advance <span style="font-size:10px;font-weight:600;color:var(--gray-light);">loan</span></td>
+                                        <td class="mono right">—</td>
+                                        <td class="mono">₱{{ number_format($caDed, 2) }}</td>
+                                    </tr>
+                                @endif
+                                @if ($slDed > 0)
+                                    <tr>
+                                        <td>Salary Loan <span style="font-size:10px;font-weight:600;color:var(--gray-light);">loan</span></td>
+                                        <td class="mono right">—</td>
+                                        <td class="mono">₱{{ number_format($slDed, 2) }}</td>
+                                    </tr>
+                                @endif
                                 @forelse ($payroll->deductions as $ded)
                                     <tr>
                                         <td>
@@ -427,7 +454,9 @@
                                         <td class="mono">₱{{ number_format($ded->amount, 2) }}</td>
                                     </tr>
                                 @empty
-                                    <tr><td class="dim" colspan="3">No deductions this period</td></tr>
+                                    @if ($caDed <= 0 && $slDed <= 0)
+                                        <tr><td class="dim" colspan="3">No deductions this period</td></tr>
+                                    @endif
                                 @endforelse
                             </tbody>
                         </table>

@@ -335,7 +335,7 @@
                     ->toArray();
 
                 $manualDeductions = $payroll->deductions
-                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                         || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
                     ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
                     ->values()
@@ -351,8 +351,11 @@
 
                 $payroll->setAttribute('basic_salary', $computed['basicSalary']);
                 $payroll->setAttribute('gross_pay', $computed['grossPay']);
-                $payroll->setAttribute('total_deductions', $computed['totalDeductions']);
-                $payroll->setAttribute('net_pay', $computed['netPay']);
+                // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+                $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
+                           + (float)($payroll->salary_loan_deduction ?? 0);
+                $payroll->setAttribute('total_deductions', $computed['totalDeductions'] + $loanTotal);
+                $payroll->setAttribute('net_pay', $computed['netPay'] - $loanTotal);
             }
 
             return view('hr.payroll.batch.payslips', compact('batch'));
@@ -517,6 +520,18 @@
                 'status' => 'prepared',
             ];
 
+            // Revert old loan deductions on source records first, so
+            // applyLoanDeductions below doesn't double-count them.
+            PayrollDeductionService::revertLoanDeductions($payroll);
+
+            // Clear loan columns so updatePayroll doesn't preserve stale values.
+            $payroll->update([
+                'cash_advance_deduction' => 0,
+                'salary_loan_deduction' => 0,
+                'loan_deduction_data' => null,
+            ]);
+            $payroll->refresh();
+
             $updatedPayroll = $this->payrollService->updatePayroll(
                 $payroll,
                 $employee,
@@ -554,7 +569,7 @@
 
             // Preserve manual + loan deductions; statutory and undertime are recomputed.
             $manualDeductions = $payroll->deductions
-                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                     || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
                 ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
                 ->values()
@@ -631,7 +646,7 @@
                 // Preserve manual + loan deductions (everything except statutory and undertime,
                 // which are recomputed by updatePayroll automatically).
                 $manualDeductions = $payroll->deductions
-                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                         || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
                     ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
                     ->values()
@@ -773,7 +788,7 @@
                     ->values()->toArray();
 
                 $manualDeductions = $payroll->deductions
-                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                         || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
                     ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
                     ->values()->toArray();
@@ -855,7 +870,7 @@
                 ->toArray();
 
             $manualDeductions = $payroll->deductions
-                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                     || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
                 ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
                 ->values()
@@ -873,8 +888,11 @@
             $payroll->setAttribute('days_worked', $computed['daysWorked']);
             $payroll->setAttribute('basic_salary', $computed['basicSalary']);
             $payroll->setAttribute('gross_pay', $computed['grossPay']);
-            $payroll->setAttribute('total_deductions', $computed['totalDeductions']);
-            $payroll->setAttribute('net_pay', $computed['netPay']);
+            // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
+                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $payroll->setAttribute('total_deductions', $computed['totalDeductions'] + $loanTotal);
+            $payroll->setAttribute('net_pay', $computed['netPay'] - $loanTotal);
             $payroll->setAttribute('per_day_rate', $computed['dailyRate']);
             $payroll->setAttribute('hourly_rate', $computed['hourlyRate']);
             $payroll->setAttribute('holiday_pay', $computed['holidayPay']);
@@ -912,6 +930,18 @@
             $periodStart = Carbon::parse($validated['payroll_period_start']);
             $periodEnd = Carbon::parse($validated['payroll_period_end']);
 
+            // Revert old loan deductions on source records first, so
+            // applyLoanDeductions below doesn't double-count them.
+            PayrollDeductionService::revertLoanDeductions($payroll);
+
+            // Clear loan columns so updatePayroll doesn't preserve stale values.
+            $payroll->update([
+                'cash_advance_deduction' => 0,
+                'salary_loan_deduction' => 0,
+                'loan_deduction_data' => null,
+            ]);
+            $payroll->refresh();
+
             $payroll = $this->payrollService->updatePayroll($payroll, $employee, $periodStart, $periodEnd, $validated['allowances'] ?? [], $validated['deductions'] ?? []);
             $payroll->update(['status' => 'pending']);
 
@@ -924,6 +954,7 @@
 
         public function destroy(Payroll $payroll)
         {
+            \App\Services\PayrollDeductionService::revertLoanDeductions($payroll);
             $payroll->delete();
             return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll deleted successfully.');
         }
@@ -961,7 +992,7 @@
                 ->toArray();
 
             $manualDeductions = $payroll->deductions
-                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                     || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
                 ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
                 ->values()
@@ -979,8 +1010,13 @@
             $payroll->setAttribute('hours_worked', $computed['hoursWorked']);
             $payroll->setAttribute('basic_salary', $computed['basicSalary']);
             $payroll->setAttribute('gross_pay', $computed['grossPay']);
-            $payroll->setAttribute('total_deductions', $computed['totalDeductions']);
-            $payroll->setAttribute('net_pay', $computed['netPay']);
+            $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay'] ?? 0);
+            $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours'] ?? 0);
+            // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
+                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $payroll->setAttribute('total_deductions', $computed['totalDeductions'] + $loanTotal);
+            $payroll->setAttribute('net_pay', $computed['netPay'] - $loanTotal);
             $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
 
             return view('hr.payroll.generate-payslip.payslip', compact('payroll'));

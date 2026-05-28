@@ -98,7 +98,7 @@ class PayrollHistoryController extends Controller
                 ->toArray();
 
             $manualDeductions = $payroll->deductions
-                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth'])
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                     || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
                 ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
                 ->values()
@@ -114,8 +114,11 @@ class PayrollHistoryController extends Controller
 
             $payroll->setAttribute('basic_salary', $computed['basicSalary']);
             $payroll->setAttribute('gross_pay', $computed['grossPay']);
-            $payroll->setAttribute('total_deductions', $computed['totalDeductions']);
-            $payroll->setAttribute('net_pay', $computed['netPay']);
+            // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
+                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $payroll->setAttribute('total_deductions', $computed['totalDeductions'] + $loanTotal);
+            $payroll->setAttribute('net_pay', $computed['netPay'] - $loanTotal);
         }
 
         // Calculate totals from recomputed values

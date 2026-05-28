@@ -59,6 +59,9 @@ class PayrollService
         $values['leavePay'] = $totalLeavePay;
         // Update gross pay to include leave pay
         $values['grossPay'] = $values['grossPay'] + $totalLeavePay;
+        
+        // Recalculate net pay after updating gross pay with leave pay
+        $values['netPay'] = round($values['grossPay'] - $values['totalDeductions'], 2);
 
         $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
@@ -83,7 +86,7 @@ class PayrollService
             'total_allowances'     => round($values['grossPay'] - $values['basicSalary'] - $holidayPay - $holidayOTPay, 2),
             'total_bonuses'        => round($totalBonuses, 2),
             'total_deductions'     => $values['totalDeductions'],
-            'net_pay'              => round($values['netPay'] + $totalLeavePay + $totalBonuses, 2),
+            'net_pay'              => round($values['netPay'] + $totalBonuses, 2),
             'holiday_pay'          => $holidayPay,
             'holiday_ot_pay'       => $holidayOTPay,
             'holiday_ot_hours'     => $holidayOTHours,
@@ -301,7 +304,7 @@ class PayrollService
         $netPay          = round($grossPay - $totalDeductionsExact, 2, PHP_ROUND_HALF_UP);
         $adjustedGross   = $grossPay; // alias kept for display layer compatibility
         $utDeduction     = $utDeductionExact;
-        $totalDeductions = $totalDeductionsExact;
+        $totalDeductions = round($totalDeductionsExact, 2);
 
         return compact(
             'daysWorked', 'daysAbsent', 'hoursWorked',
@@ -348,6 +351,9 @@ class PayrollService
         $values['leavePay'] = $totalLeavePay;
         $values['grossPay'] = $values['grossPay'] + $totalLeavePay;
         
+        // Recalculate net pay after updating gross pay with leave pay
+        $values['netPay'] = round($values['grossPay'] - $values['totalDeductions'], 2);
+        
         $totalBonuses = collect($manualBonuses)->sum(fn($b) => (float) ($b['amount'] ?? 0));
 
         // Holiday pay is stored as its own column (not part of allowances)
@@ -378,8 +384,8 @@ class PayrollService
             // total_allowances = OT + manual allowances (holiday pay excluded)
             'total_allowances'        => round($values['grossPay'] - $values['basicSalary'] - $holidayPay - $holidayOTPay, 2),
             'total_bonuses'           => round($totalBonuses, 2),
-            'total_deductions'        => $values['totalDeductions'] + $loanTotal,
-            'net_pay'                 => round($values['netPay'] + $totalLeavePay + $totalBonuses - $loanTotal, 2),
+            'total_deductions'        => round($values['totalDeductions'] + $loanTotal, 2),
+            'net_pay'                 => round($values['netPay'] + $totalBonuses - $loanTotal, 2),
             'holiday_pay'          => $holidayPay,
             'holiday_ot_pay'       => $holidayOTPay,
             'holiday_ot_hours'     => $holidayOTHours,
