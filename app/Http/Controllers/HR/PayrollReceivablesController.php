@@ -18,17 +18,15 @@ class PayrollReceivablesController extends Controller
         $salaryLoans  = collect();
 
         if ($tab === 'cash_advances') {
-            $cashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
+            $allCashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
                 ->orderBy('created_at', 'desc')
-                ->paginate(15)
-                ->withQueryString();
+                ->get();
         }
 
         if ($tab === 'salary_loans') {
-            $salaryLoans = SalaryLoan::with('user')
+            $allSalaryLoans = SalaryLoan::with('user')
                 ->orderBy('created_at', 'desc')
-                ->paginate(15)
-                ->withQueryString();
+                ->get();
         }
 
         // Stats: count by status
@@ -50,7 +48,7 @@ class PayrollReceivablesController extends Controller
         $outstandingAmount = '₱' . number_format($approvedLoanRemaining + $approvedCashNotReleased, 2);
 
         return view('hr.payroll.receivables.index', compact(
-            'tab', 'cashAdvances', 'salaryLoans',
+            'tab', 'allCashAdvances', 'allSalaryLoans',
             'caPendingCount', 'caApprovedCount', 'caReleasedTotal',
             'loanPendingCount', 'loanApprovedCount', 'loanReleasedTotal',
             'totalCashAdvances', 'totalSalaryLoans', 'outstandingAmount'

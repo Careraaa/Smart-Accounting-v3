@@ -17,32 +17,23 @@ class ThirteenthMonthPayController extends Controller
     public function index(Request $request)
     {
         $calendarYear = (int) $request->get('year', now()->year);
-        $search = trim((string) $request->get('search', ''));
 
-        $query = ThirteenthMonthPay::with('user')
-            ->where('calendar_year', $calendarYear);
+        $allRecords = ThirteenthMonthPay::with('user')
+            ->where('calendar_year', $calendarYear)
+            ->orderByDesc('thirteenth_month_pay')
+            ->get();
 
-        if ($search !== '') {
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%");
-            });
-        }
-
-        $records = $query->orderByDesc('thirteenth_month_pay')->paginate(20)->withQueryString();
         $bonus = Bonus::where('code', Bonus::CODE_THIRTEENTH_MONTH)->first();
 
         $stats = [
-            'total_employees' => $records->total(),
+            'total_employees' => $allRecords->count(),
             'total_payable' => ThirteenthMonthPay::where('calendar_year', $calendarYear)->sum('thirteenth_month_pay'),
             'total_paid' => ThirteenthMonthPay::where('calendar_year', $calendarYear)->sum('amount_paid'),
         ];
 
         return view('hr.bonuses.thirteenth-month-pay.index', compact(
-            'records',
+            'allRecords',
             'calendarYear',
-            'search',
             'bonus',
             'stats'
         ));

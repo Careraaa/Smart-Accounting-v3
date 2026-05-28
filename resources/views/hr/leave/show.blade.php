@@ -2,20 +2,31 @@
 
 @push('styles')
 <style>
-form input:focus-visible,
-form select:focus-visible,
-form textarea:focus-visible,
-form button:focus-visible,
-form a:focus-visible {
-    outline: none !important;
+@keyframes fadeSlideUp {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
+@keyframes scaleIn {
+    0% { opacity: 0; transform: scale(0.92); }
+    100% { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInRight {
+    0% { opacity: 0; transform: translateX(-10px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+.stat-card { animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.stat-card:nth-child(1) { animation-delay: 0.05s; }
+.stat-card:nth-child(2) { animation-delay: 0.1s; }
+.fade-up { animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.filter-bar { animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+.table-wrap { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
 </style>
 @endpush
 
 @section('content')
-<div>
+<div class="max-w-full" data-ls>
 
-    <div class="flex items-start justify-between gap-4 mb-6 flex-wrap">
+    <div class="flex items-start justify-between gap-4 mb-6 flex-wrap fade-up">
         <div>
             <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight m-0">Leave Request Details</h1>
             <p class="text-xs text-gray-400 m-0 mt-0.5">{{ $leave->employee->first_name }} {{ $leave->employee->last_name }} · {{ $leave->leave_type }}</p>
@@ -29,7 +40,7 @@ form a:focus-visible {
     <div class="grid grid-cols-1 gap-4">
 
         {{-- Details card --}}
-        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden table-wrap">
             <div class="px-6 py-5 border-b border-gray-50 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center shrink-0">
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

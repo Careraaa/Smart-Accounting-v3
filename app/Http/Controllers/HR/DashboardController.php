@@ -4,8 +4,10 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\CashAdvance;
 use App\Models\Leave;
 use App\Models\OvertimeUndertime;
+use App\Models\SalaryLoan;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -48,6 +50,10 @@ class DashboardController extends Controller
         $totalOTRecords = OvertimeUndertime::where('status', 'approved')
             ->where('type', 'overtime')->count();
 
+        // ── Pending Approvals ──
+        $pendingCashAdvances = CashAdvance::where('status', 'pending')->count();
+        $pendingSalaryLoans  = SalaryLoan::where('status', 'pending')->count();
+
         return view('hr.index', compact(
             'attendanceTrend',
             'approvedLeaves',
@@ -57,6 +63,8 @@ class DashboardController extends Controller
             'pendingUT',
             'otHoursThisWeek',
             'totalOTRecords',
+            'pendingCashAdvances',
+            'pendingSalaryLoans',
         ));
     }
 }

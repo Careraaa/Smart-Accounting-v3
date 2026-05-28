@@ -17,27 +17,18 @@ class OvertimeUndertimeController extends Controller
     public function pendingRequests(Request $request)
     {
         $status = $request->query('status', 'pending');
-        $type   = $request->query('type', 'all');
 
-        $query = OvertimeUndertime::with('employee')
+        $base = OvertimeUndertime::with('employee')
             ->whereHas('employee', fn($q) => $q->whereNotIn('role', ['superadmin', 'qr_admin']));
 
-        if (in_array($status, ['pending', 'approved', 'rejected'])) {
-            $query->where('status', $status);
-        }
-
-        if ($type !== 'all') {
-            $query->where('type', $type);
-        }
-
-        $requests = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+        $allRequests = $base->orderBy('created_at', 'desc')->get();
 
         $pendingCount  = OvertimeUndertime::where('status', 'pending')->count();
         $approvedCount = OvertimeUndertime::where('status', 'approved')->count();
         $rejectedCount = OvertimeUndertime::where('status', 'rejected')->count();
 
         return view('hr.overtime.pending', compact(
-            'requests', 'status', 'type',
+            'allRequests', 'status',
             'pendingCount', 'approvedCount', 'rejectedCount'
         ));
     }

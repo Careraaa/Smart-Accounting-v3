@@ -42,13 +42,13 @@
                 ->count();
 
             // All batches, newest first — main list
-            $batches = PayrollBatch::withCount('payrolls')
+            $allBatches = PayrollBatch::withCount('payrolls')
                 ->withSum('payrolls', 'gross_pay')
                 ->withSum('payrolls', 'total_deductions')
                 ->withSum('payrolls', 'net_pay')
                 ->with(['generatedBy'])
                 ->orderByDesc('created_at')
-                ->paginate(5);
+                ->get();
 
             // Sidebar: last 5 batches
             $recentBatches = PayrollBatch::with('payrolls')
@@ -87,13 +87,8 @@
             $totalPayroll    = $pendingPayrolls->sum('net_pay');
             $payrollCount    = $pendingPayrolls->count();
 
-            // Batch status counts (for stats display)
-            $submittedCount = $batches->where('status', 'submitted')->count();
-            $approvedCount  = $batches->where('status', 'approved')->count();
-            $rejectedCount  = $batches->where('status', 'rejected')->count();
-
             return view('hr.payroll.salary-computation.index', compact(
-                'batches',
+                'allBatches',
                 'payrolls',
                 'totalEmployees', 'activeEmployees', 'inactiveEmployees',
                 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees',
@@ -101,8 +96,7 @@
                 'cutoffSchedules', 'cutoffInfo', 'nextCutoffDate',
                 'totalPayroll', 'payrollCount', 'releasedCount',
                 'recentBatches', 'currentPeriod', 'availablePeriods', 'batchAlreadyExists',
-                'currentInProgressBatch', 'finalizedCurrentBatch',
-                'submittedCount', 'approvedCount', 'rejectedCount'
+                'currentInProgressBatch', 'finalizedCurrentBatch'
             ));
         }
 
@@ -363,18 +357,13 @@
 
         public function generatePayslipIndex(Request $request)
         {
-            $query = PayrollBatch::withCount('payrolls')
+            $allBatches = PayrollBatch::withCount('payrolls')
                 ->with('payrolls')
                 ->whereHas('payrolls')
-                ->orderByDesc('created_at');
+                ->orderByDesc('created_at')
+                ->get();
 
-            if ($request->filled('status')) {
-                $query->where('status', $request->status);
-            }
-
-            $batches = $query->paginate(15)->withQueryString();
-
-            return view('hr.payroll.generate-payslip.index', compact('batches'));
+            return view('hr.payroll.generate-payslip.index', compact('allBatches'));
         }
 
         public function batchAddDepartment(Request $request, PayrollBatch $batch)

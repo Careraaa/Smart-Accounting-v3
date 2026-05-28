@@ -162,86 +162,22 @@
                         @endif
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50" id="caTbody">
-                @forelse($cashAdvances as $advance)
-                    @php
-                        $initials = strtoupper(substr($advance->user->first_name ?? ($advance->user->name ?? 'U'), 0, 1) . substr($advance->user->last_name ?? '', 0, 1));
-                        $badgeCls = match($advance->status) {
-                            'pending'  => 'bg-amber-50 text-amber-700 border-amber-200',
-                            'approved' => 'bg-blue-50 text-blue-700 border-blue-200',
-                            'released' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                            'rejected' => 'bg-red-50 text-red-700 border-red-200',
-                            default    => 'bg-gray-50 text-gray-600 border-gray-200',
-                        };
-                        $dotCls = match($advance->status) {
-                            'pending'  => 'bg-amber-500',
-                            'approved' => 'bg-blue-500',
-                            'released' => 'bg-emerald-500',
-                            'rejected' => 'bg-red-500',
-                            default    => 'bg-gray-400',
-                        };
-                    @endphp
-                    <tr class="pr-row hover:bg-gray-50/40 transition-colors cursor-pointer" data-name="{{ strtolower($advance->user->name ?? '') }}" data-status="{{ $advance->status }}" data-url="{{ route('payroll.receivables.cash-advances.show', $advance) }}">
-                        <td class="px-4 py-3">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">{{ $initials }}</span>
-                                <div>
-                                    <div class="text-xs font-semibold text-gray-900">{{ $advance->user->name ?? '—' }}</div>
-                                    <div class="text-[0.55rem] text-gray-400">{{ $advance->user->position ?? '' }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱{{ number_format($advance->amount, 2) }}</span></td>
-                        <td class="px-4 py-3 text-xs text-gray-700">{{ $advance->repayment_months ?? 1 }}mo</td>
-                        <td class="px-4 py-3"><span class="font-mono tabular-nums text-xs text-gray-500">₱{{ number_format($advance->monthly_deduction ?? $advance->amount, 2) }}</span></td>
-                        <td class="px-4 py-3 text-xs text-gray-700">{{ $advance->request_date ? \Carbon\Carbon::parse($advance->request_date)->format('M d, Y') : '—' }}</td>
-                        <td class="px-4 py-3 text-center">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border {{ $badgeCls }}">
-                                <span class="w-1 h-1 rounded-full {{ $dotCls }}"></span>
-                                {{ ucfirst($advance->status) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-xs text-gray-700">
-                            @if($advance->deductedPayroll)
-                                Period ending {{ \Carbon\Carbon::parse($advance->deductedPayroll->payroll_period_end)->format('M d, Y') }}
-                            @else
-                                <span class="text-gray-300">—</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @if($advance->rejection_reason)
-                    <tr class="pr-reason-row" style="display:none;">
-                        <td colspan="{{ auth()->user()->role === 'accountant' ? 8 : 7 }}" class="px-4 py-2.5 bg-amber-50/60 border-l-2 border-amber-400">
-                            <div class="flex items-center gap-2 text-[0.55rem] text-amber-800">
-                                <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4v2m0-6a4 4 0 110 8 4 4 0 010-8z"/></svg>
-                                <strong>Rejection Reason:</strong> {{ $advance->rejection_reason }}
-                            </div>
-                        </td>
-                    </tr>
-                    @endif
-                @empty
-                    <tr><td colspan="{{ auth()->user()->role === 'accountant' ? 8 : 7 }}">
-                        <div class="flex flex-col items-center py-12 text-center">
-                            <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
-                            </div>
-                            <p class="text-sm font-semibold text-gray-500">No cash advance requests</p>
-                            <p class="text-xs text-gray-400 mt-0.5">There are no records to display.</p>
-                        </div>
-                    </td></tr>
-                @endforelse
-                </tbody>
+                <tbody class="divide-y divide-gray-50" id="caTbody"></tbody>
             </table>
         </div>
         <div id="caNoResults" class="hidden">
-            <div class="flex flex-col items-center py-8 text-center">
-                <p class="text-sm font-semibold text-gray-500">No results found</p>
-                <p class="text-xs text-gray-400 mt-0.5">Try a different search or filter.</p>
+            <div class="flex flex-col items-center py-12 text-center">
+                <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-500" id="caEmptyTitle">No cash advance requests</p>
+                <p class="text-xs text-gray-400 mt-0.5" id="caEmptySub">There are no records to display.</p>
             </div>
         </div>
-        @if($cashAdvances->hasPages())
-        <div class="px-4 py-3 border-t border-gray-50 flex justify-end text-xs">{{ $cashAdvances->links() }}</div>
-        @endif
+        <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
+            <div class="text-xs text-gray-400" id="caPaginationInfo">Showing <strong class="text-gray-700">0</strong> records</div>
+            <nav id="caPaginationNav" class="flex items-center gap-1"></nav>
+        </div>
     </div>
     @endif
 
@@ -283,92 +219,22 @@
                         @endif
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50" id="loanTbody">
-                @forelse($salaryLoans as $loan)
-                    @php
-                        $totalMonths = $loan->total_months ?? 12;
-                        $progress = $totalMonths > 0 ? min(100, round(($loan->months_paid / $totalMonths) * 100)) : 0;
-                        $initials = strtoupper(substr($loan->user->first_name ?? ($loan->user->name ?? 'U'), 0, 1) . substr($loan->user->last_name ?? '', 0, 1));
-                        $badgeCls = match($loan->status) {
-                            'pending'  => 'bg-amber-50 text-amber-700 border-amber-200',
-                            'approved' => 'bg-blue-50 text-blue-700 border-blue-200',
-                            'released' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                            'settled'  => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                            'rejected' => 'bg-red-50 text-red-700 border-red-200',
-                            default    => 'bg-gray-50 text-gray-600 border-gray-200',
-                        };
-                        $dotCls = match($loan->status) {
-                            'pending'  => 'bg-amber-500',
-                            'approved' => 'bg-blue-500',
-                            'released' => 'bg-emerald-500',
-                            'settled'  => 'bg-emerald-500',
-                            'rejected' => 'bg-red-500',
-                            default    => 'bg-gray-400',
-                        };
-                        $progColor = $progress >= 100 ? 'bg-emerald-500' : ($progress >= 50 ? 'bg-blue-500' : 'bg-amber-500');
-                    @endphp
-                    <tr class="pr-row hover:bg-gray-50/40 transition-colors cursor-pointer" data-name="{{ strtolower($loan->user->name ?? '') }}" data-status="{{ $loan->status }}" data-url="{{ route('payroll.receivables.salary-loans.show', $loan) }}">
-                        <td class="px-4 py-3">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">{{ $initials }}</span>
-                                <div>
-                                    <div class="text-xs font-semibold text-gray-900">{{ $loan->user->name ?? '—' }}</div>
-                                    <div class="text-[0.55rem] text-gray-400">{{ $loan->user->position ?? '' }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱{{ number_format($loan->loan_amount, 2) }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs text-gray-500">₱{{ number_format($loan->monthly_deduction, 2) }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-red-500">₱{{ number_format($loan->remaining_balance, 2) }}</span></td>
-                        <td class="px-4 py-3" style="min-width:130px;">
-                            <div class="flex items-center gap-2">
-                                <div class="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                                    <div class="h-full rounded-full {{ $progColor }} transition-all" style="width:{{ $progress }}%"></div>
-                                </div>
-                                <span class="text-[0.55rem] font-mono text-gray-400 tabular-nums">{{ $loan->months_paid }}/{{ $totalMonths }}</span>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border {{ $badgeCls }}">
-                                <span class="w-1 h-1 rounded-full {{ $dotCls }}"></span>
-                                {{ ucfirst($loan->status) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-xs text-gray-700">{{ $loan->start_date ? \Carbon\Carbon::parse($loan->start_date)->format('M d, Y') : '—' }}</td>
-                    </tr>
-                    @if($loan->rejection_reason)
-                    <tr class="pr-reason-row" style="display:none;">
-                        <td colspan="{{ auth()->user()->role === 'accountant' ? 8 : 7 }}" class="px-4 py-2.5 bg-amber-50/60 border-l-2 border-amber-400">
-                            <div class="flex items-center gap-2 text-[0.55rem] text-amber-800">
-                                <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4v2m0-6a4 4 0 110 8 4 4 0 010-8z"/></svg>
-                                <strong>Rejection Reason:</strong> {{ $loan->rejection_reason }}
-                            </div>
-                        </td>
-                    </tr>
-                    @endif
-                @empty
-                    <tr><td colspan="{{ auth()->user()->role === 'accountant' ? 8 : 7 }}">
-                        <div class="flex flex-col items-center py-12 text-center">
-                            <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            </div>
-                            <p class="text-sm font-semibold text-gray-500">No salary loan applications</p>
-                            <p class="text-xs text-gray-400 mt-0.5">There are no records to display.</p>
-                        </div>
-                    </td></tr>
-                @endforelse
-                </tbody>
+                <tbody class="divide-y divide-gray-50" id="loanTbody"></tbody>
             </table>
         </div>
         <div id="loanNoResults" class="hidden">
-            <div class="flex flex-col items-center py-8 text-center">
-                <p class="text-sm font-semibold text-gray-500">No results found</p>
-                <p class="text-xs text-gray-400 mt-0.5">Try a different search or filter.</p>
+            <div class="flex flex-col items-center py-12 text-center">
+                <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <p class="text-sm font-semibold text-gray-500" id="loanEmptyTitle">No salary loan applications</p>
+                <p class="text-xs text-gray-400 mt-0.5" id="loanEmptySub">There are no records to display.</p>
             </div>
         </div>
-        @if($salaryLoans->hasPages())
-        <div class="px-4 py-3 border-t border-gray-50 flex justify-end text-xs">{{ $salaryLoans->links() }}</div>
-        @endif
+        <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
+            <div class="text-xs text-gray-400" id="loanPaginationInfo">Showing <strong class="text-gray-700">0</strong> records</div>
+            <nav id="loanPaginationNav" class="flex items-center gap-1"></nav>
+        </div>
     </div>
     @endif
 
@@ -406,13 +272,51 @@
 
 @push('scripts')
 <script>
-(function(){
+window.allCashAdvances = {!! json_encode($allCashAdvances?->map(fn($a) => [
+    'id' => $a->id,
+    'name' => $a->user->name ?? '—',
+    'name_lower' => strtolower($a->user->name ?? ''),
+    'position' => $a->user->position ?? '',
+    'initial_1' => strtoupper(substr($a->user->first_name ?? ($a->user->name ?? 'U'), 0, 1)),
+    'initial_2' => strtoupper(substr($a->user->last_name ?? '', 0, 1)),
+    'amount' => (float) $a->amount,
+    'repayment_months' => $a->repayment_months ?? 1,
+    'monthly_deduction' => (float) ($a->monthly_deduction ?? $a->amount),
+    'request_date' => $a->request_date ? \Carbon\Carbon::parse($a->request_date)->format('M d, Y') : '—',
+    'status' => $a->status ?? 'pending',
+    'deducted_payroll' => $a->deductedPayroll ? \Carbon\Carbon::parse($a->deductedPayroll->payroll_period_end)->format('M d, Y') : null,
+    'rejection_reason' => $a->rejection_reason,
+    'url' => route('payroll.receivables.cash-advances.show', $a),
+    'role' => auth()->user()->role,
+]) : []) !!};
+
+window.allSalaryLoans = {!! json_encode($allSalaryLoans?->map(fn($l) => [
+    'id' => $l->id,
+    'name' => $l->user->name ?? '—',
+    'name_lower' => strtolower($l->user->name ?? ''),
+    'position' => $l->user->position ?? '',
+    'initial_1' => strtoupper(substr($l->user->first_name ?? ($l->user->name ?? 'U'), 0, 1)),
+    'initial_2' => strtoupper(substr($l->user->last_name ?? '', 0, 1)),
+    'loan_amount' => (float) $l->loan_amount,
+    'monthly_deduction' => (float) $l->monthly_deduction,
+    'remaining_balance' => (float) $l->remaining_balance,
+    'total_months' => $l->total_months ?? 12,
+    'months_paid' => $l->months_paid ?? 0,
+    'status' => $l->status ?? 'pending',
+    'start_date' => $l->start_date ? \Carbon\Carbon::parse($l->start_date)->format('M d, Y') : '—',
+    'rejection_reason' => $l->rejection_reason,
+    'url' => route('payroll.receivables.salary-loans.show', $l),
+    'role' => auth()->user()->role,
+]) : []) !!};
+
+(function () {
+    const isAcc = {{ auth()->user()->role === 'accountant' ? 'true' : 'false' }};
+    const caColspan = isAcc ? 8 : 7;
+
     // ── Row click handler ──
     document.addEventListener('click', function(e) {
         var row = e.target.closest('.pr-row');
-        if (row && row.dataset.url) {
-            window.location.href = row.dataset.url;
-        }
+        if (row && row.dataset.url) window.location.href = row.dataset.url;
     });
 
     // ── Mark as Paid Modal ──
@@ -422,63 +326,251 @@
         document.getElementById('payForm').action = payBase + '/' + payrollId + '/mark-paid';
         document.getElementById('payModalOverlay').style.display = 'flex';
     };
-    window.closePayModal = function() {
-        document.getElementById('payModalOverlay').style.display = 'none';
-    };
+    window.closePayModal = function() { document.getElementById('payModalOverlay').style.display = 'none'; };
     @endif
 
-    // ── Cash Advances filter ──
-    var caSearch = document.getElementById('caSearch');
-    var caFilter = document.getElementById('caStatusFilter');
-    var caTbody = document.getElementById('caTbody');
-    var caNR = document.getElementById('caNoResults');
-    function runCA() {
-        if (!caTbody) return;
-        var q = caSearch.value.toLowerCase().trim();
-        var st = caFilter.value;
-        var rows = Array.from(caTbody.querySelectorAll('.pr-row'));
-        var vis = rows.filter(function(r) {
-            return (!q || r.dataset.name.includes(q)) && (!st || r.dataset.status === st);
-        });
-        rows.forEach(function(r) {
-            r.style.display = 'none';
-            var reasonRow = r.nextElementSibling;
-            if (reasonRow && reasonRow.classList.contains('pr-reason-row')) reasonRow.style.display = 'none';
-        });
-        vis.forEach(function(r) { r.style.display = ''; });
-        if (caNR) caNR.style.display = vis.length === 0 && rows.length > 0 ? '' : 'none';
-    }
-    if (caSearch) { caSearch.addEventListener('input', runCA); caFilter.addEventListener('change', runCA); }
+    const PER = 15;
 
-    // ── Salary Loans filter ──
-    var loanSearch = document.getElementById('loanSearch');
-    var loanFilter = document.getElementById('loanStatusFilter');
-    var loanTbody = document.getElementById('loanTbody');
-    var loanNR = document.getElementById('loanNoResults');
-    function runLoan() {
-        if (!loanTbody) return;
-        var q = loanSearch.value.toLowerCase().trim();
-        var st = loanFilter.value;
-        var rows = Array.from(loanTbody.querySelectorAll('.pr-row'));
-        var vis = rows.filter(function(r) {
-            return (!q || r.dataset.name.includes(q)) && (!st || r.dataset.status === st);
+    // ── Cash Advances ──
+    const caSearch = document.getElementById('caSearch');
+    const caFilter = document.getElementById('caStatusFilter');
+    const caTbody  = document.getElementById('caTbody');
+    const caNR     = document.getElementById('caNoResults');
+    const caET     = document.getElementById('caEmptyTitle');
+    const caES     = document.getElementById('caEmptySub');
+    let caPage = 1, caFiltered = [];
+
+    function caApplyFilters() {
+        const q = (caSearch ? caSearch.value : '').toLowerCase().trim();
+        const st = caFilter ? caFilter.value : '';
+        caFiltered = (window.allCashAdvances || []).filter(r => {
+            if (q && !r.name_lower.includes(q)) return false;
+            if (st && r.status !== st) return false;
+            return true;
         });
-        rows.forEach(function(r) {
-            r.style.display = 'none';
-            var reasonRow = r.nextElementSibling;
-            if (reasonRow && reasonRow.classList.contains('pr-reason-row')) reasonRow.style.display = 'none';
-        });
-        vis.forEach(function(r) { r.style.display = ''; });
-        if (loanNR) loanNR.style.display = vis.length === 0 && rows.length > 0 ? '' : 'none';
+        caPage = 1;
+        caRender();
     }
-    if (loanSearch) { loanSearch.addEventListener('input', runLoan); loanFilter.addEventListener('change', runLoan); }
+
+    function caRender() {
+        const start = (caPage - 1) * PER;
+        const end = Math.min(start + PER, caFiltered.length);
+        const pageData = caFiltered.slice(start, end);
+        caTbody.innerHTML = '';
+
+        if (pageData.length === 0) {
+            caNR.classList.remove('hidden');
+            caET.textContent = caFiltered.length === 0 ? 'No cash advance requests' : 'No results found';
+            caES.textContent = caFiltered.length === 0 ? 'There are no records to display.' : 'Try a different search or filter.';
+        } else {
+            caNR.classList.add('hidden');
+            pageData.forEach(r => {
+                const initials = (r.initial_1 || 'U') + (r.initial_2 || '');
+                const badgeCls = { pending: 'bg-amber-50 text-amber-700 border-amber-200', approved: 'bg-blue-50 text-blue-700 border-blue-200', released: 'bg-emerald-50 text-emerald-700 border-emerald-200', rejected: 'bg-red-50 text-red-700 border-red-200' }[r.status] || 'bg-gray-50 text-gray-600 border-gray-200';
+                const dotCls = { pending: 'bg-amber-500', approved: 'bg-blue-500', released: 'bg-emerald-500', rejected: 'bg-red-500' }[r.status] || 'bg-gray-400';
+                const tr = document.createElement('tr');
+                tr.className = 'pr-row hover:bg-gray-50/40 transition-colors cursor-pointer';
+                tr.dataset.url = r.url;
+                tr.innerHTML = `
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">${initials}</span>
+                            <div>
+                                <div class="text-xs font-semibold text-gray-900">${r.name}</div>
+                                <div class="text-[0.55rem] text-gray-400">${r.position}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱${r.amount.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+                    <td class="px-4 py-3 text-xs text-gray-700">${r.repayment_months}mo</td>
+                    <td class="px-4 py-3"><span class="font-mono tabular-nums text-xs text-gray-500">₱${r.monthly_deduction.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+                    <td class="px-4 py-3 text-xs text-gray-700">${r.request_date}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border ${badgeCls}">
+                            <span class="w-1 h-1 rounded-full ${dotCls}"></span>
+                            ${r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-gray-700">${r.deducted_payroll ? 'Period ending ' + r.deducted_payroll : '<span class="text-gray-300">—</span>'}</td>
+                    ${isAcc ? '<td class="px-4 py-3 text-end"></td>' : ''}
+                `;
+                caTbody.appendChild(tr);
+                if (r.rejection_reason) {
+                    const rr = document.createElement('tr');
+                    rr.className = 'pr-reason-row';
+                    rr.style.display = 'none';
+                    rr.innerHTML = `<td colspan="${caColspan}" class="px-4 py-2.5 bg-amber-50/60 border-l-2 border-amber-400">
+                        <div class="flex items-center gap-2 text-[0.55rem] text-amber-800">
+                            <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4v2m0-6a4 4 0 110 8 4 4 0 010-8z"/></svg>
+                            <strong>Rejection Reason:</strong> ${r.rejection_reason}
+                        </div>
+                    </td>`;
+                    caTbody.appendChild(rr);
+                }
+            });
+        }
+        caUpdatePagination();
+    }
+
+    function caUpdatePagination() {
+        const total = caFiltered.length;
+        const pages = Math.ceil(total / PER);
+        const info  = document.getElementById('caPaginationInfo');
+        const nav   = document.getElementById('caPaginationNav');
+        if (!info || !nav) return;
+        if (total === 0) { info.innerHTML = 'No records to display'; nav.innerHTML = ''; return; }
+        const s = (caPage - 1) * PER + 1, e = Math.min(caPage * PER, total);
+        info.innerHTML = `Showing <strong class="text-gray-700">${s}</strong>–<strong class="text-gray-700">${e}</strong> of <strong class="text-gray-700">${total}</strong>`;
+        if (pages <= 1) { nav.innerHTML = ''; return; }
+        const base = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+        const act  = base + ' bg-gray-900 text-white border-gray-900';
+        const def  = base + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+        const dis  = base + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+        let html = `<button data-p="${caPage - 1}" class="${caPage === 1 ? dis : def}">‹</button>`;
+        for (let i = 1; i <= pages; i++) html += `<button data-p="${i}" class="${i === caPage ? act : def}">${i}</button>`;
+        html += `<button data-p="${caPage + 1}" class="${caPage === pages ? dis : def}">›</button>`;
+        nav.innerHTML = html;
+        nav.querySelectorAll('button[data-p]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const p = parseInt(this.dataset.p);
+                if (p < 1 || p > pages) return;
+                caPage = p;
+                caRender();
+            });
+        });
+    }
+
+    if (caSearch) { caSearch.addEventListener('input', caApplyFilters); caFilter.addEventListener('change', caApplyFilters); }
+
+    // ── Salary Loans ──
+    const loanSearch = document.getElementById('loanSearch');
+    const loanFilter = document.getElementById('loanStatusFilter');
+    const loanTbody  = document.getElementById('loanTbody');
+    const loanNR     = document.getElementById('loanNoResults');
+    const loanET     = document.getElementById('loanEmptyTitle');
+    const loanES     = document.getElementById('loanEmptySub');
+    let loanPage = 1, loanFiltered = [];
+
+    function loanApplyFilters() {
+        const q = (loanSearch ? loanSearch.value : '').toLowerCase().trim();
+        const st = loanFilter ? loanFilter.value : '';
+        loanFiltered = (window.allSalaryLoans || []).filter(r => {
+            if (q && !r.name_lower.includes(q)) return false;
+            if (st && r.status !== st) return false;
+            return true;
+        });
+        loanPage = 1;
+        loanRender();
+    }
+
+    function loanRender() {
+        const start = (loanPage - 1) * PER;
+        const end = Math.min(start + PER, loanFiltered.length);
+        const pageData = loanFiltered.slice(start, end);
+        loanTbody.innerHTML = '';
+
+        if (pageData.length === 0) {
+            loanNR.classList.remove('hidden');
+            loanET.textContent = loanFiltered.length === 0 ? 'No salary loan applications' : 'No results found';
+            loanES.textContent = loanFiltered.length === 0 ? 'There are no records to display.' : 'Try a different search or filter.';
+        } else {
+            loanNR.classList.add('hidden');
+            pageData.forEach(r => {
+                const progress = r.total_months > 0 ? Math.min(100, Math.round((r.months_paid / r.total_months) * 100)) : 0;
+                const progColor = progress >= 100 ? 'bg-emerald-500' : (progress >= 50 ? 'bg-blue-500' : 'bg-amber-500');
+                const initials = (r.initial_1 || 'U') + (r.initial_2 || '');
+                const badgeCls = { pending: 'bg-amber-50 text-amber-700 border-amber-200', approved: 'bg-blue-50 text-blue-700 border-blue-200', released: 'bg-emerald-50 text-emerald-700 border-emerald-200', settled: 'bg-emerald-50 text-emerald-700 border-emerald-200', rejected: 'bg-red-50 text-red-700 border-red-200' }[r.status] || 'bg-gray-50 text-gray-600 border-gray-200';
+                const dotCls = { pending: 'bg-amber-500', approved: 'bg-blue-500', released: 'bg-emerald-500', settled: 'bg-emerald-500', rejected: 'bg-red-500' }[r.status] || 'bg-gray-400';
+                const tr = document.createElement('tr');
+                tr.className = 'pr-row hover:bg-gray-50/40 transition-colors cursor-pointer';
+                tr.dataset.url = r.url;
+                tr.innerHTML = `
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">${initials}</span>
+                            <div>
+                                <div class="text-xs font-semibold text-gray-900">${r.name}</div>
+                                <div class="text-[0.55rem] text-gray-400">${r.position}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱${r.loan_amount.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+                    <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs text-gray-500">₱${r.monthly_deduction.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+                    <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-red-500">₱${r.remaining_balance.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+                    <td class="px-4 py-3" style="min-width:130px;">
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                                <div class="h-full rounded-full ${progColor} transition-all" style="width:${progress}%"></div>
+                            </div>
+                            <span class="text-[0.55rem] font-mono text-gray-400 tabular-nums">${r.months_paid}/${r.total_months}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border ${badgeCls}">
+                            <span class="w-1 h-1 rounded-full ${dotCls}"></span>
+                            ${r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-gray-700">${r.start_date}</td>
+                    ${isAcc ? '<td class="px-4 py-3 text-end"></td>' : ''}
+                `;
+                loanTbody.appendChild(tr);
+                if (r.rejection_reason) {
+                    const rr = document.createElement('tr');
+                    rr.className = 'pr-reason-row';
+                    rr.style.display = 'none';
+                    rr.innerHTML = `<td colspan="${caColspan}" class="px-4 py-2.5 bg-amber-50/60 border-l-2 border-amber-400">
+                        <div class="flex items-center gap-2 text-[0.55rem] text-amber-800">
+                            <svg class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4v2m0-6a4 4 0 110 8 4 4 0 010-8z"/></svg>
+                            <strong>Rejection Reason:</strong> ${r.rejection_reason}
+                        </div>
+                    </td>`;
+                    loanTbody.appendChild(rr);
+                }
+            });
+        }
+        loanUpdatePagination();
+    }
+
+    function loanUpdatePagination() {
+        const total = loanFiltered.length;
+        const pages = Math.ceil(total / PER);
+        const info  = document.getElementById('loanPaginationInfo');
+        const nav   = document.getElementById('loanPaginationNav');
+        if (!info || !nav) return;
+        if (total === 0) { info.innerHTML = 'No records to display'; nav.innerHTML = ''; return; }
+        const s = (loanPage - 1) * PER + 1, e = Math.min(loanPage * PER, total);
+        info.innerHTML = `Showing <strong class="text-gray-700">${s}</strong>–<strong class="text-gray-700">${e}</strong> of <strong class="text-gray-700">${total}</strong>`;
+        if (pages <= 1) { nav.innerHTML = ''; return; }
+        const base = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+        const act  = base + ' bg-gray-900 text-white border-gray-900';
+        const def  = base + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+        const dis  = base + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+        let html = `<button data-p="${loanPage - 1}" class="${loanPage === 1 ? dis : def}">‹</button>`;
+        for (let i = 1; i <= pages; i++) html += `<button data-p="${i}" class="${i === loanPage ? act : def}">${i}</button>`;
+        html += `<button data-p="${loanPage + 1}" class="${loanPage === pages ? dis : def}">›</button>`;
+        nav.innerHTML = html;
+        nav.querySelectorAll('button[data-p]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const p = parseInt(this.dataset.p);
+                if (p < 1 || p > pages) return;
+                loanPage = p;
+                loanRender();
+            });
+        });
+    }
+
+    if (loanSearch) { loanSearch.addEventListener('input', loanApplyFilters); loanFilter.addEventListener('change', loanApplyFilters); }
+
+    // ── Initial renders ──
+    caApplyFilters();
+    loanApplyFilters();
 
     @if(in_array(auth()->user()->role, ['hr', 'superadmin']))
-    // ── Escape key closes modals ──
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            if (document.getElementById('payModalOverlay').style.display !== 'none') closePayModal();
-        }
+        if (e.key === 'Escape' && document.getElementById('payModalOverlay').style.display !== 'none') closePayModal();
     });
     @endif
 })();
