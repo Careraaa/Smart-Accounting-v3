@@ -13,8 +13,9 @@ class AccountController extends Controller
     public function index()
     {
         $users = User::orderBy('created_at', 'desc')->paginate(15);
+        $allUsers = User::orderBy('created_at', 'desc')->get();
 
-        return view('superadmin.accounts.index', compact('users'));
+        return view('superadmin.accounts.index', compact('users', 'allUsers'));
     }
 
     public function create()
