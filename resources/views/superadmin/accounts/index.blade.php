@@ -22,73 +22,10 @@
 .ac-stats-in:nth-child(4){ animation-delay:.19s; }
 .ac-filter-in{ animation:slideInLeft 0.38s cubic-bezier(0.16,1,0.3,1) .1s both; }
 .ac-table-in { animation:fadeSlideUp 0.48s cubic-bezier(0.16,1,0.3,1) .15s both; }
-
 .ac-row-hover:hover { background:rgba(99,102,241,0.03); }
-
 [data-ac] input:focus-visible,
 [data-ac] select:focus-visible,
 [data-ac] button:focus-visible { outline:none !important; }
-
-/* Role badges */
-.sa-role {
-    display:inline-flex;align-items:center;justify-content:center;
-    padding:3px 10px;min-width:128px;border-radius:20px;
-    font-size:0.68rem;font-weight:700;text-transform:capitalize;
-    letter-spacing:0.04em;white-space:nowrap;text-align:center;
-}
-.sa-role.r-superadmin { background:#fef3c7;color:#b45309;border:1px solid #fde68a; }
-.sa-role.r-hr { background:#dbeafe;color:#0369a1;border:1px solid #bae6fd; }
-.sa-role.r-accountant { background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe; }
-.sa-role.r-remittance_clerk { background:#fce7f3;color:#be185d;border:1px solid #fbcfe8; }
-.sa-role.r-employee { background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0; }
-.sa-role.r-qr_admin { background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe; }
-
-/* Status badges */
-.sa-status { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
-.sa-status::before { content:'';width:5px;height:5px;border-radius:50%; }
-.sa-status.s-active   { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
-.sa-status.s-active::before { background:#16a34a; }
-.sa-status.s-inactive { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }
-.sa-status.s-inactive::before { background:#ef4444; }
-
-/* Toggle switch */
-.sa-toggle { position:relative;display:inline-block;width:44px;height:24px; }
-.sa-toggle input { opacity:0;width:0;height:0; }
-.sa-toggle-slider { position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#d1d5db;transition:0.3s;border-radius:24px; }
-.sa-toggle-slider:before { position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:#fff;transition:0.3s;border-radius:50%; }
-.sa-toggle input:checked + .sa-toggle-slider { background-color:#16a34a; }
-.sa-toggle input:checked + .sa-toggle-slider:before { transform:translateX(20px); }
-
-/* Action buttons */
-.prl-actions { display:flex;gap:6px;align-items:center; }
-.prl-action-btn { width:30px;height:30px;border-radius:7px;border:1px solid #e5e7eb;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;text-decoration:none;color:#6b7280;transition:all 0.13s;padding:0; }
-.prl-action-btn:hover { background:#f4f5f7;color:#111827;border-color:#d1d5db; }
-
-/* Employee cell */
-.prl-emp-cell { display:flex;align-items:center;gap:10px; }
-.prl-emp-avatar { width:32px;height:32px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#6b7280;flex-shrink:0;border:1.5px solid #e5e7eb;text-transform:uppercase; }
-.prl-emp-name { font-weight:600;color:#111827;font-size:0.845rem; }
-.prl-mono { font-family:'DM Mono',monospace;font-size:0.82rem;font-variant-numeric:tabular-nums; }
-
-/* Empty state */
-.ac-empty { display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 24px;text-align:center; }
-.ac-empty-icon { width:56px;height:56px;background:#f3f4f6;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#d1d5db; }
-.ac-empty-title { font-size:0.9rem;font-weight:700;color:#374151;margin:0 0 6px; }
-.ac-empty-sub   { font-size:0.78rem;color:#9ca3af;margin:0; }
-
-/* Modal buttons */
-.prl-btn-generate {
-    display:inline-flex;align-items:center;gap:10px;padding:11px 22px;background:#c8292a;color:#fff;
-    border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:0.86rem;font-weight:700;
-    cursor:pointer;transition:background 0.15s,box-shadow 0.15s;
-    box-shadow:0 4px 20px rgba(200,41,42,0.45);white-space:nowrap;text-decoration:none;
-}
-.prl-btn-generate:hover { background:#a81f20;color:#fff;box-shadow:0 8px 28px rgba(200,41,42,0.55); }
-.prl-btn-cancel {
-    display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;
-    font-family:'Sora',sans-serif;font-size:0.82rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.15s;
-}
-.prl-btn-cancel:hover { border-color:#c8292a;color:#c8292a;background:#fff5f5; }
 </style>
 @endpush
 
@@ -157,7 +94,7 @@
     {{-- Filter bar --}}
     <div class="ac-filter-in flex items-center gap-2.5 mb-4 flex-wrap">
         <div class="relative flex-1 min-w-[200px]">
-            <input type="text" id="accSearch" placeholder="Search by name or email…"
+            <input type="text" id="accSearch" placeholder="Search by name or email&hellip;"
                 class="w-full pl-4 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/50 hover:border-gray-300">
         </div>
         <select id="accRoleFilter"
@@ -199,8 +136,18 @@
                                 substr($user->first_name ?? 'U', 0, 1) .
                                 substr($user->last_name ?? '', 0, 1)
                             );
-                            $roleClass = 'r-' . $user->role;
-                            $statusClass = $user->status === 'active' ? 's-active' : 's-inactive';
+                            $roleBadge = match($user->role) {
+                                'superadmin'      => 'bg-amber-100 text-amber-800 border border-amber-200',
+                                'hr'              => 'bg-blue-100 text-blue-800 border border-blue-200',
+                                'accountant'      => 'bg-purple-100 text-purple-800 border border-purple-200',
+                                'remittance_clerk'=> 'bg-pink-100 text-pink-800 border border-pink-200',
+                                'employee'        => 'bg-green-100 text-green-800 border border-green-200',
+                                'qr_admin'        => 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+                                default           => 'bg-gray-100 text-gray-700 border border-gray-200',
+                            };
+                            $statusBadge = $user->status === 'active'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                : 'bg-red-100 text-red-800 border border-red-200';
                             $statusLabel = ucfirst($user->status ?? 'inactive');
                         @endphp
                         <tr class="ac-row-hover border-b border-gray-100 transition-colors duration-150"
@@ -217,12 +164,14 @@
                                 <span class="font-mono text-sm text-gray-600 tabular-nums">{{ $user->email }}</span>
                             </td>
                             <td class="px-5 py-3.5 text-center">
-                                <span class="sa-role {{ $roleClass }}">
+                                <span class="inline-flex items-center justify-center px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full min-w-[120px] whitespace-nowrap {{ $roleBadge }}">
                                     {{ str_replace('_', ' ', $user->role) }}
                                 </span>
                             </td>
                             <td class="px-5 py-3.5 text-center">
-                                <span class="sa-status {{ $statusClass }}" data-status-badge>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full whitespace-nowrap {{ $statusBadge }}"
+                                      data-status-badge>
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $user->status === 'active' ? 'bg-emerald-600' : 'bg-red-500' }}"></span>
                                     {{ $statusLabel }}
                                 </span>
                             </td>
@@ -231,21 +180,22 @@
                                     @if(isset($user->last_login_at) && $user->last_login_at)
                                         {{ $user->last_login_at->format('M d, Y H:i') }}
                                     @else
-                                        <span style="color:#9ca3af;">—</span>
+                                        <span style="color:#9ca3af;">&mdash;</span>
                                     @endif
                                 </span>
                             </td>
                             <td class="px-5 py-3.5 text-center">
-                                <div class="prl-actions" style="justify-content:center;">
-                                    <a href="{{ route('superadmin.accounts.edit', $user->id) }}" class="prl-action-btn" title="Edit User">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <div class="flex items-center gap-1.5 justify-center">
+                                    <a href="{{ route('superadmin.accounts.edit', $user->id) }}" class="w-7 h-7 rounded-lg border border-gray-200 bg-white inline-flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-all duration-150 no-underline" title="Edit User">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </a>
-                                    <a href="{{ route('superadmin.accounts.reset-password', $user->id) }}" class="prl-action-btn" title="Reset Password">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                                    <a href="{{ route('superadmin.accounts.reset-password', $user->id) }}" class="w-7 h-7 rounded-lg border border-gray-200 bg-white inline-flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-all duration-150 no-underline" title="Reset Password">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                                     </a>
-                                    <label class="sa-toggle">
-                                        <input type="checkbox" {{ $user->status === 'active' ? 'checked' : '' }} onchange="toggleStatus({{ $user->id }}, this)">
-                                        <span class="sa-toggle-slider"></span>
+                                    <label class="relative inline-block w-10 h-5.5 cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" {{ $user->status === 'active' ? 'checked' : '' }} onchange="toggleStatus({{ $user->id }}, this)">
+                                        <span class="absolute inset-0 bg-gray-300 rounded-full transition-colors duration-300 peer-checked:bg-emerald-500"></span>
+                                        <span class="absolute left-0.5 top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-4.5"></span>
                                     </label>
                                 </div>
                             </td>
@@ -253,12 +203,12 @@
                     @empty
                         <tr>
                             <td colspan="6">
-                                <div class="ac-empty">
-                                    <div class="ac-empty-icon">
+                                <div class="flex flex-col items-center justify-center py-14 text-center">
+                                    <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-3.5 text-gray-300">
                                         <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                                     </div>
-                                    <p class="ac-empty-title">No users found</p>
-                                    <p class="ac-empty-sub">Try adjusting your search or filter criteria</p>
+                                    <p class="text-sm font-bold text-gray-600 mb-1.5">No users found</p>
+                                    <p class="text-xs text-gray-400">Try adjusting your search or filter criteria</p>
                                 </div>
                             </td>
                         </tr>
@@ -269,37 +219,34 @@
 
         {{-- Pagination --}}
         <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
-
             <div class="text-xs text-gray-400" id="accPaginationInfo">
                 Showing <strong class="text-gray-700">0</strong> users
             </div>
-
             <nav id="accPaginationNav" class="flex items-center gap-1"></nav>
-
         </div>
     </div>
 
 </div>
 
-{{-- Confirmation Modal (custom, replaces browser confirm) --}}
-<div id="saConfirmModal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999;">
-    <div id="saConfirmBackdrop" style="position:absolute;inset:0;background:rgba(17,24,39,0.55);"></div>
+{{-- Confirmation Modal --}}
+<div id="saConfirmModal" class="fixed inset-0 hidden items-center justify-center z-[9999]">
+    <div id="saConfirmBackdrop" class="absolute inset-0 bg-gray-900/55"></div>
     <div role="dialog" aria-modal="true" aria-labelledby="saConfirmTitle"
-         style="position:relative;width:min(520px,92vw);background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;">
-        <div style="padding:16px 18px;border-bottom:1px solid #f3f4f6;display:flex;gap:12px;align-items:flex-start;">
-            <div style="width:36px;height:36px;border-radius:10px;background:#fffbeb;color:#d97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+         class="relative w-[min(520px,92vw)] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden">
+        <div class="px-4 py-4 border-b border-gray-100 flex gap-3 items-start">
+            <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86l-8.3 14.4A2 2 0 003.7 21h16.6a2 2 0 001.71-2.74l-8.3-14.4a2 2 0 00-3.42 0z"/>
                 </svg>
             </div>
-            <div style="flex:1;min-width:0;">
-                <p id="saConfirmTitle" style="margin:0 0 4px;font-size:0.92rem;font-weight:800;color:#111827;letter-spacing:-0.01em;">Confirm action</p>
-                <p id="saConfirmMessage" style="margin:0;font-size:0.82rem;color:#6b7280;line-height:1.45;">Are you sure?</p>
+            <div class="flex-1 min-w-0">
+                <p id="saConfirmTitle" class="text-sm font-extrabold text-gray-900 -tracking-[0.01em] mb-1">Confirm action</p>
+                <p id="saConfirmMessage" class="text-xs text-gray-500 leading-relaxed">Are you sure?</p>
             </div>
         </div>
-        <div style="padding:14px 18px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;">
-            <button type="button" id="saConfirmCancel" class="prl-btn-cancel">Cancel</button>
-            <button type="button" id="saConfirmOk" class="prl-btn-generate" style="box-shadow:none;">Confirm</button>
+        <div class="px-4 py-3.5 flex justify-end gap-2.5 flex-wrap">
+            <button type="button" id="saConfirmCancel" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl text-sm font-semibold hover:border-red-500 hover:text-red-500 hover:bg-red-50 transition-all duration-150">Cancel</button>
+            <button type="button" id="saConfirmOk" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#c8292a] text-white rounded-xl text-sm font-bold hover:bg-[#a81f20] transition-all duration-150 shadow-lg shadow-red-700/30">Confirm</button>
         </div>
     </div>
 </div>
@@ -316,6 +263,15 @@ window.allAccountsData = {!! json_encode($allUsers->map(fn($u) => [
     'lastLogin'  => $u->last_login_at ? $u->last_login_at->format('M d, Y H:i') : null,
     'initials'   => strtoupper(substr($u->first_name ?? 'U', 0, 1) . substr($u->last_name ?? '', 0, 1)),
 ])) !!};
+
+const ROLE_BADGE_MAP = {
+    superadmin: 'bg-amber-100 text-amber-800 border border-amber-200',
+    hr: 'bg-blue-100 text-blue-800 border border-blue-200',
+    accountant: 'bg-purple-100 text-purple-800 border border-purple-200',
+    remittance_clerk: 'bg-pink-100 text-pink-800 border border-pink-200',
+    employee: 'bg-green-100 text-green-800 border border-green-200',
+    qr_admin: 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+};
 
 (function(){
     const search  = document.getElementById('accSearch');
@@ -345,9 +301,9 @@ window.allAccountsData = {!! json_encode($allUsers->map(fn($u) => [
 
         if(!pageData.length){
             if(filtered.length === 0 && window.allAccountsData.length > 0){
-                tbody.innerHTML = `<tr><td colspan="6"><div class="ac-empty"><div class="ac-empty-icon"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div><p class="ac-empty-title">No results found</p><p class="ac-empty-sub">Try adjusting your search or filter criteria</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="flex flex-col items-center justify-center py-14 text-center"><div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-3.5 text-gray-300"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div><p class="text-sm font-bold text-gray-600 mb-1.5">No results found</p><p class="text-xs text-gray-400">Try adjusting your search or filter criteria</p></div></td></tr>`;
             } else if(window.allAccountsData.length === 0){
-                tbody.innerHTML = `<tr><td colspan="6"><div class="ac-empty"><div class="ac-empty-icon"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div><p class="ac-empty-title">No users found</p><p class="ac-empty-sub">Try adjusting your search or filter criteria</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="flex flex-col items-center justify-center py-14 text-center"><div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-3.5 text-gray-300"><svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div><p class="text-sm font-bold text-gray-600 mb-1.5">No users found</p><p class="text-xs text-gray-400">Try adjusting your search or filter criteria</p></div></td></tr>`;
             }
         } else {
             const editRoute  = '{{ route("superadmin.accounts.edit", ["account"=>"__ID__"]) }}';
@@ -362,10 +318,12 @@ window.allAccountsData = {!! json_encode($allUsers->map(fn($u) => [
                 row.dataset.status = u.status;
 
                 const roleLabel  = u.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                const roleClass  = 'r-' + u.role;
-                const statusClass= u.status === 'active' ? 's-active' : 's-inactive';
+                const roleBadge  = ROLE_BADGE_MAP[u.role] || 'bg-gray-100 text-gray-700 border border-gray-200';
+                const isActive   = u.status === 'active';
+                const statusBadge= isActive ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-red-100 text-red-800 border border-red-200';
+                const statusDot  = isActive ? 'bg-emerald-600' : 'bg-red-500';
                 const statusLabel= u.status.charAt(0).toUpperCase() + u.status.slice(1);
-                const lastLoginHtml = u.lastLogin || '<span style="color:#9ca3af;">—</span>';
+                const lastLoginHtml = u.lastLogin || '<span style="color:#9ca3af;">&mdash;</span>';
 
                 row.innerHTML = `
                     <td class="px-5 py-3.5">
@@ -375,20 +333,21 @@ window.allAccountsData = {!! json_encode($allUsers->map(fn($u) => [
                         </div>
                     </td>
                     <td class="px-5 py-3.5"><span class="font-mono text-sm text-gray-600 tabular-nums">${u.email}</span></td>
-                    <td class="px-5 py-3.5 text-center"><span class="sa-role ${roleClass}">${roleLabel}</span></td>
-                    <td class="px-5 py-3.5 text-center"><span class="sa-status ${statusClass}" data-status-badge>${statusLabel}</span></td>
+                    <td class="px-5 py-3.5 text-center"><span class="inline-flex items-center justify-center px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full min-w-[120px] whitespace-nowrap ${roleBadge}">${roleLabel}</span></td>
+                    <td class="px-5 py-3.5 text-center"><span class="inline-flex items-center gap-1 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full whitespace-nowrap ${statusBadge}" data-status-badge><span class="w-1.5 h-1.5 rounded-full ${statusDot}"></span>${statusLabel}</span></td>
                     <td class="px-5 py-3.5 text-center"><span class="font-mono text-sm text-gray-600 tabular-nums">${lastLoginHtml}</span></td>
                     <td class="px-5 py-3.5 text-center">
-                        <div class="prl-actions" style="justify-content:center;">
-                            <a href="${editHref}" class="prl-action-btn" title="Edit User">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <div class="flex items-center gap-1.5 justify-center">
+                            <a href="${editHref}" class="w-7 h-7 rounded-lg border border-gray-200 bg-white inline-flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-all duration-150 no-underline" title="Edit User">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </a>
-                            <a href="${resetHref}" class="prl-action-btn" title="Reset Password">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                            <a href="${resetHref}" class="w-7 h-7 rounded-lg border border-gray-200 bg-white inline-flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-all duration-150 no-underline" title="Reset Password">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                             </a>
-                            <label class="sa-toggle">
-                                <input type="checkbox" ${u.status === 'active' ? 'checked' : ''} onchange="toggleStatus(${u.id}, this)">
-                                <span class="sa-toggle-slider"></span>
+                            <label class="relative inline-block w-10 h-5.5 cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" ${u.status === 'active' ? 'checked' : ''} onchange="toggleStatus(${u.id}, this)">
+                                <span class="absolute inset-0 bg-gray-300 rounded-full transition-colors duration-300 peer-checked:bg-emerald-500"></span>
+                                <span class="absolute left-0.5 top-0.5 w-4.5 h-4.5 bg-white rounded-full shadow transition-transform duration-300 peer-checked:translate-x-4.5"></span>
                             </label>
                         </div>
                     </td>
@@ -407,7 +366,7 @@ window.allAccountsData = {!! json_encode($allUsers->map(fn($u) => [
         if(!info||!nav) return;
         if(total === 0){ info.innerHTML='No accounts to display'; nav.innerHTML=''; return; }
         const s = (page-1)*PER+1, e = Math.min(page*PER, total);
-        info.innerHTML = `Showing <strong class="text-gray-700">${s}</strong>–<strong class="text-gray-700">${e}</strong> of <strong class="text-gray-700">${total}</strong> users`;
+        info.innerHTML = `Showing <strong class="text-gray-700">${s}</strong>&ndash;<strong class="text-gray-700">${e}</strong> of <strong class="text-gray-700">${total}</strong> users`;
         if(pages<=1){ nav.innerHTML=''; return; }
 
         const btnClass = `flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150`;
@@ -416,11 +375,11 @@ window.allAccountsData = {!! json_encode($allUsers->map(fn($u) => [
         const disClass    = `${btnClass} bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none`;
 
         let html = '';
-        html += `<button data-p="${page-1}" class="${page===1?disClass:defClass}">‹</button>`;
+        html += `<button data-p="${page-1}" class="${page===1?disClass:defClass}">&lsaquo;</button>`;
         for(let i=1;i<=pages;i++){
             html += `<button data-p="${i}" class="${i===page?activeClass:defClass}">${i}</button>`;
         }
-        html += `<button data-p="${page+1}" class="${page===pages?disClass:defClass}">›</button>`;
+        html += `<button data-p="${page+1}" class="${page===pages?disClass:defClass}">&rsaquo;</button>`;
         nav.innerHTML = html;
         nav.querySelectorAll('button[data-p]').forEach(btn => {
             btn.addEventListener('click', e => {
@@ -438,7 +397,6 @@ window.allAccountsData = {!! json_encode($allUsers->map(fn($u) => [
     applyFilters();
 })();
 
-// Route templates (avoid hardcoded paths; fixes subfolder / tunnel deployments)
 const SA_TOGGLE_STATUS_URL = @json(route('superadmin.accounts.toggle-status', ['account' => '__ACCOUNT__']));
 const SA_RESET_PASSWORD_URL = @json(route('superadmin.accounts.perform-reset-password', ['account' => '__ACCOUNT__']));
 
@@ -558,9 +516,9 @@ function toggleStatus(userId, checkbox) {
         if (row) row.setAttribute('data-status', effectiveStatus);
 
         if (badge) {
-            badge.textContent = effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1);
-            badge.classList.remove('s-active', 's-inactive');
-            badge.classList.add(effectiveStatus === 'active' ? 's-active' : 's-inactive');
+            const isActive = effectiveStatus === 'active';
+            badge.className = `inline-flex items-center gap-1 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full whitespace-nowrap ${isActive ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-600' : 'bg-red-500'}"></span>${effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1)}`;
         }
 
         const userData = window.allAccountsData.find(u => u.id === userId);

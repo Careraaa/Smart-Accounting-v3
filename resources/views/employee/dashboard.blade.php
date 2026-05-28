@@ -1,4 +1,4 @@
-﻿@extends('layouts.layout')
+@extends('layouts.layout')
 
 @push('styles')
 <style>
@@ -66,12 +66,12 @@ $user = auth()->user();
                     <div>
                         <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Today's Status</span>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span id="dash-status-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500">—</span>
+                            <span id="dash-status-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500">�</span>
                             <span id="dash-status-time" class="text-[11px] font-mono text-gray-400"></span>
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('employee.attendance.index') }}" class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-md text-[9px] font-bold no-underline transition-all hover:bg-indigo-100 hover:text-indigo-800 active:scale-[0.95]">View all →</a>
+                <a href="{{ route('employee.attendance.index') }}" class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-md text-[9px] font-bold no-underline transition-all hover:bg-indigo-100 hover:text-indigo-800 active:scale-[0.95]">View all ?</a>
             </div>
 
             {{-- Interactive Calendar --}}
@@ -97,74 +97,6 @@ $user = auth()->user();
 
         {{-- RIGHT COLUMN (1/3): Module Summary Cards --}}
         <div class="space-y-3">
-
-            {{-- My Leaves --}}
-            <a href="{{ route('employee.leaves.index') }}" class="emp-scale-in rounded-xl bg-white px-5 py-3.5 shadow-sm border border-gray-100 flex items-center gap-3.5 no-underline transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] group" style="animation-delay:0.05s">
-                <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-gray-900">My Leaves</span>
-                        @if($pendingLeaves > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $pendingLeaves }}</span>
-                        @endif
-                    </div>
-                    <div class="text-[10px] text-gray-400 mt-0.5">{{ $totalLeaves }} total · {{ $approvedLeaves }} approved</div>
-                </div>
-                <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
-
-            {{-- OT / UT --}}
-            <a href="{{ route('employee.overtime-undertime.index') }}" class="emp-scale-in rounded-xl bg-white px-5 py-3.5 shadow-sm border border-gray-100 flex items-center gap-3.5 no-underline transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] group" style="animation-delay:0.1s">
-                <div class="w-9 h-9 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-gray-900">OT / UT</span>
-                        @if($pendingOT + $pendingUT > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $pendingOT + $pendingUT }}</span>
-                        @endif
-                    </div>
-                    <div class="text-[10px] text-gray-400 mt-0.5">{{ $pendingOT }} OT · {{ $pendingUT }} UT pending</div>
-                </div>
-                <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
-
-            {{-- Cash Advances --}}
-            <a href="{{ route('employee.cash-advances.index') }}" class="emp-scale-in rounded-xl bg-white px-5 py-3.5 shadow-sm border border-gray-100 flex items-center gap-3.5 no-underline transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] group" style="animation-delay:0.15s">
-                <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-gray-900">Cash Advances</span>
-                        @if($pendingCashAdvances > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $pendingCashAdvances }}</span>
-                        @endif
-                    </div>
-                    <div class="text-[10px] text-gray-400 mt-0.5">₱{{ number_format($totalBorrowed, 0) }} borrowed total</div>
-                </div>
-                <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
-
-            {{-- Salary Loans --}}
-            <a href="{{ route('employee.salary-loans.index') }}" class="emp-scale-in rounded-xl bg-white px-5 py-3.5 shadow-sm border border-gray-100 flex items-center gap-3.5 no-underline transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] group" style="animation-delay:0.2s">
-                <div class="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-gray-900">Salary Loans</span>
-                        @if($activeLoans > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $activeLoans }}</span>
-                        @endif
-                    </div>
-                    <div class="text-[10px] text-gray-400 mt-0.5">₱{{ number_format($totalLoanRemaining, 0) }} remaining</div>
-                </div>
-                <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
 
             {{-- Quick Actions --}}
             <div class="emp-scale-in rounded-xl bg-white px-5 py-4 shadow-sm border border-gray-100" style="animation-delay:0.25s">
@@ -207,6 +139,74 @@ $user = auth()->user();
                     </a>
                 </div>
             </div>
+
+            {{-- My Leaves --}}
+            <a href="{{ route('employee.leaves.index') }}" class="emp-scale-in rounded-xl bg-white px-5 py-3.5 shadow-sm border border-gray-100 flex items-center gap-3.5 no-underline transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] group" style="animation-delay:0.05s">
+                <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-900">My Leaves</span>
+                        @if($pendingLeaves > 0)
+                            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $pendingLeaves }}</span>
+                        @endif
+                    </div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">{{ $totalLeaves }} total � {{ $approvedLeaves }} approved</div>
+                </div>
+                <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+
+            {{-- OT / UT --}}
+            <a href="{{ route('employee.overtime-undertime.index') }}" class="emp-scale-in rounded-xl bg-white px-5 py-3.5 shadow-sm border border-gray-100 flex items-center gap-3.5 no-underline transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] group" style="animation-delay:0.1s">
+                <div class="w-9 h-9 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-900">OT / UT</span>
+                        @if($pendingOT + $pendingUT > 0)
+                            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $pendingOT + $pendingUT }}</span>
+                        @endif
+                    </div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">{{ $pendingOT }} OT � {{ $pendingUT }} UT pending</div>
+                </div>
+                <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+
+            {{-- Cash Advances --}}
+            <a href="{{ route('employee.cash-advances.index') }}" class="emp-scale-in rounded-xl bg-white px-5 py-3.5 shadow-sm border border-gray-100 flex items-center gap-3.5 no-underline transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] group" style="animation-delay:0.15s">
+                <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-900">Cash Advances</span>
+                        @if($pendingCashAdvances > 0)
+                            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $pendingCashAdvances }}</span>
+                        @endif
+                    </div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">?{{ number_format($totalBorrowed, 0) }} borrowed total</div>
+                </div>
+                <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
+
+            {{-- Salary Loans --}}
+            <a href="{{ route('employee.salary-loans.index') }}" class="emp-scale-in rounded-xl bg-white px-5 py-3.5 shadow-sm border border-gray-100 flex items-center gap-3.5 no-underline transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] group" style="animation-delay:0.2s">
+                <div class="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-900">Salary Loans</span>
+                        @if($activeLoans > 0)
+                            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $activeLoans }}</span>
+                        @endif
+                    </div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">?{{ number_format($totalLoanRemaining, 0) }} remaining</div>
+                </div>
+                <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </a>
         </div>
     </div>
 </div>

@@ -10,6 +10,7 @@ use App\Models\OvertimeUndertime;
 use App\Models\Payroll;
 use App\Models\SalaryLoan;
 use App\Models\CashAdvance;
+use App\Models\DailyRemittance;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -53,6 +54,8 @@ class DashboardController extends Controller
         $totalUndertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')
             ->sum('hours') ?? 0;
         $totalOvertimeRecords = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')->count();
+        $pendingOT = OvertimeUndertime::where('status', 'pending')->where('type', 'overtime')->count();
+        $pendingUT = OvertimeUndertime::where('status', 'pending')->where('type', 'undertime')->count();
 
         // ============ PAYROLL STATISTICS ============
         $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])->get();
@@ -77,9 +80,18 @@ class DashboardController extends Controller
         // ============ SALARY LOAN & CASH ADVANCE STATISTICS ============
         $totalOutstandingLoans = SalaryLoan::where('status', '!=', 'fully_paid')->sum('remaining_balance') ?? 0;
         $activeSalaryLoans = SalaryLoan::where('status', 'active')->count();
+        $pendingSalaryLoansCount = SalaryLoan::where('status', 'pending')->count();
         
         $totalCashAdvances = CashAdvance::sum('amount') ?? 0;
         $pendingCashAdvances = CashAdvance::where('status', 'pending')->sum('amount') ?? 0;
+        $pendingCashAdvancesCount = CashAdvance::where('status', 'pending')->count();
+
+        // ============ REMITTANCE STATISTICS ============
+        $totalCollections = DailyRemittance::whereIn('status', ['approved', 'completed'])->sum('total_collection') ?? 0;
+        $totalExpenses = DailyRemittance::whereIn('status', ['approved', 'completed'])->sum('total_expenses') ?? 0;
+        $totalNetRemittance = DailyRemittance::whereIn('status', ['approved', 'completed'])->sum('net_remittance') ?? 0;
+        $pendingRemittancesCount = DailyRemittance::where('status', 'pending')->count();
+        $completedRemittances = DailyRemittance::where('status', 'completed')->count();
 
         // ============ ATTENDANCE TREND (Last 7 days) ============
         $attendanceTrend = [];
@@ -97,6 +109,7 @@ class DashboardController extends Controller
             
             $attendanceTrend[] = [
                 'date' => $date->format('m-d'),
+                'date_iso' => $date->format('Y-m-d'),
                 'present' => $present,
                 'absent' => $absent,
                 'late' => $late
@@ -117,6 +130,28 @@ class DashboardController extends Controller
                 'total' => $total,
             ];
         }
+
+        // ============ LEAVE TREND (Last 6 months) ============
+        $leaveTrend = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $start = $month->copy()->startOfMonth();
+            $end = $month->copy()->endOfMonth();
+            $total = Leave::whereBetween('created_at', [$start, $end])->count();
+            $approved = Leave::whereBetween('created_at', [$start, $end])->whereIn('status', ['approved', 'paid'])->count();
+            $leaveTrend[] = [
+                'label' => $month->format('M'),
+                'total' => $total,
+                'approved' => $approved,
+            ];
+        }
+
+        // ============ CALENDAR DATA ============
+        $calMonth = now()->month;
+        $calYear = now()->year;
+
+        // ============ PENDING TOTALS ============
+        $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvancesCount + $pendingSalaryLoansCount;
 
         // ============ RECENT RECORDS ============
         $recentLeaves = Leave::with('employee')
@@ -147,6 +182,8 @@ class DashboardController extends Controller
             'totalOvertimeHours',
             'totalUndertimeHours',
             'totalOvertimeRecords',
+            'pendingOT',
+            'pendingUT',
             'totalPayroll',
             'totalAllowances',
             'totalDeductions',
@@ -159,10 +196,21 @@ class DashboardController extends Controller
             'allowancePercentage',
             'totalOutstandingLoans',
             'activeSalaryLoans',
+            'pendingSalaryLoansCount',
             'totalCashAdvances',
             'pendingCashAdvances',
+            'pendingCashAdvancesCount',
+            'totalCollections',
+            'totalExpenses',
+            'totalNetRemittance',
+            'pendingRemittancesCount',
+            'completedRemittances',
             'attendanceTrend',
             'monthlyPayrollTrend',
+            'leaveTrend',
+            'calMonth',
+            'calYear',
+            'totalPending',
             'recentLeaves',
             'recentAttendance',
             'recentPayroll'

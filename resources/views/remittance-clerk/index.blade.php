@@ -1,4 +1,4 @@
-﻿@extends('layouts.layout')
+@extends('layouts.layout')
 
 @push('styles')
 <style>
@@ -59,173 +59,6 @@ $today = now()->format('Y-m-d');
 
         {{-- Main content --}}
         <div class="lg:col-span-2 space-y-5">
-
-            {{-- Stat cards --}}
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300" style="animation-delay:0.05s">
-                    <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Collections</p>
-                    <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.15s">₱{{ number_format($totalCollections, 0) }}</p>
-                    <div class="flex items-center gap-1.5 mt-1">
-                        <span class="inline-flex items-center gap-0.5 text-[9px] font-bold {{ $collectionGrowth > 0 ? 'text-emerald-600' : ($collectionGrowth < 0 ? 'text-red-500' : 'text-gray-400') }}">
-                            @if($collectionGrowth > 0)
-                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
-                            @elseif($collectionGrowth < 0)
-                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                            @else
-                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/></svg>
-                            @endif
-                            {{ number_format(abs($collectionGrowth), 1) }}%
-                        </span>
-                        <span class="text-[9px] text-gray-400">vs prev 30d</span>
-                    </div>
-                </div>
-                <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300" style="animation-delay:0.1s">
-                    <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Expenses</p>
-                    <p class="text-lg font-bold text-red-500 tabular-nums mt-1 rc-count-num" style="animation-delay:0.2s">₱{{ number_format($totalExpenses, 0) }}</p>
-                    <p class="text-[9px] text-gray-400 mt-1">Avg ₱{{ number_format($averageExpenses, 0) }} / record</p>
-                </div>
-                <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300" style="animation-delay:0.15s">
-                    <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-                    <p class="text-lg font-bold text-blue-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.25s">₱{{ number_format($totalNetRemittance, 0) }}</p>
-                    <p class="text-[9px] text-gray-400 mt-1">{{ $margin }}% margin</p>
-                </div>
-                <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300" style="animation-delay:0.2s">
-                    <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
-                    <p class="text-lg font-bold text-amber-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.3s">{{ $pendingRemittances }}</p>
-                    <p class="text-[9px] text-gray-400 mt-1">{{ $completedRemittances }} finalized</p>
-                </div>
-            </div>
-
-            {{-- Chart cards --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {{-- Collections vs Expenses --}}
-                <div class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                    <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                            </div>
-                            <span class="text-xs font-semibold text-gray-900">Collections vs Expenses</span>
-                        </div>
-                        <span class="text-[9px] text-gray-400">Finalized only</span>
-                    </div>
-                    @php $cveSum = $totalCollections + $totalExpenses; $cvePct = fn($v) => $cveSum > 0 ? round(($v / $cveSum) * 100) : 50; @endphp
-                    <div class="p-4 space-y-4">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="rounded-lg bg-gray-900 px-3.5 py-2.5">
-                                <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400">Collections</p>
-                                <p class="text-sm font-bold text-white tabular-nums mt-0.5">₱{{ number_format($totalCollections, 0) }}</p>
-                                <p class="text-[9px] text-gray-500 mt-0.5">{{ $cvePct($totalCollections) }}% of total</p>
-                            </div>
-                            <div class="rounded-lg bg-gray-50 border border-gray-200 px-3.5 py-2.5">
-                                <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400">Expenses</p>
-                                <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($totalExpenses, 0) }}</p>
-                                <p class="text-[9px] text-gray-400 mt-0.5">{{ $cvePct($totalExpenses) }}% of total</p>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-                                <span>Collections</span>
-                                <span>Expenses</span>
-                            </div>
-                            <div class="h-2.5 rounded-full bg-gray-100 overflow-hidden flex gap-0.5">
-                                <div class="h-full rounded-full bg-gray-900 transition-all duration-700" style="width:{{ $cvePct($totalCollections) }}%"></div>
-                                <div class="h-full rounded-full bg-red-500 transition-all duration-700" style="width:{{ $cvePct($totalExpenses) }}%"></div>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3.5 py-2.5">
-                            <div>
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-                                <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($totalNetRemittance, 0) }}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Margin</p>
-                                <p class="text-xs font-bold text-emerald-600 tabular-nums mt-0.5">{{ $margin }}%</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Monthly Collection Trend --}}
-                <div class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                    <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                            </div>
-                            <span class="text-xs font-semibold text-gray-900">Monthly Collection Trend</span>
-                        </div>
-                        <span class="text-[9px] text-gray-400">Last 6 months</span>
-                    </div>
-                    <div class="p-4">
-                        @if(count($monthlyCollectionTrend))
-                        <div class="flex items-end gap-2 h-[120px] mb-3" id="mct-bars">
-                            @foreach($monthlyCollectionTrend as $i => $m)
-                            @php $barH = $mctMax > 0 ? max(8, round(($m['total_collection'] / $mctMax) * 110)) : 8; @endphp
-                            <div class="flex-1 flex flex-col items-center gap-1 cursor-pointer group {{ $i === $mctActive ? '' : '' }}"
-                                 data-val="{{ $m['total_collection'] }}" data-month="{{ $m['month'] }}" data-idx="{{ $i }}">
-                                <div class="w-full max-w-[32px] rounded-t-md transition-all duration-500 group-hover:brightness-110 group-hover:scale-x-105 {{ $i === $mctActive ? 'bg-gray-900' : 'bg-gray-200' }}"
-                                     style="height:{{ $barH }}px;"></div>
-                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider {{ $i === $mctActive ? 'text-gray-900' : '' }}">{{ $m['month'] }}</span>
-                            </div>
-                            @endforeach
-                        </div>
-                        <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3.5 py-2.5 transition-opacity" id="mct-detail">
-                            <div>
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider" id="mct-detail-month">{{ $monthlyCollectionTrend[$mctActive]['month'] ?? '—' }}</p>
-                                <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5" id="mct-detail-val">₱{{ number_format($monthlyCollectionTrend[$mctActive]['total_collection'] ?? 0, 0) }}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-[9px] text-gray-400">Total collection</p>
-                            </div>
-                        </div>
-                        @else
-                        <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No data yet.</div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            {{-- Module resource cards --}}
-            <div class="grid grid-cols-3 gap-3">
-                <a href="{{ route('drivers.index') }}" class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm p-3.5 hover:shadow-md hover:border-indigo-200 transition-all no-underline group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Drivers</p>
-                            <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">{{ $activeDrivers }}</p>
-                        </div>
-                        <svg class="w-3.5 h-3.5 text-gray-300 ml-auto group-hover:text-gray-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </div>
-                </a>
-                <a href="{{ route('paos.index') }}" class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm p-3.5 hover:shadow-md hover:border-purple-200 transition-all no-underline group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">PAOs</p>
-                            <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">{{ $activePAOs }}</p>
-                        </div>
-                        <svg class="w-3.5 h-3.5 text-gray-300 ml-auto group-hover:text-gray-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </div>
-                </a>
-                <a href="{{ route('vehicles.index') }}" class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm p-3.5 hover:shadow-md hover:border-cyan-200 transition-all no-underline group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Vehicles</p>
-                            <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">{{ $activeVehicles }}</p>
-                        </div>
-                        <svg class="w-3.5 h-3.5 text-gray-300 ml-auto group-hover:text-gray-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </div>
-                </a>
-            </div>
-
             {{-- Quick Actions --}}
             <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm p-4">
                 <div class="flex items-center gap-2 mb-3">
@@ -279,6 +112,173 @@ $today = now()->format('Y-m-d');
                     </a>
                 </div>
             </div>
+
+            {{-- Stat cards --}}
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300" style="animation-delay:0.05s">
+                    <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Collections</p>
+                    <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.15s">?{{ number_format($totalCollections, 0) }}</p>
+                    <div class="flex items-center gap-1.5 mt-1">
+                        <span class="inline-flex items-center gap-0.5 text-[9px] font-bold {{ $collectionGrowth > 0 ? 'text-emerald-600' : ($collectionGrowth < 0 ? 'text-red-500' : 'text-gray-400') }}">
+                            @if($collectionGrowth > 0)
+                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+                            @elseif($collectionGrowth < 0)
+                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            @else
+                            <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"/></svg>
+                            @endif
+                            {{ number_format(abs($collectionGrowth), 1) }}%
+                        </span>
+                        <span class="text-[9px] text-gray-400">vs prev 30d</span>
+                    </div>
+                </div>
+                <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300" style="animation-delay:0.1s">
+                    <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Expenses</p>
+                    <p class="text-lg font-bold text-red-500 tabular-nums mt-1 rc-count-num" style="animation-delay:0.2s">?{{ number_format($totalExpenses, 0) }}</p>
+                    <p class="text-[9px] text-gray-400 mt-1">Avg ?{{ number_format($averageExpenses, 0) }} / record</p>
+                </div>
+                <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300" style="animation-delay:0.15s">
+                    <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
+                    <p class="text-lg font-bold text-blue-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.25s">?{{ number_format($totalNetRemittance, 0) }}</p>
+                    <p class="text-[9px] text-gray-400 mt-1">{{ $margin }}% margin</p>
+                </div>
+                <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300" style="animation-delay:0.2s">
+                    <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
+                    <p class="text-lg font-bold text-amber-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.3s">{{ $pendingRemittances }}</p>
+                    <p class="text-[9px] text-gray-400 mt-1">{{ $completedRemittances }} finalized</p>
+                </div>
+            </div>
+
+            {{-- Chart cards --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {{-- Collections vs Expenses --}}
+                <div class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                            </div>
+                            <span class="text-xs font-semibold text-gray-900">Collections vs Expenses</span>
+                        </div>
+                        <span class="text-[9px] text-gray-400">Finalized only</span>
+                    </div>
+                    @php $cveSum = $totalCollections + $totalExpenses; $cvePct = fn($v) => $cveSum > 0 ? round(($v / $cveSum) * 100) : 50; @endphp
+                    <div class="p-4 space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="rounded-lg bg-gray-900 px-3.5 py-2.5">
+                                <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400">Collections</p>
+                                <p class="text-sm font-bold text-white tabular-nums mt-0.5">?{{ number_format($totalCollections, 0) }}</p>
+                                <p class="text-[9px] text-gray-500 mt-0.5">{{ $cvePct($totalCollections) }}% of total</p>
+                            </div>
+                            <div class="rounded-lg bg-gray-50 border border-gray-200 px-3.5 py-2.5">
+                                <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400">Expenses</p>
+                                <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">?{{ number_format($totalExpenses, 0) }}</p>
+                                <p class="text-[9px] text-gray-400 mt-0.5">{{ $cvePct($totalExpenses) }}% of total</p>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+                                <span>Collections</span>
+                                <span>Expenses</span>
+                            </div>
+                            <div class="h-2.5 rounded-full bg-gray-100 overflow-hidden flex gap-0.5">
+                                <div class="h-full rounded-full bg-gray-900 transition-all duration-700" style="width:{{ $cvePct($totalCollections) }}%"></div>
+                                <div class="h-full rounded-full bg-red-500 transition-all duration-700" style="width:{{ $cvePct($totalExpenses) }}%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3.5 py-2.5">
+                            <div>
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Net Remittance</p>
+                                <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5">?{{ number_format($totalNetRemittance, 0) }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Margin</p>
+                                <p class="text-xs font-bold text-emerald-600 tabular-nums mt-0.5">{{ $margin }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Monthly Collection Trend --}}
+                <div class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            </div>
+                            <span class="text-xs font-semibold text-gray-900">Monthly Collection Trend</span>
+                        </div>
+                        <span class="text-[9px] text-gray-400">Last 6 months</span>
+                    </div>
+                    <div class="p-4">
+                        @if(count($monthlyCollectionTrend))
+                        <div class="flex items-end gap-2 h-[120px] mb-3" id="mct-bars">
+                            @foreach($monthlyCollectionTrend as $i => $m)
+                            @php $barH = $mctMax > 0 ? max(8, round(($m['total_collection'] / $mctMax) * 110)) : 8; @endphp
+                            <div class="flex-1 flex flex-col items-center gap-1 cursor-pointer group {{ $i === $mctActive ? '' : '' }}"
+                                 data-val="{{ $m['total_collection'] }}" data-month="{{ $m['month'] }}" data-idx="{{ $i }}">
+                                <div class="w-full max-w-[32px] rounded-t-md transition-all duration-500 group-hover:brightness-110 group-hover:scale-x-105 {{ $i === $mctActive ? 'bg-gray-900' : 'bg-gray-200' }}"
+                                     style="height:{{ $barH }}px;"></div>
+                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider {{ $i === $mctActive ? 'text-gray-900' : '' }}">{{ $m['month'] }}</span>
+                            </div>
+                            @endforeach
+                        </div>
+                        <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3.5 py-2.5 transition-opacity" id="mct-detail">
+                            <div>
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider" id="mct-detail-month">{{ $monthlyCollectionTrend[$mctActive]['month'] ?? '�' }}</p>
+                                <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5" id="mct-detail-val">?{{ number_format($monthlyCollectionTrend[$mctActive]['total_collection'] ?? 0, 0) }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[9px] text-gray-400">Total collection</p>
+                            </div>
+                        </div>
+                        @else
+                        <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No data yet.</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Module resource cards --}}
+            <div class="grid grid-cols-3 gap-3">
+                <a href="{{ route('drivers.index') }}" class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm p-3.5 hover:shadow-md hover:border-indigo-200 transition-all no-underline group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Drivers</p>
+                            <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">{{ $activeDrivers }}</p>
+                        </div>
+                        <svg class="w-3.5 h-3.5 text-gray-300 ml-auto group-hover:text-gray-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+                <a href="{{ route('paos.index') }}" class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm p-3.5 hover:shadow-md hover:border-purple-200 transition-all no-underline group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">PAOs</p>
+                            <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">{{ $activePAOs }}</p>
+                        </div>
+                        <svg class="w-3.5 h-3.5 text-gray-300 ml-auto group-hover:text-gray-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+                <a href="{{ route('vehicles.index') }}" class="scale-in bg-white rounded-xl border border-gray-100 shadow-sm p-3.5 hover:shadow-md hover:border-cyan-200 transition-all no-underline group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Vehicles</p>
+                            <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">{{ $activeVehicles }}</p>
+                        </div>
+                        <svg class="w-3.5 h-3.5 text-gray-300 ml-auto group-hover:text-gray-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </div>
+                </a>
+            </div>
+
 
             {{-- Recent remittances chart --}}
             <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -358,7 +358,7 @@ $today = now()->format('Y-m-d');
                             Net remittance
                         </span>
                         <span>
-                            Total: <strong class="text-gray-700 font-mono">₱{{ number_format($dailyData->sum('net'), 2) }}</strong>
+                            Total: <strong class="text-gray-700 font-mono">?{{ number_format($dailyData->sum('net'), 2) }}</strong>
                         </span>
                     </div>
                 </div>
@@ -438,12 +438,12 @@ $today = now()->format('Y-m-d');
 @push('scripts')
 <script>
 (function () {
-    /* ── Monthly trend interaction ── */
+    /* -- Monthly trend interaction -- */
     const cols = document.querySelectorAll('#mct-bars > div');
     const detMonth = document.getElementById('mct-detail-month');
     const detVal = document.getElementById('mct-detail-val');
     if (cols.length && detMonth) {
-        function fmt(n) { return '₱' + Number(n).toLocaleString('en-PH', { maximumFractionDigits: 0 }); }
+        function fmt(n) { return '?' + Number(n).toLocaleString('en-PH', { maximumFractionDigits: 0 }); }
         function activate(el) {
             cols.forEach(c => {
                 c.querySelector('div:first-child')?.classList.remove('bg-gray-900');
@@ -473,11 +473,11 @@ $today = now()->format('Y-m-d');
         });
     }
 
-    /* ── Count-up animation for stat values ── */
+    /* -- Count-up animation for stat values -- */
     document.querySelectorAll('.rc-count-num').forEach(el => {
         const text = el.textContent.trim();
-        const prefix = text.startsWith('₱') ? '₱' : '';
-        const target = parseInt(text.replace(/[₱,]/g, '')) || 0;
+        const prefix = text.startsWith('?') ? '?' : '';
+        const target = parseInt(text.replace(/[?,]/g, '')) || 0;
         if (target === 0) return;
         const steps = 24, dur = 500;
         let cur = 0;
@@ -489,7 +489,7 @@ $today = now()->format('Y-m-d');
         }, dur / steps);
     });
 
-    /* ── Interactive calendar ── */
+    /* -- Interactive calendar -- */
     const calState = { month: {{ $calMonth }}, year: {{ $calYear }}, selected: '{{ $today }}' };
     const todayStr = '{{ $today }}';
     const calGrid = document.getElementById('cal-grid');

@@ -1,4 +1,4 @@
-﻿@extends('layouts.layout')
+@extends('layouts.layout')
 
 @push('styles')
 <style>
@@ -55,6 +55,56 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
 
     {{-- LEFT COLUMN (2/3) --}}
     <div class="lg:col-span-2 space-y-5">
+        {{-- Quick Actions / Shortcuts --}}
+        <div class="acd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
+            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm acd-float">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <span class="text-xs font-semibold text-gray-900">Quick Actions</span>
+                </div>
+                <span class="text-[0.55rem] font-mono text-gray-400">Accountant modules</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
+                <a href="{{ route('payroll-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Payroll Approval</span>
+                    @if($processingPayroll > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $processingPayroll }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('remittance-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-violet-700 transition-colors text-center">Remittance Approval</span>
+                    @if($pendingRemittances > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.45rem] font-bold">{{ $pendingRemittances }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-blue-50 hover:border-blue-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center transition-all group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-blue-700 transition-colors text-center">Cash Advances</span>
+                    @if($pendingCashAdvancesCount > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-blue-100 text-blue-700 text-[0.45rem] font-bold">{{ $pendingCashAdvancesCount }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('payroll.receivables.index', ['tab' => 'salary_loans']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors text-center">Salary Loans</span>
+                    @if($pendingSalaryLoansCount > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-amber-100 text-amber-700 text-[0.45rem] font-bold">{{ $pendingSalaryLoansCount }}</span>
+                    @endif
+                </a>
+            </div>
+        </div>
 
 
 
@@ -64,7 +114,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Payroll</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.15s">₱{{ number_format($totalPayroll, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.15s">?{{ number_format($totalPayroll, 0) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -78,7 +128,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Allowances</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.2s">₱{{ number_format($totalAllowances, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.2s">?{{ number_format($totalAllowances, 0) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -92,7 +142,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Deductions</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.25s">₱{{ number_format($totalDeductions, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.25s">?{{ number_format($totalDeductions, 0) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
@@ -106,7 +156,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Outstanding Loans</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.3s">₱{{ number_format($totalOutstandingLoans, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.3s">?{{ number_format($totalOutstandingLoans, 0) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -120,7 +170,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Avg. Basic</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.35s">₱{{ number_format($averageBasicSalary ?? 0, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.35s">?{{ number_format($averageBasicSalary ?? 0, 0) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
@@ -155,7 +205,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
             $stTotal = array_sum($stSeries);
         @endphp
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {{-- Net Payroll Trend (SVG line chart — clerk style) --}}
+            {{-- Net Payroll Trend (SVG line chart � clerk style) --}}
             @php
             $chartMax = $trendCount > 0 ? max(array_column($trendPts, 'total')) : 1;
             $chartH = 160;
@@ -215,7 +265,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                             Net pay trend
                         </span>
                         <span>
-                            Peak: <strong class="text-gray-700 font-mono">₱{{ number_format($chartMax, 0) }}</strong>
+                            Peak: <strong class="text-gray-700 font-mono">?{{ number_format($chartMax, 0) }}</strong>
                         </span>
                     </div>
                     @else
@@ -260,7 +310,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                             @endphp
                             <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
                                 <span class="w-2 h-2 rounded-sm shrink-0" style="background:{{ $stColors[$i % count($stColors)] }}"></span>
-                                <span class="text-[10px] text-gray-600 flex-1 truncate">{{ $stLabels[$i] ?? '—' }}</span>
+                                <span class="text-[10px] text-gray-600 flex-1 truncate">{{ $stLabels[$i] ?? '�' }}</span>
                                 <span class="text-[10px] font-bold text-gray-900 tabular-nums">{{ $val }}</span>
                                 <span class="text-[8px] text-gray-400 min-w-[24px] text-right">{{ $pct }}%</span>
                             </div>
@@ -274,56 +324,6 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
             </div>
         </div>
 
-        {{-- Quick Actions / Shortcuts --}}
-        <div class="acd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
-            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm acd-float">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-900">Quick Actions</span>
-                </div>
-                <span class="text-[0.55rem] font-mono text-gray-400">Accountant modules</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-                <a href="{{ route('payroll-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Payroll Approval</span>
-                    @if($processingPayroll > 0)
-                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $processingPayroll }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('remittance-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-                    </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-violet-700 transition-colors text-center">Remittance Approval</span>
-                    @if($pendingRemittances > 0)
-                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.45rem] font-bold">{{ $pendingRemittances }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-blue-50 hover:border-blue-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center transition-all group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
-                    </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-blue-700 transition-colors text-center">Cash Advances</span>
-                    @if($pendingCashAdvancesCount > 0)
-                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-blue-100 text-blue-700 text-[0.45rem] font-bold">{{ $pendingCashAdvancesCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('payroll.receivables.index', ['tab' => 'salary_loans']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors text-center">Salary Loans</span>
-                    @if($pendingSalaryLoansCount > 0)
-                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-amber-100 text-amber-700 text-[0.45rem] font-bold">{{ $pendingSalaryLoansCount }}</span>
-                    @endif
-                </a>
-            </div>
-        </div>
 
         {{-- Charts row 2 --}}
         @php
@@ -358,20 +358,20 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                                 <circle cx="50" cy="50" r="36" fill="none" stroke="#f43f5e" stroke-width="8" stroke-dasharray="{{ $circ - $allowOffset }} {{ $circ }}" stroke-dashoffset="{{ -$allowOffset }}" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ $circ - $allowOffset }};animation-delay:0.3s"/>
                             </svg>
                             <div class="absolute inset-0 flex items-center justify-center">
-                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">₱{{ number_format($adTotal/1000,0) }}k</span>
+                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">?{{ number_format($adTotal/1000,0) }}k</span>
                             </div>
                         </div>
                         <div class="flex-1 space-y-2 w-full">
                             <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-emerald-50 transition-colors">
                                 <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-emerald-500"></span>
                                 <span class="text-[10px] font-semibold text-gray-700 flex-1">Allowances</span>
-                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">₱{{ number_format($ta,0) }}</span>
+                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">?{{ number_format($ta,0) }}</span>
                                 <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adAllowPct }}%</span>
                             </div>
                             <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-rose-50 transition-colors">
                                 <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-rose-500"></span>
                                 <span class="text-[10px] font-semibold text-gray-700 flex-1">Deductions</span>
-                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">₱{{ number_format($td,0) }}</span>
+                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">?{{ number_format($td,0) }}</span>
                                 <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adDeducPct }}%</span>
                             </div>
                         </div>
@@ -386,14 +386,14 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
             <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <h2 class="text-[11px] font-semibold text-gray-900">Pipeline</h2>
-                    <span class="text-[9px] text-gray-400 font-medium">Awaiting · approved · released · rejected</span>
+                    <span class="text-[9px] text-gray-400 font-medium">Awaiting � approved � released � rejected</span>
                 </div>
                 <div class="px-4 py-4 space-y-3">
                     @forelse($pipeVals as $i => $val)
                     @php $barW = $pipeMax > 0 ? ($val / $pipeMax) * 100 : 0; @endphp
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-[10px] font-semibold text-gray-600">{{ $pipeLabels[$i] ?? '—' }}</span>
+                            <span class="text-[10px] font-semibold text-gray-600">{{ $pipeLabels[$i] ?? '�' }}</span>
                             <span class="text-[10px] font-bold text-gray-900 tabular-nums">{{ $val }} <span class="text-[8px] text-gray-400 font-medium">batch{{ $val !== 1 ? 'es' : '' }}</span></span>
                         </div>
                         <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
