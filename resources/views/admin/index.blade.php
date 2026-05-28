@@ -1,150 +1,225 @@
 @extends('layouts.qr-monitor')
 
 @section('content')
-<div class="relative w-full h-full flex items-center justify-center overflow-hidden select-none" style="background: radial-gradient(ellipse at 50% 30%, #0c1628 0%, #060a16 100%);">
 
-    {{-- Particle field --}}
-    <div id="particles" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+{{-- ================================================================
+     QR ATTENDANCE MONITOR — Knights Transport Fleet System
+     Light theme | Minibus attendance terminal
+================================================================ --}}
 
-    {{-- Ambient glow orbs --}}
+<div class="relative w-full h-full flex flex-col overflow-hidden select-none" id="qr-page">
+
+    {{-- ── Animated gradient background ── --}}
+    <div class="absolute inset-0" id="bg-layer" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 30%, #f0f9ff 60%, #f8fafc 100%);"></div>
+
+    {{-- ── Slow-drift blob orbs ── --}}
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-1/4 left-1/4 w-[32rem] h-[32rem] bg-emerald-500/8 rounded-full blur-[150px] animate-[orbA_14s_ease-in-out_infinite]"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-[28rem] h-[28rem] bg-emerald-400/5 rounded-full blur-[130px] animate-[orbB_18s_ease-in-out_infinite_reverse]"></div>
-        <div class="absolute top-1/3 right-1/3 w-[20rem] h-[20rem] bg-amber-400/4 rounded-full blur-[120px] animate-[orbC_16s_ease-in-out_infinite_2s]"></div>
+        <div class="blob blob-a absolute w-[44rem] h-[44rem] rounded-full -top-40 -left-32"
+             style="background: radial-gradient(circle, rgba(16,185,129,0.13) 0%, transparent 65%);"></div>
+        <div class="blob blob-b absolute w-[36rem] h-[36rem] rounded-full -bottom-32 -right-20"
+             style="background: radial-gradient(circle, rgba(6,182,212,0.10) 0%, transparent 65%);"></div>
+        <div class="blob blob-c absolute w-[28rem] h-[28rem] rounded-full top-1/3 right-1/4"
+             style="background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 65%);"></div>
     </div>
 
-    {{-- Animated road dashes --}}
-    <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.035]">
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full" style="background: repeating-linear-gradient(to bottom, #fff 0px, #fff 24px, transparent 24px, transparent 48px); animation: roadScroll 10s linear infinite;"></div>
+    {{-- ── Subtle dot grid ── --}}
+    <div class="absolute inset-0 pointer-events-none" style="background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px); background-size: 32px 32px; mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);"></div>
+
+    {{-- ── Floating shapes ── --}}
+    <div class="absolute inset-0 overflow-hidden pointer-events-none" id="float-shapes">
+        <div class="float-shape absolute w-3 h-3 rounded-sm border-2 border-emerald-300/40" style="top:12%; left:8%; animation: floatA 8s ease-in-out infinite;"></div>
+        <div class="float-shape absolute w-2 h-2 rounded-full bg-emerald-300/30" style="top:25%; right:12%; animation: floatB 10s ease-in-out 1s infinite;"></div>
+        <div class="float-shape absolute w-4 h-4 rounded-full border border-cyan-300/30" style="bottom:30%; left:6%; animation: floatA 12s ease-in-out 2s infinite;"></div>
+        <div class="float-shape absolute w-2 h-2 rounded-sm bg-amber-300/25" style="bottom:20%; right:8%; animation: floatC 9s ease-in-out 0.5s infinite;"></div>
+        <div class="float-shape absolute w-1.5 h-1.5 rounded-full bg-emerald-400/40" style="top:60%; left:14%; animation: floatB 7s ease-in-out 3s infinite;"></div>
+        <div class="float-shape absolute w-3 h-3 rounded border border-emerald-200/50" style="top:70%; right:16%; animation: floatC 11s ease-in-out 1.5s infinite;"></div>
+        <div class="float-shape absolute w-2 h-2 rounded-full border border-cyan-200/40" style="top:40%; left:5%; animation: floatA 9s ease-in-out 4s infinite;"></div>
+        <div class="float-shape absolute w-1.5 h-1.5 bg-amber-200/50 rounded-full" style="top:15%; right:22%; animation: floatB 13s ease-in-out 2.5s infinite;"></div>
     </div>
 
-    {{-- Main content --}}
-    <div class="relative flex flex-col items-center gap-6 animate-[fadeUp_1s_cubic-bezier(0.16,1,0.3,1)_both]">
+    {{-- ─────────────────────────────────────────────────────────────
+         TOP BAR
+    ───────────────────────────────────────────────────────────────── --}}
+    <div class="relative z-10 flex items-center justify-between px-8 pt-5 animate-header">
 
-        {{-- Fleet header --}}
-        <div class="flex flex-col items-center gap-2.5">
-            <div class="flex items-center gap-2.5">
-                <div class="w-6 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent"></div>
-                <svg class="w-4 h-4 text-amber-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        {{-- Brand --}}
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-md shadow-emerald-200/60 brand-icon"
+                 style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
                 </svg>
-                <h1 class="text-[0.6rem] font-bold tracking-[0.35em] uppercase text-white/35">Knights Transport</h1>
-                <svg class="w-4 h-4 text-amber-400/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
-                </svg>
-                <div class="w-6 h-px bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent"></div>
             </div>
-            <div class="flex items-center gap-1.5">
-                <div class="w-1 h-1 rounded-full bg-emerald-400/30"></div>
-                <div class="w-8 h-px bg-gradient-to-r from-emerald-400/20 via-amber-400/30 to-emerald-400/20"></div>
-                <span class="text-[0.45rem] uppercase tracking-[0.4em] text-white/20">Fleet Attendance</span>
-                <div class="w-8 h-px bg-gradient-to-r from-emerald-400/20 via-amber-400/30 to-emerald-400/20"></div>
-                <div class="w-1 h-1 rounded-full bg-emerald-400/30"></div>
+            <div>
+                <div class="text-sm font-extrabold text-gray-800 tracking-tight leading-none">Knights Transport</div>
+                <div class="text-[0.58rem] text-gray-400 tracking-widest uppercase mt-0.5 font-semibold">Fleet Attendance System</div>
             </div>
         </div>
 
-        {{-- QR with rotating glow ring --}}
-        <div class="relative">
-            {{-- Outer rotating gradient ring --}}
-            <div id="glow-ring" class="absolute -inset-[5px] rounded-[26px]" style="background: conic-gradient(from 0deg, transparent 30%, rgba(16,185,129,0.35), rgba(245,158,11,0.2), rgba(52,211,153,0.15), transparent 70%); mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1.5px)); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1.5px));"></div>
+        {{-- Live badge --}}
+        <div class="live-badge flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-emerald-200 shadow-sm shadow-emerald-100">
+            <span class="live-dot w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span class="text-[0.65rem] font-bold text-emerald-600 uppercase tracking-widest">Live</span>
+        </div>
 
-            {{-- QR wrapper --}}
-            <div id="qr-wrap" class="relative p-[2.5px] rounded-[21px]" style="background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01));">
-                <div class="relative bg-[#0b1121] rounded-[18px] overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]">
+        {{-- Clock --}}
+        <div class="text-right">
+            <div id="clock-time" class="text-2xl font-mono font-bold text-gray-800 tabular-nums leading-none"></div>
+            <div id="clock-date" class="text-[0.65rem] text-gray-400 mt-1 font-medium"></div>
+        </div>
+    </div>
 
-                    {{-- Instant block overlay (appears BEFORE sweep to prevent double-scan) --}}
-                    <div id="block-overlay" class="hidden absolute inset-0 z-20 rounded-[18px]" style="background: #0b1121;"></div>
+    {{-- ─────────────────────────────────────────────────────────────
+         MAIN CONTENT
+    ───────────────────────────────────────────────────────────────── --}}
+    <div class="relative z-10 flex-1 flex flex-col items-center justify-center gap-6" id="main-content">
 
-                    {{-- Sweep overlay --}}
-                    <div id="sweep-overlay" class="absolute inset-0 z-20 rounded-[18px] pointer-events-none opacity-0" style="background: radial-gradient(circle at center, rgba(5,150,105,0.95) 0%, rgba(16,185,129,0.8) 40%, rgba(52,211,153,0.4) 100%);"></div>
+        {{-- Headline --}}
+        <div class="text-center animate-title">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm mb-3">
+                <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+                <span class="text-xs font-bold text-gray-500 tracking-widest uppercase">Scan to Log Attendance</span>
+            </div>
+        </div>
 
-                    {{-- QR inner --}}
-                    <div id="qr-inner" class="p-5">
-                        <div id="qrcode" class="w-[--qr-size] h-[--qr-size]" style="--qr-size:260px"></div>
-                    </div>
+        {{-- ── QR Code Card ── --}}
+        <div class="relative animate-qr">
 
-                    {{-- Success overlay --}}
-                    <div id="scan-success" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 rounded-[18px]">
-                        <div class="w-14 h-14 rounded-full bg-white/15 flex items-center justify-center backdrop-blur-sm">
-                            <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                            </svg>
+            {{-- Outer glow ring --}}
+            <div class="absolute -inset-3 rounded-[2rem] opacity-60 glow-ring"
+                 style="background: conic-gradient(from 0deg, #10b981, #34d399, #6ee7b7, #10b981); filter: blur(18px); z-index: 0;"></div>
+
+            {{-- Rotating border --}}
+            <div class="absolute -inset-[2px] rounded-[26px] z-0 rotate-border"
+                 style="background: conic-gradient(from 0deg, #10b981 0%, #6ee7b7 25%, transparent 50%, #34d399 75%, #10b981 100%); padding: 2px; border-radius: 26px;"></div>
+
+            {{-- Card --}}
+            <div class="relative z-10 bg-white rounded-[24px] p-2 shadow-2xl shadow-emerald-100/80" style="box-shadow: 0 32px 64px -12px rgba(16,185,129,0.2), 0 8px 24px -6px rgba(0,0,0,0.08);">
+
+                {{-- Inner QR frame --}}
+                <div class="relative rounded-[18px] overflow-hidden bg-gray-50" style="padding: 2px;">
+                    <div class="relative rounded-[17px] overflow-hidden bg-white">
+
+                        {{-- Block overlay --}}
+                        <div id="block-overlay" class="hidden absolute inset-0 z-20 rounded-[17px] bg-white"></div>
+
+                        {{-- Sweep overlay --}}
+                        <div id="sweep-overlay" class="absolute inset-0 z-20 rounded-[17px] pointer-events-none opacity-0"
+                             style="background: radial-gradient(circle at center, rgba(5,150,105,0.92) 0%, rgba(16,185,129,0.75) 40%, rgba(52,211,153,0.4) 100%);"></div>
+
+                        {{-- QR inner --}}
+                        <div id="qr-inner" class="p-4 relative">
+                            {{-- Scan line --}}
+                            <div id="scan-line" class="absolute left-6 right-6 h-0.5 z-10 pointer-events-none"
+                                 style="background: linear-gradient(90deg, transparent, #10b981, #34d399, #10b981, transparent); border-radius: 9999px; animation: scanLineLight 2.6s ease-in-out infinite; top: 50%;"></div>
+                            <div id="qrcode"></div>
                         </div>
-                        <div class="text-center">
-                            <p class="text-sm font-bold text-white tracking-wide">Recorded</p>
-                            <p class="text-[0.6rem] text-white/60 mt-0.5 tracking-wide">Loading new code…</p>
+
+                        {{-- Success overlay --}}
+                        <div id="scan-success" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 rounded-[17px]"
+                             style="background: linear-gradient(135deg, rgba(5,150,105,0.95), rgba(16,185,129,0.9));">
+                            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm shadow-lg">
+                                <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm font-extrabold text-white tracking-wide">Attendance Recorded!</p>
+                                <p class="text-[0.62rem] text-white/70 mt-1 tracking-wide">Generating new code…</p>
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                {{-- Corner brackets inside card --}}
+                <div class="absolute inset-4 pointer-events-none z-10">
+                    <div class="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-emerald-400 rounded-tl-md"></div>
+                    <div class="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-emerald-400 rounded-tr-md"></div>
+                    <div class="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-emerald-400 rounded-bl-md"></div>
+                    <div class="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-emerald-400 rounded-br-md"></div>
                 </div>
             </div>
         </div>
 
-        {{-- Token — large for manual time-in --}}
-        <div class="flex flex-col items-center gap-2">
-            <div id="token-display" class="text-2xl font-mono tracking-[0.35em] text-white/60 select-all">——</div>
-            <div class="flex items-center gap-3">
-                {{-- Circular countdown --}}
-                <svg class="w-7 h-7 -rotate-90" viewBox="0 0 40 40">
-                    <circle cx="20" cy="20" r="17" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2"/>
-                    <circle id="timer-ring" cx="20" cy="20" r="17" fill="none" stroke="rgba(16,185,129,0.7)" stroke-width="2" stroke-linecap="round" stroke-dasharray="106.8" stroke-dashoffset="0" style="transition: stroke-dashoffset 1s linear;"/>
-                </svg>
-                {{-- Timer label --}}
-                <div id="timer-text" class="text-[0.5rem] font-semibold uppercase tracking-[0.2em] text-white/25">—</div>
+        {{-- ── Token + Timer ── --}}
+        <div class="flex flex-col items-center gap-4 animate-token">
+
+            {{-- Token chip --}}
+            <div class="flex flex-col items-center gap-1.5">
+                <div class="text-[0.55rem] font-bold uppercase tracking-[0.35em] text-gray-400">Manual Entry Token</div>
+                <div class="relative flex items-center gap-1">
+                    <div class="token-glow absolute inset-0 rounded-xl bg-emerald-300/30 blur-md"></div>
+                    <div id="token-display"
+                         class="relative px-6 py-2.5 rounded-xl bg-white border border-gray-200 shadow-sm text-2xl font-mono font-bold tracking-[0.4em] text-gray-700 select-all tabular-nums"
+                         style="letter-spacing: 0.5em; min-width: 14rem; text-align: center;">——</div>
+                </div>
+            </div>
+
+            {{-- Timer bar --}}
+            <div class="flex items-center gap-3 w-56">
+                <div class="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                    <div id="timer-bar" class="h-full rounded-full"
+                         style="width: 100%; background: linear-gradient(90deg, #059669, #10b981, #34d399); transition: width 1s linear;"></div>
+                </div>
+                <div id="timer-text" class="text-xs font-mono font-bold text-gray-400 tabular-nums w-7 text-right shrink-0">—</div>
             </div>
         </div>
+
     </div>
+
+    {{-- ─────────────────────────────────────────────────────────────
+         BOTTOM BAR
+    ───────────────────────────────────────────────────────────────── --}}
+    <div class="relative z-10 flex items-center justify-between px-8 py-4">
+        <div class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-emerald-400/60"></div>
+            <span class="text-[0.58rem] font-semibold text-gray-400 uppercase tracking-widest">Attendance Terminal</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="text-[0.58rem] font-mono text-gray-300">Auto-refresh: 60s</span>
+            <div class="w-px h-3 bg-gray-200"></div>
+            <span class="text-[0.58rem] font-mono text-gray-200">v2.0</span>
+        </div>
+    </div>
+
 </div>
 
+{{-- ─────────────────────────────────────────────────────────────── --}}
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 (function () {
     const QR_REFRESH_SECONDS = 60;
-    const CIRCUMFERENCE      = 106.8;
     let qrCountdown   = QR_REFRESH_SECONDS;
     let reloadPending = false;
     let tokenCheckInt = null;
     let refreshInt    = null;
     let resizeDeb     = null;
 
-    const qrDiv       = document.getElementById('qrcode');
-    const qrInner     = document.getElementById('qr-inner');
-    const tokenEl     = document.getElementById('token-display');
-    const blockEl     = document.getElementById('block-overlay');
-    const sweepEl     = document.getElementById('sweep-overlay');
-    const overlay     = document.getElementById('scan-success');
-    const timerText   = document.getElementById('timer-text');
-    const timerRing   = document.getElementById('timer-ring');
-    const glowRing    = document.getElementById('glow-ring');
+    const qrDiv    = document.getElementById('qrcode');
+    const qrInner  = document.getElementById('qr-inner');
+    const tokenEl  = document.getElementById('token-display');
+    const blockEl  = document.getElementById('block-overlay');
+    const sweepEl  = document.getElementById('sweep-overlay');
+    const overlay  = document.getElementById('scan-success');
+    const timerTxt = document.getElementById('timer-text');
+    const timerBar = document.getElementById('timer-bar');
 
-    // ── Particle field ──
-    (function initParticles() {
-        const c = document.getElementById('particles');
-        if (!c) return;
-        const frag = document.createDocumentFragment();
-        for (let i = 0; i < 80; i++) {
-            const dot = document.createElement('div');
-            const size = 1 + Math.random() * 2;
-            const x = Math.random() * 100;
-            const y = Math.random() * 100;
-            const dur = 3 + Math.random() * 5;
-            const del = Math.random() * 4;
-            Object.assign(dot.style, {
-                position: 'absolute',
-                left: x + '%', top: y + '%',
-                width: size + 'px', height: size + 'px',
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,' + (0.15 + Math.random() * 0.3) + ')',
-                opacity: '0',
-                animation: 'particleFade ' + dur + 's ease-in-out ' + del + 's infinite alternate',
-            });
-            frag.appendChild(dot);
-        }
-        c.appendChild(frag);
-    })();
+    // ── Clock ──
+    function updateClock() {
+        const now = new Date();
+        const te = document.getElementById('clock-time');
+        const de = document.getElementById('clock-date');
+        if (te) te.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        if (de) de.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
 
-    // ── QR sizing ──
+    // ── QR size ──
     function getQRSize() {
-        return Math.max(200, Math.min(400, Math.min(window.innerWidth - 80, 400)));
+        return Math.max(200, Math.min(320, Math.min(window.innerWidth - 140, 300)));
     }
 
     // ── Render QR ──
@@ -152,41 +227,37 @@
         if (!token || token === '——') return;
         qrDiv.innerHTML = '';
         const size = getQRSize();
-        qrDiv.style.setProperty('--qr-size', size + 'px');
+        qrDiv.style.width  = size + 'px';
+        qrDiv.style.height = size + 'px';
         new QRCode(qrDiv, {
             text: token,
-            width: size,
-            height: size,
-            colorDark: '#e5e7eb',
-            colorLight: 'transparent',
+            width: size, height: size,
+            colorDark: '#111827',
+            colorLight: '#ffffff',
             correctLevel: QRCode.CorrectLevel.H
         });
     }
 
-    // ── Refresh animation ──
+    // ── Animate refresh ──
     function animateRefresh() {
-        qrInner.style.transition = 'transform 0.25s ease, opacity 0.2s ease';
-        qrInner.style.transform = 'scale(0.92) rotate(3deg)';
+        qrInner.style.transition = 'transform 0.2s ease, opacity 0.16s ease';
+        qrInner.style.transform = 'scale(0.92) rotate(-2deg)';
         qrInner.style.opacity = '0';
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                qrInner.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease 0.05s';
-                qrInner.style.transform = 'scale(1) rotate(0deg)';
-                qrInner.style.opacity = '1';
-            });
-        });
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            qrInner.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.32s ease 0.04s';
+            qrInner.style.transform = 'scale(1) rotate(0deg)';
+            qrInner.style.opacity = '1';
+        }));
         setTimeout(() => { qrInner.style.transition = ''; }, 600);
     }
 
-    // ── Reset all overlays ──
+    // ── Reset overlays ──
     function resetOverlays() {
         blockEl.classList.add('hidden');
         sweepEl.style.transition = 'none';
         sweepEl.style.opacity = '0';
         sweepEl.style.clipPath = '';
         overlay.classList.add('hidden');
-        glowRing.style.transition = '';
-        glowRing.style.opacity = '';
     }
 
     // ── Load QR ──
@@ -195,9 +266,9 @@
         resetOverlays();
         qrInner.style.opacity = '1';
         qrInner.style.transform = '';
-        timerText.textContent = 'Generating…';
-        timerRing.style.transition = 'none';
-        timerRing.style.strokeDashoffset = CIRCUMFERENCE;
+        timerTxt.textContent = '—';
+        timerBar.style.transition = 'none';
+        timerBar.style.width = '100%';
         fetch("{{ route('hr.qr.generate') }}", {
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
@@ -206,32 +277,52 @@
         .then(data => {
             animateRefresh();
             setTimeout(() => renderQR(data.token), 50);
-            tokenEl.textContent = data.token;
+            // Token character-by-character reveal
+            revealToken(data.token);
             qrCountdown = QR_REFRESH_SECONDS;
-            timerText.textContent = qrCountdown + 's';
-            timerRing.style.transition = 'stroke-dashoffset 1s linear';
-            timerRing.style.strokeDashoffset = '0';
+            timerTxt.textContent = qrCountdown + 's';
+            timerBar.style.transition = 'width 1s linear';
+            timerBar.style.width = '100%';
             stopAll();
-            refreshInt = setInterval(tick, 1000);
+            refreshInt    = setInterval(tick, 1000);
             tokenCheckInt = setInterval(checkToken, 2000);
         })
         .catch(() => {
-            timerText.textContent = 'Retrying…';
+            timerTxt.textContent = '…';
             setTimeout(loadQR, 4000);
         });
+    }
+
+    // ── Token reveal animation ──
+    function revealToken(token) {
+        tokenEl.textContent = '';
+        let i = 0;
+        const interval = setInterval(() => {
+            tokenEl.textContent = token.slice(0, i + 1) + (i < token.length - 1 ? '·'.repeat(token.length - i - 1) : '');
+            i++;
+            if (i >= token.length) {
+                clearInterval(interval);
+                tokenEl.textContent = token;
+            }
+        }, 55);
     }
 
     // ── Tick ──
     function tick() {
         if (reloadPending) return;
         qrCountdown--;
-        timerText.textContent = qrCountdown + 's';
-        const offset = CIRCUMFERENCE * (1 - qrCountdown / QR_REFRESH_SECONDS);
-        timerRing.style.strokeDashoffset = offset;
-        if (qrCountdown <= 0) {
-            clearInterval(refreshInt);
-            loadQR();
+        timerTxt.textContent = qrCountdown + 's';
+        const pct = (qrCountdown / QR_REFRESH_SECONDS) * 100;
+        timerBar.style.width = pct + '%';
+        // Color shift: green → amber → red as time runs out
+        if (qrCountdown <= 10) {
+            timerBar.style.background = 'linear-gradient(90deg, #dc2626, #ef4444)';
+        } else if (qrCountdown <= 20) {
+            timerBar.style.background = 'linear-gradient(90deg, #d97706, #f59e0b, #fbbf24)';
+        } else {
+            timerBar.style.background = 'linear-gradient(90deg, #059669, #10b981, #34d399)';
         }
+        if (qrCountdown <= 0) { clearInterval(refreshInt); loadQR(); }
     }
 
     // ── Check token ──
@@ -239,44 +330,26 @@
         if (reloadPending) return;
         fetch("{{ route('api.qr.token-status') }}")
             .then(r => r.json())
-            .then(d => {
-                if (d.used) {
-                    reloadPending = true;
-                    stopAll();
-                    triggerSweep();
-                }
-            })
+            .then(d => { if (d.used) { reloadPending = true; stopAll(); triggerSweep(); } })
             .catch(() => {});
     }
 
-    // ── Trigger sweep ──
+    // ── Sweep ──
     function triggerSweep() {
-        timerText.textContent = 'Scanned';
-
-        // 1. Instantly hide QR from view — no double-scan possible
+        timerTxt.textContent = '✓';
+        timerBar.style.transition = 'none';
+        timerBar.style.width = '0%';
         qrInner.style.transition = 'none';
         qrInner.style.opacity = '0';
-
-        // 2. Instantly show block overlay (same color as bg, hidden QR)
         blockEl.classList.remove('hidden');
-
-        // 3. Dim glow ring
-        glowRing.style.transition = 'opacity 0.3s ease';
-        glowRing.style.opacity = '0';
-
-        // 4. Animate green sweep over the block overlay
-        sweepEl.style.transition = 'clip-path 0.38s cubic-bezier(0.22,1,0.36,1)';
+        sweepEl.style.transition = 'clip-path 0.4s cubic-bezier(0.22,1,0.36,1)';
         sweepEl.style.opacity = '1';
         sweepEl.style.clipPath = 'circle(150% at 50% 50%)';
-
-        // 5. Show success checkmark after sweep
         setTimeout(() => {
             overlay.classList.remove('hidden');
             overlay.style.animation = 'successIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both';
-        }, 420);
-
-        // 6. Load new QR seamlessly (no full page reload)
-        setTimeout(() => loadQR(), 2000);
+        }, 440);
+        setTimeout(() => loadQR(), 2200);
     }
 
     function stopAll() {
@@ -291,7 +364,7 @@
         window.addEventListener('resize', () => {
             clearTimeout(resizeDeb);
             resizeDeb = setTimeout(() => {
-                const t = tokenEl.textContent.trim();
+                const t = tokenEl.textContent.replace(/·/g, '').trim();
                 if (t && t !== '——') renderQR(t);
             }, 150);
         });
@@ -300,70 +373,150 @@
 </script>
 
 <style>
+/* ── QR image fill ── */
 #qrcode > img,
 #qrcode > canvas {
     width: 100% !important;
     height: 100% !important;
     display: block;
-    border-radius: 12px;
+    border-radius: 10px;
+}
+
+/* ── Page entrance ── */
+#main-content {
+    animation: mainFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) both;
+}
+.animate-header {
+    animation: fadeDown 0.6s cubic-bezier(0.16,1,0.3,1) both;
+}
+.animate-title {
+    animation: mainFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+}
+.animate-qr {
+    animation: qrPop 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s both;
+}
+.animate-token {
+    animation: mainFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.4s both;
+}
+
+@keyframes mainFadeUp {
+    0%   { opacity: 0; transform: translateY(18px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeDown {
+    0%   { opacity: 0; transform: translateY(-14px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes qrPop {
+    0%   { opacity: 0; transform: scale(0.88) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Blob drift ── */
+.blob-a { animation: blobA 18s ease-in-out infinite; }
+.blob-b { animation: blobB 22s ease-in-out infinite; }
+.blob-c { animation: blobC 16s ease-in-out infinite; }
+@keyframes blobA {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33%       { transform: translate(50px,-30px) scale(1.06); }
+    66%       { transform: translate(-30px,25px) scale(0.94); }
+}
+@keyframes blobB {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    40%       { transform: translate(-40px,30px) scale(1.07); }
+    70%       { transform: translate(30px,-20px) scale(0.96); }
+}
+@keyframes blobC {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50%       { transform: translate(25px,-35px) scale(1.1); }
+}
+
+/* ── Floating shapes ── */
+@keyframes floatA {
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    50%       { transform: translate(8px,-14px) rotate(12deg); }
+}
+@keyframes floatB {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50%       { transform: translate(-6px,-10px) scale(1.15); }
+}
+@keyframes floatC {
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    33%       { transform: translate(5px,-12px) rotate(-8deg); }
+    66%       { transform: translate(-5px,-6px) rotate(6deg); }
 }
 
 /* ── Rotating glow ring ── */
-#glow-ring {
-    animation: ringSpin 6s linear infinite;
+.rotate-border {
+    animation: rotateBorder 6s linear infinite;
+    border-radius: 26px;
 }
-@keyframes ringSpin {
+@keyframes rotateBorder {
     to { transform: rotate(360deg); }
 }
-
-/* ── Particle animation ── */
-@keyframes particleFade {
-    0%   { opacity: 0; transform: translateY(0) scale(0.5); }
-    50%  { opacity: 1; transform: translateY(-12px) scale(1); }
-    100% { opacity: 0; transform: translateY(-24px) scale(0.3); }
+.glow-ring {
+    animation: glowPulse 4s ease-in-out infinite;
+}
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.45; transform: scale(0.98); }
+    50%       { opacity: 0.7;  transform: scale(1.02); }
 }
 
-/* ── Orb animations ── */
-@keyframes orbA {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(40px, -25px) scale(1.08); }
-    66% { transform: translate(-25px, 20px) scale(0.92); }
-}
-@keyframes orbB {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-30px, 20px) scale(1.05); }
-    66% { transform: translate(25px, -15px) scale(0.95); }
-}
-@keyframes orbC {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(20px, -30px) scale(1.1); }
+/* ── Scan line ── */
+@keyframes scanLineLight {
+    0%   { top: 4%; opacity: 0; }
+    8%   { opacity: 0.9; }
+    92%  { opacity: 0.9; }
+    100% { top: 96%; opacity: 0; }
 }
 
-/* ── Road divider scroll ── */
-@keyframes roadScroll {
-    0%   { transform: translateY(-48px); }
-    100% { transform: translateY(0); }
+/* ── Live dot pulse ── */
+.live-dot {
+    animation: livePulse 2.2s ease-in-out infinite;
+}
+@keyframes livePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+    50%       { box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+}
+.live-badge {
+    animation: badgePop 0.7s cubic-bezier(0.16,1,0.3,1) 0.3s both;
+}
+@keyframes badgePop {
+    0%   { opacity: 0; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
-/* ── Entrance ── */
-@keyframes fadeUp {
-    0% { opacity: 0; transform: translateY(20px) scale(0.97); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+/* ── Brand icon hover breathe ── */
+.brand-icon {
+    animation: iconBreathe 4s ease-in-out infinite;
+}
+@keyframes iconBreathe {
+    0%, 100% { box-shadow: 0 4px 14px rgba(16,185,129,0.3); }
+    50%       { box-shadow: 0 6px 20px rgba(16,185,129,0.55); }
+}
+
+/* ── Token glow pulse ── */
+.token-glow {
+    animation: tokenGlow 2.5s ease-in-out infinite;
+}
+@keyframes tokenGlow {
+    0%, 100% { opacity: 0.4; transform: scale(0.97); }
+    50%       { opacity: 0.75; transform: scale(1.03); }
 }
 
 /* ── Success overlay ── */
 @keyframes successIn {
-    0% { opacity: 0; transform: scale(0.85); }
+    0%   { opacity: 0; transform: scale(0.82); }
     100% { opacity: 1; transform: scale(1); }
 }
-
 #scan-success:not(.hidden) svg path {
-    stroke-dasharray: 20;
-    stroke-dashoffset: 20;
-    animation: drawCheck 0.35s ease-out 0.12s forwards;
+    stroke-dasharray: 22;
+    stroke-dashoffset: 22;
+    animation: drawCheck 0.38s ease-out 0.14s forwards;
 }
 @keyframes drawCheck {
     to { stroke-dashoffset: 0; }
 }
 </style>
+
 @endsection
