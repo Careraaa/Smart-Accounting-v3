@@ -83,21 +83,7 @@
                             <span class="text-sm font-bold text-gray-900 tabular-nums font-mono" id="ep_basic_display">₱{{ number_format($payroll->basic_salary??0,2) }}</span>
                         </div>
                         <div id="ep_holiday_rows">
-                            @php $holidayBreakdown = $payroll->holiday_breakdown ?? []; @endphp
-                            @foreach($holidayBreakdown as $hb)
-                            @php
-                                $hbLabel = $hb['label'] ?? 'Holiday Pay';
-                                $hbBadge = 'holiday';
-                                if (preg_match('/^Holiday Pay\s*[—\-]+\s*(.+?)\s*\((.+)\)$/', $hbLabel, $hm)) {
-                                    $hbName  = 'Holiday Pay — ' . $hm[1];
-                                    $hbBadge = $hm[2];
-                                } else { $hbName = 'Holiday Pay — Holiday'; }
-                            @endphp
-                            <div class="flex items-center justify-between py-2.5">
-                                <span class="text-sm text-emerald-600 flex items-center gap-1.5">{{ $hbName }} <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $hbBadge }}</span></span>
-                                <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($hb['amount'], 2) }}</span>
-                            </div>
-                            @endforeach
+                            {{-- Holiday rows are rendered by JavaScript from window._ep.initComputed.holidayBreakdown --}}
                         </div>
                         <div class="flex items-center justify-between py-2.5" id="ep_leave_pay_row" style="display:none;">
                             <span class="text-sm text-emerald-600 flex items-center gap-1.5">Leave Pay <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded" id="ep_leave_pay_badge">0 days</span></span>
@@ -141,8 +127,13 @@
                             <span class="text-sm font-bold text-red-500 tabular-nums font-mono" id="ep_sl_deduct_display">-₱{{ number_format($slDeduction, 2) }}</span>
                         </div>
                         <div class="flex items-center justify-between py-2.5">
-                            <span class="text-sm font-bold text-gray-900">Gross Pay</span>
-                            <span class="text-base font-bold text-gray-900 tabular-nums font-mono" id="ep_adjusted">₱{{ number_format($payroll->gross_pay??0,2) }}</span>
+                            <span class="text-sm font-bold text-gray-900">Initial Net Pay</span>
+                            @php
+                                $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
+                                $computedLeavePay = (float)($leavePayAllowances->sum('amount') ?? 0);
+                                $initialNetPay = max(0, ($payroll->basic_salary??0) + ($payroll->holiday_pay??0) + ($payroll->holiday_ot_pay??0) + $computedLeavePay - ($payroll->undertime_deduction??0) - ($payroll->deductions->where('deduction_type','Late Deduction')->sum('amount')??0) - ($payroll->sss??0) - ($payroll->pagibig??0) - ($payroll->phil_health??$payroll->philhealth??0) - ($payroll->withholding_tax??0) - ($payroll->cash_advance_deduction??0) - ($payroll->salary_loan_deduction??0));
+                            @endphp
+                            <span class="text-base font-bold text-gray-900 tabular-nums font-mono" id="ep_adjusted">₱{{ number_format($initialNetPay, 2) }}</span>
                         </div>
                     </div>
                 </div>
@@ -343,7 +334,8 @@ window._ep = {
         const totalEarnings = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.holidayOTPay ?? 0) + (c.leavePay ?? 0) + (c.otPay ?? 0);
         const manualAllowTotal = allowances.reduce((s,a) => s + a.amount, 0);
         const bonusTotal = bonuses.reduce((s,b) => s + b.amount, 0);
-        $('ep_adjusted').textContent      = fmt(Math.max(0, totalEarnings + manualAllowTotal + bonusTotal));
+        const totalDeductions = (c.utDeduction ?? 0) + (c.late_deduction ?? 0) + (c.sss ?? 0) + (c.pagibig ?? 0) + (c.philhealth ?? 0) + (c.withholdingTax ?? 0) + (c.caDeduction ?? 0) + (c.slDeduction ?? 0);
+        $('ep_adjusted').textContent      = fmt(Math.max(0, totalEarnings + manualAllowTotal + bonusTotal - totalDeductions));
 
         const holidayContainer = $('ep_holiday_rows');
         holidayContainer.querySelectorAll('[data-holiday-item]').forEach(el => el.remove());

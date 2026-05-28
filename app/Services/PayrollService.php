@@ -173,7 +173,7 @@ class PayrollService
             ->map(fn($d) => Carbon::parse($d)->toDateString());
 
         // ── Step 4: Overtime / Undertime ──────────────────────────────────────
-        // REGULAR OT: Recalculate from approved hours × hourlyRate × 1.30.
+        // REGULAR OT: Recalculate from approved hours × hourlyRate × 1.25.
         // We do NOT use the stored `amount` column because HR may have left it
         // as 0/null; recalculating guarantees alignment with the current salary rate.
         // Holiday dates are excluded — those are handled separately below.
@@ -184,51 +184,11 @@ class PayrollService
             ->whereNotIn('date', $holidayDates->toArray());
 
         $otHours = (float) $otQuery->sum('hours');
-        $otPay   = $otHours > 0 ? round($otHours * $hourlyRate * 1.30, 2) : 0.0;
+        $otPay   = $otHours > 0 ? round($otHours * $hourlyRate * 1.25, 2) : 0.0;
 
-        // ── Supplement OT from attendance for days with no approved OT record ──
-        // Calendar attendance may show OT (hours > 8) that HR hasn't entered
-        // as an OvertimeUndertime record yet. Include it so payroll is never
-        // missing OT that was actually worked. This aligns "calendar logic" with
-        // "payroll logic" — what the attendance calendar shows is what payroll uses.
-        $allAttendanceDays = Attendance::where('user_id', $employee->id)
-            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-            ->whereIn('status', ['present', 'late'])
-            ->whereNotNull('time_in')
-            ->whereNotNull('time_out')
-            ->get();
-
-        $approvedOTDates = OvertimeUndertime::forUser($employee->id)
-            ->forPeriod($start, $end)
-            ->approved()
-            ->overtime()
-            ->whereNotIn('date', $holidayDates->toArray())
-            ->pluck('date')
-            ->map(fn($d) => $d instanceof Carbon ? $d->toDateString() : Carbon::parse($d)->toDateString())
-            ->toArray();
-
-        $activeShift = Shift::where('is_active', true)->first()
-            ?: Shift::orderBy('created_at')->first();
-
-        $supplementOTHours = 0.0;
-        if ($activeShift) {
-            foreach ($allAttendanceDays as $day) {
-                $dateStr = $day->date instanceof Carbon ? $day->date->toDateString() : Carbon::parse($day->date)->toDateString();
-                if (in_array($dateStr, $approvedOTDates)) continue;
-
-                $otUt = $this->attendanceService->calculateOvertimeAndUndertime($day, $activeShift);
-                $dayOT = $otUt['overtime_hours'] ?? 0.0;
-                if ($dayOT > 0) {
-                    $supplementOTHours += $dayOT;
-                }
-            }
-        }
-
-        if ($supplementOTHours > 0) {
-            $supplementOTPay = round($supplementOTHours * $hourlyRate * 1.30, 2);
-            $otHours += $supplementOTHours;
-            $otPay   += $supplementOTPay;
-        }
+        // NOTE: We NO LONGER auto-detect OT from attendance records.
+        // OT is only paid when explicitly approved by HR via OvertimeUndertime records.
+        // This ensures payroll respects the approval process and doesn't pay unapproved hours.
 
         // ── Holiday OT ─────────────────────────────────────────────────────────
         // Holiday OT from HolidayWageService (computed from attendance hours > 8).
