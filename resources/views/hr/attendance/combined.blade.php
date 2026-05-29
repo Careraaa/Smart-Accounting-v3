@@ -22,19 +22,18 @@
 .table-wrap { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
 .filter-bar { animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
 
-/* OT/UT tab active states */
-.otut-tab.active[data-status="pending"] { background: #f59e0b !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(245,158,11,0.25) !important; }
-.otut-tab.active[data-status="approved"] { background: #10b981 !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(16,185,129,0.25) !important; }
-.otut-tab.active[data-status="rejected"] { background: #ef4444 !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(239,68,68,0.25) !important; }
-.otut-tab.active .otut-badge { background: rgba(255,255,255,0.25) !important; color: #fff !important; }
+/* OT/UT tab active states — can't use Tailwind since JS toggles .active + data-status dynamically */
+.otut-tab.active[data-status="pending"] { background: #f59e0b; color: #fff; box-shadow: 0 2px 8px rgba(245,158,11,0.25); }
+.otut-tab.active[data-status="approved"] { background: #10b981; color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,0.25); }
+.otut-tab.active[data-status="rejected"] { background: #ef4444; color: #fff; box-shadow: 0 2px 8px rgba(239,68,68,0.25); }
 
-/* Dark mode: status dots in attendance records */
+/* Dark mode: status dots (JS-rendered — Tailwind dark: won't compile) */
 html.dark .att-status-dot-red { background: #b91c1c !important; }
 html.dark .att-status-dot-emerald { background: #047857 !important; }
 html.dark .att-status-dot-yellow { background: #a16207 !important; }
 html.dark .att-status-dot-slate { background: #64748b !important; }
 
-/* Dark mode: OT/UT action buttons */
+/* Dark mode: OT/UT action buttons (JS-rendered) */
 html.dark .otut-action-approve { background: rgba(2,44,34,0.6) !important; color: #6ee7b7 !important; }
 html.dark .otut-action-approve:hover { background: rgba(2,44,34,0.8) !important; color: #34d399 !important; }
 html.dark .otut-action-reject { background: rgba(69,10,10,0.6) !important; color: #fca5a5 !important; }
@@ -296,22 +295,14 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
 
         {{-- Status tabs --}}
         <div class="flex items-center gap-1 mb-4 filter-bar">
-            <button class="otut-tab active px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 active:scale-90" data-status="pending" id="otutDefaultTab">
+            <button class="otut-tab active px-4 py-2 text-xs font-bold rounded-lg text-gray-500 dark:text-gray-400 transition-all duration-200 active:scale-90" data-status="pending" id="otutDefaultTab">
                 Pending <span class="otut-badge ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-white/25 text-[10px] font-bold px-1">{{ $pendingCount }}</span>
             </button>
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-90" data-status="approved">
-                Approved <span class="otut-badge ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1">{{ $approvedCount }}</span>
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg text-gray-500 dark:text-gray-400 transition-all duration-200 active:scale-90" data-status="approved">
+                Approved <span class="otut-badge ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-white/25 text-[10px] font-bold px-1">{{ $approvedCount }}</span>
             </button>
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-90" data-status="rejected">
-                Rejected <span class="otut-badge ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-100 text-red-700 text-[10px] font-bold px-1">{{ $rejectedCount }}</span>
-            </button>
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-90"
-                data-status="approved">
-                Approved <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-1">{{ $approvedCount }}</span>
-            </button>
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-90"
-                data-status="rejected">
-                Rejected <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-bold px-1">{{ $rejectedCount }}</span>
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg text-gray-500 dark:text-gray-400 transition-all duration-200 active:scale-90" data-status="rejected">
+                Rejected <span class="otut-badge ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-white/25 text-[10px] font-bold px-1">{{ $rejectedCount }}</span>
             </button>
         </div>
 
