@@ -19,12 +19,15 @@
 
     <style>
         @keyframes bgEntrance {
-            0% { opacity: 0; transform: scale(1.06); }
+            0% { opacity: 0; transform: scale(1.08); }
             100% { opacity: 1; transform: scale(1); }
         }
-        @keyframes bgZoom {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.04); }
+        @keyframes bgPanZoom {
+            0%   { transform: scale(1)      translate(0%, 0%); }
+            25%  { transform: scale(1.12)   translate(-3%, -1%); }
+            50%  { transform: scale(1.15)   translate(1.5%, -2%); }
+            75%  { transform: scale(1.10)   translate(2.5%, 1%); }
+            100% { transform: scale(1.14)   translate(-1.5%, 1.5%); }
         }
         .bg-slide {
             background-size: cover;
@@ -32,10 +35,10 @@
             will-change: opacity, transform;
         }
         .bg-slide.enter {
-            animation: bgEntrance 2s cubic-bezier(0.16,1,0.3,1) both, bgZoom 40s ease-in-out 2s infinite alternate;
+            animation: bgEntrance 2s cubic-bezier(0.16,1,0.3,1) both, bgPanZoom 45s ease-in-out 2s infinite alternate;
         }
         .bg-slide.zoom-only {
-            animation: bgZoom 40s ease-in-out infinite alternate;
+            animation: bgPanZoom 45s ease-in-out infinite alternate;
         }
         .bg-wrap {
             opacity: 0;
