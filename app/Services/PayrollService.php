@@ -242,12 +242,11 @@ class PayrollService
         // ── Undertime ──────────────────────────────────────────────────────────
         // Undertime deduction = hours short × hourly rate.
         // Always recalculated from approved hours to stay consistent.
-        // Also exclude undertime on holiday dates for consistency.
+        // Undertime on holidays is still counted as regular undertime.
         $utQuery = OvertimeUndertime::forUser($employee->id)
             ->forPeriod($start, $end)
             ->approved()
-            ->undertime()
-            ->whereNotIn('date', $holidayDates->toArray());
+            ->undertime();
 
         $utHours          = (float) $utQuery->sum('hours');
         $utDeductionExact = $utHours > 0 ? $utHours * $hourlyRate : 0.0;

@@ -97,7 +97,10 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch('{{ $apiUrl }}?year=' + year)
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                data.forEach(function (h) { holidays[h.date] = h.name; });
+                data.forEach(function (h) {
+                    if (!holidays[h.date]) holidays[h.date] = [];
+                    holidays[h.date].push(h.name);
+                });
                 renderCalendar();
             })
             .catch(function () {});
@@ -119,7 +122,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         for (let d = 1; d <= daysIn; d++) {
             const ds = calState.year + '-' + String(calState.month).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-            const isHoliday = holidays[ds];
+            const dayHolidays = holidays[ds];
+            const isHoliday = !!dayHolidays;
+            const tipText = dayHolidays ? dayHolidays.join(', ') : '';
             let cls = 'relative text-center py-2 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer select-none ';
             if (ds === todayStr) {
                 cls += 'bg-rose-500 text-white shadow-sm shadow-rose-200 ';
@@ -130,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 cls += 'text-gray-700 hover:bg-gray-50 ';
             }
-            html += '<span class="' + cls + '" data-date="' + ds + '"' + (isHoliday ? ' data-tip="' + escHtml(isHoliday) + '"' : '') + '>' + d + '</span>';
+            html += '<span class="' + cls + '" data-date="' + ds + '"' + (isHoliday ? ' data-tip="' + escHtml(tipText) + '"' : '') + '>' + d + '</span>';
         }
 
         calGrid.innerHTML = html;
