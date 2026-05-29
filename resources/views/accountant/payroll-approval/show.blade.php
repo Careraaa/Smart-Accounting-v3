@@ -10,6 +10,12 @@
 .stat-card:nth-child(3) { animation-delay:0.15s; }
 .stat-card:nth-child(4) { animation-delay:0.2s; }
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* Readability: darker labels/descriptions, bigger font for small text */
+.text-gray-400 { color: #6b7280 !important; }
+.text-gray-500 { color: #4b5563 !important; }
+.stat-card p:first-child { font-size: 0.625rem !important; }
+th { font-size: 0.625rem !important; }
 </style>
 @endpush
 

@@ -487,6 +487,7 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::post('payroll-approval/{payroll}/reject', [PayrollApprovalController::class, 'reject'])->name('payroll-approval.reject');
 
     Route::get('/remittance-approval', [RemittanceApprovalController::class, 'index'])->name('remittance-approval.index');
+    Route::get('/remittance-approval/{remittance}', [RemittanceApprovalController::class, 'show'])->name('remittance-approval.show');
     Route::post('/remittance-approval/{remittance}/approve', [RemittanceApprovalController::class, 'approve'])->name('remittance-approval.approve');
     Route::post('/remittance-approval/{remittance}/reject', [RemittanceApprovalController::class, 'reject'])->name('remittance-approval.reject');
 
@@ -504,6 +505,7 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
 
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
     Route::get('/reports/print/payroll-report', [ReportController::class, 'printPayrollReport'])->name('reports.print.payroll-report');
+    Route::get('/reports/print/remittance-report', [ReportController::class, 'printRemittanceReport'])->name('reports.print.remittance-report');
 });
 
 // ===== QR ATTENDANCE ADMIN ROUTES =====

@@ -1,4 +1,4 @@
-<header class="fixed top-0 lg:left-[var(--sidebar-w)] left-0 right-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center transition-all duration-300">
+<header class="fixed top-0 lg:left-[var(--sidebar-w)] left-0 right-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center transition-all duration-500">
     <div class="flex items-center w-full h-full px-4 sm:px-6">
 
         {{-- Mobile menu toggle (hidden on desktop) --}}

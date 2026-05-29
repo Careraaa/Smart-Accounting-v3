@@ -270,7 +270,19 @@
         html.dark .sidebar-sub .sidebar-link { color: #44445a; }
         html.dark .sidebar-sub .sidebar-link:hover { color: #b0b0cc; }
 
-        /* Collapse button */
+        /* Sidebar collapse — main content margin + width and toggle button position */
+        main { width: calc(100% - 240px); margin-left: 240px; transition: width .5s cubic-bezier(.4,0,.2,1), margin-left .5s cubic-bezier(.4,0,.2,1); }
+        body.sidebar-collapsed main { width: calc(100% - 64px); margin-left: 64px; }
+        @media (max-width: 1023px) { main { width: 100% !important; margin-left: 0 !important; transition: none !important; } }
+
+        /* Prevent content elements from animating layout properties during sidebar collapse —
+           override any transition-all / transition on width, height, margin, padding, etc.
+           so only visual/composited properties animate, staying in sync with main's width. */
+        main .main-content * { transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter !important; transition-duration: 0.15s !important; transition-timing-function: ease !important; }
+        #sidebar-collapse-btn { left: 224px; transition: left .5s cubic-bezier(.4,0,.2,1), background-color .2s ease, border-color .2s ease, box-shadow .2s ease, color .2s ease; }
+        body.sidebar-collapsed #sidebar-collapse-btn { left: 48px; }
+
+        /* Collapse button dark */
         html.dark #sidebar-collapse-btn { background: #10101c; border-color: #18182a; color: #44445a; }
         html.dark #sidebar-collapse-btn:hover { background: #18182a; }
 
@@ -468,7 +480,7 @@
     @include('partials.sidebar')
     @include('partials.header')
 
-    <main class="lg:ml-[var(--sidebar-w)] ml-0 bg-gray-100 pt-16 min-h-screen transition-all duration-300" data-global-datepicker="off">
+    <main class="bg-gray-100 pt-16 min-h-screen" data-global-datepicker="off">
         <div class="bg-gray-100">
 
             <div class="main-content px-4 sm:px-7 lg:px-9 py-7">
@@ -852,7 +864,7 @@
             });
         })();
     </script>
-<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.flash-bar,.bn-flash,[class*=\"bg-green-50\"][class*=\"rounded-xl\"],[class*=\"bg-green-50\"][class*=\"rounded-lg\"],[class*=\"bg-red-50\"][class*=\"rounded-xl\"],[class*=\"bg-blue-50\"][class*=\"rounded-xl\"]').forEach(function(el){if(el.offsetParent===null)return;setTimeout(function(){el.style.transition='opacity 0.5s ease,transform 0.5s ease';el.style.opacity='0';el.style.transform='translateY(-8px)';setTimeout(function(){el.remove()},500);},5000);});});</script>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.flash-bar,.bn-flash,[class*="bg-green-50"][class*="rounded-xl"],[class*="bg-green-50"][class*="rounded-lg"],[class*="bg-red-50"][class*="rounded-xl"],[class*="bg-blue-50"][class*="rounded-xl"]').forEach(function(el){if(el.offsetParent===null)return;var c=el.className||'';var hasExact=function(n){return c.match(new RegExp('(^|\\s)'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(\\s|$)'))};if(!hasExact('bg-green-50')&&!hasExact('bg-red-50')&&!hasExact('bg-blue-50'))return;setTimeout(function(){el.style.transition='opacity 0.5s ease,transform 0.5s ease';el.style.opacity='0';el.style.transform='translateY(-8px)';setTimeout(function(){el.remove()},500);},5000);});});</script>
 </body>
 
 </html>

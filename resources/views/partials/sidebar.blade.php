@@ -108,13 +108,13 @@
         /* ── Sidebar collapse ── */
         :root { --sidebar-w: 240px; }
         body.sidebar-collapsed { --sidebar-w: 64px; }
-        .sidebar,
-        body.sidebar-collapsed .sidebar { width: var(--sidebar-w); transition: width .3s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1); }
+        .sidebar { width: 240px; transition: width .5s cubic-bezier(.4,0,.2,1), transform .5s cubic-bezier(.4,0,.2,1); }
+        body.sidebar-collapsed .sidebar { width: 64px; }
         body.sidebar-collapsed .sidebar-text,
         body.sidebar-collapsed .sidebar-caption,
         body.sidebar-collapsed .sidebar-arrow,
         body.sidebar-collapsed .b-brand span:not(.flex-shrink-0),
-        body.sidebar-collapsed #kt-nav-search,
+        body.sidebar-collapsed #kt-nav-search { display: none; }
         body.sidebar-collapsed #kt-search-popup,
         body.sidebar-collapsed .sidebar-sub { display: none; }
         body.sidebar-collapsed .sidebar .sidebar-link { justify-content: center; padding: 10px 0; gap: 0; }
@@ -123,7 +123,7 @@
         @media (max-width: 1023px) {
             .sidebar { transform: translateX(-100%); }
             body.sidebar-open .sidebar { transform: translateX(0); }
-            body.sidebar-collapsed .sidebar { --sidebar-w: 240px; transform: translateX(-100%); }
+            body.sidebar-collapsed .sidebar { width: 240px; transform: translateX(-100%); }
             body.sidebar-collapsed.sidebar-open .sidebar { transform: translateX(0); }
         }
 
@@ -146,7 +146,7 @@
             body.sidebar-open::before { display: none; }
         }
     </style>
-    <button id="sidebar-collapse-btn" class="fixed top-[12px] z-50 w-8 h-8 rounded-full bg-white border-2 border-gray-200 shadow-sm text-gray-400 hover:text-gray-700 hover:border-gray-300 hover:shadow-md transition-all duration-200 hidden lg:flex lg:items-center lg:justify-center" style="left: calc(var(--sidebar-w, 240px) - 16px)" type="button">
+    <button id="sidebar-collapse-btn" class="fixed top-[12px] z-50 w-8 h-8 rounded-full bg-white border-2 border-gray-200 shadow-sm text-gray-400 hover:text-gray-700 hover:border-gray-300 hover:shadow-md hidden lg:flex lg:items-center lg:justify-center" type="button">
         <svg class="w-3.5 h-3.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.5 19l-7-7 7-7"/>
         </svg>

@@ -9,10 +9,19 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    public function remittanceReports()
+    public function remittanceReports(Request $request)
     {
-        $remittances = DailyRemittance::where('status', 'approved')->with('driver', 'pao', 'route')->get();
-        return view('accountant.reports.remittance', compact('remittances'));
+        $month = $request->get('month', now()->month);
+        $year  = $request->get('year', now()->year);
+
+        $remittances = DailyRemittance::where('status', 'approved')
+            ->whereYear('remittance_date', $year)
+            ->whereMonth('remittance_date', $month)
+            ->with('driver', 'pao', 'route')
+            ->orderByDesc('remittance_date')
+            ->get();
+
+        return view('accountant.reports.remittance', compact('remittances', 'month', 'year'));
     }
 
     public function payslips()
@@ -85,9 +94,9 @@ class ReportController extends Controller
         $week   = $request->get('week',  now()->week);
         $month  = $request->get('month', now()->month);
         $year   = $request->get('year',  now()->year);
- 
+  
         $query = Payroll::where('status', 'approved');
- 
+  
         if ($period === 'weekly') {
             $query->whereYear('payroll_period_start', $year)
                   ->whereRaw('WEEK(payroll_period_start) = ?', [$week]);
@@ -97,9 +106,9 @@ class ReportController extends Controller
         } else {
             $query->whereYear('payroll_period_start', $year);
         }
- 
+  
         $payrolls = $query->orderBy('payroll_period_start')->get();
- 
+  
         $batchData = $payrolls
             ->groupBy(fn($p) => $p->payroll_period_start->format('Y-m-d') . '_' . $p->payroll_period_end->format('Y-m-d'))
             ->map(fn($group) => [
@@ -112,9 +121,24 @@ class ReportController extends Controller
             ])
             ->values()
             ->toArray();
- 
+  
         return view('accountant.reports.payroll-print', compact(
             'batchData', 'period', 'week', 'month', 'year'
         ));
+    }
+
+    public function printRemittanceReport(Request $request)
+    {
+        $month = $request->get('month', now()->month);
+        $year  = $request->get('year', now()->year);
+
+        $remittances = DailyRemittance::where('status', 'approved')
+            ->whereYear('remittance_date', $year)
+            ->whereMonth('remittance_date', $month)
+            ->with('driver', 'pao', 'route')
+            ->orderByDesc('remittance_date')
+            ->get();
+
+        return view('accountant.reports.remittance-print', compact('remittances', 'month', 'year'));
     }
 }

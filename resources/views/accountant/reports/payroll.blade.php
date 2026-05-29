@@ -121,46 +121,108 @@ $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? da
                         <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net Pay</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($batchData as $batch)
-                        <tr class="transition-colors hover:bg-gray-50/50">
-                            <td class="px-5 py-3.5 text-xs font-semibold text-gray-900">
-                                {{ \Carbon\Carbon::parse($batch['period_start'])->format('M d') }}
-                                –
-                                {{ \Carbon\Carbon::parse($batch['period_end'])->format('M d, Y') }}
-                            </td>
-                            <td class="px-4 py-3.5 text-center text-xs font-semibold text-gray-700 tabular-nums">{{ $batch['count'] }}</td>
-                            <td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-600">₱{{ number_format($batch['total_gross'], 0) }}</td>
-                            <td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-400">₱{{ number_format($batch['total_deductions'], 0) }}</td>
-                            <td class="px-5 py-3.5 text-right text-xs font-bold tabular-nums text-emerald-600">₱{{ number_format($batch['total_net'], 0) }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center py-12">
-                                <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                <p class="text-xs text-gray-400">No payroll batches for this filter.</p>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
+                <tbody class="divide-y divide-gray-50" id="payrollGrid"></tbody>
             </table>
+        </div>
+        <div id="payrollNoResults" class="hidden">
+            <div class="flex flex-col items-center py-12 text-center">
+                <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <p class="text-xs text-gray-400">No payroll batches for this filter.</p>
+            </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
+            <div class="text-xs text-gray-400" id="payrollInfo">Showing <strong class="text-gray-700">0</strong> batches</div>
+            <nav id="payrollNav" class="flex items-center gap-1"></nav>
         </div>
     </div>
 </div>
 
 <script>
+window.payrollData = {!! json_encode(array_map(function($b) {
+    return [
+        'period'    => \Carbon\Carbon::parse($b['period_start'])->format('M d').' – '.\Carbon\Carbon::parse($b['period_end'])->format('M d, Y'),
+        'count'     => $b['count'],
+        'gross'     => (float) $b['total_gross'],
+        'ded'       => (float) $b['total_deductions'],
+        'net'       => (float) $b['total_net'],
+    ];
+}, $batchData)) !!};
+window.payrollTotals = { gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $sumNet }} };
+
 (function () {
-    var period = document.getElementById('period');
-    if (!period) return;
-    function toggleFilters() {
-        var p = period.value;
-        var w = document.getElementById('weekSelectWrap');
-        var m = document.getElementById('monthSelectWrap');
-        if (w) w.style.display = p === 'weekly' ? 'block' : 'none';
-        if (m) m.style.display = p === 'monthly' ? 'block' : 'none';
+    var grid   = document.getElementById('payrollGrid');
+    var noRes  = document.getElementById('payrollNoResults');
+    var info   = document.getElementById('payrollInfo');
+    var nav    = document.getElementById('payrollNav');
+    var PER = 10, page = 1;
+    var data = window.payrollData;
+
+    function render() {
+        var total = data.length, pages = Math.ceil(total / PER);
+        var start = (page - 1) * PER, end = Math.min(start + PER, total);
+        var pageData = data.slice(start, end);
+        grid.innerHTML = '';
+
+        if (pageData.length === 0) {
+            noRes.classList.remove('hidden');
+        } else {
+            noRes.classList.add('hidden');
+            pageData.forEach(function (b) {
+                var tr = document.createElement('tr');
+                tr.className = 'transition-colors hover:bg-gray-50/50';
+                tr.innerHTML =
+                    '<td class="px-5 py-3.5 text-xs font-semibold text-gray-900">' + b.period + '</td>' +
+                    '<td class="px-4 py-3.5 text-center text-xs font-semibold text-gray-700 tabular-nums">' + b.count + '</td>' +
+                    '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-600">\u20b1' + b.gross.toLocaleString('en-US') + '</td>' +
+                    '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-400">\u20b1' + b.ded.toLocaleString('en-US') + '</td>' +
+                    '<td class="px-5 py-3.5 text-right text-xs font-bold tabular-nums text-emerald-600">\u20b1' + b.net.toLocaleString('en-US') + '</td>';
+                grid.appendChild(tr);
+            });
+            // totals row
+            var tr = document.createElement('tr');
+            tr.className = 'border-t border-gray-100 bg-gray-50/50';
+            tr.innerHTML =
+                '<td class="px-5 py-3.5 text-xs font-bold text-gray-900">Totals</td>' +
+                '<td class="px-4 py-3.5 text-center text-xs font-bold text-gray-900 tabular-nums">' + total + '</td>' +
+                '<td class="px-4 py-3.5 text-right text-xs font-bold text-gray-900 tabular-nums">\u20b1' + window.payrollTotals.gross.toLocaleString('en-US') + '</td>' +
+                '<td class="px-4 py-3.5 text-right text-xs font-bold text-amber-600 tabular-nums">\u20b1' + window.payrollTotals.ded.toLocaleString('en-US') + '</td>' +
+                '<td class="px-5 py-3.5 text-right text-xs font-bold text-emerald-700 tabular-nums">\u20b1' + window.payrollTotals.net.toLocaleString('en-US') + '</td>';
+            grid.appendChild(tr);
+        }
+
+        // pagination info & nav
+        if (info) {
+            if (total === 0) { info.innerHTML = 'No batches to display'; } else {
+                info.innerHTML = 'Showing <strong class="text-gray-700">' + (start + 1) + '</strong>\u2013<strong class="text-gray-700">' + end + '</strong> of <strong class="text-gray-700">' + total + '</strong>';
+            }
+        }
+        if (!nav) return;
+        if (pages <= 1) { nav.innerHTML = ''; return; }
+
+        var base = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+        var actS = base + ' bg-gray-900 text-white border-gray-900';
+        var defS = base + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+        var disS = base + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+
+        var html = '';
+        html += '<button data-p="' + (page - 1) + '" class="' + (page === 1 ? disS : defS) + '">\u2039</button>';
+        for (var i = 1; i <= pages; i++) {
+            html += '<button data-p="' + i + '" class="' + (i === page ? actS : defS) + '">' + i + '</button>';
+        }
+        html += '<button data-p="' + (page + 1) + '" class="' + (page === pages ? disS : defS) + '">\u203a</button>';
+        nav.innerHTML = html;
+        Array.from(nav.querySelectorAll('button[data-p]')).forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var p = parseInt(btn.dataset.p);
+                if (p < 1 || p > pages) return;
+                page = p;
+                render();
+            });
+        });
     }
-    period.addEventListener('change', toggleFilters);
-    toggleFilters();
+
+    render();
 })();
 </script>
 @endsection

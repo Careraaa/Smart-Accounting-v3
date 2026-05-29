@@ -11,8 +11,16 @@ class RemittanceApprovalController extends Controller
 {
     public function index()
     {
-        $remittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')->get();
+        $remittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
+            ->orderByDesc('remittance_date')
+            ->get();
         return view('accountant.remittances-approval.index', compact('remittances'));
+    }
+
+    public function show(DailyRemittance $remittance)
+    {
+        $remittance->load('driver', 'pao', 'route', 'vehicle');
+        return view('accountant.remittances-approval.show', compact('remittance'));
     }
 
     public function approve(DailyRemittance $remittance)
@@ -27,14 +35,7 @@ class RemittanceApprovalController extends Controller
 
     public function reject(Request $request, DailyRemittance $remittance)
     {
-        $request->validate([
-            'rejection_reason' => 'nullable|string|max:255',
-        ]);
-
         $remittance->update(['status' => 'rejected']);
-        $remittance->load('driver', 'pao', 'vehicle');
-
-        RemittanceNotification::remittanceRejected($remittance);
 
         return redirect()->back()->with('success', 'Remittance rejected successfully.');
     }
