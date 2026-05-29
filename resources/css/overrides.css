@@ -674,3 +674,39 @@ body {
 .cal-cell-holiday {
     position: relative;
 }
+
+/* ================================================================
+   Global UI refinements — darker gray text & bigger fonts
+   ================================================================ */
+
+/* Darken gray-400 text site-wide for readability */
+.text-gray-400 {
+    color: #8890a0;
+}
+
+/* Bump tiny stat-label text from 9px → 10px */
+.text-\[9px\] {
+    font-size: 10px !important;
+}
+
+/* Shift common muted/label text one shade darker */
+.stat-label,
+.dash-label,
+.emp-field-label,
+.emp-view-label,
+.prl-hint,
+.prl-field-label,
+.prl-section-label,
+.prl-sub-label,
+.prl-section-divider {
+    color: #6b7280 !important;
+    font-size: 0.75rem !important;
+}
+
+/* Darken field values */
+.prl-field-value,
+.prl-line-key,
+.prl-line-val,
+.prl-line {
+    color: #374151 !important;
+}

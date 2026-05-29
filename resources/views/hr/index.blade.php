@@ -40,7 +40,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances + $pendingSalaryLoans;
 @endphp
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
     {{-- LEFT COLUMN (2/3) --}}
     <div class="lg:col-span-2 space-y-5">
@@ -331,7 +331,7 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
     </div>
 
     {{-- RIGHT COLUMN (1/3): Calendar + To-Do --}}
-    <div class="space-y-5">
+    <div class="space-y-5 max-w-[280px] sticky top-24 self-start">
 
         {{-- Calendar Card --}}
         @include('partials.dashboard-calendar')
