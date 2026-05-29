@@ -5,15 +5,15 @@ $today    = now()->format('Y-m-d');
 $apiUrl   = url('api/holidays');
 @endphp
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="cal-card">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden w-full max-w-[260px]" id="cal-card">
     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Calendar</span>
+        <span class="text-[11px] font-semibold text-gray-600 uppercase tracking-widest">Calendar</span>
         <div class="flex items-center gap-1">
-            <button class="p-1.5 rounded-lg hover:bg-gray-100 transition-all text-gray-400 hover:text-gray-700 active:scale-90" id="cal-prev" type="button">
+            <button class="p-1.5 rounded-lg hover:bg-gray-100 transition-all text-gray-500 hover:text-gray-700 active:scale-90" id="cal-prev" type="button">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
             </button>
             <span class="text-sm font-bold text-gray-900 min-w-[120px] text-center tracking-tight leading-none" id="cal-label">{{ \Carbon\Carbon::createFromDate($calYear, $calMonth, 1)->format('F Y') }}</span>
-            <button class="p-1.5 rounded-lg hover:bg-gray-100 transition-all text-gray-400 hover:text-gray-700 active:scale-90" id="cal-next" type="button">
+            <button class="p-1.5 rounded-lg hover:bg-gray-100 transition-all text-gray-500 hover:text-gray-700 active:scale-90" id="cal-next" type="button">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
         </div>
@@ -21,9 +21,9 @@ $apiUrl   = url('api/holidays');
     <div class="px-3 pt-1 pb-3">
         <div class="grid grid-cols-7 gap-px" id="cal-grid"></div>
         <div class="flex items-center gap-3 mt-3 pt-2.5 border-t border-gray-50">
-            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span class="text-[10px] text-gray-400">Today</span></span>
-            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span><span class="text-[10px] text-gray-400">Selected</span></span>
-            <span class="flex items-center gap-1" id="cal-holiday-legend"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span class="text-[10px] text-gray-400">Holiday</span></span>
+            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span class="text-[11px] text-gray-600">Today</span></span>
+            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span><span class="text-[11px] text-gray-600">Selected</span></span>
+            <span class="flex items-center gap-1" id="cal-holiday-legend"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span class="text-[11px] text-gray-600">Holiday</span></span>
         </div>
     </div>
 </div>
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     '</svg>' +
                 '</div>' +
                 '<div class="min-w-0">' +
-                    '<div class="text-[10px] font-semibold text-amber-600 uppercase tracking-wider leading-tight">Holiday</div>' +
+                    '<div class="text-[11px] font-semibold text-amber-600 uppercase tracking-wider leading-tight">Holiday</div>' +
                     '<div class="text-sm font-semibold text-gray-800 leading-tight mt-0.5 truncate" id="cal-tip-name"></div>' +
                 '</div>' +
             '</div>' +
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let html = '';
 
         ['S','M','T','W','T','F','S'].forEach(function (d) {
-            html += '<span class="text-[9px] font-semibold uppercase tracking-widest text-gray-400 text-center pb-1 pt-2">' + d + '</span>';
+            html += '<span class="text-[10px] font-semibold uppercase tracking-widest text-gray-600 text-center pb-1 pt-2">' + d + '</span>';
         });
 
         for (let i = 0; i < firstDow; i++) {
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (isHoliday) {
                 cls += 'text-amber-700 bg-amber-50 cal-cell-holiday hover:bg-amber-100 ';
             } else {
-                cls += 'text-gray-600 hover:bg-gray-50 ';
+                cls += 'text-gray-700 hover:bg-gray-50 ';
             }
             html += '<span class="' + cls + '" data-date="' + ds + '"' + (isHoliday ? ' data-tip="' + escHtml(isHoliday) + '"' : '') + '>' + d + '</span>';
         }
