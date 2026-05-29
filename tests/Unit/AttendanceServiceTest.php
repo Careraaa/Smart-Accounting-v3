@@ -41,6 +41,27 @@ class AttendanceServiceTest extends TestCase
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
+
+        $capsule->schema()->create('shifts', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable();
+            $table->string('start_time');
+            $table->string('end_time');
+            $table->string('break_start')->nullable();
+            $table->string('break_end')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamps();
+        });
+
+        $capsule->schema()->create('attendance', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->string('date');
+            $table->string('time_in')->nullable();
+            $table->string('time_out')->nullable();
+            $table->string('status')->default('present');
+            $table->timestamps();
+        });
     }
 
     public function test_underTime_should_not_deduct_break_when_attendance_ends_before_break_start()
@@ -81,5 +102,73 @@ class AttendanceServiceTest extends TestCase
 
         $this->assertEquals(4.0, $result['actual_hours']);
         $this->assertEquals(4.0, $result['undertime_hours']);
+    }
+
+    public function test_calculateTotalHoursWorked_excludes_break_only_when_attendance_overlaps_break()
+    {
+        Capsule::table('shifts')->insert([
+            'name' => 'Day Shift',
+            'start_time' => '08:00:00',
+            'end_time' => '17:00:00',
+            'break_start' => '12:00:00',
+            'break_end' => '13:00:00',
+            'is_active' => true,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        $date = Carbon::create(2026, 5, 29);
+        Capsule::table('attendance')->insert([
+            'user_id' => 1,
+            'date' => $date->format('Y-m-d H:i:s'),
+            'time_in' => '08:00:00',
+            'time_out' => '12:00:00',
+            'status' => 'present',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        $service = new AttendanceService();
+        $hours = $service->calculateTotalHoursWorked(
+            1,
+            $date->copy(),
+            $date->copy()
+        );
+
+        $this->assertEquals(4.0, $hours);
+    }
+
+    public function test_calculateTotalHoursWorked_deducts_break_when_attendance_spans_break()
+    {
+        Capsule::table('shifts')->insert([
+            'name' => 'Day Shift',
+            'start_time' => '08:00:00',
+            'end_time' => '17:00:00',
+            'break_start' => '12:00:00',
+            'break_end' => '13:00:00',
+            'is_active' => true,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        $date = Carbon::create(2026, 5, 29);
+        Capsule::table('attendance')->insert([
+            'user_id' => 1,
+            'date' => $date->format('Y-m-d H:i:s'),
+            'time_in' => '08:00:00',
+            'time_out' => '13:00:00',
+            'status' => 'present',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
+        $service = new AttendanceService();
+        $hours = $service->calculateTotalHoursWorked(
+            1,
+            $date->copy(),
+            $date->copy()
+        );
+
+        $this->assertEquals(4.0, $hours);
     }
 }
