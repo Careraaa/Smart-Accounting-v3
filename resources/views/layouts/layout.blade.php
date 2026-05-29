@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
 
 <head>
     <meta charset="utf-8">
@@ -24,13 +24,409 @@
         /* Bootstrap CSS no longer loaded — vendors.min.css replaced with feather.min.css alone */
     </style>
 
+    <style>
+        /* ── Dark Mode ──────────────────────────────────────────── */
+        html.dark { color-scheme: dark; }
+        html.dark body { background: #050508; }
+
+        /* Sidebar */
+        html.dark .sidebar { background: #08080f; border-color: #12121e; }
+        html.dark .sidebar .sidebar-logo { border-color: #12121e; }
+        html.dark .sidebar .sidebar-link { color: #44445a; }
+        html.dark .sidebar .sidebar-link:hover { color: #d0d0e8; background: rgba(255,255,255,.03); }
+        html.dark .sidebar .sidebar-link.active { color: #e8e8f5; }
+        html.dark .sidebar .sidebar-caption label { color: #30304a; }
+        html.dark .sidebar .b-brand span.text-gray-900 { color: #e8e8f5; }
+        html.dark .sidebar .bg-gray-50 { background: #10101c; }
+        html.dark .sidebar input { background: transparent; color: #d0d0e8; }
+
+        /* Header */
+        html.dark header { background: rgba(8,8,15,.88); border-color: #12121e; backdrop-filter: blur(14px); }
+        html.dark header .text-gray-500 { color: #44445a; }
+        html.dark header .text-gray-700 { color: #b8b8d0; }
+        html.dark header .hover\:bg-gray-100 { background: transparent !important; }
+        html.dark header .hover\:bg-gray-100:hover { background: rgba(255,255,255,.05) !important; }
+        html.dark header .bg-white { background: #10101c; }
+        html.dark header .border-gray-100 { border-color: #12121e; }
+        html.dark header .border-gray-200 { border-color: #18182a; }
+
+        /* Main content area */
+        html.dark .bg-gray-100 { background: #050508 !important; }
+        html.dark .bg-gray-50 { background: #0c0c18; }
+        html.dark main.bg-gray-100 { background: #050508 !important; }
+        html.dark main > .bg-gray-100 { background: #050508 !important; }
+        html.dark .main-content { background: #050508; }
+
+        /* Cards / surfaces — override all bg-white */
+        html.dark .bg-white,
+        html.dark .table-wrap,
+        html.dark .stat-card,
+        html.dark .modal-card,
+        html.dark .net-pop,
+        html.dark .hrd-slide-bounce,
+        html.dark .hrd-stat-card,
+        html.dark .hrd-fade-up,
+        html.dark .hrd-slide-right,
+        html.dark .pf2-card { background: #0a0a14 !important; }
+        html.dark .bg-white\/80 { background: rgba(10,10,20,.82); }
+        html.dark .bg-white\/95 { background: rgba(10,10,20,.95); }
+
+        /* Text colors — all gray shades */
+        html.dark .text-gray-900 { color: #e0e0f0 !important; }
+        html.dark .text-gray-800 { color: #cccce0 !important; }
+        html.dark .text-gray-700 { color: #b0b0cc !important; }
+        html.dark .text-gray-600 { color: #78789a !important; }
+        html.dark .text-gray-500 { color: #4e4e6a !important; }
+        html.dark .text-gray-400 { color: #383850 !important; }
+        html.dark .text-gray-300 { color: #24243a !important; }
+
+        /* Borders */
+        html.dark .border-gray-50 { border-color: #0c0c18 !important; }
+        html.dark .divide-gray-50,
+        html.dark .divide-gray-50 > :not([hidden]) ~ :not([hidden]) { border-color: #0c0c18 !important; }
+        html.dark .border-gray-100 { border-color: #12121e !important; }
+        html.dark .divide-gray-100,
+        html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #12121e !important; }
+        html.dark .border-gray-200 { border-color: #18182a !important; }
+        html.dark .divide-gray-200,
+        html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: #18182a !important; }
+        html.dark .border-gray-300 { border-color: #24243a !important; }
+
+        /* Shadows — darken them (no white glow) */
+        html.dark .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,.5); }
+        html.dark .shadow-md { box-shadow: 0 4px 12px rgba(0,0,0,.55); }
+        html.dark .shadow-lg { box-shadow: 0 8px 24px rgba(0,0,0,.6); }
+        html.dark .shadow-xl { box-shadow: 0 20px 60px rgba(0,0,0,.7); }
+        html.dark .shadow-2xl { box-shadow: 0 30px 80px rgba(0,0,0,.8); }
+
+        /* Tables */
+        html.dark table { background: transparent; }
+        html.dark thead { background: #0a0a14; }
+        html.dark th { color: #78789a; border-color: #18182a; }
+        html.dark td { color: #b0b0cc; border-color: #18182a; }
+        html.dark tr { background: transparent; }
+        html.dark tr:hover { background: rgba(255,255,255,.015) !important; }
+
+        /* Kill all gray-50 opacity variant backgrounds (commonly used on table rows) */
+        html.dark [class*="bg-gray-50"] { background: #0c0c18 !important; }
+        html.dark [class*="hover:bg-gray-50"] { background: transparent !important; }
+        html.dark .sidebar .sidebar-link { background: transparent !important; }
+        html.dark .sidebar .sidebar-link:hover { background: rgba(255,255,255,.035) !important; }
+
+        /* Invert status/colored badges for dark mode */
+        html.dark [class*="bg-emerald-50"] { background: rgba(2,44,34,0.6) !important; }
+        html.dark [class*="bg-emerald-50"][class*="text-emerald-"] { color: #6ee7b7 !important; }
+        html.dark [class*="bg-emerald-50"][class*="border-emerald-"] { border-color: #065f46 !important; }
+
+        html.dark [class*="bg-red-50"] { background: rgba(69,10,10,0.6) !important; }
+        html.dark [class*="bg-red-50"][class*="text-red-"] { color: #fca5a5 !important; }
+        html.dark [class*="bg-red-50"][class*="border-red-"] { border-color: #991b1b !important; }
+
+        html.dark [class*="bg-amber-50"] { background: rgba(69,26,3,0.6) !important; }
+        html.dark [class*="bg-amber-50"][class*="text-amber-"] { color: #fcd34d !important; }
+        html.dark [class*="bg-amber-50"][class*="border-amber-"] { border-color: #92400e !important; }
+
+        html.dark [class*="bg-blue-50"] { background: rgba(12,35,102,0.6) !important; }
+        html.dark [class*="bg-blue-50"][class*="text-blue-"] { color: #93c5fd !important; }
+        html.dark [class*="bg-blue-50"][class*="border-blue-"] { border-color: #1d4ed8 !important; }
+
+        html.dark [class*="bg-violet-50"] { background: rgba(46,16,91,0.6) !important; }
+        html.dark [class*="bg-violet-50"][class*="text-violet-"] { color: #c4b5fd !important; }
+        html.dark [class*="bg-violet-50"][class*="border-violet-"] { border-color: #6d28d9 !important; }
+
+        html.dark [class*="bg-indigo-50"] { background: rgba(31,27,85,0.6) !important; }
+        html.dark [class*="bg-indigo-50"][class*="text-indigo-"] { color: #a5b4fc !important; }
+        html.dark [class*="bg-indigo-50"][class*="border-indigo-"] { border-color: #4338ca !important; }
+
+        html.dark [class*="bg-sky-50"] { background: rgba(3,48,73,0.6) !important; }
+        html.dark [class*="bg-sky-50"][class*="text-sky-"] { color: #7dd3fc !important; }
+        html.dark [class*="bg-sky-50"][class*="border-sky-"] { border-color: #0369a1 !important; }
+
+        html.dark [class*="bg-green-50"] { background: rgba(8,52,22,0.6) !important; }
+        html.dark [class*="bg-green-50"][class*="text-green-"] { color: #86efac !important; }
+        html.dark [class*="bg-green-50"][class*="border-green-"] { border-color: #15803d !important; }
+
+        html.dark [class*="bg-yellow-50"] { background: rgba(63,32,4,0.6) !important; }
+        html.dark [class*="bg-yellow-50"][class*="text-yellow-"] { color: #fde047 !important; }
+        html.dark [class*="bg-yellow-50"][class*="border-yellow-"] { border-color: #a16207 !important; }
+
+        html.dark [class*="bg-cyan-50"] { background: rgba(10,55,92,0.6) !important; }
+        html.dark [class*="bg-cyan-50"][class*="text-cyan-"] { color: #67e8f9 !important; }
+        html.dark [class*="bg-cyan-50"][class*="border-cyan-"] { border-color: #0891b2 !important; }
+
+        html.dark [class*="bg-purple-50"] { background: rgba(59,7,100,0.6) !important; }
+        html.dark [class*="bg-purple-50"][class*="text-purple-"] { color: #d8b4fe !important; }
+        html.dark [class*="bg-purple-50"][class*="border-purple-"] { border-color: #7e22ce !important; }
+
+        html.dark [class*="bg-rose-50"] { background: rgba(69,10,26,0.6) !important; }
+        html.dark [class*="bg-rose-50"][class*="text-rose-"] { color: #fb7185 !important; }
+        html.dark [class*="bg-rose-50"][class*="border-rose-"] { border-color: #be123c !important; }
+
+        html.dark [class*="bg-slate-50"] { background: rgba(30,41,59,0.6) !important; }
+        html.dark [class*="bg-slate-50"][class*="text-slate-"] { color: #94a3b8 !important; }
+        html.dark [class*="bg-slate-50"][class*="border-slate-"] { border-color: #334155 !important; }
+
+        /* Invert bg-*-100 badges (tab active states, count badges) */
+        html.dark [class*="bg-emerald-100"] { background: rgba(2,44,34,0.8) !important; }
+        html.dark [class*="bg-emerald-100"][class*="text-emerald-"] { color: #34d399 !important; }
+
+        html.dark [class*="bg-amber-100"] { background: rgba(69,26,3,0.8) !important; }
+        html.dark [class*="bg-amber-100"][class*="text-amber-"] { color: #fbbf24 !important; }
+
+        html.dark [class*="bg-red-100"] { background: rgba(69,10,10,0.8) !important; }
+        html.dark [class*="bg-red-100"][class*="text-red-"] { color: #f87171 !important; }
+
+        html.dark [class*="bg-blue-100"] { background: rgba(12,35,102,0.8) !important; }
+        html.dark [class*="bg-blue-100"][class*="text-blue-"] { color: #60a5fa !important; }
+
+        html.dark [class*="bg-indigo-100"] { background: rgba(31,27,85,0.8) !important; }
+        html.dark [class*="bg-indigo-100"][class*="text-indigo-"] { color: #818cf8 !important; }
+
+        html.dark [class*="bg-violet-100"] { background: rgba(46,16,91,0.8) !important; }
+        html.dark [class*="bg-violet-100"][class*="text-violet-"] { color: #a78bfa !important; }
+
+        html.dark [class*="bg-cyan-100"] { background: rgba(10,55,92,0.8) !important; }
+        html.dark [class*="bg-cyan-100"][class*="text-cyan-"] { color: #22d3ee !important; }
+
+        html.dark [class*="bg-purple-100"] { background: rgba(59,7,100,0.8) !important; }
+        html.dark [class*="bg-purple-100"][class*="text-purple-"] { color: #d8b4fe !important; }
+
+        html.dark [class*="bg-gray-200"] { background: #1c1c30 !important; }
+        html.dark [class*="bg-gray-200"][class*="text-gray-"] { color: #9ca3af !important; }
+
+        /* Department/gray badges — subtle dark pill */
+        html.dark [class*="bg-gray-100"] { background: #14142a !important; }
+        html.dark [class*="bg-gray-100"][class*="text-gray-"] { color: #9ca3af !important; }
+        html.dark [class*="bg-gray-100"][class*="border-gray-200"] { border-color: #1e1e34 !important; }
+
+        /* Calendar legend boxes */
+        html.dark [class*="bg-emerald-100"][class*="border-emerald-300"] { background: rgba(2,44,34,0.8) !important; border-color: #065f46 !important; }
+        html.dark [class*="bg-red-100"][class*="border-red-300"] { background: rgba(69,10,10,0.8) !important; border-color: #991b1b !important; }
+        html.dark [class*="bg-yellow-100"][class*="border-yellow-300"] { background: rgba(63,32,4,0.8) !important; border-color: #a16207 !important; }
+        html.dark [class*="bg-blue-100"][class*="border-blue-300"] { background: rgba(12,35,102,0.8) !important; border-color: #1d4ed8 !important; }
+        html.dark [class*="bg-violet-100"][class*="border-violet-300"] { background: rgba(46,16,91,0.8) !important; border-color: #6d28d9 !important; }
+
+        /* Restore group-hover invert animations on stat cards (override [class*="bg-*-50"] catch-all) */
+        html.dark .group:hover [class*="group-hover:bg-emerald-500"] { background: #10b981 !important; }
+        html.dark .group:hover [class*="group-hover:bg-red-500"] { background: #ef4444 !important; }
+        html.dark .group:hover [class*="group-hover:bg-amber-500"] { background: #f59e0b !important; }
+        html.dark .group:hover [class*="group-hover:bg-blue-500"] { background: #3b82f6 !important; }
+        html.dark .group:hover [class*="group-hover:bg-indigo-500"] { background: #6366f1 !important; }
+        html.dark .group:hover [class*="group-hover:bg-violet-500"] { background: #8b5cf6 !important; }
+        html.dark .group:hover [class*="group-hover:bg-cyan-500"] { background: #06b6d4 !important; }
+        html.dark .group:hover [class*="group-hover:bg-rose-500"] { background: #f43f5e !important; }
+        html.dark .group:hover [class*="group-hover:bg-yellow-500"] { background: #eab308 !important; }
+        html.dark .group:hover [class*="group-hover:bg-green-500"] { background: #22c55e !important; }
+        html.dark .group:hover [class*="group-hover:bg-sky-500"] { background: #0ea5e9 !important; }
+        html.dark .group:hover [class*="group-hover:bg-teal-500"] { background: #14b8a6 !important; }
+        html.dark .group:hover [class*="group-hover:bg-purple-500"] { background: #a855f7 !important; }
+        html.dark .group:hover [class*="group-hover:bg-pink-500"] { background: #ec4899 !important; }
+        html.dark .group:hover [class*="group-hover:bg-gray-500"] { background: #6b7280 !important; }
+        html.dark .group:hover [class*="group-hover:bg-gray-900"] { background: #111827 !important; }
+        html.dark .group:hover [class*="group-hover:text-white"] { color: #fff !important; }
+
+        /* Forms */
+        html.dark input:not([type="checkbox"]):not([type="radio"]),
+        html.dark select,
+        html.dark textarea { background: #0a0a14; border-color: #18182a; color: #cccce0; }
+        html.dark input:focus,
+        html.dark select:focus,
+        html.dark textarea:focus { border-color: #c8292a; }
+        html.dark label { color: #78789a; }
+        html.dark select option { background: #0a0a14; color: #cccce0; }
+
+        /* Dropdowns */
+        html.dark [data-dropdown-menu],
+        html.dark #kt-search-popup,
+        html.dark #notification-dropdown,
+        html.dark #user-dropdown { background: #0a0a14; border-color: #18182a; }
+        html.dark #kt-search-popup .text-gray-800 { color: #cccce0; }
+        html.dark #notification-dropdown .text-gray-900 { color: #e0e0f0; }
+        html.dark #notification-dropdown .text-gray-600 { color: #78789a; }
+        html.dark #notification-dropdown .bg-gray-50\/80 { background: rgba(16,16,28,.8); }
+
+        /* Hover fixes — remove white glow */
+        html.dark .hover\:bg-gray-50:hover,
+        html.dark .hover\:bg-gray-100:hover,
+        html.dark #user-dropdown .hover\:bg-gray-50:hover { background: rgba(255,255,255,.035) !important; }
+        html.dark .hover\:border-gray-300:hover { border-color: #24243a !important; }
+        html.dark .hover\:shadow-sm:hover { box-shadow: 0 1px 3px rgba(0,0,0,.5); }
+        html.dark .hover\:shadow-md:hover { box-shadow: 0 4px 12px rgba(0,0,0,.55); }
+
+        /* Buttons */
+        html.dark .btn-uv-pill { color: #78789a; }
+
+        /* Sidebar search */
+        html.dark #kt-nav-search .bg-gray-50 { background: #10101c; }
+        html.dark #kt-nav-search .border-gray-200 { border-color: #18182a; }
+        html.dark #kt-nav-search input { color: #cccce0; }
+        html.dark #kt-nav-search .focus-within\:bg-white:focus-within { background: #0a0a14 !important; }
+
+        /* Flash messages */
+        html.dark .bg-blue-50 { background: rgba(20,50,140,.25); border-color: rgba(20,50,140,.35); }
+        html.dark .text-blue-700 { color: #7aabf0; }
+
+        /* Submenu */
+        html.dark .sidebar-sub .sidebar-link { color: #44445a; }
+        html.dark .sidebar-sub .sidebar-link:hover { color: #b0b0cc; }
+
+        /* Collapse button */
+        html.dark #sidebar-collapse-btn { background: #10101c; border-color: #18182a; color: #44445a; }
+        html.dark #sidebar-collapse-btn:hover { background: #18182a; }
+
+        /* Confirm modal */
+        html.dark #sa-confirm-modal { background: #0a0a14; border-color: #18182a; }
+        html.dark .sa-confirm-title { color: #e0e0f0; }
+        html.dark .sa-confirm-msg { color: #78789a; }
+        html.dark .sa-confirm-btn.ghost { background: #10101c; color: #cccce0; border-color: #18182a; }
+        html.dark .sa-confirm-btn.ghost:hover { background: #18182a; }
+
+        /* Smooth dark/light mode transition — lightweight, only color/bg/border on key containers */
+        body, .sidebar, header, main, .bg-white, .bg-gray-100, .bg-gray-50,
+        table, thead, th, td, tr, input, select, textarea,
+        [class*="border-"], [class*="divide-"], [class*="text-"],
+        .main-content, .card, [class*="bg-emerald"], [class*="bg-red"],
+        [class*="bg-amber"], [class*="bg-blue"], [class*="bg-indigo"],
+        [class*="bg-violet"], [class*="bg-cyan"], [class*="bg-rose"],
+        [class*="bg-gray"], [class*="bg-sky"], [class*="bg-green"],
+        [class*="bg-yellow"], [class*="bg-purple"], [class*="bg-slate"] {
+            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+
+        /* Dark mode toggle tooltip (calendar-style, bottom) */
+        .dark-tip {
+            position: relative;
+        }
+        .dark-tip::before,
+        .dark-tip::after {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            transform: translateX(-50%) translateY(-4px);
+            z-index: 9999;
+        }
+        .dark-tip::before {
+            content: attr(data-tip);
+            top: calc(100% + 5px);
+            white-space: nowrap;
+            padding: 5px 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #374151;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            line-height: 1.4;
+        }
+        .dark-tip::after {
+            content: '';
+            top: calc(100% - 1px);
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-left: 1px solid #e5e7eb;
+            border-top: 1px solid #e5e7eb;
+            transform: translateX(-50%) translateY(-4px) rotate(45deg);
+            box-shadow: -2px -2px 4px rgba(0,0,0,.04);
+        }
+        .dark-tip:hover::before,
+        .dark-tip:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .dark-tip:hover::after {
+            transform: translateX(-50%) translateY(0) rotate(45deg);
+        }
+
+        /* Dark mode toggle tooltip — dark variant */
+        html.dark .dark-tip::before {
+            background: #0a0a14;
+            border-color: #18182a;
+            color: #b0b0cc;
+            box-shadow: 0 4px 12px rgba(0,0,0,.4);
+        }
+        html.dark .dark-tip::after {
+            background: #0a0a14;
+            border-left-color: #18182a;
+            border-top-color: #18182a;
+            box-shadow: -2px -2px 4px rgba(0,0,0,.3);
+        }
+
+        /* Dark mode toggle */
+        html.dark #dark-mode-toggle { background: #18182a !important; }
+        html.dark #dark-mode-toggle:has(:checked) { background: #080810 !important; }
+        html.dark #dark-mode-toggle span { background: #30304a; }
+        html.dark #dark-mode-toggle:has(:checked) span { background: #b8b8d0 !important; }
+
+        /* Profile page (pf2 classes) */
+        html.dark .pf2-page { background: #050508; }
+        html.dark .pf2-card { border-color: #18182a; }
+        html.dark .pf2-card-head { border-color: #18182a; }
+        html.dark .pf2-input { background: #0a0a14; border-color: #18182a; color: #cccce0; }
+        html.dark .pf2-input:focus { border-color: #c8292a; }
+        html.dark .pf2-field-label { color: #78789a; }
+        html.dark .pf2-title { color: #e0e0f0; }
+        html.dark .pf2-sub { color: #78789a; }
+        html.dark .pf2-hero-name { color: #e0e0f0; }
+        html.dark .pf2-hero-meta { color: #78789a; }
+        html.dark .pf2-avatar { background: #0a0a14; color: #b8b8d0; border-color: #18182a; }
+        html.dark .pf2-btn { background: #0a0a14; color: #b0b0cc; border-color: #18182a; }
+        html.dark .pf2-btn:hover { background: #101020; }
+        html.dark .pf2-btn-primary { background: #c8292a; }
+        html.dark .pf2-btn-primary:hover { background: #a81f20; }
+        html.dark .pf2-help { color: #4e4e6a; }
+        html.dark .pf2-divider { border-color: #18182a; }
+        html.dark .pf2-chip { background: #10101c; color: #78789a; border-color: #18182a; }
+        html.dark .pf2-backdrop .pf2-grid div { background: rgba(255,255,255,.015); }
+
+        /* Calendar (prl-calendar classes) */
+        html.dark .prl-calendar-container { background: transparent; }
+        html.dark .prl-calendar { background: #0a0a14; border-color: #18182a; }
+        html.dark .prl-calendar-header { border-color: #18182a; }
+        html.dark .prl-calendar-title { color: #e0e0f0; }
+        html.dark .prl-calendar-btn { background: #10101c; color: #78789a; border-color: #18182a; }
+        html.dark .prl-calendar-btn:hover { background: #18182a; color: #b0b0cc; }
+        html.dark .prl-calendar-weekday { color: #4e4e6a; }
+        html.dark .prl-calendar-date { color: #b0b0cc; }
+        html.dark .prl-calendar-date:hover { background: rgba(255,255,255,.03); }
+        html.dark .prl-calendar-date.other-month { color: #24243a; }
+        html.dark .prl-calendar-date.today { background: rgba(200,41,42,.15); color: #e0e0f0; }
+        html.dark .prl-calendar-date.holiday { color: #f87171; }
+        html.dark .prl-calendar-date.selected { background: #c8292a; color: #fff; }
+        html.dark .prl-calendar-footer { border-color: #18182a; }
+        html.dark .prl-calendar-link { color: #4e4e6a; }
+        html.dark .prl-calendar-link:hover { color: #b0b0cc; }
+
+        /* Employee show page cards */
+        html.dark .rounded-2xl.overflow-hidden.shadow-sm,
+        html.dark [class*="rounded-2xl"][class*="shadow-sm"] { background: #0a0a14; border-color: #18182a; }
+
+        /* General hover:bg-gray-50  remap */
+        html.dark [class*="hover:bg-gray-50"]:hover { background: rgba(255,255,255,.03) !important; }
+
+        /* Attendance calendar page */
+        html.dark .bg-gray-50.border { background: #0c0c18; border-color: #18182a; }
+
+        /* Badge/pill backgrounds */
+        html.dark .bg-gray-100 { background: #10101c; }
+
+        /* Pagination */
+        html.dark .page-link { background: #0a0a14; border-color: #18182a; color: #b0b0cc; }
+        html.dark .page-link:hover { background: #10101c; }
+        html.dark .page-item.active .page-link { background: #c8292a; border-color: #c8292a; }
+    </style>
+
     @stack('styles')
 </head>
 
 <body>
 
     {{-- Page loader --}}
-    <div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-white">
+    <script>document.write('<div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center" style="background:'+(localStorage.getItem('dark-mode')==='true'?'#050508':'#ffffff')+'">');</script>
         <div class="loader relative w-[200px] h-[200px]" style="perspective:800px">
             <div class="crystal"></div>
             <div class="crystal"></div>
@@ -351,6 +747,34 @@
                 const ok = await window.saConfirm({ message: msg });
                 if (ok && btn.href) window.location.href = btn.href;
             }, true);
+        })();
+    </script>
+
+    <script>
+        // ── Dark Mode Toggle ──────────────────────────────────────────
+        (function() {
+            var html = document.documentElement;
+            var toggle = document.getElementById('darkModeCheckbox');
+            var key = 'dark-mode';
+
+            // Restore saved preference
+            if (localStorage.getItem(key) === 'true') {
+                html.classList.add('dark');
+                if (toggle) toggle.checked = true;
+            }
+
+            if (toggle) {
+                toggle.addEventListener('change', function() {
+                    var isDark = this.checked;
+                    html.classList.add('dt-flash');
+                    requestAnimationFrame(function() {
+                        html.classList.toggle('dark', isDark);
+                        localStorage.setItem(key, isDark);
+                        html.offsetHeight;
+                        html.classList.remove('dt-flash');
+                    });
+                });
+            }
         })();
     </script>
 

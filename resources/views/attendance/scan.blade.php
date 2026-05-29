@@ -23,24 +23,18 @@
 @endpush
 
 @section('content')
-<div class="min-h-screen bg-gray-50/60">
+<div class="min-h-screen">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
 
         {{-- Top Bar --}}
-        <div class="anim-header flex items-center justify-between gap-4 bg-gray-900 rounded-2xl px-6 py-5 mb-6 shadow-xl relative overflow-hidden">
-            <div class="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-rose-700/10 pointer-events-none"></div>
-            <div class="absolute -bottom-12 left-1/4 w-40 h-40 rounded-full bg-white/[0.04] pointer-events-none"></div>
-
-            <div class="relative z-10">
-                <p class="text-xs font-bold tracking-widest text-gray-500 uppercase mb-0.5">Attendance</p>
-                <h1 class="text-xl font-extrabold tracking-tight text-white leading-tight">Scan QR Code</h1>
+        <div class="anim-header flex items-center justify-between gap-4 mb-6">
+            <div>
+                <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">Attendance</p>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Scan QR Code</h1>
             </div>
-
-            <div class="relative z-10 flex flex-col items-end gap-1">
-                <div class="flex flex-col items-end bg-white/10 border border-white/[0.14] rounded-xl px-4 py-2.5">
-                    <div id="current-date" class="text-[0.6rem] font-semibold text-gray-400 leading-none mb-1"></div>
-                    <div id="time-display" class="text-sm font-bold text-white tabular-nums leading-none font-mono"></div>
-                </div>
+            <div class="flex flex-col items-end gap-1 bg-white dark:bg-[#0a0a14] border border-gray-200 dark:border-[#18182a] rounded-xl px-4 py-2.5">
+                <div id="current-date" class="text-[0.6rem] font-semibold text-gray-400 dark:text-gray-500 leading-none mb-1"></div>
+                <div id="time-display" class="text-sm font-bold text-gray-700 dark:text-gray-300 tabular-nums leading-none font-mono"></div>
             </div>
         </div>
 

@@ -47,6 +47,7 @@
         .bg-wrap.loaded {
             opacity: 1;
         }
+
     </style>
 </head>
 

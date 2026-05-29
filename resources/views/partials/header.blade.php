@@ -27,6 +27,12 @@
         {{-- Right side icons --}}
         <div class="flex items-center gap-0.5 ml-auto">
 
+            {{-- Dark mode toggle --}}
+            <label class="dark-tip relative inline-block h-5 w-9 cursor-pointer rounded-full bg-gray-300 transition [-webkit-tap-highlight-color:_transparent] has-[:checked]:bg-gray-900" id="dark-mode-toggle" data-tip="Toggle dark mode">
+                <input class="peer sr-only" id="darkModeCheckbox" type="checkbox" />
+                <span class="absolute inset-y-0 start-0 m-[3px] size-3.5 rounded-full bg-gray-300 ring-[3px] ring-inset ring-white transition-all peer-checked:start-[18px] peer-checked:w-1 peer-checked:bg-white peer-checked:ring-transparent"></span>
+            </label>
+
             {{-- Fullscreen --}}
             <a href="javascript:void(0);" class="hidden sm:flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors" id="kt-fullscreen-btn">
                 <i class="feather-maximize" style="font-size:16px"></i>

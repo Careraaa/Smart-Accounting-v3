@@ -52,7 +52,7 @@ input:-webkit-autofill:focus {
     <div class="text-center mb-7 animate-[fadeUp_0.5s_cubic-bezier(0.16,1,0.3,1)_both]">
         <img src="{{ asset('images/knights-icon.png') }}" alt="Knights Transport"
             class="hidden md:block mx-auto w-14 h-14 object-contain rounded-xl mb-4">
-        <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">Welcome</h1>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight"><span id="typewriter"></span><span class="animate-pulse">|</span></h1>
         <p class="text-sm text-gray-400 mt-1">Sign in to your account to continue.</p>
     </div>
 
@@ -125,6 +125,21 @@ input:-webkit-autofill:focus {
 
     <script>
     (function () {
+        (function typewriter() {
+            var el = document.getElementById('typewriter');
+            if (!el) return;
+            var text = 'Welcome';
+            var i = 0;
+            function next() {
+                if (i < text.length) {
+                    el.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(next, 80 + Math.random() * 60);
+                }
+            }
+            next();
+        })();
+
         var toggle = document.getElementById('togglePassword');
         var input  = document.getElementById('password');
         var closed = document.getElementById('eyeClosed');
