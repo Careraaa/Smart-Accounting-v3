@@ -177,8 +177,10 @@ $user = auth()->user();
         </div>
 
         {{-- RIGHT COLUMN (1/3): Calendar --}}
-        <div class="space-y-3 sticky top-24 self-start">
-            @include('partials.dashboard-calendar')
+        <div class="space-y-3">
+            <div class="sticky top-24">
+                @include('partials.dashboard-calendar')
+            </div>
         </div>
     </div>
 

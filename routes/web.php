@@ -334,9 +334,6 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::post('/settings/attendance-settings', [\App\Http\Controllers\HR\ConfigurationController::class, 'updateAttendanceSettings'])->name('settings.attendance-settings.update');
     });
 
-    // Define specific overtime routes before resource routes to prevent conflicts
-    Route::get('/overtime/pending', [OvertimeUndertimeController::class, 'pendingRequests'])
-        ->name('overtime.pending');
     Route::get('/overtime/approved', [OvertimeUndertimeController::class, 'index'])
         ->name('overtime.approved')
         ->defaults('status', 'approved');

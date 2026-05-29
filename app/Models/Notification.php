@@ -232,7 +232,7 @@ class Notification extends Model
                 return route('overtime.index');
 
             case 'overtime_pending_approval':
-                return route('overtime.pending');
+                return route('attendance.index', ['tab' => 'otut']);
 
             // Remittance related notifications
             case 'remittance_created':

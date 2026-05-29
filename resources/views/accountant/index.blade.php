@@ -315,10 +315,11 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                     </div>
                     @else
                     <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No status data yet.</div>
-                    @endif
-                </div>
-            </div>
+        @endif
         </div>
+        </div>
+    </div>
+</div>
 
 
         {{-- Charts row 2 --}}
@@ -406,7 +407,8 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
     </div>
 
     {{-- RIGHT COLUMN (1/3): Calendar + To-Do --}}
-    <div class="space-y-5 max-w-[280px] sticky top-24 self-start">
+    <div class="space-y-5 max-w-[280px]">
+        <div class="sticky top-24 space-y-5">
 
         {{-- Calendar Card --}}
         @include('partials.dashboard-calendar')

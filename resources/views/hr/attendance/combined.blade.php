@@ -261,15 +261,39 @@
             </div>
         </div>
 
-        {{-- Recent pending requests --}}
-        <div class="flex items-center justify-between mb-4 filter-bar">
-            <div class="text-sm font-semibold text-gray-700">Pending Requests</div>
-            <a href="{{ route('overtime.pending') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 hover:shadow-sm transition-all duration-200">
-                View All
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </a>
+        {{-- Filters & tabs --}}
+        <div class="filter-bar flex items-center justify-between mb-4 flex-wrap gap-3">
+            <div class="flex items-center gap-2">
+                <input type="text" id="otutSearch" placeholder="Search employee…"
+                    class="w-52 px-3.5 py-2 text-sm border border-gray-200 rounded-xl bg-white text-gray-900 placeholder-gray-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 hover:border-gray-300">
+                <select id="otutTypeFilter"
+                    class="px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white text-gray-700 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 hover:border-gray-300 cursor-pointer">
+                    <option value="all">All Types</option>
+                    <option value="overtime">Overtime</option>
+                    <option value="undertime">Undertime</option>
+                </select>
+            </div>
+            <span class="text-xs font-semibold text-gray-500 bg-gray-100 border border-gray-200 rounded-lg px-2.5 py-1.5" id="otutResultCount">0 requests</span>
         </div>
 
+        {{-- Status tabs --}}
+        <div class="flex items-center gap-1 mb-4 filter-bar">
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 active scale-90"
+                data-status="pending"
+                style="background:#f59e0b;color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);" id="otutDefaultTab">
+                Pending <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-white/25 text-[10px] font-bold px-1">{{ $pendingCount }}</span>
+            </button>
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200"
+                data-status="approved">
+                Approved <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1">{{ $approvedCount }}</span>
+            </button>
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200"
+                data-status="rejected">
+                Rejected <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-100 text-red-700 text-[10px] font-bold px-1">{{ $rejectedCount }}</span>
+            </button>
+        </div>
+
+        {{-- Table --}}
         <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -277,59 +301,54 @@
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
                             <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
-                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Hours</th>
                             <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Hours</th>
+                            <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Amount</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse($recentOtUt as $req)
-                            <tr class="border-b border-gray-100 hover:bg-amber-50/30 transition-colors duration-150">
-                                <td class="px-4 py-3.5">
-                                    <div class="flex items-center gap-2.5">
-                                        <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 uppercase shrink-0">
-                                            {{ strtoupper(substr($req->employee->first_name ?? 'U', 0, 1) . substr($req->employee->last_name ?? '', 0, 1)) }}
-                                        </div>
-                                        <div class="font-semibold text-gray-900 text-sm">{{ $req->employee->first_name ?? 'Unknown' }} {{ $req->employee->last_name ?? '' }}</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3.5 text-center">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold {{ $req->type === 'overtime' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-amber-50 text-amber-700 border border-amber-200' }}">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                            @if($req->type === 'overtime')
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                                            @else
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/>
-                                            @endif
-                                        </svg>
-                                        {{ $req->type === 'overtime' ? 'OT' : 'UT' }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3.5 text-center font-mono text-sm font-semibold text-gray-700">{{ number_format($req->hours ?? 0, 1) }}h</td>
-                                <td class="px-4 py-3.5 text-sm text-gray-600">{{ $req->date ? \Carbon\Carbon::parse($req->date)->format('M d, Y') : '—' }}</td>
-                                <td class="px-4 py-3.5">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                        Pending
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="100">
-                                    <div class="flex flex-col items-center justify-center py-16 text-center">
-                                        <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
-                                            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>
-                                        </div>
-                                        <p class="text-sm font-semibold text-gray-700">No pending OT/UT requests</p>
-                                        <p class="text-xs text-gray-400 mt-1">All caught up — nothing to review.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
+                    <tbody id="otutTbody"></tbody>
                 </table>
             </div>
+
+            <div id="otutNoResults" class="hidden">
+                <div class="flex flex-col items-center justify-center py-16 text-center">
+                    <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 8v4m0 4h.01"/></svg>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-700" id="otutEmptyTitle">No pending requests</p>
+                    <p class="text-xs text-gray-400 mt-1" id="otutEmptySub">All caught up — nothing to review.</p>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50 flex-wrap gap-3">
+                <div class="text-xs text-gray-400" id="otutPaginationInfo">No requests to display</div>
+                <nav id="otutPaginationNav"></nav>
+            </div>
+        </div>
+    </div>
+
+    {{-- Reject modal --}}
+    <div class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[9999] p-5" id="otutRejectModal">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-7">
+            <div class="mb-5">
+                <h3 class="text-lg font-bold text-gray-900 mb-1">Reject Request</h3>
+                <p class="text-xs text-gray-400" id="otutRejectModalSub">Provide a reason for rejecting this request.</p>
+            </div>
+            <form id="otutRejectForm" method="POST">
+                @csrf
+                <div class="mb-6">
+                    <label for="otutRejectReason" class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Rejection Reason <span class="text-amber-600">*</span></label>
+                    <textarea name="rejection_reason" id="otutRejectReason"
+                        class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-900 bg-gray-50/50 outline-none resize-y min-h-[80px] focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 focus:bg-white transition-colors"
+                        placeholder="Enter reason for rejection…" required></textarea>
+                </div>
+                <div class="flex gap-2.5 justify-end">
+                    <button type="button" id="otutRejectCancel" class="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200">Cancel</button>
+                    <button type="submit" class="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-colors bg-red-600/80 text-white hover:bg-red-700/80">Confirm Rejection</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -357,6 +376,19 @@ window.todayAttendance = {!! json_encode($todayAttendance->map(fn($a) => [
     'time_out' => $a->time_out,
     'status' => $a->status,
 ])->keyBy('user_id')) !!};
+
+window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
+    'id' => $r->id,
+    'firstName' => $r->employee?->first_name ?? 'Unknown',
+    'lastName'  => $r->employee?->last_name ?? '',
+    'name' => strtolower(trim(($r->employee?->first_name ?? '') . ' ' . ($r->employee?->last_name ?? ''))),
+    'type' => $r->type,
+    'date' => $r->date->format('M d, Y'),
+    'dateSort' => $r->date->format('Y-m-d'),
+    'hours' => (float) $r->hours,
+    'amount' => (float) abs($r->amount),
+    'status' => $r->status,
+])) !!};
 
 (function(){
     // ── Tab switching ──
@@ -541,6 +573,182 @@ window.todayAttendance = {!! json_encode($todayAttendance->map(fn($a) => [
     }
     setInterval(pollNotifications, 30000);
     pollNotifications();
+
+    // ── OT/UT Overview: tabs, filter, pagination ──
+    (function () {
+        if (!window.allOtRequests) return;
+        var PER = 15, page = 1, curStatus = 'pending', filtered = [];
+        var tbody = document.getElementById('otutTbody');
+        var noRes = document.getElementById('otutNoResults');
+        var emptyT = document.getElementById('otutEmptyTitle');
+        var emptyS = document.getElementById('otutEmptySub');
+        var countEl = document.getElementById('otutResultCount');
+        var search = document.getElementById('otutSearch');
+        var typeF  = document.getElementById('otutTypeFilter');
+
+        function switchTab(status) {
+            curStatus = status;
+            document.querySelectorAll('.otut-tab').forEach(function (btn) {
+                var isActive = btn.dataset.status === status;
+                if (isActive) {
+                    btn.style.background = '#f59e0b';
+                    btn.style.color = '#fff';
+                    btn.style.borderColor = 'transparent';
+                    btn.style.boxShadow = '0 2px 8px rgba(245,158,11,0.25)';
+                } else {
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    btn.style.borderColor = '';
+                    btn.style.boxShadow = '';
+                }
+            });
+            page = 1;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            var q = search ? search.value.toLowerCase().trim() : '';
+            var t = typeF ? typeF.value : 'all';
+            filtered = window.allOtRequests.filter(function (r) {
+                if (r.status !== curStatus) return false;
+                if (t !== 'all' && r.type !== t) return false;
+                if (q && !r.name.includes(q)) return false;
+                return true;
+            });
+            page = 1;
+            render();
+        }
+
+        function render() {
+            var start = (page - 1) * PER;
+            var end = Math.min(start + PER, filtered.length);
+            var pageData = filtered.slice(start, end);
+            tbody.innerHTML = '';
+            if (countEl) countEl.textContent = filtered.length + ' ' + (filtered.length === 1 ? 'request' : 'requests');
+
+            if (pageData.length === 0) {
+                noRes.classList.remove('hidden');
+                var labels = { pending: ['No pending requests', 'All caught up — nothing awaiting review.'], approved: ['No approved requests', 'No approved requests yet.'], rejected: ['No rejected requests', 'No rejected requests yet.'] };
+                var l = labels[curStatus] || ['No requests found', 'Try adjusting your filters.'];
+                emptyT.textContent = filtered.length === 0 ? l[0] : 'No results found';
+                emptyS.textContent = filtered.length === 0 ? l[1] : 'Try adjusting your search or filters.';
+            } else {
+                noRes.classList.add('hidden');
+                pageData.forEach(function (r) {
+                    var initials = (r.firstName.charAt(0) + r.lastName.charAt(0)).toUpperCase() || '?';
+                    var isOt = r.type === 'overtime';
+                    var typeCls = isOt ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-amber-50 text-amber-700 border border-amber-200';
+                    var typeLabel = isOt ? 'OT' : 'UT';
+                    var statusCls = r.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : r.status === 'rejected' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-700 border border-amber-200';
+                    var statusDot = r.status === 'approved' ? 'bg-emerald-500' : r.status === 'rejected' ? 'bg-red-500' : 'bg-amber-500';
+                    var statusLabel = r.status.charAt(0).toUpperCase() + r.status.slice(1);
+
+                    var row = document.createElement('tr');
+                    row.className = 'border-b border-gray-100 hover:bg-amber-50/30 transition-colors duration-150';
+                    var actionsHtml = '';
+                    if (r.status === 'pending') {
+                        actionsHtml = '<div class="flex items-center justify-center gap-1">' +
+                            '<form method="POST" action="/overtime/' + r.id + '/approve" style="display:inline">' +
+                                '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
+                                '<button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer border-none" title="Approve">' +
+                                    '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' +
+                                '</button>' +
+                            '</form>' +
+                            '<button onclick="openOtutRejectModal(' + r.id + ',\'' + r.firstName + ' ' + r.lastName + '\')" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-colors flex items-center justify-center cursor-pointer border-none" title="Reject">' +
+                                '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
+                            '</button>' +
+                        '</div>';
+                    } else {
+                        actionsHtml = '<span class="text-xs text-gray-300 block text-center">—</span>';
+                    }
+
+                    row.innerHTML =
+                        '<td class="px-4 py-3.5"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 uppercase shrink-0">' + initials + '</div><div class="font-semibold text-gray-900 text-sm">' + r.firstName + ' ' + r.lastName + '</div></div></td>' +
+                        '<td class="px-4 py-3.5 text-center"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ' + typeCls + '"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="' + (isOt ? 'M12 4v16m8-8H4' : 'M20 12H4') + '"/></svg>' + typeLabel + '</span></td>' +
+                        '<td class="px-4 py-3.5 text-sm text-gray-600">' + r.date + '</td>' +
+                        '<td class="px-4 py-3.5 text-center font-mono text-sm font-semibold text-gray-700">' + r.hours.toFixed(1) + 'h</td>' +
+                        '<td class="px-4 py-3.5 text-right font-mono text-sm font-bold text-emerald-600">₱' + r.amount.toFixed(2) + '</td>' +
+                        '<td class="px-4 py-3.5 text-center"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ' + statusCls + '"><span class="w-1.5 h-1.5 rounded-full ' + statusDot + '"></span>' + statusLabel + '</span></td>' +
+                        '<td class="px-4 py-3.5">' + actionsHtml + '</td>';
+                    tbody.appendChild(row);
+                });
+            }
+            updatePagination();
+        }
+
+        function updatePagination() {
+            var total = filtered.length, pages = Math.ceil(total / PER);
+            var info = document.getElementById('otutPaginationInfo');
+            var nav  = document.getElementById('otutPaginationNav');
+            if (!info || !nav) return;
+            if (total === 0) { info.innerHTML = 'No requests to display'; nav.innerHTML = ''; return; }
+            var s = (page - 1) * PER + 1, e = Math.min(page * PER, total);
+            info.innerHTML = 'Showing <strong class="text-gray-600">' + s + '</strong>\u2013<strong class="text-gray-600">' + e + '</strong> of <strong class="text-gray-600">' + total + '</strong>';
+
+            if (pages <= 1) { nav.innerHTML = ''; return; }
+            var html = '<div class="flex items-center gap-1">';
+            html += '<button class="w-7 h-7 rounded-lg border border-gray-200 bg-white text-gray-500 text-xs font-semibold flex items-center justify-center hover:bg-gray-100 transition-colors ' + (page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer') + '" data-p="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + '>\u2039</button>';
+            for (var i = 1; i <= pages; i++) {
+                html += '<button class="w-7 h-7 rounded-lg text-xs font-semibold flex items-center justify-center transition-colors ' + (i === page ? 'bg-gray-900 text-white' : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-100') + '" data-p="' + i + '">' + i + '</button>';
+            }
+            html += '<button class="w-7 h-7 rounded-lg border border-gray-200 bg-white text-gray-500 text-xs font-semibold flex items-center justify-center hover:bg-gray-100 transition-colors ' + (page === pages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer') + '" data-p="' + (page + 1) + '"' + (page === pages ? ' disabled' : '') + '>\u203a</button>';
+            html += '</div>';
+            nav.innerHTML = html;
+            nav.querySelectorAll('button[data-p]:not([disabled])').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var p = parseInt(this.dataset.p);
+                    if (p < 1 || p > pages) return;
+                    page = p;
+                    render();
+                });
+            });
+        }
+
+        if (search) search.addEventListener('input', applyFilters);
+        if (typeF) typeF.addEventListener('change', applyFilters);
+
+        document.querySelectorAll('.otut-tab').forEach(function (btn) {
+            btn.addEventListener('click', function () { switchTab(this.dataset.status); });
+        });
+
+        applyFilters();
+    })();
+
+    // ── Reject modal for OT/UT ──
+    var otutRejectModal = document.getElementById('otutRejectModal');
+    var otutRejectCancel = document.getElementById('otutRejectCancel');
+
+    window.openOtutRejectModal = function (id, name) {
+        document.getElementById('otutRejectModalSub').textContent = 'Provide a reason for rejecting ' + name + '\'s request.';
+        document.getElementById('otutRejectForm').action = '/overtime/' + id + '/reject';
+        document.getElementById('otutRejectReason').value = '';
+        otutRejectModal.classList.remove('hidden');
+        otutRejectModal.classList.add('flex');
+        setTimeout(function () { document.getElementById('otutRejectReason').focus(); }, 100);
+    };
+
+    if (otutRejectCancel) {
+        otutRejectCancel.addEventListener('click', function () {
+            otutRejectModal.classList.add('hidden');
+            otutRejectModal.classList.remove('flex');
+        });
+    }
+
+    if (otutRejectModal) {
+        otutRejectModal.addEventListener('click', function (e) {
+            if (e.target === this) {
+                otutRejectModal.classList.add('hidden');
+                otutRejectModal.classList.remove('flex');
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && otutRejectModal && !otutRejectModal.classList.contains('hidden')) {
+            otutRejectModal.classList.add('hidden');
+            otutRejectModal.classList.remove('flex');
+        }
+    });
 })();
 </script>
 @endpush

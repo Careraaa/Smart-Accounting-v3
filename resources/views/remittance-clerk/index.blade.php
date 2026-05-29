@@ -190,9 +190,10 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                             <div class="text-right">
                                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Margin</p>
                                 <p class="text-xs font-bold text-emerald-600 tabular-nums mt-0.5">{{ $margin }}%</p>
-                            </div>
-                        </div>
-                    </div>
+        </div>
+        </div>
+    </div>
+</div>
                 </div>
 
                 {{-- Monthly Collection Trend --}}
@@ -366,7 +367,8 @@ $mctActive = count($monthlyCollectionTrend) - 1;
         </div>
 
         {{-- Right sidebar --}}
-        <div class="space-y-5 max-w-[280px] sticky top-24 self-start">
+        <div class="space-y-5 max-w-[280px]">
+        <div class="sticky top-24 space-y-5">
 
         {{-- Calendar Card --}}
         @include('partials.dashboard-calendar')

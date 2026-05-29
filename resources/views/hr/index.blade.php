@@ -331,7 +331,8 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
     </div>
 
     {{-- RIGHT COLUMN (1/3): Calendar + To-Do --}}
-    <div class="space-y-5 max-w-[280px] sticky top-24 self-start">
+    <div class="space-y-5 max-w-[280px]">
+        <div class="sticky top-24 space-y-5">
 
         {{-- Calendar Card --}}
         @include('partials.dashboard-calendar')
@@ -344,9 +345,36 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
                     <span class="text-xs font-semibold text-gray-900">To Do</span>
                 </div>
                 @if($totalPending > 0)
-                    <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[0.5rem] font-bold px-1">{{ $totalPending }}</span>
-                @endif
-            </div>
+        <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[0.5rem] font-bold px-1">{{ $totalPending }}</span>
+            @endif
+        </div>
+        @if($totalPending > 0)
+        <div class="divide-y divide-gray-50">
+            <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
+                <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
+                </div>
+                <span class="flex-1 text-xs font-semibold text-gray-700">Cash Advances</span>
+                <span class="text-[0.6rem] font-bold text-blue-600">{{ $pendingCashAdvances ?? 0 }} pending</span>
+            </a>
+            <a href="{{ route('payroll.receivables.index', ['tab' => 'salary_loans']) }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
+                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                </div>
+                <span class="flex-1 text-xs font-semibold text-gray-700">Salary Loans</span>
+                <span class="text-[0.6rem] font-bold text-emerald-600">{{ $pendingSalaryLoans ?? 0 }} pending</span>
+            </a>
+        </div>
+        @else
+        <div class="flex items-center justify-center py-8">
+            <span class="text-[0.6rem] font-semibold text-gray-400">Nothing to do!</span>
+        </div>
+        @endif
+        </div>
+        </div>
+    </div>
+
+</div>
             @if($totalPending > 0)
             <div class="divide-y divide-gray-50">
                 <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
@@ -388,7 +416,7 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
                     @endif
                     <svg class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </a>
-                <a href="{{ route('overtime.pending') }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
+                <a href="{{ route('attendance.index', ['tab' => 'otut']) }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
                     <div class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
