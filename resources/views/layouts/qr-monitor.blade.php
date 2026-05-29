@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>QR Attendance Monitor - Smart Accounting</title>
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights-icon.png') }}">
 
     @vite(['resources/css/tailwind.css', 'resources/css/overrides.css', 'resources/js/app.js'])
 

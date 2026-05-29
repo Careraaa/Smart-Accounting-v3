@@ -26,19 +26,23 @@ class DashboardController extends Controller
             ->count();
 
         // ── Attendance trend (last 7 days) ──
+        $attendanceRaw = Attendance::whereDate('date', '>=', now()->subDays(6)->startOfDay())
+            ->whereDate('date', '<=', now()->endOfDay())
+            ->selectRaw("DATE(`date`) as dt, status, COUNT(*) as cnt")
+            ->groupBy('dt', 'status')
+            ->get()
+            ->groupBy('dt');
         $attendanceTrend = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->startOfDay();
-            $present = Attendance::whereDate('date', $date)->where('status', 'present')->count();
-            $absent = Attendance::whereDate('date', $date)->where('status', 'absent')->count();
-            $late = Attendance::whereDate('date', $date)->where('status', 'late')->count();
-
+            $key = $date->toDateString();
+            $rows = $attendanceRaw->get($key, collect());
             $attendanceTrend[] = [
-                'date_iso' => $date->toDateString(),
+                'date_iso' => $key,
                 'label' => $date->format('D') . ' · ' . $date->format('M j'),
-                'present' => $present,
-                'absent' => $absent,
-                'late' => $late,
+                'present' => (int) $rows->where('status','present')->sum('cnt'),
+                'absent'  => (int) $rows->where('status','absent')->sum('cnt'),
+                'late'    => (int) $rows->where('status','late')->sum('cnt'),
             ];
         }
         $td = $attendanceTrend[array_key_last($attendanceTrend)];
@@ -51,18 +55,20 @@ class DashboardController extends Controller
         $rejectedLeaves = Leave::where('status', 'rejected')->count();
 
         // ── Leave Trend (last 6 months) ──
+        $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+        $leaveRaw = Leave::where('created_at', '>=', $sixMonthsAgo)
+            ->selectRaw("YEAR(created_at) as yr, MONTH(created_at) as mo, IF(status IN ('approved','paid'),1,0) as is_approved, COUNT(*) as cnt")
+            ->groupBy('yr', 'mo', 'is_approved')
+            ->get();
         $leaveTrend = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $start = (clone $month)->startOfMonth();
-            $end = (clone $month)->endOfMonth();
-            $total = Leave::whereBetween('created_at', [$start, $end])->count();
-            $approved = Leave::whereBetween('created_at', [$start, $end])
-                ->whereIn('status', ['approved', 'paid'])->count();
+            $key = $month->format('Y-m');
+            $rows = $leaveRaw->filter(fn($r) => $r->yr == $month->year && $r->mo == $month->month);
             $leaveTrend[] = [
-                'label' => $month->format('M'),
-                'total' => $total,
-                'approved' => $approved,
+                'label'    => $month->format('M'),
+                'total'    => (int) $rows->sum('cnt'),
+                'approved' => (int) $rows->where('is_approved', 1)->sum('cnt'),
             ];
         }
 
@@ -85,11 +91,12 @@ class DashboardController extends Controller
         $pendingSalaryLoans  = SalaryLoan::where('status', 'pending')->count();
 
         // ── Payroll Batch Stats ──
-        $totalBatches = PayrollBatch::count();
-        $batchSubmitted = PayrollBatch::where('status', 'submitted')->count();
-        $batchApproved = PayrollBatch::where('status', 'approved')->count();
-        $batchPaid = PayrollBatch::where('status', 'paid')->count();
-        $batchRejected = PayrollBatch::where('status', 'rejected')->count();
+        $batchCounts = PayrollBatch::selectRaw("COUNT(*) as total, status")->groupBy('status')->pluck('total','status');
+        $totalBatches   = $batchCounts->sum();
+        $batchSubmitted = (int) ($batchCounts['submitted'] ?? 0);
+        $batchApproved  = (int) ($batchCounts['approved'] ?? 0);
+        $batchPaid      = (int) ($batchCounts['paid'] ?? 0);
+        $batchRejected  = (int) ($batchCounts['rejected'] ?? 0);
 
         $currentInProgress = PayrollBatch::inProgressForCurrentPeriod();
 

@@ -7,7 +7,7 @@
     <title>Payslip – {{ $payroll->user->name }} – 
         {{ $payroll->payroll_period_start->format('M d') }}–{{ $payroll->payroll_period_end->format('M d, Y') }}</title>
     
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights-icon.png') }}">
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -340,8 +340,8 @@
             <!-- Header -->
             <div class="slip-header">
                 <div class="company-logo-wrap">
-                    <img src="{{ asset('images/knights_logo_icon.png') }}" alt="Logo">
-                    <div class="company-name">Knights Transport Services Corporation</div>
+<img src="{{ asset('images/knights-icon.png') }}" alt="Logo" class="rounded-lg">
+                     <div class="company-name">Knights Transport Services Corporation</div>
                 </div>
                 <div>
                     <div class="slip-title">PAY SLIP</div>

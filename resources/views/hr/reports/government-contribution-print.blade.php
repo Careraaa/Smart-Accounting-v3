@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Government Contribution Summary – {{ date('M d, Y') }}</title>
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights-icon.png') }}">
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -265,7 +265,7 @@
         {{-- Header --}}
         <div class="report-header">
             <div class="company-info">
-                <img src="{{ asset('images/knights_logo_icon.png') }}" alt="Logo">
+                <img src="{{ asset('images/knights-icon.png') }}" alt="Logo" class="rounded-lg">
                 <div>
                     <div class="company-name">Knights Transport Services Corporation</div>
                     <div class="company-sub">Human Resources</div>

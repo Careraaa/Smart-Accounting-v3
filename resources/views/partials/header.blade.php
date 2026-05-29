@@ -34,7 +34,14 @@
 
             {{-- Notifications --}}
             @php
-                $unread_count = auth()->user()->notifications()->unread()->count();
+                $notifData = cache()->remember('notif.'.auth()->id(), 30, function() {
+                    $u = auth()->user();
+                    return [
+                        'count' => $u->notifications()->unread()->count(),
+                        'recent' => $u->notifications()->unread()->recent()->limit(3)->get(),
+                    ];
+                });
+                $unread_count = $notifData['count'];
             @endphp
             <div class="relative" data-dropdown>
                 <button class="relative flex items-center justify-center w-9 h-9 rounded-lg transition-colors hover:bg-gray-100" id="notification-btn" type="button">
@@ -60,7 +67,7 @@
                     </div>
                     <div class="max-h-[420px] overflow-y-auto p-1.5">
                         <div id="notification-list">
-                            @forelse(auth()->user()->notifications()->unread()->recent()->limit(3)->get() as $notification)
+                            @forelse($notifData['recent'] as $notification)
                                 <div class="flex items-start gap-3 px-4 py-3.5 rounded-lg cursor-pointer transition-colors duration-100 hover:bg-red-50 {{ $notification->isUnread() ? 'bg-gray-50/80 font-medium' : '' }}" data-notif-id="{{ $notification->id }}" data-action-url="{{ $notification->getActionUrl() }}">
                                     <div class="flex-1 min-w-0">
                                         <div class="text-sm font-bold text-gray-900 mb-1">{{ $notification->title }}</div>

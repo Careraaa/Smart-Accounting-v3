@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Smart Accounting System">
     <title>@yield('title', 'Smart Accounting')</title>
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights_logo_icon.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights-icon.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="preload" as="image" href="{{ asset('images/login_bg.png') }}">
     <link rel="preload" as="image" href="{{ asset('images/login_bg2.png') }}">
@@ -63,9 +63,12 @@
             </div>
             <div class="absolute inset-0 bg-gradient-to-t from-[#020617]/80 via-[#020617]/30 to-transparent pointer-events-none"></div>
             <div class="absolute bottom-0 left-0 right-0 p-12 lg:p-16">
-                <div class="backdrop-blur-md bg-white/10 border border-white/15 rounded-2xl px-8 py-6 w-fit">
-                    <h1 class="text-2xl font-extrabold text-white tracking-tight">Knights Transport</h1>
-                    <p class="text-xs text-white/50 uppercase tracking-[2px] mt-1">Smart Accounting System</p>
+                <div class="backdrop-blur-md bg-white/10 border border-white/15 rounded-2xl px-8 py-6 w-fit flex items-center gap-3">
+                    <img src="{{ asset('images/knights-icon.png') }}" alt="" class="w-16 h-16 object-contain rounded-xl shrink-0">
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-white tracking-tight">Knights Transport</h1>
+                        <p class="text-xs text-white/50 uppercase tracking-[2px] mt-1">Smart Accounting System</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -75,8 +78,8 @@
 
             {{-- Mobile-only header --}}
             <div class="md:hidden text-center mb-8">
-                <img src="{{ asset('images/knights_white-bg.png') }}" alt="Knights Transport"
-                    class="mx-auto w-20 h-20 object-contain rounded-xl mb-4">
+                <img src="{{ asset('images/knights-icon.png') }}" alt="Knights Transport"
+                    class="mx-auto w-14 h-14 object-contain rounded-xl mb-4">
                 <h1 class="text-xl font-extrabold text-white">Knights Transport</h1>
                 <p class="text-xs text-white/50 mt-0.5">Smart Accounting System</p>
             </div>

@@ -116,7 +116,7 @@
         <div class="sidebar-logo shrink-0 flex items-center px-3 h-14 border-b border-gray-100">
             <a href="{{ route('dashboard') }}" class="b-brand flex items-center gap-2.5 no-underline min-w-0">
                 <span class="flex-shrink-0">
-                    <img src="{{ asset('images/bus.png') }}" alt="Bus Logo" width="22" height="22" class="block">
+                    <img src="{{ asset('images/knights-icon.png') }}" alt="Knights Transport" width="30" height="30" class="block rounded-lg">
                 </span>
                 <span class="text-sm font-bold text-gray-900 truncate">Knights Transport</span>
             </a>

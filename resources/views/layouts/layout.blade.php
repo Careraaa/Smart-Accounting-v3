@@ -11,7 +11,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Knights TSC</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/knights_white-bg.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights-icon.png') }}">
 
     {{-- Feather icons only (vendors.min.css replaced — all other vendor CSS was unused) --}}
     <link rel="stylesheet" href="{{ asset('vendors/css/feather.min.css') }}">
@@ -93,10 +93,6 @@
 
         </div>
     </main>
-
-    {{-- jQuery only (all other vendor JS was unused — DataTables, Select2, SweetAlert2, nxlNavigation, etc.) --}}
-    <script src="{{ asset('vendors/js/jquery.min.js') }}"></script>
-    <script>if(typeof jQuery!=='undefined'){jQuery(".sidebar-list li").off("click");}</script>
 
     {{-- Sidebar Collapse / Mobile Toggle --}}
     <script>

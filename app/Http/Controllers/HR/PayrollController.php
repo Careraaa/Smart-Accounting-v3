@@ -50,8 +50,8 @@
                 ->orderByDesc('created_at')
                 ->get();
 
-            // Sidebar: last 5 batches
-            $recentBatches = PayrollBatch::with('payrolls')
+            // Sidebar: last 5 batches (only need count, not full payrolls relation)
+            $recentBatches = PayrollBatch::withCount('payrolls')
                 ->orderByDesc('created_at')
                 ->limit(5)
                 ->get();
@@ -71,9 +71,12 @@
 
             $totalEmployees    = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])->count();
             $inactiveEmployees = $totalEmployees - $activeEmployees;
-            $presentToday      = Attendance::whereDate('date', now())->where('status', 'present')->count();
-            $absentToday       = Attendance::whereDate('date', now())->where('status', 'absent')->count();
-            $lateToday         = Attendance::whereDate('date', now())->where('status', 'late')->count();
+            $attendanceCounts  = Attendance::whereDate('date', now())
+                ->selectRaw("COALESCE(SUM(status='present'),0) as present, COALESCE(SUM(status='absent'),0) as absent, COALESCE(SUM(status='late'),0) as late")
+                ->first();
+            $presentToday      = (int)($attendanceCounts->present ?? 0);
+            $absentToday       = (int)($attendanceCounts->absent ?? 0);
+            $lateToday         = (int)($attendanceCounts->late ?? 0);
             $onLeaveEmployees  = Leave::whereIn('status', ['approved', 'paid'])->whereDate('start_date', '<=', now())->whereDate('end_date', '>=', now())->count();
             $totalLeaves       = Leave::count();
             $pendingLeaves     = Leave::where('status', 'pending')->count();
@@ -85,7 +88,7 @@
 
             $pendingPayrolls = Payroll::where('status', 'pending');
             $totalPayroll    = $pendingPayrolls->sum('net_pay');
-            $payrollCount    = $pendingPayrolls->count();
+            $payrollCount    = (clone $pendingPayrolls)->count();
 
             return view('hr.payroll.salary-computation.index', compact(
                 'allBatches',
