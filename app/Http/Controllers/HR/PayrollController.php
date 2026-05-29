@@ -326,7 +326,7 @@
 
         public function batchPayslips(PayrollBatch $batch)
         {
-            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
 
             // Recompute each payroll so the list shows live values, not stale DB zeros
             foreach ($batch->payrolls as $payroll) {
@@ -352,13 +352,29 @@
                     $manualDeductions,
                 );
 
+                // Recompute leave pay (same as generatePayrollForEmployee does)
+                $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
+                $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
+                    $payroll->user_id,
+                    $payroll->payroll_period_start,
+                    $payroll->payroll_period_end,
+                    $dailyRate
+                );
+                $leavePay = collect($leaveAllowances)->sum('amount');
+
+                // Sum bonuses from stored records
+                $bonusTotal = (float) $payroll->bonuses->sum('amount');
+
+                $fullGrossPay = $computed['grossPay'] + $leavePay + $bonusTotal;
+
                 $payroll->setAttribute('basic_salary', $computed['basicSalary']);
-                $payroll->setAttribute('gross_pay', $computed['grossPay']);
+                $payroll->setAttribute('gross_pay', $fullGrossPay);
                 // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
                 $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
                            + (float)($payroll->salary_loan_deduction ?? 0);
-                $payroll->setAttribute('total_deductions', $computed['totalDeductions'] + $loanTotal);
-                $payroll->setAttribute('net_pay', $computed['netPay'] - $loanTotal);
+                $totalDeductions = $computed['totalDeductions'] + $loanTotal;
+                $payroll->setAttribute('total_deductions', $totalDeductions);
+                $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
             }
 
             return view('hr.payroll.batch.payslips', compact('batch'));
@@ -887,15 +903,31 @@
                 $manualDeductions,
             );
 
+            // Recompute leave pay (same as generatePayrollForEmployee does)
+            $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
+            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
+                $payroll->user_id,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $dailyRate
+            );
+            $leavePay = collect($leaveAllowances)->sum('amount');
+
+            // Sum bonuses from stored records
+            $bonusTotal = (float) $payroll->bonuses->sum('amount');
+
+            $fullGrossPay = $computed['grossPay'] + $leavePay + $bonusTotal;
+
             // Override model attributes with live-computed values (in-memory only)
             $payroll->setAttribute('days_worked', $computed['daysWorked']);
             $payroll->setAttribute('basic_salary', $computed['basicSalary']);
-            $payroll->setAttribute('gross_pay', $computed['grossPay']);
+            $payroll->setAttribute('gross_pay', $fullGrossPay);
             // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
             $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
                        + (float)($payroll->salary_loan_deduction ?? 0);
-            $payroll->setAttribute('total_deductions', $computed['totalDeductions'] + $loanTotal);
-            $payroll->setAttribute('net_pay', $computed['netPay'] - $loanTotal);
+            $totalDeductions = $computed['totalDeductions'] + $loanTotal;
+            $payroll->setAttribute('total_deductions', $totalDeductions);
+            $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
             $payroll->setAttribute('per_day_rate', $computed['dailyRate']);
             $payroll->setAttribute('hourly_rate', $computed['hourlyRate']);
             $payroll->setAttribute('holiday_pay', $computed['holidayPay']);
@@ -985,7 +1017,7 @@
 
         public function generatePayslip(Payroll $payroll)
         {
-            $payroll->load(['user', 'allowances', 'deductions']);
+            $payroll->load(['user', 'allowances', 'deductions', 'bonuses']);
 
             $manualAllowances = $payroll->allowances
                 ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay')
@@ -1015,18 +1047,34 @@
             $totalWeekdays = $ps->diffInDaysFiltered(fn (Carbon $d) => !$d->isWeekend(), $pe);
             if (!$ps->isWeekend()) $totalWeekdays++;
 
+            // Recompute leave pay (same as generatePayrollForEmployee does)
+            $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
+            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
+                $payroll->user_id,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $dailyRate
+            );
+            $leavePay = collect($leaveAllowances)->sum('amount');
+
+            // Sum bonuses from stored records
+            $bonusTotal = (float) $payroll->bonuses->sum('amount');
+
+            $fullGrossPay = $computed['grossPay'] + $leavePay + $bonusTotal;
+
             $payroll->setAttribute('days_worked', $computed['daysWorked']);
             $payroll->setAttribute('total_weekdays', $totalWeekdays);
             $payroll->setAttribute('hours_worked', $computed['hoursWorked']);
             $payroll->setAttribute('basic_salary', $computed['basicSalary']);
-            $payroll->setAttribute('gross_pay', $computed['grossPay']);
+            $payroll->setAttribute('gross_pay', $fullGrossPay);
             $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay'] ?? 0);
             $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours'] ?? 0);
             // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
             $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
                        + (float)($payroll->salary_loan_deduction ?? 0);
-            $payroll->setAttribute('total_deductions', $computed['totalDeductions'] + $loanTotal);
-            $payroll->setAttribute('net_pay', $computed['netPay'] - $loanTotal);
+            $totalDeductions = $computed['totalDeductions'] + $loanTotal;
+            $payroll->setAttribute('total_deductions', $totalDeductions);
+            $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
             $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
 
             return view('hr.payroll.generate-payslip.payslip', compact('payroll'));

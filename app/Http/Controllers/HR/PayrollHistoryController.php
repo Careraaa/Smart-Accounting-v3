@@ -7,6 +7,7 @@ use App\Models\Payroll;
 use App\Models\PayrollBatch;
 use App\Models\User;
 use App\Models\PayrollCutoffSchedule;
+use App\Services\LeaveService;
 use App\Services\PayrollService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -14,10 +15,12 @@ use Carbon\Carbon;
 class PayrollHistoryController extends Controller
 {
     protected $payrollService;
+    protected $leaveService;
 
-    public function __construct(PayrollService $payrollService)
+    public function __construct(PayrollService $payrollService, LeaveService $leaveService)
     {
         $this->payrollService = $payrollService;
+        $this->leaveService = $leaveService;
     }
     // ====================== INDEX ======================
     public function index(Request $request)
@@ -80,7 +83,7 @@ class PayrollHistoryController extends Controller
         $endDate   = Carbon::createFromFormat('Y-m-d', $end)->endOfDay();
 
         // Get payrolls for this batch period
-        $payrolls = Payroll::with(['user', 'allowances', 'deductions'])
+        $payrolls = Payroll::with(['user', 'allowances', 'deductions', 'bonuses'])
             ->where(function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('payroll_period_start', [$startDate, $endDate])
                   ->orWhereBetween('payroll_period_end', [$startDate, $endDate]);
@@ -112,13 +115,29 @@ class PayrollHistoryController extends Controller
                 $manualDeductions,
             );
 
+            // Recompute leave pay (same as generatePayrollForEmployee does)
+            $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
+            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
+                $payroll->user_id,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $dailyRate
+            );
+            $leavePay = collect($leaveAllowances)->sum('amount');
+
+            // Sum bonuses from stored records
+            $bonusTotal = (float) $payroll->bonuses->sum('amount');
+
+            $fullGrossPay = $computed['grossPay'] + $leavePay + $bonusTotal;
+
             $payroll->setAttribute('basic_salary', $computed['basicSalary']);
-            $payroll->setAttribute('gross_pay', $computed['grossPay']);
+            $payroll->setAttribute('gross_pay', $fullGrossPay);
             // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
             $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
                        + (float)($payroll->salary_loan_deduction ?? 0);
-            $payroll->setAttribute('total_deductions', $computed['totalDeductions'] + $loanTotal);
-            $payroll->setAttribute('net_pay', $computed['netPay'] - $loanTotal);
+            $totalDeductions = $computed['totalDeductions'] + $loanTotal;
+            $payroll->setAttribute('total_deductions', $totalDeductions);
+            $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
         }
 
         // Calculate totals from recomputed values
