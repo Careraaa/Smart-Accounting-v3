@@ -169,3 +169,29 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var fmt = function(n) { return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+  var targets = document.querySelectorAll('.tabular-nums');
+  targets.forEach(function(el, i) {
+    if (el.offsetParent === null) return;
+    var raw = el.textContent.trim();
+    var m = raw.match(/^([+-])?\s*₱?\s*([\d,]+\.\d{2})/);
+    if (!m) return;
+    var sign = m[1] || '';
+    var target = parseFloat(m[2].replace(/,/g, ''));
+    var duration = 600 + i * 50;
+    var t0 = performance.now();
+    function tick(now) {
+      var p = Math.min((now - t0) / duration, 1);
+      var v = (1 - Math.pow(1 - p, 3)) * Math.abs(target);
+      el.textContent = sign + '₱' + fmt(v);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+});
+</script>
+@endpush

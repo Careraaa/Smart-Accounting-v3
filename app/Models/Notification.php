@@ -211,6 +211,10 @@ class Notification extends Model
             case 'employee_absent':
             case 'employee_late':
             case 'attendance_recorded':
+                // Route employees to their own attendance page
+                if ($authUser && $authUser->role === 'employee') {
+                    return route('employee.attendance.index');
+                }
                 if ($data['employee_id'] ?? null) {
                     return route('employees.show', ['employee' => $data['employee_id']]);
                 }

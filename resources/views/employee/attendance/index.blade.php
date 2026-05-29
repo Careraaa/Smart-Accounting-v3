@@ -15,8 +15,7 @@
 .att-nav { animation:attFadeUp 0.35s ease-out 0.05s both; }
 .att-section { animation:attFadeUp 0.4s ease-out 0.1s both; }
 @media (max-width: 639px) {
-    .att-section .grid-cols-5 > div { min-height:60px !important; }
-    .att-section .grid-cols-5 .att-timing { display:none; }
+    .att-section .grid-cols-7 > div { min-height:60px !important; }
 }
 </style>
 @endpush
@@ -286,8 +285,8 @@
                                             <span class="text-xs font-extrabold text-gray-700 leading-none {{ $isToday ? '!text-rose-600' : '' }}">{{ $day->day }}</span>
                                             @if(($att || $hasOtut) && !$isFuture)
                                             <span class="inline-flex items-center gap-1">
-                                                <span class="w-1.5 h-1.5 rounded-full {{ $dotClass }}"></span>
-                                                <span class="text-[8px] font-bold uppercase tracking-wider {{ $statusColor }}">{{ $statusText }}</span>
+                                                <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full {{ $dotClass }}"></span>
+                                                <span class="hidden sm:inline text-[8px] font-bold uppercase tracking-wider {{ $statusColor }}">{{ $statusText }}</span>
                                             </span>
                                             @endif
                                         </div>
@@ -298,7 +297,7 @@
                                                 $timeIn = $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:ia') : null;
                                                 $timeOut = $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:ia') : null;
                                             @endphp
-                                            <div class="text-[9px] font-mono text-gray-500 leading-tight -mt-0.5">
+                                            <div class="text-[8px] sm:text-[9px] font-mono text-gray-500 leading-tight -mt-0.5">
                                                 @if($timeIn && $timeOut)
                                                     <span>{{ $timeIn }} → {{ $timeOut }}</span>
                                                 @elseif($timeIn)
@@ -310,12 +309,12 @@
                                                 @endif
                                             </div>
                                         @elseif(!$att && !$hasOtut && !$isFuture && !$isWeekend)
-                                            <div class="text-[8px] text-gray-300 leading-tight -mt-0.5">No record</div>
+                                            <div class="text-[7px] sm:text-[8px] text-gray-300 leading-tight -mt-0.5">No record</div>
                                         @endif
 
                                         {{-- OT/UT pills --}}
                                         @if($hasOtut && !$isFuture)
-                                        <div class="flex items-center gap-1 mt-auto pt-0.5">
+                                        <div class="hidden sm:flex items-center gap-1 mt-auto pt-0.5">
                                             @if($otHours > 0)
                                             <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-[3px] text-[8px] font-bold bg-blue-50 text-blue-700 border border-blue-200 leading-none">
                                                 <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>

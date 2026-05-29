@@ -77,7 +77,7 @@
 
             <div class="main-content px-4 sm:px-7 lg:px-9 py-7">
                 @if (session('info'))
-                    <div id="flash-info" class="flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-sm font-medium bg-blue-50 border border-blue-200 text-blue-700" role="alert">
+                    <div class="flash-bar flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-sm font-medium bg-blue-50 border border-blue-200 text-blue-700" role="alert">
                         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
                         <span class="flex-1">{{ session('info') }}</span>
                         <button type="button" onclick="this.parentElement.remove()" class="text-blue-500 hover:text-blue-700 cursor-pointer bg-transparent border-none p-0 leading-none">
@@ -432,6 +432,7 @@
             });
         })();
     </script>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.flash-bar,.bn-flash,[class*=\"bg-green-50\"][class*=\"rounded-xl\"],[class*=\"bg-green-50\"][class*=\"rounded-lg\"],[class*=\"bg-red-50\"][class*=\"rounded-xl\"],[class*=\"bg-blue-50\"][class*=\"rounded-xl\"]').forEach(function(el){if(el.offsetParent===null)return;setTimeout(function(){el.style.transition='opacity 0.5s ease,transform 0.5s ease';el.style.opacity='0';el.style.transform='translateY(-8px)';setTimeout(function(){el.remove()},500);},5000);});});</script>
 </body>
 
 </html>

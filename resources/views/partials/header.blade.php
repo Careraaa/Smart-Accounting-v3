@@ -77,7 +77,7 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between px-4 py-3 bg-gray-50/80 border-t border-gray-100">
-                        <a class="text-sm font-bold text-red-500 no-underline hover:underline" href="{{ route('notifications.index') }}">View all</a>
+                        <a class="btn-uv-pill text-sm" href="{{ route('notifications.index') }}">View all</a>
                         <button class="text-sm font-bold text-red-500 no-underline hover:underline bg-transparent border-none cursor-pointer {{ $unread_count > 0 ? '' : 'hidden' }}" id="mark-all-read">Mark all as read</button>
                     </div>
                 </div>
@@ -156,6 +156,78 @@
         0%   { width: 2px; height: 2px; opacity: 1; }
         100% { width: 28px; height: 28px; opacity: 0; }
     }
+
+    /* ── Search loading spinner ── */
+    .three-body {
+        --uib-size: 35px;
+        --uib-speed: 0.8s;
+        --uib-color: #f43f5e;
+        position: relative;
+        display: inline-block;
+        height: var(--uib-size);
+        width: var(--uib-size);
+        animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+    }
+    .three-body__dot {
+        position: absolute;
+        height: 100%;
+        width: 30%;
+    }
+    .three-body__dot::after {
+        content: '';
+        position: absolute;
+        height: 0%;
+        width: 100%;
+        padding-bottom: 100%;
+        background-color: var(--uib-color);
+        border-radius: 50%;
+    }
+    .three-body__dot:nth-child(1) {
+        bottom: 5%;
+        left: 0;
+        transform: rotate(60deg);
+        transform-origin: 50% 85%;
+    }
+    .three-body__dot:nth-child(1)::after {
+        bottom: 0;
+        left: 0;
+        animation: wobble1 var(--uib-speed) infinite ease-in-out;
+        animation-delay: calc(var(--uib-speed) * -0.3);
+    }
+    .three-body__dot:nth-child(2) {
+        bottom: 5%;
+        right: 0;
+        transform: rotate(-60deg);
+        transform-origin: 50% 85%;
+    }
+    .three-body__dot:nth-child(2)::after {
+        bottom: 0;
+        left: 0;
+        animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+    }
+    .three-body__dot:nth-child(3) {
+        bottom: -5%;
+        left: 0;
+        transform: translateX(116.666%);
+    }
+    .three-body__dot:nth-child(3)::after {
+        top: 0;
+        left: 0;
+        animation: wobble2 var(--uib-speed) infinite ease-in-out;
+    }
+    @keyframes spin78236 {
+        0%   { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    @keyframes wobble1 {
+        0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+        50%      { transform: translateY(-66%) scale(0.65); opacity: 0.8; }
+    }
+    @keyframes wobble2 {
+        0%, 100% { transform: translateY(0%) scale(1); opacity: 1; }
+        50%      { transform: translateY(66%) scale(0.65); opacity: 0.8; }
+    }
+
 </style>
 
 @push('scripts')
@@ -176,31 +248,51 @@
             var activeIdx = -1;
             var isOpen    = false;
 
+            var ANIM_DURATION = 200;
+
             function reposition() {
                 var pill = document.getElementById('kt-nav-search');
                 if (!pill) return;
                 var r = pill.getBoundingClientRect();
-                popup.style.top  = (r.bottom + 4) + 'px';
-                popup.style.left = r.left + 'px';
-                popup.style.width = r.width + 'px';
+                var gap = 8;
+                var maxW = window.innerWidth - gap * 2;
+                var w = Math.min(300, maxW);
+                var l = Math.min(r.left, window.innerWidth - w - gap);
+                l = Math.max(gap, l);
+                popup.style.top   = (r.bottom + 4) + 'px';
+                popup.style.left  = l + 'px';
+                popup.style.width = w + 'px';
             }
 
             function openPopup() {
+                if (isOpen) return;
                 reposition();
-                popup.classList.remove('hidden');
+                popup.style.visibility = 'visible';
+                popup.style.pointerEvents = 'auto';
+                void popup.offsetWidth;
+                popup.style.opacity = '1';
+                popup.style.transform = 'translateY(0) scale(1)';
                 isOpen = true;
             }
 
             function closePopup() {
-                popup.classList.add('hidden');
-                isOpen    = false;
+                if (!isOpen) return;
+                popup.style.opacity = '0';
+                popup.style.transform = 'translateY(-8px) scale(0.97)';
+                popup.style.pointerEvents = 'none';
+                popup.style.visibility = 'hidden';
+                isOpen = false;
                 activeIdx = -1;
             }
 
             function resetState() {
                 spList.innerHTML = '';
-                spState.classList.remove('hidden');
-                spState.textContent = 'Type to search';
+                spState.style.display = '';
+                spState.innerHTML =
+                    '<svg class="w-6 h-6 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">' +
+                        '<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>' +
+                    '</svg>' +
+                    '<span class="text-sm text-gray-400">Type to search</span>';
             }
 
             function escHtml(s) {
@@ -215,10 +307,43 @@
                     '<strong class="text-gray-900 font-extrabold">$1</strong>'
                 );
             }
+
+            var iconColorMap = {
+                'feather-airplay': 'text-blue-500 bg-blue-50',
+                'feather-camera': 'text-cyan-500 bg-cyan-50',
+                'feather-user': 'text-indigo-500 bg-indigo-50',
+                'feather-folder': 'text-sky-500 bg-sky-50',
+                'feather-bell': 'text-amber-500 bg-amber-50',
+                'feather-user-plus': 'text-emerald-500 bg-emerald-50',
+                'feather-tag': 'text-violet-500 bg-violet-50',
+                'feather-calendar': 'text-violet-500 bg-violet-50',
+                'feather-clock': 'text-cyan-500 bg-cyan-50',
+                'feather-dollar-sign': 'text-green-600 bg-green-50',
+                'feather-inbox': 'text-emerald-500 bg-emerald-50',
+                'feather-file-text': 'text-sky-500 bg-sky-50',
+                'feather-bar-chart-2': 'text-sky-500 bg-sky-50',
+                'feather-users': 'text-orange-500 bg-orange-50',
+                'feather-map': 'text-orange-500 bg-orange-50',
+                'feather-truck': 'text-orange-500 bg-orange-50',
+                'feather-activity': 'text-teal-500 bg-teal-50',
+                'feather-check-circle': 'text-indigo-500 bg-indigo-50',
+                'feather-credit-card': 'text-emerald-500 bg-emerald-50',
+                'feather-briefcase': 'text-amber-500 bg-amber-50',
+                'feather-settings': 'text-slate-500 bg-slate-50',
+                'feather-shield': 'text-pink-500 bg-pink-50',
+                'feather-monitor': 'text-rose-500 bg-rose-50',
+                'feather-gift': 'text-rose-500 bg-rose-50',
+                'feather-award': 'text-yellow-500 bg-yellow-50',
+            };
+
+            function getIconColors(icon) {
+                return iconColorMap[icon] || 'text-gray-500 bg-gray-100';
+            }
+
             function setActive(idx) {
                 var links = spList.querySelectorAll('li a');
                 links.forEach(function(a, i) {
-                    a.classList.toggle('bg-gray-100', i === idx);
+                    a.classList.toggle('bg-rose-50', i === idx);
                     a.classList.toggle('bg-transparent', i !== idx);
                 });
                 activeIdx = idx;
@@ -230,23 +355,27 @@
                 activeIdx = -1;
 
                 if (!results.length) {
-                    spState.classList.remove('hidden');
-                    spState.innerHTML = 'No results for <span class="font-semibold text-gray-700">"' + escHtml(q) + '"</span>';
+                    spState.style.display = '';
+                    spState.innerHTML =
+                        '<svg class="w-8 h-8 mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>' +
+                        '</svg>' +
+                        '<span class="text-sm text-gray-400">No results for <span class="font-semibold text-gray-600">"' + escHtml(q) + '"</span></span>';
                     return;
                 }
 
-                spState.classList.add('hidden');
+                spState.style.display = 'none';
 
                 function makeRow(href, left, nameHtml, subHtml) {
                     var li = document.createElement('li');
                     var a  = document.createElement('a');
                     a.href = href;
-                    a.className = 'flex items-center gap-2 px-2.5 py-1.5 rounded-lg no-underline text-gray-900 transition-colors duration-100 hover:bg-gray-100';
+                    a.className = 'flex items-center gap-3 px-3 py-2.5 no-underline transition-all duration-150 hover:bg-rose-50 group';
                     a.innerHTML =
                         left +
-                        '<span class="min-w-0">' +
-                            '<div class="text-xs font-semibold text-gray-900 leading-tight truncate">' + nameHtml + '</div>' +
-                            (subHtml ? '<div class="text-[11px] text-gray-500 mt-0.5">' + subHtml + '</div>' : '') +
+                        '<span class="min-w-0 flex-1">' +
+                            '<div class="text-sm font-semibold text-gray-800 leading-tight truncate group-hover:text-rose-700">' + nameHtml + '</div>' +
+                            (subHtml ? '<div class="text-xs text-gray-400 mt-0.5 leading-tight truncate">' + subHtml + '</div>' : '') +
                         '</span>';
                     li.appendChild(a);
                     spList.appendChild(li);
@@ -254,10 +383,11 @@
 
                 results.forEach(function(item) {
                     if (item.type === 'page') {
-                        var iconBox = '<span class="w-7 h-7 min-w-[28px] rounded-lg bg-gray-100 text-gray-500 text-xs flex items-center justify-center shrink-0"><i class="' + escHtml(item.icon) + '"></i></span>';
+                        var colors = getIconColors(item.icon).split(' ');
+                        var iconBox = '<span style="width:32px;height:32px;min-width:32px" class="rounded-lg flex items-center justify-center shrink-0 ' + colors.join(' ') + '"><i class="' + escHtml(item.icon) + '" style="font-size:14px"></i></span>';
                         makeRow(escHtml(item.url), iconBox, markText(item.label, q), '');
                     } else {
-                        var avatar = '<span class="w-7 h-7 min-w-[28px] rounded-full bg-gray-700 text-white text-[10px] font-bold flex items-center justify-center shrink-0">' + escHtml(item.initials) + '</span>';
+                        var avatar = '<span style="width:32px;height:32px;min-width:32px" class="rounded-full bg-gradient-to-br from-gray-700 to-gray-600 text-white text-[11px] font-bold flex items-center justify-center shrink-0 tracking-tight shadow-sm">' + escHtml(item.initials) + '</span>';
                         makeRow(escHtml(item.url), avatar, markText(item.label, q), item.subtitle ? escHtml(item.subtitle) : '');
                     }
                 });
@@ -266,8 +396,8 @@
             function doSearch(q) {
                 if (q === lastQ) return;
                 lastQ = q;
-                spState.classList.remove('hidden');
-                spState.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-gray-200 border-t-gray-500 rounded-full animate-spin"></span>';
+                spState.style.display = '';
+                spState.innerHTML = '<div class="three-body"><div class="three-body__dot"></div><div class="three-body__dot"></div><div class="three-body__dot"></div></div>';
                 spList.innerHTML = '';
                 openPopup();
 
@@ -278,13 +408,13 @@
                 .then(function (d) { render(d.results || [], q); })
                 .catch(function (err) {
                     console.error('[Search] fetch error', err);
-                    spState.classList.remove('hidden');
+                    spState.style.display = '';
                     spState.innerHTML = 'Search unavailable';
                 });
             }
 
             /* ── Events ── */
-            input.addEventListener('focus', function () { openPopup(); });
+            input.addEventListener('focus', function () { resetState(); openPopup(); });
 
             input.addEventListener('input', function () {
                 var q = this.value.trim();

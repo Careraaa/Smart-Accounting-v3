@@ -44,10 +44,6 @@
 
 @section('content')
 @php
-$calMonth = now()->month;
-$calYear  = now()->year;
-$firstDay = \Carbon\Carbon::createFromDate($calYear, $calMonth, 1);
-$today = now()->format('Y-m-d');
 $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvancesCount + $pendingSalaryLoansCount;
 @endphp
 
@@ -205,7 +201,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
             $stTotal = array_sum($stSeries);
         @endphp
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {{-- Net Payroll Trend (SVG line chart — clerk style) --}}
+            {{-- Net Payroll Trend (SVG line chart ï¿½ clerk style) --}}
             @php
             $chartMax = $trendCount > 0 ? max(array_column($trendPts, 'total')) : 1;
             $chartH = 160;
@@ -310,7 +306,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                             @endphp
                             <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
                                 <span class="w-2 h-2 rounded-sm shrink-0" style="background:{{ $stColors[$i % count($stColors)] }}"></span>
-                                <span class="text-[10px] text-gray-600 flex-1 truncate">{{ $stLabels[$i] ?? '—' }}</span>
+                                <span class="text-[10px] text-gray-600 flex-1 truncate">{{ $stLabels[$i] ?? 'ï¿½' }}</span>
                                 <span class="text-[10px] font-bold text-gray-900 tabular-nums">{{ $val }}</span>
                                 <span class="text-[8px] text-gray-400 min-w-[24px] text-right">{{ $pct }}%</span>
                             </div>
@@ -386,14 +382,14 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
             <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <h2 class="text-[11px] font-semibold text-gray-900">Pipeline</h2>
-                    <span class="text-[9px] text-gray-400 font-medium">Awaiting · approved · released · rejected</span>
+                    <span class="text-[9px] text-gray-400 font-medium">Awaiting ï¿½ approved ï¿½ released ï¿½ rejected</span>
                 </div>
                 <div class="px-4 py-4 space-y-3">
                     @forelse($pipeVals as $i => $val)
                     @php $barW = $pipeMax > 0 ? ($val / $pipeMax) * 100 : 0; @endphp
                     <div>
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-[10px] font-semibold text-gray-600">{{ $pipeLabels[$i] ?? '—' }}</span>
+                            <span class="text-[10px] font-semibold text-gray-600">{{ $pipeLabels[$i] ?? 'ï¿½' }}</span>
                             <span class="text-[10px] font-bold text-gray-900 tabular-nums">{{ $val }} <span class="text-[8px] text-gray-400 font-medium">batch{{ $val !== 1 ? 'es' : '' }}</span></span>
                         </div>
                         <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -413,24 +409,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
     <div class="space-y-5">
 
         {{-- Calendar Card --}}
-        <div class="slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="cal-card">
-            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                    <button class="p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600" id="cal-prev" title="Previous month">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                    </button>
-                    <span class="text-xs font-semibold text-gray-900 min-w-[100px] text-center" id="cal-label">{{ $firstDay->format('F Y') }}</span>
-                    <button class="p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600" id="cal-next" title="Next month">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                </div>
-                <span class="text-[0.55rem] font-mono text-gray-400">{{ now()->format('D, M j') }}</span>
-            </div>
-            <div class="px-4 py-3">
-                <div class="grid grid-cols-7 gap-0" id="cal-grid"></div>
-            </div>
-        </div>
+        @include('partials.dashboard-calendar')
 
         {{-- To-Do Card --}}
         <div class="slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.1s">
@@ -472,59 +451,3 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
 
 </div>
 @endsection
-
-@push('scripts')
-<script>
-(function () {
-
-    /* Interactive calendar */
-    const calState = { month: {{ $calMonth }}, year: {{ $calYear }}, selected: '{{ $today }}' };
-    const todayStr = '{{ $today }}';
-    const calGrid = document.getElementById('cal-grid');
-    const calLabel = document.getElementById('cal-label');
-    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-    function renderCalendar() {
-        const firstDow = new Date(calState.year, calState.month - 1, 1).getDay();
-        const daysIn = new Date(calState.year, calState.month, 0).getDate();
-        calLabel.textContent = monthNames[calState.month - 1] + ' ' + calState.year;
-        let html = '';
-        ['S','M','T','W','T','F','S'].forEach(d => {
-            html += '<span class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-center py-1.5">' + d + '</span>';
-        });
-        for (let i = 0; i < firstDow; i++) {
-            html += '<span class="text-center py-1.5"></span>';
-        }
-        for (let d = 1; d <= daysIn; d++) {
-            const ds = calState.year + '-' + String(calState.month).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-            let cls = 'text-center py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ';
-            if (ds === todayStr) {
-                cls += 'bg-gray-900 text-white ';
-            } else if (ds === calState.selected) {
-                cls += 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300 ';
-            } else {
-                cls += 'text-gray-600 hover:bg-gray-100 ';
-            }
-            html += '<span class="' + cls + '" data-date="' + ds + '">' + d + '</span>';
-        }
-        calGrid.innerHTML = html;
-        calGrid.querySelectorAll('[data-date]').forEach(el => {
-            el.addEventListener('click', function () {
-                calState.selected = this.dataset.date;
-                renderCalendar();
-            });
-        });
-    }
-    renderCalendar();
-
-    document.getElementById('cal-prev').addEventListener('click', function () {
-        if (--calState.month < 1) { calState.month = 12; calState.year--; }
-        renderCalendar();
-    });
-    document.getElementById('cal-next').addEventListener('click', function () {
-        if (++calState.month > 12) { calState.month = 1; calState.year++; }
-        renderCalendar();
-    });
-})();
-</script>
-@endpush

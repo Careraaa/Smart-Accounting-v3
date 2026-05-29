@@ -125,16 +125,11 @@ class SearchController extends Controller
         }
 
         // ── 2. Employee suggestions (role-gated) ──────────────────────────
-        $canSearchEmployees = in_array($role, ['hr', 'superadmin', 'qr_admin', 'employee']);
+        $canSearchEmployees = in_array($role, ['hr', 'superadmin', 'accountant', 'qr_admin']);
 
         if ($canSearchEmployees) {
             $empQuery = User::whereIn('role', ['employee', 'hr', 'accountant', 'remittance_clerk', 'superadmin', 'qr_admin'])
                 ->where('status', 'active');
-
-            // Employees can only find themselves
-            if ($role === 'employee') {
-                $empQuery->where('id', $user->id);
-            }
 
             $like = '%' . $query . '%';
             $users = $empQuery
@@ -155,8 +150,6 @@ class SearchController extends Controller
                 $url = '#';
                 if (in_array($role, ['hr', 'superadmin', 'accountant', 'qr_admin'])) {
                     try { $url = route('employees.show', $u->id); } catch (\Exception $e) {}
-                } elseif ($role === 'employee') {
-                    try { $url = route('employee.profile.show'); } catch (\Exception $e) {}
                 }
 
                 $initials = strtoupper(

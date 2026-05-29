@@ -32,10 +32,6 @@
 $margin = $totalCollections > 0 ? round(($totalNetRemittance / $totalCollections) * 100, 1) : 0;
 $mctMax = collect($monthlyCollectionTrend)->max('total_collection') ?: 1;
 $mctActive = count($monthlyCollectionTrend) - 1;
-$calMonth = now()->month;
-$calYear  = now()->year;
-$firstDay = \Carbon\Carbon::createFromDate($calYear, $calMonth, 1);
-$today = now()->format('Y-m-d');
 @endphp
 
     {{-- Header --}}
@@ -117,7 +113,7 @@ $today = now()->format('Y-m-d');
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300" style="animation-delay:0.05s">
                     <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Collections</p>
-                    <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.15s">?{{ number_format($totalCollections, 0) }}</p>
+                    <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.15s">₱{{ number_format($totalCollections, 0) }}</p>
                     <div class="flex items-center gap-1.5 mt-1">
                         <span class="inline-flex items-center gap-0.5 text-[9px] font-bold {{ $collectionGrowth > 0 ? 'text-emerald-600' : ($collectionGrowth < 0 ? 'text-red-500' : 'text-gray-400') }}">
                             @if($collectionGrowth > 0)
@@ -134,12 +130,12 @@ $today = now()->format('Y-m-d');
                 </div>
                 <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300" style="animation-delay:0.1s">
                     <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Expenses</p>
-                    <p class="text-lg font-bold text-red-500 tabular-nums mt-1 rc-count-num" style="animation-delay:0.2s">?{{ number_format($totalExpenses, 0) }}</p>
-                    <p class="text-[9px] text-gray-400 mt-1">Avg ?{{ number_format($averageExpenses, 0) }} / record</p>
+                    <p class="text-lg font-bold text-red-500 tabular-nums mt-1 rc-count-num" style="animation-delay:0.2s">₱{{ number_format($totalExpenses, 0) }}</p>
+                    <p class="text-[9px] text-gray-400 mt-1">Avg ₱{{ number_format($averageExpenses, 0) }} / record</p>
                 </div>
                 <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300" style="animation-delay:0.15s">
                     <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-                    <p class="text-lg font-bold text-blue-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.25s">?{{ number_format($totalNetRemittance, 0) }}</p>
+                    <p class="text-lg font-bold text-blue-600 tabular-nums mt-1 rc-count-num" style="animation-delay:0.25s">₱{{ number_format($totalNetRemittance, 0) }}</p>
                     <p class="text-[9px] text-gray-400 mt-1">{{ $margin }}% margin</p>
                 </div>
                 <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300" style="animation-delay:0.2s">
@@ -167,12 +163,12 @@ $today = now()->format('Y-m-d');
                         <div class="grid grid-cols-2 gap-3">
                             <div class="rounded-lg bg-gray-900 px-3.5 py-2.5">
                                 <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400">Collections</p>
-                                <p class="text-sm font-bold text-white tabular-nums mt-0.5">?{{ number_format($totalCollections, 0) }}</p>
+                                <p class="text-sm font-bold text-white tabular-nums mt-0.5">₱{{ number_format($totalCollections, 0) }}</p>
                                 <p class="text-[9px] text-gray-500 mt-0.5">{{ $cvePct($totalCollections) }}% of total</p>
                             </div>
                             <div class="rounded-lg bg-gray-50 border border-gray-200 px-3.5 py-2.5">
                                 <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400">Expenses</p>
-                                <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">?{{ number_format($totalExpenses, 0) }}</p>
+                                <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($totalExpenses, 0) }}</p>
                                 <p class="text-[9px] text-gray-400 mt-0.5">{{ $cvePct($totalExpenses) }}% of total</p>
                             </div>
                         </div>
@@ -189,7 +185,7 @@ $today = now()->format('Y-m-d');
                         <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3.5 py-2.5">
                             <div>
                                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-                                <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5">?{{ number_format($totalNetRemittance, 0) }}</p>
+                                <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($totalNetRemittance, 0) }}</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Margin</p>
@@ -225,8 +221,8 @@ $today = now()->format('Y-m-d');
                         </div>
                         <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3.5 py-2.5 transition-opacity" id="mct-detail">
                             <div>
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider" id="mct-detail-month">{{ $monthlyCollectionTrend[$mctActive]['month'] ?? '�' }}</p>
-                                <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5" id="mct-detail-val">?{{ number_format($monthlyCollectionTrend[$mctActive]['total_collection'] ?? 0, 0) }}</p>
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider" id="mct-detail-month">{{ $monthlyCollectionTrend[$mctActive]['month'] ?? '�' }}</p>
+                                <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5" id="mct-detail-val">₱{{ number_format($monthlyCollectionTrend[$mctActive]['total_collection'] ?? 0, 0) }}</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-[9px] text-gray-400">Total collection</p>
@@ -289,7 +285,7 @@ $today = now()->format('Y-m-d');
                         </div>
                         <span class="text-xs font-semibold text-gray-900">Daily Remittance Trend</span>
                     </div>
-                    <a href="{{ route('remittances.index') }}" class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-bold no-underline transition-all hover:bg-emerald-100 hover:text-emerald-800 active:scale-[0.95]">View all &rarr;</a>
+                    <a href="{{ route('remittances.index') }}" class="btn-uv-pill">View all &rarr;</a>
                 </div>
                 @php
                 $dailyData = collect();
@@ -358,7 +354,7 @@ $today = now()->format('Y-m-d');
                             Net remittance
                         </span>
                         <span>
-                            Total: <strong class="text-gray-700 font-mono">?{{ number_format($dailyData->sum('net'), 2) }}</strong>
+                            Total: <strong class="text-gray-700 font-mono">₱{{ number_format($dailyData->sum('net'), 2) }}</strong>
                         </span>
                     </div>
                 </div>
@@ -372,25 +368,8 @@ $today = now()->format('Y-m-d');
         {{-- Right sidebar --}}
         <div class="space-y-5">
 
-            {{-- Calendar Card --}}
-            <div class="slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="cal-card">
-                <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                        <button class="p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600" id="cal-prev" title="Previous month">
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                        </button>
-                        <span class="text-xs font-semibold text-gray-900 min-w-[100px] text-center" id="cal-label">{{ $firstDay->format('F Y') }}</span>
-                        <button class="p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600" id="cal-next" title="Next month">
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                        </button>
-                    </div>
-                    <span class="text-[0.55rem] font-mono text-gray-400">{{ now()->format('D, M j') }}</span>
-                </div>
-                <div class="px-4 py-3">
-                    <div class="grid grid-cols-7 gap-0" id="cal-grid"></div>
-                </div>
-            </div>
+        {{-- Calendar Card --}}
+        @include('partials.dashboard-calendar')
 
             {{-- To-Do Card --}}
             @php $totalPendingTodo = $pendingRemittances; @endphp
@@ -487,55 +466,6 @@ $today = now()->format('Y-m-d');
             el.textContent = prefix + Math.round(inc * cur).toLocaleString('en-PH');
             if (cur >= steps) { el.textContent = text; clearInterval(t); }
         }, dur / steps);
-    });
-
-    /* -- Interactive calendar -- */
-    const calState = { month: {{ $calMonth }}, year: {{ $calYear }}, selected: '{{ $today }}' };
-    const todayStr = '{{ $today }}';
-    const calGrid = document.getElementById('cal-grid');
-    const calLabel = document.getElementById('cal-label');
-    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-    function renderCalendar() {
-        const firstDow = new Date(calState.year, calState.month - 1, 1).getDay();
-        const daysIn = new Date(calState.year, calState.month, 0).getDate();
-        calLabel.textContent = monthNames[calState.month - 1] + ' ' + calState.year;
-        let html = '';
-        ['S','M','T','W','T','F','S'].forEach(d => {
-            html += '<span class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-center py-1.5">' + d + '</span>';
-        });
-        for (let i = 0; i < firstDow; i++) {
-            html += '<span class="text-center py-1.5"></span>';
-        }
-        for (let d = 1; d <= daysIn; d++) {
-            const ds = calState.year + '-' + String(calState.month).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-            let cls = 'text-center py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ';
-            if (ds === todayStr) {
-                cls += 'bg-gray-900 text-white ';
-            } else if (ds === calState.selected) {
-                cls += 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300 ';
-            } else {
-                cls += 'text-gray-600 hover:bg-gray-100 ';
-            }
-            html += '<span class="' + cls + '" data-date="' + ds + '">' + d + '</span>';
-        }
-        calGrid.innerHTML = html;
-        calGrid.querySelectorAll('[data-date]').forEach(el => {
-            el.addEventListener('click', function () {
-                calState.selected = this.dataset.date;
-                renderCalendar();
-            });
-        });
-    }
-    renderCalendar();
-
-    document.getElementById('cal-prev').addEventListener('click', function () {
-        if (--calState.month < 1) { calState.month = 12; calState.year--; }
-        renderCalendar();
-    });
-    document.getElementById('cal-next').addEventListener('click', function () {
-        if (++calState.month > 12) { calState.month = 1; calState.year++; }
-        renderCalendar();
     });
 })();
 </script>

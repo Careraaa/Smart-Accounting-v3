@@ -32,8 +32,6 @@
 @php
 $maxV = collect($attendanceTrend)->map(fn($d) => $d['present'] + $d['late'] + $d['absent'])->max() ?: 1;
 $td = $attendanceTrend[array_key_last($attendanceTrend)];
-$firstDay = \Carbon\Carbon::createFromDate($calYear, $calMonth, 1);
-$today = now()->format('Y-m-d');
 @endphp
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -492,25 +490,7 @@ $today = now()->format('Y-m-d');
     <div class="space-y-5">
 
         {{-- Calendar Card --}}
-        <div class="sad-slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="cal-card">
-            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                    <button class="p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600" id="cal-prev" title="Previous month">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                    </button>
-                    <span class="text-xs font-semibold text-gray-900 min-w-[100px] text-center" id="cal-label">{{ $firstDay->format('F Y') }}</span>
-                    <button class="p-0.5 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600" id="cal-next" title="Next month">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                    </button>
-                </div>
-                <span class="text-[0.55rem] font-mono text-gray-400">{{ now()->format('D, M j') }}</span>
-            </div>
-            <div class="px-4 py-3">
-                <div class="grid grid-cols-7 gap-0" id="cal-grid">
-                </div>
-            </div>
-        </div>
+        @include('partials.dashboard-calendar')
 
         {{-- To-Do Card --}}
         <div class="sad-slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.1s">
@@ -586,57 +566,3 @@ $today = now()->format('Y-m-d');
 
 </div>
 @endsection
-
-@push('scripts')
-<script>
-(function () {
-    const calState = { month: {{ $calMonth }}, year: {{ $calYear }}, selected: '{{ $today }}' };
-    const todayStr = '{{ $today }}';
-    const calGrid = document.getElementById('cal-grid');
-    const calLabel = document.getElementById('cal-label');
-    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-    function renderCalendar() {
-        const firstDow = new Date(calState.year, calState.month - 1, 1).getDay();
-        const daysIn = new Date(calState.year, calState.month, 0).getDate();
-        calLabel.textContent = monthNames[calState.month - 1] + ' ' + calState.year;
-        let html = '';
-        ['S','M','T','W','T','F','S'].forEach(d => {
-            html += '<span class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-center py-1.5">' + d + '</span>';
-        });
-        for (let i = 0; i < firstDow; i++) {
-            html += '<span class="text-center py-1.5"></span>';
-        }
-        for (let d = 1; d <= daysIn; d++) {
-            const ds = calState.year + '-' + String(calState.month).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-            let cls = 'text-center py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ';
-            if (ds === todayStr) {
-                cls += 'bg-gray-900 text-white ';
-            } else if (ds === calState.selected) {
-                cls += 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300 ';
-            } else {
-                cls += 'text-gray-600 hover:bg-gray-100 ';
-            }
-            html += '<span class="' + cls + '" data-date="' + ds + '">' + d + '</span>';
-        }
-        calGrid.innerHTML = html;
-        calGrid.querySelectorAll('[data-date]').forEach(el => {
-            el.addEventListener('click', function () {
-                calState.selected = this.dataset.date;
-                renderCalendar();
-            });
-        });
-    }
-    renderCalendar();
-
-    document.getElementById('cal-prev').addEventListener('click', function () {
-        if (--calState.month < 1) { calState.month = 12; calState.year--; }
-        renderCalendar();
-    });
-    document.getElementById('cal-next').addEventListener('click', function () {
-        if (++calState.month > 12) { calState.month = 1; calState.year++; }
-        renderCalendar();
-    });
-})();
-</script>
-@endpush

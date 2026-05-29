@@ -58,9 +58,6 @@
         .sidebar .overflow-y-auto { scrollbar-width: none; -ms-overflow-style: none; }
         .sidebar .overflow-y-auto::-webkit-scrollbar { display: none; }
 
-        /* ── Search border on focus ── */
-        #kt-nav-search:focus-within { border-color: #d1d5db; box-shadow: 0 0 0 2px rgba(0,0,0,.06); }
-
         /* ── White theme link overrides ── */
         .sidebar .sidebar-link { color: #6b7280; }
         .sidebar .sidebar-link:hover { color: #111827; background: rgba(0,0,0,.04); }
@@ -126,15 +123,17 @@
         </div>
 
         {{-- ── Search ── --}}
-        <div id="kt-nav-search" class="mx-3 mt-3 mb-1 flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-lg px-2.5 h-8 cursor-text transition-colors">
-            <svg class="w-3.5 h-3.5 shrink-0 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            <input id="kt-search-input" type="text" placeholder="Search" autocomplete="off" spellcheck="false" class="flex-1 border-none bg-transparent outline-none text-xs text-gray-600 min-w-0 p-0 leading-none placeholder:text-gray-500">
+        <div id="kt-nav-search" class="relative mx-3 mt-3 mb-1 cursor-text">
+            <div class="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 transition-all duration-200 ring-2 ring-transparent focus-within:ring-rose-500/20 focus-within:border-rose-300 focus-within:bg-white focus-within:shadow-sm">
+                <svg class="w-4 h-4 shrink-0 text-gray-400 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input id="kt-search-input" type="text" placeholder="Search pages, employees…" autocomplete="off" spellcheck="false" class="flex-1 border-none bg-transparent outline-none text-sm text-gray-700 min-w-0 p-0 leading-tight placeholder:text-gray-400">
+            </div>
         </div>
 
         {{-- ── Search results popup ── --}}
-        <div id="kt-search-popup" class="hidden fixed z-[9999] w-[224px] bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden" style="font-family:inherit">
-            <div class="max-h-[360px] overflow-y-auto py-1">
-                <div id="kt-sp-state" class="px-3 py-4 text-center text-xs text-gray-400">Type to search</div>
+        <div id="kt-search-popup" class="fixed z-[9999] bg-white rounded-xl border border-gray-200 shadow-xl shadow-gray-200/50 overflow-hidden" style="transition:all 0.2s cubic-bezier(0.16, 1, 0.3, 1);opacity:0;transform:translateY(-8px) scale(0.97);pointer-events:none;visibility:hidden;width:300px">
+            <div class="max-h-[400px] overflow-y-auto">
+                <div id="kt-sp-state" class="px-4 py-5 text-center text-sm text-gray-400">Type to search</div>
                 <ul id="kt-sp-list" class="list-none m-0 p-0"></ul>
             </div>
         </div>

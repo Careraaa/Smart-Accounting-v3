@@ -22,7 +22,7 @@
     {{-- Flash --}}
     @foreach(['success','error','info'] as $t)
         @if(session($t))
-        <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium animate-[fadeSlideUp_0.3s_ease] @switch($t) @case('success') bg-green-50 text-green-700 @break @case('error') bg-red-50 text-red-700 @break @case('info') bg-blue-50 text-blue-700 @break @endswitch">
+        <div class="flash-bar flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium animate-[fadeSlideUp_0.3s_ease] @switch($t) @case('success') bg-green-50 text-green-700 @break @case('error') bg-red-50 text-red-700 @break @case('info') bg-blue-50 text-blue-700 @break @endswitch">
             <span>{{ session($t) }}</span>
         </div>
         @endif
@@ -214,19 +214,19 @@
             <div class="flex items-center gap-8 font-mono tabular-nums">
                 <div class="text-right">
                     <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Gross</p>
-                    <p class="text-xs font-semibold text-gray-900">₱{{ number_format($batch->total_gross_pay ?? 0,2) }}</p>
+                    <p class="text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($batch->total_gross_pay ?? 0,2) }}</p>
                 </div>
                 <div class="text-right">
                     <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
-                    <p class="text-xs font-semibold text-red-500">₱{{ number_format($batch->total_deductions ?? 0,2) }}</p>
+                    <p class="text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($batch->total_deductions ?? 0,2) }}</p>
                 </div>
                 <div class="text-right">
                     <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Allowances</p>
-                    <p class="text-xs font-semibold text-emerald-500">₱{{ number_format($batch->total_allowances ?? 0,2) }}</p>
+                    <p class="text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format($batch->total_allowances ?? 0,2) }}</p>
                 </div>
                 <div class="text-right">
                     <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Net</p>
-                    <p class="text-sm font-bold text-gray-900">₱{{ number_format($batch->total_net_pay,2) }}</p>
+                    <p class="text-sm font-bold text-gray-900 tabular-nums">₱{{ number_format($batch->total_net_pay,2) }}</p>
                 </div>
             </div>
         </div>
@@ -424,6 +424,27 @@ document.addEventListener('keydown', function(e) {
             if (!m.classList.contains('hidden')) closeModal(m.id);
         });
     }
+});
+document.addEventListener('DOMContentLoaded', function() {
+  var fmt = function(n) { return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+  var targets = document.querySelectorAll('.tabular-nums');
+  targets.forEach(function(el, i) {
+    if (el.offsetParent === null) return;
+    var raw = el.textContent.trim();
+    var m = raw.match(/^([+-])?\s*₱?\s*([\d,]+\.\d{2})/);
+    if (!m) return;
+    var sign = m[1] || '';
+    var target = parseFloat(m[2].replace(/,/g, ''));
+    var duration = 600 + i * 50;
+    var t0 = performance.now();
+    function tick(now) {
+      var p = Math.min((now - t0) / duration, 1);
+      var v = (1 - Math.pow(1 - p, 3)) * Math.abs(target);
+      el.textContent = sign + '₱' + fmt(v);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
 });
 </script>
 @endpush

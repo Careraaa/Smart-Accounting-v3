@@ -8,6 +8,30 @@
 .stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 .stat-card:nth-child(1) { animation-delay:0.05s; }
 .stat-card:nth-child(2) { animation-delay:0.1s; }
+@keyframes compSlide { 0%{opacity:0.3;transform:translateX(-4px)} 100%{opacity:1;transform:translateX(0)} }
+.comp-section > div { animation:compSlide 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+.comp-section > div:nth-child(1) { animation-delay:0.02s; }
+.comp-section > div:nth-child(2) { animation-delay:0.05s; }
+.comp-section > div:nth-child(3) { animation-delay:0.08s; }
+.comp-section > div:nth-child(4) { animation-delay:0.11s; }
+.comp-section > div:nth-child(5) { animation-delay:0.14s; }
+.comp-section > div:nth-child(6) { animation-delay:0.17s; }
+.comp-section > div:nth-child(7) { animation-delay:0.20s; }
+.comp-section > div:nth-child(8) { animation-delay:0.23s; }
+.comp-section > div:nth-child(9) { animation-delay:0.26s; }
+.comp-section > div:nth-child(10) { animation-delay:0.29s; }
+.comp-section > div:nth-child(11) { animation-delay:0.32s; }
+.comp-section > div:nth-child(12) { animation-delay:0.35s; }
+.comp-section > div:nth-child(13) { animation-delay:0.38s; }
+.comp-section > div:nth-child(14) { animation-delay:0.41s; }
+.comp-section > div:nth-child(15) { animation-delay:0.44s; }
+.comp-section > div:nth-child(16) { animation-delay:0.47s; }
+.comp-section > div:nth-child(17) { animation-delay:0.50s; }
+.comp-section > div:nth-child(18) { animation-delay:0.53s; }
+.comp-section > div:nth-child(19) { animation-delay:0.56s; }
+.comp-section > div:nth-child(20) { animation-delay:0.59s; }
+@keyframes netPop { 0%{opacity:0;transform:scale(0.92)} 70%{transform:scale(1.03)} 100%{opacity:1;transform:scale(1)} }
+.net-pop { animation:netPop 0.5s cubic-bezier(0.16,1,0.3,1) 0.4s both; }
 </style>
 @endpush
 
@@ -77,7 +101,7 @@
                     <div><p class="text-sm font-bold text-gray-900">Salary Computation</p><p class="text-xs text-gray-400">Earnings and deductions</p></div>
                 </div>
                 <div class="p-4">
-                    <div class="divide-y divide-gray-50">
+                    <div class="divide-y divide-gray-50 comp-section">
                         <div class="flex items-center justify-between py-2.5 first:pt-0">
                             <span class="text-sm text-gray-500 flex items-center gap-1.5">Basic Pay <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded" id="ep_basic_badge">rate &times; days</span></span>
                             <span class="text-sm font-bold text-gray-900 tabular-nums font-mono" id="ep_basic_display">₱{{ number_format($payroll->basic_salary??0,2) }}</span>
@@ -211,7 +235,7 @@
         </div>
 
         {{-- Net Pay --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-5 flex items-center justify-between gap-4">
+        <div class="net-pop bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-5 flex items-center justify-between gap-4">
             <div>
                 <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Net Pay</p>
                 <p class="text-xs text-gray-400 mt-0.5">Basic + Allowances − Deductions + Bonuses</p>
@@ -563,5 +587,28 @@ window._ep = {
     render();
     doFetch();
 })();
+requestAnimationFrame(function() {
+  requestAnimationFrame(function() {
+    var fmt = function(n) { return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+    var targets = document.querySelectorAll('.comp-section .tabular-nums.font-mono, .net-pop .tabular-nums.font-mono');
+    targets.forEach(function(el, i) {
+      if (el.offsetParent === null) return;
+      var raw = el.textContent.trim();
+      var m = raw.match(/^([+-])?\s*₱?\s*([\d,]+\.\d{2})/);
+      if (!m) return;
+      var sign = m[1] || '';
+      var target = parseFloat(m[2].replace(/,/g, ''));
+      var duration = 600 + i * 50;
+      var t0 = performance.now();
+      function tick(now) {
+        var p = Math.min((now - t0) / duration, 1);
+        var v = (1 - Math.pow(1 - p, 3)) * Math.abs(target);
+        el.textContent = sign + '₱' + fmt(v);
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  });
+});
 </script>
 @endpush

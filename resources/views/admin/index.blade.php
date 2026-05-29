@@ -4,22 +4,22 @@
 
 {{-- ================================================================
      QR ATTENDANCE MONITOR — Knights Transport Fleet System
-     Light theme | Minibus attendance terminal
+     Crimson theme | Minibus attendance terminal
 ================================================================ --}}
 
 <div class="relative w-full h-full flex flex-col overflow-hidden select-none" id="qr-page">
 
     {{-- ── Animated gradient background ── --}}
-    <div class="absolute inset-0" id="bg-layer" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 30%, #f0f9ff 60%, #f8fafc 100%);"></div>
+    <div class="absolute inset-0" id="bg-layer" style="background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 30%, #fef6f6 60%, #fafafa 100%);"></div>
 
     {{-- ── Slow-drift blob orbs ── --}}
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="blob blob-a absolute w-[44rem] h-[44rem] rounded-full -top-40 -left-32"
-             style="background: radial-gradient(circle, rgba(16,185,129,0.13) 0%, transparent 65%);"></div>
+             style="background: radial-gradient(circle, rgba(244,63,94,0.11) 0%, transparent 65%);"></div>
         <div class="blob blob-b absolute w-[36rem] h-[36rem] rounded-full -bottom-32 -right-20"
-             style="background: radial-gradient(circle, rgba(6,182,212,0.10) 0%, transparent 65%);"></div>
+             style="background: radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 65%);"></div>
         <div class="blob blob-c absolute w-[28rem] h-[28rem] rounded-full top-1/3 right-1/4"
-             style="background: radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 65%);"></div>
+             style="background: radial-gradient(circle, rgba(251,146,60,0.06) 0%, transparent 65%);"></div>
     </div>
 
     {{-- ── Subtle dot grid ── --}}
@@ -27,46 +27,14 @@
 
     {{-- ── Floating shapes ── --}}
     <div class="absolute inset-0 overflow-hidden pointer-events-none" id="float-shapes">
-        <div class="float-shape absolute w-3 h-3 rounded-sm border-2 border-emerald-300/40" style="top:12%; left:8%; animation: floatA 8s ease-in-out infinite;"></div>
-        <div class="float-shape absolute w-2 h-2 rounded-full bg-emerald-300/30" style="top:25%; right:12%; animation: floatB 10s ease-in-out 1s infinite;"></div>
-        <div class="float-shape absolute w-4 h-4 rounded-full border border-cyan-300/30" style="bottom:30%; left:6%; animation: floatA 12s ease-in-out 2s infinite;"></div>
-        <div class="float-shape absolute w-2 h-2 rounded-sm bg-amber-300/25" style="bottom:20%; right:8%; animation: floatC 9s ease-in-out 0.5s infinite;"></div>
-        <div class="float-shape absolute w-1.5 h-1.5 rounded-full bg-emerald-400/40" style="top:60%; left:14%; animation: floatB 7s ease-in-out 3s infinite;"></div>
-        <div class="float-shape absolute w-3 h-3 rounded border border-emerald-200/50" style="top:70%; right:16%; animation: floatC 11s ease-in-out 1.5s infinite;"></div>
-        <div class="float-shape absolute w-2 h-2 rounded-full border border-cyan-200/40" style="top:40%; left:5%; animation: floatA 9s ease-in-out 4s infinite;"></div>
-        <div class="float-shape absolute w-1.5 h-1.5 bg-amber-200/50 rounded-full" style="top:15%; right:22%; animation: floatB 13s ease-in-out 2.5s infinite;"></div>
-    </div>
-
-    {{-- ─────────────────────────────────────────────────────────────
-         TOP BAR
-    ───────────────────────────────────────────────────────────────── --}}
-    <div class="relative z-10 flex items-center justify-between px-8 pt-5 animate-header">
-
-        {{-- Brand --}}
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-md shadow-emerald-200/60 brand-icon"
-                 style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
-                </svg>
-            </div>
-            <div>
-                <div class="text-sm font-extrabold text-gray-800 tracking-tight leading-none">Knights Transport</div>
-                <div class="text-[0.58rem] text-gray-400 tracking-widest uppercase mt-0.5 font-semibold">Fleet Attendance System</div>
-            </div>
-        </div>
-
-        {{-- Live badge --}}
-        <div class="live-badge flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-emerald-200 shadow-sm shadow-emerald-100">
-            <span class="live-dot w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span class="text-[0.65rem] font-bold text-emerald-600 uppercase tracking-widest">Live</span>
-        </div>
-
-        {{-- Clock --}}
-        <div class="text-right">
-            <div id="clock-time" class="text-2xl font-mono font-bold text-gray-800 tabular-nums leading-none"></div>
-            <div id="clock-date" class="text-[0.65rem] text-gray-400 mt-1 font-medium"></div>
-        </div>
+        <div class="float-shape absolute w-3 h-3 rounded-sm border-2 border-rose-300/40" style="top:12%; left:8%; animation: floatA 8s ease-in-out infinite;"></div>
+        <div class="float-shape absolute w-2 h-2 rounded-full bg-rose-300/30" style="top:25%; right:12%; animation: floatB 10s ease-in-out 1s infinite;"></div>
+        <div class="float-shape absolute w-4 h-4 rounded-full border border-red-300/30" style="bottom:30%; left:6%; animation: floatA 12s ease-in-out 2s infinite;"></div>
+        <div class="float-shape absolute w-2 h-2 rounded-sm bg-orange-300/25" style="bottom:20%; right:8%; animation: floatC 9s ease-in-out 0.5s infinite;"></div>
+        <div class="float-shape absolute w-1.5 h-1.5 rounded-full bg-rose-400/40" style="top:60%; left:14%; animation: floatB 7s ease-in-out 3s infinite;"></div>
+        <div class="float-shape absolute w-3 h-3 rounded border border-rose-200/50" style="top:70%; right:16%; animation: floatC 11s ease-in-out 1.5s infinite;"></div>
+        <div class="float-shape absolute w-2 h-2 rounded-full border border-red-200/40" style="top:40%; left:5%; animation: floatA 9s ease-in-out 4s infinite;"></div>
+        <div class="float-shape absolute w-1.5 h-1.5 bg-orange-200/50 rounded-full" style="top:15%; right:22%; animation: floatB 13s ease-in-out 2.5s infinite;"></div>
     </div>
 
     {{-- ─────────────────────────────────────────────────────────────
@@ -77,7 +45,7 @@
         {{-- Headline --}}
         <div class="text-center animate-title">
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm mb-3">
-                <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                 </svg>
                 <span class="text-xs font-bold text-gray-500 tracking-widest uppercase">Scan to Log Attendance</span>
@@ -89,14 +57,14 @@
 
             {{-- Outer glow ring --}}
             <div class="absolute -inset-3 rounded-[2rem] opacity-60 glow-ring"
-                 style="background: conic-gradient(from 0deg, #10b981, #34d399, #6ee7b7, #10b981); filter: blur(18px); z-index: 0;"></div>
+                 style="background: conic-gradient(from 0deg, #f43f5e, #fb7185, #fda4af, #f43f5e); filter: blur(18px); z-index: 0;"></div>
 
             {{-- Rotating border --}}
             <div class="absolute -inset-[2px] rounded-[26px] z-0 rotate-border"
-                 style="background: conic-gradient(from 0deg, #10b981 0%, #6ee7b7 25%, transparent 50%, #34d399 75%, #10b981 100%); padding: 2px; border-radius: 26px;"></div>
+                 style="background: conic-gradient(from 0deg, #f43f5e 0%, #fda4af 25%, transparent 50%, #fb7185 75%, #f43f5e 100%); padding: 2px; border-radius: 26px;"></div>
 
             {{-- Card --}}
-            <div class="relative z-10 bg-white rounded-[24px] p-2 shadow-2xl shadow-emerald-100/80" style="box-shadow: 0 32px 64px -12px rgba(16,185,129,0.2), 0 8px 24px -6px rgba(0,0,0,0.08);">
+            <div class="relative z-10 bg-white rounded-[24px] p-2 shadow-2xl shadow-rose-100/80" style="box-shadow: 0 32px 64px -12px rgba(244,63,94,0.18), 0 8px 24px -6px rgba(0,0,0,0.08);">
 
                 {{-- Inner QR frame --}}
                 <div class="relative rounded-[18px] overflow-hidden bg-gray-50" style="padding: 2px;">
@@ -107,19 +75,19 @@
 
                         {{-- Sweep overlay --}}
                         <div id="sweep-overlay" class="absolute inset-0 z-20 rounded-[17px] pointer-events-none opacity-0"
-                             style="background: radial-gradient(circle at center, rgba(5,150,105,0.92) 0%, rgba(16,185,129,0.75) 40%, rgba(52,211,153,0.4) 100%);"></div>
+                             style="background: radial-gradient(circle at center, rgba(225,29,72,0.92) 0%, rgba(244,63,94,0.75) 40%, rgba(251,113,133,0.4) 100%);"></div>
 
                         {{-- QR inner --}}
                         <div id="qr-inner" class="p-4 relative">
                             {{-- Scan line --}}
                             <div id="scan-line" class="absolute left-6 right-6 h-0.5 z-10 pointer-events-none"
-                                 style="background: linear-gradient(90deg, transparent, #10b981, #34d399, #10b981, transparent); border-radius: 9999px; animation: scanLineLight 2.6s ease-in-out infinite; top: 50%;"></div>
+                                 style="background: linear-gradient(90deg, transparent, #f43f5e, #fb7185, #f43f5e, transparent); border-radius: 9999px; animation: scanLineLight 2.6s ease-in-out infinite; top: 50%;"></div>
                             <div id="qrcode"></div>
                         </div>
 
                         {{-- Success overlay --}}
                         <div id="scan-success" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 rounded-[17px]"
-                             style="background: linear-gradient(135deg, rgba(5,150,105,0.95), rgba(16,185,129,0.9));">
+                             style="background: linear-gradient(135deg, rgba(225,29,72,0.95), rgba(244,63,94,0.9));">
                             <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm shadow-lg">
                                 <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
@@ -135,10 +103,10 @@
 
                 {{-- Corner brackets inside card --}}
                 <div class="absolute inset-4 pointer-events-none z-10">
-                    <div class="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-emerald-400 rounded-tl-md"></div>
-                    <div class="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-emerald-400 rounded-tr-md"></div>
-                    <div class="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-emerald-400 rounded-bl-md"></div>
-                    <div class="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-emerald-400 rounded-br-md"></div>
+                    <div class="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-rose-400 rounded-tl-md"></div>
+                    <div class="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-rose-400 rounded-tr-md"></div>
+                    <div class="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-rose-400 rounded-bl-md"></div>
+                    <div class="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-rose-400 rounded-br-md"></div>
                 </div>
             </div>
         </div>
@@ -150,7 +118,7 @@
             <div class="flex flex-col items-center gap-1.5">
                 <div class="text-[0.55rem] font-bold uppercase tracking-[0.35em] text-gray-400">Manual Entry Token</div>
                 <div class="relative flex items-center gap-1">
-                    <div class="token-glow absolute inset-0 rounded-xl bg-emerald-300/30 blur-md"></div>
+                    <div class="token-glow absolute inset-0 rounded-xl bg-rose-300/30 blur-md"></div>
                     <div id="token-display"
                          class="relative px-6 py-2.5 rounded-xl bg-white border border-gray-200 shadow-sm text-2xl font-mono font-bold tracking-[0.4em] text-gray-700 select-all tabular-nums"
                          style="letter-spacing: 0.5em; min-width: 14rem; text-align: center;">——</div>
@@ -161,9 +129,9 @@
             <div class="flex items-center gap-3 w-56">
                 <div class="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
                     <div id="timer-bar" class="h-full rounded-full"
-                         style="width: 100%; background: linear-gradient(90deg, #059669, #10b981, #34d399); transition: width 1s linear;"></div>
+                         style="width: 100%; background: linear-gradient(90deg, #e11d48, #f43f5e, #fb7185); transition: width 1s linear;"></div>
                 </div>
-                <div id="timer-text" class="text-xs font-mono font-bold text-gray-400 tabular-nums w-7 text-right shrink-0">—</div>
+                <div id="timer-text" class="text-xs font-mono font-bold text-gray-400 tabular-nums w-7 text-center shrink-0">—</div>
             </div>
         </div>
 
@@ -174,7 +142,7 @@
     ───────────────────────────────────────────────────────────────── --}}
     <div class="relative z-10 flex items-center justify-between px-8 py-4">
         <div class="flex items-center gap-2">
-            <div class="w-1.5 h-1.5 rounded-full bg-emerald-400/60"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-rose-400/60"></div>
             <span class="text-[0.58rem] font-semibold text-gray-400 uppercase tracking-widest">Attendance Terminal</span>
         </div>
         <div class="flex items-center gap-4">
@@ -205,17 +173,6 @@
     const overlay  = document.getElementById('scan-success');
     const timerTxt = document.getElementById('timer-text');
     const timerBar = document.getElementById('timer-bar');
-
-    // ── Clock ──
-    function updateClock() {
-        const now = new Date();
-        const te = document.getElementById('clock-time');
-        const de = document.getElementById('clock-date');
-        if (te) te.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-        if (de) de.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    }
-    updateClock();
-    setInterval(updateClock, 1000);
 
     // ── QR size ──
     function getQRSize() {
@@ -277,7 +234,6 @@
         .then(data => {
             animateRefresh();
             setTimeout(() => renderQR(data.token), 50);
-            // Token character-by-character reveal
             revealToken(data.token);
             qrCountdown = QR_REFRESH_SECONDS;
             timerTxt.textContent = qrCountdown + 's';
@@ -314,13 +270,13 @@
         timerTxt.textContent = qrCountdown + 's';
         const pct = (qrCountdown / QR_REFRESH_SECONDS) * 100;
         timerBar.style.width = pct + '%';
-        // Color shift: green → amber → red as time runs out
+        // Color shift: rose → deeper red as time runs out
         if (qrCountdown <= 10) {
-            timerBar.style.background = 'linear-gradient(90deg, #dc2626, #ef4444)';
+            timerBar.style.background = 'linear-gradient(90deg, #9f1239, #be123c)';
         } else if (qrCountdown <= 20) {
-            timerBar.style.background = 'linear-gradient(90deg, #d97706, #f59e0b, #fbbf24)';
+            timerBar.style.background = 'linear-gradient(90deg, #be123c, #e11d48, #f43f5e)';
         } else {
-            timerBar.style.background = 'linear-gradient(90deg, #059669, #10b981, #34d399)';
+            timerBar.style.background = 'linear-gradient(90deg, #e11d48, #f43f5e, #fb7185)';
         }
         if (qrCountdown <= 0) { clearInterval(refreshInt); loadQR(); }
     }
@@ -386,9 +342,6 @@
 #main-content {
     animation: mainFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) both;
 }
-.animate-header {
-    animation: fadeDown 0.6s cubic-bezier(0.16,1,0.3,1) both;
-}
 .animate-title {
     animation: mainFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both;
 }
@@ -402,10 +355,6 @@
 @keyframes mainFadeUp {
     0%   { opacity: 0; transform: translateY(18px) scale(0.98); }
     100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes fadeDown {
-    0%   { opacity: 0; transform: translateY(-14px); }
-    100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes qrPop {
     0%   { opacity: 0; transform: scale(0.88) translateY(20px); }
@@ -470,30 +419,6 @@
     100% { top: 96%; opacity: 0; }
 }
 
-/* ── Live dot pulse ── */
-.live-dot {
-    animation: livePulse 2.2s ease-in-out infinite;
-}
-@keyframes livePulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
-    50%       { box-shadow: 0 0 0 6px rgba(52,211,153,0); }
-}
-.live-badge {
-    animation: badgePop 0.7s cubic-bezier(0.16,1,0.3,1) 0.3s both;
-}
-@keyframes badgePop {
-    0%   { opacity: 0; transform: scale(0.85); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-/* ── Brand icon hover breathe ── */
-.brand-icon {
-    animation: iconBreathe 4s ease-in-out infinite;
-}
-@keyframes iconBreathe {
-    0%, 100% { box-shadow: 0 4px 14px rgba(16,185,129,0.3); }
-    50%       { box-shadow: 0 6px 20px rgba(16,185,129,0.55); }
-}
 
 /* ── Token glow pulse ── */
 .token-glow {
