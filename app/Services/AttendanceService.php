@@ -67,18 +67,33 @@ class AttendanceService
             ->where('time_out', '!=', null)
             ->get();
 
+        // Get the active shift to determine break times
+        $shift = Shift::where('is_active', true)->first();
+
         $totalHours = 0;
 
         foreach ($attendances as $attendance) {
-            // Combine the date with time values to get full datetime
             $timeIn = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $attendance->time_in);
             $timeOut = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $attendance->time_out);
-            
-            // Calculate hours using timestamp difference to avoid sign issues
-            $hoursWorked = abs(($timeOut->timestamp - $timeIn->timestamp) / 3600);
-            
-            // Subtract 1-hour break from each day
-            $hoursWorked = max(0, $hoursWorked - 1);
+
+            $totalMinutes = abs($timeOut->diffInMinutes($timeIn));
+            $breakOverlapMinutes = 0;
+
+            if ($shift) {
+                $dateStr = $attendance->date->format('Y-m-d');
+                $breakStartTime = Carbon::parse($dateStr . ' ' . ($shift->break_start ?? '12:00:00'));
+                $breakEndTime = Carbon::parse($dateStr . ' ' . ($shift->break_end ?? '13:00:00'));
+
+                if ($timeOut->greaterThan($breakStartTime) && $timeIn->lessThan($breakEndTime)) {
+                    $overlapStart = $timeIn->greaterThan($breakStartTime) ? $timeIn : $breakStartTime;
+                    $overlapEnd = $timeOut->lessThan($breakEndTime) ? $timeOut : $breakEndTime;
+                    $breakOverlapMinutes = max(0, abs($overlapEnd->diffInMinutes($overlapStart)));
+                }
+            } else {
+                $breakOverlapMinutes = min(60, $totalMinutes);
+            }
+
+            $hoursWorked = max(0, ($totalMinutes - $breakOverlapMinutes) / 60);
             $totalHours += $hoursWorked;
         }
 
@@ -297,18 +312,12 @@ class AttendanceService
             return $result;
         }
 
-        // Parse shift times
-        $shiftStart = Carbon::createFromFormat('H:i:s', $shift->start_time);
-        $shiftEnd = Carbon::createFromFormat('H:i:s', $shift->end_time);
-        $breakStart = Carbon::createFromFormat('H:i:s', $shift->break_start ?? '12:00:00');
-        $breakEnd = Carbon::createFromFormat('H:i:s', $shift->break_end ?? '13:00:00');
-
         // Create full datetime objects for the day
         $dateStr = $attendance->date->format('Y-m-d');
         $expectedStart = Carbon::parse($dateStr . ' ' . $shift->start_time);
         $expectedEnd = Carbon::parse($dateStr . ' ' . $shift->end_time);
-        $breakStartTime = Carbon::parse($dateStr . ' ' . $shift->break_start ?? '12:00:00');
-        $breakEndTime = Carbon::parse($dateStr . ' ' . $shift->break_end ?? '13:00:00');
+        $breakStartTime = Carbon::parse($dateStr . ' ' . ($shift->break_start ?? '12:00:00'));
+        $breakEndTime = Carbon::parse($dateStr . ' ' . ($shift->break_end ?? '13:00:00'));
 
         // Parse actual time in and time out
         $actualStart = Carbon::parse($dateStr . ' ' . $attendance->time_in);
