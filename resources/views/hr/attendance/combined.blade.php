@@ -27,6 +27,18 @@
 .otut-tab.active[data-status="approved"] { background: #10b981 !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(16,185,129,0.25) !important; }
 .otut-tab.active[data-status="rejected"] { background: #ef4444 !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(239,68,68,0.25) !important; }
 .otut-tab.active .otut-badge { background: rgba(255,255,255,0.25) !important; color: #fff !important; }
+
+/* Dark mode: status dots in attendance records */
+html.dark .att-status-dot-red { background: #b91c1c !important; }
+html.dark .att-status-dot-emerald { background: #047857 !important; }
+html.dark .att-status-dot-yellow { background: #a16207 !important; }
+html.dark .att-status-dot-slate { background: #64748b !important; }
+
+/* Dark mode: OT/UT action buttons */
+html.dark .otut-action-approve { background: rgba(2,44,34,0.6) !important; color: #6ee7b7 !important; }
+html.dark .otut-action-approve:hover { background: rgba(2,44,34,0.8) !important; color: #34d399 !important; }
+html.dark .otut-action-reject { background: rgba(69,10,10,0.6) !important; color: #fca5a5 !important; }
+html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important; color: #f87171 !important; }
 </style>
 @endpush
 
@@ -473,13 +485,13 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                     const status = getEmployeeStatus(emp);
                     let statusLabel, statusDot, statusBg;
                     if (status === 'absent') {
-                        statusLabel = 'Not Yet In'; statusDot = 'bg-red-500'; statusBg = 'bg-red-50 text-red-700 border-red-200';
+                        statusLabel = 'Not Yet In'; statusDot = 'att-status-dot-red bg-red-500'; statusBg = 'bg-red-50 text-red-700 border-red-200';
                     } else if (status === 'out') {
-                        statusLabel = 'Timed Out'; statusDot = 'bg-slate-400'; statusBg = 'bg-slate-50 text-slate-600 border-slate-200';
+                        statusLabel = 'Timed Out'; statusDot = 'att-status-dot-slate bg-slate-400'; statusBg = 'bg-slate-50 text-slate-600 border-slate-200';
                     } else if (status === 'late') {
-                        statusLabel = 'Late'; statusDot = 'bg-yellow-500'; statusBg = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+                        statusLabel = 'Late'; statusDot = 'att-status-dot-yellow bg-yellow-500'; statusBg = 'bg-yellow-50 text-yellow-700 border-yellow-200';
                     } else {
-                        statusLabel = 'Timed In'; statusDot = 'bg-emerald-500'; statusBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                        statusLabel = 'Timed In'; statusDot = 'att-status-dot-emerald bg-emerald-500'; statusBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
                     }
 
                     const initials = (emp.firstName.charAt(0) + emp.lastName.charAt(0)).toUpperCase();
@@ -649,11 +661,11 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                         actionsHtml = '<div class="flex items-center justify-center gap-1">' +
                             '<form method="POST" action="/overtime/' + r.id + '/approve" class="inline">' +
                                 '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
-                                '<button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer border-0" title="Approve">' +
+                                '<button type="submit" class="otut-action-approve w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer border-0" title="Approve">' +
                                     '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' +
                                 '</button>' +
                             '</form>' +
-                            '<button onclick="openOtutRejectModal(' + r.id + ',\'' + r.firstName + ' ' + r.lastName + '\')" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-colors flex items-center justify-center cursor-pointer border-0" title="Reject">' +
+                            '<button onclick="openOtutRejectModal(' + r.id + ',\'' + r.firstName + ' ' + r.lastName + '\')" class="otut-action-reject w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-colors flex items-center justify-center cursor-pointer border-0" title="Reject">' +
                                 '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
                             '</button>' +
                         '</div>';
