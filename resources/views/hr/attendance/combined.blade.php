@@ -20,7 +20,13 @@
 .stat-card:nth-child(2) { animation-delay: 0.1s; }
 .stat-card:nth-child(3) { animation-delay: 0.15s; }
 .table-wrap { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
-.filter-bar { animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+.filter-bar { animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+
+/* OT/UT tab active states */
+.otut-tab.active[data-status="pending"] { background: #f59e0b !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(245,158,11,0.25) !important; }
+.otut-tab.active[data-status="approved"] { background: #10b981 !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(16,185,129,0.25) !important; }
+.otut-tab.active[data-status="rejected"] { background: #ef4444 !important; color: #fff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(239,68,68,0.25) !important; }
+.otut-tab.active .otut-badge { background: rgba(255,255,255,0.25) !important; color: #fff !important; }
 </style>
 @endpush
 
@@ -278,10 +284,14 @@
 
         {{-- Status tabs --}}
         <div class="flex items-center gap-1 mb-4 filter-bar">
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 active:scale-90"
-                data-status="pending"
-                style="background:#f59e0b;color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25); border:0" id="otutDefaultTab">
-                Pending <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-white/25 text-[10px] font-bold px-1">{{ $pendingCount }}</span>
+            <button class="otut-tab active px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 active:scale-90" data-status="pending" id="otutDefaultTab">
+                Pending <span class="otut-badge ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-white/25 text-[10px] font-bold px-1">{{ $pendingCount }}</span>
+            </button>
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-90" data-status="approved">
+                Approved <span class="otut-badge ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1">{{ $approvedCount }}</span>
+            </button>
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-90" data-status="rejected">
+                Rejected <span class="otut-badge ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-100 text-red-700 text-[10px] font-bold px-1">{{ $rejectedCount }}</span>
             </button>
             <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-90"
                 data-status="approved">
@@ -463,13 +473,13 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                     const status = getEmployeeStatus(emp);
                     let statusLabel, statusDot, statusBg;
                     if (status === 'absent') {
-                        statusLabel = 'Not Yet In'; statusDot = 'bg-red-500'; statusBg = 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/50';
+                        statusLabel = 'Not Yet In'; statusDot = 'bg-red-500'; statusBg = 'bg-red-50 text-red-700 border-red-200';
                     } else if (status === 'out') {
-                        statusLabel = 'Timed Out'; statusDot = 'bg-slate-400 dark:bg-slate-500'; statusBg = 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+                        statusLabel = 'Timed Out'; statusDot = 'bg-slate-400'; statusBg = 'bg-slate-50 text-slate-600 border-slate-200';
                     } else if (status === 'late') {
-                        statusLabel = 'Late'; statusDot = 'bg-yellow-500'; statusBg = 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800/50';
+                        statusLabel = 'Late'; statusDot = 'bg-yellow-500'; statusBg = 'bg-yellow-50 text-yellow-700 border-yellow-200';
                     } else {
-                        statusLabel = 'Timed In'; statusDot = 'bg-emerald-500'; statusBg = 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50';
+                        statusLabel = 'Timed In'; statusDot = 'bg-emerald-500'; statusBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
                     }
 
                     const initials = (emp.firstName.charAt(0) + emp.lastName.charAt(0)).toUpperCase();
@@ -478,7 +488,7 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                     const calendarUrl = window.attendanceCalendarRoute.replace(':id', emp.id);
 
                     const row = document.createElement('tr');
-                    row.className = 'border-b border-gray-100 hover:bg-cyan-50/30 transition-colors duration-150 cursor-pointer';
+                    row.className = 'border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150 cursor-pointer';
                     row.dataset.empId = emp.id;
                     row.dataset.name = emp.name;
                     row.dataset.dept = emp.dept;
@@ -588,28 +598,8 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
 
         function switchTab(status) {
             curStatus = status;
-            var colors = {
-                pending:  { bg: '#f59e0b', shadow: 'rgba(245,158,11,0.25)' },
-                approved: { bg: '#10b981', shadow: 'rgba(16,185,129,0.25)' },
-                rejected: { bg: '#ef4444', shadow: 'rgba(239,68,68,0.25)' }
-            };
             document.querySelectorAll('.otut-tab').forEach(function (btn) {
-                var isActive = btn.dataset.status === status;
-                var span = btn.querySelector('span');
-                if (isActive) {
-                    var c = colors[status] || colors.pending;
-                    btn.style.setProperty('background', c.bg, 'important');
-                    btn.style.setProperty('color', '#fff', 'important');
-                    btn.style.setProperty('border', '0', 'important');
-                    btn.style.setProperty('box-shadow', '0 2px 8px ' + c.shadow, 'important');
-                    if (span) { span.style.setProperty('background', 'rgba(255,255,255,0.25)', 'important'); span.style.setProperty('color', '#fff', 'important'); }
-                } else {
-                    btn.style.removeProperty('background');
-                    btn.style.removeProperty('color');
-                    btn.style.removeProperty('border');
-                    btn.style.removeProperty('box-shadow');
-                    if (span) { span.style.removeProperty('background'); span.style.removeProperty('color'); }
-                }
+                btn.classList.toggle('active', btn.dataset.status === status);
             });
             page = 1;
             applyFilters();
