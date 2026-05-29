@@ -331,7 +331,7 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
     </div>
 
     {{-- RIGHT COLUMN (1/3): Calendar + To-Do --}}
-    <div class="space-y-5">
+    <div class="space-y-5 max-w-[280px]">
 
         {{-- Calendar Card --}}
         @include('partials.dashboard-calendar')

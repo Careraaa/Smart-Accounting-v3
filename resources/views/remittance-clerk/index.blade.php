@@ -366,7 +366,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
         </div>
 
         {{-- Right sidebar --}}
-        <div class="space-y-5">
+        <div class="space-y-5 max-w-[280px]">
 
         {{-- Calendar Card --}}
         @include('partials.dashboard-calendar')
