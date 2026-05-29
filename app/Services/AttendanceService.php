@@ -331,9 +331,15 @@ class AttendanceService
         $scheduledWorkMinutes = $scheduledMinutes - $breakMinutes;
         $scheduledWorkHours = $scheduledWorkMinutes / 60;
 
-        // Calculate actual hours worked (excluding lunch break)
+        // Calculate actual hours worked (excluding only the break interval that falls within the actual attendance window)
         $totalMinutesWorked = abs($actualEnd->diffInMinutes($actualStart));
-        $actualWorkMinutes = max(0, $totalMinutesWorked - $breakMinutes);
+        $actualBreakOverlapMinutes = 0;
+        if ($actualEnd->greaterThan($breakStartTime) && $actualStart->lessThan($breakEndTime)) {
+            $overlapStart = $actualStart->greaterThan($breakStartTime) ? $actualStart : $breakStartTime;
+            $overlapEnd = $actualEnd->lessThan($breakEndTime) ? $actualEnd : $breakEndTime;
+            $actualBreakOverlapMinutes = max(0, abs($overlapEnd->diffInMinutes($overlapStart)));
+        }
+        $actualWorkMinutes = max(0, $totalMinutesWorked - $actualBreakOverlapMinutes);
         $actualWorkHours = $actualWorkMinutes / 60;
 
         // ── Overtime Calculation ──
