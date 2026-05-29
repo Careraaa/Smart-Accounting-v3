@@ -55,9 +55,9 @@
             </p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('overtime.pending') }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 hover:shadow-lg active:scale-[0.97] transition-all duration-200 no-underline">
+            <a href="{{ route('attendance.index', ['tab' => 'otut']) }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 text-white text-sm font-semibold rounded-xl hover:bg-amber-600 hover:shadow-lg active:scale-[0.97] transition-all duration-200 no-underline">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 3"/></svg>
-                Pending Requests
+                Pending
                 @php $pendingOtCount = \App\Models\OvertimeUndertime::where('status','pending')->count(); @endphp
                 @if($pendingOtCount > 0)
                     <span class="ml-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold bg-white/20 text-white">{{ $pendingOtCount }}</span>

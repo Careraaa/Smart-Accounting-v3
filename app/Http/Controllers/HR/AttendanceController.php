@@ -57,15 +57,19 @@ class AttendanceController extends Controller
         // OT/UT summary data
         $pendingOT = OvertimeUndertime::where('status', 'pending')->where('type', 'overtime')->count();
         $pendingUT = OvertimeUndertime::where('status', 'pending')->where('type', 'undertime')->count();
-        $recentOtUt = OvertimeUndertime::with('employee')
-            ->where('status', 'pending')
-            ->latest('created_at')
-            ->limit(8)
+
+        $allOtRequests = OvertimeUndertime::with('employee')
+            ->whereHas('employee', fn($q) => $q->whereNotIn('role', ['superadmin', 'qr_admin']))
+            ->orderBy('created_at', 'desc')
             ->get();
+
+        $pendingCount  = OvertimeUndertime::where('status', 'pending')->count();
+        $approvedCount = OvertimeUndertime::where('status', 'approved')->count();
+        $rejectedCount = OvertimeUndertime::where('status', 'rejected')->count();
 
         return view('hr.attendance.combined', compact(
             'tab', 'employees', 'allEmployees', 'departments', 'todayAttendance', 'recentLogs',
-            'pendingOT', 'pendingUT', 'recentOtUt'
+            'pendingOT', 'pendingUT', 'allOtRequests', 'pendingCount', 'approvedCount', 'rejectedCount'
         ));
     }
 

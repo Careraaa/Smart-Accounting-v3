@@ -34,10 +34,10 @@ $maxV = collect($attendanceTrend)->map(fn($d) => $d['present'] + $d['late'] + $d
 $td = $attendanceTrend[array_key_last($attendanceTrend)];
 @endphp
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+<div class="flex flex-col lg:flex-row gap-5 items-start">
 
     {{-- LEFT COLUMN (2/3) --}}
-    <div class="lg:col-span-2 space-y-5">
+    <div class="flex-1 min-w-0 space-y-5">
 
         {{-- Quick Actions / Shortcuts --}}
         <div class="sad-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -486,8 +486,9 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
     </div>
 
-    {{-- RIGHT COLUMN (1/3): Calendar + To-Do --}}
-    <div class="space-y-5 max-w-[280px] sticky top-24 self-start">
+    {{-- RIGHT COLUMN: Calendar + To-Do --}}
+    <div class="w-[280px] shrink-0 space-y-5">
+        <div class="sticky top-24 space-y-5">
 
         {{-- Calendar Card --}}
         @include('partials.dashboard-calendar')
@@ -561,6 +562,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <p class="text-xs text-gray-400 mt-0.5">All caught up!</p>
             </div>
             @endif
+        </div>
         </div>
     </div>
 

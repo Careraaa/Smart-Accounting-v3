@@ -40,10 +40,10 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances + $pendingSalaryLoans;
 @endphp
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+<div class="flex flex-col lg:flex-row gap-5 items-start">
 
-    {{-- LEFT COLUMN (2/3) --}}
-    <div class="lg:col-span-2 space-y-5">
+    {{-- LEFT COLUMN --}}
+    <div class="flex-1 min-w-0 space-y-5">
         {{-- Quick Actions / Shortcuts --}}
         <div class="hrd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
             <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
@@ -330,8 +330,9 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
 
     </div>
 
-    {{-- RIGHT COLUMN (1/3): Calendar + To-Do --}}
-    <div class="space-y-5 max-w-[280px] sticky top-24 self-start">
+    {{-- RIGHT COLUMN: Calendar + To-Do --}}
+    <div class="w-[280px] shrink-0 space-y-5">
+        <div class="sticky top-24 space-y-5">
 
         {{-- Calendar Card --}}
         @include('partials.dashboard-calendar')
@@ -344,7 +345,7 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
                     <span class="text-xs font-semibold text-gray-900">To Do</span>
                 </div>
                 @if($totalPending > 0)
-                    <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[0.5rem] font-bold px-1">{{ $totalPending }}</span>
+                <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[0.5rem] font-bold px-1">{{ $totalPending }}</span>
                 @endif
             </div>
             @if($totalPending > 0)
@@ -388,7 +389,7 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
                     @endif
                     <svg class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </a>
-                <a href="{{ route('overtime.pending') }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
+                <a href="{{ route('attendance.index', ['tab' => 'otut']) }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
                     <div class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
@@ -409,6 +410,7 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
                 <p class="text-xs text-gray-400 mt-0.5">All caught up!</p>
             </div>
             @endif
+        </div>
         </div>
     </div>
 
