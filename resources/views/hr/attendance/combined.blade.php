@@ -278,16 +278,16 @@
 
         {{-- Status tabs --}}
         <div class="flex items-center gap-1 mb-4 filter-bar">
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 active scale-90"
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 active:scale-90"
                 data-status="pending"
                 style="background:#f59e0b;color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);" id="otutDefaultTab">
                 Pending <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-white/25 text-[10px] font-bold px-1">{{ $pendingCount }}</span>
             </button>
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200"
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 active:scale-90"
                 data-status="approved">
                 Approved <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1">{{ $approvedCount }}</span>
             </button>
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200"
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 active:scale-90"
                 data-status="rejected">
                 Rejected <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-100 text-red-700 text-[10px] font-bold px-1">{{ $rejectedCount }}</span>
             </button>
@@ -588,13 +588,19 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
 
         function switchTab(status) {
             curStatus = status;
+            var colors = {
+                pending:  { bg: '#f59e0b', shadow: 'rgba(245,158,11,0.25)' },
+                approved: { bg: '#10b981', shadow: 'rgba(16,185,129,0.25)' },
+                rejected: { bg: '#ef4444', shadow: 'rgba(239,68,68,0.25)' }
+            };
             document.querySelectorAll('.otut-tab').forEach(function (btn) {
                 var isActive = btn.dataset.status === status;
                 if (isActive) {
-                    btn.style.background = '#f59e0b';
+                    var c = colors[status] || colors.pending;
+                    btn.style.background = c.bg;
                     btn.style.color = '#fff';
                     btn.style.borderColor = 'transparent';
-                    btn.style.boxShadow = '0 2px 8px rgba(245,158,11,0.25)';
+                    btn.style.boxShadow = '0 2px 8px ' + c.shadow;
                 } else {
                     btn.style.background = '';
                     btn.style.color = '';
@@ -648,14 +654,14 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                     var actionsHtml = '';
                     if (r.status === 'pending') {
                         actionsHtml = '<div class="flex items-center justify-center gap-1">' +
-                            '<form method="POST" action="/overtime/' + r.id + '/approve" style="display:inline">' +
+                            '<form method="POST" action="/overtime/' + r.id + '/approve" class="inline">' +
                                 '<input type="hidden" name="_token" value="{{ csrf_token() }}">' +
-                                '<button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer border-none" title="Approve">' +
+                                '<button type="submit" class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors flex items-center justify-center cursor-pointer border-0" title="Approve">' +
                                     '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' +
                                 '</button>' +
                             '</form>' +
-                            '<button onclick="openOtutRejectModal(' + r.id + ',\'' + r.firstName + ' ' + r.lastName + '\')" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-colors flex items-center justify-center cursor-pointer border-none" title="Reject">' +
-                                '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
+                            '<button onclick="openOtutRejectModal(' + r.id + ',\'' + r.firstName + ' ' + r.lastName + '\')" class="w-7 h-7 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-colors flex items-center justify-center cursor-pointer border-0" title="Reject">' +
+                                '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
                             '</button>' +
                         '</div>';
                     } else {
