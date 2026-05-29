@@ -280,16 +280,16 @@
         <div class="flex items-center gap-1 mb-4 filter-bar">
             <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 active:scale-90"
                 data-status="pending"
-                style="background:#f59e0b;color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25);" id="otutDefaultTab">
+                style="background:#f59e0b;color:#fff;box-shadow:0 2px 8px rgba(245,158,11,0.25); border:0" id="otutDefaultTab">
                 Pending <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-white/25 text-[10px] font-bold px-1">{{ $pendingCount }}</span>
             </button>
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 active:scale-90"
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-90"
                 data-status="approved">
-                Approved <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1">{{ $approvedCount }}</span>
+                Approved <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-1">{{ $approvedCount }}</span>
             </button>
-            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 active:scale-90"
+            <button class="otut-tab px-4 py-2 text-xs font-bold rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 active:scale-90"
                 data-status="rejected">
-                Rejected <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-100 text-red-700 text-[10px] font-bold px-1">{{ $rejectedCount }}</span>
+                Rejected <span class="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 text-[10px] font-bold px-1">{{ $rejectedCount }}</span>
             </button>
         </div>
 

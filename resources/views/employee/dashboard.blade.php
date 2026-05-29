@@ -43,7 +43,7 @@ $user = auth()->user();
 
 <div class="max-w-full">
 
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
 
         {{-- LEFT COLUMN (2/3) --}}
         <div class="lg:col-span-2 space-y-5">
@@ -177,7 +177,7 @@ $user = auth()->user();
         </div>
 
         {{-- RIGHT COLUMN (1/3): Calendar --}}
-        <div class="space-y-3">
+        <div class="space-y-3 max-w-[280px] justify-self-end">
             <div class="sticky top-24">
                 @include('partials.dashboard-calendar')
             </div>
