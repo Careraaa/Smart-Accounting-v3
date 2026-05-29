@@ -43,7 +43,7 @@ $user = auth()->user();
 
 <div class="max-w-full">
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5 items-start">
 
         {{-- LEFT COLUMN (2/3) --}}
         <div class="lg:col-span-2 space-y-5">

@@ -595,17 +595,20 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
             };
             document.querySelectorAll('.otut-tab').forEach(function (btn) {
                 var isActive = btn.dataset.status === status;
+                var span = btn.querySelector('span');
                 if (isActive) {
                     var c = colors[status] || colors.pending;
                     btn.style.background = c.bg;
                     btn.style.color = '#fff';
                     btn.style.borderColor = 'transparent';
                     btn.style.boxShadow = '0 2px 8px ' + c.shadow;
+                    if (span) { span.style.background = 'rgba(255,255,255,0.25)'; span.style.color = '#fff'; }
                 } else {
                     btn.style.background = '';
                     btn.style.color = '';
                     btn.style.borderColor = '';
                     btn.style.boxShadow = '';
+                    if (span) { span.style.background = ''; span.style.color = ''; }
                 }
             });
             page = 1;
