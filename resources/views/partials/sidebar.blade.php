@@ -378,6 +378,55 @@
                             <span class="sidebar-text truncate min-w-0">Remittance Report</span>
                         </a>
                     </li>
+
+                    {{-- Employee Self-Service --}}
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">My Finances</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.cash-advances.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.cash-advances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-emerald-500"><i class="feather-credit-card" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Cash Advances</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.salary-loans.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.salary-loans.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-briefcase" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Salary Loans</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Time Off</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.leaves.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.leaves.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-violet-500"><i class="feather-calendar" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Leaves</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.attendance.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attendance.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-blue-500"><i class="feather-check-square" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Attendance</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">My Account</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('profile.details') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('profile.details') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-indigo-500"><i class="feather-user" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Profile</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.attachments.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attachments.index') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-sky-500"><i class="feather-folder" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Documents</span>
+                        </a>
+                    </li>
                 @endif
 
                 {{-- ── HR ── --}}
@@ -453,6 +502,55 @@
                             <span class="sidebar-text truncate min-w-0">Settings</span>
                         </a>
                     </li>
+
+                    {{-- Employee Self-Service --}}
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">My Finances</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.cash-advances.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.cash-advances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-emerald-500"><i class="feather-credit-card" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Cash Advances</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.salary-loans.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.salary-loans.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-briefcase" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Salary Loans</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Time Off</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.leaves.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.leaves.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-violet-500"><i class="feather-calendar" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Leaves</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.attendance.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attendance.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-blue-500"><i class="feather-check-square" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Attendance</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">My Account</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('profile.details') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('profile.details') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-indigo-500"><i class="feather-user" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Profile</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.attachments.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attachments.index') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-sky-500"><i class="feather-folder" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Documents</span>
+                        </a>
+                    </li>
                 @endif
 
                 {{-- ── Employee ── --}}
@@ -483,16 +581,9 @@
                     </li>
 
                     <li class="sidebar-item">
-                        <a href="{{ route('employee.overtime-undertime.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.overtime-undertime.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center text-cyan-500"><i class="feather-clock" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">OT / UT Requests</span>
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item">
                         <a href="{{ route('employee.attendance.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attendance.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center text-blue-500"><i class="feather-check-square" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">My Attendance</span>
+                            <span class="sidebar-text truncate min-w-0">Attendance</span>
                         </a>
                     </li>
 
@@ -548,6 +639,55 @@
                             <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('reports.remittance') ? 'active' : 'text-gray-500' }}" href="{{ route('reports.remittance') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-sky-500"><i class="feather-file-text" style="font-size:13px"></i></span><span>Remittance Reports</span></a></li>
                             <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('reports.payroll') ? 'active' : 'text-gray-500' }}" href="{{ route('reports.payroll') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-sky-500"><i class="feather-file-text" style="font-size:13px"></i></span><span>Payroll Reports</span></a></li>
                         </ul>
+                    </li>
+
+                    {{-- Employee Self-Service --}}
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">My Finances</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.cash-advances.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.cash-advances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-emerald-500"><i class="feather-credit-card" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Cash Advances</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.salary-loans.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.salary-loans.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-briefcase" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Salary Loans</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Time Off</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.leaves.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.leaves.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-violet-500"><i class="feather-calendar" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Leaves</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.attendance.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attendance.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-blue-500"><i class="feather-check-square" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Attendance</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">My Account</label></li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('profile.details') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('profile.details') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-indigo-500"><i class="feather-user" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Profile</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a href="{{ route('employee.attachments.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.attachments.index') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-sky-500"><i class="feather-folder" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">My Documents</span>
+                        </a>
                     </li>
                 @endif
 

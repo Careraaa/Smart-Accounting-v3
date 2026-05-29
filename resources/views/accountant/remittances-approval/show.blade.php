@@ -2,13 +2,10 @@
 
 @push('styles')
 <style>
-@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
-@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
-.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
-.stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-.stat-card:nth-child(1) { animation-delay:0.05s; }
-.stat-card:nth-child(2) { animation-delay:0.1s; }
-.stat-card:nth-child(3) { animation-delay:0.15s; }
+@keyframes fadeUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.93)} 100%{opacity:1;transform:scale(1)} }
+.fade-up { animation:fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.scale-in { animation:scaleIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
 @keyframes modalFadeIn { 0%{opacity:0} 100%{opacity:1} }
 @keyframes modalScaleIn { 0%{opacity:0;transform:scale(0.92) translateY(8px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
 .modal-overlay { animation:modalFadeIn 0.2s ease-out both; }
@@ -30,41 +27,53 @@ $statusInfo = match($remittance->status) {
 };
 @endphp
 
-<div class="space-y-5">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-5">
+
+{{-- Back --}}
+<div>
+        <a href="{{ route('remittance-approval.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to remittances
+        </a>
+</div>
 
 {{-- Flash --}}
 @foreach(['success','error'] as $t)
     @if(session($t))
-    <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium @switch($t) @case('success') bg-green-50 text-green-700 @break @case('error') bg-red-50 text-red-700 @break @endswitch fade-up">
-        <span>{{ session($t) }}</span>
+    <div class="fade-up flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold {{ $t === 'success' ? 'bg-emerald-500/15 border border-emerald-500/25 text-emerald-700' : 'bg-red-500/15 border border-red-500/25 text-red-700' }}">
+        @if($t==='success')<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        @else<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>@endif
+        {{ session($t) }}
     </div>
     @endif
 @endforeach
 
-{{-- Header --}}
-<div class="fade-up flex items-start justify-between gap-4">
-    <div class="min-w-0">
-        <a href="{{ route('remittance-approval.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-[0.97] no-underline mb-2">
-            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-            Back to remittances
-        </a>
-        <h1 class="text-xl font-bold text-gray-900 tracking-tight">{{ $remittance->remittance_date?->format('F d, Y') }}</h1>
-        <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $route?->route_name ?? 'N/A' }} &middot; {{ $vehicle?->plate_number ?? 'N/A' }}</p>
+{{-- Header Card --}}
+<div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </div>
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Remittance details</p>
+            <h1 class="text-xl font-bold text-gray-900">{{ $remittance->remittance_date?->format('F d, Y') }}</h1>
+            <p class="text-xs text-gray-400 mt-0.5">{{ $route?->route_name ?? 'N/A' }} &middot; {{ $vehicle?->plate_number ?? 'N/A' }}</p>
+        </div>
     </div>
-    <div class="flex items-center gap-2 shrink-0 flex-wrap">
+    <div class="flex items-center gap-2">
         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
             <span class="w-2 h-2 rounded-full {{ $statusInfo['dot'] }}"></span>
             {{ $statusInfo['label'] }}
         </span>
         @if($remittance->status === 'pending')
             <button type="button" onclick="openRejectModal()"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-200 rounded-lg text-xs font-semibold text-red-600 transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition-all border-0 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
                 Reject
             </button>
             <button type="button" onclick="openApproveModal()"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer border-0">
-                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all border-0 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 Approve
             </button>
         @endif
@@ -72,56 +81,60 @@ $statusInfo = match($remittance->status) {
 </div>
 
 {{-- Personnel Card --}}
-<div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-50 bg-gray-50/30">
-        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Personnel</span>
+<div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <span class="text-xs font-bold text-gray-700">Personnel</span>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-50">
-        <div class="p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Driver</p>
-            <p class="text-sm font-semibold text-gray-900 mt-1">{{ $driver ? $driver->name : 'N/A' }}</p>
+    <div class="p-5">
+        <div class="flex items-center justify-between py-3 border-b border-gray-50">
+            <span class="text-xs font-semibold text-gray-500">Driver</span>
+            <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $driver ? $driver->name : 'N/A' }}</span>
         </div>
-        <div class="p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">PAO</p>
-            <p class="text-sm font-semibold text-gray-900 mt-1">{{ $pao ? $pao->name : 'N/A' }}</p>
+        <div class="flex items-center justify-between py-3 border-b border-gray-50">
+            <span class="text-xs font-semibold text-gray-500">PAO</span>
+            <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao ? $pao->name : 'N/A' }}</span>
         </div>
-        <div class="p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Vehicle</p>
-            <p class="text-sm font-semibold text-gray-900 mt-1">{{ $vehicle?->plate_number ?? 'N/A' }}</p>
+        <div class="flex items-center justify-between py-3">
+            <span class="text-xs font-semibold text-gray-500">Vehicle</span>
+            <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $vehicle?->plate_number ?? 'N/A' }}</span>
         </div>
     </div>
 </div>
 
 {{-- Financial Card --}}
-<div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-50 bg-gray-50/30">
-        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Financial Details</span>
+<div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <span class="text-xs font-bold text-gray-700">Financial Details</span>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-4 gap-px bg-gray-50">
-        <div class="bg-white p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Total Collection</p>
-            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($remittance->total_collection, 2) }}</p>
+    <div class="p-5">
+        <div class="flex items-center justify-between py-3 border-b border-gray-50">
+            <span class="text-xs font-semibold text-gray-500">Total Collection</span>
+            <span class="text-xs font-bold text-gray-900 font-mono">₱{{ number_format($remittance->total_collection, 2) }}</span>
         </div>
-        <div class="bg-white p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Total Expenses</p>
-            <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">₱{{ number_format($remittance->total_expenses, 2) }}</p>
+        <div class="flex items-center justify-between py-3 border-b border-gray-50">
+            <span class="text-xs font-semibold text-gray-500">Total Expenses</span>
+            <span class="text-xs font-bold text-amber-600 font-mono">₱{{ number_format($remittance->total_expenses, 2) }}</span>
         </div>
-        <div class="bg-white p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net Remittance</p>
-            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($remittance->net_remittance, 2) }}</p>
+        <div class="flex items-center justify-between py-3 border-b border-gray-50">
+            <span class="text-xs font-semibold text-gray-500">Net Remittance</span>
+            <span class="text-xs font-bold text-emerald-600 font-mono">₱{{ number_format($remittance->net_remittance, 2) }}</span>
         </div>
-        <div class="bg-white p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Boundary</p>
-            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($remittance->boundary ?? 0, 2) }}</p>
+        <div class="flex items-center justify-between py-3">
+            <span class="text-xs font-semibold text-gray-500">Boundary</span>
+            <span class="text-xs font-bold text-gray-900 font-mono">₱{{ number_format($remittance->boundary ?? 0, 2) }}</span>
         </div>
+        @if($remittance->is_short_remittance)
+        <div class="flex items-center gap-2 pt-3 mt-2 border-t border-gray-50">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-red-50 text-red-600 border border-red-200">Short: ₱{{ number_format($remittance->short_amount ?? 0, 2) }}</span>
+        </div>
+        @endif
     </div>
-    @if($remittance->is_short_remittance)
-        <div class="px-5 py-3 border-t border-gray-50 bg-red-50/30 flex items-center gap-2">
-            <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
-            <span class="text-xs font-semibold text-red-700">Short Remittance</span>
-            <span class="text-xs text-red-500 font-mono">₱{{ number_format($remittance->short_amount ?? 0, 2) }}</span>
-        </div>
-    @endif
 </div>
 
 {{-- Rejected badge --}}

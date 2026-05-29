@@ -204,7 +204,7 @@ Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])-
 });
 
 // ===== EMPLOYEE ROUTES =====
-Route::middleware(['auth', 'check-status', 'role:employee,superadmin'])->group(function () {
+Route::middleware(['auth', 'check-status', 'role:employee,superadmin,remittance_clerk,hr,accountant'])->group(function () {
     Route::get('/employee', function () {
         $user = auth()->user();
         return view('employee.dashboard', [

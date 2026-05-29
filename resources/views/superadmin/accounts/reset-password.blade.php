@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="max-w-xl">
-    <a href="{{ route('superadmin.accounts.index') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:text-[#c8292a] no-underline transition-colors duration-150 mb-4">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-        Back to accounts
-    </a>
+        <a href="{{ route('superadmin.accounts.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer mb-4">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to accounts
+        </a>
     <h1 class="text-xl font-extrabold text-gray-900 -tracking-[0.02em] mb-1">Reset password</h1>
     <p class="text-xs text-gray-400 mb-6">Generate a temporary password for {{ $user->first_name }} {{ $user->last_name }}.</p>
 
@@ -75,7 +75,10 @@
                 </div>
 
                 <div class="flex items-center justify-end">
-                    <a href="{{ route('superadmin.accounts.index') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#c8292a] text-white rounded-xl text-sm font-bold hover:bg-[#a81f20] transition-all duration-150 shadow-lg shadow-red-700/30 no-underline">Back to accounts</a>
+                    <a href="{{ route('superadmin.accounts.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Back to accounts
+                    </a>
                 </div>
             </div>
         </div>

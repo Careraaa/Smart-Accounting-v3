@@ -24,8 +24,9 @@
         </div>
     </div>
     <div class="ms-auto">
-        <a href="{{ route('employees.show', $employee) }}" class="btn btn-sm btn-secondary">
-            <i class="feather-arrow-left me-1"></i> Back to Employee
+        <a href="{{ route('employees.show', $employee) }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to Employee
         </a>
     </div>
 </div>

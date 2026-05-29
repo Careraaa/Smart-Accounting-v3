@@ -89,52 +89,36 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">
+                    <tr class="border-b border-gray-50">
+                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">
                             <a href="{{ route('paos.index', ['sort_by' => 'name', 'sort_order' => ($sortBy === 'name' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="text-gray-400 no-underline hover:text-gray-600 inline-flex items-center gap-1">
                                 Name
                                 @if($sortBy === 'name')<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>@endif
                             </a>
                         </th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Contact</th>
-                        <th class="text-center px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
-                        <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Actions</th>
+                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Contact</th>
+                        <th class="text-center px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Status</th>
                     </tr>
                 </thead>
                 <tbody id="paoTbody" class="divide-y divide-gray-50">
                     @forelse($paos as $pao)
                     @php $sc = match($pao->status) { 'active' => 'bg-emerald-500/10 text-emerald-600 border-emerald-200/30', 'pending' => 'bg-amber-500/10 text-amber-600 border-amber-200/30', default => 'bg-red-500/10 text-red-600 border-red-200/30' }; @endphp
-                    <tr class="transition-colors hover:bg-gray-50/50 cursor-pointer"
+                    <tr class="transition-colors hover:bg-gray-50/40 cursor-pointer"
                         data-name="{{ strtolower($pao->name) }}"
                         data-status="{{ $pao->status }}"
                         onclick="window.location='{{ route('paos.show', $pao) }}'">
-                        <td class="px-5 py-3.5">
-                            <span class="text-xs font-bold text-gray-900">{{ $pao->name }}</span>
+                        <td class="px-4 py-3">
+                            <span class="text-xs font-semibold text-gray-900">{{ $pao->name }}</span>
                         </td>
-                        <td class="px-5 py-3.5 text-xs text-gray-500 font-mono">{{ $pao->contact_number }}</td>
-                        <td class="px-5 py-3.5 text-center">
+                        <td class="px-4 py-3 text-xs text-gray-500 font-mono">{{ $pao->contact_number }}</td>
+                        <td class="px-4 py-3 text-center">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border {{ $sc }}">{{ ucfirst($pao->status) }}</span>
                         </td>
-                        <td class="px-5 py-3.5 text-right" onclick="event.stopPropagation()">
-                            <div class="flex items-center justify-end gap-1">
-                                <a href="{{ route('paos.show', $pao) }}" title="View" class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-all">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                </a>
-                                <a href="{{ route('paos.edit', $pao) }}" title="Edit" class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white flex items-center justify-center transition-all">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                </a>
-                                <button type="button" title="Delete" onclick="openDeleteModal({{ $pao->id }}, '{{ $pao->name }}')" class="w-7 h-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all border-0 cursor-pointer">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                </button>
-                                <form id="delete-form-{{ $pao->id }}" action="{{ route('paos.destroy', $pao) }}" method="POST" style="display:none;">
-                                    @csrf @method('DELETE')
-                                </form>
-                            </div>
-                        </td>
+
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="text-center py-12">
+                        <td colspan="4" class="text-center py-12">
                             <div class="flex flex-col items-center gap-2">
                                 <svg class="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                 <p class="text-xs text-gray-400">No PAOs found.</p>

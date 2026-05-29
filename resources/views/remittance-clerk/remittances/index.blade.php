@@ -113,81 +113,8 @@
         </nav>
     </div>
 
-    {{-- Pending tab panel --}}
-    <div id="tab-pending" class="tab-panel {{ ($tab ?? 'pending') !== 'pending' ? 'hidden' : '' }}">
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mb-6 fade-up">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">
-                            <a href="{{ route('remittances.index', ['sort_by' => 'remittance_date', 'sort_order' => ($sortBy === 'remittance_date' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="inline-flex items-center gap-1 no-underline text-gray-400 hover:text-gray-700">
-                                Date
-                                @if($sortBy === 'remittance_date')
-                                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>
-                                @endif
-                            </a>
-                        </th>
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Route</th>
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Vehicle</th>
-                        <th class="text-right px-3 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net Remittance</th>
-                        <th class="text-center px-3 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                @forelse($pendingRemittances as $remittance)
-                    <tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location='{{ route('remittances.show', $remittance) }}'">
-                        <td class="px-5 py-3.5">
-                            <p class="text-xs font-semibold text-gray-700 font-mono">{{ $remittance->remittance_date?->format('M d, Y') }}</p>
-                        </td>
-                        <td class="px-4 py-3.5">
-                            <p class="text-xs font-bold text-gray-900">{{ $remittance->route->route_name }}</p>
-                        </td>
-                        <td class="px-4 py-3.5">
-                            <p class="text-xs font-mono text-gray-700">{{ $remittance->vehicle->plate_number }}</p>
-                        </td>
-                        <td class="px-3 py-3.5 text-right">
-                            <span class="text-xs font-mono font-bold {{ $remittance->is_short_remittance ? 'text-red-600' : 'text-emerald-600' }}">
-                                ₱{{ number_format($remittance->net_remittance, 2) }}
-                            </span>
-                        </td>
-                        <td class="px-3 py-3.5 text-center">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border bg-amber-50 text-amber-700 border-amber-200">Pending</span>
-                        </td>
-                        <form id="delete-form-{{ $remittance->id }}" action="{{ route('remittances.destroy', $remittance) }}" method="POST" style="display:none;">
-                            @csrf @method('DELETE')
-                        </form>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5">
-                            <div class="flex flex-col items-center justify-center py-12 text-center">
-                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                </div>
-                                <p class="text-sm font-semibold text-gray-500">No pending remittances</p>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if(method_exists($pendingRemittances, 'hasPages') && $pendingRemittances->hasPages())
-        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50 bg-gray-50/30">
-            <p class="text-[0.65rem] text-gray-400">
-                Showing <strong class="text-gray-600">{{ $pendingRemittances->firstItem() }}</strong>–<strong class="text-gray-600">{{ $pendingRemittances->lastItem() }}</strong>
-                of <strong class="text-gray-600">{{ $pendingRemittances->total() }}</strong> pending remittances
-            </p>
-            {{ $pendingRemittances->withQueryString()->links('pagination::bootstrap-5') }}
-        </div>
-        @endif
-    </div>
-</div>
-
-{{-- Approved tab panel --}}
-<div id="tab-approved" class="tab-panel {{ ($tab ?? 'pending') !== 'approved' ? 'hidden' : '' }}">
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up">
+    {{-- Table --}}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up" id="remittanceTable">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -199,90 +126,34 @@
                         <th class="text-center px-3 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
-                @forelse($approvedRemittances as $remittance)
-                    <tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location='{{ route('remittances.show', $remittance) }}'">
-                        <td class="px-5 py-3.5">
-                            <p class="text-xs font-semibold text-gray-700 font-mono">{{ $remittance->remittance_date?->format('M d, Y') }}</p>
-                        </td>
-                        <td class="px-4 py-3.5">
-                            <p class="text-xs font-bold text-gray-900">{{ $remittance->route->route_name }}</p>
-                        </td>
-                        <td class="px-4 py-3.5">
-                            <p class="text-xs font-mono text-gray-700">{{ $remittance->vehicle->plate_number }}</p>
-                        </td>
-                        <td class="px-3 py-3.5 text-right">
-                            <span class="text-xs font-mono font-bold {{ $remittance->is_short_remittance ? 'text-red-600' : 'text-emerald-600' }}">
-                                ₱{{ number_format($remittance->net_remittance, 2) }}
-                            </span>
-                        </td>
-                        <td class="px-3 py-3.5 text-center">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">Approved</span>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5">
-                            <div class="flex flex-col items-center justify-center py-12 text-center">
-                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                </div>
-                                <p class="text-sm font-semibold text-gray-500">No approved remittances</p>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
+                <tbody class="divide-y divide-gray-50" id="remittanceBody">
                 </tbody>
             </table>
         </div>
-        @if(method_exists($approvedRemittances, 'hasPages') && $approvedRemittances->hasPages())
-        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50 bg-gray-50/30">
-            <p class="text-[0.65rem] text-gray-400">
-                Showing <strong class="text-gray-600">{{ $approvedRemittances->firstItem() }}</strong>–<strong class="text-gray-600">{{ $approvedRemittances->lastItem() }}</strong>
-                of <strong class="text-gray-600">{{ $approvedRemittances->total() }}</strong> approved remittances
-            </p>
-            {{ $approvedRemittances->withQueryString()->links('pagination::bootstrap-5') }}
-        </div>
-        @endif
-    </div>
-</div>
-
-{{-- Rejected tab panel --}}
-<div id="tab-rejected" class="tab-panel {{ ($tab ?? 'pending') !== 'rejected' ? 'hidden' : '' }}">
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up">
-        <div class="flex flex-col items-center justify-center py-14 text-center">
-            <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-3">
-                <svg class="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
-            </div>
-            <p class="text-sm font-semibold text-gray-500">No rejected remittances</p>
-            <p class="text-xs text-gray-400 mt-1">Rejected remittances will appear here.</p>
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50 bg-gray-50/30" id="paginationStrip">
+            <p class="text-[0.65rem] text-gray-400" id="paginationInfo">Showing 0–0 of 0</p>
+            <div class="flex items-center gap-1" id="paginationBtns"></div>
         </div>
     </div>
-</div>
 
-</div>
-
-{{-- Delete Modal --}}
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden" id="deleteModal">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 scale-in">
-        <div class="flex flex-col items-center text-center">
-            <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                <svg class="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-1">Delete Remittance?</h3>
-            <p class="text-sm text-gray-500 mb-6" id="deleteModalBody">This action cannot be undone.</p>
-            <div class="flex gap-3 w-full">
-                <button type="button" onclick="closeModal()" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 transition-all hover:bg-gray-200 cursor-pointer border-none">Cancel</button>
-                <button type="button" id="deleteConfirmBtn" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-red-600 transition-all hover:bg-red-700 cursor-pointer border-none">Yes, Delete</button>
-            </div>
-        </div>
-    </div>@endsection
+@endsection
 
 @push('scripts')
 <script>
 (function () {
+    var pendingData = @json($pendingData);
+    var approvedData = @json($approvedData);
+
+    var allData = { pending: pendingData, approved: approvedData, rejected: [] };
+    var PER_PAGE = 10;
     var activeTab = '{{ $tab ?? 'pending' }}';
-    var tabBtns = document.querySelectorAll('.tab-btn');
+    var currentPage = 1;
+
+    var tabBtnEls = document.querySelectorAll('.tab-btn');
+    var tbody = document.getElementById('remittanceBody');
+    var paginationInfo = document.getElementById('paginationInfo');
+    var paginationBtns = document.getElementById('paginationBtns');
+
     var tabStyles = {
         pending:  { border: 'border-amber-500',  text: 'text-amber-700',  bg: 'bg-amber-50/60', icon: 'text-amber-500',  badge: { bg: 'bg-amber-100',   text: 'text-amber-800' } },
         approved: { border: 'border-emerald-500',text: 'text-emerald-700',bg: 'bg-emerald-50/60',icon: 'text-emerald-500',badge: { bg: 'bg-emerald-100', text: 'text-emerald-800' } },
@@ -292,49 +163,100 @@
     var inactiveSvg = ['text-gray-400', 'group-hover:text-gray-500'];
     var inactiveBadge = ['bg-gray-200', 'text-gray-600'];
 
-    tabBtns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var tab = this.dataset.tab;
-            if (tab === activeTab) return;
-            var prev = document.getElementById('tab-' + activeTab);
-            if (prev) { prev.classList.add('hidden'); prev.classList.remove('active-panel'); }
-            var next = document.getElementById('tab-' + tab);
-            if (next) { next.classList.remove('hidden'); next.classList.add('active-panel'); }
-            tabBtns.forEach(function (b) {
-                b.classList.remove('border-amber-500','text-amber-700','bg-amber-50/60','border-emerald-500','text-emerald-700','bg-emerald-50/60','border-red-500','text-red-700','bg-red-50/60');
-                b.classList.add.apply(b.classList, inactiveBtn);
-                var svg = b.querySelector('svg');
-                if (svg) { svg.classList.remove('text-amber-500','text-emerald-500','text-red-500'); svg.classList.add.apply(svg.classList, inactiveSvg); }
-                var badge = b.querySelector('[class*="ml-1"]');
-                if (badge) { badge.classList.remove('bg-amber-100','text-amber-800','bg-emerald-100','text-emerald-800'); badge.classList.add.apply(badge.classList, inactiveBadge); }
+    function fmtPeso(n) { return '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function renderTable() {
+        var data = allData[activeTab] || [];
+        var total = data.length;
+        var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+        if (currentPage > totalPages) currentPage = totalPages;
+        var start = (currentPage - 1) * PER_PAGE;
+        var end = Math.min(start + PER_PAGE, total);
+        var pageData = data.slice(start, end);
+
+        if (pageData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5"><div class="flex flex-col items-center justify-center py-12 text-center">' +
+                '<div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-3">' +
+                '<svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' +
+                '</div><p class="text-sm font-semibold text-gray-500">No ' + activeTab + ' remittances</p></div></td></tr>';
+        } else {
+            var html = '';
+            pageData.forEach(function (r) {
+                var isShort = r.is_short;
+                var netClass = isShort ? 'text-red-600' : 'text-emerald-600';
+                var badgeHtml = activeTab === 'pending'
+                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border bg-amber-50 text-amber-700 border-amber-200">Pending</span>'
+                    : '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">Approved</span>';
+                html += '<tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location=\'' + r.show_url + '\'">' +
+                    '<td class="px-5 py-3.5"><p class="text-xs font-semibold text-gray-700 font-mono">' + r.date + '</p></td>' +
+                    '<td class="px-4 py-3.5"><p class="text-xs font-bold text-gray-900">' + r.route + '</p></td>' +
+                    '<td class="px-4 py-3.5"><p class="text-xs font-mono text-gray-700">' + r.vehicle + '</p></td>' +
+                    '<td class="px-3 py-3.5 text-right"><span class="text-xs font-mono font-bold ' + netClass + '">' + fmtPeso(r.net) + '</span></td>' +
+                    '<td class="px-3 py-3.5 text-center">' + badgeHtml + '</td>' +
+                    '</tr>';
             });
-            var s = tabStyles[tab];
-            this.classList.remove.apply(this.classList, inactiveBtn);
-            this.classList.add(s.border, s.text, s.bg);
-            var svg = this.querySelector('svg');
-            if (svg) { svg.classList.remove.apply(svg.classList, inactiveSvg); svg.classList.add(s.icon); }
-            var badge = this.querySelector('[class*="ml-1"]');
-            if (badge && s.badge.bg) { badge.classList.remove.apply(badge.classList, inactiveBadge); badge.classList.add(s.badge.bg, s.badge.text); }
-            var url = new URL(window.location);
-            url.searchParams.set('tab', tab);
-            url.searchParams.delete('page');
-            history.replaceState(null, '', url.toString());
-            activeTab = tab;
+            tbody.innerHTML = html;
+        }
+
+        paginationInfo.textContent = total > 0
+            ? 'Showing ' + (start + 1) + '–' + end + ' of ' + total + ' ' + activeTab + ' remittances'
+            : 'Showing 0–0 of 0';
+
+        renderPagination(totalPages, currentPage);
+    }
+
+    function renderPagination(totalPages, cur) {
+        var html = '';
+        var startP = Math.max(1, cur - 2);
+        var endP = Math.min(totalPages, cur + 2);
+        if (startP > 1) { html += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold bg-white text-gray-500 hover:bg-gray-100 border border-gray-200 cursor-pointer" data-page="1">1</button>'; if (startP > 2) html += '<span class="px-1 text-[0.55rem] text-gray-400">…</span>'; }
+        for (var p = startP; p <= endP; p++) { html += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold border cursor-pointer ' + (p === cur ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 hover:bg-gray-100 border-gray-200') + '" data-page="' + p + '">' + p + '</button>'; }
+        if (endP < totalPages) { if (endP < totalPages - 1) html += '<span class="px-1 text-[0.55rem] text-gray-400">…</span>'; html += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold bg-white text-gray-500 hover:bg-gray-100 border border-gray-200 cursor-pointer" data-page="' + totalPages + '">' + totalPages + '</button>'; }
+        paginationBtns.innerHTML = html;
+
+        paginationBtns.querySelectorAll('button').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                currentPage = parseInt(this.dataset.page);
+                renderTable();
+            });
         });
+    }
+
+    function switchTab(tab) {
+        if (tab === activeTab) return;
+        activeTab = tab;
+        currentPage = 1;
+        tabBtnEls.forEach(function (b) {
+            b.classList.remove('border-amber-500','text-amber-700','bg-amber-50/60','border-emerald-500','text-emerald-700','bg-emerald-50/60','border-red-500','text-red-700','bg-red-50/60');
+            b.classList.add.apply(b.classList, inactiveBtn);
+            var svg = b.querySelector('svg');
+            if (svg) { svg.classList.remove('text-amber-500','text-emerald-500','text-red-500'); svg.classList.add.apply(svg.classList, inactiveSvg); }
+            var badge = b.querySelector('[class*="ml-1"]');
+            if (badge) { badge.classList.remove('bg-amber-100','text-amber-800','bg-emerald-100','text-emerald-800'); badge.classList.add.apply(badge.classList, inactiveBadge); }
+        });
+        var s = tabStyles[tab];
+        var btn = document.querySelector('.tab-btn[data-tab="' + tab + '"]');
+        if (btn) {
+            btn.classList.remove.apply(btn.classList, inactiveBtn);
+            btn.classList.add(s.border, s.text, s.bg);
+            var svg = btn.querySelector('svg');
+            if (svg) { svg.classList.remove.apply(svg.classList, inactiveSvg); svg.classList.add(s.icon); }
+            var badge = btn.querySelector('[class*="ml-1"]');
+            if (badge && s.badge.bg) { badge.classList.remove.apply(badge.classList, inactiveBadge); badge.classList.add(s.badge.bg, s.badge.text); }
+        }
+        var url = new URL(window.location);
+        url.searchParams.set('tab', tab);
+        history.replaceState(null, '', url.toString());
+        renderTable();
+    }
+
+    tabBtnEls.forEach(function (btn) {
+        btn.addEventListener('click', function () { switchTab(this.dataset.tab); });
     });
+
+    renderTable();
 })();
 
-let _deleteId = null;
-function openDeleteModal(id, label) {
-    _deleteId = id;
-    document.getElementById('deleteModalBody').textContent = 'Delete remittance from "' + label + '"? This cannot be undone.';
-    document.getElementById('deleteModal').classList.remove('hidden');
-}
-function closeModal() { document.getElementById('deleteModal').classList.add('hidden'); }
-document.getElementById('deleteConfirmBtn').addEventListener('click', function () {
-    if (_deleteId) document.getElementById('delete-form-' + _deleteId).submit();
-});
-document.getElementById('deleteModal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
-document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
 </script>
 @endpush

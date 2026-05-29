@@ -79,8 +79,8 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">
+                    <tr class="border-b border-gray-50">
+                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">
                             <a href="{{ route('vehicles.index', ['sort_by' => 'plate_number', 'sort_order' => ($sortBy === 'plate_number' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="text-inherit no-underline hover:text-gray-600 inline-flex items-center gap-1">
                                 Plate Number
                                 @if($sortBy === 'plate_number')
@@ -88,9 +88,9 @@
                                 @endif
                             </a>
                         </th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Route</th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Operator</th>
-                        <th class="text-center px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
+                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Route</th>
+                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Operator</th>
+                        <th class="text-center px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="vehicleTbody">
@@ -100,19 +100,16 @@
                         $vlabel = match($vstatus) { 'under_maintenance' => 'Maintenance', default => ucfirst($vstatus) };
                         $badgeColor = match($vstatus) { 'active' => 'bg-emerald-50 text-emerald-600', 'under_maintenance' => 'bg-amber-50 text-amber-600', default => 'bg-gray-50 text-gray-500' };
                     @endphp
-                    <tr class="transition-colors hover:bg-gray-50/50 cursor-pointer"
+                    <tr class="transition-colors hover:bg-gray-50/40 cursor-pointer"
                         data-name="{{ strtolower($vehicle->plate_number . ' ' . ($vehicle->route->route_name ?? '')) }}"
                         data-status="{{ $vstatus }}"
                         onclick="window.location='{{ route('vehicles.show', $vehicle) }}'">
-                        <td class="px-5 py-3.5 text-xs font-semibold text-gray-700 tracking-wide">{{ $vehicle->plate_number }}</td>
-                        <td class="px-5 py-3.5 text-xs text-gray-600">{{ $vehicle->route->route_name ?? '—' }}</td>
-                        <td class="px-5 py-3.5 text-xs text-gray-600">{{ $vehicle->operator }}</td>
-                        <td class="px-5 py-3.5 text-center">
+                        <td class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wide">{{ $vehicle->plate_number }}</td>
+                        <td class="px-4 py-3 text-xs text-gray-600">{{ $vehicle->route->route_name ?? '—' }}</td>
+                        <td class="px-4 py-3 text-xs text-gray-600">{{ $vehicle->operator }}</td>
+                        <td class="px-4 py-3 text-center">
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold {{ $badgeColor }}">{{ $vlabel }}</span>
                         </td>
-                        <form id="delete-form-{{ $vehicle->id }}" action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" style="display:none;">
-                            @csrf @method('DELETE')
-                        </form>
                     </tr>
                 @empty
                     <tr><td colspan="4">
@@ -133,19 +130,6 @@
         </div>
     </div>
 
-<div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden scale-in" id="deleteModal">
-    <div class="bg-white rounded-xl shadow-xl border border-gray-100 p-6 max-w-sm w-full mx-4">
-        <div class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-3">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-        </div>
-        <h3 class="text-sm font-bold text-gray-900 text-center mb-1">Delete Vehicle?</h3>
-        <p class="text-xs text-gray-500 text-center mb-4" id="deleteModalBody">This action cannot be undone.</p>
-        <div class="flex gap-2 justify-center">
-            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97] cursor-pointer border-none">Cancel</button>
-            <button type="button" id="deleteConfirmBtn" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-red-500 transition-all hover:bg-red-600 active:scale-[0.97] cursor-pointer border-none">Yes, Delete</button>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('scripts')
@@ -167,18 +151,5 @@
     search.addEventListener('input', run);
     statusF.addEventListener('change', run);
 })();
-
-let _deleteId = null;
-function openDeleteModal(id, plate) {
-    _deleteId = id;
-    document.getElementById('deleteModalBody').textContent = 'Delete vehicle "' + plate + '"? This cannot be undone.';
-    document.getElementById('deleteModal').classList.remove('hidden');
-}
-function closeModal() { document.getElementById('deleteModal').classList.add('hidden'); }
-document.getElementById('deleteConfirmBtn').addEventListener('click', function () {
-    if (_deleteId) document.getElementById('delete-form-' + _deleteId).submit();
-});
-document.getElementById('deleteModal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
-document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
 </script>
 @endpush

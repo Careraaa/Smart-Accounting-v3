@@ -29,17 +29,43 @@ class DailyRemittanceController extends Controller
             $sortOrder = 'desc';
         }
         
-        // Paginate pending remittances
+        // Get all pending remittances
         $pendingRemittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
             ->where('status', 'pending')
             ->orderBy($sortBy, $sortOrder)
-            ->paginate(15, ['*'], 'pending_page');
-        
-        // Paginate approved remittances
+            ->get();
+
+        // Get all approved remittances
         $approvedRemittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
             ->where('status', 'approved')
             ->orderBy($sortBy, $sortOrder)
-            ->paginate(15, ['*'], 'approved_page');
+            ->get();
+        
+        // Tab parameter
+        $tab = $request->get('tab', 'pending');
+        
+        // Pre-map data for client-side JS
+        $pendingData = $pendingRemittances->map(fn($r) => [
+            'id' => $r->id,
+            'date' => $r->remittance_date?->format('M d, Y'),
+            'route' => $r->route->route_name ?? '—',
+            'vehicle' => $r->vehicle->plate_number ?? '—',
+            'net' => (float) $r->net_remittance,
+            'is_short' => (bool) $r->is_short_remittance,
+            'status' => 'pending',
+            'show_url' => route('remittances.show', $r),
+        ])->values();
+        
+        $approvedData = $approvedRemittances->map(fn($r) => [
+            'id' => $r->id,
+            'date' => $r->remittance_date?->format('M d, Y'),
+            'route' => $r->route->route_name ?? '—',
+            'vehicle' => $r->vehicle->plate_number ?? '—',
+            'net' => (float) $r->net_remittance,
+            'is_short' => (bool) $r->is_short_remittance,
+            'status' => 'approved',
+            'show_url' => route('remittances.show', $r),
+        ])->values();
         
         // Calculate statistics
         $totalRemittances = DailyRemittance::count();
@@ -47,7 +73,7 @@ class DailyRemittanceController extends Controller
         $pendingCount = DailyRemittance::where('status', 'pending')->count();
         $rejectedRemittances = DailyRemittance::where('status', 'rejected')->count();
         
-        return view('remittance-clerk.remittances.index', compact('pendingRemittances', 'approvedRemittances', 'sortBy', 'sortOrder', 'totalRemittances', 'approvedCount', 'pendingCount', 'rejectedRemittances'));
+        return view('remittance-clerk.remittances.index', compact('pendingRemittances', 'approvedRemittances', 'pendingData', 'approvedData', 'sortBy', 'sortOrder', 'totalRemittances', 'approvedCount', 'pendingCount', 'rejectedRemittances', 'tab'));
     }
 
     public function create()

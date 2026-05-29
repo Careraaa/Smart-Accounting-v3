@@ -3,8 +3,8 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-5">
     {{-- Back --}}
     <div>
-        <a href="{{ route('drivers.index') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors no-underline">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <a href="{{ route('drivers.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back to Drivers
         </a>
     </div>

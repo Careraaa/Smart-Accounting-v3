@@ -29,7 +29,10 @@
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">13th Month Pay</h1>
             <p class="text-sm text-gray-400 mt-0.5">Total basic salary earned &divide; 12 &middot; Calendar year {{ $calendarYear }}</p>
         </div>
-        <a href="{{ route('bonuses.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:border-gray-300 hover:text-gray-800 active:scale-[0.97] whitespace-nowrap">Back to Bonuses</a>
+        <a href="{{ route('bonuses.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to Bonuses
+        </a>
     </div>
 
     <div class="grid grid-cols-3 gap-3 max-md:grid-cols-1">
