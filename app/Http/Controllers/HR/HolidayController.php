@@ -59,12 +59,9 @@ class HolidayController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:holidays,name,NULL,id,date,' . $request->date,
-            'date' => 'required|date|unique:holidays,date',
+            'name' => 'required|string|max:255',
+            'date' => 'required|date',
             'type' => 'required|in:regular,special',
-        ], [
-            'name.unique' => 'A holiday with this name already exists on that date.',
-            'date.unique' => 'A holiday already exists on this date.',
         ]);
 
         Holiday::create($validated);
@@ -94,12 +91,9 @@ class HolidayController extends Controller
     public function update(Request $request, Holiday $holiday)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:holidays,name,' . $holiday->id . ',id,date,' . $request->date,
-            'date' => 'required|date|unique:holidays,date,' . $holiday->id,
+            'name' => 'required|string|max:255',
+            'date' => 'required|date',
             'type' => 'required|in:regular,special',
-        ], [
-            'name.unique' => 'A holiday with this name already exists on that date.',
-            'date.unique' => 'A holiday already exists on this date.',
         ]);
 
         $holiday->update($validated);

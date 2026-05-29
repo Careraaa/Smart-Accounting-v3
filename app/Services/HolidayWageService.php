@@ -136,7 +136,7 @@ class HolidayWageService
             // Pick the right pay rule based on holiday type.
             if ($isDouble) {
                 // Two holidays on the same day — highest multiplier applies.
-                $result = $this->computeDoubleHoliday($dailyRate, $isWorked);
+                $result = $this->computeDoubleHoliday($dailyRate, $hourlyRate, $hoursWorked, $isWorked, $isRestDay);
                 $type   = 'double';
             } elseif ($hasRegular) {
                 $result = $this->computeRegularHoliday(
@@ -429,27 +429,73 @@ class HolidayWageService
     //  DOUBLE HOLIDAY  (two holidays on the same date)
     // ================================================================
     /**
-     * When two holidays fall on the same date:
+     * When two regular holidays fall on the same date, the employee is
+     * entitled to the highest applicable rate per DOLE:
      *
-     *  Not worked → 100% daily_rate
-     *    At least one is a regular holiday, so the employee is still entitled to pay.
+     *  Not worked → 200% of daily rate (100% per regular holiday)
      *
-     *  Worked → 300% daily_rate
-     *    Highest multiplier in PH labor law.
+     *  Worked on a normal day:
+     *    300% of daily rate (200% base × 1.5 for second holiday)
+     *    Basic pay already exists = 100%
+     *    Holiday premium = 200%
+     *    OT: hourly_rate × 3.0 × 1.30 × OT_hours
+     *
+     *  Worked on rest day:
+     *    390% of daily rate (300% double holiday + 30% rest-day premium on top)
+     *    Basic pay already exists = 100%
+     *    Holiday premium = 290%
+     *    OT: hourly_rate × 3.90 × 1.30 × OT_hours
      */
-    private function computeDoubleHoliday(float $dailyRate, bool $isWorked): array
-    {
+    private function computeDoubleHoliday(
+        float $dailyRate,
+        float $hourlyRate,
+        float $hoursWorked,
+        bool  $isWorked,
+        bool  $isRestDay
+    ): array {
+        $cola = $this->getCOLA();
+
         // ============================================================
         // DOUBLE HOLIDAY NOT WORKED
         // ============================================================
-        // At least one regular holiday exists,
-        // therefore employee still earns 100%.
+        // Two regular holidays on the same day = 200% of daily rate
         if (!$isWorked) {
             return [
-                'base_pay'           => $dailyRate,
+                'base_pay'           => $dailyRate * 2.0,
                 'ot_hours'           => 0.0,
                 'ot_pay'             => 0.0,
                 'computation_type'   => 'double_not_worked'
+            ];
+        }
+
+        $overtimeHours = max(0.0, $hoursWorked - 8);
+
+        // ============================================================
+        // REST DAY + DOUBLE HOLIDAY
+        // ============================================================
+        // Total legal pay = 390%
+        // Basic pay already exists = 100%
+        // Holiday premium base only = 290%
+        if ($isRestDay) {
+
+            $premiumPay = $dailyRate * 2.90;
+
+            if ($overtimeHours > 0) {
+                $otPay = $hourlyRate * 3.90 * 1.30 * $overtimeHours;
+
+                return [
+                    'base_pay'           => $premiumPay + $cola,
+                    'ot_hours'           => $overtimeHours,
+                    'ot_pay'             => $otPay,
+                    'computation_type'   => 'double_rest_day_worked_ot'
+                ];
+            }
+
+            return [
+                'base_pay'           => $premiumPay + $cola,
+                'ot_hours'           => 0.0,
+                'ot_pay'             => 0.0,
+                'computation_type'   => 'double_rest_day_worked'
             ];
         }
 
@@ -459,9 +505,21 @@ class HolidayWageService
         // Total legal pay = 300%
         // Basic pay already exists = 100%
         // Holiday premium base only = 200%
-        // NOTE: Double holiday does not have OT component per DOLE rules
+        $premiumPay = $dailyRate * 2.0;
+
+        if ($overtimeHours > 0) {
+            $otPay = $hourlyRate * 3.0 * 1.30 * $overtimeHours;
+
+            return [
+                'base_pay'           => $premiumPay + $cola,
+                'ot_hours'           => $overtimeHours,
+                'ot_pay'             => $otPay,
+                'computation_type'   => 'double_worked_ot'
+            ];
+        }
+
         return [
-            'base_pay'           => $dailyRate * 2.0,
+            'base_pay'           => $premiumPay + $cola,
             'ot_hours'           => 0.0,
             'ot_pay'             => 0.0,
             'computation_type'   => 'double_worked'
