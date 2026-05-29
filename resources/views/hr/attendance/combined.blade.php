@@ -463,13 +463,13 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                     const status = getEmployeeStatus(emp);
                     let statusLabel, statusDot, statusBg;
                     if (status === 'absent') {
-                        statusLabel = 'Not Yet In'; statusDot = 'bg-red-500'; statusBg = 'bg-red-50 text-red-700 border-red-200';
+                        statusLabel = 'Not Yet In'; statusDot = 'bg-red-500'; statusBg = 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/50';
                     } else if (status === 'out') {
-                        statusLabel = 'Timed Out'; statusDot = 'bg-slate-400'; statusBg = 'bg-slate-50 text-slate-600 border-slate-200';
+                        statusLabel = 'Timed Out'; statusDot = 'bg-slate-400 dark:bg-slate-500'; statusBg = 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700';
                     } else if (status === 'late') {
-                        statusLabel = 'Late'; statusDot = 'bg-yellow-500'; statusBg = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+                        statusLabel = 'Late'; statusDot = 'bg-yellow-500'; statusBg = 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800/50';
                     } else {
-                        statusLabel = 'Timed In'; statusDot = 'bg-emerald-500'; statusBg = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                        statusLabel = 'Timed In'; statusDot = 'bg-emerald-500'; statusBg = 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50';
                     }
 
                     const initials = (emp.firstName.charAt(0) + emp.lastName.charAt(0)).toUpperCase();
@@ -598,17 +598,17 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                 var span = btn.querySelector('span');
                 if (isActive) {
                     var c = colors[status] || colors.pending;
-                    btn.style.background = c.bg;
-                    btn.style.color = '#fff';
-                    btn.style.borderColor = 'transparent';
-                    btn.style.boxShadow = '0 2px 8px ' + c.shadow;
-                    if (span) { span.style.background = 'rgba(255,255,255,0.25)'; span.style.color = '#fff'; }
+                    btn.style.setProperty('background', c.bg, 'important');
+                    btn.style.setProperty('color', '#fff', 'important');
+                    btn.style.setProperty('border', '0', 'important');
+                    btn.style.setProperty('box-shadow', '0 2px 8px ' + c.shadow, 'important');
+                    if (span) { span.style.setProperty('background', 'rgba(255,255,255,0.25)', 'important'); span.style.setProperty('color', '#fff', 'important'); }
                 } else {
-                    btn.style.background = '';
-                    btn.style.color = '';
-                    btn.style.borderColor = '';
-                    btn.style.boxShadow = '';
-                    if (span) { span.style.background = ''; span.style.color = ''; }
+                    btn.style.removeProperty('background');
+                    btn.style.removeProperty('color');
+                    btn.style.removeProperty('border');
+                    btn.style.removeProperty('box-shadow');
+                    if (span) { span.style.removeProperty('background'); span.style.removeProperty('color'); }
                 }
             });
             page = 1;

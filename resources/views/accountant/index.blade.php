@@ -47,10 +47,10 @@
 $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvancesCount + $pendingSalaryLoansCount;
 @endphp
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+<div class="flex flex-col lg:flex-row gap-5 items-start">
 
     {{-- LEFT COLUMN (2/3) --}}
-    <div class="lg:col-span-2 space-y-5">
+    <div class="flex-1 min-w-0 space-y-5">
         {{-- Quick Actions / Shortcuts --}}
         <div class="acd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
             <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
@@ -406,8 +406,8 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
 
     </div>
 
-    {{-- RIGHT COLUMN (1/3): Calendar + To-Do --}}
-    <div class="space-y-5 max-w-[280px] justify-self-end">
+    {{-- RIGHT COLUMN: Calendar + To-Do --}}
+    <div class="w-[280px] shrink-0 space-y-5">
         <div class="sticky top-24 space-y-5">
 
         {{-- Calendar Card --}}
