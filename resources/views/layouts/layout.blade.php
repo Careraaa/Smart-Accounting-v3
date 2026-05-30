@@ -29,6 +29,19 @@
         html.dark { color-scheme: dark; }
         html.dark body { background: #050508; }
 
+        /* Hide native page scrollbars while preserving scrolling */
+        html,
+        body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
         /* Sidebar */
         html.dark .sidebar { background: #08080f; border-color: #12121e; }
         html.dark .sidebar .sidebar-logo { border-color: #12121e; }

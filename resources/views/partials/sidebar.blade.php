@@ -115,6 +115,7 @@
         body.sidebar-collapsed .sidebar-arrow,
         body.sidebar-collapsed .b-brand span:not(.flex-shrink-0),
         body.sidebar-collapsed #kt-nav-search { display: none; }
+        body.sidebar-collapsed .brand-icon { display: block; }
         body.sidebar-collapsed #kt-search-popup,
         body.sidebar-collapsed .sidebar-sub { display: none; }
         body.sidebar-collapsed .sidebar .sidebar-link { justify-content: center; padding: 10px 0; gap: 0; }
@@ -154,9 +155,9 @@
     <div class="flex flex-col h-full">
 
         {{-- ── Logo / Brand ── --}}
-        <div class="sidebar-logo shrink-0 flex items-center px-3 h-14 border-b border-gray-100">
+        <div class="sidebar-logo shrink-0 flex items-center justify-center px-3 h-16 border-b border-gray-100">
             <a href="{{ route('dashboard') }}" class="b-brand flex items-center gap-2.5 no-underline min-w-0">
-                <span class="flex-shrink-0">
+                <span class="brand-icon flex-shrink-0 hidden">
                     <img src="{{ asset('images/knights-icon.png') }}" alt="Knights Transport" width="30" height="30" class="si-logo-light block rounded-lg">
                     <img src="{{ asset('images/darkmode-icon.png') }}" alt="Knights Transport" width="30" height="30" class="si-logo-dark hidden rounded-lg">
                 </span>
@@ -164,7 +165,7 @@
                     html.dark .si-logo-light { display: none !important; }
                     html.dark .si-logo-dark { display: block !important; }
                 </style>
-                <span class="brand-title text-sm font-bold text-gray-900 truncate">Knights Transport</span>
+                <span class="brand-title text-sm font-bold text-gray-900 truncate">Knights TSC</span>
             </a>
         </div>
 
