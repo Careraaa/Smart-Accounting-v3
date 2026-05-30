@@ -35,7 +35,7 @@
 
     {{-- Topbar --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 emp-header-in">
-        <div>
+        <div class="flex items-center gap-2">
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $employee->first_name }} {{ $employee->middle_name }} {{ $employee->last_name }}</h1>
             <div class="flex items-center gap-2.5 mt-1.5 flex-wrap">
                 <span class="text-sm font-semibold text-gray-500">{{ $employee->position ?? 'No Position Specified' }}</span>

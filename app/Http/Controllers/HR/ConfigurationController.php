@@ -5,11 +5,13 @@ namespace App\Http\Controllers\HR;
 use App\Models\Shift;
 use App\Models\PayrollCutoffSchedule;
 use App\Models\Setting;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class ConfigurationController extends Controller
 {
+    use LogsUserActivity;
     /**
      * Display the configuration page with all settings.
      */
@@ -24,6 +26,8 @@ class ConfigurationController extends Controller
 
         // Get attendance settings from database
         $gracePeriod = (int) Setting::get('attendance.grace_period_minutes', 5);
+
+        $this->logActivity('viewed', 'Configuration settings', request()->url(), 'configuration');
 
         return view('hr.configuration.index', compact(
             'shifts',
@@ -62,6 +66,8 @@ class ConfigurationController extends Controller
 
         Shift::create($validated);
 
+        $this->logActivity('created', "Shift: {$validated['name']}", request()->url(), 'configuration');
+
         return redirect()->route('settings.index')->with('success', 'Shift created successfully!');
     }
 
@@ -94,6 +100,8 @@ class ConfigurationController extends Controller
 
         $shift->update($validated);
 
+        $this->logActivity('updated', "Shift: {$shift->name}", request()->url(), 'configuration', $shift->id);
+
         return redirect()->route('settings.index')->with('success', 'Shift updated successfully!');
     }
 
@@ -102,6 +110,7 @@ class ConfigurationController extends Controller
      */
     public function destroyShift(Shift $shift)
     {
+        $this->logActivity('deleted', "Shift: {$shift->name}", request()->url(), 'configuration', $shift->id);
         $shift->delete();
         return redirect()->route('settings.index')->with('success', 'Shift deleted successfully!');
     }
@@ -142,6 +151,8 @@ class ConfigurationController extends Controller
             ]);
         }
 
+        $this->logActivity('updated', 'Payroll cutoff schedule', request()->url(), 'configuration');
+
         return redirect()->route('settings.index')->with('success', 'Payroll cutoff updated successfully!');
     }
 
@@ -156,6 +167,8 @@ class ConfigurationController extends Controller
 
         // Store settings in database using Setting model
         Setting::set('attendance.grace_period_minutes', $validated['grace_period']);
+
+        $this->logActivity('updated', 'Attendance settings', request()->url(), 'configuration');
 
         return redirect()->route('settings.index')->with('success', 'Attendance settings updated successfully!');
     }

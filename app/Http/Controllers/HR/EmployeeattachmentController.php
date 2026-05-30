@@ -5,12 +5,14 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\EmployeeAttachment;
 use App\Models\User;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class EmployeeAttachmentController extends Controller
 {
+    use LogsUserActivity;
     /**
      * HR: list all attachments for a specific employee, grouped by key.
      */
@@ -23,6 +25,8 @@ class EmployeeAttachmentController extends Controller
             ->groupBy('attachment_key');
 
         $attachmentTypes = EmployeeAttachment::attachmentTypes();
+
+        $this->logActivity('viewed', "Employee attachments: {$employee->first_name} {$employee->last_name}", request()->url(), 'employee', $employee->id);
 
         return view('hr.employees.attachments.index', compact('employee', 'attachments', 'attachmentTypes'));
     }
@@ -37,7 +41,9 @@ class EmployeeAttachmentController extends Controller
             'file'           => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
 
-        static::saveAttachment($request->file('file'), $employee, $request->attachment_key, 'hr');
+        $attachment = static::saveAttachment($request->file('file'), $employee, $request->attachment_key, 'hr');
+
+        $this->logActivity('created', "Attachment: {$attachment->label} for {$employee->first_name} {$employee->last_name}", request()->url(), 'employee', $employee->id);
 
         return back()->with('success', 'Attachment uploaded successfully.');
     }
@@ -53,6 +59,8 @@ class EmployeeAttachmentController extends Controller
             'reviewed_at'      => now(),
             'rejection_reason' => null,
         ]);
+
+        $this->logActivity('approved', "Attachment: {$attachment->label}", request()->url(), 'employee', $attachment->user_id);
 
         return back()->with('success', "'{$attachment->label}' approved.");
     }
@@ -73,6 +81,8 @@ class EmployeeAttachmentController extends Controller
             'rejection_reason' => $request->rejection_reason,
         ]);
 
+        $this->logActivity('rejected', "Attachment: {$attachment->label}", request()->url(), 'employee', $attachment->user_id);
+
         return back()->with('success', "'{$attachment->label}' rejected.");
     }
 
@@ -81,6 +91,7 @@ class EmployeeAttachmentController extends Controller
      */
     public function destroy(EmployeeAttachment $attachment)
     {
+        $this->logActivity('deleted', "Attachment: {$attachment->label}", request()->url(), 'employee', $attachment->user_id);
         Storage::disk('public')->delete($attachment->file_path);
         $attachment->delete();
 

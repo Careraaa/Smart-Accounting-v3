@@ -4,10 +4,12 @@ namespace App\Http\Controllers\RemittanceClerk;
 
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class DriverController extends Controller
 {
+    use LogsUserActivity;
     public function index(Request $request)
     {
         $sortBy = $request->get('sort_by', 'name');
@@ -31,6 +33,8 @@ class DriverController extends Controller
         $activeDrivers = Driver::where('status', 'active')->count();
         $inactiveDrivers = Driver::where('status', 'inactive')->count();
         
+        $this->logActivity('viewed', 'Drivers list', request()->url(), 'driver');
+
         return view('remittance-clerk.drivers.index', compact('drivers', 'sortBy', 'sortOrder', 'totalDrivers', 'activeDrivers', 'inactiveDrivers'));
     }
 
@@ -56,13 +60,17 @@ class DriverController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        Driver::create($validated);
+        $driver = Driver::create($validated);
+
+        $this->logActivity('created', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
 
         return redirect()->route('drivers.index')->with('success', 'Driver created successfully.');
     }
 
     public function show(Driver $driver)
     {
+        $this->logActivity('viewed', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
+
         return view('remittance-clerk.drivers.show', compact('driver'));
     }
 
@@ -90,11 +98,15 @@ class DriverController extends Controller
 
         $driver->update($validated);
 
+        $this->logActivity('updated', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
+
         return redirect()->route('drivers.index')->with('success', 'Driver updated successfully.');
     }
 
     public function destroy(Driver $driver)
     {
+        $this->logActivity('deleted', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
+
         $driver->delete();
         return redirect()->route('drivers.index')->with('success', 'Driver deleted successfully.');
     }

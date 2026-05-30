@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\HR;
 
 use App\Models\Holiday;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 
 class HolidayController extends Controller
 {
+    use LogsUserActivity;
     /**
      * Display a listing of the holidays.
      */
@@ -38,6 +40,8 @@ class HolidayController extends Controller
         $specialCount = $allHolidays->where('type', 'special')->count();
         $upcomingCount = $activeHolidays->count();
 
+        $this->logActivity('viewed', 'Holidays list', request()->url(), 'holiday');
+
         return view('hr.holiday.index', compact(
             'tab', 'year', 'availableYears',
             'allHolidays', 'activeHolidays',
@@ -64,7 +68,9 @@ class HolidayController extends Controller
             'type' => 'required|in:regular,special',
         ]);
 
-        Holiday::create($validated);
+        $holiday = Holiday::create($validated);
+
+        $this->logActivity('created', "Holiday: {$holiday->name}", request()->url(), 'holiday', $holiday->id);
 
         return redirect()->route('holiday.index')->with('success', 'Holiday created successfully.');
     }
@@ -74,6 +80,7 @@ class HolidayController extends Controller
      */
     public function show(Holiday $holiday)
     {
+        $this->logActivity('viewed', "Holiday: {$holiday->name}", request()->url(), 'holiday', $holiday->id);
         return view('hr.holiday.show', compact('holiday'));
     }
 
@@ -98,6 +105,8 @@ class HolidayController extends Controller
 
         $holiday->update($validated);
 
+        $this->logActivity('updated', "Holiday: {$holiday->name}", request()->url(), 'holiday', $holiday->id);
+
         return redirect()->route('holiday.index')->with('success', 'Holiday updated successfully.');
     }
 
@@ -106,6 +115,7 @@ class HolidayController extends Controller
      */
     public function destroy(Holiday $holiday)
     {
+        $this->logActivity('deleted', "Holiday: {$holiday->name}", request()->url(), 'holiday', $holiday->id);
         $holiday->delete();
 
         return redirect()->route('holiday.index')->with('success', 'Holiday deleted successfully.');

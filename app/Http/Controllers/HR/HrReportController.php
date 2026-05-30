@@ -7,12 +7,14 @@ use App\Models\Employee;
 use App\Models\Leave;
 use App\Models\Payroll;
 use App\Models\StatutoryDeduction;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Carbon\Carbon;
 
 class HrReportController extends Controller
 {
+    use LogsUserActivity;
     /**
      * Compute employer statutory contribution using the same bracket-based
      * logic as PayrollService, for consistent government contribution reporting.
@@ -48,6 +50,8 @@ class HrReportController extends Controller
     {
         $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy('last_name')->get();
 
+        $this->logActivity('viewed', 'Employee report', request()->url(), 'report');
+
         return view('hr.reports.employee-report', compact('employees'));
     }
 
@@ -61,6 +65,8 @@ class HrReportController extends Controller
         $approvedLeaves  = $leaves->count();
         $thisWeekLeaves  = $leaves->filter(fn($l) => $l->updated_at->isCurrentWeek())->count();
         $thisMonthLeaves = $leaves->filter(fn($l) => $l->updated_at->isCurrentMonth())->count();
+
+        $this->logActivity('viewed', 'Approved leaves report', request()->url(), 'report');
 
         return view('hr.reports.approved-leaves-report', compact(
             'leaves',
@@ -80,6 +86,8 @@ class HrReportController extends Controller
         $totalGrossPay  = $payrolls->sum('gross_pay');
         $totalDeductions = $payrolls->sum('total_deductions');
         $totalNetPay    = $payrolls->sum('net_pay');
+
+        $this->logActivity('viewed', 'Payroll history report', request()->url(), 'report');
 
         return view('hr.reports.payroll-history-report', compact(
             'payrolls',
@@ -203,6 +211,8 @@ class HrReportController extends Controller
             $summary['employer_philhealth'] += $empPhilhealthShare;
         }
 
+        $this->logActivity('viewed', 'Government contribution report', request()->url(), 'report');
+
         return view('hr.reports.government-contribution', compact(
             'employees',
             'contributions',
@@ -324,6 +334,8 @@ class HrReportController extends Controller
             $summary['employee_philhealth'] += $empPhilhealth;
             $summary['employer_philhealth'] += $empPhilhealthShare;
         }
+
+        $this->logActivity('viewed', 'Government contribution print report', request()->url(), 'report');
 
         return view('hr.reports.government-contribution-print', compact(
             'employees',

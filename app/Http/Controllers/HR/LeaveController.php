@@ -9,11 +9,13 @@ use App\Models\LeaveType;
 use App\Models\EmployeeLeaveBalance;
 use App\Notifications\LeaveNotification;
 use App\Services\LeaveService;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
 {
+    use LogsUserActivity;
     protected $leaveService;
 
     public function __construct(LeaveService $leaveService)
@@ -76,6 +78,8 @@ class LeaveController extends Controller
         $rejectedMonthLeaves = Leave::where('status', 'rejected')
             ->whereBetween('updated_at', [$thisMonthStart, $thisMonthEnd])->count();
 
+        $this->logActivity('viewed', 'Leaves list', request()->url(), 'leave');
+
         return view('hr.leave.index', compact(
             'tab',
             'leaveTypes',
@@ -120,6 +124,8 @@ class LeaveController extends Controller
         $leave = Leave::create($validated);
         $leave->load('employee');
 
+        $this->logActivity('created', "Leave #{$leave->id} for {$leave->employee?->first_name} {$leave->employee?->last_name}", request()->url(), 'leave', $leave->id);
+
         // Send notifications
         LeaveNotification::leaveSubmitted($leave);
         LeaveNotification::notifyManagersOfNewRequest($leave);
@@ -130,7 +136,7 @@ class LeaveController extends Controller
     public function show(Leave $leave)
     {
         $leave->load('employee', 'approvedBy');
-
+        $this->logActivity('viewed', "Leave #{$leave->id}", request()->url(), 'leave', $leave->id);
         return view('hr.leave.show', compact('leave'));
     }
 
@@ -155,6 +161,8 @@ class LeaveController extends Controller
         $leave->update($validated);
         $leave->load('employee');
 
+        $this->logActivity('updated', "Leave #{$leave->id}", request()->url(), 'leave', $leave->id);
+
         // Send notification
         LeaveNotification::leaveUpdated($leave);
 
@@ -168,6 +176,7 @@ class LeaveController extends Controller
         // Send notification
         LeaveNotification::leaveDeleted($leave);
 
+        $this->logActivity('deleted', "Leave #{$leave->id}", request()->url(), 'leave', $leave->id);
         $leave->delete();
 
         return redirect()->route('leave.pending')->with('success', 'Leave request deleted successfully.');
@@ -183,6 +192,8 @@ class LeaveController extends Controller
         }
 
         $leave->load('employee', 'leaveType');
+
+        $this->logActivity('approved', "Leave #{$leave->id}", request()->url(), 'leave', $leave->id);
 
         // Send notification
         LeaveNotification::leaveApproved($leave);
@@ -204,6 +215,8 @@ class LeaveController extends Controller
         }
 
         $leave->load('employee');
+
+        $this->logActivity('rejected', "Leave #{$leave->id}", request()->url(), 'leave', $leave->id);
 
         // Send notification
         LeaveNotification::leaveRejected($leave);

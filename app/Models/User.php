@@ -150,6 +150,20 @@ class User extends Authenticatable
         return $this->hasMany(EmployeeAttachment::class, 'user_id')->orderBy('attachment_key')->orderByDesc('created_at');
     }
 
+    // ── Activity log ───────────────────────────────────────────────────
+
+    public function activities()
+    {
+        return $this->hasMany(UserActivity::class)->latest();
+    }
+
+    // ── Pinned items ──────────────────────────────────────────────────
+
+    public function pinnedItems()
+    {
+        return $this->hasMany(PinnedItem::class)->orderBy('sort_order');
+    }
+
     /**
      * Returns the latest attachment record per key, keyed by attachment_key.
      * Usage: $user->latestAttachments->get('drivers_license')

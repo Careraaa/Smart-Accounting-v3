@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\SuperAdmin;
 
+use App\Traits\LogsUserActivity;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Employee;
@@ -10,8 +11,11 @@ use Illuminate\Support\Facades\Hash;
 
 class AccountController extends Controller
 {
+    use LogsUserActivity;
     public function index()
     {
+        $this->logActivity('viewed', 'account');
+
         $users = User::orderBy('created_at', 'desc')->paginate(15);
         $allUsers = User::orderBy('created_at', 'desc')->get();
 
@@ -49,7 +53,9 @@ class AccountController extends Controller
         $validated['password'] = Hash::make($validated['password']);
         $validated['status'] = 'active';
 
-        User::create($validated);
+        $user = User::create($validated);
+
+        $this->logActivity('created', 'account', null, 'App\Models\User', $user->id);
 
         return redirect()->route('superadmin.accounts.index')->with('success', 'Account created successfully!');
     }
@@ -76,6 +82,8 @@ class AccountController extends Controller
         $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
 
         $account->update($validated);
+
+        $this->logActivity('updated', 'account', null, 'App\Models\User', $account->id);
 
         return redirect()->route('superadmin.accounts.index')->with('success', 'Account updated successfully!');
     }

@@ -9,10 +9,12 @@ use App\Models\PAO;
 use App\Models\Vehicle;
 use App\Models\Route;
 use Carbon\Carbon;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
+    use LogsUserActivity;
     public function index()
     {
         $period = 'monthly';
@@ -54,6 +56,8 @@ class ReportController extends Controller
         );
         
         $totals = $this->calculateTotals($remittances);
+
+        $this->logActivity('viewed', 'Remittance Report', request()->url(), 'report');
 
         return view('remittance-clerk.reports.remittance-report', compact(
             'groupedRemittances',
@@ -100,6 +104,8 @@ class ReportController extends Controller
         );
         
         $totals = $this->calculateTotals($remittances);
+
+        $this->logActivity('viewed', 'Remittance Report (filtered)', request()->url(), 'report');
 
         return view('remittance-clerk.reports.remittance-report', compact(
             'groupedRemittances',

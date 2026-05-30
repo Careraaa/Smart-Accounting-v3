@@ -329,6 +329,58 @@
         html.dark #sidebar-collapse-btn { background: #10101c; border-color: #18182a; color: #44445a; }
         html.dark #sidebar-collapse-btn:hover { background: #18182a; }
 
+        /* ── Right sidebar ── */
+        #right-sidebar { width: 280px; transform: translateX(100%); transition: transform .5s cubic-bezier(.4,0,.2,1); }
+        body.right-sidebar-open #right-sidebar { transform: translateX(0); }
+        #right-sidebar-toggle { transition: right .5s cubic-bezier(.4,0,.2,1), opacity .3s ease; }
+        body.right-sidebar-open #right-sidebar-toggle { right: 280px; opacity: 0; pointer-events: none; }
+        @media (max-width: 1023px) {
+            #right-sidebar { display: none; }
+            #right-sidebar-toggle { display: none; }
+        }
+        /* Animate activity items on sidebar open — staggered entrance */
+        .rs-activity-item { opacity: 0; transform: translateX(16px); transition: opacity .45s cubic-bezier(.21,.98,.35,1), transform .45s cubic-bezier(.21,.98,.35,1), background-color .15s ease, border-color .15s ease; }
+        body.right-sidebar-open .rs-activity-item { opacity: 1; transform: translateX(0); }
+        /* Pinned item entrance animation */
+        @keyframes rsSlideIn { from { opacity: 0; transform: translateX(-12px) scale(.96); } to { opacity: 1; transform: translateX(0) scale(1); } }
+        .rs-pinned-item { transition: background-color .15s ease, transform .15s ease, opacity .15s ease; }
+        .rs-pinned-item:hover { transform: scale(1.02); }
+        /* Star bounce on hover */
+        .rs-pin-toggle svg, .rs-result-star { transition: transform .2s cubic-bezier(.34,1.56,.64,1), fill .15s ease, color .15s ease; }
+        .rs-pin-toggle:hover svg { transform: scale(1.3) rotate(-10deg); }
+        .rs-search-result:hover .rs-result-star { transform: scale(1.25) rotate(-10deg); }
+        /* Search results dropdown */
+        #rs-pin-search-results { transition: opacity .15s ease, transform .15s ease; transform-origin: top center; }
+        #rs-pin-search-results:not([style*="display: none"]) { animation: rsDropIn .15s ease-out; }
+        @keyframes rsDropIn { from { opacity: 0; transform: translateY(-6px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        /* Search result rows */
+        .rs-search-result { transition: background .12s ease, transform .12s ease; }
+        .rs-search-result:hover { transform: translateX(2px); }
+        /* Collapsible activity section */
+        #rs-activity-body { max-height: 2000px; overflow-y: auto; transition: max-height .4s cubic-bezier(.4,0,.2,1), opacity .3s ease, margin .3s ease; }
+        .rs-activity-collapsed #rs-activity-body { max-height: 0 !important; opacity: 0; overflow-y: hidden; margin-bottom: 0; }
+        #rs-activity-toggle { cursor: pointer; user-select: none; }
+        #rs-activity-toggle .rs-activity-arrow { transition: transform .35s cubic-bezier(.4,0,.2,1); }
+        .rs-activity-collapsed .rs-activity-arrow { transform: rotate(-90deg); }
+        /* Pin animation — flash on search result row when pinned */
+        @keyframes rsPinFlash { 0% { background-color: rgba(251,191,36,.2); box-shadow: inset 0 0 0 1px rgba(251,191,36,.3); } 50% { background-color: rgba(251,191,36,.12); } 100% { background-color: transparent; box-shadow: inset 0 0 0 1px transparent; } }
+        .rs-pin-flash { animation: rsPinFlash .6s ease-out forwards; border-radius: 0.5rem; }
+        /* Star pop animation when pinning */
+        @keyframes rsStarPop { 0% { transform: scale(1); } 30% { transform: scale(1.7); filter: brightness(1.5); } 60% { transform: scale(.82); } 100% { transform: scale(1); filter: brightness(1); } }
+        .rs-star-pop svg { animation: rsStarPop .5s cubic-bezier(.34,1.56,.64,1) forwards; }
+        /* Drag resize cursor */
+        body.cursor-row-resize, body.cursor-row-resize * { cursor: row-resize !important; user-select: none !important; }
+        /* Resize handle grip dots */
+        #rs-resize-handle .rs-grip { display: flex; align-items: center; gap: 4px; }
+        #rs-resize-handle .rs-grip span { width: 3px; height: 3px; border-radius: 50%; background: #d1d5db; transition: background .2s, box-shadow .2s; }
+        #rs-resize-handle:hover .rs-grip span { background: #9ca3af; box-shadow: 0 0 6px rgba(156,163,175,.4); }
+        /* Drag handle glow line */
+        #rs-resize-handle::before { content: ''; position: absolute; inset: 4px 12px; border-radius: 999px; background: transparent; transition: background .25s; }
+        #rs-resize-handle:hover::before { background: rgba(0,0,0,.03); }
+        #rs-resize-handle:active::before { background: rgba(0,0,0,.06); }
+        /* Sidebar header fade on open */
+        body.right-sidebar-open #right-sidebar .rs-section-header { animation: rsSlideIn .35s ease-out both; }
+
         /* Confirm modal */
         html.dark #sa-confirm-modal { background: #0a0a14; border-color: #18182a; }
         html.dark .sa-confirm-title { color: #e0e0f0; }
@@ -553,6 +605,8 @@
         </div>
     </main>
 
+    @include('partials.right-sidebar')
+
     {{-- Sidebar Collapse / Mobile Toggle --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -584,8 +638,6 @@
             });
         });
     </script>
-
-
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

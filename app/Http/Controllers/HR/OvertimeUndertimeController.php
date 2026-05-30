@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\OvertimeUndertime;
 use App\Models\Employee;
 use App\Notifications\OvertimeNotification;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OvertimeUndertimeController extends Controller
 {
+    use LogsUserActivity;
     /**
      * List all pending OT/UT requests submitted by employees, with approve/reject actions.
      */
@@ -26,6 +28,8 @@ class OvertimeUndertimeController extends Controller
         $pendingCount  = OvertimeUndertime::where('status', 'pending')->count();
         $approvedCount = OvertimeUndertime::where('status', 'approved')->count();
         $rejectedCount = OvertimeUndertime::where('status', 'rejected')->count();
+
+        $this->logActivity('viewed', 'OT/UT pending requests', request()->url(), 'overtime');
 
         return view('hr.overtime.pending', compact(
             'allRequests', 'status',
@@ -64,6 +68,8 @@ class OvertimeUndertimeController extends Controller
         $totalUndertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')->sum('hours');
         $overtimeCount       = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')->count();
         $undertimeCount      = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')->count();
+
+        $this->logActivity('viewed', 'OT/UT records', request()->url(), 'overtime');
 
         return view('hr.overtime.index', compact(
             'allEmployees',
@@ -153,6 +159,8 @@ class OvertimeUndertimeController extends Controller
 
         $overtime->load('employee');
 
+        $this->logActivity('created', "OT/UT record #{$overtime->id} for {$overtime->employee?->first_name} {$overtime->employee?->last_name}", request()->url(), 'overtime', $overtime->id);
+
         // Notify the employee their record was logged and approved
         OvertimeNotification::submitted($overtime);
 
@@ -163,6 +171,7 @@ class OvertimeUndertimeController extends Controller
     public function show(OvertimeUndertime $overtime)
     {
         $overtime->load('employee');
+        $this->logActivity('viewed', "OT/UT record #{$overtime->id}", request()->url(), 'overtime', $overtime->id);
         return view('hr.overtime.show', compact('overtime'));
     }
 
@@ -210,6 +219,8 @@ class OvertimeUndertimeController extends Controller
 
         $overtime->load('employee');
 
+        $this->logActivity('updated', "OT/UT record #{$overtime->id}", request()->url(), 'overtime', $overtime->id);
+
         OvertimeNotification::updated($overtime);
 
         return redirect()->route('overtime.show', $overtime->id)
@@ -224,6 +235,7 @@ class OvertimeUndertimeController extends Controller
             'approved_by' => auth()->id(),
         ]);
         $overtime->load('employee');
+        $this->logActivity('approved', "OT/UT record #{$overtime->id}", request()->url(), 'overtime', $overtime->id);
         OvertimeNotification::approved($overtime);
 
         return redirect()->back()->with('success', 'Record approved successfully.');
@@ -241,6 +253,7 @@ class OvertimeUndertimeController extends Controller
             'approved_by' => auth()->id(),
         ]);
         $overtime->load('employee');
+        $this->logActivity('rejected', "OT/UT record #{$overtime->id}", request()->url(), 'overtime', $overtime->id);
         OvertimeNotification::rejected($overtime);
 
         return redirect()->back()->with('success', 'Record rejected successfully.');
@@ -249,6 +262,7 @@ class OvertimeUndertimeController extends Controller
     public function destroy(OvertimeUndertime $overtime)
     {
         $overtime->load('employee');
+        $this->logActivity('deleted', "OT/UT record #{$overtime->id}", request()->url(), 'overtime', $overtime->id);
         OvertimeNotification::deleted($overtime);
         $overtime->delete();
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PinnedItemController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RemittanceClerk\DriverController;
 use App\Http\Controllers\RemittanceClerk\PAOController;
@@ -542,3 +543,8 @@ Route::middleware(['auth', 'check-status', 'role:superadmin'])->group(function (
 Route::get('/api/holidays', [HRHolidayController::class, 'indexApi']);
 
 require __DIR__ . '/auth.php';
+
+// ===== PINNED ITEMS =====
+Route::middleware('auth')->group(function () {
+    Route::match(['get', 'post'], '/pinned-items/toggle', [PinnedItemController::class, 'toggle'])->name('pinned-items.toggle');
+});

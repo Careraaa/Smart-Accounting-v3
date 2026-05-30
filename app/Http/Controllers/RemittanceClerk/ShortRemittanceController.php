@@ -4,10 +4,12 @@ namespace App\Http\Controllers\RemittanceClerk;
 
 use App\Http\Controllers\Controller;
 use App\Models\DailyRemittance;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class ShortRemittanceController extends Controller
 {
+    use LogsUserActivity;
     public function index(Request $request)
     {
         $sortBy = $request->get('sort_by', 'remittance_date');
@@ -51,6 +53,8 @@ class ShortRemittanceController extends Controller
         $totaldriverShares = DailyRemittance::where('is_short_remittance', true)->where('status', 'approved')->sum('driver_share');
         $totalPaoShares = DailyRemittance::where('is_short_remittance', true)->where('status', 'approved')->sum('pao_share');
 
+        $this->logActivity('viewed', 'Short Remittances list', request()->url(), 'short_remittance');
+
         return view('remittance-clerk.short-remittances.index', compact(
             'pendingRemittances',
             'fullyPaidRemittances',
@@ -71,6 +75,9 @@ class ShortRemittanceController extends Controller
         }
 
         $shortRemittance->load('driver', 'pao', 'route', 'vehicle');
+
+        $this->logActivity('viewed', "Short Remittance #{$shortRemittance->id}", request()->url(), 'short_remittance', $shortRemittance->id);
+
         return view('remittance-clerk.short-remittances.show', compact('shortRemittance'));
     }
 
@@ -107,6 +114,8 @@ class ShortRemittanceController extends Controller
             'resolution_notes' => $validated['notes'],
             'resolved_at' => now(),
         ]);
+
+        $this->logActivity('updated', "Short Remittance #{$shortRemittance->id}", request()->url(), 'short_remittance', $shortRemittance->id);
 
         return redirect()->route('short-remittances.index')
             ->with('success', 'Short remittance resolution updated successfully.');

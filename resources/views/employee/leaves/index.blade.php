@@ -40,7 +40,7 @@
                     </span>
                 </div>
             </div>
-            <div>
+            <div class="flex items-center gap-2">
                 <a href="{{ route('employee.leaves.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-bold rounded-xl transition-all shadow-sm">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     Request New Leave

@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Payroll;
 use App\Models\CashAdvance;
 use App\Models\SalaryLoan;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class PayrollReceivablesController extends Controller
 {
+    use LogsUserActivity;
     public function index(Request $request)
     {
         $tab = $request->get('tab', 'cash_advances');
@@ -40,6 +42,8 @@ class PayrollReceivablesController extends Controller
         $approvedCashNotReleased = CashAdvance::where('status', 'approved')->sum('amount') ?? 0;
         $outstandingAmount = '₱' . number_format($approvedLoanRemaining + $approvedCashNotReleased, 2);
 
+        $this->logActivity('viewed', 'Payroll receivables', request()->url(), 'payroll_receivable');
+
         return view('hr.payroll.receivables.index', compact(
             'tab', 'allCashAdvances', 'allSalaryLoans',
             'caPendingCount', 'caApprovedCount', 'caReleasedTotal',
@@ -54,6 +58,7 @@ class PayrollReceivablesController extends Controller
     public function showCashAdvance(CashAdvance $cashAdvance)
     {
         $cashAdvance->load(['user', 'approver', 'deductedPayroll']);
+        $this->logActivity('viewed', "Cash advance #{$cashAdvance->id}", request()->url(), 'payroll_receivable', $cashAdvance->id);
         return view('hr.payroll.receivables.cash-advance-detail', compact('cashAdvance'));
     }
 
@@ -63,6 +68,7 @@ class PayrollReceivablesController extends Controller
     public function showSalaryLoan(SalaryLoan $salaryLoan)
     {
         $salaryLoan->load('user');
+        $this->logActivity('viewed', "Salary loan #{$salaryLoan->id}", request()->url(), 'payroll_receivable', $salaryLoan->id);
         return view('hr.payroll.receivables.salary-loan-detail', compact('salaryLoan'));
     }
 
@@ -86,6 +92,8 @@ class PayrollReceivablesController extends Controller
             'approved_by' => auth()->id(),
             'approved_at' => now(),
         ]);
+
+        $this->logActivity('approved', "Cash advance #{$cashAdvance->id}", request()->url(), 'payroll_receivable', $cashAdvance->id);
 
         return back()->with('success', 'Cash advance approved successfully');
     }
@@ -111,6 +119,8 @@ class PayrollReceivablesController extends Controller
             'approved_at' => now(),
         ]);
 
+        $this->logActivity('rejected', "Cash advance #{$cashAdvance->id}", request()->url(), 'payroll_receivable', $cashAdvance->id);
+
         return back()->with('success', 'Cash advance rejected successfully');
     }
 
@@ -135,6 +145,8 @@ class PayrollReceivablesController extends Controller
             'approved_at' => now(),
         ]);
 
+        $this->logActivity('approved', "Salary loan #{$salaryLoan->id}", request()->url(), 'payroll_receivable', $salaryLoan->id);
+
         return back()->with('success', 'Salary loan approved successfully');
     }
 
@@ -158,6 +170,8 @@ class PayrollReceivablesController extends Controller
             'approved_by' => auth()->id(),
             'approved_at' => now(),
         ]);
+
+        $this->logActivity('rejected', "Salary loan #{$salaryLoan->id}", request()->url(), 'payroll_receivable', $salaryLoan->id);
 
         return back()->with('success', 'Salary loan rejected successfully');
     }

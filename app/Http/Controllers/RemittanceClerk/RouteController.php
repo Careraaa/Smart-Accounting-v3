@@ -5,10 +5,12 @@ namespace App\Http\Controllers\RemittanceClerk;
 use App\Http\Controllers\Controller;
 use App\Models\Route;
 use App\Models\Vehicle;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class RouteController extends Controller
 {
+    use LogsUserActivity;
     public function index(Request $request)
     {
         $sortBy = $request->get('sort_by', 'plate_number');
@@ -33,6 +35,8 @@ class RouteController extends Controller
         $activeVehicles = Vehicle::where('status', 'active')->count();
         $underMaintenanceVehicles = Vehicle::where('status', 'under_maintenance')->count();
         
+        $this->logActivity('viewed', 'Routes list', request()->url(), 'route');
+
         return view('remittance-clerk.routes.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder', 'totalVehicles', 'activeVehicles', 'underMaintenanceVehicles'));
     }
 
@@ -52,13 +56,17 @@ class RouteController extends Controller
         // Auto-generate route name from origin and destination
         $validated['route_name'] = $validated['origin'] . ' - ' . $validated['destination'];
 
-        Route::create($validated);
+        $route = Route::create($validated);
+
+        $this->logActivity('created', "Route: {$route->route_name}", request()->url(), 'route', $route->id);
 
         return redirect()->route('routes.index')->with('success', 'Route created successfully.');
     }
 
     public function show(Route $route)
     {
+        $this->logActivity('viewed', "Route: {$route->route_name}", request()->url(), 'route', $route->id);
+
         return view('remittance-clerk.routes.show', compact('route'));
     }
 
@@ -80,6 +88,8 @@ class RouteController extends Controller
 
         $route->update($validated);
 
+        $this->logActivity('updated', "Route: {$route->route_name}", request()->url(), 'route', $route->id);
+
         return redirect()->route('routes.index')->with('success', 'Route updated successfully.');
     }
 
@@ -89,6 +99,8 @@ class RouteController extends Controller
         if ($route->vehicles()->count() > 0) {
             return redirect()->route('routes.index')->with('warning', 'Cannot delete route with assigned vehicles.');
         }
+
+        $this->logActivity('deleted', "Route: {$route->route_name}", request()->url(), 'route', $route->id);
 
         $route->delete();
         return redirect()->route('routes.index')->with('success', 'Route deleted successfully.');

@@ -5,12 +5,16 @@ namespace App\Http\Controllers\Accountant;
 use App\Http\Controllers\Controller;
 use App\Models\SalaryLoan;
 use App\Notifications\SalaryLoanNotification;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class SalaryLoanController extends Controller
 {
+    use LogsUserActivity;
     public function approve(SalaryLoan $salaryLoan)
     {
+        $this->logActivity('approved', "Salary Loan #{$salaryLoan->id} for {$salaryLoan->user->name}", request()->url(), 'salary_loan', $salaryLoan->id);
+
         if ($salaryLoan->status !== 'pending') {
             return redirect()->back()
                 ->withErrors(['error' => 'This request has already been processed.']);
@@ -32,6 +36,8 @@ class SalaryLoanController extends Controller
 
     public function reject(Request $request, SalaryLoan $salaryLoan)
     {
+        $this->logActivity('rejected', "Salary Loan #{$salaryLoan->id} for {$salaryLoan->user->name}", request()->url(), 'salary_loan', $salaryLoan->id);
+
         $request->validate([
             'rejection_reason' => 'required|string|max:500',
         ]);

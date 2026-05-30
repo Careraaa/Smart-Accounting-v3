@@ -7,11 +7,13 @@ use App\Models\Vehicle;
 use App\Models\Route;
 use App\Models\Driver;
 use App\Models\PAO;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class VehicleController extends Controller
 {
+    use LogsUserActivity;
     public function index(Request $request)
     {
         $sortBy = $request->get('sort_by', 'plate_number');
@@ -36,6 +38,8 @@ class VehicleController extends Controller
         $activeVehicles = Vehicle::where('status', 'active')->count();
         $underMaintenanceVehicles = Vehicle::where('status', 'under_maintenance')->count();
         
+        $this->logActivity('viewed', 'Vehicles list', request()->url(), 'vehicle');
+
         return view('remittance-clerk.vehicles.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder', 'totalVehicles', 'activeVehicles', 'underMaintenanceVehicles'));
     }
 
@@ -76,13 +80,17 @@ class VehicleController extends Controller
             'status' => $validated['status'],
         ];
 
-        Vehicle::create($vehicleData);
+        $vehicle = Vehicle::create($vehicleData);
+
+        $this->logActivity('created', "Vehicle: {$vehicle->plate_number}", request()->url(), 'vehicle', $vehicle->id);
 
         return redirect()->route('vehicles.index')->with('success', 'Vehicle created successfully.');
     }
 
     public function show(Vehicle $vehicle)
     {
+        $this->logActivity('viewed', "Vehicle: {$vehicle->plate_number}", request()->url(), 'vehicle', $vehicle->id);
+
         return view('remittance-clerk.vehicles.show', compact('vehicle'));
     }
 
@@ -127,11 +135,15 @@ class VehicleController extends Controller
 
         $vehicle->update($vehicleData);
 
+        $this->logActivity('updated', "Vehicle: {$vehicle->plate_number}", request()->url(), 'vehicle', $vehicle->id);
+
         return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
     }
 
     public function destroy(Vehicle $vehicle)
     {
+        $this->logActivity('deleted', "Vehicle: {$vehicle->plate_number}", request()->url(), 'vehicle', $vehicle->id);
+
         $vehicle->delete();
         return redirect()->route('vehicles.index')->with('success', 'Vehicle deleted successfully.');
     }

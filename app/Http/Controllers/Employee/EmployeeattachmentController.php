@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Employee;
 
+use App\Traits\LogsUserActivity;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HR\EmployeeAttachmentController as HRAttachmentController;
 use App\Models\EmployeeAttachment;
@@ -9,9 +10,12 @@ use Illuminate\Http\Request;
 
 class AttachmentController extends Controller
 {
+    use LogsUserActivity;
     // ── Employee: view their own document statuses ────────────────────
     public function index()
     {
+        $this->logActivity('viewed', 'attachment');
+
         $employee        = auth()->user();
         $attachments     = EmployeeAttachment::where('user_id', $employee->id)
             ->orderBy('attachment_key')
@@ -46,6 +50,8 @@ class AttachmentController extends Controller
         }
 
         HRAttachmentController::saveAttachment($request->file('file'), $employee, $key, 'employee');
+
+        $this->logActivity('submitted', 'attachment');
 
         return back()->with('success', 'Document submitted. HR will review it shortly.');
     }

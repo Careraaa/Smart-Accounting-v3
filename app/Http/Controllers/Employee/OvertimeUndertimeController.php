@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Models\OvertimeUndertime;
 use App\Notifications\OvertimeNotification;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class OvertimeUndertimeController extends Controller
 {
+    use LogsUserActivity;
     /**
      * Display a listing of the user's overtime/undertime requests.
      */
@@ -45,6 +47,8 @@ class OvertimeUndertimeController extends Controller
         
         $totalOvertimeHours = OvertimeUndertime::where('user_id', $userId)->where('type', 'overtime')->sum('hours');
         $totalUndertimeHours = OvertimeUndertime::where('user_id', $userId)->where('type', 'undertime')->sum('hours');
+
+        $this->logActivity('viewed', 'Overtime/Undertime', request()->url());
 
         return view('employee.overtime-undertime.index', compact(
             'requests',
@@ -113,6 +117,8 @@ class OvertimeUndertimeController extends Controller
         OvertimeNotification::submitted($overtimeRequest);
         OvertimeNotification::notifyManagersForApproval($overtimeRequest);
 
+        $this->logActivity('submitted', 'Overtime/Undertime ' . $overtimeRequest->id, request()->url(), 'overtime_undertime', $overtimeRequest->id);
+
         return redirect()->route('employee.overtime-undertime.index')->with('success', 'Overtime/Undertime request submitted successfully. Awaiting approval.');
     }
 
@@ -127,6 +133,8 @@ class OvertimeUndertimeController extends Controller
         }
 
         $overtimeUndertime->load('employee');
+
+        $this->logActivity('viewed', 'Overtime/Undertime ' . $overtimeUndertime->id, request()->url(), 'overtime_undertime', $overtimeUndertime->id);
 
         return view('employee.overtime-undertime.show', compact('overtimeUndertime'));
     }
@@ -192,6 +200,8 @@ class OvertimeUndertimeController extends Controller
         // Send notification about the update
         OvertimeNotification::updated($overtimeUndertime);
 
+        $this->logActivity('updated', 'Overtime/Undertime ' . $overtimeUndertime->id, request()->url(), 'overtime_undertime', $overtimeUndertime->id);
+
         return redirect()->route('employee.overtime-undertime.show', $overtimeUndertime->id)->with('success', 'Overtime/Undertime request updated successfully.');
     }
 
@@ -211,6 +221,7 @@ class OvertimeUndertimeController extends Controller
 
         $overtimeUndertime->load('employee');
         OvertimeNotification::deleted($overtimeUndertime);
+        $this->logActivity('deleted', 'Overtime/Undertime ' . $overtimeUndertime->id, request()->url(), 'overtime_undertime', $overtimeUndertime->id);
         $overtimeUndertime->delete();
 
         return redirect()->route('employee.overtime-undertime.index')->with('success', 'Overtime/Undertime request deleted successfully.');

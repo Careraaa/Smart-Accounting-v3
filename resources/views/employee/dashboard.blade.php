@@ -43,6 +43,13 @@ $user = auth()->user();
 
 <div class="max-w-full">
 
+    <div class="flex items-center justify-between mb-5">
+        <div>
+            <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase">Employee Portal</p>
+            <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">Employee Dashboard</h1>
+        </div>
+        </div>
+
     <div class="flex flex-col lg:flex-row gap-5 items-start">
 
         {{-- LEFT COLUMN --}}

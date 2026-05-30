@@ -14,11 +14,13 @@ use App\Models\User;
 use App\Notifications\AttendanceNotification;
 use App\Notifications\OvertimeNotification;
 use App\Services\AttendanceService;
+use App\Traits\LogsUserActivity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    use LogsUserActivity;
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'records');
@@ -66,6 +68,8 @@ class AttendanceController extends Controller
         $pendingCount  = OvertimeUndertime::where('status', 'pending')->count();
         $approvedCount = OvertimeUndertime::where('status', 'approved')->count();
         $rejectedCount = OvertimeUndertime::where('status', 'rejected')->count();
+
+        $this->logActivity('viewed', 'Attendance dashboard', request()->url(), 'attendance');
 
         return view('hr.attendance.combined', compact(
             'tab', 'employees', 'allEmployees', 'departments', 'todayAttendance', 'recentLogs',
@@ -615,6 +619,8 @@ class AttendanceController extends Controller
             }
         }
         // ─────────────────────────────────────────────────────────────────────
+
+        $this->logActivity('created', "Attendance record for {$attendance->date->format('Y-m-d')}", request()->url(), 'attendance', $attendance->id);
 
         $successMsg = 'Attendance record saved successfully.';
         if ($otutMessage) {

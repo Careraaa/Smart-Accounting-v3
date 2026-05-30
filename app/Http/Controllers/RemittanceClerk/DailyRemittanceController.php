@@ -9,10 +9,12 @@ use App\Models\PAO;
 use App\Models\Route;
 use App\Models\Vehicle;
 use App\Notifications\RemittanceNotification;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class DailyRemittanceController extends Controller
 {
+    use LogsUserActivity;
     public function index(Request $request)
     {
         $sortBy = $request->get('sort_by', 'remittance_date');
@@ -73,6 +75,8 @@ class DailyRemittanceController extends Controller
         $pendingCount = DailyRemittance::where('status', 'pending')->count();
         $rejectedRemittances = DailyRemittance::where('status', 'rejected')->count();
         
+        $this->logActivity('viewed', 'Daily Remittances list', request()->url(), 'daily_remittance');
+
         return view('remittance-clerk.remittances.index', compact('pendingRemittances', 'approvedRemittances', 'pendingData', 'approvedData', 'sortBy', 'sortOrder', 'totalRemittances', 'approvedCount', 'pendingCount', 'rejectedRemittances', 'tab'));
     }
 
@@ -128,12 +132,17 @@ class DailyRemittanceController extends Controller
 
         RemittanceNotification::remittanceCreated($remittance);
 
+        $this->logActivity('created', "Daily Remittance #{$remittance->id} - {$remittance->remittance_date?->format('Y-m-d')}", request()->url(), 'daily_remittance', $remittance->id);
+
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance created successfully.');
     }
 
     public function show(DailyRemittance $remittance)
     {
         $remittance->load('driver', 'pao', 'route', 'vehicle');
+
+        $this->logActivity('viewed', "Daily Remittance #{$remittance->id}", request()->url(), 'daily_remittance', $remittance->id);
+
         return view('remittance-clerk.remittances.show', compact('remittance'));
     }
 
@@ -192,6 +201,8 @@ class DailyRemittanceController extends Controller
 
         RemittanceNotification::remittanceUpdated($remittance);
 
+        $this->logActivity('updated', "Daily Remittance #{$remittance->id}", request()->url(), 'daily_remittance', $remittance->id);
+
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance updated successfully.');
     }
 
@@ -200,6 +211,8 @@ class DailyRemittanceController extends Controller
         $remittance->load('driver', 'pao', 'vehicle');
         
         RemittanceNotification::remittanceDeleted($remittance);
+
+        $this->logActivity('deleted', "Daily Remittance #{$remittance->id}", request()->url(), 'daily_remittance', $remittance->id);
         
         $remittance->delete();
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance deleted successfully.');

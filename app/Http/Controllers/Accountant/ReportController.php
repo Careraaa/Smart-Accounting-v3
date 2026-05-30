@@ -5,12 +5,16 @@ namespace App\Http\Controllers\Accountant;
 use App\Http\Controllers\Controller;
 use App\Models\DailyRemittance;
 use App\Models\Payroll;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
+    use LogsUserActivity;
     public function remittanceReports(Request $request)
     {
+        $this->logActivity('viewed', 'Remittance Report', request()->url());
+
         $month = $request->get('month', now()->month);
         $year  = $request->get('year', now()->year);
 
@@ -26,30 +30,40 @@ class ReportController extends Controller
 
     public function payslips()
     {
+        $this->logActivity('viewed', 'Payslips Report', request()->url());
+
         $payrolls = Payroll::with('employee')->whereIn('status', ['approved', 'released', 'paid'])->get();
         return view('accountant.reports.payslips', compact('payrolls'));
     }
 
     public function payrollSummary()
     {
+        $this->logActivity('viewed', 'Payroll Summary Report', request()->url());
+
         $payrolls = Payroll::with('employee')->get();
         return view('accountant.reports.payroll-summary', compact('payrolls'));
     }
 
     public function deductionSummary()
     {
+        $this->logActivity('viewed', 'Deduction Summary Report', request()->url());
+
         $payrolls = Payroll::with('deductions')->get();
         return view('accountant.reports.deduction-summary', compact('payrolls'));
     }
 
     public function governmentContributionSummary()
     {
+        $this->logActivity('viewed', 'Government Contribution Summary Report', request()->url());
+
         $payrolls = Payroll::with('deductions')->get();
         return view('accountant.reports.government-contribution-summary', compact('payrolls'));
     }
 
     public function payrollReports(Request $request)
     {
+        $this->logActivity('viewed', 'Payroll Report', request()->url());
+
         $period = $request->get('period', 'monthly');
         $week   = $request->get('week',  now()->week);
         $month  = $request->get('month', now()->month);
@@ -90,6 +104,8 @@ class ReportController extends Controller
  
     public function printPayrollReport(Request $request)
     {
+        $this->logActivity('viewed', 'Payroll Report (Print)', request()->url());
+
         $period = $request->get('period', 'monthly');
         $week   = $request->get('week',  now()->week);
         $month  = $request->get('month', now()->month);
@@ -129,6 +145,8 @@ class ReportController extends Controller
 
     public function printRemittanceReport(Request $request)
     {
+        $this->logActivity('viewed', 'Remittance Report (Print)', request()->url());
+
         $month = $request->get('month', now()->month);
         $year  = $request->get('year', now()->year);
 

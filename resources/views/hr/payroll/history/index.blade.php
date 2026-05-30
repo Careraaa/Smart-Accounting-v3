@@ -38,7 +38,7 @@
 
     {{-- Header --}}
     <div class="fade-up flex items-start justify-between gap-4 flex-wrap">
-        <div>
+        <div class="flex items-center gap-2">
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Payroll History</h1>
             <p class="text-sm text-gray-400 mt-0.5">View all finalized and released payroll batches</p>
         </div>

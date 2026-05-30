@@ -8,15 +8,19 @@ use App\Models\Employee;
 use App\Models\SalaryLoan;
 use App\Models\DailyRemittance;
 use App\Models\CashAdvance;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    use LogsUserActivity;
     // Statuses that represent finalized / actionable payrolls for the accountant view.
     private const ACTIVE_STATUSES = ['submitted', 'approved', 'released', 'paid'];
 
     public function index()
     {
+        $this->logActivity('viewed', 'Accountant Dashboard', request()->url());
+
         // Exclude superadmin and qr_admin from employee counts
         $totalEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->count();
 

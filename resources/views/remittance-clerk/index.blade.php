@@ -34,6 +34,11 @@ $mctMax = collect($monthlyCollectionTrend)->max('total_collection') ?: 1;
 $mctActive = count($monthlyCollectionTrend) - 1;
 @endphp
 
+<div class="flex items-center gap-2 mb-4">
+    <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">Remittance Clerk Dashboard</h1>
+
+</div>
+
 <div class="flex flex-col lg:flex-row gap-5 items-start">
 
     {{-- LEFT COLUMN --}}
@@ -79,8 +84,8 @@ $mctActive = count($monthlyCollectionTrend) - 1;
             </div>
 
             {{-- Daily Remittance Trend --}}
-            <div class="flex-1 min-w-0 fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+            <div class="flex-1 min-w-0 fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+            <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-2">
                     <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
@@ -101,16 +106,16 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                 ])->sortBy('date')->values();
             }
             $chartMax = $dailyData->max('net') ?: 1;
-            $chartH = 160;
+            $chartH = 200;
             $chartW = 600;
-            $padL = 0; $padR = 0; $padT = 8; $padB = 24;
+            $padL = 0; $padR = 0; $padT = 8; $padB = 26;
             $plotW = $chartW - $padL - $padR;
             $plotH = $chartH - $padT - $padB;
             $cnt = $dailyData->count();
             @endphp
             @if($dailyData->isNotEmpty())
-            <div class="p-4">
-                <svg viewBox="0 0 {{ $chartW }} {{ $chartH }}" class="w-full h-auto" style="max-height:180px">
+            <div class="flex-1 p-4 flex flex-col min-h-0">
+                <svg viewBox="0 0 {{ $chartW }} {{ $chartH }}" class="flex-1 w-full min-h-0" preserveAspectRatio="xMidYMid meet">
                     @php
                     $step = $cnt > 1 ? $plotW / ($cnt - 1) : 0;
                     $points = [];
@@ -144,7 +149,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                         </linearGradient>
                     </defs>
                 </svg>
-                <div class="flex items-center justify-between mt-2 text-[10px] text-gray-400">
+                <div class="flex items-center justify-between mt-auto pt-2 text-[10px] text-gray-400 shrink-0">
                     <span class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
                         Net remittance
@@ -155,20 +160,20 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                 </div>
             </div>
             @else
-            <div class="text-center py-10 text-xs text-gray-400">No remittance data yet.</div>
+            <div class="flex-1 flex items-center justify-center text-xs text-gray-400">No remittance data yet.</div>
             @endif
         </div>
         </div>
 
         {{-- Stat cards --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300" style="animation-delay:0.05s">
+        <div class="grid grid-cols-2 gap-3">
+            <div class="group rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300 no-underline" style="animation-delay:0.05s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Collections</p>
                         <p class="text-lg font-bold text-emerald-600 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.15s">₱{{ number_format($totalCollections, 0) }}</p>
                     </div>
-                    <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center transition-all duration-300 group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                     </div>
                 </div>
@@ -179,37 +184,37 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                     </span>
                 </div>
             </div>
-            <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300" style="animation-delay:0.1s">
+            <div class="group rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300 no-underline" style="animation-delay:0.1s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Expenses</p>
                         <p class="text-lg font-bold text-red-500 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.2s">₱{{ number_format($totalExpenses, 0) }}</p>
                     </div>
-                    <div class="w-9 h-9 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-lg bg-red-50 text-red-500 flex items-center justify-center transition-all duration-300 group-hover:bg-red-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
                     </div>
                 </div>
                 <div class="mt-2 text-[9px] text-gray-400">Avg ₱{{ number_format($averageExpenses, 0) }} / record</div>
             </div>
-            <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300" style="animation-delay:0.15s">
+            <div class="group rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 no-underline" style="animation-delay:0.15s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
                         <p class="text-lg font-bold text-blue-600 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.25s">₱{{ number_format($totalNetRemittance, 0) }}</p>
                     </div>
-                    <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     </div>
                 </div>
                 <div class="mt-2 text-[9px] text-gray-400">{{ $margin }}% margin</div>
             </div>
-            <div class="rc-bounce bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300" style="animation-delay:0.2s">
+            <div class="group rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 no-underline" style="animation-delay:0.2s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
                         <p class="text-lg font-bold text-amber-600 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.3s">{{ $pendingRemittances }}</p>
                     </div>
-                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center transition-all duration-300 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                 </div>

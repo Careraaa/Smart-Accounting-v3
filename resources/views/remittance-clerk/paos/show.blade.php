@@ -18,6 +18,7 @@
             <div>
                 <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">PAO / Conductor profile</p>
                 <h1 class="text-xl font-bold text-gray-900">{{ $pao->name }}</h1>
+
             </div>
         </div>
         <div class="flex items-center gap-2">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\HR;
 
+use App\Traits\LogsUserActivity;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Bonus;
@@ -16,8 +17,11 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
+    use LogsUserActivity;
     public function index()
     {
+        $this->logActivity('viewed', 'dashboard');
+
         // ── Employee Stats ──
         $totalEmployees = User::where('role', 'employee')->where('status', 'active')->count();
         $newHiresThisMonth = User::where('role', 'employee')->where('status', 'active')

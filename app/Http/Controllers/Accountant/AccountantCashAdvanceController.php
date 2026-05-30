@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Accountant;
 
 use App\Http\Controllers\Controller;
 use App\Models\CashAdvance;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class AccountantCashAdvanceController extends Controller
 {
+    use LogsUserActivity;
     /**
      * Show cash advance details page
      */
     public function show(CashAdvance $cashAdvance)
     {
+        $this->logActivity('viewed', "Cash Advance #{$cashAdvance->id}", request()->url(), 'cash_advance', $cashAdvance->id);
+
         $cashAdvance->load(['user', 'approver', 'deductedPayroll']);
         return view('hr.payroll.receivables.cash-advance-detail', compact('cashAdvance'));
     }
@@ -22,6 +26,8 @@ class AccountantCashAdvanceController extends Controller
      */
     public function release(CashAdvance $cashAdvance, Request $request)
     {
+        $this->logActivity('updated', "Cash Advance #{$cashAdvance->id} released", request()->url(), 'cash_advance', $cashAdvance->id);
+
         // Only accountant and superadmin can release
         if (!in_array(auth()->user()->role, ['accountant', 'superadmin'])) {
             abort(403, 'Unauthorized');
@@ -44,6 +50,8 @@ class AccountantCashAdvanceController extends Controller
      */
     public function reject(CashAdvance $cashAdvance, Request $request)
     {
+        $this->logActivity('rejected', "Cash Advance #{$cashAdvance->id}", request()->url(), 'cash_advance', $cashAdvance->id);
+
         // Only accountant and superadmin can reject
         if (!in_array(auth()->user()->role, ['accountant', 'superadmin'])) {
             abort(403, 'Unauthorized');

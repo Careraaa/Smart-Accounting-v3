@@ -7,11 +7,14 @@ use App\Models\Payroll;
 use App\Models\PayrollBatch;
 use App\Notifications\PayrollNotification;
 use App\Services\LeaveService;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class PayrollApprovalController extends Controller
 {
+    use LogsUserActivity;
+
     protected $leaveService;
 
     public function __construct(LeaveService $leaveService)
@@ -24,6 +27,8 @@ class PayrollApprovalController extends Controller
      ══════════════════════════════════════════════════════════════ */
     public function index()
     {
+        $this->logActivity('viewed', 'Payroll Approval List', request()->url());
+
         $allBatches = PayrollBatch::with(['payrolls'])
             ->whereIn('status', ['submitted', 'approved', 'rejected'])
             ->orderByDesc('period_start')
@@ -65,6 +70,8 @@ class PayrollApprovalController extends Controller
      ══════════════════════════════════════════════════════════════ */
     public function showBatch(PayrollBatch $batch)
     {
+        $this->logActivity('viewed', "Payroll Batch #{$batch->id}", request()->url(), 'payroll_batch', $batch->id);
+
         $batch->load(['payrolls.user', 'payrolls.deductions', 'payrolls.allowances', 'generatedBy', 'finalizedBy']);
 
         $payrolls       = $batch->payrolls;
@@ -86,6 +93,8 @@ class PayrollApprovalController extends Controller
      ══════════════════════════════════════════════════════════════ */
     public function show($id)
     {
+        $this->logActivity('viewed', "Payroll #{$id}", request()->url(), 'payroll', (int) $id);
+
         $payroll = Payroll::with(['user', 'deductions', 'allowances', 'bonuses', 'batch'])->findOrFail($id);
         $overtimeUndertimeBreakdown = $payroll->getOvertimeUndertimeBreakdown();
         return view('accountant.payroll-approval.show', compact('payroll', 'overtimeUndertimeBreakdown'));
@@ -97,6 +106,7 @@ class PayrollApprovalController extends Controller
     public function approveBatch(Request $request)
     {
         $batch = PayrollBatch::with('payrolls')->findOrFail($request->input('batch_id'));
+        $this->logActivity('approved', "Payroll Batch #{$batch->id}", request()->url(), 'payroll_batch', $batch->id);
 
         if ($batch->status !== 'submitted') {
             return redirect()->route('payroll-approval.batch', $batch)
@@ -142,6 +152,7 @@ class PayrollApprovalController extends Controller
         ]);
 
         $batch = PayrollBatch::with('payrolls')->findOrFail($validated['batch_id']);
+        $this->logActivity('rejected', "Payroll Batch #{$batch->id}", request()->url(), 'payroll_batch', $batch->id);
 
         if ($batch->status !== 'submitted') {
             return redirect()->route('payroll-approval.batch', $batch)
@@ -173,6 +184,8 @@ class PayrollApprovalController extends Controller
      ══════════════════════════════════════════════════════════════ */
     public function approve(Payroll $payroll)
     {
+        $this->logActivity('approved', "Payroll for {$payroll->user->name}", request()->url(), 'payroll', $payroll->id);
+
         if (!in_array($payroll->status, ['pending', 'submitted'])) {
             return redirect()->back()->with('error', 'Payroll already processed.');
         }
@@ -188,6 +201,8 @@ class PayrollApprovalController extends Controller
 
     public function reject(Payroll $payroll)
     {
+        $this->logActivity('rejected', "Payroll for {$payroll->user->name}", request()->url(), 'payroll', $payroll->id);
+
         if (!in_array($payroll->status, ['pending', 'submitted'])) {
             return redirect()->back()->with('error', 'Payroll already processed.');
         }

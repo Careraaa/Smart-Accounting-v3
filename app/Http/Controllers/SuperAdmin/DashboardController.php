@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\SuperAdmin;
 
+use App\Traits\LogsUserActivity;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\Attendance;
@@ -15,8 +16,11 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    use LogsUserActivity;
     public function index()
     {
+        $this->logActivity('viewed', 'dashboard');
+
         // ============ EMPLOYEE STATISTICS ============
         $totalEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->count();
         $activeEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->where('status', 'active')->count();

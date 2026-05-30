@@ -7,10 +7,12 @@ use App\Models\Leave;
 use App\Models\LeaveType;
 use App\Models\EmployeeLeaveBalance;
 use App\Notifications\LeaveNotification;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class LeaveController extends Controller
 {
+    use LogsUserActivity;
     /**
      * Display a listing of the user's leave requests.
      */
@@ -41,6 +43,8 @@ class LeaveController extends Controller
             ->where('year', now()->year)
             ->with('leaveType')
             ->get();
+
+        $this->logActivity('viewed', 'Leave', request()->url());
 
         return view('employee.leaves.index', compact(
             'leaves',
@@ -124,6 +128,8 @@ class LeaveController extends Controller
         LeaveNotification::leaveSubmitted($leave);
         LeaveNotification::notifyManagersOfNewRequest($leave);
 
+        $this->logActivity('submitted', 'Leave ' . $leave->id, request()->url(), 'leave', $leave->id);
+
         return redirect()->route('employee.leaves.index')->with('success', 'Leave request submitted successfully. Awaiting approval.');
     }
 
@@ -138,6 +144,8 @@ class LeaveController extends Controller
         }
 
         $leave->load('employee', 'approvedBy', 'leaveType');
+
+        $this->logActivity('viewed', 'Leave ' . $leave->id, request()->url(), 'leave', $leave->id);
 
         return view('employee.leaves.show', compact('leave'));
     }
@@ -210,6 +218,8 @@ class LeaveController extends Controller
         // Send notification about the update
         LeaveNotification::leaveUpdated($leave);
 
+        $this->logActivity('updated', 'Leave ' . $leave->id, request()->url(), 'leave', $leave->id);
+
         return redirect()->route('employee.leaves.show', $leave->id)->with('success', 'Leave request updated successfully.');
     }
 
@@ -231,6 +241,8 @@ class LeaveController extends Controller
 
         // Send notification about the cancellation
         LeaveNotification::leaveDeleted($leave);
+
+        $this->logActivity('deleted', 'Leave ' . $leave->id, request()->url(), 'leave', $leave->id);
 
         $leave->delete();
 

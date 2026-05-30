@@ -8,11 +8,13 @@ use App\Models\ThirteenthMonthPay;
 use App\Models\User;
 use App\Services\BonusFormulaEngine;
 use App\Services\ThirteenthMonthPayService;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use InvalidArgumentException;
 
 class BonusController extends Controller
 {
+    use LogsUserActivity;
     public function __construct(
         protected BonusFormulaEngine $formulaEngine,
         protected ThirteenthMonthPayService $thirteenthMonthPayService
@@ -24,6 +26,8 @@ class BonusController extends Controller
             ->orderByDesc('is_mandatory')
             ->orderBy('name')
             ->get();
+
+        $this->logActivity('viewed', 'Bonuses list', request()->url(), 'bonus');
 
         return view('hr.bonuses.index', compact('allBonuses'));
     }
@@ -47,6 +51,8 @@ class BonusController extends Controller
         ]));
 
         $this->syncEligibleEmployees($bonus, $request->input('eligible_employees', []));
+
+        $this->logActivity('created', "Bonus: {$bonus->name}", request()->url(), 'bonus', $bonus->id);
 
         return redirect()
             ->route('bonuses.index')
@@ -107,6 +113,8 @@ class BonusController extends Controller
         $bonus->update($validated);
         $this->syncEligibleEmployees($bonus, $request->input('eligible_employees', []));
 
+        $this->logActivity('updated', "Bonus: {$bonus->name}", request()->url(), 'bonus', $bonus->id);
+
         return redirect()
             ->route('bonuses.index')
             ->with('success', 'Bonus updated successfully.');
@@ -124,6 +132,7 @@ class BonusController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        $this->logActivity('deleted', "Bonus: {$bonus->name}", request()->url(), 'bonus', $bonus->id);
         $bonus->delete();
 
         return redirect()

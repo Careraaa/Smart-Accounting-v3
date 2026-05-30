@@ -5,15 +5,19 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Models\CashAdvance;
 use App\Notifications\CashAdvanceNotification;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class CashAdvanceController extends Controller
 {
+    use LogsUserActivity;
     public function index()
     {
         $advances = CashAdvance::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        $this->logActivity('viewed', 'Cash Advance', request()->url());
 
         return view('employee.cash-advances.index', compact('advances'));
     }
@@ -48,6 +52,8 @@ class CashAdvanceController extends Controller
         ]);
 
         CashAdvanceNotification::submitted($cashAdvance);
+
+        $this->logActivity('submitted', 'Cash Advance ' . $cashAdvance->id, request()->url(), 'cash_advance', $cashAdvance->id);
 
         return redirect()->route('employee.cash-advances.index')
             ->with('success', 'Cash advance request submitted successfully.');

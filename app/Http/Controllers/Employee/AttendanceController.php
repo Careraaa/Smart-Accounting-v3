@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\OvertimeUndertime;
+use App\Traits\LogsUserActivity;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
+    use LogsUserActivity;
     public function index(Request $request)
     {
         $userId = auth()->id();
@@ -46,6 +48,8 @@ class AttendanceController extends Controller
         $allOtut     = $otutRecords->flatten();
         $otHours     = $allOtut->where('type', 'overtime')->sum('hours');
         $utHours     = $allOtut->where('type', 'undertime')->sum('hours');
+
+        $this->logActivity('viewed', 'Attendance', request()->url());
 
         return view('employee.attendance.index', compact(
             'month',

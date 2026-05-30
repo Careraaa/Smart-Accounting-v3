@@ -33,6 +33,7 @@
     <div class="rc-fade-up flex items-start justify-between gap-4 mb-5 flex-wrap">
         <div>
             <h1 class="text-xl font-extrabold text-gray-900 tracking-tight m-0">Remittance Report</h1>
+
             <p class="text-xs text-gray-400 max-w-[520px] leading-relaxed m-0 mt-0.5">Filter weekly, monthly, or yearly totals and print a summary for the selected period.</p>
             <span class="inline-block text-[0.65rem] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md mt-2">{{ $periodLabel }}</span>
         </div>

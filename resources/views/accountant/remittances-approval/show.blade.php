@@ -29,6 +29,14 @@ $statusInfo = match($remittance->status) {
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-5">
 
+{{-- Page title --}}
+<div class="flex items-center justify-between">
+    <div>
+        <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase">Accountant Portal</p>
+        <h1 class="text-lg font-extrabold tracking-tight text-gray-900">Remittance Approval</h1>
+    </div>
+</div>
+
 {{-- Back --}}
 <div>
         <a href="{{ route('remittance-approval.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">

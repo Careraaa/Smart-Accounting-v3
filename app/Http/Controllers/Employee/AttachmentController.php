@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\HR\EmployeeAttachmentController as HRAttachmentController;
 use App\Models\EmployeeAttachment;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class AttachmentController extends Controller
 {
+    use LogsUserActivity;
     /**
      * Employee: view their own document statuses.
      */
@@ -22,6 +24,8 @@ class AttachmentController extends Controller
             ->groupBy('attachment_key');
 
         $attachmentTypes = EmployeeAttachment::attachmentTypes();
+
+        $this->logActivity('viewed', 'Attachment', request()->url());
 
         return view('employee.attachments.index', compact('employee', 'attachments', 'attachmentTypes'));
     }
@@ -66,6 +70,8 @@ class AttachmentController extends Controller
         $message = $isHrRole
             ? 'Document uploaded and approved.'
             : 'Document submitted for HR review.';
+
+        $this->logActivity('submitted', 'Attachment ' . $key, request()->url(), 'attachment');
 
         return back()->with('success', $message);
     }

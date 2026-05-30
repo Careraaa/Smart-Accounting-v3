@@ -51,6 +51,14 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
 
 <div class="max-w-4xl mx-auto space-y-5">
 
+    {{-- Page title --}}
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase">Accountant Portal</p>
+            <h1 class="text-lg font-extrabold tracking-tight text-gray-900">Payroll Approval</h1>
+        </div>
+        </div>
+
     {{-- Back link --}}
     <button type="button" onclick="history.back()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all hover:bg-gray-50 active:scale-[0.97] mb-2 cursor-pointer">
         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>

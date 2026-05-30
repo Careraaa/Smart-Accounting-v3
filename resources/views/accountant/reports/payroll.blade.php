@@ -23,7 +23,7 @@ $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? da
 
 {{-- Header --}}
     <div class="flex items-start justify-between mb-6 flex-wrap gap-4 fade-up">
-        <div>
+        <div class="flex items-center gap-2">
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Payroll Reports</h1>
             <p class="text-sm text-gray-500 mt-0.5">Approved payroll batches — gross, deductions, and net pay across periods.</p>
             <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[0.55rem] font-semibold mt-2">{{ count($batchData) }} {{ Str::plural('batch', count($batchData)) }} · {{ $periodLabel }}</span>

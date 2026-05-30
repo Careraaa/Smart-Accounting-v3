@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\SuperAdmin;
 
+use App\Traits\LogsUserActivity;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -10,8 +11,11 @@ use Illuminate\Support\Facades\Storage;
 
 class SystemConfigurationController extends Controller
 {
+    use LogsUserActivity;
     public function index()
     {
+        $this->logActivity('viewed', 'configuration');
+
         // Check custom maintenance mode
         $maintenanceFile = storage_path('maintenance.json');
         $maintenanceModeActive = file_exists($maintenanceFile);
@@ -46,6 +50,8 @@ class SystemConfigurationController extends Controller
         // You can extend this to use a settings table if needed
         $this->saveSettings($validated);
 
+        $this->logActivity('updated', 'configuration');
+
         return redirect()->route('configuration.index')->with('success', 'General settings updated successfully!');
     }
 
@@ -61,6 +67,8 @@ class SystemConfigurationController extends Controller
 
         $this->saveSettings($validated);
 
+        $this->logActivity('updated', 'configuration');
+
         return redirect()->route('configuration.index')->with('success', 'Backup settings updated successfully!');
     }
 
@@ -71,6 +79,7 @@ class SystemConfigurationController extends Controller
     {
         try {
             Artisan::call('backup:run');
+            $this->logActivity('updated', 'configuration');
             return redirect()->route('configuration.index')->with('success', 'Backup created successfully!');
         } catch (\Exception $e) {
             return redirect()->route('configuration.index')->with('error', 'Backup failed: ' . $e->getMessage());
@@ -210,6 +219,7 @@ class SystemConfigurationController extends Controller
             // Restore the database using the backup:restore command
             Artisan::call('backup:restore', ['--source' => $dumpFile]);
             
+            $this->logActivity('updated', 'configuration');
             return redirect()->route('configuration.index')->with('success', 'Database restored successfully!');
         } catch (\Exception $e) {
             return redirect()->route('configuration.restore-form')->with('error', 'Restore failed: ' . $e->getMessage());
@@ -239,6 +249,7 @@ class SystemConfigurationController extends Controller
                 $message = 'Maintenance mode enabled. Superadmin users can still access the system.';
             }
 
+            $this->logActivity('updated', 'configuration');
             return redirect()->route('configuration.index')->with('success', $message);
         } catch (\Exception $e) {
             return redirect()->route('configuration.index')->with('error', 'Failed to toggle maintenance mode: ' . $e->getMessage());
@@ -253,6 +264,7 @@ class SystemConfigurationController extends Controller
         try {
             Artisan::call('cache:clear');
             Artisan::call('config:clear');
+            $this->logActivity('updated', 'configuration');
             
             return redirect()->route('configuration.index')->with('success', 'System cache cleared successfully!');
         } catch (\Exception $e) {
@@ -274,6 +286,7 @@ class SystemConfigurationController extends Controller
                     unlink($file);
                 }
             }
+            $this->logActivity('updated', 'configuration');
 
             return redirect()->route('configuration.index')->with('success', 'System logs cleared successfully!');
         } catch (\Exception $e) {
@@ -356,6 +369,7 @@ class SystemConfigurationController extends Controller
                 unlink($filePath);
             }
 
+            $this->logActivity('updated', 'configuration');
             return redirect()->route('configuration.backup-history')->with('success', 'Backup deleted successfully.');
 
         } catch (\Exception $e) {

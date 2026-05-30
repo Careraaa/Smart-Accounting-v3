@@ -23,6 +23,7 @@
             <div>
                 <div class="flex items-center gap-2.5 mb-0.5">
                     <h1 class="text-2xl font-bold text-gray-900 tracking-tight m-0">{{ $remittance->remittance_date?->format('F d, Y') ?? 'Remittance' }}</h1>
+
                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border {{ $rsc }}">
                         <span class="w-1.5 h-1.5 rounded-full
                             {{ $remittance->status === 'approved' ? 'bg-emerald-600' : '' }}

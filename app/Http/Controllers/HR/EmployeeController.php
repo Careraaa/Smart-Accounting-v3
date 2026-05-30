@@ -8,9 +8,11 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\LogsUserActivity;
 
 class EmployeeController extends Controller
 {
+    use LogsUserActivity;
     public function index(Request $request)
     {
         $tab = $request->get('tab', 'all');
@@ -41,6 +43,8 @@ class EmployeeController extends Controller
             $query->where('status', 'inactive');
         }
         $employees = $query->orderBy($sortBy, $sortOrder)->paginate(10);
+
+        $this->logActivity('viewed', 'Employee list', request()->url(), 'employee');
 
         // All employees for client-side filtering
         $allQuery = clone $baseQuery;
@@ -138,6 +142,8 @@ class EmployeeController extends Controller
 
         $employee = User::create($validated);
 
+        $this->logActivity('created', "Employee: {$employee->first_name} {$employee->last_name}", request()->url(), 'employee', $employee->id);
+
         $this->handleAttachments($request, $employee);
         $this->handleRelations($request, $employee);
 
@@ -149,6 +155,7 @@ class EmployeeController extends Controller
     public function show(User $employee)
     {
         $employee->load(['workExperiences', 'specialSkills', 'beneficiaries', 'charRefs', 'employeeAttachments']);
+        $this->logActivity('viewed', "Employee: {$employee->first_name} {$employee->last_name}", request()->url(), 'employee', $employee->id);
         return view('hr.employees.show', compact('employee'));
     }
 
@@ -209,6 +216,8 @@ class EmployeeController extends Controller
 
         $employee->update($validated);
 
+        $this->logActivity('updated', "Employee: {$employee->first_name} {$employee->last_name}", request()->url(), 'employee', $employee->id);
+
         $this->handleAttachments($request, $employee);
 
         $employee->workExperiences()->delete();
@@ -242,6 +251,7 @@ class EmployeeController extends Controller
         $employee->specialSkills()->delete();
         $employee->beneficiaries()->delete();
         $employee->charRefs()->delete();
+        $this->logActivity('deleted', "Employee: {$employee->first_name} {$employee->last_name}", request()->url(), 'employee', $employee->id);
         $employee->delete();
 
         return redirect()->route('employees.index')->with('success', 'Employee deleted successfully.');

@@ -9,11 +9,13 @@ use App\Models\User;
 use App\Models\PayrollCutoffSchedule;
 use App\Services\LeaveService;
 use App\Services\PayrollService;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class PayrollHistoryController extends Controller
 {
+    use LogsUserActivity;
     protected $payrollService;
     protected $leaveService;
 
@@ -50,6 +52,8 @@ class PayrollHistoryController extends Controller
         $filterMonth = $request->get('month', '');
         $filterYear  = $request->get('year', '');
 
+        $this->logActivity('viewed', 'Payroll history', request()->url(), 'payroll');
+
         return view('hr.payroll.history.index', compact(
             'allBatches',
             'totalBatches',
@@ -66,6 +70,7 @@ class PayrollHistoryController extends Controller
     public function show(Payroll $payroll)
     {
         $payroll->load(['user', 'allowances', 'deductions']);
+        $this->logActivity('viewed', "Payroll #{$payroll->id} history", request()->url(), 'payroll', $payroll->id);
         return view('hr.payroll.history.show', compact('payroll'));
     }
 
@@ -152,6 +157,8 @@ class PayrollHistoryController extends Controller
             ->whereDate('period_end', $endDate->toDateString())
             ->latest('id')
             ->first();
+
+        $this->logActivity('viewed', "Payroll batch history {$startDate->format('Y-m-d')} - {$endDate->format('Y-m-d')}", request()->url(), 'payroll', $batch?->id);
 
         return view('hr.payroll.history.batch', compact(
             'startDate', 

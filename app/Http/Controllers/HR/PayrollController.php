@@ -15,12 +15,15 @@
     use App\Services\LeaveService;
     use App\Services\PayrollDeductionService;
     use App\Notifications\PayrollNotification;
+    use App\Traits\LogsUserActivity;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\DB;
     use Carbon\Carbon;
 
     class PayrollController extends Controller
     {
+        use LogsUserActivity;
+
         protected $attendanceService;
         protected $payrollService;
         protected $leaveService;
@@ -90,6 +93,8 @@
             $totalPayroll    = $pendingPayrolls->sum('net_pay');
             $payrollCount    = (clone $pendingPayrolls)->count();
 
+            $this->logActivity('viewed', 'Payroll dashboard', request()->url(), 'payroll');
+
             return view('hr.payroll.salary-computation.index', compact(
                 'allBatches',
                 'payrolls',
@@ -137,6 +142,8 @@
             // BUG FIX: call only once — generatePayrollForEmployee no longer calls it internally
             PayrollDeductionService::applyLoanDeductions($payroll);
             PayrollNotification::payrollCreated($payroll);
+
+            $this->logActivity('created', "Payroll for {$employee->first_name} {$employee->last_name}", request()->url(), 'payroll', $payroll->id);
 
             return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll created successfully.');
         }
@@ -278,6 +285,8 @@
                 'status'       => 'submitted',
                 'generated_by' => auth()->id(),
             ]);
+
+            $this->logActivity('created', "Payroll batch #{$batch->id}", request()->url(), 'payroll', $batch->id);
 
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
@@ -437,6 +446,8 @@
                 $added++;
             }
 
+            $this->logActivity('created', "Payroll batch #{$batch->id} added {$added} employee(s) from {$deptLabel}", request()->url(), 'payroll', $batch->id);
+
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
                 ->with('success', "{$added} employee" . ($added !== 1 ? 's' : '') . " added to batch.");
@@ -472,6 +483,8 @@
             ])->save();
             PayrollDeductionService::applyLoanDeductions($payroll);
 
+            $this->logActivity('created', "Payroll for {$employee->first_name} {$employee->last_name} in batch #{$batch->id}", request()->url(), 'payroll', $payroll->id);
+
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
                 ->with('success', "{$employee->first_name} {$employee->last_name} added to batch.");
@@ -489,6 +502,7 @@
             $payroll->allowances()->delete();
             $payroll->deductions()->delete();
             $payroll->bonuses()->delete();
+            $this->logActivity('deleted', "Payroll #{$payroll->id} ({$employeeName}) removed from batch #{$batch->id}", request()->url(), 'payroll', $payroll->id);
             $payroll->delete();
 
             return redirect()
@@ -699,6 +713,8 @@
             // Notify accountants that payroll batch is ready for approval
             PayrollNotification::notifyAccountantsPayrollGenerated($periodStart, $periodEnd, $batch->payrolls->count());
 
+            $this->logActivity('submitted', "Payroll batch #{$batch->id} finalized", request()->url(), 'payroll', $batch->id);
+
             return redirect()->route('payroll.salary-computation.index')
                 ->with('success', 'Payroll batch submitted to accounting.');
         }
@@ -716,6 +732,8 @@
             foreach ($batch->payrolls as $payroll) {
                 PayrollNotification::payrollCreated($payroll);
             }
+
+            $this->logActivity('submitted', "Payroll batch #{$batch->id} submitted for approval", request()->url(), 'payroll', $batch->id);
 
             return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll batch submitted for approval.');
         }
@@ -743,6 +761,8 @@
 
                 $batch->delete();
             });
+
+            $this->logActivity('deleted', "Payroll batch #{$batch->id} cancelled", request()->url(), 'payroll', $batch->id);
 
             return redirect()
                 ->route('payroll.salary-computation.index')
@@ -861,6 +881,7 @@
             }
 
             $label = $count === 1 ? '1 employee' : "{$count} employees";
+            $this->logActivity('deleted', "Removed {$label} from payroll batch #{$batch->id}", request()->url(), 'payroll', $batch->id);
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
                 ->with('success', "Removed {$label} from batch.");
@@ -935,6 +956,8 @@
             $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours']);
             $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
 
+            $this->logActivity('viewed', "Payroll #{$payroll->id}", request()->url(), 'payroll', $payroll->id);
+
             return view('hr.payroll.salary-computation.show', compact('payroll', 'overtimeUndertimeBreakdown'));
         }
 
@@ -984,12 +1007,15 @@
             PayrollNotification::payrollUpdated($payroll);
             PayrollNotification::notifyAccountantsPayrollNeedsApproval($payroll);
 
+            $this->logActivity('updated', "Payroll #{$payroll->id}", request()->url(), 'payroll', $payroll->id);
+
             return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll updated, set to pending, and sent to accountant.');
         }
 
         public function destroy(Payroll $payroll)
         {
             \App\Services\PayrollDeductionService::revertLoanDeductions($payroll);
+            $this->logActivity('deleted', "Payroll #{$payroll->id}", request()->url(), 'payroll', $payroll->id);
             $payroll->delete();
             return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll deleted successfully.');
         }
@@ -1005,6 +1031,7 @@
         public function releasePayroll(Request $request)
         {
             $count = Payroll::whereIn('status', ['pending', 'prepared'])->update(['status' => 'submitted']);
+            $this->logActivity('submitted', "Released {$count} payroll(s) for processing", request()->url(), 'payroll');
             return redirect()
                 ->route('payroll.salary-computation.index')
                 ->with('success', "Released {$count} payroll(s) for processing.");
@@ -1123,6 +1150,8 @@
                         $schedule->update($data);
                     }
                 }
+
+                $this->logActivity('updated', 'Payroll cutoff schedule', request()->url(), 'configuration');
 
                 return response()->json([
                     'success' => true,

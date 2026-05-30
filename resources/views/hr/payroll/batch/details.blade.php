@@ -55,7 +55,9 @@
                 <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Back to batches
             </a>
-            <h1 class="text-xl font-bold text-gray-900 tracking-tight">{{ $batch->display_name }}</h1>
+            <div class="flex items-center gap-2">
+                <h1 class="text-xl font-bold text-gray-900 tracking-tight">{{ $batch->display_name }}</h1>
+            </div>
             <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $start->format('M d, Y') }} &ndash; {{ $end->format('M d, Y') }}</p>
         </div>
         <div class="flex items-center gap-2 shrink-0 flex-wrap">

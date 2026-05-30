@@ -93,6 +93,11 @@
             @if($batch->isEditable())
             <button type="button" onclick="addEmployeePanel()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-900 text-white transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add Employee</button>
             <button type="button" onclick="prepareSelected()" id="prepareSelectedBtn" disabled class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-gray-400 border border-gray-200 transition-all cursor-not-allowed">Prepare</button>
+            <span class="w-px h-5 bg-gray-200"></span>
+            <button type="button" onclick="document.getElementById('finalizeModal').classList.remove('hidden')" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Finalize &amp; Submit
+            </button>
             @endif
         </div>
     </div>
@@ -232,18 +237,6 @@
         </div>
     </div>
 
-    {{-- Submit --}}
-    @if($batch->status === 'pending' && $batch->payrolls->count() > 0)
-    <div class="fade-up flex justify-end">
-        <form action="{{ route('payroll.batch.submit', $batch->id) }}" method="POST" onsubmit="return confirm('Submit this batch for approval?')">
-            @csrf
-            <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Submit for Approval
-            </button>
-        </form>
-    </div>
-    @endif
 
 </div>
 
@@ -335,6 +328,39 @@
     </div>
 </div>
 @endsection
+
+{{-- Finalize confirmation modal --}}
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="finalizeModal">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('finalizeModal').classList.add('hidden')"></div>
+    <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-gray-900">Finalize &amp; Submit</h3>
+                <p class="text-xs text-gray-400 mt-0.5">This will lock payroll data and send to accounting.</p>
+            </div>
+        </div>
+        <div class="text-sm text-gray-600 mb-5 bg-emerald-50/50 rounded-xl px-4 py-3 border border-emerald-100 space-y-2">
+            <p>This batch will be <strong class="font-semibold text-gray-900">finalized</strong> and sent to accounting for review.</p>
+            <div class="flex items-center gap-2 text-xs text-gray-500 pt-1 border-t border-emerald-100/50">
+                <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span>All payrolls must be <strong>prepared</strong> before finalizing.</span>
+            </div>
+        </div>
+        <form action="{{ route('payroll.batch.finalize', $batch) }}" method="POST">
+            @csrf
+            <div class="flex gap-2">
+                <button type="button" onclick="document.getElementById('finalizeModal').classList.add('hidden')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Cancel</button>
+                <button type="submit" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Yes, finalize
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 @push('scripts')
 <script>

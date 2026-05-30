@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\RemittanceClerk;
 
+use App\Traits\LogsUserActivity;
 use App\Http\Controllers\Controller;
 use App\Models\DailyRemittance;
 use App\Models\Driver;
@@ -11,8 +12,11 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
+    use LogsUserActivity;
     public function index()
     {
+        $this->logActivity('viewed', 'dashboard');
+
         $finalizedStatuses = ['approved', 'completed'];
 
         $totalRemittances = DailyRemittance::whereIn('status', $finalizedStatuses)->count();

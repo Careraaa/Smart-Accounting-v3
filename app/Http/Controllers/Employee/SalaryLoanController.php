@@ -5,15 +5,19 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use App\Models\SalaryLoan;
 use App\Notifications\SalaryLoanNotification;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class SalaryLoanController extends Controller
 {
+    use LogsUserActivity;
     public function index()
     {
         $loans = SalaryLoan::where('user_id', auth()->id())
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        $this->logActivity('viewed', 'Salary Loan', request()->url());
 
         return view('employee.salary-loans.index', compact('loans'));
     }
@@ -49,6 +53,8 @@ class SalaryLoanController extends Controller
         ]);
 
         SalaryLoanNotification::submitted($salaryLoan);
+
+        $this->logActivity('submitted', 'Salary Loan ' . $salaryLoan->id, request()->url(), 'salary_loan', $salaryLoan->id);
 
         return redirect()->route('employee.salary-loans.index')
             ->with('success', 'Salary loan application submitted successfully.');

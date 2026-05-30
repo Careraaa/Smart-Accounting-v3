@@ -5,10 +5,12 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\EmployeeLeaveBalance;
 use App\Models\LeaveType;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class LeaveTypeController extends Controller
 {
+    use LogsUserActivity;
     /**
      * Display a listing of the resource.
      */
@@ -39,7 +41,9 @@ class LeaveTypeController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        LeaveType::create($validated);
+        $leaveType = LeaveType::create($validated);
+
+        $this->logActivity('created', "Leave type: {$leaveType->name}", request()->url(), 'leave_type', $leaveType->id);
 
         return redirect()->route('leave-type.index')->with('success', 'Leave type created successfully.');
     }
@@ -82,6 +86,8 @@ class LeaveTypeController extends Controller
                 ->update(['total_days' => $leaveType->days_allowed]);
         }
 
+        $this->logActivity('updated', "Leave type: {$leaveType->name}", request()->url(), 'leave_type', $leaveType->id);
+
         return redirect()->route('leave-type.index')->with('success', 'Leave type updated successfully.');
     }
 
@@ -90,6 +96,7 @@ class LeaveTypeController extends Controller
      */
     public function destroy(LeaveType $leaveType)
     {
+        $this->logActivity('deleted', "Leave type: {$leaveType->name}", request()->url(), 'leave_type', $leaveType->id);
         $leaveType->delete();
 
         return redirect()->route('leave-type.index')->with('success', 'Leave type deleted successfully.');

@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Bonus;
 use App\Models\ThirteenthMonthPay;
 use App\Services\ThirteenthMonthPayService;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class ThirteenthMonthPayController extends Controller
 {
+    use LogsUserActivity;
     public function __construct(
         protected ThirteenthMonthPayService $service
     ) {}
@@ -31,6 +33,8 @@ class ThirteenthMonthPayController extends Controller
             'total_paid' => ThirteenthMonthPay::where('calendar_year', $calendarYear)->sum('amount_paid'),
         ];
 
+        $this->logActivity('viewed', "13th month pay for {$calendarYear}", request()->url(), 'thirteenth_month');
+
         return view('hr.bonuses.thirteenth-month-pay.index', compact(
             'allRecords',
             'calendarYear',
@@ -47,6 +51,8 @@ class ThirteenthMonthPayController extends Controller
 
         $year = (int) $request->input('year');
         $results = $this->service->computeForYear($year, auth()->id());
+
+        $this->logActivity('created', "Computed 13th month pay for {$year}", request()->url(), 'thirteenth_month');
 
         if ($request->boolean('return_bonus_edit')) {
             $bonusId = $request->input('bonus_id');
@@ -66,6 +72,8 @@ class ThirteenthMonthPayController extends Controller
         $thirteenthMonthPay->load(['user', 'computedBy', 'paidBy']);
         $breakdown = $thirteenthMonthPay->computation_breakdown
             ?? $this->service->buildComputationBreakdown($thirteenthMonthPay->user, $thirteenthMonthPay->calendar_year);
+
+        $this->logActivity('viewed', "13th month pay record #{$thirteenthMonthPay->id}", request()->url(), 'thirteenth_month', $thirteenthMonthPay->id);
 
         return view('hr.bonuses.thirteenth-month-pay.show', compact('thirteenthMonthPay', 'breakdown'));
     }
@@ -91,6 +99,8 @@ class ThirteenthMonthPayController extends Controller
             'notes' => $validated['notes'] ?? $thirteenthMonthPay->notes,
             'is_eligible' => $request->boolean('is_eligible', $thirteenthMonthPay->is_eligible),
         ]);
+
+        $this->logActivity('updated', "13th month pay record #{$thirteenthMonthPay->id}", request()->url(), 'thirteenth_month', $thirteenthMonthPay->id);
 
         if ($request->boolean('return_bonus_edit')) {
             return redirect()
@@ -134,6 +144,8 @@ class ThirteenthMonthPayController extends Controller
             'notes' => $validated['notes'] ?? $thirteenthMonthPay->notes,
         ]);
 
+        $this->logActivity('updated', "13th month pay payment recorded for #{$thirteenthMonthPay->id}", request()->url(), 'thirteenth_month', $thirteenthMonthPay->id);
+
         return redirect()
             ->route('payroll.thirteenth-month-pay.index', ['year' => $thirteenthMonthPay->calendar_year])
             ->with('success', 'Payment recorded successfully.');
@@ -146,6 +158,8 @@ class ThirteenthMonthPayController extends Controller
             $thirteenthMonthPay->calendar_year,
             auth()->id()
         );
+
+        $this->logActivity('updated', "13th month pay recomputed for #{$thirteenthMonthPay->id}", request()->url(), 'thirteenth_month', $thirteenthMonthPay->id);
 
         return back()->with('success', 'Employee 13th month pay recomputed.');
     }

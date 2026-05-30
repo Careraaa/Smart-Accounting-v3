@@ -4,18 +4,21 @@ namespace App\Http\Controllers\Employee;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    use LogsUserActivity;
     /**
      * Show the employee's profile/personal records
      */
     public function show()
     {
         $employee = Auth::user();
+        $this->logActivity('viewed', 'Profile', request()->url());
         return view('employee.profile.show', compact('employee'));
     }
 
@@ -85,6 +88,8 @@ class ProfileController extends Controller
 
         // Update the employee
         $employee->update($validated);
+
+        $this->logActivity('updated', 'Profile', request()->url());
 
         return redirect()->route('employee.profile.show')
             ->with('success', 'Your profile has been updated successfully.');
