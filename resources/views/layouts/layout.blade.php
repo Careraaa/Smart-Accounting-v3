@@ -84,13 +84,33 @@
         html.dark .bg-white\/80 { background: rgba(10,10,20,.82); }
         html.dark .bg-white\/95 { background: rgba(10,10,20,.95); }
 
+        /* Bar chart & To-Do icon dark mode overrides */
+        html.dark .hrd-bar.bg-gray-200 { background: #2a2a48 !important; }
+        html.dark .hrd-bar.bg-emerald-500 { background: #065f46 !important; }
+        html.dark .bg-amber-100 { background: rgba(69,26,3,0.6) !important; }
+        html.dark .text-amber-700 { color: #fcd34d !important; }
+        html.dark .ring-gray-200 { --tw-ring-color: #1a1a30 !important; }
+        html.dark .ring-emerald-100 { --tw-ring-color: rgba(6,95,70,0.6) !important; }
+        /* To-Do item icon backgrounds (inline styles) */
+        html.dark [style*="background:#fef3c7"] { background: #3d2e00 !important; }
+        html.dark [style*="background:#e0f2fe"] { background: #002e4d !important; }
+        html.dark [style*="background:#f5f3ff"] { background: #1a0050 !important; }
+        html.dark [style*="background:#f0fdf4"] { background: #003d1a !important; }
+        html.dark [style*="background:#fff0f0"] { background: #4d0000 !important; }
+        /* To-Do item icon colors (inline styles) */
+        html.dark [style*="color:#d97706"] { color: #fbbf24 !important; }
+        html.dark [style*="color:#0284c7"] { color: #38bdf8 !important; }
+        html.dark [style*="color:#7c3aed"] { color: #a78bfa !important; }
+        html.dark [style*="color:#16a34a"] { color: #4ade80 !important; }
+        html.dark [style*="color:#c8292a"] { color: #f87171 !important; }
+
         /* Text colors — all gray shades */
         html.dark .text-gray-900 { color: #e0e0f0 !important; }
         html.dark .text-gray-800 { color: #cccce0 !important; }
         html.dark .text-gray-700 { color: #b0b0cc !important; }
         html.dark .text-gray-600 { color: #78789a !important; }
         html.dark .text-gray-500 { color: #4e4e6a !important; }
-        html.dark .text-gray-400 { color: #383850 !important; }
+        html.dark .text-gray-400 { color: #5a5a7a !important; }
         html.dark .text-gray-300 { color: #24243a !important; }
 
         /* Borders */
@@ -454,24 +474,38 @@
 
 <body>
 
-    {{-- Page loader --}}
-    <script>document.write('<div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center" style="background:'+(localStorage.getItem('dark-mode')==='true'?'#050508':'#ffffff')+'">');</script>
-        <div class="loader relative w-[200px] h-[200px]" style="perspective:800px">
-            <div class="crystal"></div>
-            <div class="crystal"></div>
-            <div class="crystal"></div>
-            <div class="crystal"></div>
-            <div class="crystal"></div>
-            <div class="crystal"></div>
-        </div>
-    </div>
+    {{-- Page loader (crystal colors adapt to dark/light mode) --}}
+    <script>
+        (function(){
+            var isDark = localStorage.getItem('dark-mode') === 'true';
+            var bg = isDark ? '#050508' : '#ffffff';
+            var c = isDark
+                ? ['#4a0e0e,#7f1d1d','#5c1010,#991b1b','#6e1313,#b91c1c','#7f1d1d,#dc2626','#991b1b,#ef4444','#b91c1c,#f87171']
+                : ['#7f1d1d,#dc2626','#991b1b,#ef4444','#b91c1c,#f87171','#dc2626,#fca5a5','#ef4444,#fecaca','#f87171,#fee2e2'];
+            document.write(
+                '<div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center" style="background:'+bg+'">' +
+                '<style>' +
+                '.crystal:nth-child(1){background:linear-gradient(45deg,'+c[0]+');animation-delay:0s}' +
+                '.crystal:nth-child(2){background:linear-gradient(45deg,'+c[1]+');animation-delay:0.15s}' +
+                '.crystal:nth-child(3){background:linear-gradient(45deg,'+c[2]+');animation-delay:0.3s}' +
+                '.crystal:nth-child(4){background:linear-gradient(45deg,'+c[3]+');animation-delay:0.45s}' +
+                '.crystal:nth-child(5){background:linear-gradient(45deg,'+c[4]+');animation-delay:0.6s}' +
+                '.crystal:nth-child(6){background:linear-gradient(45deg,'+c[5]+');animation-delay:0.75s}' +
+                '</style>' +
+                '<div class="loader relative w-[200px] h-[200px]" style="perspective:800px">' +
+                '<div class="crystal"></div><div class="crystal"></div><div class="crystal"></div>' +
+                '<div class="crystal"></div><div class="crystal"></div><div class="crystal"></div>' +
+                '</div></div>'
+            );
+        })();
+    </script>
     <style>
         .crystal {
             position:absolute; top:50%; left:50%;
             width:60px; height:60px; opacity:0;
             transform-origin:bottom center;
             transform:translate(-50%,-50%) rotateX(45deg) rotateZ(0deg);
-            animation:spin 4s linear infinite, emerge 2s ease-in-out infinite alternate, fadeIn 0.3s ease-out forwards;
+            animation:spin 2s linear infinite, emerge 0.8s ease-in-out infinite alternate, fadeIn 0.25s ease-out forwards;
             border-radius:10px; visibility:hidden;
         }
         @keyframes spin {
@@ -483,12 +517,6 @@
             50%     { transform:translate(-50%,-50%) scale(1);   opacity:1; }
         }
         @keyframes fadeIn { to { visibility:visible; opacity:0.8; } }
-        .crystal:nth-child(1) { background:linear-gradient(45deg,#7f1d1d,#dc2626); animation-delay:0s; }
-        .crystal:nth-child(2) { background:linear-gradient(45deg,#991b1b,#ef4444); animation-delay:0.3s; }
-        .crystal:nth-child(3) { background:linear-gradient(45deg,#b91c1c,#f87171); animation-delay:0.6s; }
-        .crystal:nth-child(4) { background:linear-gradient(45deg,#dc2626,#fca5a5); animation-delay:0.9s; }
-        .crystal:nth-child(5) { background:linear-gradient(45deg,#ef4444,#fecaca); animation-delay:1.2s; }
-        .crystal:nth-child(6) { background:linear-gradient(45deg,#f87171,#fee2e2); animation-delay:1.5s; }
     </style>
     <script>
         window.addEventListener('load', function(){ document.getElementById('page-loader').style.display = 'none'; });

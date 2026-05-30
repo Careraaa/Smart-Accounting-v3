@@ -144,6 +144,7 @@
             pointer-events: auto;
         }
         @media (min-width: 1024px) {
+            body:not(.sidebar-collapsed) .brand-icon { display: none; }
             body.sidebar-open::before { display: none; }
         }
     </style>
