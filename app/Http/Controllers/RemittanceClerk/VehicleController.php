@@ -29,7 +29,7 @@ class VehicleController extends Controller
         }
         
         $routes = Route::all();
-        $vehicles = Vehicle::orderBy($sortBy, $sortOrder)->get();
+        $vehicles = Vehicle::with('route')->orderBy($sortBy, $sortOrder)->get();
         
         // Calculate statistics
         $totalVehicles = Vehicle::count();
