@@ -311,7 +311,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
 
     </div>
 
-    {{-- RIGHT COLUMN: Calendar + To-Do --}}
+    {{-- RIGHT COLUMN: Calendar --}}
     <div class="w-[280px] shrink-0 space-y-5">
         <div class="sticky top-24 space-y-5">
 

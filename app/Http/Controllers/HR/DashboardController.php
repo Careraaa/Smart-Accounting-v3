@@ -90,6 +90,64 @@ class DashboardController extends Controller
         $pendingCashAdvances = CashAdvance::where('status', 'pending')->count();
         $pendingSalaryLoans  = SalaryLoan::where('status', 'pending')->count();
 
+        // ── Pending To-Do Items ──────────────────────────────────────────────
+        $pendingItems = [];
+
+        if ($pendingCashAdvances > 0) {
+            $pendingItems[] = [
+                'text' => $pendingCashAdvances === 1
+                    ? '1 Cash Advance Needs Approval'
+                    : "{$pendingCashAdvances} Cash Advances Need Approval",
+                'count' => $pendingCashAdvances,
+                'url' => route('payroll.receivables.index', ['tab' => 'cash_advances']),
+                'icon' => 'feather-dollar-sign',
+                'color' => '#fef3c7',
+                'iconColor' => '#d97706'
+            ];
+        }
+
+        if ($pendingSalaryLoans > 0) {
+            $pendingItems[] = [
+                'text' => $pendingSalaryLoans === 1
+                    ? '1 Salary Loan Needs Approval'
+                    : "{$pendingSalaryLoans} Salary Loans Need Approval",
+                'count' => $pendingSalaryLoans,
+                'url' => route('payroll.receivables.index', ['tab' => 'salary_loans']),
+                'icon' => 'feather-credit-card',
+                'color' => '#e0f2fe',
+                'iconColor' => '#0284c7'
+            ];
+        }
+
+        if ($pendingLeaves > 0) {
+            $pendingItems[] = [
+                'text' => $pendingLeaves === 1
+                    ? '1 Leave Request Needs Review'
+                    : "{$pendingLeaves} Leave Requests Need Review",
+                'count' => $pendingLeaves,
+                'url' => route('leave.pending'),
+                'icon' => 'feather-calendar',
+                'color' => '#fef3c7',
+                'iconColor' => '#d97706'
+            ];
+        }
+
+        $pendingOTUT = $pendingOT + $pendingUT;
+        if ($pendingOTUT > 0) {
+            $pendingItems[] = [
+                'text' => $pendingOTUT === 1
+                    ? '1 Overtime/Undertime Request Pending'
+                    : "{$pendingOTUT} Overtime/Undertime Requests Pending",
+                'count' => $pendingOTUT,
+                'url' => route('attendance.index', ['tab' => 'otut']),
+                'icon' => 'feather-clock',
+                'color' => '#f5f3ff',
+                'iconColor' => '#7c3aed'
+            ];
+        }
+
+        $totalPending = array_sum(array_column($pendingItems, 'count'));
+
         // ── Payroll Batch Stats ──
         $batchCounts = PayrollBatch::selectRaw("COUNT(*) as total, status")->groupBy('status')->pluck('total','status');
         $totalBatches   = $batchCounts->sum();
@@ -147,6 +205,8 @@ class DashboardController extends Controller
             'totalPaidLoans',
             'upcomingHolidays',
             'activeBonuses',
+            'pendingItems',
+            'totalPending',
         ));
     }
 }

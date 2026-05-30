@@ -35,9 +35,6 @@
 @php
 $maxV = collect($attendanceTrend)->map(fn($d) => $d['present'] + $d['late'] + $d['absent'])->max() ?: 1;
 $td = $attendanceTrend[array_key_last($attendanceTrend)];
-
-// To-do total
-$totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances + $pendingSalaryLoans;
 @endphp
 
 <div class="flex flex-col lg:flex-row gap-5 items-start">
@@ -345,63 +342,25 @@ $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvances 
                     <span class="text-xs font-semibold text-gray-900">To Do</span>
                 </div>
                 @if($totalPending > 0)
-                <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[0.5rem] font-bold px-1">{{ $totalPending }}</span>
+                    <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[0.5rem] font-bold px-1">{{ $totalPending }}</span>
                 @endif
             </div>
             @if($totalPending > 0)
             <div class="divide-y divide-gray-50">
-                <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
-                    <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
+                @foreach($pendingItems as $item)
+                <a href="{{ $item['url'] }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background:{{ $item['color'] }};color:{{ $item['iconColor'] }}">
+                        <i class="{{ $item['icon'] }}" style="font-size:14px"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold text-gray-900">Cash Advances</p>
-                        <p class="text-[0.55rem] text-gray-400">Pending approval</p>
+                        <p class="text-xs font-semibold text-gray-900">{{ $item['text'] }}</p>
                     </div>
-                    @if($pendingCashAdvances > 0)
-                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full bg-blue-100 text-blue-700 text-[0.5rem] font-bold px-1.5">{{ $pendingCashAdvances }}</span>
+                    @if($item['count'] > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full text-[0.5rem] font-bold px-1.5" style="background:{{ $item['color'] }};color:{{ $item['iconColor'] }}">{{ $item['count'] }}</span>
                     @endif
                     <svg class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </a>
-                <a href="{{ route('payroll.receivables.index', ['tab' => 'salary_loans']) }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
-                    <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold text-gray-900">Salary Loans</p>
-                        <p class="text-[0.55rem] text-gray-400">Pending approval</p>
-                    </div>
-                    @if($pendingSalaryLoans > 0)
-                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full bg-emerald-100 text-emerald-700 text-[0.5rem] font-bold px-1.5">{{ $pendingSalaryLoans }}</span>
-                    @endif
-                    <svg class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </a>
-                <a href="{{ route('leave.pending') }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
-                    <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold text-gray-900">Leave Requests</p>
-                        <p class="text-[0.55rem] text-gray-400">Awaiting review</p>
-                    </div>
-                    @if($pendingLeaves > 0)
-                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full bg-amber-100 text-amber-700 text-[0.5rem] font-bold px-1.5">{{ $pendingLeaves }}</span>
-                    @endif
-                    <svg class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </a>
-                <a href="{{ route('attendance.index', ['tab' => 'otut']) }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
-                    <div class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-semibold text-gray-900">Overtime</p>
-                        <p class="text-[0.55rem] text-gray-400">{{ $pendingOT }} pending, {{ $pendingUT }} undertime</p>
-                    </div>
-                    @if($pendingOT + $pendingUT > 0)
-                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full bg-violet-100 text-violet-700 text-[0.5rem] font-bold px-1.5">{{ $pendingOT + $pendingUT }}</span>
-                    @endif
-                    <svg class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                </a>
+                @endforeach
             </div>
             @else
             <div class="flex flex-col items-center justify-center py-8 text-center">

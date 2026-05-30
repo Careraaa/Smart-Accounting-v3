@@ -151,6 +151,61 @@ class DashboardController extends Controller
         $calYear = now()->year;
 
         // ============ PENDING TOTALS ============
+        $pendingItems = [];
+
+        if ($pendingCashAdvancesCount > 0) {
+            $pendingItems[] = [
+                'text' => $pendingCashAdvancesCount === 1
+                    ? '1 Cash Advance Needs Approval'
+                    : "{$pendingCashAdvancesCount} Cash Advances Need Approval",
+                'count' => $pendingCashAdvancesCount,
+                'url' => route('payroll.receivables.index', ['tab' => 'cash_advances']),
+                'icon' => 'feather-dollar-sign',
+                'color' => '#fef3c7',
+                'iconColor' => '#d97706'
+            ];
+        }
+
+        if ($pendingSalaryLoansCount > 0) {
+            $pendingItems[] = [
+                'text' => $pendingSalaryLoansCount === 1
+                    ? '1 Salary Loan Needs Approval'
+                    : "{$pendingSalaryLoansCount} Salary Loans Need Approval",
+                'count' => $pendingSalaryLoansCount,
+                'url' => route('payroll.receivables.index', ['tab' => 'salary_loans']),
+                'icon' => 'feather-credit-card',
+                'color' => '#e0f2fe',
+                'iconColor' => '#0284c7'
+            ];
+        }
+
+        if ($pendingLeaves > 0) {
+            $pendingItems[] = [
+                'text' => $pendingLeaves === 1
+                    ? '1 Leave Request Needs Review'
+                    : "{$pendingLeaves} Leave Requests Need Review",
+                'count' => $pendingLeaves,
+                'url' => route('leave.pending'),
+                'icon' => 'feather-calendar',
+                'color' => '#fef3c7',
+                'iconColor' => '#d97706'
+            ];
+        }
+
+        $pendingOTUT = $pendingOT + $pendingUT;
+        if ($pendingOTUT > 0) {
+            $pendingItems[] = [
+                'text' => $pendingOTUT === 1
+                    ? '1 Overtime/Undertime Request Pending'
+                    : "{$pendingOTUT} Overtime/Undertime Requests Pending",
+                'count' => $pendingOTUT,
+                'url' => route('overtime.index'),
+                'icon' => 'feather-clock',
+                'color' => '#f5f3ff',
+                'iconColor' => '#7c3aed'
+            ];
+        }
+
         $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvancesCount + $pendingSalaryLoansCount;
 
         // ============ RECENT RECORDS ============
@@ -211,6 +266,7 @@ class DashboardController extends Controller
             'calMonth',
             'calYear',
             'totalPending',
+            'pendingItems',
             'recentLeaves',
             'recentAttendance',
             'recentPayroll'
