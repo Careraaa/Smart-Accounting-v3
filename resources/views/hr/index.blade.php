@@ -42,8 +42,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
     {{-- LEFT COLUMN --}}
     <div class="flex-1 min-w-0 space-y-5">
         {{-- Quick Actions + Attendance Trend + Leave Activity --}}
-        <div class="flex gap-4 items-stretch">
-            <div class="w-[360px] shrink-0 hrd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
+        <div class="flex flex-col lg:flex-row gap-4 items-stretch">
+            <div class="w-full lg:w-[360px] lg:shrink-0 hrd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
                 <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-sm hrd-float">

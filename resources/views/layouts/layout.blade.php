@@ -319,6 +319,12 @@
         #sidebar-collapse-btn { left: 224px; transition: left .5s cubic-bezier(.4,0,.2,1), background-color .2s ease, border-color .2s ease, box-shadow .2s ease, color .2s ease; }
         body.sidebar-collapsed #sidebar-collapse-btn { left: 48px; }
 
+        /* ── Mobile: table horizontal scroll ── */
+        @media (max-width: 639px) {
+            .overflow-x-auto { -webkit-overflow-scrolling: touch; }
+            .main-content .overflow-x-auto > table.w-full { min-width: 580px; }
+        }
+
         /* Collapse button dark */
         html.dark #sidebar-collapse-btn { background: #10101c; border-color: #18182a; color: #44445a; }
         html.dark #sidebar-collapse-btn:hover { background: #18182a; }

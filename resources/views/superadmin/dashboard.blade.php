@@ -212,7 +212,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
         </div>
 
         {{-- GRAPH CARDS ROW --}}
-        <div class="grid grid-cols-2 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
             {{-- Attendance Trend (SVG line chart) --}}
             @php
