@@ -34,11 +34,6 @@ $mctMax = collect($monthlyCollectionTrend)->max('total_collection') ?: 1;
 $mctActive = count($monthlyCollectionTrend) - 1;
 @endphp
 
-<div class="flex items-center gap-2 mb-4">
-    <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">Remittance Clerk Dashboard</h1>
-
-</div>
-
 <div class="flex flex-col lg:flex-row gap-5 items-start">
 
     {{-- LEFT COLUMN --}}

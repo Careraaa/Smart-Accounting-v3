@@ -54,9 +54,7 @@
                     <svg viewBox="0 0 24 24" fill="none" height="20" width="20" xmlns="http://www.w3.org/2000/svg" class="text-gray-500">
                         <path d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke="currentColor"></path>
                     </svg>
-                    @if($unread_count > 0)
-                        <span class="notif-blip"></span>
-                    @endif
+                    <span class="notif-blip hidden"></span>
                 </button>
                 <div id="notification-dropdown" class="dropdown-closed sm:absolute sm:top-full sm:right-[-8px] sm:left-auto sm:mt-3 sm:w-[780px] sm:max-w-[96vw] fixed top-16 right-4 left-4 w-auto bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50" data-dropdown-menu>
                     <div class="flex items-center justify-between px-4 py-3.5 border-b border-gray-100">
@@ -67,9 +65,7 @@
                                 <div class="text-xs text-gray-500">Latest updates</div>
                             </div>
                         </div>
-                        @if($unread_count > 0)
-                            <span class="inline-block text-[11px] font-bold text-white uppercase tracking-wide px-2.5 py-1 rounded-full bg-red-500" id="notif-badge">{{ $unread_count }} New</span>
-                        @endif
+
                     </div>
                     <div class="max-h-[420px] overflow-y-auto p-1.5">
                         <div id="notification-list">
@@ -457,7 +453,15 @@
 
         // Global polling interval ID
         let notificationPollingInterval = null;
-        
+
+        // Track unread count for notification sound
+        let previousUnreadCount = 0;
+
+        // Preload notification sound
+        const notifSound = new Audio(@json(asset('sounds/notif.mp3')));
+        notifSound.volume = 0.5;
+        notifSound.preload = 'auto';
+
         const notificationReadUrlTemplate = @json(route('notifications.read', ['notification' => '__ID__']));
 
         // ── Notification functionality ────────────────────────────────────
@@ -471,6 +475,9 @@
             if (!isNotificationsPage) {
                 startNotificationPolling();
             }
+
+            // Initialise blip + sound tracking immediately
+            updateNotificationCount();
 
             // Refresh list when dropdown opens
             const notifBtn = document.getElementById('notification-btn');
@@ -604,33 +611,22 @@
             });
         }
 
-        // Update the bell badge count
+        // Update the bell blip + sound on new notifications
         function updateNotificationCount() {
             fetch(@json(route('notifications.count')), { headers: { 'Accept': 'application/json' } })
             .then(r => r.json())
             .then(data => {
                 const count = data.unread_count || 0;
-                const dot   = document.getElementById('notif-count');
-                const badge = document.getElementById('notif-badge');
                 let   blip  = document.querySelector('#notification-btn .notif-blip');
-                if (count > 0) {
-                    if (dot) {
-                        dot.textContent = count > 99 ? '99+' : count;
-                        dot.classList.remove('hidden');
-                    } else {
-                        const span = document.createElement('span');
-                        span.id = 'notif-count';
-                        span.className = 'absolute top-1 right-1 bg-red-500 text-white text-[9px] font-bold min-w-[15px] h-[15px] rounded-full flex items-center justify-center border-2 border-white leading-none';
-                        span.textContent = count > 99 ? '99+' : count;
-                        document.getElementById('notification-btn').appendChild(span);
-                    }
-                    if (badge) badge.textContent = count + ' New';
-                    if (blip) { blip.classList.remove('hidden'); }
-                } else {
-                    if (dot) dot.classList.add('hidden');
-                    if (badge) badge.textContent = '0 New';
-                    if (blip) blip.classList.add('hidden');
+
+                // Play notification sound if unread count increased
+                if (count > previousUnreadCount) {
+                    notifSound.currentTime = 0;
+                    notifSound.play().catch(function(){});
                 }
+                previousUnreadCount = count;
+
+                if (blip) blip.classList.toggle('hidden', count === 0);
                 const markAllBtn = document.getElementById('mark-all-read');
                 if (markAllBtn) markAllBtn.classList.toggle('hidden', count === 0);
             })
@@ -684,7 +680,7 @@
         // Start polling
         function startNotificationPolling() {
             if (notificationPollingInterval) clearInterval(notificationPollingInterval);
-            notificationPollingInterval = setInterval(refreshNotificationList, 30000);
+            notificationPollingInterval = setInterval(refreshNotificationList, 10000);
         }
 
         // Stop polling when page unloads

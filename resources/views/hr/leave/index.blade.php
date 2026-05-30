@@ -179,12 +179,11 @@
                             <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Days Allowed</th>
                             <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Carry Over</th>
                             <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Description</th>
-                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($leaveTypes as $leaveType)
-                        <tr class="border-b border-gray-100 hover:bg-violet-50/30 transition-colors duration-150">
+                        <tr class="border-b border-gray-100 hover:bg-violet-50/30 hover:cursor-pointer transition-colors duration-150" onclick="window.location='{{ route('leave-type.show', $leaveType) }}'">
                             <td class="px-4 py-3.5">
                                 <div class="font-semibold text-gray-900">{{ $leaveType->name }}</div>
                                 @if($leaveType->abbreviation)
@@ -210,23 +209,10 @@
                             <td class="px-4 py-3.5">
                                 <span class="text-gray-500 text-xs">{{ Str::limit($leaveType->description, 60) }}</span>
                             </td>
-                            <td class="px-4 py-3.5">
-                                <div class="flex items-center justify-center gap-1">
-                                    <a href="{{ route('leave-type.edit', $leaveType) }}" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-violet-600 hover:bg-violet-50 transition-colors duration-150" title="Edit">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                    </a>
-                                    <form action="{{ route('leave-type.destroy', $leaveType) }}" method="POST" onsubmit="return confirm('Are you sure?')" class="inline">
-                                        @csrf @method('DELETE')
-                                        <button class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors duration-150" title="Delete">
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5">
+                            <td colspan="4">
                                 <div class="flex flex-col items-center justify-center py-16 text-center">
                                     <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
                                         <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

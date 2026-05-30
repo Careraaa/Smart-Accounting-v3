@@ -53,7 +53,7 @@ class LeaveTypeController extends Controller
      */
     public function show(LeaveType $leaveType)
     {
-        return redirect()->route('leave.index', ['tab' => 'types']);
+        return view('hr.leavetype.show', compact('leaveType'));
     }
 
     /**

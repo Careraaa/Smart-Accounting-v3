@@ -2,101 +2,185 @@
 
 @push('styles')
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
-.ntf-page{font-family:'Sora',sans-serif;padding-top:22px}
-.ntf-topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
-.ntf-title{font-size:1.35rem;font-weight:800;color:#111827;letter-spacing:-0.02em;margin:0 0 2px}
-.ntf-sub{font-size:.78rem;color:#9ca3af;margin:0}
-.ntf-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.ntf-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.ntf-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;background:#fff;color:#374151;border:1px solid #e5e7eb;border-radius:10px;font-family:'Sora',sans-serif;font-size:.82rem;font-weight:700;text-decoration:none;cursor:pointer;transition:all .15s;white-space:nowrap}
-.ntf-btn:hover{border-color:#c8292a;color:#c8292a;background:#fff5f5}
-.ntf-btn.active{border-color:#c8292a;color:#c8292a;background:#fff5f5}
-.ntf-btn-primary{display:inline-flex;align-items:center;gap:10px;padding:11px 20px;background:#c8292a;color:#fff;border:none;border-radius:12px;font-family:'Sora',sans-serif;font-size:.86rem;font-weight:800;cursor:pointer;transition:background .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(200,41,42,.5);white-space:nowrap;text-decoration:none}
-.ntf-btn-primary:hover{background:#a81f20;color:#fff;box-shadow:0 10px 34px rgba(200,41,42,.62)}
-.ntf-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden}
-.ntf-card-head{padding:14px 18px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.ntf-card-title{font-size:.82rem;font-weight:900;color:#111827;margin:0;display:flex;align-items:center;gap:8px}
-.ntf-dot{width:8px;height:8px;border-radius:50%;background:#c8292a;display:inline-block}
-.ntf-card-body{padding:0}
-.ntf-row{display:flex;gap:12px;align-items:flex-start;padding:14px 18px;border-bottom:1px solid #f3f4f6;transition:background .12s}
-.ntf-row:hover{background:#fafafa}
-.ntf-row:last-child{border-bottom:none}
-.ntf-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
-.ntf-badge.unread{background:#fff0f0;color:#c8292a;border:1px solid #fecaca}
-.ntf-badge.read{background:#f3f4f6;color:#6b7280}
-.ntf-time{font-size:.74rem;color:#9ca3af;font-family:'DM Mono',monospace}
-.ntf-title2{font-size:.9rem;font-weight:900;color:#111827;margin:0 0 4px}
-.ntf-msg{font-size:.85rem;color:#6b7280;margin:0;line-height:1.45}
-.ntf-actions2{margin-left:auto;display:flex;gap:8px;align-items:center}
-.ntf-iconbtn{width:32px;height:32px;border-radius:9px;border:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background .12s;color:#6b7280;background:#f4f5f7}
-.ntf-iconbtn:hover{background:#eff6ff;color:#3b82f6}
-.ntf-empty{padding:56px 24px;text-align:center;color:#9ca3af}
+@keyframes ntfFadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes ntfScaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+@keyframes ntfSlideInRight { 0%{opacity:0;transform:translateX(-10px)} 100%{opacity:1;transform:translateX(0)} }
+@keyframes ntfPulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.2)} }
+@keyframes ntfShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
+.ntf-page { animation: ntfFadeSlideUp 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.ntf-fade { animation: ntfFadeSlideUp 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.ntf-scale { animation: ntfScaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.ntf-slide { animation: ntfSlideInRight 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.ntf-row { animation: ntfFadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.ntf-row:nth-child(1) { animation-delay: 0.03s; }
+.ntf-row:nth-child(2) { animation-delay: 0.06s; }
+.ntf-row:nth-child(3) { animation-delay: 0.09s; }
+.ntf-row:nth-child(4) { animation-delay: 0.12s; }
 </style>
 @endpush
 
 @section('content')
 @php
     $currentView = $filter['view'] ?? 'all';
+    $unreadCount = $stats['unread'] ?? 0;
 @endphp
-<div class="ntf-page">
-    <div class="ntf-topbar">
+
+<div class="ntf-page max-w-3xl mx-auto">
+
+    {{-- Header --}}
+    <div class="flex items-start justify-between mb-6 flex-wrap gap-4">
         <div>
-            <h1 class="ntf-title">Notifications</h1>
-            <p class="ntf-sub">All system alerts and updates</p>
+            <div class="flex items-center gap-2.5 mb-0.5">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900 tracking-tight leading-tight">Notifications</h1>
+                    <p class="text-xs text-gray-400 leading-tight">All system alerts and updates</p>
+                </div>
+            </div>
         </div>
-        <div class="ntf-actions">
-            <a href="{{ route('dashboard') }}" class="ntf-btn">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m5-4h-2"/></svg>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:bg-gray-50 transition-all duration-200">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m5-4h-2"/></svg>
                 Dashboard
             </a>
-            <button type="button" class="ntf-btn-primary" id="ntfMarkAll">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            @if($unreadCount > 0)
+            <button type="button" id="ntfMarkAll" class="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 active:scale-[0.97] transition-all duration-200 border-none cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 Mark all as read
             </button>
+            @endif
         </div>
     </div>
 
-    <div class="ntf-filters">
-        <a href="{{ route('notifications.all') }}" class="ntf-btn {{ $currentView === 'all' ? 'active' : '' }}">All</a>
-        <a href="{{ route('notifications.unread-page') }}" class="ntf-btn {{ $currentView === 'unread' ? 'active' : '' }}">Unread</a>
-        <a href="{{ route('notifications.read-page') }}" class="ntf-btn {{ $currentView === 'read' ? 'active' : '' }}">Read</a>
+    {{-- Filters --}}
+    <div class="flex items-center gap-2 mb-5 ntf-slide">
+        <a href="{{ route('notifications.all') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 no-underline {{ $currentView === 'all' ? 'bg-gray-900 text-white border-gray-900 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm' }}">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M3 8h18M3 12h18M3 16h18M3 20h18"/></svg>
+            All
+            @if(($stats['total'] ?? 0) > 0)
+                <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold {{ $currentView === 'all' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600' }}">{{ $stats['total'] }}</span>
+            @endif
+        </a>
+        <a href="{{ route('notifications.unread-page') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 no-underline {{ $currentView === 'unread' ? 'bg-gray-900 text-white border-gray-900 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm' }}">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            Unread
+            @if($unreadCount > 0)
+                <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold {{ $currentView === 'unread' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700' }}">{{ $unreadCount }}</span>
+            @endif
+        </a>
+        <a href="{{ route('notifications.read-page') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border transition-all duration-200 no-underline {{ $currentView === 'read' ? 'bg-gray-900 text-white border-gray-900 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:text-gray-900 hover:shadow-sm' }}">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Read
+        </a>
     </div>
 
-    <div class="ntf-card">
-        <div class="ntf-card-head">
-            <p class="ntf-card-title"><span class="ntf-dot"></span> Inbox</p>
+    {{-- Notifications Card --}}
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm ntf-scale">
+        {{-- Card header --}}
+        <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                </div>
+                <span class="text-sm font-bold text-gray-900">Inbox</span>
+                @if($unreadCount > 0)
+                    <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">{{ $unreadCount }} new</span>
+                @endif
+            </div>
+            <span class="text-[11px] font-mono text-gray-400">{{ $notifications->total() }} total</span>
         </div>
-        <div class="ntf-card-body">
+
+        {{-- Card body --}}
+        <div>
             @forelse($notifications as $n)
-                <div class="ntf-row" data-notif-id="{{ $n->id }}" data-action-url="{{ $n->getActionUrl() }}">
-                    <div style="display:flex;flex-direction:column;gap:6px;min-width:0;flex:1;">
-                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                            <span class="ntf-badge {{ $n->isUnread() ? 'unread' : 'read' }}">{{ $n->isUnread() ? 'unread' : 'read' }}</span>
-                            <span class="ntf-time">{{ $n->created_at?->diffForHumans() }}</span>
-                        </div>
-                        <p class="ntf-title2">{{ $n->title }}</p>
-                        <p class="ntf-msg">{{ $n->message }}</p>
+                <div class="ntf-row flex items-start gap-3 px-5 py-3.5 border-b border-gray-50 cursor-pointer transition-all duration-150 hover:bg-emerald-50/30 hover:border-l-2 hover:border-l-emerald-500 hover:pl-[18px] no-underline" data-notif-id="{{ $n->id }}" data-action-url="{{ $n->getActionUrl() }}">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 {{ $n->isUnread() ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400' }}">
+                        @if($n->isUnread())
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        @else
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        @endif
                     </div>
-                    <div class="ntf-actions2">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span class="text-sm font-bold {{ $n->isUnread() ? 'text-gray-900' : 'text-gray-600' }}">{{ $n->title }}</span>
+                            @if($n->isUnread())
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shrink-0" style="animation:ntfPulseDot 1.5s ease-in-out infinite"></span>
+                            @endif
+                        </div>
+                        <p class="text-sm {{ $n->isUnread() ? 'text-gray-600' : 'text-gray-500' }} mb-1 leading-snug">{{ $n->message }}</p>
+                        <div class="flex items-center gap-2">
+                            @if($n->isUnread())
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 leading-tight">Unread</span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500 border border-gray-200 leading-tight">Read</span>
+                            @endif
+                            <span class="text-[11px] font-mono text-gray-400">{{ $n->created_at?->diffForHumans() }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
                         @if($n->isUnread() && $currentView !== 'deleted')
-                            <button class="ntf-iconbtn" title="Mark as read" data-action="read">
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            <button class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-150 border-none cursor-pointer" title="Mark as read" data-action="read">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                             </button>
                         @endif
+                        <svg class="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </div>
             @empty
-                <div class="ntf-empty">
-                    <div style="font-weight:900;color:#111827;margin-bottom:6px;">No {{ $currentView }} notifications</div>
-                    You’re all caught up.
+                <div class="flex flex-col items-center justify-center py-16 text-center">
+                    <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-700">No {{ $currentView }} notifications</p>
+                    <p class="text-xs text-gray-400 mt-1">You're all caught up.</p>
                 </div>
             @endforelse
         </div>
-    </div>
 
-    <div style="margin-top:14px;">
-        {{ $notifications->withQueryString()->links() }}
+        {{-- Pagination --}}
+        @if($notifications->hasPages())
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
+            <div class="text-xs text-gray-400">
+                Showing <strong class="text-gray-700">{{ $notifications->firstItem() }}</strong>
+                – <strong class="text-gray-700">{{ $notifications->lastItem() }}</strong>
+                of <strong class="text-gray-700">{{ $notifications->total() }}</strong>
+            </div>
+            <nav class="flex items-center gap-1">
+                {{-- Previous --}}
+                @if($notifications->onFirstPage())
+                    <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    </span>
+                @else
+                    <a href="{{ $notifications->previousPageUrl() }}" class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150 bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 no-underline">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                    </a>
+                @endif
+
+                {{-- Pages --}}
+                @foreach($notifications->getUrlRange(max(1, $notifications->currentPage() - 2), min($notifications->lastPage(), $notifications->currentPage() + 2)) as $page => $url)
+                    <a href="{{ $url }}" class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150 no-underline {{ $page === $notifications->currentPage() ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300' }}">
+                        {{ $page }}
+                    </a>
+                @endforeach
+
+                {{-- Next --}}
+                @if(!$notifications->hasMorePages())
+                    <span class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </span>
+                @else
+                    <a href="{{ $notifications->nextPageUrl() }}" class="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150 bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 no-underline">
+                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                @endif
+            </nav>
+        </div>
+        @endif
     </div>
 </div>
 @endsection
@@ -105,36 +189,39 @@
 <script>
 (function(){
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+
+    // Mark all as read
     const markAllBtn = document.getElementById('ntfMarkAll');
     if (markAllBtn) {
         markAllBtn.addEventListener('click', function(){
             fetch(@json(route('notifications.mark-all-as-read')), {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
-            }).then(()=> window.location.reload());
+            }).then(() => window.location.reload());
         });
     }
 
-    document.querySelectorAll('.ntf-row').forEach(row => {
+    // Row click -> navigate to action url
+    document.querySelectorAll('[data-notif-id]').forEach(row => {
         row.addEventListener('click', function(e){
             if (e.target.closest('button')) return;
             const url = this.dataset.actionUrl;
             if (url && url !== 'null') window.location.href = url;
         });
+        // Mark as read button
         row.querySelectorAll('button[data-action]').forEach(btn => {
             btn.addEventListener('click', function(e){
-                e.preventDefault(); e.stopPropagation();
+                e.preventDefault();
+                e.stopPropagation();
                 const id = row.dataset.notifId;
-                const action = btn.dataset.action;
                 if (!id) return;
-                if (action === 'read') {
-                    fetch(`/notifications/${id}/read`, { method:'POST', headers:{ 'X-CSRF-TOKEN': csrf, 'Accept':'application/json' } })
-                        .then(()=> window.location.reload());
-                }
+                fetch(`/notifications/${id}/read`, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }
+                }).then(() => window.location.reload());
             });
         });
     });
 })();
 </script>
 @endpush
-

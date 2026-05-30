@@ -41,9 +41,11 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
     {{-- LEFT COLUMN --}}
     <div class="flex-1 min-w-0 space-y-5">
-        {{-- Quick Actions + Attendance Trend + Leave Activity --}}
+
+        {{-- Quick Actions + Graph Cards Row --}}
         <div class="flex flex-col lg:flex-row gap-4 items-stretch">
-            <div class="w-full lg:w-[360px] lg:shrink-0 hrd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
+            {{-- Quick Actions --}}
+            <div class="w-full lg:w-[280px] lg:shrink-0 hrd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
                 <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-sm hrd-float">
@@ -53,39 +55,39 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     </div>
                     <span class="text-[0.55rem] font-mono text-gray-400">HR modules</span>
                 </div>
-                <div class="grid grid-cols-2 gap-3 p-4">
-                    <a href="{{ route('payroll.salary-computation.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center transition-all group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-indigo-200/50">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M8 21h8M12 17v4"/></svg>
+                <div class="grid grid-cols-2 gap-2 p-3">
+                    <a href="{{ route('payroll.salary-computation.index') }}" class="group flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center transition-all group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-indigo-200/50">
+                            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M8 21h8M12 17v4"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-indigo-700 transition-colors text-center">Payroll</span>
+                        <span class="text-[9px] font-semibold text-gray-700 group-hover:text-indigo-700 transition-colors text-center">Payroll</span>
                         @if($batchSubmitted > 0)
                             <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-indigo-100 text-indigo-700 text-[0.45rem] font-bold">{{ $batchSubmitted }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('leave.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
-                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <a href="{{ route('leave.index') }}" class="group flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
+                        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
+                            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors text-center">Leave Mgmt</span>
+                        <span class="text-[9px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors text-center">Leave Mgmt</span>
                         @if($pendingLeaves > 0)
                             <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-amber-100 text-amber-700 text-[0.45rem] font-bold">{{ $pendingLeaves }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('overtime.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
-                        <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
+                    <a href="{{ route('overtime.index') }}" class="group flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
+                        <div class="w-9 h-9 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
+                            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-violet-700 transition-colors text-center">OT / UT</span>
+                        <span class="text-[9px] font-semibold text-gray-700 group-hover:text-violet-700 transition-colors text-center">OT / UT</span>
                         @if($pendingOT + $pendingUT > 0)
                             <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.45rem] font-bold">{{ $pendingOT + $pendingUT }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('payroll.receivables.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                    <a href="{{ route('payroll.receivables.index') }}" class="group flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
+                            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Receivables</span>
+                        <span class="text-[9px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Receivables</span>
                         @if($pendingCashAdvances + $pendingSalaryLoans > 0)
                             <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $pendingCashAdvances + $pendingSalaryLoans }}</span>
                         @endif
@@ -203,9 +205,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
         </div>
 
-        {{-- STAT CARDS ROW 1: Employees, Attendance --}}
-        <div class="grid grid-cols-2 gap-3">
-            {{-- Employees --}}
+        {{-- STAT CARDS: Employees, Attendance, Holidays, Bonuses --}}
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <a href="{{ route('employees.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
                 <div class="flex items-center justify-between">
                     <div>
@@ -221,7 +222,6 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
             </a>
 
-            {{-- Attendance --}}
             <a href="{{ route('attendance.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-cyan-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
                 <div class="flex items-center justify-between">
                     <div>
@@ -236,11 +236,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>{{ $tdRate }}% present today</span>
                 </div>
             </a>
-        </div>
 
-        {{-- STAT CARDS ROW 2: Holidays, Bonuses --}}
-        <div class="grid grid-cols-2 gap-3">
-            {{-- Holidays --}}
             <a href="{{ route('holiday.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-rose-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
                 <div class="flex items-center justify-between">
                     <div>
@@ -256,7 +252,6 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
             </a>
 
-            {{-- Bonuses --}}
             <a href="{{ route('bonuses.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-yellow-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
                 <div class="flex items-center justify-between">
                     <div>

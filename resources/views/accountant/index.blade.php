@@ -47,12 +47,6 @@
 $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvancesCount + $pendingSalaryLoansCount;
 @endphp
 
-<div class="flex items-center justify-between mb-5">
-    <div>
-        <p class="text-xs font-semibold tracking-widest text-gray-400 uppercase">Accountant Portal</p>
-        <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">Accountant Dashboard</h1>
-    </div>
-</div>
 
 <div class="flex flex-col lg:flex-row gap-5 items-start">
 
