@@ -25,7 +25,7 @@ class RouteController extends Controller
             $sortOrder = 'asc';
         }
         
-        $routes = Route::with('vehicles')->get();
+        $routes = Route::all();
         $vehicles = Vehicle::orderBy($sortBy, $sortOrder)->get();
         
         // Calculate statistics
@@ -59,7 +59,6 @@ class RouteController extends Controller
 
     public function show(Route $route)
     {
-        $route->load('vehicles');
         return view('remittance-clerk.routes.show', compact('route'));
     }
 
