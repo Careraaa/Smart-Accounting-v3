@@ -5,6 +5,7 @@
 @keyframes ad-page-in { 0%{opacity:0} 100%{opacity:1} }
 @keyframes ad-stat-in { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
 @keyframes ad-card-in { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes ad-zone-pulse { 0%,100%{border-color:#d1d5db} 50%{border-color:#9ca3af} }
 .ad-page { animation:ad-page-in 0.3s ease-out; }
 .ad-stat { animation:ad-stat-in 0.35s ease-out both; }
 .ad-stat:nth-child(1) { animation-delay:0.05s; }
@@ -18,11 +19,16 @@
 .ad-card:nth-child(4) { animation-delay:0.3s; }
 .ad-card:nth-child(5) { animation-delay:0.35s; }
 .ad-card:nth-child(6) { animation-delay:0.4s; }
+.ad-zone { animation:ad-zone-pulse 3s ease-in-out infinite; }
+.ad-zone:hover { animation:none; border-color:#9ca3af; }
 </style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){document.querySelectorAll('.ad-card,.ad-stat').forEach(function(e){var s=getComputedStyle(e);if(s.opacity==='0'){e.style.opacity='1';e.style.transform='translateY(0)'}})},800)})
+</script>
 @endpush
 
 @section('content')
-<div class="ad-page min-h-screen bg-gray-50/60">
+<div class="ad-page min-h-screen">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
 
         {{-- Header --}}
@@ -128,88 +134,79 @@
                     $isApproved = $latest?->status === 'approved';
                     $isRejected = $latest?->status === 'rejected';
                     $canUpload  = $latest === null || $isRejected;
-
-                    $borderColor = match(true) {
-                        $isApproved => 'border-emerald-300',
-                        $isPending  => 'border-amber-300',
-                        $isRejected => 'border-rose-300',
-                        default     => 'border-gray-200',
-                    };
-                    $borderWidth = $latest ? 'border-2' : 'border';
                 @endphp
 
-                <div class="ad-card bg-white border {{ $borderWidth }} {{ $borderColor }} rounded-2xl shadow-sm overflow-hidden flex flex-col">
-                    <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-2 h-2 rounded-full bg-gray-900"></span>
-                            <span class="text-sm font-bold text-gray-800">{{ $label }}</span>
-                        </div>
-                        @if($isApproved)     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Approved</span>
-                        @elseif($isPending)  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">Under Review</span>
-                        @elseif($isRejected) <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">Rejected</span>
-                        @else                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600">Missing</span>
-                        @endif
-                    </div>
+                <div class="ad-card bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col hover:shadow-lg hover:-translate-y-0.5 transition-all duration-[400ms]">
+                    <div class="h-1 rounded-t-2xl transition-colors duration-500 {{ $isApproved ? 'bg-emerald-400' : ($isPending ? 'bg-amber-400' : ($isRejected ? 'bg-rose-400' : 'bg-gray-200')) }}"></div>
 
-                    <div class="p-5 flex flex-col gap-3 flex-1">
-                        @if($latest)
-                            @if($latest->is_image)
-                                <img src="{{ $latest->url }}" alt="{{ $label }}"
-                                    class="w-full rounded-xl object-cover"
-                                    style="max-height:100px;">
-                            @else
-                                <div class="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                    <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                    <span class="text-sm text-gray-600 truncate font-semibold">{{ $latest->original_name }}</span>
+                    <div class="p-5 flex flex-col gap-4 flex-1">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-500 {{ $isApproved ? 'bg-emerald-50 text-emerald-500' : ($isPending ? 'bg-amber-50 text-amber-500' : ($isRejected ? 'bg-rose-50 text-rose-500' : 'bg-gray-100 text-gray-400')) }}">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                                 </div>
-                            @endif
+                                <span class="text-sm font-semibold text-gray-900">{{ $label }}</span>
+                            </div>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold {{ $isApproved ? 'bg-emerald-50 text-emerald-600' : ($isPending ? 'bg-amber-50 text-amber-600' : ($isRejected ? 'bg-rose-50 text-rose-600' : 'bg-gray-100 text-gray-500')) }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $isApproved ? 'bg-emerald-500' : ($isPending ? 'bg-amber-500 animate-pulse' : ($isRejected ? 'bg-rose-500' : 'bg-gray-300')) }}"></span>
+                                {{ $isApproved ? 'Approved' : ($isPending ? 'Pending' : ($isRejected ? 'Rejected' : 'Missing')) }}
+                            </span>
+                        </div>
 
-                            <div class="text-xs text-gray-400">Submitted {{ $latest->created_at->diffForHumans() }}</div>
+                        @if($latest)
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                <div class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-700 truncate">{{ $latest->original_name }}</p>
+                                    <p class="text-xs text-gray-400">{{ $latest->created_at->diffForHumans() }}</p>
+                                </div>
+                                <a href="{{ $latest->url }}" target="_blank" class="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-900 hover:text-white flex items-center justify-center transition-all duration-300 animate-bounce hover:animate-none group/dl" title="Download">
+                                    <svg class="w-4 h-4 transition-transform duration-300 group-hover/dl:scale-110" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" fill="none"><path d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" stroke-linejoin="round" stroke-linecap="round"></path></svg>
+                                </a>
+                            </div>
 
                             @if($isRejected && $latest->rejection_reason)
-                                <div class="p-3 rounded-xl bg-rose-50 border border-rose-100">
-                                    <span class="text-xs font-bold text-rose-700">Rejected:</span>
-                                    <span class="text-xs text-rose-600">{{ $latest->rejection_reason }}</span>
+                                <div class="flex items-start gap-2 p-3 rounded-xl bg-rose-50 border border-rose-100">
+                                    <svg class="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
+                                    <p class="text-xs text-rose-600"><span class="font-semibold">Rejected:</span> {{ $latest->rejection_reason }}</p>
                                 </div>
                             @endif
 
                             @if($isPending)
-                                <p class="text-xs text-amber-600 font-semibold flex items-center gap-1.5">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
-                                    Waiting for HR review.
-                                </p>
+                                <div class="flex items-center gap-2 p-3 rounded-xl bg-amber-50 border border-amber-100">
+                                    <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+                                    <p class="text-xs font-medium text-amber-700">Under review</p>
+                                </div>
                             @endif
-
-                            <a href="{{ $latest->url }}" target="_blank" class="inline-flex items-center gap-2 self-start px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-xl transition-all">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                View
-                            </a>
-                        @else
-                            <p class="text-xs text-gray-400 font-semibold flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
-                                Not uploaded yet.
-                            </p>
                         @endif
 
                         @if($canUpload)
-                            <form method="POST" action="{{ route('employee.attachments.store') }}" enctype="multipart/form-data" class="mt-auto pt-3 border-t border-gray-100">
-                                @csrf
-                                <input type="hidden" name="attachment_key" value="{{ $key }}">
-                                <label class="block text-xs font-semibold text-gray-500 mb-1.5">
-                                    {{ $isRejected ? 'Resubmit document' : 'Upload document' }}
-                                </label>
-                                <div class="flex flex-col sm:flex-row gap-1.5">
-                                    <input type="file" name="file"
-                                        class="block w-full text-xs text-gray-600 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] sm:file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:cursor-pointer file:transition-all rounded-xl border border-gray-200 bg-white px-2 py-1.5"
-                                        accept=".jpg,.jpeg,.png,.pdf" required>
-                                    <button type="submit" class="inline-flex items-center justify-center w-full sm:w-9 h-9 bg-gray-900 hover:bg-gray-800 text-white rounded-xl transition-all flex-shrink-0">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m7-1l4 4 4-4m-4-10v14"/></svg>
-                                    </button>
-                                </div>
-                                <div class="text-xs text-gray-400 mt-1">JPG, PNG or PDF · Max 5MB</div>
-                            </form>
+                            <div class="mt-auto {{ $latest ? 'pt-4 border-t border-gray-100' : '' }}">
+                                <form method="POST" action="{{ route('employee.attachments.store') }}" enctype="multipart/form-data" class="ad-form">
+                                    @csrf
+                                    <input type="hidden" name="attachment_key" value="{{ $key }}">
+                                    <label class="block text-xs font-medium text-gray-500 mb-2">
+                                        {{ $isRejected ? 'Upload new document' : 'Upload document' }}
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <label class="ad-zone flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 cursor-pointer transition-all duration-300">
+                                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 3v12"/></svg>
+                                            <span class="text-xs text-gray-500 truncate ad-filename">Choose file...</span>
+                                            <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required class="hidden" onchange="this.closest('.ad-form').querySelector('.ad-filename').textContent=this.files[0].name">
+                                        </label>
+                                        <button type="submit" class="flex-shrink-0 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95">
+                                            Upload
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-1.5">JPG, PNG or PDF · Max 5MB</p>
+                                </form>
+                            </div>
                         @elseif($isPending)
-                            <p class="text-xs text-gray-400 mt-auto pt-3 border-t border-gray-100">Cannot re-upload while a review is pending.</p>
+                            <div class="mt-auto pt-4 border-t border-gray-100 text-center">
+                                <p class="text-xs text-gray-400">Awaiting HR review</p>
+                            </div>
                         @endif
                     </div>
                 </div>

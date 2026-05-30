@@ -58,8 +58,15 @@ class AttachmentController extends Controller
             return back()->with('error', 'This document is already approved. Contact HR if you need to replace it.');
         }
 
-        HRAttachmentController::saveAttachment($request->file('file'), $employee, $key, 'employee');
+        $isHrRole = in_array($employee->role, ['hr', 'superadmin', 'accountant', 'qr_admin'], true);
+        $uploadedByRole = $isHrRole ? 'hr' : 'employee';
 
-        return back()->with('success', 'Document submitted for HR review.');
+        HRAttachmentController::saveAttachment($request->file('file'), $employee, $key, $uploadedByRole);
+
+        $message = $isHrRole
+            ? 'Document uploaded and approved.'
+            : 'Document submitted for HR review.';
+
+        return back()->with('success', $message);
     }
 }
