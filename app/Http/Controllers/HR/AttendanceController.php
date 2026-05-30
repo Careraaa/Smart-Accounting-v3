@@ -543,86 +543,73 @@ class AttendanceController extends Controller
                     $undertimeHours = $otutResult['undertime_hours'];
                     $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
 
-                    // If an approved OT/UT record already exists for this day,
-                    // skip auto-detection to preserve the manually-approved record.
-                    $hasApprovedRecord = OvertimeUndertime::where('user_id', $userId)
+                    // Remove any existing OT/UT records for this day (both pending and approved)
+                    // so they are recalculated based on the updated attendance times.
+                    OvertimeUndertime::where('user_id', $userId)
                         ->where('date', $dateStr)
-                        ->whereIn('type', ['overtime', 'undertime'])
-                        ->where('status', 'approved')
-                        ->exists();
+                        ->delete();
 
-                    if (!$hasApprovedRecord) {
-                        // Remove all pending OT/UT records for this day (auto-detected or manually created)
-                        // to prevent duplicates when re-saving attendance.
-                        OvertimeUndertime::where('user_id', $userId)
-                            ->where('date', $dateStr)
-                            ->where('status', 'pending')
-                            ->delete();
+                    // Create overtime record if applicable
+                    if ($overtimeHours > 0) {
+                        $otAmount = $overtimeHours * $hourlyRate * 1.25;
+                        
+                        OvertimeUndertime::create([
+                            'user_id'          => $userId,
+                            'date'             => $dateStr,
+                            'type'             => 'overtime',
+                            'hours'            => $overtimeHours,
+                            'reason'           => "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $attendance->time_out)->format('g:i A') . ")",
+                            'status'           => 'pending',
+                            'amount'           => $otAmount,
+                            'hourly_rate_used' => $hourlyRate,
+                        ]);
 
-                        // Create overtime record if applicable
-                        if ($overtimeHours > 0) {
-                            $otAmount = $overtimeHours * $hourlyRate * 1.25;
-                            
-                            OvertimeUndertime::create([
-                                'user_id'          => $userId,
-                                'date'             => $dateStr,
-                                'type'             => 'overtime',
-                                'hours'            => $overtimeHours,
-                                'reason'           => "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $attendance->time_out)->format('g:i A') . ")",
-                                'status'           => 'pending',
-                                'amount'           => $otAmount,
-                                'hourly_rate_used' => $hourlyRate,
-                            ]);
-
-                            try {
-                                $otRecord = OvertimeUndertime::where('user_id', $userId)
-                                    ->where('date', $dateStr)
-                                    ->where('type', 'overtime')
-                                    ->latest()
-                                    ->first();
-                                if ($otRecord) {
-                                    $otRecord->load('employee');
-                                    OvertimeNotification::submitted($otRecord);
-                                }
-                            } catch (\Throwable $e) {
-                                logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
+                        try {
+                            $otRecord = OvertimeUndertime::where('user_id', $userId)
+                                ->where('date', $dateStr)
+                                ->where('type', 'overtime')
+                                ->latest()
+                                ->first();
+                            if ($otRecord) {
+                                $otRecord->load('employee');
+                                OvertimeNotification::submitted($otRecord);
                             }
-
-                            $otutMessage = "Overtime of " . number_format($overtimeHours, 1) . "h auto-logged and pending approval.";
+                        } catch (\Throwable $e) {
+                            logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
                         }
-                        // Create undertime record if applicable
-                        elseif ($undertimeHours > 0) {
-                            $utAmount = -($undertimeHours * $hourlyRate);
-                            
-                            OvertimeUndertime::create([
-                                'user_id'          => $userId,
-                                'date'             => $dateStr,
-                                'type'             => 'undertime',
-                                'hours'            => $undertimeHours,
-                                'reason'           => "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $attendance->time_in)->format('g:i A') . ")",
-                                'status'           => 'pending',
-                                'amount'           => $utAmount,
-                                'hourly_rate_used' => $hourlyRate,
-                            ]);
 
-                            try {
-                                $utRecord = OvertimeUndertime::where('user_id', $userId)
-                                    ->where('date', $dateStr)
-                                    ->where('type', 'undertime')
-                                    ->latest()
-                                    ->first();
-                                if ($utRecord) {
-                                    $utRecord->load('employee');
-                                    OvertimeNotification::submitted($utRecord);
-                                }
-                            } catch (\Throwable $e) {
-                                logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
+                        $otutMessage = "Overtime of " . number_format($overtimeHours, 1) . "h auto-logged and pending approval.";
+                    }
+                    // Create undertime record if applicable
+                    elseif ($undertimeHours > 0) {
+                        $utAmount = -($undertimeHours * $hourlyRate);
+                        
+                        OvertimeUndertime::create([
+                            'user_id'          => $userId,
+                            'date'             => $dateStr,
+                            'type'             => 'undertime',
+                            'hours'            => $undertimeHours,
+                            'reason'           => "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $attendance->time_in)->format('g:i A') . ")",
+                            'status'           => 'pending',
+                            'amount'           => $utAmount,
+                            'hourly_rate_used' => $hourlyRate,
+                        ]);
+
+                        try {
+                            $utRecord = OvertimeUndertime::where('user_id', $userId)
+                                ->where('date', $dateStr)
+                                ->where('type', 'undertime')
+                                ->latest()
+                                ->first();
+                            if ($utRecord) {
+                                $utRecord->load('employee');
+                                OvertimeNotification::submitted($utRecord);
                             }
-
-                            $otutMessage = "Undertime of " . number_format($undertimeHours, 1) . "h auto-logged and pending approval.";
+                        } catch (\Throwable $e) {
+                            logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
                         }
-                    } else {
-                        $otutMessage = "OT/UT record already exists and approved for this day — auto-detection skipped.";
+
+                        $otutMessage = "Undertime of " . number_format($undertimeHours, 1) . "h auto-logged and pending approval.";
                     }
                 }
             }
