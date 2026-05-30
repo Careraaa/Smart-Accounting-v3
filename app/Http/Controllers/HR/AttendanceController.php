@@ -310,37 +310,57 @@ class AttendanceController extends Controller
                 ->withInput();
         }
 
-        // Auto-determine status based on office hours and grace period
-        $status = 'present'; // default
-        if (!$request->time_in || !$request->time_out) {
-            $status = 'absent';
-        } else {
-            $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
-            $timeOut = Carbon::createFromFormat('H:i', $request->time_out);
-            $officeStart = Carbon::createFromFormat('H:i', '08:00');
-            $officeEnd = Carbon::createFromFormat('H:i', '17:00');
-            
-            // Get grace period from settings (default: 5 minutes)
-            $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
-            
-            // Apply grace period: only mark as late if beyond (officeStart + gracePeriod)
-            $lateThreshold = $officeStart->copy()->addMinutes($gracePeriodMinutes);
-            
-            // Check if employee came in late (after grace period)
-            if ($timeIn->isAfter($lateThreshold)) {
-                $status = 'late';
+        // Require at least one time value
+        if (!$request->time_in && !$request->time_out) {
+            return back()
+                ->withErrors(['time' => 'Please set at least Time In or Time Out.'])
+                ->withInput();
+        }
+
+        // Build data to save — only include provided fields so we don't overwrite existing values
+        $data = ['is_manual' => true];
+
+        // Determine status when time_in is provided (and optionally time_out).
+        // If both provided, compute status using both; if only time_in provided, compute late/present.
+        $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
+
+        if ($request->time_in) {
+            $data['time_in'] = $request->time_in ? $request->time_in . ':00' : null;
+
+            try {
+                $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
+                $officeStart = Carbon::createFromFormat('H:i', '08:00');
+                $lateThreshold = $officeStart->copy()->addMinutes($gracePeriodMinutes);
+
+                $data['status'] = $timeIn->isAfter($lateThreshold) ? 'late' : 'present';
+            } catch (\Throwable $e) {
+                $data['status'] = 'present';
             }
         }
 
-        Attendance::updateOrCreate(
-            ['user_id' => $userId, 'date' => $request->date],
-            [
-                'time_in' => $request->time_in ? $request->time_in . ':00' : null,
-                'time_out' => $request->time_out ? $request->time_out . ':00' : null,
-                'status' => $status,
-                'is_manual' => true,
-            ],
-        );
+        if ($request->time_out) {
+            $data['time_out'] = $request->time_out ? $request->time_out . ':00' : null;
+        }
+
+        // If both provided, run the stricter status logic using both times
+        if ($request->time_in && $request->time_out) {
+            try {
+                $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
+                $timeOut = Carbon::createFromFormat('H:i', $request->time_out);
+                $officeStart = Carbon::createFromFormat('H:i', '08:00');
+                $lateThreshold = $officeStart->copy()->addMinutes($gracePeriodMinutes);
+
+                $data['status'] = $timeIn->isAfter($lateThreshold) ? 'late' : 'present';
+            } catch (\Throwable $e) {
+                $data['status'] = $data['status'] ?? 'present';
+            }
+        }
+
+        // Find existing attendance or create new one without mass-nullifying fields
+        $attendance = Attendance::firstOrNew(['user_id' => $userId, 'date' => $request->date]);
+        $attendance->fill($data);
+        $attendance->is_manual = true;
+        $attendance->save();
 
         try {
             $user = User::find($userId);
@@ -361,13 +381,9 @@ class AttendanceController extends Controller
         // 5. Overtime and undertime do NOT offset each other
         $otutMessage = null;
 
-        if ($request->time_in && $request->time_out) {
-            $dateStr  = $request->date;
-            
-            // Fetch the attendance record we just created
-            $attendance = Attendance::where('user_id', $userId)
-                ->where('date', $dateStr)
-                ->first();
+        // Run OT/UT detection if the saved attendance now has both time_in and time_out
+        if ($attendance->time_in && $attendance->time_out) {
+            $dateStr = $attendance->date->format('Y-m-d');
 
             if ($attendance) {
                 // Get employee to find their shift assignment
@@ -421,7 +437,7 @@ class AttendanceController extends Controller
                                 'date'             => $dateStr,
                                 'type'             => 'overtime',
                                 'hours'            => $overtimeHours,
-                                'reason'           => "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $request->time_out)->format('g:i A') . ")",
+                                'reason'           => "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $attendance->time_out)->format('g:i A') . ")",
                                 'status'           => 'pending',
                                 'amount'           => $otAmount,
                                 'hourly_rate_used' => $hourlyRate,
@@ -452,7 +468,7 @@ class AttendanceController extends Controller
                                 'date'             => $dateStr,
                                 'type'             => 'undertime',
                                 'hours'            => $undertimeHours,
-                                'reason'           => "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $request->time_in)->format('g:i A') . ")",
+                                'reason'           => "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $attendance->time_in)->format('g:i A') . ")",
                                 'status'           => 'pending',
                                 'amount'           => $utAmount,
                                 'hourly_rate_used' => $hourlyRate,

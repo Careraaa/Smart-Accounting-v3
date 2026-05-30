@@ -5,7 +5,7 @@ $today    = now()->format('Y-m-d');
 $apiUrl   = url('api/holidays');
 @endphp
 
-<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden w-full max-w-[280px]" id="cal-card">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden w-full lg:max-w-[280px]" id="cal-card">
     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <span class="text-[11px] font-semibold text-gray-600 uppercase tracking-widest">Calendar</span>
         <div class="flex items-center gap-1">

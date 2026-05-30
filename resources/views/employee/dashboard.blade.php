@@ -177,8 +177,8 @@ $user = auth()->user();
         </div>
 
         {{-- RIGHT COLUMN: Calendar --}}
-        <div class="w-[280px] shrink-0 space-y-3">
-            <div class="sticky top-24">
+        <div class="w-full lg:w-[280px] lg:shrink-0 space-y-3">
+            <div class="lg:sticky lg:top-24">
                 @include('partials.dashboard-calendar')
             </div>
         </div>

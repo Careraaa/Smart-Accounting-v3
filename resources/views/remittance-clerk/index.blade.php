@@ -312,8 +312,8 @@ $mctActive = count($monthlyCollectionTrend) - 1;
     </div>
 
     {{-- RIGHT COLUMN: Calendar --}}
-    <div class="w-[280px] shrink-0 space-y-5">
-        <div class="sticky top-24 space-y-5">
+    <div class="w-full lg:w-[280px] lg:shrink-0 space-y-5">
+        <div class="lg:sticky lg:top-24 space-y-5">
 
         @include('partials.dashboard-calendar')
         </div>

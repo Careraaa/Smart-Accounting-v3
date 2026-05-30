@@ -1,4 +1,4 @@
-<nav class="sidebar fixed top-0 left-0 z-40 h-screen bg-white border-r border-gray-200 flex flex-col">
+<nav class="sidebar fixed top-0 left-0 z-40 h-dvh bg-white border-r border-gray-200 flex flex-col">
     <style>
         /* ── Submenu slide animation ── */
         .sidebar-sub {
