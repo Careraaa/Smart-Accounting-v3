@@ -7,9 +7,6 @@
 .stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 .stat-card:nth-child(1) { animation-delay:0.05s; }
 .stat-card:nth-child(2) { animation-delay:0.1s; }
-.stat-card:nth-child(3) { animation-delay:0.15s; }
-.stat-card:nth-child(4) { animation-delay:0.2s; }
-.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 @keyframes compSlide { 0%{opacity:0.3;transform:translateX(-4px)} 100%{opacity:1;transform:translateX(0)} }
 .comp-section > div { animation:compSlide 0.35s cubic-bezier(0.16,1,0.3,1) both; }
 .comp-section > div:nth-child(1) { animation-delay:0.02s; }
@@ -55,30 +52,37 @@
             'rejected' => ['label'=>'Rejected','dot'=>'bg-red-400','text'=>'text-red-600','bg'=>'bg-red-50'],
             default => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
         };
-        $overtimeAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay'));
-        $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with($a->allowance_type, 'Leave Pay'));
-        $regularAllowances  = $payroll->allowances->reject(fn($a) => str_starts_with($a->allowance_type, 'Overtime Pay') || str_starts_with($a->allowance_type, 'Leave Pay'));
-        $undertimeDeductions= $payroll->deductions->filter(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
-        $regularDeductions  = $payroll->deductions->reject(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
-        $caDeduction  = (float) ($payroll->cash_advance_deduction ?? 0);
-        $slDeduction  = (float) ($payroll->salary_loan_deduction ?? 0);
-        $otAllowanceTotal = $overtimeAllowances->sum('amount');
-        $leavePayTotal = $leavePayAllowances->sum('amount');
+        $overtimePay = (float)($payroll->overtime_pay ?? 0);
+        $overtimeHours = (float)($payroll->allowances->where('allowance_type', 'like', 'Overtime Pay%')->sum('hours') ?? 0);
+        $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
+        $leavePayTotal = (float)($leavePayAllowances->sum('amount') ?? 0);
         $leavePayDays = (int) $leavePayAllowances->sum('hours');
-        $regularAllowanceTotal = $regularAllowances->sum('amount');
+        $holidayPay = (float)($payroll->holiday_pay ?? 0);
+        $holidayOTPay = (float)($payroll->holiday_ot_pay ?? 0);
+        $holidayOTHours = (float)($payroll->holiday_ot_hours ?? 0);
         $holidayBreakdown = $payroll->holiday_breakdown ?? [];
-        $holidayPay = $payroll->holiday_pay;
+        $undertimeDeduction = (float)($payroll->undertime_deduction ?? 0);
+        $undertimeHours = (float)($payroll->deductions->where('deduction_type', 'like', 'Undertime Deduction%')->sum('hours') ?? 0);
+        $lateDeduction = (float)($payroll->deductions->where('deduction_type', 'Late Deduction')->sum('amount') ?? 0);
+        $lateMinutes = (int)($payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description ? (preg_match('/^(\d+)/', $payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description, $m) ? $m[1] : 0) : 0);
+        $caDeduction = (float)($payroll->cash_advance_deduction ?? 0);
+        $slDeduction = (float)($payroll->salary_loan_deduction ?? 0);
+        $sss = (float)($payroll->sss ?? 0);
+        $pagibig = (float)($payroll->pagibig ?? 0);
+        $philhealth = (float)($payroll->phil_health ?? $payroll->philhealth ?? 0);
+        $withholdingTax = (float)($payroll->withholding_tax ?? 0);
+        $manualAllowances = $payroll->allowances->filter(fn($a) => !str_starts_with((string)($a->allowance_type ?? ''), 'Overtime Pay') && !str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
+        $manualDeductions = $payroll->deductions->filter(fn($d) => !in_array($d->deduction_type, ['SSS','Pag-IBIG','PhilHealth','Withholding Tax','Late Deduction']) && !str_starts_with((string)($d->deduction_type ?? ''), 'Undertime Deduction'));
     @endphp
 
     {{-- Employee header --}}
-    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-5 flex items-center gap-4">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-5 flex items-center gap-4">
         <span class="w-12 h-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center text-base font-extrabold text-gray-600 shrink-0 uppercase">{{ strtoupper(substr($payroll->user->first_name??'U',0,1).substr($payroll->user->last_name??'',0,1)) }}</span>
         <div class="flex-1">
             <h1 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</h1>
             <p class="text-xs text-gray-400">{{ $payroll->user->position ?? ($payroll->user->department ?? 'Employee') }}</p>
-            <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $payroll->payroll_period_start->format('F d, Y') }} &mdash; {{ $payroll->payroll_period_end->format('F d, Y') }}</p>
         </div>
-        <div class="flex flex-col items-end gap-2">
+        <div class="flex items-center gap-3">
             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $sc['bg'] }} {{ $sc['text'] }}">
                 <span class="w-2 h-2 rounded-full {{ $sc['dot'] }}"></span>
                 {{ $sc['label'] }}
@@ -86,184 +90,223 @@
             @if($payroll->approvedBy)
                 <span class="text-[0.55rem] font-mono text-gray-500">Approved by {{ $payroll->approvedBy->first_name }} {{ $payroll->approvedBy->last_name }}</span>
             @endif
+            <span class="font-mono text-xs text-gray-500 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-lg shrink-0">{{ $payroll->payroll_period_start->format('M d') }} &ndash; {{ $payroll->payroll_period_end->format('M d, Y') }}</span>
         </div>
     </div>
 
-    {{-- Stat chips --}}
-    <div class="grid grid-cols-4 gap-3">
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Days Worked</p>
-            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">{{ $payroll->days_worked }}</p>
-        </div>
-        @php $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)->whereBetween('date', [$payroll->payroll_period_start, $payroll->payroll_period_end])->where('status', 'absent')->count(); @endphp
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Absent</p>
-            <p class="text-lg font-extrabold {{ $daysAbsent > 0 ? 'text-red-500' : 'text-gray-900' }} tabular-nums mt-1">{{ $daysAbsent }}</p>
-        </div>
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Daily Rate</p>
-            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($payroll->per_day_rate, 2) }}</p>
-        </div>
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Hourly Rate</p>
-            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($payroll->hourly_rate, 2) }}</p>
-        </div>
-    </div>
-
-    {{-- Earnings --}}
-    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    {{-- Row 1: Attendance + Salary --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{-- Attendance card --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden stat-card">
+            <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </div>
+                <div><p class="text-sm font-bold text-gray-900">Attendance</p><p class="text-xs text-gray-400">From records</p></div>
             </div>
-            <div><p class="text-sm font-bold text-gray-900">Earnings</p><p class="text-xs text-gray-400">Basic pay, overtime, and allowances</p></div>
-        </div>
-        <div class="px-5 py-4 divide-y divide-gray-50 comp-section">
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-gray-600">Basic Pay <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1.5">daily rate &times; {{ $payroll->days_worked }} days</span></span>
-                <span class="text-sm font-semibold text-gray-900 tabular-nums font-mono">₱{{ number_format($payroll->basic_salary, 2) }}</span>
-            </div>
-
-            @foreach($holidayBreakdown as $hb)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                    {{ $hb['label'] ?? 'Holiday Pay' }}
-                </span>
-                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($hb['amount'], 2) }}</span>
-            </div>
-            @endforeach
-
-            @php $holidayOTPay = (float)($payroll->holiday_ot_pay ?? 0); $holidayOTHours = (float)($payroll->holiday_ot_hours ?? 0); @endphp
-            @if($holidayOTPay > 0)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                    Holiday Overtime Pay
-                    @if($holidayOTHours > 0)<span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ number_format($holidayOTHours, 2) }} hrs</span>@endif
-                </span>
-                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($holidayOTPay, 2) }}</span>
-            </div>
-            @endif
-
-            @foreach($overtimeAllowances as $ot)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                    {{ $ot->allowance_type }}
-                    @if($ot->hours)<span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $ot->hours }} hrs</span>@endif
-                </span>
-                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($ot->amount, 2) }}</span>
-            </div>
-            @endforeach
-
-            @if($leavePayTotal > 0)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                    Leave Pay
-                    <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $leavePayDays }} day{{ $leavePayDays !== 1 ? 's' : '' }}</span>
-                </span>
-                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($leavePayTotal, 2) }}</span>
-            </div>
-            @endif
-
-            @foreach($regularAllowances as $allow)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-emerald-600 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                    {{ $allow->allowance_type }}
-                </span>
-                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($allow->amount, 2) }}</span>
-            </div>
-            @endforeach
-
-            @foreach($payroll->bonuses as $bonus)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-purple-600 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                    {{ $bonus->bonus_type }}
-                    @if($bonus->description)<span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $bonus->description }}</span>@endif
-                </span>
-                <span class="text-sm font-semibold text-purple-600 tabular-nums font-mono">+₱{{ number_format($bonus->amount, 2) }}</span>
-            </div>
-            @endforeach
-
-            <div class="flex items-center justify-between py-3 mt-1 border-t-2 border-gray-100">
-                <span class="text-sm font-bold text-gray-900">Gross Pay</span>
-                <span class="text-base font-bold text-gray-900 tabular-nums font-mono">₱{{ number_format($payroll->gross_pay, 2) }}</span>
+            <div class="p-4">
+                <div class="grid grid-cols-3 gap-2.5">
+                    <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
+                        <p class="text-xs text-gray-400 font-medium">Days Worked</p>
+                        <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5">{{ $payroll->days_worked ?? '—' }}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
+                        <p class="text-xs text-gray-400 font-medium">Hours</p>
+                        <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5">{{ $payroll->hours_worked ?? '—' }}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
+                        <p class="text-xs text-gray-400 font-medium">Absent</p>
+                        <p class="text-lg font-extrabold text-red-500 tabular-nums mt-0.5">{{ \App\Models\Attendance::where('user_id', $payroll->user_id)->whereBetween('date', [$payroll->payroll_period_start, $payroll->payroll_period_end])->where('status', 'absent')->count() }}</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    {{-- Deductions --}}
-    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+        {{-- Salary Computation card (summary) --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden stat-card">
+            <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div><p class="text-sm font-bold text-gray-900">Salary Computation</p><p class="text-xs text-gray-400">Earnings and deductions</p></div>
             </div>
-            <div><p class="text-sm font-bold text-gray-900">Deductions</p><p class="text-xs text-gray-400">Statutory contributions and other deductions</p></div>
-        </div>
-        <div class="px-5 py-4 divide-y divide-gray-50 comp-section">
-            @forelse($regularDeductions as $d)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-red-500 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-                    {{ $d->deduction_type === 'Late Deduction' ? 'Tardiness' : $d->deduction_type }}
-                    @if($d->description)<span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $d->description }}</span>@endif
-                </span>
-                <span class="text-sm font-semibold text-red-500 tabular-nums font-mono">−₱{{ number_format($d->amount, 2) }}</span>
-            </div>
-            @empty
-            @endforelse
+            <div class="p-4">
+                <div class="divide-y divide-gray-50 comp-section">
+                    <div class="flex items-center justify-between py-2.5 first:pt-0">
+                        <span class="text-sm text-gray-500 flex items-center gap-1.5">Basic Pay <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">&#x20B1;{{ number_format($payroll->per_day_rate, 2) }} &times; {{ $payroll->days_worked }} day{{ $payroll->days_worked != 1 ? 's' : '' }}</span></span>
+                        <span class="text-sm font-bold text-gray-900 tabular-nums font-mono">&#x20B1;{{ number_format($payroll->basic_salary ?? 0, 2) }}</span>
+                    </div>
 
-            @foreach($undertimeDeductions as $ut)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-red-500 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-                    Undertime <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">attendance-based</span>
-                </span>
-                <span class="text-sm font-semibold text-red-500 tabular-nums font-mono">−₱{{ number_format($ut->amount, 2) }}</span>
-            </div>
-            @endforeach
+                    {{-- Holiday rows --}}
+                    @foreach($holidayBreakdown as $hb)
+                    @php
+                        $_hbType = match($hb['type'] ?? '') { 'regular' => 'Regular', 'special' => 'Special', 'double' => 'Double', default => ucfirst($hb['type'] ?? '') };
+                        $_hbRest = !empty($hb['is_rest_day']) ? ', rest day' : '';
+                        $_hbWorked = empty($hb['is_worked']) ? (($hb['type'] === 'regular' || $hb['type'] === 'double') ? 'unworked — statutory entitlement' : 'not worked') : 'worked';
+                        $_hbLabel = 'Holiday Pay — ' . ($hb['holiday'] ?? 'Holiday') . ' (' . $_hbType . $_hbRest . ', ' . $_hbWorked . ')';
+                    @endphp
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-emerald-600 flex items-center gap-1.5">
+                            {{ $_hbLabel }}
+                        </span>
+                        <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+&#x20B1;{{ number_format($hb['amount'], 2) }}</span>
+                    </div>
+                    @endforeach
 
-            @if($caDeduction > 0)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-red-500 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-                    Cash Advance <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">loan</span>
-                </span>
-                <span class="text-sm font-semibold text-red-500 tabular-nums font-mono">−₱{{ number_format($caDeduction, 2) }}</span>
-            </div>
-            @endif
+                    {{-- Leave Pay --}}
+                    @if($leavePayTotal > 0)
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-emerald-600 flex items-center gap-1.5">Leave Pay <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $leavePayDays }} day{{ $leavePayDays !== 1 ? 's' : '' }}</span></span>
+                        <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+&#x20B1;{{ number_format($leavePayTotal, 2) }}</span>
+                    </div>
+                    @endif
 
-            @if($slDeduction > 0)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-red-500 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-                    Salary Loan <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">loan</span>
-                </span>
-                <span class="text-sm font-semibold text-red-500 tabular-nums font-mono">−₱{{ number_format($slDeduction, 2) }}</span>
-            </div>
-            @endif
+                    {{-- Overtime Pay --}}
+                    @if($overtimePay > 0)
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-emerald-600 flex items-center gap-1.5">Overtime Pay <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $overtimeHours }} hrs</span></span>
+                        <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+&#x20B1;{{ number_format($overtimePay, 2) }}</span>
+                    </div>
+                    @endif
 
-            @if($regularDeductions->isEmpty() && $undertimeDeductions->isEmpty() && $caDeduction <= 0 && $slDeduction <= 0)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-gray-300 italic">No deductions</span>
-                <span></span>
-            </div>
-            @endif
+                    {{-- Holiday Overtime --}}
+                    @if($holidayOTPay > 0)
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-emerald-600 flex items-center gap-1.5">Holiday Overtime <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $holidayOTHours }} hrs</span></span>
+                        <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+&#x20B1;{{ number_format($holidayOTPay, 2) }}</span>
+                    </div>
+                    @endif
 
-            <div class="flex items-center justify-between py-3 mt-1 border-t-2 border-gray-100">
-                <span class="text-sm font-bold text-gray-900">Total Deductions</span>
-                <span class="text-base font-bold text-red-500 tabular-nums font-mono">₱{{ number_format($payroll->total_deductions, 2) }}</span>
+                    {{-- Undertime --}}
+                    @if($undertimeDeduction > 0)
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-red-500 flex items-center gap-1.5">Undertime <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $undertimeHours }} hrs</span></span>
+                        <span class="text-sm font-bold text-red-500 tabular-nums font-mono">-&#x20B1;{{ number_format($undertimeDeduction, 2) }}</span>
+                    </div>
+                    @endif
+
+                    {{-- Tardiness --}}
+                    @if($lateDeduction > 0)
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-red-500 flex items-center gap-1.5">Tardiness <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $lateMinutes }} mins</span></span>
+                        <span class="text-sm font-bold text-red-500 tabular-nums font-mono">-&#x20B1;{{ number_format($lateDeduction, 2) }}</span>
+                    </div>
+                    @endif
+
+                    {{-- Government contributions --}}
+                    @php $govContribs = [['label'=>'SSS','badge'=>'sss','amount'=>$sss],['label'=>'Pag-IBIG','badge'=>'pagibig','amount'=>$pagibig],['label'=>'PhilHealth','badge'=>'philhealth','amount'=>$philhealth],['label'=>'Withholding Tax','badge'=>'withholding','amount'=>$withholdingTax]]; @endphp
+                    @foreach($govContribs as $gc)
+                    @if($gc['amount'] > 0)
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-red-500 flex items-center gap-1.5">{{ $gc['label'] }} <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $gc['badge'] }}</span></span>
+                        <span class="text-sm font-bold text-red-500 tabular-nums font-mono">-&#x20B1;{{ number_format($gc['amount'], 2) }}</span>
+                    </div>
+                    @endif
+                    @endforeach
+
+                    {{-- CA / SL --}}
+                    @if($caDeduction > 0)
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-red-500 flex items-center gap-1.5">Cash Advance <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">loan</span></span>
+                        <span class="text-sm font-bold text-red-500 tabular-nums font-mono">-&#x20B1;{{ number_format($caDeduction, 2) }}</span>
+                    </div>
+                    @endif
+                    @if($slDeduction > 0)
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm text-red-500 flex items-center gap-1.5">Salary Loan <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">loan</span></span>
+                        <span class="text-sm font-bold text-red-500 tabular-nums font-mono">-&#x20B1;{{ number_format($slDeduction, 2) }}</span>
+                    </div>
+                    @endif
+
+                    {{-- Initial Net Pay --}}
+                    <div class="flex items-center justify-between py-2.5">
+                        <span class="text-sm font-bold text-gray-900">Initial Net Pay</span>
+                        <span class="text-base font-bold text-gray-900 tabular-nums font-mono">&#x20B1;{{ number_format($payroll->net_pay ?? 0, 2) }}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    {{-- Row 2: Allowances + Deductions --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{-- Allowances --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <div><p class="text-sm font-bold text-gray-900">Allowances <span class="font-normal text-gray-400 text-xs">(optional)</span></p><p class="text-xs text-gray-400">Transportation, meal, housing&hellip;</p></div>
+            </div>
+            <div class="p-4">
+                <div class="flex flex-wrap gap-1.5 min-h-[28px] py-0.5">
+                    @forelse($manualAllowances as $a)
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="max-w-[120px] truncate">{{ $a->allowance_type }}</span>
+                        <span class="tabular-nums font-mono opacity-85">&nbsp;&#x20B1;{{ number_format($a->amount, 2) }}</span>
+                    </span>
+                    @empty
+                    <span class="text-xs text-gray-300 italic">None added yet.</span>
+                    @endforelse
+                </div>
+                @if($manualAllowances->count() > 0)
+                <div class="text-xs font-semibold text-emerald-600 text-right mt-1 font-mono tabular-nums">Total: &#x20B1;<span>{{ number_format($manualAllowances->sum('amount'), 2) }}</span></div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Deductions --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                </div>
+                <div><p class="text-sm font-bold text-gray-900">Deductions <span class="font-normal text-gray-400 text-xs">(optional)</span></p><p class="text-xs text-gray-400">Penalty, medical, savings&hellip;</p></div>
+            </div>
+            <div class="p-4">
+                <div class="flex flex-wrap gap-1.5 min-h-[28px] py-0.5">
+                    @forelse($manualDeductions as $d)
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+                        <span class="max-w-[120px] truncate">{{ $d->deduction_type }}</span>
+                        <span class="tabular-nums font-mono opacity-85">&nbsp;&#x20B1;{{ number_format($d->amount, 2) }}</span>
+                    </span>
+                    @empty
+                    <span class="text-xs text-gray-300 italic">None added yet.</span>
+                    @endforelse
+                </div>
+                @if($manualDeductions->count() > 0)
+                <div class="text-xs font-semibold text-red-500 text-right mt-1 font-mono tabular-nums">Total: &#x20B1;<span>{{ number_format($manualDeductions->sum('amount'), 2) }}</span></div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- Bonuses --}}
+    @if($payroll->bonuses->count() > 0)
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                </div>
+            <div><p class="text-sm font-bold text-gray-900">Bonuses</p><p class="text-xs text-gray-400">Performance, holiday, attendance, special</p></div>
+        </div>
+        <div class="p-4">
+            <div class="flex flex-wrap gap-1.5 min-h-[28px] py-0.5">
+                @foreach($payroll->bonuses as $b)
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
+                    <span class="max-w-[120px] truncate">{{ ucfirst($b->bonus_type) }}{{ $b->description ? ' — ' . $b->description : '' }}</span>
+                    <span class="tabular-nums font-mono opacity-85">&nbsp;&#x20B1;{{ number_format($b->amount, 2) }}</span>
+                </span>
+                @endforeach
+            </div>
+            <div class="text-xs font-semibold text-violet-600 text-right mt-1 font-mono tabular-nums">Total: &#x20B1;<span>{{ number_format($payroll->bonuses->sum('amount'), 2) }}</span></div>
+        </div>
+    </div>
+    @endif
 
     {{-- OT / UT Breakdown --}}
     @if($overtimeUndertimeBreakdown->count())
-    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
             <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
@@ -310,12 +353,15 @@
 
     {{-- Net Pay --}}
     <div class="net-pop bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-5 flex items-center justify-between">
-        <span class="text-xs font-semibold uppercase tracking-widest text-gray-400">Net Pay</span>
-        <span class="text-2xl font-extrabold text-gray-900 tabular-nums font-mono">₱{{ number_format($payroll->net_pay, 2) }}</span>
+        <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Net Pay</p>
+            <p class="text-xs text-gray-400 mt-0.5">Basic + Allowances &#x2212; Deductions + Bonuses</p>
+        </div>
+        <span class="text-2xl font-extrabold text-gray-900 tabular-nums font-mono tracking-tight">₱{{ number_format($payroll->net_pay ?? 0, 2) }}</span>
     </div>
 
     {{-- Actions --}}
-    <div class="fade-up flex items-center gap-3 pt-2">
+    <div class="flex items-center gap-3 pt-2">
         <a href="{{ route('payroll.generatePayslip', $payroll) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97]">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
             Generate Payslip
