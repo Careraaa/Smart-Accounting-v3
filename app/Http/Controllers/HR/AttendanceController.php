@@ -148,25 +148,56 @@ class AttendanceController extends Controller
             return response()->json(['message' => 'User not authenticated'], 401);
         }
 
-        // Determine log type
-        $last = AttendanceLog::where('user_id', $user->id)->latest('logged_at')->first();
-        $type = $last && $last->type === 'time_in' ? 'time_out' : 'time_in';
+        // New QR scan rules:
+        // - First scan of the day for employee => time_in
+        // - All subsequent scans => time_out (always overwrite to keep the last scan)
+        // - If an existing attendance was created manually (`is_manual`), do not overwrite any non-null manual fields
+        $today = today();
+        $currentTime = now();
 
+        // Get today's logs to decide if this is the first scan
+        $todayLogs = AttendanceLog::where('user_id', $user->id)
+            ->whereDate('logged_at', $today)
+            ->orderBy('logged_at')
+            ->get();
+
+        $isFirstScan = $todayLogs->isEmpty();
+        $type = $isFirstScan ? 'time_in' : 'time_out';
+
+        // Create a log entry for the scan
         AttendanceLog::create([
             'user_id' => $user->id,
             'type' => $type,
-            'logged_at' => now(),
+            'logged_at' => $currentTime,
         ]);
 
-        $today = today();
-        $currentTime = now()->format('H:i:s');
+        // Load or initialize today's attendance record
+        $attendance = Attendance::firstOrNew(['user_id' => $user->id, 'date' => $today]);
+
+        // Respect manual attendance entries: do not overwrite existing manual fields
+        $isManual = (bool) $attendance->is_manual;
 
         if ($type === 'time_in') {
-            Attendance::updateOrCreate(['user_id' => $user->id, 'date' => $today], ['time_in' => $currentTime, 'status' => 'present', 'is_manual' => false]);
+            // Only set time_in if it doesn't already exist. Never overwrite a manual time_in.
+            if (empty($attendance->time_in)) {
+                $attendance->time_in = $currentTime->format('H:i:s');
+                $attendance->status = $attendance->status ?? 'present';
+                $attendance->is_manual = false;
+                $attendance->save();
+            }
         } else {
-            $attendance = Attendance::where('user_id', $user->id)->where('date', $today)->first();
-            if ($attendance) {
-                $attendance->update(['time_out' => $currentTime]);
+            // time_out: set/overwrite the time_out so the last scan is preserved,
+            // but do not overwrite an existing manual time_out.
+            if ($isManual) {
+                if (empty($attendance->time_out)) {
+                    $attendance->time_out = $currentTime->format('H:i:s');
+                    $attendance->save();
+                }
+            } else {
+                // If attendance is brand-new (no record), ensure a record exists with time_out
+                $attendance->time_out = $currentTime->format('H:i:s');
+                $attendance->is_manual = false;
+                $attendance->save();
             }
         }
 
@@ -180,6 +211,106 @@ class AttendanceController extends Controller
         } catch (\Throwable $e) {
             logger()->warning('AttendanceNotification failed: ' . $e->getMessage());
         }
+
+        // ── Auto OT/UT detection (run after QR scan) ────────────────────────
+        // Reuse same logic as manual `store()` to auto-detect OT/UT when both
+        // time_in and time_out are present for the day.
+        try {
+            $userId = $user->id;
+            if ($attendance && $attendance->time_in && $attendance->time_out) {
+                $dateStr = $attendance->date->format('Y-m-d');
+
+                // Get employee and shift
+                $employee = Employee::find($userId);
+                $shift = null;
+                if ($employee && isset($employee->shift_id) && $employee->shift_id) {
+                    $shift = Shift::find($employee->shift_id);
+                }
+                if (!$shift) {
+                    $shift = Shift::where('is_active', true)->first();
+                }
+
+                if ($shift) {
+                    $attendanceService = new AttendanceService();
+                    $otutResult = $attendanceService->calculateOvertimeAndUndertime($attendance, $shift);
+
+                    $overtimeHours = $otutResult['overtime_hours'];
+                    $undertimeHours = $otutResult['undertime_hours'];
+                    $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
+
+                    $hasApprovedRecord = OvertimeUndertime::where('user_id', $userId)
+                        ->where('date', $dateStr)
+                        ->whereIn('type', ['overtime', 'undertime'])
+                        ->where('status', 'approved')
+                        ->exists();
+
+                    if (!$hasApprovedRecord) {
+                        // Remove existing pending OT/UT for the day to avoid duplicates
+                        OvertimeUndertime::where('user_id', $userId)
+                            ->where('date', $dateStr)
+                            ->where('status', 'pending')
+                            ->delete();
+
+                        if ($overtimeHours > 0) {
+                            $otAmount = $overtimeHours * $hourlyRate * 1.25;
+                            OvertimeUndertime::create([
+                                'user_id' => $userId,
+                                'date' => $dateStr,
+                                'type' => 'overtime',
+                                'hours' => $overtimeHours,
+                                'reason' => "Auto-detected from QR scan (time out: " . Carbon::parse($dateStr . ' ' . $attendance->time_out)->format('g:i A') . ")",
+                                'status' => 'pending',
+                                'amount' => $otAmount,
+                                'hourly_rate_used' => $hourlyRate,
+                            ]);
+
+                            try {
+                                $otRecord = OvertimeUndertime::where('user_id', $userId)
+                                    ->where('date', $dateStr)
+                                    ->where('type', 'overtime')
+                                    ->latest()
+                                    ->first();
+                                if ($otRecord) {
+                                    $otRecord->load('employee');
+                                    OvertimeNotification::submitted($otRecord);
+                                }
+                            } catch (\Throwable $e) {
+                                logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
+                            }
+                        } elseif ($undertimeHours > 0) {
+                            $utAmount = -($undertimeHours * $hourlyRate);
+                            OvertimeUndertime::create([
+                                'user_id' => $userId,
+                                'date' => $dateStr,
+                                'type' => 'undertime',
+                                'hours' => $undertimeHours,
+                                'reason' => "Auto-detected from QR scan (time in: " . Carbon::parse($dateStr . ' ' . $attendance->time_in)->format('g:i A') . ")",
+                                'status' => 'pending',
+                                'amount' => $utAmount,
+                                'hourly_rate_used' => $hourlyRate,
+                            ]);
+
+                            try {
+                                $utRecord = OvertimeUndertime::where('user_id', $userId)
+                                    ->where('date', $dateStr)
+                                    ->where('type', 'undertime')
+                                    ->latest()
+                                    ->first();
+                                if ($utRecord) {
+                                    $utRecord->load('employee');
+                                    OvertimeNotification::submitted($utRecord);
+                                }
+                            } catch (\Throwable $e) {
+                                logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            logger()->warning('QR OT/UT detection failed: ' . $e->getMessage());
+        }
+        // ─────────────────────────────────────────────────────────────────────
 
         return response()->json([
             'message' => ucfirst(str_replace('_', ' ', $type)) . ' recorded',
@@ -310,37 +441,57 @@ class AttendanceController extends Controller
                 ->withInput();
         }
 
-        // Auto-determine status based on office hours and grace period
-        $status = 'present'; // default
-        if (!$request->time_in || !$request->time_out) {
-            $status = 'absent';
-        } else {
-            $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
-            $timeOut = Carbon::createFromFormat('H:i', $request->time_out);
-            $officeStart = Carbon::createFromFormat('H:i', '08:00');
-            $officeEnd = Carbon::createFromFormat('H:i', '17:00');
-            
-            // Get grace period from settings (default: 5 minutes)
-            $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
-            
-            // Apply grace period: only mark as late if beyond (officeStart + gracePeriod)
-            $lateThreshold = $officeStart->copy()->addMinutes($gracePeriodMinutes);
-            
-            // Check if employee came in late (after grace period)
-            if ($timeIn->isAfter($lateThreshold)) {
-                $status = 'late';
+        // Require at least one time value
+        if (!$request->time_in && !$request->time_out) {
+            return back()
+                ->withErrors(['time' => 'Please set at least Time In or Time Out.'])
+                ->withInput();
+        }
+
+        // Build data to save — only include provided fields so we don't overwrite existing values
+        $data = ['is_manual' => true];
+
+        // Determine status when time_in is provided (and optionally time_out).
+        // If both provided, compute status using both; if only time_in provided, compute late/present.
+        $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
+
+        if ($request->time_in) {
+            $data['time_in'] = $request->time_in ? $request->time_in . ':00' : null;
+
+            try {
+                $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
+                $officeStart = Carbon::createFromFormat('H:i', '08:00');
+                $lateThreshold = $officeStart->copy()->addMinutes($gracePeriodMinutes);
+
+                $data['status'] = $timeIn->isAfter($lateThreshold) ? 'late' : 'present';
+            } catch (\Throwable $e) {
+                $data['status'] = 'present';
             }
         }
 
-        Attendance::updateOrCreate(
-            ['user_id' => $userId, 'date' => $request->date],
-            [
-                'time_in' => $request->time_in ? $request->time_in . ':00' : null,
-                'time_out' => $request->time_out ? $request->time_out . ':00' : null,
-                'status' => $status,
-                'is_manual' => true,
-            ],
-        );
+        if ($request->time_out) {
+            $data['time_out'] = $request->time_out ? $request->time_out . ':00' : null;
+        }
+
+        // If both provided, run the stricter status logic using both times
+        if ($request->time_in && $request->time_out) {
+            try {
+                $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
+                $timeOut = Carbon::createFromFormat('H:i', $request->time_out);
+                $officeStart = Carbon::createFromFormat('H:i', '08:00');
+                $lateThreshold = $officeStart->copy()->addMinutes($gracePeriodMinutes);
+
+                $data['status'] = $timeIn->isAfter($lateThreshold) ? 'late' : 'present';
+            } catch (\Throwable $e) {
+                $data['status'] = $data['status'] ?? 'present';
+            }
+        }
+
+        // Find existing attendance or create new one without mass-nullifying fields
+        $attendance = Attendance::firstOrNew(['user_id' => $userId, 'date' => $request->date]);
+        $attendance->fill($data);
+        $attendance->is_manual = true;
+        $attendance->save();
 
         try {
             $user = User::find($userId);
@@ -361,13 +512,9 @@ class AttendanceController extends Controller
         // 5. Overtime and undertime do NOT offset each other
         $otutMessage = null;
 
-        if ($request->time_in && $request->time_out) {
-            $dateStr  = $request->date;
-            
-            // Fetch the attendance record we just created
-            $attendance = Attendance::where('user_id', $userId)
-                ->where('date', $dateStr)
-                ->first();
+        // Run OT/UT detection if the saved attendance now has both time_in and time_out
+        if ($attendance->time_in && $attendance->time_out) {
+            $dateStr = $attendance->date->format('Y-m-d');
 
             if ($attendance) {
                 // Get employee to find their shift assignment
@@ -421,7 +568,7 @@ class AttendanceController extends Controller
                                 'date'             => $dateStr,
                                 'type'             => 'overtime',
                                 'hours'            => $overtimeHours,
-                                'reason'           => "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $request->time_out)->format('g:i A') . ")",
+                                'reason'           => "Auto-detected from manual attendance log (time out: " . Carbon::parse($dateStr . ' ' . $attendance->time_out)->format('g:i A') . ")",
                                 'status'           => 'pending',
                                 'amount'           => $otAmount,
                                 'hourly_rate_used' => $hourlyRate,
@@ -452,7 +599,7 @@ class AttendanceController extends Controller
                                 'date'             => $dateStr,
                                 'type'             => 'undertime',
                                 'hours'            => $undertimeHours,
-                                'reason'           => "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $request->time_in)->format('g:i A') . ")",
+                                'reason'           => "Auto-detected from manual attendance log (time in: " . Carbon::parse($dateStr . ' ' . $attendance->time_in)->format('g:i A') . ")",
                                 'status'           => 'pending',
                                 'amount'           => $utAmount,
                                 'hourly_rate_used' => $hourlyRate,

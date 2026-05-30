@@ -1,4 +1,4 @@
-<nav class="sidebar fixed top-0 left-0 z-40 h-screen bg-white border-r border-gray-200 flex flex-col">
+<nav class="sidebar fixed top-0 left-0 z-40 h-dvh bg-white border-r border-gray-200 flex flex-col">
     <style>
         /* ── Submenu slide animation ── */
         .sidebar-sub {
@@ -156,9 +156,9 @@
     <div class="flex flex-col h-full">
 
         {{-- ── Logo / Brand ── --}}
-        <div class="sidebar-logo shrink-0 flex items-center justify-start px-4 h-16 border-b border-gray-100">
+        <div class="sidebar-logo shrink-0 flex items-center justify-center px-3 h-16 border-b border-gray-100">
             <a href="{{ route('dashboard') }}" class="b-brand flex items-center gap-2.5 no-underline min-w-0">
-                <span class="brand-icon flex-shrink-0">
+                <span class="brand-icon flex-shrink-0 hidden">
                     <img src="{{ asset('images/knights-icon.png') }}" alt="Knights Transport" width="30" height="30" class="si-logo-light block rounded-lg">
                     <img src="{{ asset('images/darkmode-icon.png') }}" alt="Knights Transport" width="30" height="30" class="si-logo-dark hidden rounded-lg">
                 </span>

@@ -276,8 +276,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
     </div>
 
     {{-- RIGHT COLUMN: Calendar + To-Do --}}
-    <div class="w-[280px] shrink-0 space-y-5">
-        <div class="sticky top-24 space-y-5">
+    <div class="w-full lg:w-[280px] lg:shrink-0 space-y-5">
+        <div class="lg:sticky lg:top-24 space-y-5">
 
         {{-- Calendar Card --}}
         @include('partials.dashboard-calendar')

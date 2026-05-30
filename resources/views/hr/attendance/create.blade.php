@@ -74,19 +74,6 @@
                         @error('user_id')
                             <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
                         @enderror
-                        <p class="text-xs text-gray-400 mt-2">You can also type the employee username below.</p>
-                    </div>
-
-                    <div class="mb-5">
-                        <label for="employee_identifier" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Employee Username <span class="text-xs font-normal normal-case tracking-normal text-gray-400">(optional)</span></label>
-                        <input type="text" name="employee_identifier" id="employee_identifier"
-                            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-200/50 placeholder:text-gray-400 @error('employee_identifier') border-red-400 @enderror"
-                            value="{{ old('employee_identifier') }}"
-                            placeholder="e.g. juan.delacruz">
-                        @error('employee_identifier')
-                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
-                        @enderror
-                    </div>
 
                     {{-- Date --}}
                     <div class="mb-5">
