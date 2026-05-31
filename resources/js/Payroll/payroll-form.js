@@ -182,12 +182,27 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // Leave Pay
-        if (EL.leavePayRow) EL.leavePayRow.style.display = S.leavePay > 0 ? "flex" : "none";
-        if (S.leavePay > 0 && EL.leavePayVal) EL.leavePayVal.textContent = fmt(S.leavePay);
-        if (EL.leavePayBadge) {
-            const days = S.leavePayDays ?? 0;
-            EL.leavePayBadge.textContent = days + " day" + (days !== 1 ? "s" : "");
+        // Leave Pay — one row per leave type
+        if (EL.leavePayRow) {
+            EL.leavePayRow.querySelectorAll('[data-leave-item]').forEach(el => el.remove());
+            const lb = S.leaveBreakdown ?? [];
+            if (lb.length > 0) {
+                EL.leavePayRow.style.display = "flex";
+                EL.leavePayRow.style.flexDirection = "column";
+                EL.leavePayRow.style.gap = "0";
+            } else {
+                EL.leavePayRow.style.display = "none";
+            }
+            lb.forEach(item => {
+                if (item.amount > 0) {
+                    const row = document.createElement('div');
+                    row.setAttribute('data-leave-item', '');
+                    row.className = 'prl-brow';
+                    row.innerHTML = '<span class="prl-brow-lbl c-green">' + item.type_name + ' <span class="prl-badge">' + item.paid_days + ' day' + (item.paid_days !== 1 ? 's' : '') + '</span></span>'
+                        + '<span class="prl-brow-val c-green">+' + fmt(item.amount) + '</span>';
+                    EL.leavePayRow.appendChild(row);
+                }
+            });
         }
 
         // OT

@@ -430,13 +430,13 @@ class PayrollService
             ]);
         }
 
-        // Leave Pay — sum all approved leaves with paid days for the period.
-        // Displayed in Salary Computation section, not in manual allowances.
+        // Leave Pay — one line per leave type (Sick Leave, Vacation Leave, etc.).
+        // Each is stored with a distinct allowance_type so the view can render them individually.
         // paid_days is stored in the 'hours' column for display purposes.
         foreach ($leaveAllowances as $leave) {
             if ($leave['amount'] > 0) {
                 $payroll->allowances()->create([
-                    'allowance_type' => 'Leave Pay',
+                    'allowance_type' => 'Leave Pay (' . ($leave['type_name'] ?? $leave['name'] ?? 'Leave') . ')',
                     'hours'          => $leave['paid_days'] ?? 0,
                     'amount'         => round($leave['amount'], 2),
                 ]);

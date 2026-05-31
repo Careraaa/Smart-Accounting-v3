@@ -176,6 +176,11 @@
             $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances($employee->id, $periodStart, $periodEnd, $dailyRate);
             $leavePay = collect($leaveAllowances)->sum('amount');
             $leavePayDays = collect($leaveAllowances)->sum('paid_days');
+            $leaveBreakdown = array_map(fn($la) => [
+                'type_name' => $la['type_name'] ?? $la['name'] ?? 'Leave',
+                'amount'    => round($la['amount'], 2),
+                'paid_days' => $la['paid_days'] ?? 0,
+            ], $leaveAllowances);
 
             // BUG FIX: return overtime_hours, undertime_hours, and adjusted_gross
             // so payroll-form.js can display OT/UT rows and the adjusted gross line.
@@ -231,6 +236,7 @@
                     'label'  => $this->payrollService->buildHolidayLabel($hb),
                     'amount' => round($hb['amount'], 2),
                 ], $v['holidayBreakdown']),
+                'leave_breakdown' => $leaveBreakdown,
                 'leave_pay' => round($leavePay, 2),
                 'leave_paid_days' => $leavePayDays,
                 'sss' => round($v['sss'], 2),

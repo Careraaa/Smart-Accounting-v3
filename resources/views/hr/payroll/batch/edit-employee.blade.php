@@ -109,18 +109,22 @@
                         <div id="ep_holiday_rows">
                             {{-- Holiday rows are rendered by JavaScript from window._ep.initComputed.holidayBreakdown --}}
                         </div>
-                        <div class="flex items-center justify-between py-2.5" id="ep_leave_pay_row" style="display:none;">
-                            <span class="text-sm text-emerald-600 flex items-center gap-1.5">Leave Pay <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded" id="ep_leave_pay_badge">0 days</span></span>
-                            <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono" id="ep_leave_pay_display">+₱0.00</span>
+                        <div id="ep_leave_pay_rows">
+                            @php
+                                $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
+                            @endphp
+                            @forelse($leavePayAllowances as $la)
+                            @php
+                                $_laName = str_replace(['Leave Pay (', ')'], '', $la->allowance_type);
+                                $_laDays = (int)($la->hours ?? 0);
+                            @endphp
+                            <div class="flex items-center justify-between py-2.5">
+                                <span class="text-sm text-emerald-600 flex items-center gap-1.5">{{ $_laName }} <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $_laDays }} day{{ $_laDays !== 1 ? 's' : '' }}</span></span>
+                                <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($la->amount, 2) }}</span>
+                            </div>
+                            @empty
+                            @endforelse
                         </div>
-                        @php
-                            $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
-                            $existingLeavePay = $leavePayAllowances->sum('amount');
-                            $existingLeavePayDays = (int) $leavePayAllowances->sum('hours');
-                        @endphp
-                        @if($existingLeavePay > 0)
-                        <script>document.addEventListener('DOMContentLoaded',function(){document.getElementById('ep_leave_pay_row').style.display='';document.getElementById('ep_leave_pay_display').textContent='+₱{{ number_format($existingLeavePay, 2) }}';document.getElementById('ep_leave_pay_badge').textContent='{{ $existingLeavePayDays }} day{{ $existingLeavePayDays !== 1 ? "s" : "" }}';});</script>
-                        @endif
                         <div class="flex items-center justify-between py-2.5" id="ep_ot_row" style="display:none;">
                             <span class="text-sm text-emerald-600 flex items-center gap-1.5">Overtime Pay <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded" id="ep_ot_hrs_badge"></span></span>
                             <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono" id="ep_ot_display">+₱0.00</span>
@@ -391,13 +395,19 @@ window._ep = {
             $('ep_holiday_ot_hrs_badge').textContent = c.holidayOTHours + ' hrs';
             holidayOtRow.style.display = '';
         } else { holidayOtRow.style.display = 'none'; }
-        const leavePayRow = $('ep_leave_pay_row');
-        if (c.leavePay > 0) {
-            $('ep_leave_pay_display').textContent = '+' + fmt(c.leavePay);
-            const days = c.leavePayDays ?? 0;
-            $('ep_leave_pay_badge').textContent = days + ' day' + (days !== 1 ? 's' : '');
-            leavePayRow.style.display = '';
-        } else { leavePayRow.style.display = 'none'; }
+        const leavePayContainer = $('ep_leave_pay_rows');
+        leavePayContainer.querySelectorAll('[data-leave-item]').forEach(el => el.remove());
+        const leaveBreakdown = c.leaveBreakdown ?? [];
+        leaveBreakdown.forEach(lb => {
+            if (lb.amount > 0) {
+                const row = document.createElement('div');
+                row.setAttribute('data-leave-item','');
+                row.className = 'flex items-center justify-between py-2.5';
+                row.innerHTML = '<span class="text-sm text-emerald-600 flex items-center gap-1.5">' + lb.type_name + ' <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">' + lb.paid_days + ' day' + (lb.paid_days !== 1 ? 's' : '') + '</span></span>'
+                              + '<span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+' + fmt(lb.amount) + '</span>';
+                leavePayContainer.appendChild(row);
+            }
+        });
         const utRow = $('ep_ut_row');
         if (c.utDeduction > 0) {
             $('ep_ut_display').textContent   = '-' + fmt(c.utDeduction);
@@ -567,6 +577,7 @@ window._ep = {
                 holidayOTPay:data.holiday_overtime_pay??0,
                 holidayOTHours:data.holiday_overtime_hours??0,
                 holidayBreakdown:data.holiday_breakdown??[],
+                leaveBreakdown:data.leave_breakdown??[],
                 leavePay:data.leave_pay??0,
                 leavePayDays:data.leave_paid_days??0,
                 otPay:data.overtime_pay??0, otHours:data.overtime_hours??0,

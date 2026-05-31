@@ -151,16 +151,20 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             </div>
             @endforeach
 
-            @if($leavePayTotal > 0)
+            @foreach($leavePayAllowances as $la)
+            @php
+                $_laName = str_replace(['Leave Pay (', ')'], '', $la->allowance_type);
+                $_laDays = (int)($la->hours ?? 0);
+            @endphp
             <div class="flex items-center justify-between py-2.5">
                 <span class="text-sm text-emerald-600 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                    Leave Pay
-                    <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $leavePayDays }} day{{ $leavePayDays !== 1 ? 's' : '' }}</span>
+                    {{ $_laName }}
+                    <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">{{ $_laDays }} day{{ $_laDays !== 1 ? 's' : '' }}</span>
                 </span>
-                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($leavePayTotal, 2) }}</span>
+                <span class="text-sm font-semibold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($la->amount, 2) }}</span>
             </div>
-            @endif
+            @endforeach
 
             @foreach($regularAllowances as $allow)
             <div class="flex items-center justify-between py-2.5">

@@ -241,12 +241,13 @@ class LeaveService
         $allowances = [];
 
         foreach ($approvedLeaves as $leave) {
-            // If paid_days is null (leaves approved before LWOP system), default to total days
             $paidDays = $leave->paid_days ?? $leave->days;
             if ($paidDays > 0) {
                 $leavePayAmount = $dailyRate * $paidDays;
+                $typeName = $leave->leaveType?->name ?? $leave->leave_type ?? 'Leave';
                 $allowances[] = [
-                    'name' => 'Leave Pay',
+                    'name' => $typeName,
+                    'type_name' => $typeName,
                     'amount' => $leavePayAmount,
                     'paid_days' => $paidDays,
                 ];

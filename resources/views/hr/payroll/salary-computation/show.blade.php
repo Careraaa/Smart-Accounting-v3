@@ -153,13 +153,17 @@
                     </div>
                     @endforeach
 
-                    {{-- Leave Pay --}}
-                    @if($leavePayTotal > 0)
+                    {{-- Leave Pay — one row per leave type --}}
+                    @foreach($leavePayAllowances as $la)
+                    @php
+                        $_laName = str_replace(['Leave Pay (', ')'], '', $la->allowance_type);
+                        $_laDays = (int)($la->hours ?? 0);
+                    @endphp
                     <div class="flex items-center justify-between py-2.5">
-                        <span class="text-sm text-emerald-600 flex items-center gap-1.5">Leave Pay <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $leavePayDays }} day{{ $leavePayDays !== 1 ? 's' : '' }}</span></span>
-                        <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+&#x20B1;{{ number_format($leavePayTotal, 2) }}</span>
+                        <span class="text-sm text-emerald-600 flex items-center gap-1.5">{{ $_laName }} <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $_laDays }} day{{ $_laDays !== 1 ? 's' : '' }}</span></span>
+                        <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+&#x20B1;{{ number_format($la->amount, 2) }}</span>
                     </div>
-                    @endif
+                    @endforeach
 
                     {{-- Overtime Pay --}}
                     @if($overtimePay > 0)
