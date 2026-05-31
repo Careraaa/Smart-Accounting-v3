@@ -14,8 +14,7 @@
 @section('content')
 @php $u = auth()->user(); @endphp
 
-<div class="min-h-screen bg-[#f6f7fb]">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
 
         {{-- Header --}}
         <div class="ac-h flex items-start justify-between gap-4 mb-7">
@@ -136,5 +135,4 @@
 
         </div>
     </div>
-</div>
 @endsection

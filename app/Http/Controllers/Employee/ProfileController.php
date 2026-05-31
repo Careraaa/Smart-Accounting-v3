@@ -162,4 +162,20 @@ class ProfileController extends Controller
         return redirect()->route('employee.profile.show')
             ->with('success', 'Password changed successfully.');
     }
+
+    public function updatePhoto(Request $request)
+    {
+        $request->validate(['photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
+        $employee = Auth::user();
+        if ($employee->profile_picture) {
+            Storage::disk('public')->delete($employee->profile_picture);
+        }
+        $path = $request->file('photo')->store('photos', 'public');
+        $employee->update(['profile_picture' => $path]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Profile photo updated.']);
+        }
+        return redirect()->back()->with('success', 'Profile photo updated.');
+    }
 }

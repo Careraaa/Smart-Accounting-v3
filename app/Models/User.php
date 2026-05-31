@@ -183,7 +183,8 @@ class User extends Authenticatable
         if (!$this->profile_picture) {
             return null;
         }
-        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->profile_picture);
+        $request = request();
+        return $request->getSchemeAndHttpHost() . $request->getBasePath() . '/storage/' . ltrim($this->profile_picture, '/');
     }
 
     /**

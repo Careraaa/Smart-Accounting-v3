@@ -186,7 +186,7 @@
                 <label for="rejection_reason" class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">
                     Rejection Reason <span class="text-amber-600">*</span>
                 </label>
-                <textarea name="rejection_reason" id="rejectNote" rows="3" required
+                <textarea name="rejection_note" id="rejectNote" rows="3" required
                           placeholder="Explain why this payroll batch is being rejected…"
                           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder:text-gray-300 resize-none outline-none transition-all focus:border-gray-400 focus:bg-white"></textarea>
                 <p class="text-xs text-gray-400 mt-1.5">The HR team will be notified and can resubmit.</p>

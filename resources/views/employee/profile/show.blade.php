@@ -66,9 +66,8 @@
 
             <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
                 <div class="flex items-center gap-4">
-                    <form action="{{ route('employee.profile.update') }}" method="POST" enctype="multipart/form-data" id="emp-photo-form" class="relative shrink-0">
+                    <form action="{{ route('employee.profile.photo') }}" method="POST" enctype="multipart/form-data" id="emp-photo-form" class="relative shrink-0">
                         @csrf
-                        @method('PATCH')
                         <label tabindex="0" class="pf-avatar block w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/20 shadow-inner cursor-pointer group relative" role="button" aria-label="Upload profile photo">
                             @if($u->photo_url)
                                 <img src="{{ $u->photo_url }}" alt="Photo" class="w-full h-full object-cover">
@@ -80,7 +79,7 @@
                             <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 rounded-2xl">
                                 <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             </div>
-                            <input type="file" name="photo" accept="image/*" class="hidden" onchange="document.getElementById('emp-photo-form').submit();">
+                            <input type="file" name="photo" accept="image/*" class="hidden" id="emp-photo-input" onchange="empPreviewPhoto(this);">
                         </label>
                     </form>
                     <div>
@@ -461,5 +460,82 @@ document.addEventListener('DOMContentLoaded', function() {
     m.addEventListener('click', function(e) { if (e.target === this) closePfModal(); });
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePfModal(); });
 });
+
+// ── Photo upload confirm ──
+var _empPendingPhoto = null;
+
+function empPreviewPhoto(input) {
+    if (!input.files || !input.files[0]) return;
+    if (typeof sndPlay === 'function') sndPlay();
+    _empPendingPhoto = input.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var preview = document.getElementById('emp-photo-preview');
+        var placeholder = document.getElementById('emp-photo-preview-placeholder');
+        preview.src = e.target.result;
+        preview.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        document.getElementById('emp-photo-confirm-modal').classList.remove('hidden');
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function closeEmpPhotoModal() {
+    document.getElementById('emp-photo-confirm-modal').classList.add('hidden');
+    document.getElementById('emp-photo-input').value = '';
+    _empPendingPhoto = null;
+    var preview = document.getElementById('emp-photo-preview');
+    var placeholder = document.getElementById('emp-photo-preview-placeholder');
+    preview.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+}
+
+function confirmEmpPhoto() {
+    if (!_empPendingPhoto) return;
+    var form = document.getElementById('emp-photo-form');
+    var data = new FormData(form);
+    data.set('photo', _empPendingPhoto);
+    var submitBtn = document.querySelector('#emp-photo-confirm-modal button:last-child');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Uploading...';
+    fetch(form.action, { method: 'POST', body: data, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.success) { if (typeof sndPlay === 'function') sndPlay(); window.location.reload(); }
+            else { submitBtn.disabled = false; submitBtn.textContent = 'Set Photo'; closeEmpPhotoModal(); alert(d.message || 'Upload failed.'); }
+        })
+        .catch(function() {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Set Photo';
+            closeEmpPhotoModal();
+            window.location.reload();
+        });
+}
 </script>
+
+{{-- Photo Confirm Modal --}}
+<div id="emp-photo-confirm-modal" class="fixed inset-0 z-[100000] flex items-center justify-center hidden">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick="closeEmpPhotoModal()"></div>
+    <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-w-sm w-full mx-4 animate-modal-in">
+        <div class="text-center">
+            <div class="w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-4 border-2 border-gray-200 dark:border-gray-700 shadow-sm">
+                <img id="emp-photo-preview" class="w-full h-full object-cover hidden">
+                <div id="emp-photo-preview-placeholder" class="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-300">
+                    <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+            </div>
+            <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 mb-1">Set as profile photo?</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-5">This will update your profile picture across the system.</p>
+            <div class="flex items-center gap-3 justify-center">
+                <button type="button" onclick="closeEmpPhotoModal()" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">Cancel</button>
+                <button type="button" onclick="confirmEmpPhoto()" class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm">Set Photo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animate-modal-in { animation: modalPop 0.25s cubic-bezier(0.34,1.56,0.64,1) both; }
+    @keyframes modalPop { 0%{opacity:0;transform:scale(0.92) translateY(8px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
+</style>
 @endsection

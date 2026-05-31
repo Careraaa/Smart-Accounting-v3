@@ -173,6 +173,20 @@ Route::middleware(['auth', 'check-status'])->group(function () {
         return redirect()->route('profile.details')->with('success', 'Profile updated successfully.');
     })->name('profile.update');
 
+    Route::post('/profile/photo', function (\Illuminate\Http\Request $request) {
+        $request->validate(['photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048']);
+        $user = auth()->user();
+        if ($user->profile_picture) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
+        }
+        $path = $request->file('photo')->store('photos', 'public');
+        $user->update(['profile_picture' => $path]);
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Profile photo updated.']);
+        }
+        return redirect()->back()->with('success', 'Profile photo updated.');
+    })->name('profile.photo');
+
     Route::get('/settings/account', fn() => view('partials.profile.account-settings'))->name('settings.account');
     Route::post('/settings/update-password', [ProfileController::class, 'updatePassword'])->name('settings.update-password');
 
@@ -180,6 +194,7 @@ Route::middleware(['auth', 'check-status'])->group(function () {
     Route::get('/my/profile', [EmployeeProfileController::class, 'show'])->name('employee.profile.show');
     Route::get('/my/profile/edit', [EmployeeProfileController::class, 'edit'])->name('employee.profile.edit');
     Route::patch('/my/profile', [EmployeeProfileController::class, 'update'])->name('employee.profile.update');
+    Route::post('/my/profile/photo', [EmployeeProfileController::class, 'updatePhoto'])->name('employee.profile.photo');
     Route::get('/my/profile/password', [EmployeeProfileController::class, 'editPassword'])->name('employee.profile.password');
     Route::patch('/my/profile/password', [EmployeeProfileController::class, 'updatePassword'])->name('employee.profile.password.update');
 

@@ -116,7 +116,7 @@
                 </form>
             </div>
 
-            <div class="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <div class="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-gray-100 bg-white">
                 <button type="submit" form="attForm" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 active:scale-[0.97] transition-all duration-200">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     Save Attendance

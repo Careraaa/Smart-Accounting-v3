@@ -8,20 +8,31 @@
             </svg>
         </button>
 
-        {{-- Typewriter greeting --}}
+        {{-- Greeting --}}
         @php
             $user = auth()->user();
             $name = $user->first_name ?? $user->name ?? 'User';
             $greetings = [
-                "Welcome, $name",
-                "Hello, $name",
-                "Good to see you, $name!",
+                "Welcome back, $name. The dashboard is ready when you are.",
+                "Good to see you, $name. Let's see what today has in store.",
+                "Morning, $name. Your tasks arrived before you did.",
+                "Welcome back, $name. The system has been expecting you.",
+                "Hey, $name. Another day, another opportunity to click things professionally.",
+                "Glad you're here, $name. Let's keep things moving.",
+                "Hi, $name. Status: Logged in. Everything else is optional. (Mostly.)",
+                "Welcome back, $name. One login closer to payday.",
+                "Good morning, $name. Coffee first, dashboard second—we won't judge.",
+                "Hello, $name. The dashboard behaved itself while you were away.",
+                "Welcome back, $name. Your attendance has noticed.",
+                "Hey, $name. Ready for whatever today decides to be?",
+                "Good to have you back, $name. Let's make the checklist a little shorter.",
+                "Welcome, $name. Another chapter, same protagonist.",
+                "Hi, $name. Your workspace is ready and waiting.",
             ];
             $greeting = $greetings[array_rand($greetings)];
         @endphp
         <div class="flex-1 min-w-0 flex items-center h-full ml-2 sm:ml-4">
             <span id="typewriter" class="text-sm sm:text-base font-semibold text-gray-700 truncate"></span>
-            <span class="inline-block w-[2px] h-4 bg-gray-700 ml-0.5 animate-pulse" id="typewriter-cursor"></span>
         </div>
 
         {{-- Right side icons --}}
@@ -112,8 +123,10 @@
             <div class="relative" data-dropdown>
                 <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-all duration-200 hover:bg-gray-50 group" id="user-dropdown-btn" type="button">
                     @if($avatarPhoto)
-                        <div class="relative w-9 h-9 min-w-[36px] rounded-full overflow-hidden flex-shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-105">
-                            <img src="{{ $avatarPhoto }}" alt="Photo" class="w-full h-full object-cover">
+                        <div class="relative w-9 h-9 min-w-[36px] flex-shrink-0">
+                            <div class="w-full h-full rounded-full overflow-hidden shadow-sm transition-transform duration-200 group-hover:scale-105">
+                                <img src="{{ $avatarPhoto }}" alt="Photo" class="w-full h-full object-cover">
+                            </div>
                             <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white"></span>
                         </div>
                     @else
