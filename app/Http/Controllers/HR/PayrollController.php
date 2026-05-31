@@ -259,11 +259,10 @@
                 $period = PayrollBatch::resolvePeriod();
             }
 
-            // Check if batch already exists for this period
+            // Check if a pending batch already exists for this period
             $existing = PayrollBatch::where('period_start', $period['start'])
                 ->where('period_end', $period['end'])
-                ->where('status', 'submitted')
-                ->whereNull('finalized_at')
+                ->where('status', 'pending')
                 ->first();
 
             if ($existing) {
@@ -275,13 +274,13 @@
             $batch = PayrollBatch::create([
                 'period_start' => $period['start'],
                 'period_end'   => $period['end'],
-                'status'       => 'submitted',
+                'status'       => 'pending',
                 'generated_by' => auth()->id(),
             ]);
 
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
-                ->with('success', 'Batch created. Add employees, review, then finalize.');
+                ->with('success', 'Batch created. Add employees, review, then submit for approval.');
         }
 
         /* ══════════════════════════════════════════════════════════════
@@ -302,8 +301,8 @@
                         ->whereDate('payroll_period_start', $periodStart)
                         ->whereDate('payroll_period_end', $periodEnd);
                 })
-                ->orderBy('first_name')
                 ->orderBy('last_name')
+                ->orderBy('first_name')
                 ->get(['id', 'first_name', 'last_name', 'position']);
 
             $departments = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
@@ -708,16 +707,77 @@
         ══════════════════════════════════════════════════════════════ */
         public function batchSubmit(PayrollBatch $batch)
         {
-            abort_if($batch->status !== 'finalized', 403, 'Batch must be finalized before submitting.');
+            abort_if($batch->status !== 'pending', 403, 'Batch must be pending before submitting.');
 
-            $batch->payrolls()->update(['status' => 'submitted']);
-            $batch->update(['status' => 'submitted']);
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
 
-            foreach ($batch->payrolls as $payroll) {
-                PayrollNotification::payrollCreated($payroll);
+            if ($batch->payrolls->isEmpty()) {
+                return redirect()
+                    ->route('payroll.batch.confirm', $batch)
+                    ->with('error', 'Cannot submit an empty batch. Add at least one employee.');
             }
 
-            return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll batch submitted for approval.');
+            $notPrepared = $batch->payrolls
+                ->filter(fn ($p) => $p->status !== 'prepared')
+                ->map(function ($p) {
+                    $u = $p->user;
+                    return trim(($u->first_name ?? '') . ' ' . ($u->last_name ?? ''));
+                })
+                ->filter()
+                ->values();
+
+            if ($notPrepared->isNotEmpty()) {
+                return redirect()
+                    ->route('payroll.batch.confirm', $batch)
+                    ->with('error', 'Cannot submit batch. Some employees are not marked as prepared yet.');
+            }
+
+            // Recompute every payroll to pick up any OT/UT approved after initial generation.
+            $periodStart = Carbon::parse($batch->period_start);
+            $periodEnd   = Carbon::parse($batch->period_end);
+
+            foreach ($batch->payrolls as $payroll) {
+                $manualAllowances = $payroll->allowances
+                    ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay'))
+                    ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                    ->values()
+                    ->toArray();
+
+                $manualDeductions = $payroll->deductions
+                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
+                        || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                    ->values()
+                    ->toArray();
+
+                $manualBonuses = $payroll->bonuses
+                    ->map(fn ($b) => ['type' => $b->bonus_type, 'description' => $b->description, 'amount' => $b->amount])
+                    ->values()
+                    ->toArray();
+
+                $this->payrollService->updatePayroll(
+                    $payroll,
+                    $payroll->user,
+                    $periodStart,
+                    $periodEnd,
+                    $manualAllowances,
+                    $manualDeductions,
+                    ['status' => 'submitted'],
+                    $manualBonuses,
+                );
+            }
+
+            $batch->update([
+                'status'       => 'submitted',
+                'finalized_by' => auth()->id(),
+                'finalized_at' => now(),
+            ]);
+
+            // Notify accountants that payroll batch is ready for approval
+            PayrollNotification::notifyAccountantsPayrollGenerated($periodStart, $periodEnd, $batch->payrolls->count());
+
+            return redirect()->route('payroll.salary-computation.index')
+                ->with('success', 'Payroll batch submitted to accounting.');
         }
 
         /* ══════════════════════════════════════════════════════════════
@@ -726,9 +786,9 @@
         public function batchCancel(PayrollBatch $batch)
         {
             abort_if(
-                $batch->status !== 'submitted',
+                $batch->status !== 'pending',
                 403,
-                'Only submitted batches can be deleted.'
+                'Only pending batches can be deleted.'
             );
 
             DB::transaction(function () use ($batch) {
@@ -764,15 +824,15 @@
             $batch->payrolls()->update(['status' => 'prepared']);
 
             $batch->update([
-                'status'         => 'submitted',
+                'status'         => 'pending',
                 'rejected_by'    => null,
                 'rejected_at'    => null,
                 'rejection_note' => null,
             ]);
 
             $msg = $previousStatus === 'rejected'
-                ? 'Rejected batch reopened. Review employees and finalize to resubmit.'
-                : 'Batch reopened for editing. Make your changes and finalize to resubmit.';
+                ? 'Rejected batch reopened. Review employees and submit to resubmit.'
+                : 'Batch reopened for editing. Make your changes and submit to resubmit.';
 
             return redirect()
                 ->route('payroll.batch.confirm', $batch)

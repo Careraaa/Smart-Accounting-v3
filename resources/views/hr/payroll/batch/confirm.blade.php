@@ -29,7 +29,7 @@
     @endforeach
 
     {{-- Back + header --}}
-    <div class="fade-up flex items-start justify-between gap-4">
+    <div class="fade-up flex flex-wrap items-start justify-between gap-4">
         <div class="min-w-0">
             <a href="{{ route('payroll.salary-computation.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer mb-2">
                 <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -53,10 +53,44 @@
                 default => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
             };
         @endphp
-        <span class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
-            <span class="w-2 h-2 rounded-full {{ $statusInfo['dot'] }}"></span>
-            {{ $statusInfo['label'] }}
-        </span>
+        <div class="flex flex-col items-end gap-3 justify-end">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
+                <span class="w-2 h-2 rounded-full {{ $statusInfo['dot'] }}"></span>
+                {{ $statusInfo['label'] }}
+            </span>
+            @if($batch->status === 'pending')
+            <button type="button" onclick="openModal('submitBatchModal')" class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Submit for Approval
+            </button>
+            @endif
+        </div>
+    </div>
+
+    {{-- Submit confirmation modal --}}
+    <div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="submitBatchModal">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('submitBatchModal')"></div>
+        <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M5.5 19h13a2.5 2.5 0 002.5-2.5V7.5A2.5 2.5 0 0018.5 5h-13A2.5 2.5 0 003 7.5v9A2.5 2.5 0 005.5 19z"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-gray-900">Submit Batch</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Confirm submission for approval.</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-5 bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                Are you sure you want to submit this payroll batch for approval? This will lock the batch and notify the Accountant.
+            </p>
+            <form action="{{ route('payroll.batch.submit', $batch->id) }}" method="POST">
+                @csrf
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeModal('submitBatchModal')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Yes, submit</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     {{-- Stats --}}
@@ -111,32 +145,35 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <form action="{{ route('payroll.batch.add-employee', $batch) }}" method="POST" class="flex gap-2">
-                @csrf
-                <select name="user_id" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
-                    <option value="">Select employee&hellip;</option>
-                    @foreach($availableEmployees as $employee)
-                    <option value="{{ $employee->id }}">{{ $employee->last_name }}, {{ $employee->first_name }}</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add</button>
-            </form>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mt-3">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-semibold text-gray-900">Add by Department</h3>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                    <p class="text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 mb-2">By employee</p>
+                    <form action="{{ route('payroll.batch.add-employee', $batch) }}" method="POST" class="flex gap-2">
+                        @csrf
+                        <select name="user_id" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
+                            <option value="">Select employee&hellip;</option>
+                            @foreach($availableEmployees as $employee)
+                            <option value="{{ $employee->id }}">{{ $employee->last_name }}, {{ $employee->first_name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add</button>
+                    </form>
+                </div>
+                <div>
+                    <p class="text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 mb-2">By department</p>
+                    <form action="{{ route('payroll.batch.add-department', $batch) }}" method="POST" class="flex gap-2">
+                        @csrf
+                        <select name="department" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
+                            <option value="">Select department&hellip;</option>
+                            <option value="all">All Departments</option>
+                            @foreach($departments as $dept)
+                            <option value="{{ $dept }}">{{ $dept }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add</button>
+                    </form>
+                </div>
             </div>
-            <form action="{{ route('payroll.batch.add-department', $batch) }}" method="POST" class="flex gap-2">
-                @csrf
-                <select name="department" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
-                    <option value="">Select department&hellip;</option>
-                    <option value="all">All Departments</option>
-                    @foreach($departments as $dept)
-                    <option value="{{ $dept }}">{{ $dept }}</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add</button>
-            </form>
         </div>
     </div>
 
@@ -231,19 +268,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Submit --}}
-    @if($batch->status === 'pending' && $batch->payrolls->count() > 0)
-    <div class="fade-up flex justify-end">
-        <form action="{{ route('payroll.batch.submit', $batch->id) }}" method="POST" onsubmit="return confirm('Submit this batch for approval?')">
-            @csrf
-            <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Submit for Approval
-            </button>
-        </form>
-    </div>
-    @endif
 
 </div>
 

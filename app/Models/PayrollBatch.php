@@ -109,7 +109,7 @@ class PayrollBatch extends Model
 
     public function isEditable(): bool
     {
-        return in_array($this->status, ['submitted', 'rejected'], true);
+        return in_array($this->status, ['pending', 'submitted', 'rejected'], true);
     }
 
     /* ── Static helpers ────────────────────────────────────────── */
@@ -222,8 +222,13 @@ class PayrollBatch extends Model
 
         return self::where('period_start', $period['start'])
             ->where('period_end', $period['end'])
-            ->where('status', 'submitted')
-            ->whereNull('finalized_at')
+            ->where(function ($q) {
+                $q->where('status', 'pending')
+                  ->orWhere(function ($q2) {
+                      $q2->where('status', 'submitted')
+                         ->whereNull('finalized_at');
+                  });
+            })
             ->latest('id')
             ->first();
     }

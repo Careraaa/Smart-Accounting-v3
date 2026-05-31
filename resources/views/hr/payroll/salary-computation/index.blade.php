@@ -182,6 +182,7 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
     let page = 1;
 
     const STATUS_MAP = {
+        pending:   { label: 'Pending',   dot: 'bg-amber-400', text: 'text-amber-600', bg: 'bg-amber-50' },
         submitted: { label: 'Submitted', dot: 'bg-violet-400', text: 'text-violet-600', bg: 'bg-violet-50' },
         approved:  { label: 'Approved',  dot: 'bg-emerald-400', text: 'text-emerald-600', bg: 'bg-emerald-50' },
         rejected:  { label: 'Rejected',  dot: 'bg-red-400', text: 'text-red-600', bg: 'bg-red-50' },
