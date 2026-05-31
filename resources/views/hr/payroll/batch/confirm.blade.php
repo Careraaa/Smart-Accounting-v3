@@ -59,10 +59,17 @@
                 {{ $statusInfo['label'] }}
             </span>
             @if($batch->status === 'pending')
-            <button type="button" onclick="openModal('submitBatchModal')" class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Submit for Approval
-            </button>
+            <div class="flex items-center gap-2">
+                @if($batch->isEditable())
+                <button type="button" onclick="document.getElementById('deleteBatchModal').classList.remove('hidden')" class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 bg-white text-red-500 border border-red-200 rounded-lg text-sm font-semibold transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">
+                    Delete Batch
+                </button>
+                @endif
+                <button type="button" onclick="openModal('submitBatchModal')" class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">
+                    Submit for Approval
+                </button>
+                
+            </div>
             @endif
         </div>
     </div>
@@ -120,9 +127,6 @@
             <span class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-300 bg-gray-50 px-2 py-1 rounded-md selected-count" id="selectedCount">0 selected</span>
         </div>
         <div class="flex items-center gap-2">
-            @if($batch->isEditable())
-            <button type="button" onclick="document.getElementById('deleteBatchModal').classList.remove('hidden')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-red-500 border border-red-200 transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">Delete Batch</button>
-            @endif
             <button type="button" onclick="showDeleteModal()" id="deleteSelectedBtn" disabled class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-gray-400 border border-gray-200 transition-all cursor-not-allowed">Remove</button>
             @if($batch->isEditable())
             <button type="button" onclick="addEmployeePanel()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-900 text-white transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add Employee</button>
