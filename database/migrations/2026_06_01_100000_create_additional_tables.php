@@ -51,6 +51,25 @@ return new class extends Migration
             });
         }
 
+        // --- payroll_batches (created after base migration) ---
+        if (!Schema::hasTable('payroll_batches')) {
+            Schema::create('payroll_batches', function (Blueprint $table) {
+                $table->id();
+                $table->date('period_start');
+                $table->date('period_end');
+                $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'paid'])->default('draft');
+                $table->unsignedBigInteger('generated_by')->nullable();
+                $table->unsignedBigInteger('finalized_by')->nullable();
+                $table->timestamp('finalized_at')->nullable();
+                $table->timestamps();
+
+                $table->foreign('generated_by')->references('id')->on('users')->nullOnDelete();
+                $table->foreign('finalized_by')->references('id')->on('users')->nullOnDelete();
+
+                $table->unique(['period_start', 'period_end']);
+            });
+        }
+
         // --- holidays ---
         if (!Schema::hasTable('holidays')) {
             Schema::create('holidays', function (Blueprint $table) {
@@ -210,6 +229,7 @@ return new class extends Migration
         Schema::dropIfExists('pinned_items');
         Schema::dropIfExists('settings');
         Schema::dropIfExists('payroll_cutoff_schedules');
+        Schema::dropIfExists('payroll_batches');
         Schema::dropIfExists('holidays');
         Schema::dropIfExists('employee_leave_balances');
         Schema::dropIfExists('leave_types');
