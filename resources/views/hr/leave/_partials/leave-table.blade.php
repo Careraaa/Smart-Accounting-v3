@@ -57,7 +57,7 @@ window.leaveData_{{ $status }} = {!! json_encode($leaves->map(fn($l) => [
     'department_display' => $l->employee->department ?? 'N/A',
     'start_date' => $l->start_date->format('M d'),
     'end_date' => $l->end_date->format('M d, Y'),
-    'days' => $l->start_date->diffInDays($l->end_date) + 1,
+    'days' => $l->days,
     'created_at' => $l->created_at->format('M d, Y'),
     'updated_at' => $l->updated_at->format('M d, Y'),
     'status' => $l->status ?? 'pending',

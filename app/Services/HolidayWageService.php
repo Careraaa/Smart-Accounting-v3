@@ -256,7 +256,15 @@ class HolidayWageService
             ];
         }
 
-        $overtimeHours = max(0.0, $hoursWorked - 8);
+        // Convert overtime to 0.5-hour increments (use AttendanceService helper)
+        $rawOvertimeHours = max(0.0, $hoursWorked - 8);
+        if ($rawOvertimeHours > 0) {
+            $attendanceService = app(\App\Services\AttendanceService::class);
+            $overtimeMinutes = (int) round($rawOvertimeHours * 60);
+            $overtimeHours = $attendanceService->convertMinutesToHourIncrement($overtimeMinutes);
+        } else {
+            $overtimeHours = 0.0;
+        }
 
         // ============================================================
         // REST DAY + REGULAR HOLIDAY
@@ -363,7 +371,15 @@ class HolidayWageService
             ];
         }
 
-        $overtimeHours = max(0.0, $hoursWorked - 8);
+        // Convert overtime to 0.5-hour increments (use AttendanceService helper)
+        $rawOvertimeHours = max(0.0, $hoursWorked - 8);
+        if ($rawOvertimeHours > 0) {
+            $attendanceService = app(\App\Services\AttendanceService::class);
+            $overtimeMinutes = (int) round($rawOvertimeHours * 60);
+            $overtimeHours = $attendanceService->convertMinutesToHourIncrement($overtimeMinutes);
+        } else {
+            $overtimeHours = 0.0;
+        }
 
         // ============================================================
         // REST DAY + SPECIAL HOLIDAY
@@ -468,7 +484,15 @@ class HolidayWageService
             ];
         }
 
-        $overtimeHours = max(0.0, $hoursWorked - 8);
+        // Convert overtime to 0.5-hour increments (use AttendanceService helper)
+        $rawOvertimeHours = max(0.0, $hoursWorked - 8);
+        if ($rawOvertimeHours > 0) {
+            $attendanceService = app(\App\Services\AttendanceService::class);
+            $overtimeMinutes = (int) round($rawOvertimeHours * 60);
+            $overtimeHours = $attendanceService->convertMinutesToHourIncrement($overtimeMinutes);
+        } else {
+            $overtimeHours = 0.0;
+        }
 
         // ============================================================
         // REST DAY + DOUBLE HOLIDAY

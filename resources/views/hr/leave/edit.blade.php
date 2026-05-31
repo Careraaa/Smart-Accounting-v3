@@ -126,12 +126,33 @@ form a:focus-visible {
     const s = document.getElementById('start_date');
     const e = document.getElementById('end_date');
     const d = document.getElementById('durationDays');
-    function calc(){
-        if(s.value && e.value){
-            const diff = Math.ceil(Math.abs(new Date(e.value) - new Date(s.value)) / 86400000) + 1;
-            d.textContent = diff > 0 ? diff : 0;
-        } else { d.textContent = 0; }
+
+    function countWorkingDays(startDate, endDate) {
+        let current = new Date(startDate.getTime());
+        let days = 0;
+
+        while (current <= endDate) {
+            const weekday = current.getDay();
+            if (weekday !== 0 && weekday !== 6) {
+                days += 1;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+
+        return days;
     }
+
+    function calc(){
+        if (s.value && e.value) {
+            const startDate = new Date(s.value);
+            const endDate = new Date(e.value);
+            const workingDays = countWorkingDays(startDate, endDate);
+            d.textContent = workingDays > 0 ? workingDays : 0;
+        } else {
+            d.textContent = 0;
+        }
+    }
+
     s.addEventListener('change', calc);
     e.addEventListener('change', calc);
     calc();

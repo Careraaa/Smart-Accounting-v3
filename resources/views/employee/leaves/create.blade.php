@@ -117,12 +117,26 @@
     const durationSpan = document.getElementById('durationDays');
     const balanceWarning = document.getElementById('balanceWarning');
 
+    function countWorkingDays(startDate, endDate) {
+        let current = new Date(startDate.getTime());
+        let workingDays = 0;
+
+        while (current <= endDate) {
+            const day = current.getDay();
+            if (day !== 0 && day !== 6) {
+                workingDays += 1;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+
+        return workingDays;
+    }
+
     function calculateDuration() {
         if (startDateInput.value && endDateInput.value) {
             const startDate = new Date(startDateInput.value);
             const endDate = new Date(endDateInput.value);
-            const timeDiff = endDate - startDate;
-            const daysDiff = timeDiff / (1000 * 60 * 60 * 24) + 1;
+            const daysDiff = countWorkingDays(startDate, endDate);
             durationSpan.textContent = daysDiff > 0 ? daysDiff : 0;
 
             if (daysDiff > 0 && leaveTypeSelect.value) {

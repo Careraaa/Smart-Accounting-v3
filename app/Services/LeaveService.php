@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Leave;
 use App\Models\Attendance;
 use App\Models\EmployeeLeaveBalance;
+use App\Models\LeaveType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -87,17 +88,24 @@ class LeaveService
                 ];
             }
 
-            // Step 2: Calculate total leave days
-            $totalLeaveDays = $leave->start_date->diffInDays($leave->end_date) + 1;
+            // Step 2: Calculate total leave days using working days only
+            $totalLeaveDays = $leave->days;
 
             // Step 3: Check leave credits
             $leaveTypeId = $leave->leave_type_id;
+            if (!$leaveTypeId && $leave->leave_type) {
+                $leaveType = LeaveType::where('name', $leave->leave_type)->first();
+                $leaveTypeId = $leaveType?->id;
+            }
             $year = $leave->start_date->year;
 
-            $leaveBalance = EmployeeLeaveBalance::where('user_id', $leave->user_id)
-                ->where('leave_type_id', $leaveTypeId)
-                ->where('year', $year)
-                ->first();
+            $leaveBalance = null;
+            if ($leaveTypeId) {
+                $leaveBalance = EmployeeLeaveBalance::where('user_id', $leave->user_id)
+                    ->where('leave_type_id', $leaveTypeId)
+                    ->where('year', $year)
+                    ->first();
+            }
 
             if (!$leaveBalance) {
                 return [
@@ -123,10 +131,11 @@ class LeaveService
 
             // Step 6: Create attendance records with 'on leave' status for each day
             // Both paid and unpaid days are marked as 'on leave' in attendance
-            $currentDate = $leave->start_date->clone();
+            $currentDate = $leave->start_date->copy();
+            $restDayNumber = optional($leave->employee)->rest_day;
+
             while ($currentDate->lte($leave->end_date)) {
-                // Skip weekends if needed (configure based on business rules)
-                if ($this->isWorkingDay($currentDate)) {
+                if ($this->isWorkingDay($currentDate, $restDayNumber)) {
                     Attendance::updateOrCreate(
                         [
                             'user_id' => $leave->user_id,
@@ -175,13 +184,15 @@ class LeaveService
      * Check if a date is a working day (Mon-Fri, excluding holidays)
      * You can extend this to check against the holiday table
      */
-    private function isWorkingDay(Carbon $date): bool
+    private function isWorkingDay(Carbon $date, ?int $restDayNumber = null): bool
     {
-        // Monday = 1, Sunday = 7
         $dayOfWeek = $date->dayOfWeek;
-        
-        // Check if it's not a weekend (Saturday or Sunday)
-        if ($dayOfWeek == 0 || $dayOfWeek == 6) {
+
+        if ($dayOfWeek === 0 || $dayOfWeek === 6) {
+            return false;
+        }
+
+        if ($restDayNumber !== null && $date->dayOfWeek === (int) $restDayNumber) {
             return false;
         }
 

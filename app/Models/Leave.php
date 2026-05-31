@@ -71,7 +71,37 @@ class Leave extends Model
      */
     public function getDaysAttribute()
     {
-        return $this->start_date->diffInDays($this->end_date) + 1;
+        return $this->calculateWorkingDays();
+    }
+
+    /**
+     * Count working days between the leave start and end dates.
+     * Weekends and the employee's configured rest day are excluded.
+     */
+    public function calculateWorkingDays(): int
+    {
+        if (!$this->start_date || !$this->end_date) {
+            return 0;
+        }
+
+        $restDayNumber = optional($this->employee)->rest_day;
+
+        return self::countWorkingDays($this->start_date, $this->end_date, $restDayNumber);
+    }
+
+    public static function countWorkingDays(Carbon $startDate, Carbon $endDate, ?int $restDayNumber = null): int
+    {
+        $currentDate = $startDate->copy();
+        $workingDays = 0;
+
+        while ($currentDate->lte($endDate)) {
+            if (!$currentDate->isWeekend() && ($restDayNumber === null || $currentDate->dayOfWeek !== (int) $restDayNumber)) {
+                $workingDays++;
+            }
+            $currentDate->addDay();
+        }
+
+        return $workingDays;
     }
 
     /**

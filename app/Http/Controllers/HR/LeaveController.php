@@ -117,6 +117,12 @@ class LeaveController extends Controller
             'reason' => 'required|string',
         ]);
 
+        $leaveType = LeaveType::where('name', $validated['leave_type'])->first();
+        if ($leaveType) {
+            $validated['leave_type_id'] = $leaveType->id;
+        }
+
+        $validated['status'] = 'pending';
         $leave = Leave::create($validated);
         $leave->load('employee');
 
@@ -151,6 +157,11 @@ class LeaveController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'required|string',
         ]);
+
+        $leaveType = LeaveType::where('name', $validated['leave_type'])->first();
+        if ($leaveType) {
+            $validated['leave_type_id'] = $leaveType->id;
+        }
 
         $leave->update($validated);
         $leave->load('employee');

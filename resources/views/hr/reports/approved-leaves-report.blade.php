@@ -313,7 +313,7 @@
             </thead>
             <tbody>
                 @forelse ($leaves as $leave)
-                    @php $days = $leave->start_date->diffInDays($leave->end_date) + 1; @endphp
+                    @php $days = $leave->days; @endphp
                     <tr>
                         <td><strong>{{ $leave->employee->first_name ?? 'N/A' }} {{ $leave->employee->last_name ?? '' }}</strong></td>
                         <td>{{ $leave->employee->department ?? 'N/A' }}</td>

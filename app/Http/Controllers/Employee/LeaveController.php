@@ -102,7 +102,15 @@ class LeaveController extends Controller
         // Calculate the number of days
         $startDate = \Carbon\Carbon::parse($validated['start_date']);
         $endDate = \Carbon\Carbon::parse($validated['end_date']);
-        $days = $endDate->diffInDays($startDate) + 1;
+        $days = \App\Models\Leave::countWorkingDays($startDate, $endDate, auth()->user()?->rest_day);
+
+        if ($days <= 0) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'start_date' => 'Leave request must include at least one working day.',
+                ]);
+        }
 
         // Check if employee has sufficient balance
         $balance = EmployeeLeaveBalance::getBalance($userId, $leaveTypeId);
@@ -185,10 +193,18 @@ class LeaveController extends Controller
         // Calculate the new number of days
         $startDate = \Carbon\Carbon::parse($validated['start_date']);
         $endDate = \Carbon\Carbon::parse($validated['end_date']);
-        $newDays = $endDate->diffInDays($startDate) + 1;
+        $newDays = \App\Models\Leave::countWorkingDays($startDate, $endDate, auth()->user()?->rest_day);
+
+        if ($newDays <= 0) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'start_date' => 'Leave request must include at least one working day.',
+                ]);
+        }
 
         // Calculate the old number of days for comparison
-        $oldDays = $leave->end_date->diffInDays($leave->start_date) + 1;
+        $oldDays = \App\Models\Leave::countWorkingDays($leave->start_date, $leave->end_date, auth()->user()?->rest_day);
         $daysDifference = $newDays - $oldDays;
 
         // If changing leave type or dates, validate balance

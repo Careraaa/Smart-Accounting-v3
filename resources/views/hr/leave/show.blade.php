@@ -85,7 +85,7 @@
                     </div>
                     <div>
                         <span class="block text-[0.7rem] font-bold uppercase tracking-wide text-gray-400 mb-1.5">Number of Days</span>
-                        <div class="bg-gray-50/50 border border-gray-200 rounded-lg px-3.5 py-2.5 font-mono text-xs"><span class="text-sm text-gray-900 font-medium">{{ $leave->start_date->diffInDays($leave->end_date) + 1 }} day(s)</span></div>
+                        <div class="bg-gray-50/50 border border-gray-200 rounded-lg px-3.5 py-2.5 font-mono text-xs"><span class="text-sm text-gray-900 font-medium">{{ $leave->days }} day(s)</span></div>
                     </div>
                     <div>
                         <span class="block text-[0.7rem] font-bold uppercase tracking-wide text-gray-400 mb-1.5">Start Date</span>
