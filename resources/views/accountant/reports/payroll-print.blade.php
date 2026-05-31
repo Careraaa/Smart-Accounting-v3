@@ -148,7 +148,6 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <a href="{{ route('reports.payroll') }}" class="btn btn-ghost">← Back</a>
         <button class="btn btn-primary" onclick="window.print()">Print Report</button>
     </div>
 
@@ -186,35 +185,13 @@
             $totalNet        = collect($batchData)->sum('total_net');
         @endphp
 
-        <div class="summary-strip">
-            <div class="summary-item">
-                <span class="summary-label">Total Batches</span>
-                <span class="summary-value">{{ $totalBatches }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Gross</span>
-                <span class="summary-value" style="color: #0369a1;">₱{{ number_format($totalGross, 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Deductions</span>
-                <span class="summary-value" style="color: #ea580c;">₱{{ number_format($totalDeductions, 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Net Pay</span>
-                <span class="summary-value" style="color: #16a34a;">₱{{ number_format($totalNet, 2) }}</span>
-            </div>
-        </div>
-
         {{-- Table --}}
         <table>
             <thead>
                 <tr>
                     <th>Period</th>
                     <th class="text-right">Employees</th>
-                    <th class="text-right">Gross</th>
+                    <th class="text-right">Gross Pay</th>
                     <th class="text-right">Deductions</th>
                     <th class="text-right">Net Pay</th>
                 </tr>
@@ -237,12 +214,15 @@
                     </tr>
                 @endforelse
             </tbody>
+            <tfoot>
+                <tr style="border-top: 2px solid var(--gray-dark); background: var(--gray-bg); font-weight: 700; color: var(--black);">
+                    <td colspan="2" style="padding: 10px; font-size: 13px;">TOTAL</td>
+                    <td class="text-right mono" style="padding: 10px; font-size: 13px;">₱{{ number_format($totalGross, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; font-size: 13px; color: #ea580c;">₱{{ number_format($totalDeductions, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; font-size: 13px; color: #16a34a;">₱{{ number_format($totalNet, 2) }}</td>
+                </tr>
+            </tfoot>
         </table>
-
-        {{-- Footer --}}
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--gray-rule); text-align: center; font-size: 10px; color: var(--gray-mid);">
-            <p>Report generated on {{ date('M d, Y \a\t h:i A') }}</p>
-        </div>
 
     </div>
 

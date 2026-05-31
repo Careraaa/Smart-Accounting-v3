@@ -18,6 +18,7 @@
 $sumGross = collect($batchData)->sum('total_gross');
 $sumDed   = collect($batchData)->sum('total_deductions');
 $sumNet   = collect($batchData)->sum('total_net');
+$sumCount = collect($batchData)->sum('count');
 $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? date('F', mktime(0,0,0,$month,1)) : "Year $year");
 @endphp
 
@@ -147,7 +148,7 @@ window.payrollData = {!! json_encode(array_map(function($b) {
         'net'       => (float) $b['total_net'],
     ];
 }, $batchData)) !!};
-window.payrollTotals = { gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $sumNet }} };
+window.payrollTotals = { employees: {{ $sumCount }}, gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $sumNet }} };
 
 (function () {
     var grid   = document.getElementById('payrollGrid');
@@ -183,7 +184,7 @@ window.payrollTotals = { gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $su
             tr.className = 'border-t border-gray-100 bg-gray-50/50';
             tr.innerHTML =
                 '<td class="px-5 py-3.5 text-xs font-bold text-gray-900">Totals</td>' +
-                '<td class="px-4 py-3.5 text-center text-xs font-bold text-gray-900 tabular-nums">' + total + '</td>' +
+                '<td class="px-4 py-3.5 text-center text-xs font-bold text-gray-900 tabular-nums">' + window.payrollTotals.employees + '</td>' +
                 '<td class="px-4 py-3.5 text-right text-xs font-bold text-gray-900 tabular-nums">\u20b1' + window.payrollTotals.gross.toLocaleString('en-US') + '</td>' +
                 '<td class="px-4 py-3.5 text-right text-xs font-bold text-amber-600 tabular-nums">\u20b1' + window.payrollTotals.ded.toLocaleString('en-US') + '</td>' +
                 '<td class="px-5 py-3.5 text-right text-xs font-bold text-emerald-700 tabular-nums">\u20b1' + window.payrollTotals.net.toLocaleString('en-US') + '</td>';

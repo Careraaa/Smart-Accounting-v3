@@ -54,7 +54,12 @@ class PayrollSeeder extends Seeder
                     ->first();
 
                 if ($existing) {
-                    $existing->forceFill(['batch_id' => $batch->id])->save();
+                    $existing->forceFill([
+                        'batch_id' => $batch->id,
+                        'status' => 'approved',
+                        'approved_by' => User::where('role', 'accountant')->value('id'),
+                        'payment_date' => $periodEnd->copy()->addDays(5)->toDateString(),
+                    ])->save();
                     continue;
                 }
 
@@ -71,11 +76,10 @@ class PayrollSeeder extends Seeder
                 $payroll->forceFill(['batch_id' => $batch->id])->save();
                 PayrollDeductionService::applyLoanDeductions($payroll);
 
-                $status = $this->payrollStatusFor($employee->id, $index, $isLatest);
                 $payroll->forceFill([
-                    'status' => $status,
-                    'approved_by' => $status === 'approved' ? User::where('role', 'accountant')->value('id') : null,
-                    'payment_date' => $status === 'approved' ? $periodEnd->copy()->addDays(5)->toDateString() : null,
+                    'status' => 'approved',
+                    'approved_by' => User::where('role', 'accountant')->value('id'),
+                    'payment_date' => $periodEnd->copy()->addDays(5)->toDateString(),
                 ])->save();
 
                 $totalPayrolls++;
@@ -107,16 +111,4 @@ class PayrollSeeder extends Seeder
         return [$allowances, $deductions];
     }
 
-    private function payrollStatusFor(int $userId, int $periodIndex, bool $isLatest): string
-    {
-        if ($isLatest) {
-            return SeedConfig::hashFloat($userId, 'latest') > 0.5 ? 'submitted' : 'submitted';
-        }
-
-        if ($periodIndex >= 4) {
-            return SeedConfig::hashFloat($userId, 'apr') > 0.3 ? 'approved' : 'submitted';
-        }
-
-        return 'approved';
-    }
 }

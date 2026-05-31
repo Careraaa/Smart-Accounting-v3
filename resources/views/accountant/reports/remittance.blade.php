@@ -4,6 +4,7 @@
 <style>
 @keyframes fadeUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
 @keyframes scaleIn { 0%{opacity:0;transform:scale(0.93)} 100%{opacity:1;transform:scale(1)} }
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
 .fade-up { animation:fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 .scale-in { animation:scaleIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
 .stat-card:nth-child(1) { animation-delay:0.05s; }
@@ -15,18 +16,21 @@
 
 @section('content')
 @php
-$sumCol = $remittances->sum('total_collection');
-$sumExp = $remittances->sum('total_expenses');
-$sumNet = $remittances->sum('net_remittance');
-$monthLabel = date('F', mktime(0, 0, 0, $month, 1));
+$periodLabel = match ($period) {
+    'daily' => \Carbon\Carbon::parse($date)->format('M d, Y'),
+    'weekly' => 'Week ' . $week . ', ' . $year,
+    'monthly' => date('F', mktime(0, 0, 0, $month, 1)) . ' ' . $year,
+    'yearly' => (string) $year,
+    default => '',
+};
 @endphp
 
 {{-- Header --}}
     <div class="flex items-start justify-between mb-6 flex-wrap gap-4 fade-up">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Remittance Reports</h1>
-            <p class="text-sm text-gray-500 mt-0.5">Approved daily remittances — collections, expenses, and net amounts across all routes.</p>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[0.55rem] font-semibold mt-2">{{ $remittances->count() }} approved {{ Str::plural('record', $remittances->count()) }} · {{ $monthLabel }} {{ $year }}</span>
+            <p class="text-sm text-gray-500 mt-0.5">Filter daily, weekly, monthly, or yearly remittance records across all routes.</p>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[0.55rem] font-semibold mt-2">{{ $grouped->count() }} approved {{ Str::plural('record', $grouped->count()) }} &middot; {{ $periodLabel }}</span>
         </div>
         <a href="{{ route('reports.print.remittance-report', request()->query()) }}" target="_blank" rel="noopener"
            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 transition-all no-underline">
@@ -39,6 +43,25 @@ $monthLabel = date('F', mktime(0, 0, 0, $month, 1));
     <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6">
         <form method="get" action="{{ route('reports.remittance') }}" class="flex items-end gap-4 flex-wrap">
             <div>
+                <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Period</label>
+                <select name="period" onchange="this.form.submit()"
+                    class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
+                    <option value="daily" {{ $period === 'daily' ? 'selected' : '' }}>Daily</option>
+                    <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
+                    <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
+                    <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
+                </select>
+            </div>
+            <div id="weekGroup" style="display:{{ $period === 'weekly' ? 'block' : 'none' }}">
+                <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Week</label>
+                <select name="week" onchange="this.form.submit()"
+                    class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
+                    @for ($i = 1; $i <= 52; $i++)
+                        <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
+                    @endfor
+                </select>
+            </div>
+            <div id="monthGroup" style="display:{{ $period === 'monthly' ? 'block' : 'none' }}">
                 <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Month</label>
                 <select name="month" onchange="this.form.submit()"
                     class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
@@ -48,6 +71,11 @@ $monthLabel = date('F', mktime(0, 0, 0, $month, 1));
                         </option>
                     @endfor
                 </select>
+            </div>
+            <div id="dateGroup" style="display:{{ $period === 'daily' ? 'block' : 'none' }}">
+                <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Date</label>
+                <input type="date" name="date" value="{{ $date ?? date('Y-m-d') }}" onchange="this.form.submit()"
+                    class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
             </div>
             <div>
                 <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Year</label>
@@ -65,23 +93,23 @@ $monthLabel = date('F', mktime(0, 0, 0, $month, 1));
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
             <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Collection</p>
-            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($sumCol, 0) }}</p>
+            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalCollection, 0) }}</p>
             <p class="text-[10px] text-gray-400 mt-0.5">Gross collections</p>
         </div>
         <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300">
             <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Expenses</p>
-            <p class="text-lg font-bold text-red-600 tabular-nums mt-1">₱{{ number_format($sumExp, 0) }}</p>
+            <p class="text-lg font-bold text-red-600 tabular-nums mt-1">₱{{ number_format($totalExpenses, 0) }}</p>
             <p class="text-[10px] text-gray-400 mt-0.5">Trip and operating costs</p>
         </div>
         <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
             <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-            <p class="text-lg font-bold text-blue-600 tabular-nums mt-1">₱{{ number_format($sumNet, 0) }}</p>
+            <p class="text-lg font-bold text-blue-600 tabular-nums mt-1">₱{{ number_format($totalNetRemittance, 0) }}</p>
             <p class="text-[10px] text-gray-400 mt-0.5">Collection minus expenses</p>
         </div>
-        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300">
-            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Records</p>
-            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">{{ $remittances->count() }}</p>
-            <p class="text-[10px] text-gray-400 mt-0.5">Approved remittances</p>
+        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300">
+            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Short Remittances</p>
+            <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">{{ $shortRemittances }}</p>
+            <p class="text-[10px] text-gray-400 mt-0.5">Shortages in period</p>
         </div>
     </div>
 
@@ -89,17 +117,15 @@ $monthLabel = date('F', mktime(0, 0, 0, $month, 1));
     <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span class="text-sm font-semibold text-gray-900">All approved remittances</span>
+            <span class="text-sm font-semibold text-gray-900">Daily totals</span>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-50 bg-gray-50/50">
                         <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Date</th>
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Driver</th>
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Route</th>
-                        <th class="text-right px-3 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Collection</th>
-                        <th class="text-right px-3 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Expenses</th>
+                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Collection</th>
+                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Expenses</th>
                         <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net Remittance</th>
                     </tr>
                 </thead>
@@ -117,18 +143,39 @@ $monthLabel = date('F', mktime(0, 0, 0, $month, 1));
             <nav id="remittanceNav" class="flex items-center gap-1"></nav>
         </div>
     </div>
+
+    {{-- Details Modal --}}
+    <div id="detailsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm" style="animation:fadeSlideUp 0.2s ease both;">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+                <div>
+                    <h3 class="text-sm font-extrabold text-gray-900 m-0">Daily Details</h3>
+                    <p class="text-[0.65rem] text-gray-400 m-0 mt-0.5" id="modalDateLabel">—</p>
+                </div>
+                <button onclick="closeDetailsModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all cursor-pointer border-none">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="overflow-y-auto p-6" id="modalBody">
+                <div class="flex items-center justify-center py-12 text-gray-400">
+                    <svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    <span class="text-xs ml-2">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+@push('scripts')
 <script>
-window.remittanceReportData = {!! json_encode($remittances->map(fn($r) => [
-    'date'       => $r->remittance_date?->format('M d, Y') ?? '—',
-    'driver'     => $r->driver?->name ?? '—',
-    'route'      => $r->route?->route_name ?? '—',
-    'collection' => (float) $r->total_collection,
-    'expenses'   => (float) $r->total_expenses,
-    'net'        => (float) $r->net_remittance,
+window.remittanceData = {!! json_encode($grouped->map(fn($r) => [
+    'date'       => $r['remittance_date']->format('Y-m-d'),
+    'dateLabel'  => $r['remittance_date']->format('M d, Y'),
+    'collection' => (float) $r['total_collection'],
+    'expenses'   => (float) $r['total_expenses'],
+    'net'        => (float) $r['net_remittance'],
+    'is_short'   => $r['is_short_remittance'],
 ])->values()->all()) !!};
-window.remittanceReportTotals = { collection: {{ $sumCol }}, expenses: {{ $sumExp }}, net: {{ $sumNet }} };
 
 (function () {
     var grid   = document.getElementById('remittanceGrid');
@@ -136,7 +183,7 @@ window.remittanceReportTotals = { collection: {{ $sumCol }}, expenses: {{ $sumEx
     var info   = document.getElementById('remittanceInfo');
     var nav    = document.getElementById('remittanceNav');
     var PER = 10, page = 1;
-    var data = window.remittanceReportData;
+    var data = window.remittanceData;
 
     function render() {
         var total = data.length, pages = Math.ceil(total / PER);
@@ -150,25 +197,17 @@ window.remittanceReportTotals = { collection: {{ $sumCol }}, expenses: {{ $sumEx
             noRes.classList.add('hidden');
             pageData.forEach(function (r) {
                 var tr = document.createElement('tr');
-                tr.className = 'transition-colors hover:bg-gray-50/50';
+                tr.className = 'transition-colors hover:bg-gray-50/50 cursor-pointer';
+                tr.setAttribute('data-date', r.date);
+                tr.setAttribute('onclick', 'openDetailsModal(this)');
+                var netClass = r.is_short ? 'text-red-600' : 'text-emerald-600';
                 tr.innerHTML =
-                    '<td class="px-5 py-3.5 text-xs text-gray-600">' + r.date + '</td>' +
-                    '<td class="px-4 py-3.5 text-xs text-gray-600">' + r.driver + '</td>' +
-                    '<td class="px-4 py-3.5 text-xs font-semibold text-gray-900">' + r.route + '</td>' +
-                    '<td class="px-3 py-3.5 text-right text-xs tabular-nums text-gray-600">\u20b1' + r.collection.toLocaleString('en-US') + '</td>' +
-                    '<td class="px-3 py-3.5 text-right text-xs tabular-nums text-gray-400">\u20b1' + r.expenses.toLocaleString('en-US') + '</td>' +
-                    '<td class="px-5 py-3.5 text-right text-xs font-bold tabular-nums text-emerald-600">\u20b1' + r.net.toLocaleString('en-US') + '</td>';
+                    '<td class="px-5 py-3.5 text-xs font-semibold text-gray-800">' + r.dateLabel + '</td>' +
+                    '<td class="px-4 py-3.5 text-right text-xs font-mono font-bold text-emerald-600">\u20b1' + r.collection.toLocaleString('en-US', {minimumFractionDigits:2}) + '</td>' +
+                    '<td class="px-4 py-3.5 text-right text-xs font-mono text-gray-400">\u20b1' + r.expenses.toLocaleString('en-US', {minimumFractionDigits:2}) + '</td>' +
+                    '<td class="px-5 py-3.5 text-right text-xs font-mono font-bold ' + netClass + '">\u20b1' + r.net.toLocaleString('en-US', {minimumFractionDigits:2}) + '</td>';
                 grid.appendChild(tr);
             });
-            // totals row
-            var tr = document.createElement('tr');
-            tr.className = 'border-t border-gray-100 bg-gray-50/50';
-            tr.innerHTML =
-                '<td class="px-5 py-3.5 text-xs font-bold text-gray-900" colspan="3">Totals (' + total + ' records)</td>' +
-                '<td class="px-3 py-3.5 text-right text-xs font-bold text-gray-900 tabular-nums">\u20b1' + window.remittanceReportTotals.collection.toLocaleString('en-US') + '</td>' +
-                '<td class="px-3 py-3.5 text-right text-xs font-bold text-amber-600 tabular-nums">\u20b1' + window.remittanceReportTotals.expenses.toLocaleString('en-US') + '</td>' +
-                '<td class="px-5 py-3.5 text-right text-xs font-bold text-emerald-700 tabular-nums">\u20b1' + window.remittanceReportTotals.net.toLocaleString('en-US') + '</td>';
-            grid.appendChild(tr);
         }
 
         if (info) {
@@ -204,5 +243,49 @@ window.remittanceReportTotals = { collection: {{ $sumCol }}, expenses: {{ $sumEx
 
     render();
 })();
+
+function openDetailsModal(row) {
+    var date = row.dataset.date;
+    var modal = document.getElementById('detailsModal');
+    var dateLabel = document.getElementById('modalDateLabel');
+    var body = document.getElementById('modalBody');
+
+    dateLabel.textContent = date;
+    body.innerHTML = '<div class="flex items-center justify-center py-12 text-gray-400"><svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg><span class="text-xs ml-2">Loading...</span></div>';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    fetch('{{ route('reports.remittance.daily-details') }}?date=' + date)
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.error) {
+                body.innerHTML = '<div class="text-center py-12 text-gray-400 text-xs">' + data.error + '</div>';
+                return;
+            }
+            if (!data.length) {
+                body.innerHTML = '<div class="text-center py-12 text-gray-400 text-xs">No remittances found for this date.</div>';
+                return;
+            }
+            var html = '<table class="w-full text-xs"><thead><tr class="bg-gray-50/80 border-b border-gray-200"><th class="text-left px-3 py-2 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Driver</th><th class="text-left px-3 py-2 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">PAO</th><th class="text-left px-3 py-2 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Vehicle</th><th class="text-left px-3 py-2 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Route</th><th class="text-right px-3 py-2 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Collection</th><th class="text-right px-3 py-2 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Expenses</th><th class="text-right px-3 py-2 text-[0.55rem] font-bold uppercase tracking-wider text-gray-500">Net</th></tr></thead><tbody>';
+            data.forEach(function (r) {
+                var netClass = r.is_short ? 'text-red-600' : 'text-emerald-600';
+                html += '<tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"><td class="px-3 py-2 font-semibold text-gray-800">' + r.driver + '</td><td class="px-3 py-2 text-gray-600">' + r.pao + '</td><td class="px-3 py-2 text-gray-600">' + r.vehicle + '</td><td class="px-3 py-2 text-gray-600">' + r.route + '</td><td class="px-3 py-2 text-right font-mono font-bold text-emerald-600">\u20B1' + r.total_collection + '</td><td class="px-3 py-2 text-right font-mono text-gray-400">\u20B1' + r.total_expenses + '</td><td class="px-3 py-2 text-right font-mono font-bold ' + netClass + '">\u20B1' + r.net_remittance + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            body.innerHTML = html;
+        })
+        .catch(function () {
+            body.innerHTML = '<div class="text-center py-12 text-red-400 text-xs">Failed to load details. Please try again.</div>';
+        });
+}
+
+function closeDetailsModal() {
+    var modal = document.getElementById('detailsModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+document.getElementById('detailsModal').addEventListener('click', closeDetailsModal);
 </script>
+@endpush
 @endsection

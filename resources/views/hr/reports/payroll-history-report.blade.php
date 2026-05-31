@@ -285,6 +285,11 @@
             </div>
         </div>
 
+        @php
+            $totalBasicSalary = $payrolls->sum('basic_salary');
+            $totalAllowances  = $payrolls->sum('total_allowances');
+        @endphp
+
         {{-- Summary Strip --}}
         <div class="summary-strip">
             <div class="summary-item">
@@ -338,6 +343,17 @@
                     </tr>
                 @endforelse
             </tbody>
+            <tfoot>
+                <tr style="border-top: 2px solid var(--gray-dark); background: var(--gray-bg); font-weight: 700; color: var(--black);">
+                    <td style="padding: 10px; font-size: 13px;">TOTAL</td>
+                    <td style="padding: 10px;"></td>
+                    <td class="text-right mono" style="padding: 10px; font-size: 13px;">₱{{ number_format($totalBasicSalary, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; font-size: 13px;">₱{{ number_format($totalAllowances, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; font-size: 13px;">₱{{ number_format($totalGrossPay, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; font-size: 13px; color: #dc2626;">₱{{ number_format($totalDeductions, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; font-size: 13px; color: #16a34a;">₱{{ number_format($totalNetPay, 2) }}</td>
+                </tr>
+            </tfoot>
         </table>
 
         {{-- Footer --}}

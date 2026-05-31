@@ -23,7 +23,6 @@
 <body>
     {{-- Controls --}}
     <div class="no-print max-w-[900px] mx-auto mt-7 mb-3 flex justify-end gap-2">
-        <a href="{{ route('paos.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-semibold bg-white text-gray-700 border border-gray-200 no-underline cursor-pointer hover:opacity-80 transition-opacity">← Back</a>
         <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-semibold text-white cursor-pointer border-none hover:opacity-80 transition-opacity" style="background:#0a0a0a;">Print Report</button>
     </div>
 

@@ -40,7 +40,9 @@
             <div class="text-right">
                 <h1 class="text-xl font-bold text-gray-900 mb-1">REMITTANCE REPORT</h1>
                 <div class="text-[11px] text-gray-500">
-                    @if ($period === 'weekly')
+                    @if ($period === 'daily')
+                        {{ \Carbon\Carbon::parse($date)->format('M d, Y') }}
+                    @elseif ($period === 'weekly')
                         {{ 'Week ' . $week . ' - ' . date('Y') }}
                     @elseif ($period === 'monthly')
                         {{ date('F Y', mktime(0, 0, 0, $month, 1, $year)) }}
@@ -48,26 +50,6 @@
                         {{ 'Year ' . $year }}
                     @endif
                 </div>
-            </div>
-        </div>
-
-        {{-- Stats grid --}}
-        <div class="grid grid-cols-4 gap-4 mb-8">
-            <div class="p-4 rounded text-center bg-blue-100">
-                <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1.5">Total collection</div>
-                <div class="text-lg font-bold text-gray-900 font-mono">₱{{ number_format($totalCollection, 2) }}</div>
-            </div>
-            <div class="p-4 rounded text-center bg-emerald-100">
-                <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1.5">Total expenses</div>
-                <div class="text-lg font-bold text-gray-900 font-mono">₱{{ number_format($totalExpenses, 2) }}</div>
-            </div>
-            <div class="p-4 rounded text-center bg-orange-100">
-                <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1.5">Net remittance</div>
-                <div class="text-lg font-bold text-gray-900 font-mono">₱{{ number_format($totalNetRemittance, 2) }}</div>
-            </div>
-            <div class="p-4 rounded text-center bg-red-100">
-                <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1.5">Short remittances</div>
-                <div class="text-lg font-bold text-gray-900 font-mono">{{ $shortRemittances }}</div>
             </div>
         </div>
 
@@ -96,6 +78,14 @@
                         </tr>
                     @endforelse
                 </tbody>
+                <tfoot>
+                    <tr class="border-t-2 border-gray-400 bg-gray-50 font-semibold text-gray-800">
+                        <td class="px-2.5 py-2.5 text-sm font-bold">TOTAL</td>
+                        <td class="px-2.5 py-2.5 text-right text-emerald-700 text-sm font-bold">₱{{ number_format($totalCollection, 2) }}</td>
+                        <td class="px-2.5 py-2.5 text-right text-gray-500 text-sm font-bold">₱{{ number_format($totalExpenses, 2) }}</td>
+                        <td class="px-2.5 py-2.5 text-right text-sm font-bold {{ $totalNetRemittance < 0 ? 'text-red-600' : 'text-emerald-600' }}">₱{{ number_format($totalNetRemittance, 2) }}</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
 

@@ -195,6 +195,7 @@ Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])-
     // Report Routes
     Route::get('/reports', [RemittanceClerkReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/remittance-report', [RemittanceClerkReportController::class, 'remittanceReport'])->name('reports.remittance-report');
+    Route::get('/reports/remittance-report/daily-details', [RemittanceClerkReportController::class, 'getDailyDetails'])->name('reports.remittance-report.daily-details');
 
     // Print Routes
     Route::get('/reports/print/remittance-report', [RemittanceClerkReportController::class, 'printRemittanceReport'])->name('reports.print.remittance-report');
@@ -500,6 +501,7 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::post('/salary-loans/{salaryLoan}/reject', [AccountantSalaryLoanController::class, 'reject'])->name('salary-loans.reject');
 
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');
+    Route::get('/reports/remittance/daily-details', [ReportController::class, 'getDailyDetails'])->name('reports.remittance.daily-details');
     Route::get('/reports/payroll-approval', fn() => view('accountant.reports.payroll-approval'))->name('reports.payroll-approval');
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
 
