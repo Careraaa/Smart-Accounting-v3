@@ -41,7 +41,7 @@ class PayrollSeeder extends Seeder
             $batch = PayrollBatch::updateOrCreate(
                 ['period_start' => $periodStart->toDateString(), 'period_end' => $periodEnd->toDateString()],
                 [
-                    'status' => $isLatest ? 'submitted' : 'submitted',
+                    'status' => 'approved',
                     'generated_by' => $generatedBy,
                     'finalized_at' => $isLatest ? null : $periodEnd->copy()->addDays(3),
                 ]
