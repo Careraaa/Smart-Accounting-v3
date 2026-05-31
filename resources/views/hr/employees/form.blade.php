@@ -764,6 +764,7 @@
                 prev.style.visibility = current === 0 ? 'hidden' : 'visible';
                 next.style.display = current === totalTabs - 1 ? 'none' : 'inline-flex';
                 submit.style.display = current === totalTabs - 1 ? 'inline-flex' : 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 // Reinitialize datepickers when tab changes
                 if (typeof initGlobalDatepickers === "function") {
                     setTimeout(initGlobalDatepickers, 50);

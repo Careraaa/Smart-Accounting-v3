@@ -260,9 +260,10 @@
         html.dark .group:hover [class*="group-hover:text-white"] { color: #fff !important; }
 
         /* Forms */
-        html.dark input:not([type="checkbox"]):not([type="radio"]),
+        html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
         html.dark select,
         html.dark textarea { background: #0a0a14; border-color: #18182a; color: #cccce0; }
+        html.dark input[type="file"] { background: transparent; color: #9ca3af; }
         html.dark input:focus,
         html.dark select:focus,
         html.dark textarea:focus { border-color: #c8292a; }
@@ -277,7 +278,8 @@
         html.dark #kt-search-popup .text-gray-800 { color: #cccce0; }
         html.dark #notification-dropdown .text-gray-900 { color: #e0e0f0; }
         html.dark #notification-dropdown .text-gray-600 { color: #78789a; }
-        html.dark #notification-dropdown .bg-gray-50\/80 { background: rgba(16,16,28,.8); }
+        html.dark #notification-dropdown .bg-gray-50\/80 { background: transparent !important; }
+        html.dark #notification-dropdown [data-notif-id]:hover { background: transparent !important; }
 
         /* Hover fixes — remove white glow */
         html.dark .hover\:bg-gray-50:hover,

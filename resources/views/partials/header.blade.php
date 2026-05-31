@@ -603,7 +603,7 @@
             (function type() {
                 el.textContent = text.substring(0, j + 1);
                 j++;
-                if (j < text.length) { setTimeout(type, 100); }
+                if (j < text.length) { setTimeout(type, text.length > 40 ? 30 : 50); }
             })();
         })();
 

@@ -52,45 +52,6 @@
 </head>
 
 <body class="font-[Sora,sans-serif] antialiased">
-    {{-- Crystal loader for login page only --}}
-    <script>
-        (function(){
-            var bg = '#020617';
-            var c = ['#4a0e0e,#7f1d1d','#5c1010,#991b1b','#6e1313,#b91c1c','#7f1d1d,#dc2626','#991b1b,#ef4444','#b91c1c,#f87171'];
-            document.write(
-                '<div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center" style="background:'+bg+'">' +
-                '<style>' +
-                '.crystal:nth-child(1){background:linear-gradient(45deg,'+c[0]+');animation-delay:0s}' +
-                '.crystal:nth-child(2){background:linear-gradient(45deg,'+c[1]+');animation-delay:0.15s}' +
-                '.crystal:nth-child(3){background:linear-gradient(45deg,'+c[2]+');animation-delay:0.3s}' +
-                '.crystal:nth-child(4){background:linear-gradient(45deg,'+c[3]+');animation-delay:0.45s}' +
-                '.crystal:nth-child(5){background:linear-gradient(45deg,'+c[4]+');animation-delay:0.6s}' +
-                '.crystal:nth-child(6){background:linear-gradient(45deg,'+c[5]+');animation-delay:0.75s}' +
-                '</style>' +
-                '<div class="loader relative w-[200px] h-[200px]" style="perspective:800px">' +
-                '<div class="crystal"></div><div class="crystal"></div><div class="crystal"></div>' +
-                '<div class="crystal"></div><div class="crystal"></div><div class="crystal"></div>' +
-                '</div></div>'
-            );
-        })();
-    </script>
-    <style>
-        .crystal {
-            position:absolute; top:50%; left:50%;
-            width:60px; height:60px; opacity:0;
-            transform-origin:bottom center;
-            transform:translate(-50%,-50%) rotateX(45deg) rotateZ(0deg);
-            animation:spin 2s linear infinite, emerge 0.8s ease-in-out infinite alternate, fadeIn 0.25s ease-out forwards;
-            border-radius:10px; visibility:hidden;
-        }
-        @keyframes spin { from{transform:translate(-50%,-50%) rotateX(45deg) rotateZ(0deg)} to{transform:translate(-50%,-50%) rotateX(45deg) rotateZ(360deg)} }
-        @keyframes emerge { 0%,100%{transform:translate(-50%,-50%) scale(0.5);opacity:0} 50%{transform:translate(-50%,-50%) scale(1);opacity:1} }
-        @keyframes fadeIn { to{visibility:visible;opacity:0.8} }
-    </style>
-    <script>
-        window.addEventListener('load', function(){ var el = document.getElementById('page-loader'); if (el) el.style.display = 'none'; });
-    </script>
-
     <div class="grid md:grid-cols-[3fr_2fr] h-screen overflow-hidden">
 
         {{-- Desktop left: background slideshow --}}

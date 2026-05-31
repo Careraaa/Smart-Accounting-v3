@@ -40,6 +40,8 @@ class User extends Authenticatable
         'department',
         'status',
         'salary_rate',
+        'bank_name',
+        'bank_account_number',
         'has_sss',
         'has_pagibig',
         'has_philhealth',

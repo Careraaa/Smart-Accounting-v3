@@ -16,7 +16,7 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
         $tab = $request->get('tab', 'all');
-        $sortBy = $request->get('sort_by', 'first_name');
+        $sortBy = $request->get('sort_by', 'last_name');
         $sortOrder = $request->get('sort_order', 'asc');
 
         $allowedColumns = ['first_name', 'last_name', 'gender', 'position', 'department', 'salary_rate', 'status'];
@@ -69,7 +69,13 @@ class EmployeeController extends Controller
     public function create()
     {
         $employee = new User();
-        return view('hr.employees.create', compact('employee'));
+        $departments = User::whereNotIn('role', ['superadmin', 'qr_admin'])
+            ->whereNotNull('department')
+            ->distinct()
+            ->pluck('department')
+            ->sort()
+            ->values();
+        return view('hr.employees.create', compact('employee', 'departments'));
     }
 
     public function store(Request $request)
@@ -107,6 +113,8 @@ class EmployeeController extends Controller
                 'generated_password' => 'nullable|string',
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'bank_name' => 'nullable|string|max:100',
+                'bank_account_number' => 'nullable|string|max:50',
             ],
             [
                 'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
@@ -123,6 +131,11 @@ class EmployeeController extends Controller
         $validated['has_philhealth'] = $request->has('has_philhealth');
         $validated['role'] = 'employee';
         $validated['address'] = $this->assembleAddress($request);
+
+        if (!$validated['has_sss']) $validated['sss_number'] = null;
+        if (!$validated['has_tin']) $validated['tin_number'] = null;
+        if (!$validated['has_pagibig']) $validated['pagibig_number'] = null;
+        if (!$validated['has_philhealth']) $validated['philhealth_number'] = null;
 
         // Auto-generate username
         $baseUsername = strtolower(preg_replace('/\s+/', '', $validated['first_name']) . '.' . preg_replace('/\s+/', '', $validated['last_name']));
@@ -165,7 +178,13 @@ class EmployeeController extends Controller
     public function edit(User $employee)
     {
         $employee->load(['workExperiences', 'specialSkills', 'beneficiaries', 'charRefs']);
-        return view('hr.employees.edit', compact('employee'));
+        $departments = User::whereNotIn('role', ['superadmin', 'qr_admin'])
+            ->whereNotNull('department')
+            ->distinct()
+            ->pluck('department')
+            ->sort()
+            ->values();
+        return view('hr.employees.edit', compact('employee', 'departments'));
     }
 
     public function update(Request $request, User $employee)
@@ -201,6 +220,8 @@ class EmployeeController extends Controller
                 'signature_path' => 'nullable|string',
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'bank_name' => 'nullable|string|max:100',
+                'bank_account_number' => 'nullable|string|max:50',
             ],
             [
                 'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
@@ -217,6 +238,11 @@ class EmployeeController extends Controller
         $validated['has_philhealth'] = $request->has('has_philhealth');
         $validated['name'] = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
         $validated['address'] = $this->assembleAddress($request);
+
+        if (!$validated['has_sss']) $validated['sss_number'] = null;
+        if (!$validated['has_tin']) $validated['tin_number'] = null;
+        if (!$validated['has_pagibig']) $validated['pagibig_number'] = null;
+        if (!$validated['has_philhealth']) $validated['philhealth_number'] = null;
 
         $employee->update($validated);
 

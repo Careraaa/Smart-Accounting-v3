@@ -13,11 +13,17 @@
             @endif
         </div>
         <div class="flex-1 min-w-0">
-            <label for="photo" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+            <label class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 Profile Photo <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
             </label>
-            <input type="file" name="photo" id="photo" accept="image/*"
-                class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-50 dark:file:bg-red-900/20 file:text-red-500 dark:file:text-red-400 hover:file:bg-red-100 dark:hover:file:bg-red-900/30 file:cursor-pointer file:transition-colors cursor-pointer">
+            <div class="flex items-stretch border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all duration-150 focus-within:border-red-400 dark:focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/10">
+                <label for="photo" class="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/20 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border-r border-gray-200 dark:border-gray-700 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Choose File
+                </label>
+                <input type="file" name="photo" id="photo" accept="image/*" class="sr-only" onchange="this.nextElementSibling.textContent = this.files[0]?.name || 'No file chosen';">
+                <span class="flex items-center px-3.5 py-2.5 text-sm text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 flex-1 truncate">No file chosen</span>
+            </div>
             @error('photo')
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
@@ -26,7 +32,7 @@
 
     {{-- Section: Full Name --}}
     <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Full Name</div>
-    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <div>
             <label for="first_name" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 First Name <span class="text-red-500 dark:text-red-400">*</span>
@@ -57,16 +63,6 @@
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
         </div>
-        <div>
-            <label for="suffix" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
-                Suffix <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
-            </label>
-            <input type="text" name="suffix" id="suffix" value="{{ old('suffix', $employee->suffix ?? '') }}" placeholder="Jr., III"
-                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('suffix') ? 'border-red-500 dark:border-red-400!' : '' }}">
-            @error('suffix')
-                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
-            @enderror
-        </div>
     </div>
 
     {{-- Section: Birth Details --}}
@@ -76,7 +72,7 @@
             <label for="date_of_birth" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 Birth Date <span class="text-red-500 dark:text-red-400">*</span>
             </label>
-            <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth', $employee->date_of_birth ?? '') }}" required
+            <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth', $employee->date_of_birth?->format('Y-m-d') ?? '') }}" required
                 class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('date_of_birth') ? 'border-red-500 dark:border-red-400!' : '' }}">
             @error('date_of_birth')
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
@@ -96,7 +92,7 @@
 
     {{-- Section: Demographics --}}
     <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Demographics</div>
-    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <div>
             <label for="gender" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 Gender <span class="text-red-500 dark:text-red-400">*</span>
@@ -133,19 +129,9 @@
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
         </div>
-        <div>
-            <label for="citizenship" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
-                Citizenship <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
-            </label>
-            <input type="text" name="citizenship" id="citizenship" value="{{ old('citizenship', $employee->citizenship ?? '') }}" placeholder="Filipino"
-                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('citizenship') ? 'border-red-500 dark:border-red-400!' : '' }}">
-            @error('citizenship')
-                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
-            @enderror
-        </div>
     </div>
 
-        <div>
+    <div>
             <label for="spouse_name" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 Spouse Name <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
             </label>
@@ -189,32 +175,22 @@
             @enderror
         </div>
         <div>
-            <label for="telephone_number" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
-                Telephone No. <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
+            <label for="email" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Email Address <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
             </label>
-            <input type="text" name="telephone_number" id="telephone_number" value="{{ old('telephone_number', $employee->telephone_number ?? '') }}"
-                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('telephone_number') ? 'border-red-500 dark:border-red-400!' : '' }}">
-            @error('telephone_number')
+            <input type="email" name="email" id="email" value="{{ old('email', $employee->email ?? '') }}"
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('email') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('email')
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
         </div>
-    </div>
-    <div>
-        <label for="email" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
-            Email Address <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
-        </label>
-        <input type="email" name="email" id="email" value="{{ old('email', $employee->email ?? '') }}"
-            class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('email') ? 'border-red-500 dark:border-red-400!' : '' }}">
-        @error('email')
-            <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
-        @enderror
     </div>
 
     {{-- Section: Address --}}
     <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Address</div>
     <div>
         <label for="address_street" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
-            Address Line <span class="text-red-500 dark:text-red-400">*</span>
+            Street <span class="text-red-500 dark:text-red-400">*</span>
         </label>
         <input type="text" name="address_street" id="address_street" value="{{ old('address_street', $employee->address_street ?? '') }}" required
             class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('address_street') ? 'border-red-500 dark:border-red-400!' : '' }}">
@@ -250,18 +226,6 @@
             <input type="text" name="address_province" id="address_province" value="{{ old('address_province', $employee->address_province ?? '') }}" required
                 class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('address_province') ? 'border-red-500 dark:border-red-400!' : '' }}">
             @error('address_province')
-                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
-            @enderror
-        </div>
-    </div>
-    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 mt-4">
-        <div>
-            <label for="zip_code" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
-                ZIP Code <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
-            </label>
-            <input type="text" name="zip_code" id="zip_code" value="{{ old('zip_code', $employee->zip_code ?? '') }}"
-                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('zip_code') ? 'border-red-500 dark:border-red-400!' : '' }}">
-            @error('zip_code')
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
         </div>

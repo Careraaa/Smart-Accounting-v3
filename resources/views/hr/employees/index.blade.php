@@ -183,10 +183,10 @@
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                <a href="{{ route('employees.index', ['tab' => $tab, 'sort_by' => 'first_name', 'sort_order' => ($sortBy==='first_name'&&$sortOrder==='asc')?'desc':'asc']) }}"
+                                <a href="{{ route('employees.index', ['tab' => $tab, 'sort_by' => 'last_name', 'sort_order' => ($sortBy==='last_name'&&$sortOrder==='asc')?'desc':'asc']) }}"
                                    class="inline-flex items-center gap-1 hover:text-indigo-600 transition-colors">
                                     Employee
-                                    @if($sortBy==='first_name')
+                                    @if($sortBy==='last_name')
                                         @if($sortOrder==='asc')
                                             <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
                                         @else
