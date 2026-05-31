@@ -8,6 +8,7 @@ use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -60,6 +61,7 @@ class ProfileController extends Controller
             'address_province'        => 'required|string|max:150',
             'driver_license_number'   => 'nullable|string|max:50',
             'driver_license_validity' => 'nullable|date',
+            'photo'                   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             
             // Employment & Government - READ-ONLY (not validated, won't be updated)
             // date_of_hire, position, department, status, salary_rate
@@ -88,6 +90,15 @@ class ProfileController extends Controller
 
         // Update the employee
         $employee->update($validated);
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            if ($employee->profile_picture) {
+                Storage::disk('public')->delete($employee->profile_picture);
+            }
+            $path = $request->file('photo')->store('photos', 'public');
+            $employee->update(['profile_picture' => $path]);
+        }
 
         $this->logActivity('updated', 'Profile', request()->url());
 

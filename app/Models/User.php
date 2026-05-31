@@ -173,7 +173,18 @@ class User extends Authenticatable
         return $this->employeeAttachments->groupBy('attachment_key')->map(fn($group) => $group->first());
     }
 
-    // ── Avatar Methods ─────────────────────────────────────────────────
+    // ── Avatar / Photo Methods ─────────────────────────────────────────
+
+    /**
+     * Get the URL for the profile photo
+     */
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (!$this->profile_picture) {
+            return null;
+        }
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->profile_picture);
+    }
 
     /**
      * Get the initials from first name and last name

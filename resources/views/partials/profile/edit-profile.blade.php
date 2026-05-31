@@ -33,7 +33,13 @@
 
         <div class="pf2-hero">
             <div class="pf2-hero-left">
-                <div class="pf2-avatar">{{ $initials }}</div>
+                @if($u->photo_url)
+                    <div class="pf2-avatar pf2-avatar-img">
+                        <img src="{{ $u->photo_url }}" alt="Photo" class="w-full h-full object-cover">
+                    </div>
+                @else
+                    <div class="pf2-avatar">{{ $initials }}</div>
+                @endif
                 <div>
                     <p class="pf2-hero-name">{{ $u->name ?? '—' }}</p>
                     <p class="pf2-hero-meta"><span class="pf2-mono">{{ $u->email ?? '—' }}</span></p>
@@ -59,9 +65,19 @@
                     <p class="pf2-card-title"><span class="pf2-dot"></span> Update Details</p>
                 </div>
                 <div class="pf2-card-body">
-                    <form action="{{ route('profile.update') }}" method="POST">
+                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
+
+                        <div style="margin-bottom:14px;">
+                            <label class="pf2-field-label" for="photo">Profile Photo</label>
+                            <input id="photo" type="file" name="photo" accept="image/*"
+                                class="pf2-input @error('photo') is-invalid @enderror" style="padding:6px 10px;font-size:0.82rem;">
+                            @error('photo')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+                            @if($u->photo_url)
+                                <div class="pf2-help" style="margin-top:4px;">Leave empty to keep current photo</div>
+                            @endif
+                        </div>
 
                         <div style="margin-bottom:14px;">
                             <label class="pf2-field-label" for="name">Full Name *</label>

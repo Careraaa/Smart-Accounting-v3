@@ -1,181 +1,269 @@
-@php $readOnly = $readOnly ?? false; @endphp
+{{-- Personal Info --}}
+<div class="space-y-6">
 
-<p class="emp-section-title-form">Personal Information</p>
-
-<div class="emp-divider">Full Name</div>
-<div class="emp-row cols-3" style="margin-bottom:16px;">
-    <div class="emp-field">
-        <label class="emp-label">First Name <span class="req">*</span></label>
-        <input type="text" name="first_name" id="first_name"
-            class="emp-input @error('first_name') is-invalid @enderror"
-            placeholder="e.g. Juan"
-            value="{{ old('first_name', $employee->first_name ?? '') }}"
-            {{ $readOnly ? 'readonly' : 'required' }}>
-        @error('first_name')<span class="emp-invalid">{{ $message }}</span>@enderror
-    </div>
-    <div class="emp-field">
-        <label class="emp-label">Middle Name <span class="opt">(optional)</span></label>
-        <input type="text" name="middle_name" id="middle_name"
-            class="emp-input"
-            placeholder="e.g. Santos"
-            value="{{ old('middle_name', $employee->middle_name ?? '') }}"
-            {{ $readOnly ? 'readonly' : '' }}>
-    </div>
-    <div class="emp-field">
-        <label class="emp-label">Last Name <span class="req">*</span></label>
-        <input type="text" name="last_name" id="last_name"
-            class="emp-input @error('last_name') is-invalid @enderror"
-            placeholder="e.g. Dela Cruz"
-            value="{{ old('last_name', $employee->last_name ?? '') }}"
-            {{ $readOnly ? 'readonly' : 'required' }}>
-        @error('last_name')<span class="emp-invalid">{{ $message }}</span>@enderror
-    </div>
-</div>
-
-<div class="emp-row cols-2" style="margin-bottom:16px;">
-    <div class="emp-field">
-        <label class="emp-label">Gender <span class="req">*</span></label>
-        <div class="emp-select-wrap">
-            <select name="gender" id="gender"
-                class="emp-select @error('gender') is-invalid @enderror"
-                {{ $readOnly ? 'disabled' : 'required' }}>
-                <option value="">— Select —</option>
-                <option value="male"              @selected(old('gender', $employee->gender ?? '') == 'male')>Male</option>
-                <option value="female"            @selected(old('gender', $employee->gender ?? '') == 'female')>Female</option>
-                <option value="prefer_not_to_say" @selected(old('gender', $employee->gender ?? '') == 'prefer_not_to_say')>Prefer not to say</option>
-            </select>
-            <svg class="emp-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    {{-- Profile Photo --}}
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-4">
+        <div class="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex-shrink-0">
+            @if(isset($employee) && $employee->photo_url)
+                <img src="{{ $employee->photo_url }}" alt="Photo" class="w-full h-full object-cover">
+            @else
+                <div class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+            @endif
         </div>
-        @error('gender')<span class="emp-invalid">{{ $message }}</span>@enderror
-    </div>
-</div>
-
-<div class="emp-divider">Contact Information</div>
-<div class="emp-row cols-2" style="margin-bottom:16px;">
-    <div class="emp-field">
-        <label class="emp-label">Email <span class="opt">(optional)</span></label>
-        <input type="email" name="email" id="email"
-            class="emp-input @error('email') is-invalid @enderror"
-            placeholder="e.g. juan.delacruz@email.com"
-            value="{{ old('email', $employee->email ?? '') }}"
-            {{ $readOnly ? 'readonly' : '' }}>
-        @error('email')<span class="emp-invalid">{{ $message }}</span>@enderror
-    </div>
-    <div class="emp-field">
-        <label class="emp-label">Phone <span class="req">*</span></label>
-        <input type="tel" name="phone" id="phone"
-            class="emp-input @error('phone') is-invalid @enderror"
-            placeholder="09XXXXXXXXX" maxlength="13"
-            pattern="(09\d{9}|\+639\d{9})"
-            oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
-            value="{{ old('phone', $employee->phone ?? '') }}"
-            {{ $readOnly ? 'readonly' : 'required' }}>
-        @error('phone')<span class="emp-invalid">{{ $message }}</span>@enderror
-    </div>
-</div>
-
-<div class="emp-divider">Personal Details</div>
-<div class="emp-row cols-3" style="margin-bottom:16px;">
-    <div class="emp-field">
-        <label class="emp-label">Civil Status <span class="req">*</span></label>
-        <div class="emp-select-wrap">
-            <select name="civil_status" id="civil_status"
-                class="emp-select @error('civil_status') is-invalid @enderror"
-                onchange="document.getElementById('spouseField').style.display = this.value === 'married' ? 'block' : 'none'"
-                {{ $readOnly ? 'disabled' : 'required' }}>
-                <option value="">— Select —</option>
-                <option value="single"    @selected(old('civil_status', $employee->civil_status ?? '') == 'single')>Single</option>
-                <option value="married"   @selected(old('civil_status', $employee->civil_status ?? '') == 'married')>Married</option>
-                <option value="widowed"   @selected(old('civil_status', $employee->civil_status ?? '') == 'widowed')>Widowed</option>
-                <option value="separated" @selected(old('civil_status', $employee->civil_status ?? '') == 'separated')>Separated</option>
-            </select>
-            <svg class="emp-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        <div class="flex-1 min-w-0">
+            <label for="photo" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Profile Photo <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
+            </label>
+            <input type="file" name="photo" id="photo" accept="image/*"
+                class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-red-50 dark:file:bg-red-900/20 file:text-red-500 dark:file:text-red-400 hover:file:bg-red-100 dark:hover:file:bg-red-900/30 file:cursor-pointer file:transition-colors cursor-pointer">
+            @error('photo')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
         </div>
-        @error('civil_status')<span class="emp-invalid">{{ $message }}</span>@enderror
     </div>
-    <div class="emp-field" id="spouseField" style="display:{{ (old('civil_status', $employee->civil_status ?? '') === 'married') ? 'block' : 'none' }};">
-        <label class="emp-label">Spouse Name</label>
-        <input type="text" name="spouse_name" id="spouse_name"
-            class="emp-input"
-            placeholder="Full name of spouse"
-            value="{{ old('spouse_name', $employee->spouse_name ?? '') }}"
-            {{ $readOnly ? 'readonly' : '' }}>
-    </div>
-    <div class="emp-field">
-        <label class="emp-label">Date of Birth <span class="req">*</span></label>
-        <input type="date" name="date_of_birth" id="date_of_birth"
-            class="emp-input @error('date_of_birth') is-invalid @enderror"
-            value="{{ old('date_of_birth', isset($employee->date_of_birth) ? $employee->date_of_birth?->format('Y-m-d') : '') }}"
-            {{ $readOnly ? 'readonly' : 'required' }}>
-        @error('date_of_birth')<span class="emp-invalid">{{ $message }}</span>@enderror
-    </div>
-</div>
 
-<div class="emp-divider">Birth &amp; Education</div>
-<div class="emp-row cols-2" style="margin-bottom:16px;">
-    <div class="emp-field">
-        <label class="emp-label">Place of Birth <span class="req">*</span></label>
-        <input type="text" name="place_of_birth" id="place_of_birth"
-            class="emp-input @error('place_of_birth') is-invalid @enderror"
-            placeholder="e.g. Manila, Metro Manila"
-            value="{{ old('place_of_birth', $employee->place_of_birth ?? '') }}"
-            {{ $readOnly ? 'readonly' : 'required' }}>
-        @error('place_of_birth')<span class="emp-invalid">{{ $message }}</span>@enderror
-    </div>
-    <div class="emp-field">
-        <label class="emp-label">Educational Attainment <span class="req">*</span></label>
-        <div class="emp-select-wrap">
-            <select name="educational_attainment" id="educational_attainment"
-                class="emp-select @error('educational_attainment') is-invalid @enderror"
-                {{ $readOnly ? 'disabled' : 'required' }}>
-                <option value="">— Select —</option>
-                @foreach(['Elementary','High School','Senior High School / K-12','Vocational / TESDA',"College (Bachelor's)"] as $ea)
-                    <option value="{{ $ea }}" @selected(old('educational_attainment', $employee->educational_attainment ?? '') == $ea)>{{ $ea }}</option>
-                @endforeach
-            </select>
-            <svg class="emp-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    {{-- Section: Full Name --}}
+    <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Full Name</div>
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+            <label for="first_name" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                First Name <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $employee->first_name ?? '') }}" required
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('first_name') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('first_name')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
         </div>
-        @error('educational_attainment')<span class="emp-invalid">{{ $message }}</span>@enderror
+        <div>
+            <label for="middle_name" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Middle Name <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
+            </label>
+            <input type="text" name="middle_name" id="middle_name" value="{{ old('middle_name', $employee->middle_name ?? '') }}"
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('middle_name') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('middle_name')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="last_name" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Last Name <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $employee->last_name ?? '') }}" required
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('last_name') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('last_name')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="suffix" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Suffix <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
+            </label>
+            <input type="text" name="suffix" id="suffix" value="{{ old('suffix', $employee->suffix ?? '') }}" placeholder="Jr., III"
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('suffix') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('suffix')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
     </div>
-</div>
 
-<div class="emp-divider">Address</div>
-<div class="emp-row cols-2" style="margin-bottom:4px;">
-    <div class="emp-field">
-        <label class="emp-label">Street / House No. <span class="req">*</span></label>
-        <input type="text" name="address_street" id="address_street"
-            class="emp-input @error('address_street') is-invalid @enderror"
-            placeholder="e.g. 123 Rizal St."
-            value="{{ old('address_street', $employee->address_street ?? '') }}"
-            {{ $readOnly ? 'readonly' : 'required' }}>
-        @error('address_street')<span class="emp-invalid">{{ $message }}</span>@enderror
+    {{-- Section: Birth Details --}}
+    <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Birth Details</div>
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+        <div>
+            <label for="date_of_birth" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Birth Date <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input type="date" name="date_of_birth" id="date_of_birth" value="{{ old('date_of_birth', $employee->date_of_birth ?? '') }}" required
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('date_of_birth') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('date_of_birth')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="place_of_birth" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Birth Place <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input type="text" name="place_of_birth" id="place_of_birth" value="{{ old('place_of_birth', $employee->place_of_birth ?? '') }}" required
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('place_of_birth') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('place_of_birth')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
     </div>
-    <div class="emp-field">
-        <label class="emp-label">Barangay <span class="req">*</span></label>
-        <input type="text" name="address_barangay" id="address_barangay"
-            class="emp-input @error('address_barangay') is-invalid @enderror"
-            placeholder="e.g. Brgy. Poblacion"
-            value="{{ old('address_barangay', $employee->address_barangay ?? '') }}"
-            {{ $readOnly ? 'readonly' : 'required' }}>
-        @error('address_barangay')<span class="emp-invalid">{{ $message }}</span>@enderror
+
+    {{-- Section: Demographics --}}
+    <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Demographics</div>
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+            <label for="gender" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Gender <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <div class="relative">
+                <select name="gender" id="gender" required
+                    class="w-full appearance-none border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 pr-9 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 {{ $errors->has('gender') ? 'border-red-500 dark:border-red-400!' : '' }}">
+                    <option value="" disabled {{ old('gender', $employee->gender ?? '') === '' ? 'selected' : '' }}>Select gender</option>
+                    @foreach(['male', 'female', 'prefer_not_to_say'] as $opt)
+                        <option value="{{ $opt }}" {{ old('gender', $employee->gender ?? '') === $opt ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $opt)) }}</option>
+                    @endforeach
+                </select>
+                <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            @error('gender')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="civil_status" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Civil Status <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <div class="relative">
+                <select name="civil_status" id="civil_status" required
+                    class="w-full appearance-none border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 pr-9 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 {{ $errors->has('civil_status') ? 'border-red-500 dark:border-red-400!' : '' }}">
+                    <option value="" disabled {{ old('civil_status', $employee->civil_status ?? '') === '' ? 'selected' : '' }}>Select status</option>
+                    @foreach(['Single', 'Married', 'Divorced', 'Widowed', 'Separated'] as $opt)
+                        <option value="{{ $opt }}" {{ old('civil_status', $employee->civil_status ?? '') === $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                    @endforeach
+                </select>
+                <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            @error('civil_status')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="citizenship" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Citizenship <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
+            </label>
+            <input type="text" name="citizenship" id="citizenship" value="{{ old('citizenship', $employee->citizenship ?? '') }}" placeholder="Filipino"
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('citizenship') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('citizenship')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
     </div>
-    <div class="emp-field">
-        <label class="emp-label">City / Municipality <span class="req">*</span></label>
-        <input type="text" name="address_city" id="address_city"
-            class="emp-input @error('address_city') is-invalid @enderror"
-            placeholder="e.g. Makati City"
-            value="{{ old('address_city', $employee->address_city ?? '') }}"
-            {{ $readOnly ? 'readonly' : 'required' }}>
-        @error('address_city')<span class="emp-invalid">{{ $message }}</span>@enderror
+
+        <div>
+            <label for="spouse_name" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Spouse Name <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
+            </label>
+            <input type="text" name="spouse_name" id="spouse_name" value="{{ old('spouse_name', $employee->spouse_name ?? '') }}"
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('spouse_name') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('spouse_name')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
     </div>
-    <div class="emp-field">
-        <label class="emp-label">Province <span class="req">*</span></label>
-        <input type="text" name="address_province" id="address_province"
-            class="emp-input @error('address_province') is-invalid @enderror"
-            placeholder="e.g. Metro Manila"
-            value="{{ old('address_province', $employee->address_province ?? '') }}"
-            {{ $readOnly ? 'readonly' : 'required' }}>
-        @error('address_province')<span class="emp-invalid">{{ $message }}</span>@enderror
+
+    {{-- Section: Education --}}
+    <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Education</div>
+    <div class="grid gap-4 grid-cols-1">
+        <div>
+            <label for="educational_attainment" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Educational Attainment <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input type="text" name="educational_attainment" id="educational_attainment" value="{{ old('educational_attainment', $employee->educational_attainment ?? '') }}" required
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('educational_attainment') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('educational_attainment')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+    </div>
+
+    {{-- Section: Contact --}}
+    <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Contact Information</div>
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+        <div>
+            <label for="phone" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Mobile Number <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <div class="flex items-stretch border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all duration-150 focus-within:border-red-400 dark:focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/10">
+                <span class="flex items-center px-3 bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-sm border-r border-gray-200 dark:border-gray-600 whitespace-nowrap font-mono">+63</span>
+                <input type="text" name="phone" id="phone" value="{{ old('phone', $employee->phone ?? '') }}" required placeholder="9123456789"
+                    class="flex-1 border-none! rounded-none! shadow-none! focus:ring-0! px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('phone') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            </div>
+            @error('phone')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="telephone_number" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Telephone No. <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
+            </label>
+            <input type="text" name="telephone_number" id="telephone_number" value="{{ old('telephone_number', $employee->telephone_number ?? '') }}"
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('telephone_number') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('telephone_number')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+    </div>
+    <div>
+        <label for="email" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+            Email Address <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
+        </label>
+        <input type="email" name="email" id="email" value="{{ old('email', $employee->email ?? '') }}"
+            class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('email') ? 'border-red-500 dark:border-red-400!' : '' }}">
+        @error('email')
+            <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+        @enderror
+    </div>
+
+    {{-- Section: Address --}}
+    <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Address</div>
+    <div>
+        <label for="address_street" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+            Address Line <span class="text-red-500 dark:text-red-400">*</span>
+        </label>
+        <input type="text" name="address_street" id="address_street" value="{{ old('address_street', $employee->address_street ?? '') }}" required
+            class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('address_street') ? 'border-red-500 dark:border-red-400!' : '' }}">
+        @error('address_street')
+            <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+        @enderror
+    </div>
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-4">
+        <div>
+            <label for="address_barangay" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Barangay <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input type="text" name="address_barangay" id="address_barangay" value="{{ old('address_barangay', $employee->address_barangay ?? '') }}" required
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('address_barangay') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('address_barangay')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="address_city" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                City / Municipality <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input type="text" name="address_city" id="address_city" value="{{ old('address_city', $employee->address_city ?? '') }}" required
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('address_city') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('address_city')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="address_province" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Province <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input type="text" name="address_province" id="address_province" value="{{ old('address_province', $employee->address_province ?? '') }}" required
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('address_province') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('address_province')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
+    </div>
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 mt-4">
+        <div>
+            <label for="zip_code" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                ZIP Code <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
+            </label>
+            <input type="text" name="zip_code" id="zip_code" value="{{ old('zip_code', $employee->zip_code ?? '') }}"
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('zip_code') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('zip_code')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
     </div>
 </div>
-<input type="hidden" name="address" id="address_combined">

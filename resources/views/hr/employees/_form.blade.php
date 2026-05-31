@@ -1,48 +1,38 @@
-@php
-    /** @var \App\Models\User $employee */
-    /** @var bool $isEdit */
-@endphp
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-<div class="emp-page" data-global-datepicker="off">
-
-    @if ($isEdit && empty($employee->gender))
-        <div class="emp-alert error">
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01" />
-            </svg>
-            This employee has missing required information from older records (Gender). Please complete it before saving.
+    {{-- Top Bar --}}
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <a href="{{ url()->previous() }}"
+                class="inline-flex items-center justify-center w-8 h-8 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-150 active:scale-[0.92]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            </a>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+                {{ ($isEdit ?? false) ? 'Edit Employee' : 'Add New Employee' }}
+            </h1>
+            @if(isset($employee) && $employee->employee_code)
+                <span class="text-xs font-mono text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-gray-700">
+                    {{ $employee->employee_code }}
+                </span>
+            @endif
         </div>
-    @endif
-
-    {{-- Topbar --}}
-    <div class="emp-topbar">
-        <div>
-            <h1 class="emp-topbar-title">{{ $isEdit ? 'Edit Employee' : 'Add New Employee' }}</h1>
-            <p class="emp-topbar-sub">
-                {{ $isEdit ? 'Update the employee profile and information' : 'Fill out each section to create a new employee record' }}
-            </p>
+        <div class="flex items-center gap-2">
+            <a href="{{ url()->previous() }}"
+                class="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold no-underline cursor-pointer transition-all duration-150 hover:border-red-400 dark:hover:border-red-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-[0.97] whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                Cancel
+            </a>
         </div>
-        <a href="{{ url()->previous() }}" class="emp-btn-sec">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back
-        </a>
     </div>
 
-    {{-- Errors summary --}}
+    {{-- Error Summary --}}
     @if ($errors->any())
-        <div class="emp-errors-card">
-            <p class="emp-errors-title">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01" />
-                </svg>
-                Please fix the following errors
-            </p>
-            <ul class="emp-errors-list">
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-5 py-4 mb-5">
+            <div class="text-xs font-bold text-red-500 dark:text-red-400 mb-2 flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                Please fix the following {{ $errors->count() > 1 ? 'errors' : 'error' }}
+            </div>
+            <ul class="m-0 pl-4 text-xs text-red-600 dark:text-red-400 leading-relaxed">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -50,81 +40,83 @@
         </div>
     @endif
 
-    {{-- Form card --}}
-    <div class="emp-form-card">
-
-        {{-- Tab navigation --}}
-        @php
-            $tabs = [
-                'Personal Info',
-                'Employment',
-                'Account',
-                'Government Numbers',
-                'Work Experience',
-                'Special Skills',
-                'Beneficiaries',
-                'Character References',
-                'Attachments',
-            ];
-        @endphp
-        <nav class="emp-tab-nav" id="empTabNav">
-            @foreach ($tabs as $i => $tab)
-                <button type="button" class="emp-tab-btn {{ $i === 0 ? 'active' : '' }}"
-                    data-tab="{{ $i }}">
-                    <span class="emp-tab-num">{{ $i + 1 }}</span>
-                    {{ $tab }}
-                </button>
-            @endforeach
-        </nav>
-
-        {{-- Form --}}
-        <form action="{{ $isEdit ? route('employees.update', $employee) : route('employees.store') }}" method="POST"
-            enctype="multipart/form-data" novalidate id="empForm">
-            @csrf
-            @if ($isEdit)
-                @method('PUT')
-            @endif
-
-            <div class="emp-tab-body">
-                <div class="emp-tab-pane active" data-pane="0">@include('partials.employee.personal')</div>
-                <div class="emp-tab-pane" data-pane="1">@include('partials.employee.employment') @include('partials.employee.employment_hr')</div>
-                <div class="emp-tab-pane" data-pane="2">@include('partials.employee.account')</div>
-                <div class="emp-tab-pane" data-pane="3">@include('partials.employee.government')</div>
-                <div class="emp-tab-pane" data-pane="4">@include('partials.employee.work_experience')</div>
-                <div class="emp-tab-pane" data-pane="5">@include('partials.employee.skills')</div>
-                <div class="emp-tab-pane" data-pane="6">@include('partials.employee.beneficiaries')</div>
-                <div class="emp-tab-pane" data-pane="7">@include('partials.employee.references')</div>
-                <div class="emp-tab-pane" data-pane="8">@include('partials.employee.attachments')</div>
-            </div>
-
-            <div class="emp-form-footer">
-                <button type="button" class="emp-btn-nav emp-btn-prev" id="empPrev" style="visibility:hidden;">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                        stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    Previous
-                </button>
-                <div class="emp-form-footer-right">
-                    <button type="button" class="emp-btn-nav emp-btn-next" id="empNext">
-                        Next
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                            stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </button>
-                    <button type="submit" class="emp-btn-nav emp-btn-submit" id="empSubmit" style="display:none;">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                            stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        {{ $isEdit ? 'Update Employee' : 'Add Employee' }}
-                    </button>
-                </div>
-            </div>
-
-        </form>
+    {{-- Info Alert --}}
+    <div class="flex items-start gap-2.5 px-4 py-3.5 rounded-xl text-xs font-medium mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>Please fill out all required fields marked with <span class="text-red-500 dark:text-red-400">*</span>. You can navigate between tabs using the navigation below.</span>
     </div>
 
+    {{-- Form Shell --}}
+    <form method="POST" action="{{ $isEdit ? route('employees.update', $employee) : route('employees.store') }}" enctype="multipart/form-data"
+        class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden transition-colors duration-200">
+        @csrf
+        @if($isEdit)
+            @method('PUT')
+        @endif
+
+        {{-- Tab Navigation --}}
+        <div class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 overflow-x-auto tab-nav-scroll">
+            <div class="flex gap-1 min-w-max py-3" id="tabNav">
+                @php
+                    $tabDefs = [
+                        'personal'        => ['Personal Info',    '1', 'rose',    'rose-500',    'rose-400'],
+                        'employment'      => ['Employment',       '2', 'orange',  'orange-500',  'orange-400'],
+                        'account'         => ['Account',          '3', 'amber',   'amber-500',   'amber-400'],
+                        'government'      => ["Gov't Numbers",    '4', 'emerald','emerald-500', 'emerald-400'],
+                        'work_experience' => ['Experience',       '5', 'teal',    'teal-500',    'teal-400'],
+                        'skills'          => ['Skills',           '6', 'cyan',    'cyan-500',    'cyan-400'],
+                        'beneficiaries'   => ['Beneficiaries',    '7', 'blue',    'blue-500',    'blue-400'],
+                        'references'      => ['References',       '8', 'violet',  'violet-500',  'violet-400'],
+                    ];
+                @endphp
+                @foreach($tabDefs as $key => [$label, $num, $color, $c500, $c400])
+                    <button type="button" data-tab="{{ $key }}" data-color="{{ $color }}"
+                        class="tab-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 border-b-2
+                            {{ $loop->first ? 'active text-'.$c500.' dark:text-'.$c400.' border-'.$c500.' dark:border-'.$c400.' bg-'.$color.'-50 dark:bg-'.$color.'-900/20' : 'text-gray-500 dark:text-gray-400 border-transparent' }}
+                            hover:text-{{ $c500 }} dark:hover:text-{{ $c400 }} hover:bg-{{ $color }}-50 dark:hover:bg-{{ $color }}-900/20 active:scale-[0.96]">
+                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-md text-[0.65rem] font-bold transition-colors duration-150
+                            {{ $loop->first ? 'bg-'.$c500.' dark:bg-'.$c400.' text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' }}">
+                            {{ $num }}
+                        </span>
+                        <span class="hidden sm:inline">{{ $label }}</span>
+                        <span class="inline sm:hidden">{{ explode(' ', $label)[0] }}</span>
+                    </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Tab Panes --}}
+        <div>
+            @php $tabKeys = ['personal', 'employment', 'account', 'government', 'work_experience', 'skills', 'beneficiaries', 'references']; @endphp
+            @foreach($tabKeys as $key)
+                <div data-tab-pane="{{ $key }}"
+                    class="p-4 sm:p-6 lg:p-8 {{ $loop->first ? '' : 'hidden' }}">
+                    @include('partials.employee.' . $key)
+                </div>
+            @endforeach
+        </div>
+
+        {{-- Footer --}}
+        <div class="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-3">
+            <button type="button" data-direction="prev"
+                class="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-150 hover:border-red-400 dark:hover:border-red-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-[0.97] whitespace-nowrap opacity-50 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                Previous
+            </button>
+            <div class="flex items-center gap-2">
+                <button type="button" data-direction="next"
+                    class="inline-flex items-center gap-1.5 px-5 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-150 hover:border-red-400 dark:hover:border-red-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-[0.97] whitespace-nowrap">
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+                <button type="submit" data-primary-submit
+                    class="inline-flex items-center gap-1.5 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold cursor-pointer transition-all duration-150 hover:scale-[1.02] active:scale-[0.97] shadow-sm whitespace-nowrap border border-red-500 hover:border-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Save Employee
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
 
+@include('hr.employees._scripts')

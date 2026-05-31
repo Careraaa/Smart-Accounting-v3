@@ -841,6 +841,19 @@
             window.sndPlay = function(){ try { popSnd.currentTime=0; popSnd.play(); } catch(e){} };
             window.errPlay = function(){ try { errSnd.currentTime=0; errSnd.play(); } catch(e){} };
 
+            // Play pop sound whenever any modal becomes visible (hidden class removed)
+            var popObs = new MutationObserver(function(muts){
+                muts.forEach(function(m){
+                    if (m.type === 'attributes' && m.attributeName === 'class') {
+                        var el = m.target;
+                        if (el.matches && el.matches('[id$="Modal"], .modal-overlay') && !el.classList.contains('hidden')) {
+                            window.sndPlay();
+                        }
+                    }
+                });
+            });
+            popObs.observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
+
             const overlay = document.getElementById('sa-confirm-overlay');
             const modal = document.getElementById('sa-confirm-modal');
             const elIcon = document.getElementById('saConfirmIcon');
@@ -1008,10 +1021,10 @@
             // HTML5 form validation (required, pattern, etc.)
             document.addEventListener('invalid', function(){ playErr(); }, true);
 
-            // Inline validation errors (only within form context)
+            // Inline validation errors — only elements inside @@error blocks or error-summary
             var checkInlineErrors = function(){
-                document.querySelectorAll('.text-red-500, .text-rose-500').forEach(function(el){
-                    if (el.offsetParent !== null && el.closest('form') && el.textContent.trim().length > 1) playErr();
+                document.querySelectorAll('.text-red-500').forEach(function(el){
+                    if (el.offsetParent !== null && el.closest('form') && !el.closest('button') && el.textContent.trim().length > 1) playErr();
                 });
             };
             if (document.readyState === 'loading') {

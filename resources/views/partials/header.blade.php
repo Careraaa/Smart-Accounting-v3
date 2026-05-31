@@ -100,6 +100,7 @@
             {{-- User Profile Dropdown --}}
             @php
                 $avatarUser = auth()->user();
+                $avatarPhoto = $avatarUser->photo_url;
                 $avatarFirst = strtoupper(substr($avatarUser->first_name ?? $avatarUser->name ?? 'U', 0, 1));
                 $avatarLast  = strtoupper(substr($avatarUser->last_name ?? '', 0, 1));
                 $avatarInitials = $avatarFirst . ($avatarLast ?: '');
@@ -110,10 +111,17 @@
             @endphp
             <div class="relative" data-dropdown>
                 <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-all duration-200 hover:bg-gray-50 group" id="user-dropdown-btn" type="button">
-                    <div class="profile-avatar-inner relative w-9 h-9 min-w-[36px] rounded-full flex items-center justify-center text-white text-[13px] font-bold shadow-sm transition-transform duration-200 group-hover:scale-105" style="background:{{ $avatarBg }};box-shadow:0 0 0 2px {{ $avatarRing }}, 0 2px 6px rgba(0,0,0,0.08)">
-                        {{ $avatarInitials ?: '?' }}
-                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white"></span>
-                    </div>
+                    @if($avatarPhoto)
+                        <div class="relative w-9 h-9 min-w-[36px] rounded-full overflow-hidden flex-shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-105">
+                            <img src="{{ $avatarPhoto }}" alt="Photo" class="w-full h-full object-cover">
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white"></span>
+                        </div>
+                    @else
+                        <div class="profile-avatar-inner relative w-9 h-9 min-w-[36px] rounded-full flex items-center justify-center text-white text-[13px] font-bold shadow-sm transition-transform duration-200 group-hover:scale-105" style="background:{{ $avatarBg }};box-shadow:0 0 0 2px {{ $avatarRing }}, 0 2px 6px rgba(0,0,0,0.08)">
+                            {{ $avatarInitials ?: '?' }}
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white"></span>
+                        </div>
+                    @endif
                     <svg class="hidden md:block text-gray-400 transition-transform duration-200 group-hover:rotate-180" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                     </svg>

@@ -158,8 +158,18 @@ Route::middleware(['auth', 'check-status'])->group(function () {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|string|unique:users,username,' . $user->id,
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
         $user->update($validated);
+
+        if ($request->hasFile('photo')) {
+            if ($user->profile_picture) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_picture);
+            }
+            $path = $request->file('photo')->store('photos', 'public');
+            $user->update(['profile_picture' => $path]);
+        }
+
         return redirect()->route('profile.details')->with('success', 'Profile updated successfully.');
     })->name('profile.update');
 

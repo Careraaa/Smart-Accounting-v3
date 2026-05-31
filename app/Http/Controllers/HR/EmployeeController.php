@@ -105,6 +105,7 @@ class EmployeeController extends Controller
                 'philhealth_number' => 'nullable|string|max:50',
                 'signature_path' => 'nullable|string',
                 'generated_password' => 'nullable|string',
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             ],
             [
@@ -141,6 +142,8 @@ class EmployeeController extends Controller
         $validated['password'] = Hash::make($plainPassword);
 
         $employee = User::create($validated);
+
+        $this->handlePhoto($request, $employee);
 
         $this->logActivity('created', "Employee: {$employee->first_name} {$employee->last_name}", request()->url(), 'employee', $employee->id);
 
@@ -196,6 +199,7 @@ class EmployeeController extends Controller
                 'tin_number' => 'nullable|string|max:50',
                 'pagibig_number' => 'nullable|string|max:50',
                 'signature_path' => 'nullable|string',
+                'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             ],
             [
@@ -215,6 +219,8 @@ class EmployeeController extends Controller
         $validated['address'] = $this->assembleAddress($request);
 
         $employee->update($validated);
+
+        $this->handlePhoto($request, $employee);
 
         $this->logActivity('updated', "Employee: {$employee->first_name} {$employee->last_name}", request()->url(), 'employee', $employee->id);
 
@@ -340,5 +346,17 @@ class EmployeeController extends Controller
             $phone = '0' . substr($phone, 3);
         }
         return $phone;
+    }
+
+    private function handlePhoto(Request $request, User $employee): void
+    {
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($employee->profile_picture) {
+                Storage::disk('public')->delete($employee->profile_picture);
+            }
+            $path = $request->file('photo')->store('photos', 'public');
+            $employee->update(['profile_picture' => $path]);
+        }
     }
 }

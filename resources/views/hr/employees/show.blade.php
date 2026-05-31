@@ -35,9 +35,19 @@
 
     {{-- Topbar --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 emp-header-in">
-        <div class="flex items-center gap-2">
-            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $employee->first_name }} {{ $employee->middle_name }} {{ $employee->last_name }}</h1>
-            <div class="flex items-center gap-2.5 mt-1.5 flex-wrap">
+        <div class="flex items-center gap-4">
+            <div class="relative w-14 h-14 rounded-2xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex-shrink-0 shadow-sm">
+                @if($employee->photo_url)
+                    <img src="{{ $employee->photo_url }}" alt="Photo" class="w-full h-full object-cover">
+                @else
+                    <div class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </div>
+                @endif
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $employee->first_name }} {{ $employee->middle_name }} {{ $employee->last_name }}</h1>
+                <div class="flex items-center gap-2.5 mt-1.5 flex-wrap">
                 <span class="text-sm font-semibold text-gray-500">{{ $employee->position ?? 'No Position Specified' }}</span>
                 <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                 <span class="text-sm font-semibold text-gray-500">{{ $employee->department ?? 'No Department' }}</span>

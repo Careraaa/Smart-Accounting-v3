@@ -66,9 +66,23 @@
 
             <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
                 <div class="flex items-center gap-4">
-                    <div class="pf-avatar w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center text-white font-bold text-xl border border-white/15 shadow-inner shrink-0 backdrop-blur-sm">
-                        {{ $initials ?: 'U' }}
-                    </div>
+                    <form action="{{ route('employee.profile.update') }}" method="POST" enctype="multipart/form-data" id="emp-photo-form" class="relative shrink-0">
+                        @csrf
+                        @method('PATCH')
+                        <label tabindex="0" class="pf-avatar block w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/20 shadow-inner cursor-pointer group relative" role="button" aria-label="Upload profile photo">
+                            @if($u->photo_url)
+                                <img src="{{ $u->photo_url }}" alt="Photo" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full bg-white/10 flex items-center justify-center text-white font-bold text-xl backdrop-blur-sm">
+                                    {{ $initials ?: 'U' }}
+                                </div>
+                            @endif
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200 rounded-2xl">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            </div>
+                            <input type="file" name="photo" accept="image/*" class="hidden" onchange="document.getElementById('emp-photo-form').submit();">
+                        </label>
+                    </form>
                     <div>
                         <h1 class="text-xl font-extrabold text-white tracking-tight">{{ $name }}</h1>
                         <div class="flex items-center gap-2 mt-1 text-sm text-gray-400">

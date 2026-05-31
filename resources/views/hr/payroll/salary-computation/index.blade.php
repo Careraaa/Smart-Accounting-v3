@@ -284,7 +284,6 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
 
             function openGenerateModal() { openModal('generateModal'); }
             function openModal(id) {
-                if (window.sndPlay) window.sndPlay();
                 document.querySelectorAll('[id$="Modal"]').forEach(function(el) { el.classList.add('hidden'); });
                 var m = document.getElementById(id);
                 if (m) m.classList.remove('hidden');
