@@ -21,7 +21,7 @@
         default => '',
     };
 
-    $printUrl = route('reports.print.remittance-report', [
+    $printUrl = route('reports.print.remittance-report-clerk', [
         'period' => $period,
         'week' => $week,
         'month' => $month,

@@ -66,7 +66,7 @@
                 $unread_count = $notifData['count'];
             @endphp
             <div class="relative" data-dropdown>
-                <button class="relative flex items-center justify-center w-9 h-9 rounded-lg transition-colors hover:bg-gray-100" id="notification-btn" type="button">
+                <button class="relative flex items-center justify-center w-9 h-9 rounded-lg transition-colors hover:bg-gray-100 {{ $unread_count > 0 ? 'notif-has-unread' : '' }}" id="notification-btn" type="button">
                     <svg viewBox="0 0 24 24" fill="none" height="20" width="20" xmlns="http://www.w3.org/2000/svg" class="text-gray-500">
                         <path d="M12 5.365V3m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175 0 .593 0 1.292-.538 1.292H5.538C5 18 5 17.301 5 16.708c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 12 5.365ZM8.733 18c.094.852.306 1.54.944 2.112a3.48 3.48 0 0 0 4.646 0c.638-.572 1.236-1.26 1.33-2.112h-6.92Z" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" stroke="currentColor"></path>
                     </svg>
@@ -168,6 +168,8 @@
     #dark-mode-toggle:hover svg { animation: hdrSpin 0.6s cubic-bezier(0.34,1.56,0.64,1); }
     #kt-fullscreen-btn:hover i { animation: hdrExpand 0.5s cubic-bezier(0.34,1.56,0.64,1); }
     #notification-btn:hover svg { animation: hdrRing 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+    #notification-btn.notif-has-unread svg { animation: hdrRing 0.5s cubic-bezier(0.34,1.56,0.64,1) infinite; }
+    #notification-btn.notif-has-unread:hover svg { animation: hdrRing 0.5s cubic-bezier(0.34,1.56,0.64,1) infinite; }
     #user-dropdown-btn:hover .profile-avatar-inner { animation: hdrPulse 0.6s cubic-bezier(0.34,1.56,0.64,1); }
 
     @keyframes hdrSpin { 0%{transform:rotate(0)} 100%{transform:rotate(180deg)} }
@@ -674,7 +676,9 @@
                 }
                 previousUnreadCount = count;
 
+                const notifBtn = document.getElementById('notification-btn');
                 if (blip) blip.classList.toggle('hidden', count === 0);
+                if (notifBtn) notifBtn.classList.toggle('notif-has-unread', count > 0);
                 const markAllBtn = document.getElementById('mark-all-read');
                 if (markAllBtn) markAllBtn.classList.toggle('hidden', count === 0);
             })
