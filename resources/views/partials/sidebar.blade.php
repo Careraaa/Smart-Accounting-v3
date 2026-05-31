@@ -69,6 +69,19 @@
             50% { transform: scale(1.04); opacity: 0.85; }
         }
 
+        /* ── Brand title typewriter reveal ── */
+        .brand-title-typing {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            animation: brandReveal 0.8s steps(17) forwards;
+            width: 0;
+        }
+        @keyframes brandReveal {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
         /* ── Staggered item entrance ── */
         .sidebar-item {
             opacity: 0;
@@ -166,7 +179,7 @@
                     html.dark .si-logo-light { display: none !important; }
                     html.dark .si-logo-dark { display: block !important; }
                 </style>
-                <span class="brand-title text-sm font-bold text-gray-900 truncate">Knights TSC</span>
+                <span class="brand-title brand-title-typing text-sm font-bold text-gray-900">Knights Transport</span>
             </a>
         </div>
 

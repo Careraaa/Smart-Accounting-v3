@@ -75,13 +75,13 @@ if (document.readyState === 'loading') {
 function initializeLeaveApprovalButtons() {
     // Handle approve buttons
     document.querySelectorAll('.approve-btn').forEach(button => {
-        button.addEventListener('click', function (e) {
+        button.addEventListener('click', async function (e) {
             e.preventDefault();
             
             const leaveId = this.dataset.leaveId;
             const employeeName = this.dataset.employeeName;
             
-            if (confirm(`Are you sure you want to approve the leave request from ${employeeName}?`)) {
+            if (await window.saConfirm({ message: `Are you sure you want to approve the leave request from ${employeeName}?`, confirmText: 'Approve', variant: 'primary' })) {
                 document.getElementById(`approve-form-${leaveId}`).submit();
             }
         });
@@ -89,13 +89,13 @@ function initializeLeaveApprovalButtons() {
     
     // Handle reject buttons
     document.querySelectorAll('.reject-btn').forEach(button => {
-        button.addEventListener('click', function (e) {
+        button.addEventListener('click', async function (e) {
             e.preventDefault();
             
             const leaveId = this.dataset.leaveId;
             const employeeName = this.dataset.employeeName;
             
-            if (confirm(`Are you sure you want to reject the leave request from ${employeeName}?`)) {
+            if (await window.saConfirm({ message: `Are you sure you want to reject the leave request from ${employeeName}?`, confirmText: 'Reject', variant: 'danger' })) {
                 document.getElementById(`reject-form-${leaveId}`).submit();
             }
         });

@@ -84,6 +84,7 @@ window.allBatches = {!! json_encode($allBatches->map(fn($b) => [
     let page = 1, filtered = [];
 
     const STATUS_MAP = {
+        draft:     { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500', label: 'Draft' },
         submitted: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', dot: 'bg-violet-500', label: 'Submitted' },
         approved:  { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Approved' },
         rejected:  { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', dot: 'bg-red-500', label: 'Rejected' },

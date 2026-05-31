@@ -460,14 +460,13 @@ function resetPassword(userId, userName) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(`Password reset successful!\nNew password: ${data.password}\n\nPlease share this with the user.`);
-                location.reload();
+                window.saAlert({ title: 'Password Reset', message: 'Password reset successful!\nNew password: ' + data.password + '\n\nPlease share this with the user.', variant: 'success' }).then(function(){ location.reload(); });
             } else {
-                alert('Failed to reset password: ' + (data.message || 'Unknown error'));
+                window.saAlert({ title: 'Error', message: 'Failed to reset password: ' + (data.message || 'Unknown error'), variant: 'danger' });
             }
         })
         .catch(error => {
-            alert('Error: ' + error.message);
+            window.saAlert({ title: 'Error', message: 'Error: ' + error.message, variant: 'danger' });
         });
     });
 }
@@ -528,7 +527,7 @@ function toggleStatus(userId, checkbox) {
         document.getElementById('accStatusFilter')?.dispatchEvent(new Event('change'));
     })
     .catch(error => {
-        alert('Error: ' + error.message);
+        window.saAlert({ title: 'Error', message: 'Error: ' + error.message, variant: 'danger' });
         checkbox.checked = !checkbox.checked;
     })
     .finally(() => {

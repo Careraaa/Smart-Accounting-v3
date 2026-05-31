@@ -109,7 +109,7 @@ class PayrollBatch extends Model
 
     public function isEditable(): bool
     {
-        return in_array($this->status, ['submitted', 'rejected'], true);
+        return in_array($this->status, ['draft', 'rejected'], true);
     }
 
     /* ── Static helpers ────────────────────────────────────────── */
@@ -214,7 +214,7 @@ class PayrollBatch extends Model
     }
 
     /**
-     * In-progress batch for the current period (submitted but not yet finalized).
+     * In-progress batch for the current period (draft, not yet finalized).
      */
     public static function inProgressForCurrentPeriod(): ?self
     {
@@ -222,8 +222,7 @@ class PayrollBatch extends Model
 
         return self::where('period_start', $period['start'])
             ->where('period_end', $period['end'])
-            ->where('status', 'submitted')
-            ->whereNull('finalized_at')
+            ->where('status', 'draft')
             ->latest('id')
             ->first();
     }

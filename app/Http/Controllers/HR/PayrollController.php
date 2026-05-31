@@ -266,11 +266,10 @@
                 $period = PayrollBatch::resolvePeriod();
             }
 
-            // Check if batch already exists for this period
+            // Check if a draft batch already exists for this period
             $existing = PayrollBatch::where('period_start', $period['start'])
                 ->where('period_end', $period['end'])
-                ->where('status', 'submitted')
-                ->whereNull('finalized_at')
+                ->where('status', 'draft')
                 ->first();
 
             if ($existing) {
@@ -282,7 +281,7 @@
             $batch = PayrollBatch::create([
                 'period_start' => $period['start'],
                 'period_end'   => $period['end'],
-                'status'       => 'submitted',
+                'status'       => 'draft',
                 'generated_by' => auth()->id(),
             ]);
 
@@ -290,7 +289,8 @@
 
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
-                ->with('success', 'Batch created. Add employees, review, then finalize.');
+                ->with('success', 'Batch created. Add employees, review, then finalize.')
+                ->with('_sound_success', true);
         }
 
         /* ══════════════════════════════════════════════════════════════
@@ -450,7 +450,8 @@
 
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
-                ->with('success', "{$added} employee" . ($added !== 1 ? 's' : '') . " added to batch.");
+                ->with('success', "{$added} employee" . ($added !== 1 ? 's' : '') . " added to batch.")
+                ->with('_sound_success', true);
         }
 
         public function batchAddEmployee(Request $request, PayrollBatch $batch)
@@ -473,7 +474,8 @@
             if ($alreadyExists) {
                 return redirect()
                     ->route('payroll.batch.confirm', $batch)
-                    ->with('error', 'Employee already has generated payroll for this period.');
+                    ->with('error', 'Employee already has generated payroll for this period.')
+                    ->with('_sound_error', true);
             }
 
             $employee = User::findOrFail($employeeId);
@@ -487,7 +489,8 @@
 
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
-                ->with('success', "{$employee->first_name} {$employee->last_name} added to batch.");
+                ->with('success', "{$employee->first_name} {$employee->last_name} added to batch.")
+                ->with('_sound_success', true);
         }
 
         public function batchRemoveEmployee(PayrollBatch $batch, Payroll $payroll)
@@ -579,7 +582,8 @@
             PayrollDeductionService::applyLoanDeductions($updatedPayroll);
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
-                ->with('success', "{$employee->first_name} {$employee->last_name}'s payroll saved and marked as prepared.");
+                ->with('success', "{$employee->first_name} {$employee->last_name}'s payroll saved and marked as prepared.")
+                ->with('_sound_success', true);
         }
 
         public function batchMarkPrepared(PayrollBatch $batch, Payroll $payroll)
@@ -630,7 +634,8 @@
             $name = trim(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? ''));
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
-                ->with('success', ($name ? "{$name} recomputed and marked as prepared." : 'Employee recomputed and marked as prepared.'));
+                ->with('success', ($name ? "{$name} recomputed and marked as prepared." : 'Employee recomputed and marked as prepared.'))
+                ->with('_sound_success', true);
         }
 
         /* ══════════════════════════════════════════════════════════════
@@ -645,7 +650,8 @@
             if ($batch->payrolls->isEmpty()) {
                 return redirect()
                     ->route('payroll.batch.confirm', $batch)
-                    ->with('error', 'Cannot finalize an empty batch. Add at least one employee.');
+                    ->with('error', 'Cannot finalize an empty batch. Add at least one employee.')
+                    ->with('_sound_error', true);
             }
 
             $notPrepared = $batch->payrolls
@@ -661,7 +667,8 @@
                 $names = $notPrepared->implode(', ');
                 return redirect()
                     ->route('payroll.batch.confirm', $batch)
-                    ->with('error', "Cannot finalize batch. Some employees are not marked as prepared yet.");
+                    ->with('error', "Cannot finalize batch. Some employees are not marked as prepared yet.")
+                    ->with('_sound_error', true);
             }
 
             // Recompute every payroll to pick up any OT/UT approved after initial generation.
@@ -744,9 +751,9 @@
         public function batchCancel(PayrollBatch $batch)
         {
             abort_if(
-                $batch->status !== 'submitted',
+                $batch->status !== 'draft',
                 403,
-                'Only submitted batches can be deleted.'
+                'Only draft batches can be deleted.'
             );
 
             DB::transaction(function () use ($batch) {
@@ -784,7 +791,9 @@
             $batch->payrolls()->update(['status' => 'prepared']);
 
             $batch->update([
-                'status'         => 'submitted',
+                'status'         => 'draft',
+                'finalized_by'   => null,
+                'finalized_at'   => null,
                 'rejected_by'    => null,
                 'rejected_at'    => null,
                 'rejection_note' => null,
@@ -852,7 +861,8 @@
             $label = $count === 1 ? '1 employee' : "{$count} employees";
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
-                ->with('success', "Recomputed and marked {$label} as prepared.");
+                ->with('success', "Recomputed and marked {$label} as prepared.")
+                ->with('_sound_success', true);
         }
 
         /* ══════════════════════════════════════════════════════════════

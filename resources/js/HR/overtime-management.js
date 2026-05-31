@@ -118,8 +118,8 @@ if (document.readyState === 'loading') {
 function handleOvertimeApproval(overtimeId) {
     const approveButton = document.querySelector(`button[data-overtime-id="${overtimeId}"][data-action="approve"]`);
     if (approveButton) {
-        approveButton.addEventListener('click', function () {
-            if (confirm('Are you sure you want to approve this record?')) {
+        approveButton.addEventListener('click', async function () {
+            if (await window.saConfirm({ message: 'Are you sure you want to approve this record?', confirmText: 'Approve', variant: 'primary' })) {
                 document.querySelector(`form[data-overtime-id="${overtimeId}"][data-action="approve"]`).submit();
             }
         });

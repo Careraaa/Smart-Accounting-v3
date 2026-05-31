@@ -2,7 +2,13 @@
 @php
 $user = auth()->user();
 $pinnedItems = $user ? \App\Models\PinnedItem::where('user_id', $user->id)->orderBy('sort_order')->get() : collect();
-$activities = $user ? \App\Models\UserActivity::where('user_id', $user->id)->latest()->take(50)->get() : collect();
+$activities = $user ? \App\Models\UserActivity::where('user_id', $user->id)->latest()->take(10)->get() : collect();
+
+// Prune anything beyond the 10 most recent
+if ($user) {
+    $keepIds = $activities->pluck('id');
+    \App\Models\UserActivity::where('user_id', $user->id)->whereNotIn('id', $keepIds)->delete();
+}
 
 $role = $user?->role ?? '';
 $modules = [
@@ -170,14 +176,14 @@ $pinIconsJson = json_encode($pinIcons);
             {{-- Pinned list --}}
             <div id="rs-pinned-list" class="space-y-0.5 overflow-y-auto overflow-x-hidden flex-1 min-h-0">
                 @forelse($pinnedItemsWithIcon as $item)
-                <div class="rs-pinned-item group flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-gray-50/80 hover:scale-[1.02] transition-all">
-                    <a href="{{ $item['url'] }}" class="flex-1 flex items-center gap-2 min-w-0 no-underline">
-                        <span class="shrink-0 flex items-center justify-center w-5 h-5 {{ $item['color'] }}">
-                            <i class="{{ $item['icon'] }}" style="font-size:17px;line-height:1"></i>
+                <div class="rs-pinned-item group flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-50/80 hover:scale-[1.02] transition-all">
+                    <a href="{{ $item['url'] }}" class="flex-1 flex items-center gap-2.5 min-w-0 no-underline">
+                        <span class="rs-pin-icon shrink-0 flex items-center justify-center w-6 h-6 {{ $item['color'] }}">
+                            <i class="{{ $item['icon'] }}" style="font-size:21px;line-height:1"></i>
                         </span>
-                        <span class="text-xs font-medium text-gray-700 truncate leading-tight">{{ $item['label'] }}</span>
+                        <span class="text-sm font-medium text-gray-700 truncate leading-tight">{{ $item['label'] }}</span>
                     </a>
-                    <svg class="w-2.5 h-2.5 text-amber-400 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="w-3 h-3 text-amber-400 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     <a href="#" data-pin-url="{{ $item['url'] }}" data-pin-label="{{ $item['label'] }}" class="rs-unpin-btn w-5 h-5 rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200 text-gray-300 hover:text-red-400 flex items-center justify-center transition-all no-underline shrink-0" title="Unpin">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </a>
@@ -304,11 +310,11 @@ function renderPinnedList() {
                 var arr = getPinIcon(p.label, p.url);
                 return {icon: arr[0], color: arr[1]};
             })();
-            return '<div class="rs-pinned-item group flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-gray-50/80 hover:scale-[1.02] transition-all" style="animation:rsSlideIn .35s ease-out both;animation-delay:' + (idx * 40) + 'ms">' +
-                '<a href="' + p.url.replace(/"/g, '&quot;') + '" class="flex-1 flex items-center gap-2 min-w-0 no-underline">' +
-                '<span class="shrink-0 flex items-center justify-center w-5 h-5 ' + icon.color + '"><i class="' + icon.icon + '" style="font-size:17px;line-height:1"></i></span>' +
-                '<span class="text-xs font-medium text-gray-700 truncate leading-tight">' + p.label.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></a>' +
-                '<svg class="w-2.5 h-2.5 text-amber-400 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' +
+            return '<div class="rs-pinned-item group flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-50/80 hover:scale-[1.02] transition-all" style="animation:rsSlideIn .35s ease-out both;animation-delay:' + (idx * 40) + 'ms">' +
+                '<a href="' + p.url.replace(/"/g, '&quot;') + '" class="flex-1 flex items-center gap-2.5 min-w-0 no-underline">' +
+                '<span class="rs-pin-icon shrink-0 flex items-center justify-center w-6 h-6 ' + icon.color + '"><i class="' + icon.icon + '" style="font-size:21px;line-height:1"></i></span>' +
+                '<span class="text-sm font-medium text-gray-700 truncate leading-tight">' + p.label.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></a>' +
+                '<svg class="w-3 h-3 text-amber-400 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' +
                 '<a href="#" data-pin-url="' + p.url.replace(/"/g, '&quot;') + '" data-pin-label="' + p.label.replace(/"/g, '&quot;') + '" class="rs-unpin-btn w-5 h-5 rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200 text-gray-300 hover:text-red-400 flex items-center justify-center transition-all no-underline shrink-0" title="Unpin">' +
                 '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></a></div>';
         }).join('');

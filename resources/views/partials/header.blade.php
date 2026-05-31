@@ -25,13 +25,18 @@
         </div>
 
         {{-- Right side icons --}}
-        <div class="flex items-center gap-0.5 ml-auto">
+        <div class="flex items-center gap-1.5 ml-auto">
 
             {{-- Dark mode toggle --}}
-            <label class="dark-tip relative inline-block h-5 w-9 cursor-pointer rounded-full bg-gray-300 transition [-webkit-tap-highlight-color:_transparent] has-[:checked]:bg-gray-900" id="dark-mode-toggle" data-tip="Toggle dark mode">
-                <input class="peer sr-only" id="darkModeCheckbox" type="checkbox" />
-                <span class="absolute inset-y-0 start-0 m-[3px] size-3.5 rounded-full bg-gray-300 ring-[3px] ring-inset ring-white transition-all peer-checked:start-[18px] peer-checked:w-1 peer-checked:bg-white peer-checked:ring-transparent"></span>
-            </label>
+            <button class="flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors" id="dark-mode-toggle" type="button" data-tip="Toggle dark mode">
+                <svg class="dark-mode-sun" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+                <svg class="dark-mode-moon hidden" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                </svg>
+            </button>
 
             {{-- Fullscreen --}}
             <a href="javascript:void(0);" class="hidden sm:flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors" id="kt-fullscreen-btn">
@@ -93,12 +98,23 @@
             </div>
 
             {{-- User Profile Dropdown --}}
+            @php
+                $avatarUser = auth()->user();
+                $avatarFirst = strtoupper(substr($avatarUser->first_name ?? $avatarUser->name ?? 'U', 0, 1));
+                $avatarLast  = strtoupper(substr($avatarUser->last_name ?? '', 0, 1));
+                $avatarInitials = $avatarFirst . ($avatarLast ?: '');
+                $avatarSeed = crc32($avatarUser->username ?? $avatarUser->email ?? $avatarUser->id ?? 'user');
+                $avatarHue = abs($avatarSeed) % 360;
+                $avatarBg = "hsl({$avatarHue}, 52%, 42%)";
+                $avatarRing = "hsl({$avatarHue}, 52%, 75%)";
+            @endphp
             <div class="relative" data-dropdown>
-                <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-colors hover:bg-rose-50" id="user-dropdown-btn" type="button">
-                    <div class="w-8 h-8 min-w-[32px] rounded-full bg-gradient-to-br from-rose-800 to-rose-900 flex items-center justify-center text-white text-sm font-bold shadow-sm">
-                        {{ auth()->user()->getFirstLetter() }}
+                <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-all duration-200 hover:bg-gray-50 group" id="user-dropdown-btn" type="button">
+                    <div class="profile-avatar-inner relative w-9 h-9 min-w-[36px] rounded-full flex items-center justify-center text-white text-[13px] font-bold shadow-sm transition-transform duration-200 group-hover:scale-105" style="background:{{ $avatarBg }};box-shadow:0 0 0 2px {{ $avatarRing }}, 0 2px 6px rgba(0,0,0,0.08)">
+                        {{ $avatarInitials ?: '?' }}
+                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white"></span>
                     </div>
-                    <svg class="hidden md:block text-gray-400" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg class="hidden md:block text-gray-400 transition-transform duration-200 group-hover:rotate-180" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                     </svg>
                 </button>
@@ -127,6 +143,17 @@
 </header>
 
 <style>
+    /* ── Navbar icon hover animations ── */
+    #dark-mode-toggle:hover svg { animation: hdrSpin 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+    #kt-fullscreen-btn:hover i { animation: hdrExpand 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+    #notification-btn:hover svg { animation: hdrRing 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+    #user-dropdown-btn:hover .profile-avatar-inner { animation: hdrPulse 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+
+    @keyframes hdrSpin { 0%{transform:rotate(0)} 100%{transform:rotate(180deg)} }
+    @keyframes hdrExpand { 0%{transform:scale(1)} 50%{transform:scale(1.25)} 100%{transform:scale(1)} }
+    @keyframes hdrRing { 0%{transform:rotate(0)} 20%{transform:rotate(12deg)} 40%{transform:rotate(-10deg)} 60%{transform:rotate(6deg)} 80%{transform:rotate(-4deg)} 100%{transform:rotate(0)} }
+    @keyframes hdrPulse { 0%{box-shadow:0 0 0 0 var(--pulse-color,rgba(200,41,42,0.4))} 70%{box-shadow:0 0 0 8px transparent} 100%{box-shadow:0 0 0 0 transparent} }
+
     /* ── Dropdown animation ── */
     [data-dropdown-menu] {
         transition: opacity .15s ease-out, transform .15s ease-out, visibility .15s ease-out;

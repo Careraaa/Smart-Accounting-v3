@@ -101,7 +101,7 @@
                                     <button onclick="openEditShiftModal({{ $shift->id }})" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer" title="Edit">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                     </button>
-                                    <form action="{{ route('settings.shift.destroy', $shift) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this shift?');" class="inline">
+                                    <form action="{{ route('settings.shift.destroy', $shift) }}" method="POST" data-sa-confirm="Are you sure you want to delete this shift?" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" title="Delete">

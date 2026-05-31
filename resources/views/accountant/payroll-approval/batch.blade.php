@@ -22,10 +22,11 @@
     $isFirst   = $startDate->format('d') <= 15;
 
     $statusInfo = match($status) {
+        'draft'     => ['label'=>'Draft',     'dot'=>'bg-amber-300', 'text'=>'text-amber-500', 'bg'=>'bg-amber-50'],
         'submitted' => ['label'=>'Pending',   'dot'=>'bg-amber-400', 'text'=>'text-amber-600', 'bg'=>'bg-amber-50'],
         'approved'  => ['label'=>'Approved',  'dot'=>'bg-emerald-400','text'=>'text-emerald-600','bg'=>'bg-emerald-50'],
         'rejected'  => ['label'=>'Rejected',  'dot'=>'bg-red-400',   'text'=>'text-red-600',   'bg'=>'bg-red-50'],
-        default     => ['label'=>'Pending',   'dot'=>'bg-amber-400', 'text'=>'text-amber-600', 'bg'=>'bg-amber-50'],
+        default     => ['label'=>'Draft',     'dot'=>'bg-amber-300', 'text'=>'text-amber-500', 'bg'=>'bg-amber-50'],
     };
 @endphp
 

@@ -91,9 +91,9 @@ function copyPassword() {
     if (!el) return;
     const text = el.textContent.trim();
     navigator.clipboard.writeText(text).then(function () {
-        alert('Copied to clipboard.');
+        window.saAlert({ title: 'Copied', message: 'Password copied to clipboard.', variant: 'success' });
     }).catch(function () {
-        alert('Could not copy.');
+        window.saAlert({ title: 'Error', message: 'Could not copy password to clipboard.', variant: 'warning' });
     });
 }
 </script>

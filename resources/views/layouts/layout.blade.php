@@ -10,11 +10,12 @@
     <meta name="author" content="flexilecode">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Knights TSC</title>
+    <title>Knights Transport</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights-icon.png') }}">
 
     {{-- Feather icons only (vendors.min.css replaced — all other vendor CSS was unused) --}}
     <link rel="stylesheet" href="{{ asset('vendors/css/feather.min.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @stack('head_scripts')
 
     {{-- Vite — Tailwind + custom overrides --}}
@@ -345,6 +346,8 @@
         @keyframes rsSlideIn { from { opacity: 0; transform: translateX(-12px) scale(.96); } to { opacity: 1; transform: translateX(0) scale(1); } }
         .rs-pinned-item { transition: background-color .15s ease, transform .15s ease, opacity .15s ease; }
         .rs-pinned-item:hover { transform: scale(1.02); }
+        .rs-pinned-item:hover .rs-pin-icon { animation: rsIconWiggle 0.3s ease-in-out; }
+        @keyframes rsIconWiggle { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
         /* Star bounce on hover */
         .rs-pin-toggle svg, .rs-result-star { transition: transform .2s cubic-bezier(.34,1.56,.64,1), fill .15s ease, color .15s ease; }
         .rs-pin-toggle:hover svg { transform: scale(1.3) rotate(-10deg); }
@@ -464,10 +467,8 @@
         }
 
         /* Dark mode toggle */
-        html.dark #dark-mode-toggle { background: #18182a !important; }
-        html.dark #dark-mode-toggle:has(:checked) { background: #080810 !important; }
-        html.dark #dark-mode-toggle span { background: #30304a; }
-        html.dark #dark-mode-toggle:has(:checked) span { background: #b8b8d0 !important; }
+        html.dark #dark-mode-toggle { color: #b8b8d0 !important; }
+        html.dark #dark-mode-toggle:hover { background: rgba(255,255,255,.05) !important; color: #e0e0f0 !important; }
 
         /* Profile page (pf2 classes) */
         html.dark .pf2-page { background: #050508; }
@@ -532,52 +533,111 @@
 
 <body>
 
-    {{-- Page loader (crystal colors adapt to dark/light mode) --}}
-    <script>
-        (function(){
-            var isDark = localStorage.getItem('dark-mode') === 'true';
-            var bg = isDark ? '#050508' : '#ffffff';
-            var c = isDark
-                ? ['#4a0e0e,#7f1d1d','#5c1010,#991b1b','#6e1313,#b91c1c','#7f1d1d,#dc2626','#991b1b,#ef4444','#b91c1c,#f87171']
-                : ['#7f1d1d,#dc2626','#991b1b,#ef4444','#b91c1c,#f87171','#dc2626,#fca5a5','#ef4444,#fecaca','#f87171,#fee2e2'];
-            document.write(
-                '<div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center" style="background:'+bg+'">' +
-                '<style>' +
-                '.crystal:nth-child(1){background:linear-gradient(45deg,'+c[0]+');animation-delay:0s}' +
-                '.crystal:nth-child(2){background:linear-gradient(45deg,'+c[1]+');animation-delay:0.15s}' +
-                '.crystal:nth-child(3){background:linear-gradient(45deg,'+c[2]+');animation-delay:0.3s}' +
-                '.crystal:nth-child(4){background:linear-gradient(45deg,'+c[3]+');animation-delay:0.45s}' +
-                '.crystal:nth-child(5){background:linear-gradient(45deg,'+c[4]+');animation-delay:0.6s}' +
-                '.crystal:nth-child(6){background:linear-gradient(45deg,'+c[5]+');animation-delay:0.75s}' +
-                '</style>' +
-                '<div class="loader relative w-[200px] h-[200px]" style="perspective:800px">' +
-                '<div class="crystal"></div><div class="crystal"></div><div class="crystal"></div>' +
-                '<div class="crystal"></div><div class="crystal"></div><div class="crystal"></div>' +
-                '</div></div>'
-            );
-        })();
-    </script>
+    {{-- Skeleton loader for page refreshes --}}
     <style>
-        .crystal {
-            position:absolute; top:50%; left:50%;
-            width:60px; height:60px; opacity:0;
-            transform-origin:bottom center;
-            transform:translate(-50%,-50%) rotateX(45deg) rotateZ(0deg);
-            animation:spin 2s linear infinite, emerge 0.8s ease-in-out infinite alternate, fadeIn 0.25s ease-out forwards;
-            border-radius:10px; visibility:hidden;
+        .sk-item { background: #e5e7eb; border-radius: 8px; position: relative; overflow: hidden; }
+        .sk-item::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+            animation: skShimmer 1.5s ease-in-out infinite;
         }
-        @keyframes spin {
-            from { transform:translate(-50%,-50%) rotateX(45deg) rotateZ(0deg); }
-            to   { transform:translate(-50%,-50%) rotateX(45deg) rotateZ(360deg); }
-        }
-        @keyframes emerge {
-            0%,100% { transform:translate(-50%,-50%) scale(0.5); opacity:0; }
-            50%     { transform:translate(-50%,-50%) scale(1);   opacity:1; }
-        }
-        @keyframes fadeIn { to { visibility:visible; opacity:0.8; } }
+        @keyframes skShimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+        html.dark .sk-item { background: #1a1a30; }
+        html.dark .sk-item::after { background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%); }
+        #page-skeleton { transition: opacity .3s ease; }
+        #page-skeleton.loaded { opacity: 0; pointer-events: none; }
+        .sk-sidebar { width:240px; border-right:1px solid #f3f4f6; }
+        html.dark .sk-sidebar { border-color:#12121e; }
+        .sk-crystal { --cc: 0.08; }
     </style>
+    <div id="page-skeleton" class="fixed inset-0 z-[9999] bg-white dark:bg-[#050508] flex">
+        {{-- Sidebar skeleton --}}
+        <div class="sk-sidebar shrink-0 flex flex-col h-full">
+            {{-- Brand --}}
+            <div class="flex items-center px-3 h-16 border-b border-gray-100 dark:border-[#12121e]">
+                <div class="sk-item h-4 w-28 rounded-md"></div>
+            </div>
+            {{-- Search --}}
+            <div class="mx-3 mt-3 mb-1">
+                <div class="sk-item h-9 rounded-xl"></div>
+            </div>
+            {{-- Nav items --}}
+            <div class="flex-1 overflow-hidden px-3 py-2 space-y-0.5">
+                <div class="sk-item h-3 w-20 mb-2 ml-2"></div>
+                @for($i=0;$i<5;$i++)
+                <div class="flex items-center gap-1.5 px-3 py-1.5">
+                    <div class="sk-item h-[18px] w-[18px] rounded-lg shrink-0"></div>
+                    <div class="sk-item h-3.5 flex-1 max-w-[120px] rounded-md"></div>
+                </div>
+                @endfor
+                <div class="sk-item h-3 w-24 mb-2 ml-2 mt-3"></div>
+                @for($i=0;$i<4;$i++)
+                <div class="flex items-center gap-1.5 px-3 py-1.5">
+                    <div class="sk-item h-[18px] w-[18px] rounded-lg shrink-0"></div>
+                    <div class="sk-item h-3.5 flex-1 max-w-[120px] rounded-md"></div>
+                </div>
+                @endfor
+            </div>
+        </div>
+        {{-- Main area skeleton --}}
+        <div class="flex-1 flex flex-col min-w-0">
+            {{-- Header skeleton --}}
+            <div class="h-16 border-b border-gray-100 dark:border-[#12121e] flex items-center px-6">
+                <div class="sk-item h-4 w-48"></div>
+                <div class="flex-1"></div>
+                <div class="flex items-center gap-3">
+                    <div class="sk-item h-8 w-8 rounded-lg"></div>
+                    <div class="sk-item h-8 w-8 rounded-lg"></div>
+                    <div class="sk-item h-8 w-8 rounded-lg"></div>
+                    <div class="sk-item h-8 w-8 rounded-full"></div>
+                </div>
+            </div>
+            {{-- Crystal spinner in content area --}}
+            <div class="flex-1 flex items-center justify-center bg-gray-100 dark:bg-[#0c0c18]">
+                <style>
+                    @keyframes skSpin {
+                        from{transform:translate(-50%,-50%) rotateX(45deg) rotateZ(0deg)}
+                        to{transform:translate(-50%,-50%) rotateX(45deg) rotateZ(360deg)}
+                    }
+                    @keyframes skEmerg {
+                        0%,100%{transform:translate(-50%,-50%) scale(0.5);opacity:0}
+                        50%{transform:translate(-50%,-50%) scale(1);opacity:1}
+                    }
+                    @keyframes skFade { to{visibility:visible;opacity:0.35} }
+                    .sk-crystal {
+                        position:absolute; top:50%; left:50%;
+                        width:48px; height:48px; opacity:0;
+                        transform-origin:bottom center;
+                        border-radius:8px; visibility:hidden;
+                    }
+                    .sk-crystal:nth-child(1){background:linear-gradient(45deg,#6366f1,#818cf8);animation-delay:0s}
+                    .sk-crystal:nth-child(2){background:linear-gradient(45deg,#4f46e5,#6366f1);animation-delay:0.15s}
+                    .sk-crystal:nth-child(3){background:linear-gradient(45deg,#4338ca,#4f46e5);animation-delay:0.3s}
+                    .sk-crystal:nth-child(4){background:linear-gradient(45deg,#6366f1,#a5b4fc);animation-delay:0.45s}
+                    .sk-crystal:nth-child(5){background:linear-gradient(45deg,#818cf8,#6366f1);animation-delay:0.6s}
+                    .sk-crystal:nth-child(6){background:linear-gradient(45deg,#4f46e5,#4338ca);animation-delay:0.75s}
+                    .sk-crystal { animation:skSpin 2s linear infinite, skEmerg 0.8s ease-in-out infinite alternate, skFade 0.25s ease-out forwards; }
+                </style>
+                <div class="relative w-[160px] h-[160px]" style="perspective:600px">
+                    <div class="sk-crystal"></div>
+                    <div class="sk-crystal"></div>
+                    <div class="sk-crystal"></div>
+                    <div class="sk-crystal"></div>
+                    <div class="sk-crystal"></div>
+                    <div class="sk-crystal"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
-        window.addEventListener('load', function(){ document.getElementById('page-loader').style.display = 'none'; });
+        window.addEventListener('load', function(){
+            var sk = document.getElementById('page-skeleton');
+            if (sk) sk.classList.add('loaded');
+        });
+        window.addEventListener('beforeunload', function(){
+            var sk = document.getElementById('page-skeleton');
+            if (sk) sk.classList.remove('loaded');
+        });
     </script>
 
     @include('partials.sidebar')
@@ -719,7 +779,7 @@
     <div id="sa-confirm-overlay" style="display:none;">
         <div id="sa-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="saConfirmTitle">
             <div class="sa-confirm-head">
-                <div class="sa-confirm-icon" aria-hidden="true">
+                <div id="saConfirmIcon" class="sa-confirm-icon" aria-hidden="true">
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01"/>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.29 3.86l-7.4 13.3A2 2 0 004.62 20h14.76a2 2 0 001.73-2.84l-7.4-13.3a2 2 0 00-3.42 0z"/>
@@ -773,8 +833,17 @@
 
     <script>
         (() => {
+            var popSnd = new Audio('{{ asset('sounds/pop-sound.mp3') }}');
+            popSnd.preload = 'auto';
+            var errSnd = new Audio('{{ asset('sounds/error-sound.mp3') }}');
+            errSnd.preload = 'auto';
+
+            window.sndPlay = function(){ try { popSnd.currentTime=0; popSnd.play(); } catch(e){} };
+            window.errPlay = function(){ try { errSnd.currentTime=0; errSnd.play(); } catch(e){} };
+
             const overlay = document.getElementById('sa-confirm-overlay');
             const modal = document.getElementById('sa-confirm-modal');
+            const elIcon = document.getElementById('saConfirmIcon');
             const elTitle = document.getElementById('saConfirmTitle');
             const elMsg = document.getElementById('saConfirmMessage');
             const btnCancel = document.getElementById('saConfirmCancel');
@@ -782,61 +851,124 @@
 
             if (!overlay || !modal || !btnCancel || !btnOk) return;
 
+            var iconSvgs = {
+                danger: '<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01"/><path stroke-linecap="round" stroke-linejoin="round" d="M10.29 3.86l-7.4 13.3A2 2 0 004.62 20h14.76a2 2 0 001.73-2.84l-7.4-13.3a2 2 0 00-3.42 0z"/></svg>',
+                primary: '<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+                success: '<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+                warning: '<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            };
+
+            var iconStyles = {
+                danger:  'background:#fff1f2;color:#c8292a;border-color:#fecaca',
+                primary: 'background:#eef2ff;color:#4f46e5;border-color:#c7d2fe',
+                success: 'background:#ecfdf5;color:#059669;border-color:#a7f3d0',
+                warning: 'background:#fffbeb;color:#d97706;border-color:#fde68a',
+            };
+
             const ensureStyles = () => {
                 if (document.getElementById('sa-confirm-style')) return;
+                var darkBg = getComputedStyle(document.documentElement).getPropertyValue('--sa-modal-dark-bg').trim() || '#0a0a14';
+                var darkBorder = getComputedStyle(document.documentElement).getPropertyValue('--sa-modal-dark-border').trim() || '#1a1a30';
+                var darkText = getComputedStyle(document.documentElement).getPropertyValue('--sa-modal-dark-text').trim() || '#e5e7eb';
+                var darkMuted = getComputedStyle(document.documentElement).getPropertyValue('--sa-modal-dark-muted').trim() || '#9ca3af';
                 const style = document.createElement('style');
                 style.id = 'sa-confirm-style';
                 style.textContent = `
                     #sa-confirm-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(17,24,39,.55);padding:24px;}
-                    #sa-confirm-modal{width:min(520px, 100%);background:linear-gradient(180deg,#ffffff 0%,#fbfbfc 100%);border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.28);padding:18px 18px 16px;transform:translateY(6px) scale(.98);opacity:0;transition:opacity .16s ease, transform .16s ease;font-family:'Sora',system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+                    #sa-confirm-modal{width:min(520px, 100%);background:linear-gradient(180deg,#ffffff 0%,#fbfbfc 100%);border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.28);padding:18px 18px 16px;transform:translateY(6px) scale(.98);opacity:0;transition:opacity .16s ease, transform .16s ease;font-family:inherit;}
+                    html.dark #sa-confirm-modal{background:linear-gradient(180deg,`+darkBg+` 0%,#0e0e1c 100%);border-color:`+darkBorder+`;}
                     #sa-confirm-overlay.show #sa-confirm-modal{transform:translateY(0) scale(1);opacity:1;}
                     .sa-confirm-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
-                    .sa-confirm-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#fff1f2;color:#c8292a;border:1px solid #fecaca;flex-shrink:0;}
+                    .sa-confirm-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid;flex-shrink:0;}
                     .sa-confirm-title{font-weight:900;color:#111827;font-size:0.95rem;letter-spacing:-0.01em;margin-top:2px;}
+                    html.dark .sa-confirm-title{color:`+darkText+`;}
                     .sa-confirm-msg{color:#6b7280;font-size:0.84rem;line-height:1.35;margin-top:3px;}
+                    html.dark .sa-confirm-msg{color:`+darkMuted+`;}
                     .sa-confirm-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
                     .sa-confirm-btn{border-radius:12px;border:1px solid transparent;padding:10px 14px;font-weight:800;font-size:0.82rem;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;}
                     .sa-confirm-btn:active{transform:translateY(1px);}
                     .sa-confirm-btn.ghost{background:#fff;color:#374151;border-color:#e5e7eb;}
-                    .sa-confirm-btn.ghost:hover{background:#f9fafb;border-color:#d1d5db;}
+                    html.dark .sa-confirm-btn.ghost{background:transparent;color:`+darkText+`;border-color:`+darkBorder+`;}
+                    html.dark .sa-confirm-btn.ghost:hover{background:`+darkBg+`;}
                     .sa-confirm-btn.danger{background:#c8292a;color:#fff;border-color:#c8292a;box-shadow:0 10px 26px rgba(200,41,42,.22);}
                     .sa-confirm-btn.danger:hover{background:#a81f20;border-color:#a81f20;box-shadow:0 14px 32px rgba(200,41,42,.26);}
                     .sa-confirm-btn.primary{background:#111827;color:#fff;border-color:#111827;box-shadow:0 10px 26px rgba(17,24,39,.18);}
                     .sa-confirm-btn.primary:hover{background:#000;border-color:#000;}
+                    html.dark .sa-confirm-btn.primary{background:#4f46e5;border-color:#4f46e5;}
+                    html.dark .sa-confirm-btn.primary:hover{background:#4338ca;border-color:#4338ca;}
+                    .sa-confirm-btn.success{background:#059669;color:#fff;border-color:#059669;box-shadow:0 10px 26px rgba(5,150,105,.22);}
+                    .sa-confirm-btn.success:hover{background:#047857;border-color:#047857;}
+                    .sa-confirm-btn.warning{background:#d97706;color:#fff;border-color:#d97706;box-shadow:0 10px 26px rgba(217,119,6,.22);}
+                    .sa-confirm-btn.warning:hover{background:#b45309;border-color:#b45309;}
                 `;
                 document.head.appendChild(style);
             };
 
             let resolver = null;
+            var isAlert = false;
             const close = (val) => {
                 overlay.classList.remove('show');
                 overlay.style.display = 'none';
+                btnCancel.style.display = '';
                 const r = resolver;
                 resolver = null;
                 if (r) r(val);
             };
 
-            window.saConfirm = ({ title = 'Confirm action', message = 'Are you sure?', confirmText = 'Confirm', variant = 'danger' } = {}) => {
+            var showModal = function(title, message, variant, okText, showCancel) {
                 ensureStyles();
+                sndPlay();
+                if (variant === 'danger' || variant === 'warning') errPlay();
                 elTitle.textContent = title;
                 elMsg.textContent = message;
-                btnOk.textContent = confirmText;
-                btnOk.classList.remove('danger', 'primary');
-                btnOk.classList.add(variant === 'primary' ? 'primary' : 'danger');
-
+                btnOk.textContent = okText;
+                btnOk.className = 'sa-confirm-btn ' + variant;
+                if (elIcon) {
+                    elIcon.innerHTML = iconSvgs[variant] || iconSvgs.danger;
+                    elIcon.style.cssText = 'width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;border:1px solid;flex-shrink:0;' + (iconStyles[variant] || iconStyles.danger);
+                }
+                btnCancel.style.display = showCancel ? '' : 'none';
                 overlay.style.display = 'flex';
-                requestAnimationFrame(() => overlay.classList.add('show'));
+                requestAnimationFrame(function(){ overlay.classList.add('show'); });
+            };
 
-                return new Promise((resolve) => {
+            window.saConfirm = function(opts) {
+                if (!opts) opts = {};
+                var title = opts.title || 'Confirm action';
+                var message = opts.message || 'Are you sure?';
+                var confirmText = opts.confirmText || 'Confirm';
+                var variant = opts.variant || 'danger';
+                showModal(title, message, variant, confirmText, true);
+                return new Promise(function(resolve) {
                     resolver = resolve;
-                    btnCancel.onclick = () => close(false);
-                    btnOk.onclick = () => close(true);
-                    overlay.onclick = (e) => { if (e.target === overlay) close(false); };
-                    document.addEventListener('keydown', function onKey(ev) {
-                        if (!resolver) return document.removeEventListener('keydown', onKey);
+                    btnCancel.onclick = function(){ close(false); };
+                    btnOk.onclick = function(){ close(true); };
+                    overlay.onclick = function(e) { if (e.target === overlay) close(false); };
+                    var onKey = function(ev) {
+                        if (!resolver) { document.removeEventListener('keydown', onKey); return; }
                         if (ev.key === 'Escape') close(false);
                         if (ev.key === 'Enter') close(true);
-                    });
+                    };
+                    document.addEventListener('keydown', onKey);
+                });
+            };
+
+            window.saAlert = function(opts) {
+                if (!opts) opts = {};
+                var title = opts.title || 'Notice';
+                var message = opts.message || '';
+                var variant = opts.variant || 'primary';
+                var okText = opts.okText || 'OK';
+                showModal(title, message, variant, okText, false);
+                return new Promise(function(resolve) {
+                    resolver = resolve;
+                    btnOk.onclick = function(){ close(true); };
+                    overlay.onclick = function(e) { if (e.target === overlay) close(true); };
+                    var onKey = function(ev) {
+                        if (!resolver) { document.removeEventListener('keydown', onKey); return; }
+                        if (ev.key === 'Escape' || ev.key === 'Enter') close(true);
+                    };
+                    document.addEventListener('keydown', onKey);
                 });
             };
 
@@ -865,29 +997,121 @@
         })();
     </script>
 
+    {{-- Error sound wiring — plays error-sound.mp3 for validation errors only --}}
+    <script>
+        (function(){
+            var errSnd = new Audio('{{ asset('sounds/error-sound.mp3') }}');
+            errSnd.preload = 'auto';
+            var playErr = function(){ try { errSnd.currentTime=0; errSnd.play(); } catch(e){} };
+            window._errSnd = errSnd;
+
+            // HTML5 form validation (required, pattern, etc.)
+            document.addEventListener('invalid', function(){ playErr(); }, true);
+
+            // Inline validation errors (only within form context)
+            var checkInlineErrors = function(){
+                document.querySelectorAll('.text-red-500, .text-rose-500').forEach(function(el){
+                    if (el.offsetParent !== null && el.closest('form') && el.textContent.trim().length > 1) playErr();
+                });
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', checkInlineErrors);
+            } else {
+                checkInlineErrors();
+            }
+        })();
+    </script>
+
+    {{-- Server-side sound triggers — plays sounds based on flash message content --}}
+    @php
+        $playSuccess = session('_sound_success');
+        $playError = session('_sound_error') || session('error');
+
+        if (!$playSuccess) {
+            $msg = session('success');
+            if ($msg) {
+                $actionWords = ['created', 'updated', 'deleted', 'added', 'removed', 'saved', 'submitted', 'cancelled', 'approved', 'rejected', 'released', 'restored', 'cleared', 'resolved', 'recomputed', 'changed'];
+                foreach ($actionWords as $word) {
+                    if (str_contains(strtolower($msg), $word)) { $playSuccess = true; break; }
+                }
+            }
+        }
+    @endphp
+    @if($playSuccess || $playError)
+    <script>
+        (function(){
+            @if($playSuccess)
+            var okSnd = new Audio('{{ asset('sounds/success_created-sound.mp3') }}');
+            okSnd.preload = 'auto';
+            var playOk = function(){ try { okSnd.currentTime=0; okSnd.play(); } catch(e){} };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', playOk);
+            } else {
+                playOk();
+            }
+            @endif
+            @if($playError)
+            var errSnd = new Audio('{{ asset('sounds/error-sound.mp3') }}');
+            errSnd.preload = 'auto';
+            var playErr = function(){ try { errSnd.currentTime=0; errSnd.play(); } catch(e){} };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', playErr);
+            } else {
+                playErr();
+            }
+            @endif
+        })();
+    </script>
+    @endif
+
     <script>
         // ── Dark Mode Toggle ──────────────────────────────────────────
         (function() {
             var html = document.documentElement;
-            var toggle = document.getElementById('darkModeCheckbox');
+            var btn = document.getElementById('dark-mode-toggle');
             var key = 'dark-mode';
 
-            // Restore saved preference
-            if (localStorage.getItem(key) === 'true') {
-                html.classList.add('dark');
-                if (toggle) toggle.checked = true;
+            function setDark(isDark) {
+                html.classList.add('dt-flash');
+                requestAnimationFrame(function() {
+                    html.classList.toggle('dark', isDark);
+                    localStorage.setItem(key, isDark);
+                    var sun = btn?.querySelector('.dark-mode-sun');
+                    var moon = btn?.querySelector('.dark-mode-moon');
+                    if (sun && moon) {
+                        sun.classList.toggle('hidden', isDark);
+                        moon.classList.toggle('hidden', !isDark);
+                    }
+                    html.offsetHeight;
+                    html.classList.remove('dt-flash');
+                });
             }
 
-            if (toggle) {
-                toggle.addEventListener('change', function() {
-                    var isDark = this.checked;
-                    html.classList.add('dt-flash');
-                    requestAnimationFrame(function() {
-                        html.classList.toggle('dark', isDark);
-                        localStorage.setItem(key, isDark);
-                        html.offsetHeight;
-                        html.classList.remove('dt-flash');
-                    });
+            // Restore saved preference
+            var saved = localStorage.getItem(key);
+            if (saved === null) {
+                // No saved preference — respect system
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) { html.classList.add('dark'); setDark(true); }
+            } else if (saved === 'true') {
+                html.classList.add('dark');
+            }
+
+            // Sync icons on load
+            (function syncIcons() {
+                var isDark = html.classList.contains('dark');
+                var sun = btn?.querySelector('.dark-mode-sun');
+                var moon = btn?.querySelector('.dark-mode-moon');
+                if (sun && moon) {
+                    sun.classList.toggle('hidden', isDark);
+                    moon.classList.toggle('hidden', !isDark);
+                }
+            })();
+
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    var isDark = !html.classList.contains('dark');
+                    setDark(isDark);
                 });
             }
         })();
@@ -951,13 +1175,13 @@
                 if (!document.getElementById('sa-refresh-toast-style')) {
                     const style = document.createElement('style');
                     style.id = 'sa-refresh-toast-style';
-                    style.textContent = `
-                        @keyframes saRefreshPulse {
-                            0% { box-shadow: 0 0 0 0 rgba(200, 41, 42, 0.4); }
-                            70% { box-shadow: 0 0 0 8px rgba(200, 41, 42, 0); }
-                            100% { box-shadow: 0 0 0 0 rgba(200, 41, 42, 0); }
-                        }
-                    `;
+                    style.textContent = [
+                        '@@keyframes saRefreshPulse {',
+                        '    0% { box-shadow: 0 0 0 0 rgba(200, 41, 42, 0.4); }',
+                        '    70% { box-shadow: 0 0 0 8px rgba(200, 41, 42, 0); }',
+                        '    100% { box-shadow: 0 0 0 0 rgba(200, 41, 42, 0); }',
+                        '}',
+                    ].join('\n');
                     document.head.appendChild(style);
                 }
             };

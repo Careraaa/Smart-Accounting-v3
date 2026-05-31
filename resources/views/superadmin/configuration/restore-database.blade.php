@@ -42,7 +42,7 @@ $descClass  = 'text-xs text-gray-400 mt-1 leading-relaxed';
             </div>
         </div>
         <div class="px-5 py-4">
-            <form action="{{ route('configuration.restore') }}" method="POST" onsubmit="return confirm('Restore database from this file? All current data will be replaced.');">
+            <form action="{{ route('configuration.restore') }}" method="POST" data-sa-confirm="Restore database from this file? All current data will be replaced.">
                 @csrf
 
                 <div class="mb-4">

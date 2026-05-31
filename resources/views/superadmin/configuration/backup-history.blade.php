@@ -41,7 +41,7 @@
                                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                             Download
                                         </a>
-                                        <form action="{{ route('configuration.backup-delete', ['filename' => $backup['filename']]) }}" method="POST" onsubmit="return confirm('Delete this backup permanently?');">
+                                        <form action="{{ route('configuration.backup-delete', ['filename' => $backup['filename']]) }}" method="POST" data-sa-confirm="Delete this backup permanently?">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500 text-white rounded-lg text-xs font-semibold hover:bg-red-600 transition-all duration-150">

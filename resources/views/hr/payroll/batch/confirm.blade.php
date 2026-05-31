@@ -46,11 +46,11 @@
         </div>
         @php
             $statusInfo = match($batch->status) {
-                'pending' => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
+                'draft' => ['label'=>'Draft','dot'=>'bg-amber-300','text'=>'text-amber-500','bg'=>'bg-amber-50'],
                 'submitted' => ['label'=>'Submitted','dot'=>'bg-violet-400','text'=>'text-violet-600','bg'=>'bg-violet-50'],
                 'approved' => ['label'=>'Approved','dot'=>'bg-emerald-400','text'=>'text-emerald-600','bg'=>'bg-emerald-50'],
                 'rejected' => ['label'=>'Rejected','dot'=>'bg-red-400','text'=>'text-red-600','bg'=>'bg-red-50'],
-                default => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
+                default => ['label'=>'Draft','dot'=>'bg-amber-300','text'=>'text-amber-500','bg'=>'bg-amber-50'],
             };
         @endphp
         <span class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">

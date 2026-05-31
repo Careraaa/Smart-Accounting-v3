@@ -263,9 +263,9 @@ $descClass  = 'text-xs text-gray-400 mt-1 leading-relaxed';
             </h3>
 
             <div class="flex gap-2.5 flex-wrap">
-                <form action="{{ route('configuration.clear-cache') }}" method="POST">
+                <form action="{{ route('configuration.clear-cache') }}" method="POST" data-sa-confirm="Clear system cache? This will temporarily affect performance.">
                     @csrf
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl text-sm font-semibold hover:border-[#c8292a] hover:text-[#c8292a] hover:bg-red-50 transition-all duration-150" onclick="return confirm('Clear system cache? This will temporarily affect performance.');">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 rounded-xl text-sm font-semibold hover:border-[#c8292a] hover:text-[#c8292a] hover:bg-red-50 transition-all duration-150">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 4 21 4 23 6 23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6"></polyline>
                             <line x1="10" y1="12" x2="14" y2="12"></line>
@@ -274,9 +274,9 @@ $descClass  = 'text-xs text-gray-400 mt-1 leading-relaxed';
                     </button>
                 </form>
 
-                <form action="{{ route('configuration.clear-logs') }}" method="POST">
+                <form action="{{ route('configuration.clear-logs') }}" method="POST" data-sa-confirm="Clear system logs? This action cannot be undone.">
                     @csrf
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-all duration-150" onclick="return confirm('Clear system logs? This action cannot be undone.');">
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-all duration-150">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="3 6 5 4 21 4 23 6 23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V6"></polyline>
                             <line x1="10" y1="12" x2="14" y2="12"></line>

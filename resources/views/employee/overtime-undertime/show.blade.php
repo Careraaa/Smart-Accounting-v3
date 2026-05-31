@@ -132,12 +132,11 @@
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 Edit Request
                             </a>
-                            <form action="{{ route('employee.overtime-undertime.destroy', $overtimeUndertime->id) }}" method="POST">
+                            <form action="{{ route('employee.overtime-undertime.destroy', $overtimeUndertime->id) }}" method="POST" data-sa-confirm="Are you sure you want to delete this request? This action cannot be undone.">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-sm font-semibold rounded-xl transition-all"
-                                    onclick="return confirm('Are you sure you want to delete this request? This action cannot be undone.')">
+                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-sm font-semibold rounded-xl transition-all">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
                                     Delete Request
                                 </button>
