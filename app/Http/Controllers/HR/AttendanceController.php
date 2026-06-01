@@ -448,6 +448,17 @@ class AttendanceController extends Controller
                 ->withInput();
         }
 
+        // Check if employee is on leave on the selected date
+        $existingAttendance = Attendance::where('user_id', $userId)
+            ->where('date', $request->date)
+            ->first();
+
+        if ($existingAttendance && $existingAttendance->status === 'on leave') {
+            return back()
+                ->withErrors(['date' => 'Cannot record attendance — employee is on leave on this date.'])
+                ->withInput();
+        }
+
         // Build data to save — only include provided fields so we don't overwrite existing values
         $data = ['is_manual' => true];
 

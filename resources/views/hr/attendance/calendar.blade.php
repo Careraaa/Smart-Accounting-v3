@@ -108,6 +108,9 @@
             <span class="w-3 h-3 rounded-[3px] bg-red-100 border border-red-300"></span> Absent
         </span>
         <span class="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500">
+            <span class="w-3 h-3 rounded-[3px] bg-indigo-100 border border-indigo-300"></span> On Leave
+        </span>
+        <span class="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500">
             <span class="w-3 h-3 rounded-[3px] bg-gray-50 border border-gray-200"></span> Weekend / Holiday
         </span>
         <span class="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500">
@@ -180,24 +183,28 @@
                                         'present' => 'bg-emerald-50/60 border-emerald-200',
                                         'late' => 'bg-yellow-50/60 border-yellow-200',
                                         'absent' => 'bg-red-50/60 border-red-200',
+                                        'on leave' => 'bg-indigo-50/60 border-indigo-200',
                                         default => 'bg-white border-gray-200',
                                     };
                                     $dotClass = match($att->status) {
                                         'present' => 'bg-emerald-500',
                                         'late' => 'bg-yellow-500',
                                         'absent' => 'bg-red-500',
+                                        'on leave' => 'bg-indigo-500',
                                         default => 'bg-gray-300',
                                     };
                                     $statusText = match($att->status) {
                                         'present' => 'Present',
                                         'late' => 'Late',
                                         'absent' => 'Absent',
+                                        'on leave' => 'On Leave',
                                         default => ucfirst($att->status),
                                     };
                                     $statusColor = match($att->status) {
                                         'present' => 'text-emerald-700',
                                         'late' => 'text-yellow-700',
                                         'absent' => 'text-red-700',
+                                        'on leave' => 'text-indigo-700',
                                         default => 'text-gray-500',
                                     };
                                 } elseif ($hasOtut) {
@@ -232,21 +239,25 @@
 
                                 {{-- Time range (only when attendance record exists) --}}
                                 @if($att && !$isFuture)
-                                    @php
-                                        $timeIn = $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:ia') : null;
-                                        $timeOut = $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:ia') : null;
-                                    @endphp
-                                    <div class="text-[9px] font-mono text-gray-500 leading-tight -mt-0.5">
-                                        @if($timeIn && $timeOut)
-                                            <span>{{ $timeIn }} → {{ $timeOut }}</span>
-                                        @elseif($timeIn)
-                                            <span>{{ $timeIn }} → —</span>
-                                        @elseif($timeOut)
-                                            <span>— → {{ $timeOut }}</span>
-                                        @else
-                                            <span class="text-gray-300">No times</span>
-                                        @endif
-                                    </div>
+                                    @if($att->status === 'on leave')
+                                        <div class="text-[9px] font-semibold text-indigo-600 leading-tight -mt-0.5">On Leave</div>
+                                    @else
+                                        @php
+                                            $timeIn = $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:ia') : null;
+                                            $timeOut = $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:ia') : null;
+                                        @endphp
+                                        <div class="text-[9px] font-mono text-gray-500 leading-tight -mt-0.5">
+                                            @if($timeIn && $timeOut)
+                                                <span>{{ $timeIn }} → {{ $timeOut }}</span>
+                                            @elseif($timeIn)
+                                                <span>{{ $timeIn }} → —</span>
+                                            @elseif($timeOut)
+                                                <span>— → {{ $timeOut }}</span>
+                                            @else
+                                                <span class="text-gray-300">No times</span>
+                                            @endif
+                                        </div>
+                                    @endif
                                 @elseif(!$att && !$hasOtut && !$isFuture && !$isWeekend)
                                     <div class="text-[8px] text-gray-300 leading-tight -mt-0.5">No record</div>
                                 @endif
