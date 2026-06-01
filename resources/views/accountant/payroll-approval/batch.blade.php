@@ -100,15 +100,15 @@
         </div>
         <div class="bg-white p-4">
             <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Gross Pay</p>
-            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($totalGross, 0) }}</p>
+            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($totalGross, 2) }}</p>
         </div>
         <div class="bg-white p-4">
             <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
-            <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">₱{{ number_format($totalDeductions, 0) }}</p>
+            <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">₱{{ number_format($totalDeductions, 2) }}</p>
         </div>
         <div class="bg-white p-4">
             <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net Pay</p>
-            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalNet, 0) }}</p>
+            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalNet, 2) }}</p>
         </div>
     </div>
 </div>
@@ -146,10 +146,10 @@
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-500">{{ $user->department ?? 'N/A' }}</td>
                         <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">{{ $payroll->days_worked ?? '—' }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($payroll->basic_salary, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($payroll->gross_pay, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-amber-600 tabular-nums">₱{{ number_format($payroll->total_deductions, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-emerald-600 tabular-nums">₱{{ number_format($payroll->net_pay, 0) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($payroll->basic_salary, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($payroll->gross_pay, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-semibold text-amber-600 tabular-nums">₱{{ number_format($payroll->total_deductions, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-emerald-600 tabular-nums">₱{{ number_format($payroll->net_pay, 2) }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -161,10 +161,10 @@
                 <tfoot>
                     <tr class="border-t border-gray-100 bg-gray-50/50">
                         <td colspan="3" class="px-4 py-3 text-xs font-bold text-gray-900">Totals</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payrolls->sum('basic_salary'), 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalGross, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($totalDeductions, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-emerald-600 tabular-nums">₱{{ number_format($totalNet, 0) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payrolls->sum('basic_salary'), 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalGross, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($totalDeductions, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-emerald-600 tabular-nums">₱{{ number_format($totalNet, 2) }}</td>
                     </tr>
                 </tfoot>
             @endif

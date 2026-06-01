@@ -46,6 +46,26 @@ class SalaryLoan extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function payrollDeductions()
+    {
+        return Payroll::where('user_id', $this->user_id)
+            ->whereNotNull('loan_deduction_data')
+            ->orderBy('payroll_period_end', 'desc')
+            ->get()
+            ->filter(function ($payroll) {
+                $data = $payroll->loan_deduction_data;
+                if (!is_array($data) || !isset($data['salary_loans'])) {
+                    return false;
+                }
+                return collect($data['salary_loans'])->contains('id', $this->id);
+            });
+    }
+
+    public function latestPayrollDeduction()
+    {
+        return $this->payrollDeductions()->first();
+    }
+
     // ── Scopes ────────────────────────────────────────────────────────
 
     public function scopePending($query)

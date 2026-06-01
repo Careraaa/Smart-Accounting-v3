@@ -436,7 +436,7 @@ class PayrollService
         foreach ($leaveAllowances as $leave) {
             if ($leave['amount'] > 0) {
                 $payroll->allowances()->create([
-                    'allowance_type' => 'Leave Pay',
+                    'allowance_type' => $leave['name'] ?? 'Leave Pay',
                     'hours'          => $leave['paid_days'] ?? 0,
                     'amount'         => round($leave['amount'], 2),
                 ]);
@@ -518,14 +518,12 @@ class PayrollService
     // =========================================================================
 
     /**
-     * Builds the human-readable label stored as allowance_type for each holiday line.
+     * Builds the human-readable label for each holiday line.
      *
      * Examples:
-     *   "Holiday Pay — Christmas Day (Regular, worked)"
-     *   "Holiday Pay — Labor Day (Regular, unworked — statutory entitlement)"
-     *   "Holiday Pay — All Saints' Day (Special, not worked)"
-     *   "Holiday Pay — Rizal Day + Bonus Holiday (Double, worked)"
-     *   "Holiday Pay — Labor Day (Regular, rest day, worked)"
+     *   "Holiday Pay (Regular)"
+     *   "Holiday Pay (Special)"
+     *   "Holiday Pay (Double)"
      */
     public function buildHolidayLabel(array $hb): string
     {
@@ -536,19 +534,7 @@ class PayrollService
             default   => ucfirst($hb['type']),
         };
 
-        $restLabel = $hb['is_rest_day'] ? ', rest day' : '';
-
-        // For regular/double holidays not worked, the 100% pay is a legal entitlement,
-        // not a bonus — label it clearly so it's not confused with extra pay.
-        if (!$hb['is_worked']) {
-            $workedLabel = ($hb['type'] === 'regular' || $hb['type'] === 'double')
-                ? 'unworked — statutory entitlement'
-                : 'not worked';
-        } else {
-            $workedLabel = 'worked';
-        }
-
-        return "Holiday Pay — {$hb['holiday']} ({$typeLabel}{$restLabel}, {$workedLabel})";
+        return "Holiday Pay ({$typeLabel})";
     }
 
     // =========================================================================

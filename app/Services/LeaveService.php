@@ -256,8 +256,9 @@ class LeaveService
             $paidDays = $leave->paid_days ?? $leave->days;
             if ($paidDays > 0) {
                 $leavePayAmount = $dailyRate * $paidDays;
+                $leaveTypeName = $leave->leave_type ?? 'Leave';
                 $allowances[] = [
-                    'name' => 'Leave Pay',
+                    'name' => "Leave Pay ({$leaveTypeName})",
                     'amount' => $leavePayAmount,
                     'paid_days' => $paidDays,
                 ];

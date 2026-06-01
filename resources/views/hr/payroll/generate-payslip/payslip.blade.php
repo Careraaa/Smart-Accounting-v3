@@ -399,7 +399,13 @@
                                 @forelse ($payroll->allowances as $allow)
                                     <tr>
                                         <td>{{ $allow->allowance_type }}</td>
-                                        <td class="mono right">{{ $allow->hours ?? '—' }}</td>
+                                        <td class="mono right">
+                                            @if (str_starts_with($allow->allowance_type, 'Leave Pay'))
+                                                {{ $allow->hours ? number_format($allow->hours, 0) . ' day' . ($allow->hours != 1 ? 's' : '') : '—' }}
+                                            @else
+                                                {{ $allow->hours ?? '—' }}
+                                            @endif
+                                        </td>
                                         <td class="mono">₱{{ number_format($allow->amount, 2) }}</td>
                                     </tr>
                                 @empty @endforelse

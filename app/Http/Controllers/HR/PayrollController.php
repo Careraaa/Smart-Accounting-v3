@@ -484,6 +484,9 @@
             $payroll->loadMissing('user');
             $employeeName = trim(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? ''));
 
+            // Revert loan deductions before deleting
+            \App\Services\PayrollDeductionService::revertLoanDeductions($payroll);
+            
             // Remove line items first to avoid orphans if FK cascade isn't set up.
             $payroll->allowances()->delete();
             $payroll->deductions()->delete();
@@ -795,6 +798,9 @@
                 $batch->load('payrolls');
 
                 foreach ($batch->payrolls as $payroll) {
+                    // Revert loan deductions before deleting
+                    \App\Services\PayrollDeductionService::revertLoanDeductions($payroll);
+                    
                     $payroll->allowances()->delete();
                     $payroll->deductions()->delete();
                     $payroll->bonuses()->delete();
@@ -912,6 +918,9 @@
 
             $count = 0;
             foreach ($payrolls as $payroll) {
+                // Revert loan deductions before deleting
+                \App\Services\PayrollDeductionService::revertLoanDeductions($payroll);
+                
                 // Remove line items first to avoid orphans if FK cascade isn't set up.
                 $payroll->allowances()->delete();
                 $payroll->deductions()->delete();
@@ -993,7 +1002,10 @@
             $payroll->setAttribute('holiday_pay', $computed['holidayPay']);
             $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay']);
             $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours']);
-            $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
+            $payroll->setAttribute('holiday_breakdown', array_map(fn($hb) => [
+                'label'  => $this->payrollService->buildHolidayLabel($hb),
+                'amount' => round($hb['amount'], 2),
+            ], $computed['holidayBreakdown']));
 
             return view('hr.payroll.salary-computation.show', compact('payroll', 'overtimeUndertimeBreakdown'));
         }
@@ -1135,7 +1147,10 @@
             $totalDeductions = $computed['totalDeductions'] + $loanTotal;
             $payroll->setAttribute('total_deductions', $totalDeductions);
             $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
-            $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
+            $payroll->setAttribute('holiday_breakdown', array_map(fn($hb) => [
+                'label'  => $this->payrollService->buildHolidayLabel($hb),
+                'amount' => round($hb['amount'], 2),
+            ], $computed['holidayBreakdown']));
 
             return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
         }

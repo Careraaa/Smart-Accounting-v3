@@ -157,9 +157,6 @@
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Requested</th>
                         <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deducted On</th>
-                        @if(auth()->user()->role === 'accountant')
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Actions</th>
-                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="caTbody"></tbody>
@@ -214,9 +211,6 @@
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Progress</th>
                         <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Start Date</th>
-                        @if(auth()->user()->role === 'accountant')
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Actions</th>
-                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="loanTbody"></tbody>

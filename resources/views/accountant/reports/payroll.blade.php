@@ -89,17 +89,17 @@ $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? da
         </div>
         <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
             <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Gross</p>
-            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($sumGross, 0) }}</p>
+            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($sumGross, 2) }}</p>
             <p class="text-[10px] text-gray-400 mt-0.5">Gross pay summed</p>
         </div>
         <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300">
             <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Deductions</p>
-            <p class="text-lg font-bold text-red-600 tabular-nums mt-1">₱{{ number_format($sumDed, 0) }}</p>
+            <p class="text-lg font-bold text-red-600 tabular-nums mt-1">₱{{ number_format($sumDed, 2) }}</p>
             <p class="text-[10px] text-gray-400 mt-0.5">Deductions summed</p>
         </div>
         <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
             <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Net</p>
-            <p class="text-lg font-bold text-blue-600 tabular-nums mt-1">₱{{ number_format($sumNet, 0) }}</p>
+            <p class="text-lg font-bold text-blue-600 tabular-nums mt-1">₱{{ number_format($sumNet, 2) }}</p>
             <p class="text-[10px] text-gray-400 mt-0.5">Take-home total</p>
         </div>
     </div>

@@ -32,6 +32,7 @@ class PayrollDeductionService
         $advances = CashAdvance::where('user_id', $userId)
             ->where('status', 'released')
             ->whereColumn('amount_deducted', '<', 'amount')
+            ->where('created_at', '<', $payroll->payroll_period_start)
             ->get();
 
         foreach ($advances as $advance) {
@@ -66,6 +67,7 @@ class PayrollDeductionService
         $loans = SalaryLoan::where('user_id', $userId)
             ->where('status', 'released')
             ->where('remaining_balance', '>', 0)
+            ->where('created_at', '<', $payroll->payroll_period_start)
             ->get();
 
         foreach ($loans as $loan) {

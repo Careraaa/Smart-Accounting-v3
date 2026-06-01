@@ -66,14 +66,18 @@
     </div>
 
     {{-- Stat cards --}}
+    @php
+        $semiMonthlyLoanDeduction = $salaryLoan->monthly_deduction / 2;
+    @endphp
     <div class="grid grid-cols-3 gap-3">
         <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
             <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Months Paid</p>
             <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">{{ $monthsPaid }} / {{ $totalMonths }}</p>
         </div>
         <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Monthly Deduction</p>
-            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($salaryLoan->monthly_deduction, 2) }}</p>
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Per Payroll Deduction</p>
+            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($semiMonthlyLoanDeduction, 2) }}</p>
+            <p class="text-[0.55rem] text-gray-400 mt-1">(Monthly ÷ 2)</p>
         </div>
         <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
             <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Remaining Balance</p>
@@ -141,6 +145,42 @@
                             <p class="text-xs text-gray-400 mt-1 font-mono">{{ $monthsPaid }} of {{ $totalMonths }} months paid</p>
                         </div>
                     </div>
+                    @php
+                        $latestPayrollDeduction = $salaryLoan->latestPayrollDeduction();
+                    @endphp
+                    @if ($latestPayrollDeduction && $monthsPaid > 0)
+                    <div class="py-2.5">
+                        <span class="text-xs font-semibold uppercase tracking-wide text-gray-600">Latest Payroll Deduction</span>
+                        <div class="mt-2 px-3.5 py-2.5 rounded-lg bg-indigo-50 border border-indigo-100 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-600">Payroll Period:</span>
+                                <span class="text-xs font-semibold text-gray-900">{{ \Carbon\Carbon::parse($latestPayrollDeduction->payroll_period_start)->format('M d') }} - {{ \Carbon\Carbon::parse($latestPayrollDeduction->payroll_period_end)->format('M d, Y') }}</span>
+                            </div>
+                            @if ($latestPayrollDeduction->payment_date)
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-600">Payment Date:</span>
+                                <span class="text-xs font-semibold text-gray-900">{{ \Carbon\Carbon::parse($latestPayrollDeduction->payment_date)->format('M d, Y') }}</span>
+                            </div>
+                            @endif
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-600">Deduction Amount:</span>
+                                @php
+                                    $deductionData = $latestPayrollDeduction->loan_deduction_data;
+                                    $loanDeduction = 0;
+                                    if (is_array($deductionData) && isset($deductionData['salary_loans'])) {
+                                        foreach ($deductionData['salary_loans'] as $sl) {
+                                            if ($sl['id'] == $salaryLoan->id) {
+                                                $loanDeduction = $sl['amount'];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                <span class="text-xs font-semibold text-gray-900 font-mono tabular-nums">₱{{ number_format($loanDeduction, 2) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                     @if ($salaryLoan->rejection_reason)
                     <div class="py-2.5">
                         <span class="text-xs font-semibold uppercase tracking-wide text-red-500">Rejection Reason</span>

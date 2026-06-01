@@ -62,6 +62,53 @@
         </span>
     </div>
 
+    {{-- Stat cards --}}
+    @php
+        $amountDeducted = 0;
+        $totalAmount = $cashAdvance->amount ?? 0;
+        
+        if (in_array($cashAdvance->status, ['released', 'deducted'])) {
+            $payrolls = \Illuminate\Support\Facades\DB::table('payrolls')
+                ->where('user_id', $cashAdvance->user_id)
+                ->whereNotNull('loan_deduction_data')
+                ->where('cash_advance_deduction', '>', 0)
+                ->get(['loan_deduction_data']);
+            
+            foreach ($payrolls as $payroll) {
+                $deductionData = json_decode($payroll->loan_deduction_data, true);
+                if (is_array($deductionData) && isset($deductionData['cash_advances'])) {
+                    foreach ($deductionData['cash_advances'] as $ca) {
+                        if ($ca['id'] == $cashAdvance->id) {
+                            $amountDeducted += $ca['amount'];
+                        }
+                    }
+                }
+            }
+        }
+        
+        $remainingBalance = $totalAmount - $amountDeducted;
+        $deductionProgress = $totalAmount > 0 ? ($amountDeducted / $totalAmount) * 100 : 0;
+    @endphp
+    @php
+        $monthlyDeduction = $cashAdvance->monthly_deduction ?? $cashAdvance->amount;
+        $semiMonthlyDeduction = $monthlyDeduction / 2;
+    @endphp
+    <div class="grid grid-cols-3 gap-3">
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Total Amount</p>
+            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($totalAmount, 2) }}</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Per Payroll Deduction</p>
+            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($semiMonthlyDeduction, 2) }}</p>
+            <p class="text-[0.55rem] text-gray-400 mt-1">(Monthly ÷ 2)</p>
+        </div>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Remaining Balance</p>
+            <p class="text-lg font-extrabold {{ $remainingBalance > 0 ? 'text-amber-500' : 'text-emerald-500' }} tabular-nums mt-1">₱{{ number_format($remainingBalance, 2) }}</p>
+        </div>
+    </div>
+
     {{-- 2-column layout --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {{-- Main column (2/3) --}}
@@ -109,10 +156,51 @@
                         <span class="text-sm text-gray-600">Monthly Deduction</span>
                         <span class="text-sm font-semibold text-gray-900 font-mono tabular-nums">₱{{ number_format($cashAdvance->monthly_deduction ?? $cashAdvance->amount, 2) }}</span>
                     </div>
-                    @if ($cashAdvance->status === 'released' && $cashAdvance->deductedPayroll)
-                    <div class="flex items-center justify-between py-2.5">
-                        <span class="text-sm text-gray-600">Deducted On</span>
-                        <span class="text-sm text-gray-900">Period ending {{ \Carbon\Carbon::parse($cashAdvance->deductedPayroll->payroll_period_end)->format('F d, Y') }}</span>
+                    <div class="py-2.5">
+                        <span class="text-xs font-semibold uppercase tracking-wide text-gray-600">Repayment Progress</span>
+                        <div class="mt-2">
+                            <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-500" style="width: {{ $deductionProgress }}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1 font-mono">₱{{ number_format($amountDeducted, 2) }} of ₱{{ number_format($totalAmount, 2) }} deducted</p>
+                        </div>
+                    </div>
+                    @php
+                        $latestPayrollWithDeduction = null;
+                        if (in_array($cashAdvance->status, ['released', 'deducted']) && $amountDeducted > 0) {
+                            $latestPayrollWithDeduction = \Illuminate\Support\Facades\DB::table('payrolls')
+                                ->where('user_id', $cashAdvance->user_id)
+                                ->whereNotNull('loan_deduction_data')
+                                ->where('cash_advance_deduction', '>', 0)
+                                ->orderBy('payroll_period_end', 'desc')
+                                ->first(['payroll_period_start', 'payroll_period_end', 'payment_date', 'cash_advance_deduction', 'loan_deduction_data']);
+                        }
+                    @endphp
+                    @if ($latestPayrollWithDeduction)
+                    <div class="py-2.5">
+                        <span class="text-xs font-semibold uppercase tracking-wide text-gray-600">Latest Payroll Deduction</span>
+                        <div class="mt-2 px-3.5 py-2.5 rounded-lg bg-blue-50 border border-blue-100 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-600">Payroll Period:</span>
+                                <span class="text-xs font-semibold text-gray-900">{{ \Carbon\Carbon::parse($latestPayrollWithDeduction->payroll_period_start)->format('M d') }} - {{ \Carbon\Carbon::parse($latestPayrollWithDeduction->payroll_period_end)->format('M d, Y') }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-600">Deduction Amount:</span>
+                                @php
+                                    $caDeductionAmount = 0;
+                                    $deductionData = json_decode($latestPayrollWithDeduction->loan_deduction_data, true);
+                                    if (is_array($deductionData) && isset($deductionData['cash_advances'])) {
+                                        foreach ($deductionData['cash_advances'] as $ca) {
+                                            if ($ca['id'] == $cashAdvance->id) {
+                                                $caDeductionAmount = $ca['amount'];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                <span class="text-xs font-semibold text-gray-900 font-mono tabular-nums">₱{{ number_format($caDeductionAmount > 0 ? $caDeductionAmount : $latestPayrollWithDeduction->cash_advance_deduction, 2) }}</span>
+                            </div>
+                        </div>
                     </div>
                     @endif
                     @if ($cashAdvance->rejection_reason)

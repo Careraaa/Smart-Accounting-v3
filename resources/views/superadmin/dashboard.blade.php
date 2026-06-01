@@ -135,14 +135,14 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Payroll</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.3s">₱{{ number_format($totalPayroll, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.3s">₱{{ number_format($totalPayroll, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center transition-all duration-300 group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
                 </div>
                 <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span>₱{{ number_format($averageBasicSalary ?? 0, 0) }} avg basic</span>
+                    <span>₱{{ number_format($averageBasicSalary ?? 0, 2) }} avg basic</span>
                 </div>
             </div>
         </div>
@@ -185,7 +185,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Salary Loans</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.45s">₱{{ number_format($totalOutstandingLoans, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.45s">₱{{ number_format($totalOutstandingLoans, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -199,14 +199,14 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Cash Advances</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.5s">₱{{ number_format($totalCashAdvances, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.5s">₱{{ number_format($totalCashAdvances, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-teal-50 text-teal-500 flex items-center justify-center transition-all duration-300 group-hover:bg-teal-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
                     </div>
                 </div>
                 <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span>₱{{ number_format($pendingCashAdvances, 0) }} pending</span>
+                    <span>₱{{ number_format($pendingCashAdvances, 2) }} pending</span>
                 </div>
             </div>
         </div>
@@ -333,7 +333,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Collections</p>
-                        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.15s">₱{{ number_format($totalCollections, 0) }}</p>
+                        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.15s">₱{{ number_format($totalCollections, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center transition-all duration-300 group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
@@ -347,7 +347,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Expenses</p>
-                        <p class="text-lg font-bold text-red-500 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.2s">₱{{ number_format($totalExpenses, 0) }}</p>
+                        <p class="text-lg font-bold text-red-500 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.2s">₱{{ number_format($totalExpenses, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-red-50 text-red-500 flex items-center justify-center transition-all duration-300 group-hover:bg-red-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
@@ -361,7 +361,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-                        <p class="text-lg font-bold text-blue-600 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.25s">₱{{ number_format($totalNetRemittance, 0) }}</p>
+                        <p class="text-lg font-bold text-blue-600 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.25s">₱{{ number_format($totalNetRemittance, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -392,13 +392,13 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             <div class="sad-fade-up bg-white border border-gray-200 rounded-xl overflow-hidden" style="animation-delay:0.1s">
                 <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
                     <span class="text-xs font-bold text-gray-900">Payroll breakdown</span>
-                    <span class="text-[9px] text-gray-400">Avg ₱{{ number_format($averageBasicSalary ?? 0, 0) }}</span>
+                    <span class="text-[9px] text-gray-400">Avg ₱{{ number_format($averageBasicSalary ?? 0, 2) }}</span>
                 </div>
                 <div class="px-5 py-4 space-y-4">
                     <div>
                         <div class="flex items-center justify-between text-[10px] mb-1.5">
                             <span class="font-semibold text-gray-700">Allowances</span>
-                            <span class="font-mono tabular-nums text-gray-500">₱{{ number_format($totalAllowances, 0) }} · {{ number_format($allowancePercentage, 1) }}%</span>
+                            <span class="font-mono tabular-nums text-gray-500">₱{{ number_format($totalAllowances, 2) }} · {{ number_format($allowancePercentage, 1) }}%</span>
                         </div>
                         <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div class="h-full rounded-full bg-emerald-500 transition-all duration-700" style="width: {{ $allowancePercentage }}%"></div>
@@ -407,7 +407,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <div>
                         <div class="flex items-center justify-between text-[10px] mb-1.5">
                             <span class="font-semibold text-gray-700">Deductions</span>
-                            <span class="font-mono tabular-nums text-gray-500">₱{{ number_format($totalDeductions, 0) }} · {{ number_format($deductionPercentage, 1) }}%</span>
+                            <span class="font-mono tabular-nums text-gray-500">₱{{ number_format($totalDeductions, 2) }} · {{ number_format($deductionPercentage, 1) }}%</span>
                         </div>
                         <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div class="h-full rounded-full bg-rose-500 transition-all duration-700" style="width: {{ $deductionPercentage }}%"></div>
@@ -415,7 +415,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     </div>
                     <div class="pt-2 border-t border-gray-100 grid grid-cols-2 gap-4 text-center">
                         <div>
-                            <div class="text-base font-extrabold text-gray-900 tabular-nums">₱{{ number_format($totalPayroll, 0) }}</div>
+                            <div class="text-base font-extrabold text-gray-900 tabular-nums">₱{{ number_format($totalPayroll, 2) }}</div>
                             <div class="text-[0.55rem] font-semibold uppercase tracking-wider text-gray-400 mt-0.5">Total Net Pay</div>
                         </div>
                         <div>

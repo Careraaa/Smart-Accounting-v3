@@ -53,11 +53,11 @@ $tab = request()->query('tab', 'pending');
     </div>
     <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <p class="text-xs text-gray-400 font-medium">Total Gross</p>
-        <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($totalGrossAll, 0) }}</p>
+        <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($totalGrossAll, 2) }}</p>
     </div>
     <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <p class="text-xs text-gray-400 font-medium">Total Net</p>
-        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalNetAll, 0) }}</p>
+        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalNetAll, 2) }}</p>
     </div>
 </div>
 
