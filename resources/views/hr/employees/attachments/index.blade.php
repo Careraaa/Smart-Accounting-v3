@@ -359,6 +359,7 @@
 @push('scripts')
 <script>
 function openRejectModal(id, label) {
+    if (typeof sndPlay === 'function') sndPlay();
     document.getElementById('rejectModal' + id).style.display = 'flex';
 }
 function closeRejectModal(id) {

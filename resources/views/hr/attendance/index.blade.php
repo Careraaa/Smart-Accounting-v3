@@ -331,10 +331,10 @@
                                     <td class="text-center">
                                         <span class="att-status {{ $statusClass }}">{{ $statusLabel }}</span>
                                     </td>
-                                    <td style="font-family:'DM Mono',monospace;font-size:0.82rem;color:#374151;">
+                                    <td style="font-family:'DM Mono',monospace;font-size:1rem;color:#374151;">
                                         {{ $att && $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:i A') : '—' }}
                                     </td>
-                                    <td style="font-family:'DM Mono',monospace;font-size:0.82rem;color:#374151;">
+                                    <td style="font-family:'DM Mono',monospace;font-size:1rem;color:#374151;">
                                         {{ $att && $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:i A') : '—' }}
                                     </td>
                                 </tr>
@@ -492,8 +492,8 @@ window.todayAttendance = {!! json_encode($todayAttendance->map(fn($a) => [
                     </td>
                     <td><span class="att-dept">${emp.department || '—'}</span></td>
                     <td class="text-center"><span class="att-status ${statusClass}">${statusLabel}</span></td>
-                    <td style="font-family:'DM Mono',monospace;font-size:0.82rem;color:#374151;">${timeIn}</td>
-                    <td style="font-family:'DM Mono',monospace;font-size:0.82rem;color:#374151;">${timeOut}</td>
+                    <td style="font-family:'DM Mono',monospace;font-size:1rem;color:#374151;">${timeIn}</td>
+                    <td style="font-family:'DM Mono',monospace;font-size:1rem;color:#374151;">${timeOut}</td>
                 `;
                 tbody.appendChild(row);
             });

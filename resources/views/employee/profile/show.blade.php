@@ -447,6 +447,7 @@
 <script>
 function openPfModal() {
     const m = document.getElementById('pfModal');
+    if (typeof sndPlay === 'function') sndPlay();
     m.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }

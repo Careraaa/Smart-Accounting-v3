@@ -26,6 +26,16 @@
     </style>
 
     <style>
+        /* ── Input Shake Animation ─────────────────────────────── */
+        @keyframes shakeX {
+            0%, 100% { transform: translateX(0); }
+            10%, 50%, 90% { transform: translateX(-4px); }
+            30%, 70% { transform: translateX(4px); }
+        }
+        .input-shake { animation: shakeX 0.5s ease-in-out; }
+    </style>
+
+    <style>
         /* ── Dark Mode ──────────────────────────────────────────── */
         html.dark { color-scheme: dark; }
         html.dark body { background: #050508; }
@@ -564,21 +574,24 @@
                 <div class="sk-item h-9 rounded-xl"></div>
             </div>
             {{-- Nav items --}}
+            @php
+                $skRole = auth()->user()->role;
+                $skSections = match ($skRole) {
+                    'superadmin' => [['caption'=>'SYSTEM ADMIN','count'=>4],['caption'=>'HR MANAGEMENT','count'=>5],['caption'=>'OPERATIONS','count'=>2],['caption'=>'FINANCIALS','count'=>5]],
+                    'hr' => [['caption'=>'HR MANAGEMENT','count'=>4],['caption'=>'PAYROLL','count'=>4],['caption'=>'REPORTS','count'=>2],['caption'=>'MY FINANCES','count'=>2]],
+                    default => [['caption'=>'MENU','count'=>2],['caption'=>'OPERATIONS','count'=>2],['caption'=>'REPORTS','count'=>1],['caption'=>'MY FINANCES','count'=>3],['caption'=>'TIME OFF','count'=>2],['caption'=>'MY ACCOUNT','count'=>2]],
+                };
+            @endphp
             <div class="flex-1 overflow-hidden px-3 py-2 space-y-0.5">
-                <div class="sk-item h-3 w-20 mb-2 ml-2"></div>
-                @for($i=0;$i<5;$i++)
+                @foreach($skSections as $skSec)
+                <div class="sk-item h-3 w-{{ strlen($skSec['caption']) > 10 ? '24' : '20' }} mb-2 ml-2 mt-{{ $loop->first ? '0' : '3' }}"></div>
+                @for($i=0;$i<$skSec['count'];$i++)
                 <div class="flex items-center gap-1.5 px-3 py-1.5">
-                    <div class="sk-item h-[18px] w-[18px] rounded-lg shrink-0"></div>
+                    <div class="sk-item h-[30px] w-[30px] rounded-lg shrink-0"></div>
                     <div class="sk-item h-3.5 flex-1 max-w-[120px] rounded-md"></div>
                 </div>
                 @endfor
-                <div class="sk-item h-3 w-24 mb-2 ml-2 mt-3"></div>
-                @for($i=0;$i<4;$i++)
-                <div class="flex items-center gap-1.5 px-3 py-1.5">
-                    <div class="sk-item h-[18px] w-[18px] rounded-lg shrink-0"></div>
-                    <div class="sk-item h-3.5 flex-1 max-w-[120px] rounded-md"></div>
-                </div>
-                @endfor
+                @endforeach
             </div>
         </div>
         {{-- Main area skeleton --}}
@@ -758,6 +771,21 @@
                     }
 
                     setOpen(item, next);
+
+                    // Scroll sidebar to keep the opened dropdown visible
+                    if (next) {
+                        requestAnimationFrame(function() {
+                            var sub = item.querySelector('.sidebar-sub');
+                            var scrollEl = nav.querySelector('.overflow-y-auto');
+                            if (sub && scrollEl) {
+                                var itemBottom = item.offsetTop + item.offsetHeight;
+                                var scrollBottom = scrollEl.scrollTop + scrollEl.clientHeight;
+                                if (itemBottom > scrollBottom) {
+                                    scrollEl.scrollTop = itemBottom - scrollEl.clientHeight;
+                                }
+                            }
+                        });
+                    }
                 });
             });
 
@@ -1023,17 +1051,31 @@
             // HTML5 form validation (required, pattern, etc.)
             document.addEventListener('invalid', function(){ playErr(); }, true);
 
-            // Inline validation errors — only elements inside @@error blocks or error-summary
-            var checkInlineErrors = function(){
-                document.querySelectorAll('.text-red-500').forEach(function(el){
-                    if (el.offsetParent !== null && el.closest('form') && !el.closest('button') && el.textContent.trim().length > 1) playErr();
-                });
-            };
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', checkInlineErrors);
-            } else {
-                checkInlineErrors();
-            }
+            // Server-side validation errors from last form submission only
+            @if ($errors->any())
+            (function(){
+                playErr();
+
+                // Shake inputs that have validation errors
+                setTimeout(function(){
+                    document.querySelectorAll('.text-red-500, .invalid-feedback, .prl-err, .prl-invalid-feedback').forEach(function(el) {
+                        if (el.offsetParent === null) return;
+                        var input = el.closest('.form-group, .mb-4, .mb-5, .mb-6, .flex-col, [class*="form-group"]')
+                            ?.querySelector('input, select, textarea');
+                        if (!input) {
+                            input = el.previousElementSibling;
+                            if (input && !input.matches('input, select, textarea')) {
+                                input = el.closest('div')?.querySelector('input, select, textarea');
+                            }
+                        }
+                        if (input && input.matches('input, select, textarea')) {
+                            input.classList.add('input-shake');
+                            setTimeout(function() { input.classList.remove('input-shake'); }, 600);
+                        }
+                    });
+                }, 50);
+            })();
+            @endif
         })();
     </script>
 
@@ -1102,13 +1144,9 @@
                 });
             }
 
-            // Restore saved preference
+            // Restore saved preference — default to light mode
             var saved = localStorage.getItem(key);
-            if (saved === null) {
-                // No saved preference — respect system
-                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) { html.classList.add('dark'); setDark(true); }
-            } else if (saved === 'true') {
+            if (saved === 'true') {
                 html.classList.add('dark');
             }
 
@@ -1206,7 +1244,7 @@
             });
         })();
     </script>
-<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.flash-bar,.bn-flash,[class*="bg-green-50"][class*="rounded-xl"],[class*="bg-green-50"][class*="rounded-lg"],[class*="bg-red-50"][class*="rounded-xl"],[class*="bg-blue-50"][class*="rounded-xl"]').forEach(function(el){if(el.offsetParent===null)return;var c=el.className||'';var hasExact=function(n){return c.match(new RegExp('(^|\\s)'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(\\s|$)'))};if(!hasExact('bg-green-50')&&!hasExact('bg-red-50')&&!hasExact('bg-blue-50'))return;setTimeout(function(){el.style.transition='opacity 0.5s ease,transform 0.5s ease';el.style.opacity='0';el.style.transform='translateY(-8px)';setTimeout(function(){el.remove()},500);},5000);});});</script>
+<script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.flash-bar,.bn-flash').forEach(function(el){if(el.offsetParent===null)return;setTimeout(function(){el.style.transition='opacity 0.5s ease,transform 0.5s ease';el.style.opacity='0';el.style.transform='translateY(-8px)';setTimeout(function(){el.remove()},500);},5000);});});</script>
 </body>
 
 </html>

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Leave;
 use App\Models\Attendance;
 use App\Models\EmployeeLeaveBalance;
+use App\Models\LeaveType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -90,26 +91,26 @@ class LeaveService
             // Step 2: Calculate total leave days
             $totalLeaveDays = $leave->start_date->diffInDays($leave->end_date) + 1;
 
-            // Step 3: Check leave credits
+            // Step 3: Resolve leave type ID (HR-created leaves store leave_type as string)
             $leaveTypeId = $leave->leave_type_id;
-            $year = $leave->start_date->year;
-
-            $leaveBalance = EmployeeLeaveBalance::where('user_id', $leave->user_id)
-                ->where('leave_type_id', $leaveTypeId)
-                ->where('year', $year)
-                ->first();
-
-            if (!$leaveBalance) {
-                return [
-                    'success' => false,
-                    'message' => "No leave balance found for this leave type and year.",
-                    'paid_days' => 0,
-                    'unpaid_days' => 0,
-                ];
+            if (!$leaveTypeId && $leave->leave_type) {
+                $leaveType = LeaveType::where('name', $leave->leave_type)->first();
+                $leaveTypeId = $leaveType?->id;
             }
 
-            // Step 4: Calculate paid vs unpaid days
-            $availableCredits = $leaveBalance->remaining_days;
+            $year = $leave->start_date->year;
+
+            // Look up balance by resolved leave type ID (may be null if no matching type)
+            $leaveBalance = null;
+            if ($leaveTypeId) {
+                $leaveBalance = EmployeeLeaveBalance::where('user_id', $leave->user_id)
+                    ->where('leave_type_id', $leaveTypeId)
+                    ->where('year', $year)
+                    ->first();
+            }
+
+            // Step 4: Calculate paid vs unpaid days (0 credits when no balance found)
+            $availableCredits = $leaveBalance?->remaining_days ?? 0;
             $paidDays = min($availableCredits, $totalLeaveDays);
             $unpaidDays = max(0, $totalLeaveDays - $paidDays);
 

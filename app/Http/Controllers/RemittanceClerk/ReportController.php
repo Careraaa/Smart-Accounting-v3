@@ -64,7 +64,8 @@ class ReportController extends Controller
             'period',
             'month',
             'year',
-            'week'
+            'week',
+            'remittances'
         ) + $totals);
     }
 
@@ -112,7 +113,8 @@ class ReportController extends Controller
             'period',
             'month',
             'year',
-            'week'
+            'week',
+            'remittances'
         ) + $totals);
     }
 

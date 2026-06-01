@@ -4,12 +4,14 @@
 <style>
 @keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
 @keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+@keyframes countUp { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
 .stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 .stat-card:nth-child(1) { animation-delay:0.05s; }
 .stat-card:nth-child(2) { animation-delay:0.1s; }
 .stat-card:nth-child(3) { animation-delay:0.15s; }
 .stat-card:nth-child(4) { animation-delay:0.2s; }
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.bat-count { animation:countUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 @endpush
 
@@ -88,9 +90,9 @@
                             </div>
                         </td>
                         <td class="px-4 py-3"><span class="inline-block text-[0.55rem] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{{ $payroll->user->department ?? 'N/A' }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs text-gray-500">₱{{ number_format($payroll->gross_pay, 2) }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-red-400">₱{{ number_format($payroll->total_deductions, 2) }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
+                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs text-gray-500 bat-count" style="animation-delay:0.05s">₱{{ number_format($payroll->gross_pay, 2) }}</span></td>
+                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-red-400 bat-count" style="animation-delay:0.1s">₱{{ number_format($payroll->total_deductions, 2) }}</span></td>
+                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900 bat-count" style="animation-delay:0.15s">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
                         <td class="px-4 py-3 text-center">
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border {{ $badgeCls }}">
                                 <span class="w-1 h-1 rounded-full {{ $dotCls }}"></span>
@@ -122,15 +124,15 @@
             <div class="flex items-center gap-5">
                 <div class="flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span class="text-[0.55rem] text-gray-400 font-mono">{{ $releasedCount }} released</span>
+                    <span class="text-[0.55rem] text-gray-400 font-mono bat-count" style="animation-delay:0.1s">{{ $releasedCount }} released</span>
                 </div>
                 <div class="flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                    <span class="text-[0.55rem] text-gray-400 font-mono">{{ $pendingCount }} pending</span>
+                    <span class="text-[0.55rem] text-gray-400 font-mono bat-count" style="animation-delay:0.15s">{{ $pendingCount }} pending</span>
                 </div>
             </div>
             <p class="text-[0.55rem] text-gray-400 font-mono">
-                <strong class="text-gray-700">₱{{ number_format($totalNetPay, 2) }}</strong> total net pay
+                <strong class="text-gray-700 bat-count" style="animation-delay:0.2s">₱{{ number_format($totalNetPay, 2) }}</strong> total net pay
             </p>
         </div>
     </div>

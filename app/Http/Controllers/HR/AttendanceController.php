@@ -448,7 +448,7 @@ class AttendanceController extends Controller
         // Require at least one time value
         if (!$request->time_in && !$request->time_out) {
             return back()
-                ->withErrors(['time' => 'Please set at least Time In or Time Out.'])
+                ->withErrors(['time_in' => 'Please set at least Time In or Time Out.'])
                 ->withInput();
         }
 

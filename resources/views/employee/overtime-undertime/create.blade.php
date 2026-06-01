@@ -4,6 +4,14 @@
 <div class="min-h-screen bg-gray-50/60">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
 
+        {{-- Flash --}}
+        @if(session('error'))
+        <div class="flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-sm font-medium bg-red-50 border border-red-200 text-red-700">
+            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+            {{ session('error') }}
+        </div>
+        @endif
+
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-7">
             <div>

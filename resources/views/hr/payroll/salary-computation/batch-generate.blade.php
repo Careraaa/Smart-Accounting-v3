@@ -2,6 +2,8 @@
 
 @push('styles')
 <style>
+@keyframes countUp { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+.bat-count { animation:countUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700;800&display=swap');
 
 .prl-page { font-family: 'Sora', sans-serif; }
@@ -534,11 +536,11 @@ html.dark .prl-select-all-btn:hover { color: #fca5a5; }
             <div class="prl-chips">
                 <div class="prl-chip">
                     <span class="prl-chip-lbl">Total Employees</span>
-                    <span class="prl-chip-val">{{ $activeEmployees->count() }}</span>
+                    <span class="prl-chip-val bat-count" style="animation-delay:0.05s">{{ $activeEmployees->count() }}</span>
                 </div>
                 <div class="prl-chip">
                     <span class="prl-chip-lbl">Will Process</span>
-                    <span class="prl-chip-val" id="willProcess">{{ $activeEmployees->count() }}</span>
+                    <span class="prl-chip-val bat-count" style="animation-delay:0.1s" id="willProcess">{{ $activeEmployees->count() }}</span>
                 </div>
                 <div class="prl-chip">
                     <span class="prl-chip-lbl">Mode</span>

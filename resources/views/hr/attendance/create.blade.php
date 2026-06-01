@@ -25,6 +25,16 @@
         {{ session('error') }}
     </div>
     @endif
+    @if($errors->any())
+    <div class="flex items-center gap-2.5 px-4 py-3 mb-5 rounded-xl text-sm font-medium bg-red-50 border border-red-200 text-red-700" style="animation:fadeSlideUp 0.35s ease both;">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+        <ul class="m-0 pl-4 text-sm">
+            @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
 
     {{-- Topbar --}}
     <div class="anim-header flex items-start justify-between mb-6 flex-wrap gap-4">

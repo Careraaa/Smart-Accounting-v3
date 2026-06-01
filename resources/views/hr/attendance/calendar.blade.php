@@ -218,14 +218,14 @@
                                     $statusColor = '';
                                 }
                             @endphp
-                            <div class="rounded-xl min-h-[82px] p-2 border-2 flex flex-col gap-0.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md {{ $bgClass }} {{ $isToday ? '!border-rose-500 shadow-md shadow-rose-100' : '' }}">
+                                <div class="rounded-xl min-h-[82px] p-2 border-2 flex flex-col gap-0.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md {{ $bgClass }} {{ $isToday ? '!border-rose-500 shadow-md shadow-rose-100' : '' }}">
                                 {{-- Top row: day number + status dot/label --}}
                                 <div class="flex items-center justify-between gap-0.5">
-                                    <span class="text-xs font-extrabold text-gray-700 leading-none {{ $isToday ? '!text-rose-600' : '' }}">{{ $day->day }}</span>
+                                    <span class="text-sm font-extrabold text-gray-700 leading-none {{ $isToday ? '!text-rose-600' : '' }}">{{ $day->day }}</span>
                                     @if(($att || $hasOtut) && !$isFuture)
                                     <span class="inline-flex items-center gap-1">
                                         <span class="w-1.5 h-1.5 rounded-full {{ $dotClass }}"></span>
-                                        <span class="text-[8px] font-bold uppercase tracking-wider {{ $statusColor }}">{{ $statusText }}</span>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider {{ $statusColor }}">{{ $statusText }}</span>
                                     </span>
                                     @endif
                                 </div>
@@ -236,7 +236,7 @@
                                         $timeIn = $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:ia') : null;
                                         $timeOut = $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:ia') : null;
                                     @endphp
-                                    <div class="text-[9px] font-mono text-gray-500 leading-tight -mt-0.5">
+                                    <div class="text-[11px] font-mono text-gray-500 leading-tight -mt-0.5">
                                         @if($timeIn && $timeOut)
                                             <span>{{ $timeIn }} → {{ $timeOut }}</span>
                                         @elseif($timeIn)
@@ -248,20 +248,20 @@
                                         @endif
                                     </div>
                                 @elseif(!$att && !$hasOtut && !$isFuture && !$isWeekend)
-                                    <div class="text-[8px] text-gray-300 leading-tight -mt-0.5">No record</div>
+                                    <div class="text-[10px] text-gray-300 leading-tight -mt-0.5">No record</div>
                                 @endif
 
                                 {{-- OT/UT pills --}}
                                 @if($hasOtut && !$isFuture)
                                 <div class="flex items-center gap-1 mt-auto pt-0.5">
                                     @if($otHours > 0)
-                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-[3px] text-[8px] font-bold bg-blue-50 text-blue-700 border border-blue-200 leading-none">
+                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-[3px] text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 leading-none">
                                         <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                                         {{ number_format($otHours, 1) }}h
                                     </span>
                                     @endif
                                     @if($utHours > 0)
-                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-[3px] text-[8px] font-bold bg-violet-50 text-violet-700 border border-violet-200 leading-none">
+                                    <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-[3px] text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200 leading-none">
                                         <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
                                         {{ number_format($utHours, 1) }}h
                                     </span>

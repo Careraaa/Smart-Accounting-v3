@@ -916,6 +916,62 @@
                 ->orderBy('date')
                 ->get();
 
+            // Recompute so the show page always reflects current attendance, holiday,
+            // and OT/UT data — matching what the edit preview endpoint returns.
+            $manualAllowances = $payroll->allowances
+                ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay')
+                    || str_starts_with((string) ($a->allowance_type ?? ''), 'Leave Pay'))
+                ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                ->values()
+                ->toArray();
+
+            $manualDeductions = $payroll->deductions
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
+                    || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->values()
+                ->toArray();
+
+            $computed = $this->payrollService->computePayroll(
+                $payroll->user,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $manualAllowances,
+                $manualDeductions,
+            );
+
+            // Recompute leave pay (same as generatePayrollForEmployee does)
+            $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
+            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
+                $payroll->user_id,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $dailyRate
+            );
+            $leavePay = collect($leaveAllowances)->sum('amount');
+
+            // Sum bonuses from stored records
+            $bonusTotal = (float) $payroll->bonuses->sum('amount');
+
+            $fullGrossPay = $computed['grossPay'] + $leavePay + $bonusTotal;
+
+            // Override model attributes with live-computed values (in-memory only)
+            $payroll->setAttribute('days_worked', $computed['daysWorked']);
+            $payroll->setAttribute('basic_salary', $computed['basicSalary']);
+            $payroll->setAttribute('gross_pay', $fullGrossPay);
+            // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
+                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $totalDeductions = $computed['totalDeductions'] + $loanTotal;
+            $payroll->setAttribute('total_deductions', $totalDeductions);
+            $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
+            $payroll->setAttribute('per_day_rate', $computed['dailyRate']);
+            $payroll->setAttribute('hourly_rate', $computed['hourlyRate']);
+            $payroll->setAttribute('holiday_pay', $computed['holidayPay']);
+            $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay']);
+            $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours']);
+            $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
+
             $this->logActivity('viewed', "Payroll #{$payroll->id}", request()->url(), 'payroll', $payroll->id);
 
             return view('hr.payroll.salary-computation.show', compact('payroll', 'overtimeUndertimeBreakdown'));

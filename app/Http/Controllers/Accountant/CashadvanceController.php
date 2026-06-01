@@ -17,7 +17,7 @@ class CashAdvanceController extends Controller
 
         if ($cashAdvance->status !== 'pending') {
             return redirect()->back()
-                ->withErrors(['error' => 'This request has already been processed.']);
+                ->with('error', 'This request has already been processed.');
         }
 
         $cashAdvance->update([
@@ -45,7 +45,7 @@ class CashAdvanceController extends Controller
 
         if ($cashAdvance->status !== 'pending') {
             return redirect()->back()
-                ->withErrors(['error' => 'This request has already been processed.']);
+                ->with('error', 'This request has already been processed.');
         }
 
         $cashAdvance->update([

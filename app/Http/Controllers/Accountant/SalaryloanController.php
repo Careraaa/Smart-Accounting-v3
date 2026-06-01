@@ -17,7 +17,7 @@ class SalaryLoanController extends Controller
 
         if ($salaryLoan->status !== 'pending') {
             return redirect()->back()
-                ->withErrors(['error' => 'This request has already been processed.']);
+                ->with('error', 'This request has already been processed.');
         }
 
         $salaryLoan->update([
@@ -44,7 +44,7 @@ class SalaryLoanController extends Controller
 
         if ($salaryLoan->status !== 'pending') {
             return redirect()->back()
-                ->withErrors(['error' => 'This request has already been processed.']);
+                ->with('error', 'This request has already been processed.');
         }
 
         $salaryLoan->update([

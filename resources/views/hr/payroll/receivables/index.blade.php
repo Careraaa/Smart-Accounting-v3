@@ -376,6 +376,7 @@ window.allSalaryLoans = {!! json_encode($allSalaryLoans?->map(fn($l) => [
     window.payBase = '{{ url('/payroll/receivables') }}';
     window.openPayModal = function(payrollId) {
         document.getElementById('payForm').action = payBase + '/' + payrollId + '/mark-paid';
+        if (typeof sndPlay === 'function') sndPlay();
         document.getElementById('payModalOverlay').style.display = 'flex';
     };
     window.closePayModal = function() { document.getElementById('payModalOverlay').style.display = 'none'; };

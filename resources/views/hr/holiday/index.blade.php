@@ -172,8 +172,21 @@
                             </td>
                         </tr>
                         @empty
-
-
+                        <tr>
+                            <td colspan="100">
+                                <div class="flex flex-col items-center justify-center py-16 text-center">
+                                    <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center text-gray-300 mb-4">
+                                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <p class="text-sm font-semibold text-gray-700">No holidays found</p>
+                                    <p class="text-xs text-gray-400 mt-1">Add a holiday to get started.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

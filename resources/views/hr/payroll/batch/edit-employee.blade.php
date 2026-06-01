@@ -256,6 +256,80 @@
             </button>
         </div>
     </form>
+
+    {{-- Batch actions --}}
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="text-xs text-gray-400 font-medium">Batch: {{ $batch->period_start->format('M d') }} &ndash; {{ $batch->period_end->format('M d, Y') }}</div>
+        <div class="flex items-center gap-2">
+            @if($batch->isEditable())
+            <button type="button" onclick="document.getElementById('deleteBatchModal').classList.remove('hidden')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-red-500 border border-red-200 transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">Delete Batch</button>
+            <button type="button" onclick="window.location='{{ route('payroll.batch.confirm', $batch) }}?showAdd=1'" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-900 text-white transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add Employee</button>
+            <span class="w-px h-5 bg-gray-200"></span>
+            <button type="button" onclick="document.getElementById('finalizeModal').classList.remove('hidden')" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Finalize &amp; Submit
+            </button>
+            @endif
+        </div>
+    </div>
+</div>
+
+{{-- Delete batch modal --}}
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="deleteBatchModal">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('deleteBatchModal').classList.add('hidden')"></div>
+    <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-gray-900">Delete Batch</h3>
+                <p class="text-xs text-gray-400 mt-0.5">This action cannot be undone.</p>
+            </div>
+        </div>
+        <p class="text-sm text-gray-600 mb-5 bg-red-50/50 rounded-xl px-4 py-3 border border-red-100">
+            Are you sure you want to delete this batch? All payroll records in this batch will be permanently removed.
+        </p>
+        <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST">
+            @csrf @method('DELETE')
+            <div class="flex gap-2">
+                <button type="button" onclick="document.getElementById('deleteBatchModal').classList.add('hidden')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Never mind</button>
+                <button type="submit" class="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold transition-all hover:bg-red-700 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14m-9 3v6m4-6v6m-6-10V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
+                    Yes, delete it
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Finalize modal --}}
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="finalizeModal">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('finalizeModal').classList.add('hidden')"></div>
+    <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-gray-900">Finalize &amp; Submit</h3>
+                <p class="text-xs text-gray-400 mt-0.5">This will lock payroll data and send to accounting.</p>
+            </div>
+        </div>
+        <div class="text-sm text-gray-600 mb-5 bg-emerald-50/50 rounded-xl px-4 py-3 border border-emerald-100 space-y-2">
+            <p>This batch will be <strong class="font-semibold text-gray-900">finalized</strong> and sent to accounting for review.</p>
+        </div>
+        <form action="{{ route('payroll.batch.finalize', $batch) }}" method="POST">
+            @csrf
+            <div class="flex gap-2">
+                <button type="button" onclick="document.getElementById('finalizeModal').classList.add('hidden')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Cancel</button>
+                <button type="submit" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Yes, finalize
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection
 

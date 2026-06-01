@@ -137,13 +137,13 @@
                                 substr($user->last_name ?? '', 0, 1)
                             );
                             $roleBadge = match($user->role) {
-                                'superadmin'      => 'bg-amber-100 text-amber-800 border border-amber-200',
-                                'hr'              => 'bg-blue-100 text-blue-800 border border-blue-200',
-                                'accountant'      => 'bg-purple-100 text-purple-800 border border-purple-200',
-                                'remittance_clerk'=> 'bg-pink-100 text-pink-800 border border-pink-200',
-                                'employee'        => 'bg-green-100 text-green-800 border border-green-200',
-                                'qr_admin'        => 'bg-indigo-100 text-indigo-800 border border-indigo-200',
-                                default           => 'bg-gray-100 text-gray-700 border border-gray-200',
+                                'superadmin'      => 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
+                                'hr'              => 'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+                                'accountant'      => 'bg-purple-100 text-purple-800 border border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700',
+                                'remittance_clerk'=> 'bg-pink-100 text-pink-800 border border-pink-200 dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-700',
+                                'employee'        => 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
+                                'qr_admin'        => 'bg-indigo-100 text-indigo-800 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700',
+                                default           => 'bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600',
                             };
                             $statusBadge = $user->status === 'active'
                                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
@@ -265,12 +265,12 @@ window.allAccountsData = {!! json_encode($allUsers->map(fn($u) => [
 ])) !!};
 
 const ROLE_BADGE_MAP = {
-    superadmin: 'bg-amber-100 text-amber-800 border border-amber-200',
-    hr: 'bg-blue-100 text-blue-800 border border-blue-200',
-    accountant: 'bg-purple-100 text-purple-800 border border-purple-200',
-    remittance_clerk: 'bg-pink-100 text-pink-800 border border-pink-200',
-    employee: 'bg-green-100 text-green-800 border border-green-200',
-    qr_admin: 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+    superadmin: 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
+    hr: 'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+    accountant: 'bg-purple-100 text-purple-800 border border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700',
+    remittance_clerk: 'bg-pink-100 text-pink-800 border border-pink-200 dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-700',
+    employee: 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
+    qr_admin: 'bg-indigo-100 text-indigo-800 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700',
 };
 
 (function(){
@@ -417,6 +417,7 @@ function saConfirm({ title = 'Confirm action', message = 'Are you sure?', confir
     btnOk.textContent = confirmText;
     btnCancel.textContent = cancelText;
 
+    if (typeof sndPlay === 'function') sndPlay();
     modal.style.display = 'flex';
 
     return new Promise((resolve) => {
