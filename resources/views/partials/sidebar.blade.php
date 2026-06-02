@@ -1,4 +1,5 @@
 <nav class="sidebar fixed top-0 left-0 z-40 h-dvh bg-white border-r border-gray-200 flex flex-col">
+    @php $activeRole = session('view_as_role') ?? auth()->user()->role; @endphp
     <style>
         /* ── Submenu slide animation ── */
         .sidebar-sub {
@@ -204,7 +205,7 @@
             <ul class="sidebar-list space-y-0.5 p-0 list-none">
 
                 {{-- ── SUPERADMIN ── --}}
-@if (auth()->user()->role === 'superadmin')
+@if ($activeRole === 'superadmin')
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">System Administration</label></li>
 
                     <li class="sidebar-item">
@@ -337,7 +338,7 @@
                 @endif
 
                 {{-- non-superadmin base items --}}
-                @if (auth()->user()->role !== 'superadmin')
+                @if ($activeRole !== 'superadmin')
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Menu</label></li>
 
                     <li class="sidebar-item">
@@ -356,7 +357,7 @@
                 @endif
 
                 {{-- ── Remittance Clerk ── --}}
-                @if (auth()->user()->role === 'remittance_clerk')
+                @if ($activeRole === 'remittance_clerk')
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Operations</label></li>
 
                     <li class="sidebar-item has-sub">
@@ -445,7 +446,7 @@
                 @endif
 
                 {{-- ── HR ── --}}
-                @if (auth()->user()->role === 'hr')
+                @if ($activeRole === 'hr')
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">HR Management</label></li>
 
                     <li class="sidebar-item">
@@ -569,7 +570,7 @@
                 @endif
 
                 {{-- ── Employee ── --}}
-                @if (auth()->user()->role === 'employee')
+                @if ($activeRole === 'employee')
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">My Finances</label></li>
 
                     <li class="sidebar-item">
@@ -620,7 +621,7 @@
                 @endif
 
                 {{-- ── Accountant ── --}}
-                @if (auth()->user()->role === 'accountant')
+                @if ($activeRole === 'accountant')
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Approvals &amp; Receivables</label></li>
 
                     <li class="sidebar-item has-sub">

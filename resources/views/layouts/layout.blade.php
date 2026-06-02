@@ -575,7 +575,7 @@
             </div>
             {{-- Nav items --}}
             @php
-                $skRole = auth()->user()->role;
+                $skRole = session('view_as_role') ?? auth()->user()->role;
                 $skSections = match ($skRole) {
                     'superadmin' => [['caption'=>'SYSTEM ADMIN','count'=>4],['caption'=>'HR MANAGEMENT','count'=>5],['caption'=>'OPERATIONS','count'=>2],['caption'=>'FINANCIALS','count'=>5]],
                     'hr' => [['caption'=>'HR MANAGEMENT','count'=>4],['caption'=>'PAYROLL','count'=>4],['caption'=>'REPORTS','count'=>2],['caption'=>'MY FINANCES','count'=>2]],

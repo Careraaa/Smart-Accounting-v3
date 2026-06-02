@@ -54,6 +54,55 @@
                 <i class="feather-maximize" style="font-size:16px"></i>
             </a>
 
+            @if(auth()->user()->role === 'superadmin')
+            @php
+                $viewAs = session('view_as_role');
+                $viewLabel = $viewAs ? ucwords(str_replace('_', ' ', $viewAs)) : 'Super Admin';
+                $viewIcon = $viewAs ? 'feather-eye' : 'feather-shield';
+            @endphp
+            <div class="relative" data-dropdown>
+                <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors" id="view-switch-btn" type="button">
+                    <i class="{{ $viewIcon }}" style="font-size:14px"></i>
+                    <span class="hidden sm:inline">{{ $viewLabel }}</span>
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </button>
+                <div id="view-switch-dropdown" class="dropdown-closed sm:absolute sm:top-full sm:right-0 sm:mt-2 sm:w-44 sm:left-auto fixed top-16 right-4 left-4 w-auto bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50" data-dropdown-menu>
+                    <div class="py-1">
+                        <p class="px-4 py-2 text-[0.55rem] font-bold uppercase tracking-widest text-gray-400">Switch View</p>
+                        <form id="view-switch-form" method="POST" action="{{ route('superadmin.switch-view') }}">
+                            @csrf
+                            <input type="hidden" name="role" id="view-switch-role">
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="superadmin" onclick="document.getElementById('view-switch-role').value='superadmin'">
+                                <i class="feather-shield w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>Super Admin</span>
+                                @if(!$viewAs)<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="hr" onclick="document.getElementById('view-switch-role').value='hr'">
+                                <i class="feather-users w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>HR</span>
+                                @if($viewAs === 'hr')<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="employee" onclick="document.getElementById('view-switch-role').value='employee'">
+                                <i class="feather-user w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>Employee</span>
+                                @if($viewAs === 'employee')<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="accountant" onclick="document.getElementById('view-switch-role').value='accountant'">
+                                <i class="feather-bar-chart w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>Accountant</span>
+                                @if($viewAs === 'accountant')<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="remittance_clerk" onclick="document.getElementById('view-switch-role').value='remittance_clerk'">
+                                <i class="feather-dollar-sign w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>Remittance Clerk</span>
+                                @if($viewAs === 'remittance_clerk')<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             {{-- Notifications --}}
             @php
                 $notifData = cache()->remember('notif.'.auth()->id(), 30, function() {
@@ -562,6 +611,15 @@
                 }
             });
         });
+
+        // View‑switch dropdown toggle
+        var viewSwitchBtn = document.getElementById('view-switch-btn');
+        if (viewSwitchBtn) {
+            viewSwitchBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleDropdown('view-switch-dropdown', viewSwitchBtn);
+            });
+        }
 
         // User dropdown toggle
         var userBtn = document.getElementById('user-dropdown-btn');
