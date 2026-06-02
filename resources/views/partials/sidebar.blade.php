@@ -209,6 +209,13 @@
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-2 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">System Administration</label></li>
 
                     <li class="sidebar-item">
+                        <a href="{{ route('superadmin.dashboard') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('superadmin.dashboard') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-indigo-500"><i class="feather-home" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
                         <a href="{{ route('superadmin.accounts.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('superadmin.accounts.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center text-pink-500"><i class="feather-shield" style="font-size:18px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Manage Accounts</span>
@@ -343,7 +350,7 @@
 
                     <li class="sidebar-item">
                         <a href="{{ route('dashboard') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('dashboard') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('dashboard') ? 'text-blue-500' : 'text-blue-500' }}"><i class="feather-airplay" style="font-size:18px"></i></span>
+                            <span class="sidebar-icon flex items-center justify-center text-indigo-500"><i class="feather-home" style="font-size:18px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Dashboard</span>
                         </a>
                     </li>
