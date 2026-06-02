@@ -37,7 +37,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 <div class="flex flex-col lg:flex-row gap-5 items-start">
 
     {{-- LEFT COLUMN (2/3) --}}
-    <div class="flex-1 min-w-0 space-y-5">
+    <div class="flex-1 min-w-0 w-full space-y-5">
 
         {{-- Quick Actions / Shortcuts --}}
         <div class="sad-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

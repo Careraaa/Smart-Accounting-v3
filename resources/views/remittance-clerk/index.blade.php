@@ -37,7 +37,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
 <div class="flex flex-col lg:flex-row gap-5 items-start">
 
     {{-- LEFT COLUMN --}}
-    <div class="flex-1 min-w-0 space-y-5">
+    <div class="flex-1 min-w-0 w-full space-y-5">
         <div class="flex flex-col lg:flex-row gap-4 items-stretch">
             {{-- Quick Actions --}}
             <div class="w-full lg:w-[260px] lg:shrink-0 rc-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">

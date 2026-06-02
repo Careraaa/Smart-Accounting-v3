@@ -563,8 +563,8 @@
         .sk-crystal { --cc: 0.08; }
     </style>
     <div id="page-skeleton" class="fixed inset-0 z-[9999] bg-white dark:bg-[#050508] flex">
-        {{-- Sidebar skeleton --}}
-        <div class="sk-sidebar shrink-0 flex flex-col h-full">
+        {{-- Sidebar skeleton (desktop only) --}}
+        <div class="sk-sidebar shrink-0 flex-col h-full" id="sk-sidebar-cont">
             {{-- Brand --}}
             <div class="flex items-center px-3 h-16 border-b border-gray-100 dark:border-[#12121e]">
                 <div class="sk-item h-4 w-28 rounded-md"></div>
@@ -594,21 +594,23 @@
                 @endforeach
             </div>
         </div>
+        <style>#sk-sidebar-cont{display:none}@media(min-width:1024px){#sk-sidebar-cont{display:flex!important}}</style>
         {{-- Main area skeleton --}}
         <div class="flex-1 flex flex-col min-w-0">
-            {{-- Header skeleton --}}
-            <div class="h-16 border-b border-gray-100 dark:border-[#12121e] flex items-center px-6">
-                <div class="sk-item h-4 w-48"></div>
+            {{-- Navbar skeleton --}}
+            <div class="h-16 border-b border-gray-100 dark:border-[#12121e] flex items-center px-4 sm:px-6">
+                <div class="sk-item h-5 w-6 sm:w-48 rounded-md lg:hidden"></div>
+                <div class="sk-item h-4 w-48 rounded-md hidden lg:block"></div>
                 <div class="flex-1"></div>
-                <div class="flex items-center gap-3">
-                    <div class="sk-item h-8 w-8 rounded-lg"></div>
-                    <div class="sk-item h-8 w-8 rounded-lg"></div>
-                    <div class="sk-item h-8 w-8 rounded-lg"></div>
-                    <div class="sk-item h-8 w-8 rounded-full"></div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="sk-item h-7 w-7 sm:h-8 sm:w-8 rounded-lg"></div>
+                    <div class="sk-item h-7 w-7 sm:h-8 sm:w-8 rounded-lg hidden sm:block"></div>
+                    <div class="sk-item h-7 w-7 sm:h-8 sm:w-8 rounded-lg"></div>
+                    <div class="sk-item h-7 w-7 sm:h-8 sm:w-8 rounded-full"></div>
                 </div>
             </div>
-            {{-- Crystal spinner in content area --}}
-            <div class="flex-1 flex items-center justify-center bg-gray-100 dark:bg-[#0c0c18]">
+            {{-- Crystal spinner --}}
+            <div class="flex-1 flex items-center justify-center bg-gray-50 dark:bg-[#0c0c18]">
                 <style>
                     @keyframes skSpin {
                         from{transform:translate(-50%,-50%) rotateX(45deg) rotateZ(0deg)}
