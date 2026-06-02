@@ -62,7 +62,7 @@ class AttendanceService
     {
         $attendances = Attendance::where('user_id', $employeeId)
             ->whereBetween('date', [$periodStart, $periodEnd])
-            ->where('status', 'present')
+            ->whereIn('status', ['present', 'late'])
             ->where('time_in', '!=', null)
             ->where('time_out', '!=', null)
             ->get();
@@ -370,8 +370,18 @@ class AttendanceService
         // Undertime is only applied if actual hours < scheduled hours AND no overtime
         // Overtime and undertime must NOT offset each other
         // IMPORTANT: Only apply undertime if employee left early (actualEnd is BEFORE expectedEnd)
+        // Undertime is computed based on early departure only (actualEnd → expectedEnd),
+        // NOT from scheduled start. This prevents tardiness hours from being
+        // double-counted as undertime.
         if ($result['overtime_hours'] === 0.0 && $actualWorkHours < $scheduledWorkHours && $actualEnd->isBefore($expectedEnd)) {
-            $undertimeMinutes = $scheduledWorkMinutes - $actualWorkMinutes;
+            $earlyDepartureMinutes = abs($expectedEnd->diffInMinutes($actualEnd));
+            $breakOverlapInDeparture = 0;
+            if ($expectedEnd->greaterThan($breakStartTime) && $actualEnd->lessThan($breakEndTime)) {
+                $overlapStart = $actualEnd->greaterThan($breakStartTime) ? $actualEnd : $breakStartTime;
+                $overlapEnd = $expectedEnd->lessThan($breakEndTime) ? $expectedEnd : $breakEndTime;
+                $breakOverlapInDeparture = max(0, abs($overlapEnd->diffInMinutes($overlapStart)));
+            }
+            $undertimeMinutes = max(0, $earlyDepartureMinutes - $breakOverlapInDeparture);
             $undertimeHours = $this->convertMinutesToHourIncrement($undertimeMinutes);
             $result['undertime_hours'] = $undertimeHours;
         }
