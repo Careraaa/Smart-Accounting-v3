@@ -346,7 +346,7 @@
         #right-sidebar { width: 280px; transform: translateX(100%); transition: transform .5s cubic-bezier(.4,0,.2,1); }
         body.right-sidebar-open #right-sidebar { transform: translateX(0); }
         #right-sidebar-toggle { transition: right .5s cubic-bezier(.4,0,.2,1), opacity .3s ease; }
-        body.right-sidebar-open #right-sidebar-toggle { right: 280px; opacity: 0; pointer-events: none; }
+        body.right-sidebar-open #right-sidebar-toggle { right: 280px; opacity: 1; pointer-events: auto; }
         @media (max-width: 1023px) {
             #right-sidebar { display: none; }
             #right-sidebar-toggle { display: none; }
@@ -794,6 +794,23 @@
             window.addEventListener('resize', initializeMenus);
         });
     </script>
+
+    @if(session('show_sidebar_peek'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth < 1024) return;
+            setTimeout(function() {
+                document.body.classList.add('right-sidebar-open');
+                var icon = document.querySelector('#right-sidebar-toggle svg');
+                if (icon) icon.style.transform = 'rotate(180deg)';
+                setTimeout(function() {
+                    document.body.classList.remove('right-sidebar-open');
+                    if (icon) icon.style.transform = '';
+                }, 1500);
+            }, 400);
+        });
+    </script>
+    @endif
 
     <script>
         window.attendanceRowsUrl = "{{ route('api.attendance.table-rows') }}";

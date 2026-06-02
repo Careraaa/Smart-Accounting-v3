@@ -152,9 +152,7 @@ $pinIconsJson = json_encode($pinIcons);
             </div>
             <span class="text-xs font-bold text-gray-800 tracking-widest uppercase">Quick Access</span>
         </div>
-        <button id="right-sidebar-close" class="w-6 h-6 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-400 hover:text-gray-600 flex items-center justify-center transition-all cursor-pointer border-none active:scale-95" type="button">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
+
     </div>
 
     {{-- Pinned section --}}
@@ -183,9 +181,8 @@ $pinIconsJson = json_encode($pinIcons);
                         </span>
                         <span class="text-sm font-medium text-gray-700 truncate leading-tight">{{ $item['label'] }}</span>
                     </a>
-                    <svg class="w-3 h-3 text-amber-400 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    <a href="#" data-pin-url="{{ $item['url'] }}" data-pin-label="{{ $item['label'] }}" class="rs-unpin-btn w-5 h-5 rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200 text-gray-300 hover:text-red-400 flex items-center justify-center transition-all no-underline shrink-0" title="Unpin">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <a href="#" data-pin-url="{{ $item['url'] }}" data-pin-label="{{ $item['label'] }}" class="shrink-0 flex items-center justify-center w-7 h-7 rounded-lg hover:bg-amber-50 transition-all duration-300 hover:scale-125 active:scale-90 no-underline" title="Unpin">
+                        <svg class="w-5 h-5 text-amber-400 transition-all duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                     </a>
                 </div>
                 @empty
@@ -278,7 +275,7 @@ $pinIconsJson = json_encode($pinIcons);
 </div>
 
 {{-- Toggle arrow --}}
-<button id="right-sidebar-toggle" class="fixed top-1/2 -translate-y-1/2 right-0 z-50 w-7 h-14 bg-white/90 backdrop-blur-sm border border-gray-100 border-r-0 rounded-l-xl shadow-sm text-gray-300 hover:text-gray-500 hover:border-gray-200 hover:shadow-md hidden lg:flex items-center justify-center cursor-pointer transition-all duration-200 active:scale-95" type="button" title="Open sidebar">
+<button id="right-sidebar-toggle" class="fixed top-1/2 -translate-y-1/2 right-0 z-50 w-7 h-14 bg-white/90 backdrop-blur-sm border border-gray-100 border-r-0 rounded-l-xl shadow-sm text-gray-300 hover:text-gray-500 hover:border-gray-200 hover:shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 active:scale-95" type="button" title="Open sidebar">
     <svg class="w-3.5 h-3.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M8.5 5l7 7-7 7"/>
     </svg>
@@ -314,9 +311,8 @@ function renderPinnedList() {
                 '<a href="' + p.url.replace(/"/g, '&quot;') + '" class="flex-1 flex items-center gap-2.5 min-w-0 no-underline">' +
                 '<span class="rs-pin-icon shrink-0 flex items-center justify-center w-6 h-6 ' + icon.color + '"><i class="' + icon.icon + '" style="font-size:21px;line-height:1"></i></span>' +
                 '<span class="text-sm font-medium text-gray-700 truncate leading-tight">' + p.label.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span></a>' +
-                '<svg class="w-3 h-3 text-amber-400 shrink-0 opacity-40 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' +
-                '<a href="#" data-pin-url="' + p.url.replace(/"/g, '&quot;') + '" data-pin-label="' + p.label.replace(/"/g, '&quot;') + '" class="rs-unpin-btn w-5 h-5 rounded opacity-0 group-hover:opacity-100 hover:bg-gray-200 text-gray-300 hover:text-red-400 flex items-center justify-center transition-all no-underline shrink-0" title="Unpin">' +
-                '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></a></div>';
+                '<a href="#" data-pin-url="' + p.url.replace(/"/g, '&quot;') + '" data-pin-label="' + p.label.replace(/"/g, '&quot;') + '" class="shrink-0 flex items-center justify-center w-7 h-7 rounded-lg hover:bg-amber-50 transition-all duration-300 hover:scale-125 active:scale-90 no-underline" title="Unpin">' +
+                '<svg class="w-5 h-5 text-amber-400 transition-all duration-300 group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></a></div>';
         }).join('');
     }
     var countEl = document.getElementById('rs-pinned-count');
@@ -380,16 +376,16 @@ window.togglePin = function(url, label) {
 
 document.addEventListener('DOMContentLoaded', function() {
     var btn = document.getElementById('right-sidebar-toggle');
-    var closeBtn = document.getElementById('right-sidebar-close');
     var icon = btn ? btn.querySelector('svg') : null;
     var searchInput = document.getElementById('rs-pin-search');
     var searchResults = document.getElementById('rs-pin-search-results');
 
-    function open() { document.body.classList.add('right-sidebar-open'); if (icon) icon.style.transform = 'rotate(180deg)'; }
-    function close() { document.body.classList.remove('right-sidebar-open'); if (icon) icon.style.transform = ''; }
+    function toggleSidebar() {
+        var isOpen = document.body.classList.toggle('right-sidebar-open');
+        if (icon) icon.style.transform = isOpen ? 'rotate(180deg)' : '';
+    }
 
-    if (btn) btn.addEventListener('click', open);
-    if (closeBtn) closeBtn.addEventListener('click', close);
+    if (btn) btn.addEventListener('click', toggleSidebar);
 
     // Collapsible activity section
     var activityToggle = document.getElementById('rs-activity-toggle');
