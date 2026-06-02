@@ -232,6 +232,9 @@
             color: var(--black);
             font-style: italic;
         }
+        .pay-table tbody td{
+            padding-top: 6px; /* creates space below header line */
+        }
 
         /* Subtotal stays at bottom of each column */
         .subtotal-row {
@@ -363,7 +366,7 @@
 
                     <!-- Earnings Column -->
                     <div>
-                        <div class="section-label">Earnings</div>
+                       <div class="section-label" style="font-weight: bold;">Earnings</div>
                         <table class="pay-table">
                             <thead>
                                 <tr>
@@ -414,7 +417,7 @@
 
                     <!-- Deductions Column -->
                     <div>
-                        <div class="section-label">Deductions</div>
+                        <div class="section-label" style="font-weight: bold;">Deductions</div>
                         <table class="pay-table">
                             <thead>
                                 <tr>
