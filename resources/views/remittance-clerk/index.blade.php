@@ -38,9 +38,8 @@ $mctActive = count($monthlyCollectionTrend) - 1;
 
     {{-- LEFT COLUMN --}}
     <div class="flex-1 min-w-0 w-full space-y-5">
-        <div class="flex flex-col lg:flex-row gap-4 items-stretch">
             {{-- Quick Actions --}}
-            <div class="w-full lg:w-[260px] lg:shrink-0 rc-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
+            <div class="rc-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
                 <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-sm rc-float">
@@ -50,7 +49,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                     </div>
                     <span class="text-[0.55rem] font-mono text-gray-400">Remittance modules</span>
                 </div>
-                <div class="grid grid-cols-2 gap-3 p-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
                     <a href="{{ route('remittances.create') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
                         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -79,7 +78,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
             </div>
 
             {{-- Daily Remittance Trend --}}
-            <div class="flex-1 min-w-0 fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-2">
                     <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
@@ -101,16 +100,16 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                 ])->sortBy('date')->values();
             }
             $chartMax = $dailyData->max('net') ?: 1;
-            $chartH = 200;
+            $chartH = 160;
             $chartW = 600;
-            $padL = 0; $padR = 0; $padT = 8; $padB = 26;
+            $padL = 0; $padR = 0; $padT = 6; $padB = 22;
             $plotW = $chartW - $padL - $padR;
             $plotH = $chartH - $padT - $padB;
             $cnt = $dailyData->count();
             @endphp
             @if($dailyData->isNotEmpty())
-            <div class="flex-1 p-4 flex flex-col min-h-0">
-                <svg viewBox="0 0 {{ $chartW }} {{ $chartH }}" class="flex-1 w-full min-h-0" preserveAspectRatio="xMidYMid meet">
+            <div class="p-4">
+                <svg viewBox="0 0 {{ $chartW }} {{ $chartH }}" class="w-full h-auto" style="max-height:180px">
                     @php
                     $step = $cnt > 1 ? $plotW / ($cnt - 1) : 0;
                     $points = [];
@@ -135,7 +134,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                     @endforeach
                     @foreach ($dailyData as $i => $d)
                     @php $lx = $i * $step + $padL; @endphp
-                    <text x="{{ $lx }}" y="{{ $chartH - 4 }}" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="monospace">{{ $d['label'] }}</text>
+                    <text x="{{ $lx }}" y="{{ $chartH - 4 }}" text-anchor="middle" fill="#9ca3af" font-size="12" font-family="monospace">{{ $d['label'] }}</text>
                     @endforeach
                     <defs>
                         <linearGradient id="rcChartGrad" x1="0" y1="0" x2="0" y2="1">
@@ -144,7 +143,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                         </linearGradient>
                     </defs>
                 </svg>
-                <div class="flex items-center justify-between mt-auto pt-2 text-[10px] text-gray-400 shrink-0">
+                <div class="flex items-center justify-between mt-2 text-[10px] text-gray-400">
                     <span class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
                         Net remittance
@@ -155,9 +154,8 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                 </div>
             </div>
             @else
-            <div class="flex-1 flex items-center justify-center text-xs text-gray-400">No remittance data yet.</div>
+            <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No remittance data yet.</div>
             @endif
-        </div>
         </div>
 
         {{-- Stat cards --}}
