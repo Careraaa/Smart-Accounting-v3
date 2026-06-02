@@ -45,20 +45,17 @@
     {{-- Trigger strip for showing header on hover --}}
     <div id="header-trigger" style="display:none; position:fixed; top:0; left:0; right:0; height:12px; z-index:49; background:transparent;"></div>
 
-    {{-- Header (matches main layout style) --}}
+    {{-- Header (matches main layout style with auto-hide) --}}
     <header id="qr-header" class="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center z-50">
         <div class="flex items-center w-full h-full px-4 sm:px-6">
 
-            {{-- Left: Brand --}}
+            {{-- Left: Title --}}
             <div class="flex items-center gap-2.5 min-w-0">
-                <div class="w-8 h-8 min-w-[32px] rounded-lg bg-gradient-to-br from-rose-800 to-rose-900 flex items-center justify-center shadow-sm">
-                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/>
-                    </svg>
-                </div>
+                <img src="{{ asset('images/knights-icon.png') }}" alt="Knights Transport"
+                     class="w-8 h-8 min-w-[32px] object-contain rounded-lg shadow-sm">
                 <div class="min-w-0">
-                    <div class="text-sm font-bold text-gray-900 leading-tight truncate">Knights Transport</div>
-                    <div class="text-[0.6rem] text-gray-500 font-medium leading-tight -mt-px">Fleet Attendance</div>
+                    <div class="text-sm font-bold text-gray-900 leading-tight truncate">QR Attendance Monitor</div>
+                    <div class="text-[0.6rem] text-gray-500 font-medium leading-tight -mt-px">Knights Transport</div>
                 </div>
             </div>
 
@@ -74,23 +71,35 @@
                     </svg>
                 </button>
 
-                {{-- User Profile --}}
+                {{-- User Profile (matches main layout) --}}
+                @php
+                    $avatarUser = auth()->user();
+                    $avatarFirst = strtoupper(substr($avatarUser->first_name ?? $avatarUser->name ?? 'U', 0, 1));
+                    $avatarLast  = strtoupper(substr($avatarUser->last_name ?? '', 0, 1));
+                    $avatarInitials = $avatarFirst . ($avatarLast ?: '');
+                    $avatarSeed = crc32($avatarUser->username ?? $avatarUser->email ?? $avatarUser->id ?? 'user');
+                    $avatarHue = abs($avatarSeed) % 360;
+                    $avatarBg = "hsl({$avatarHue}, 52%, 42%)";
+                    $avatarRing = "hsl({$avatarHue}, 52%, 75%)";
+                @endphp
                 <div class="relative" data-dropdown>
-                    <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-colors hover:bg-rose-50 cursor-pointer bg-transparent border-none" id="user-dropdown-btn" type="button">
-                        <div class="w-8 h-8 min-w-[32px] rounded-full bg-gradient-to-br from-rose-800 to-rose-900 flex items-center justify-center text-white text-sm font-bold shadow-sm">
-                            {{ auth()->user()->getFirstLetter() }}
+                    <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-all duration-200 hover:bg-gray-50 group" id="user-dropdown-btn" type="button">
+                        <div class="relative w-9 h-9 min-w-[36px] flex-shrink-0">
+                            <div class="w-full h-full rounded-full flex items-center justify-center text-white text-[13px] font-bold shadow-sm transition-transform duration-200 group-hover:scale-105" style="background:{{ $avatarBg }};box-shadow:0 0 0 2px {{ $avatarRing }}, 0 2px 6px rgba(0,0,0,0.08)">
+                                {{ $avatarInitials ?: '?' }}
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white"></span>
                         </div>
-                        <svg class="hidden md:block text-gray-400" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <svg class="hidden md:block text-gray-400 transition-transform duration-200 group-hover:rotate-180" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                         </svg>
                     </button>
 
-                    {{-- Dropdown (animated with scale+fade) --}}
                     <div id="user-dropdown" class="dropdown-closed absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50" data-dropdown-menu>
                         <div class="py-1.5">
                             <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 mx-2 mb-1">
-                                <div class="w-9 h-9 min-w-[36px] rounded-full bg-gradient-to-br from-rose-800 to-rose-900 flex items-center justify-center text-white text-sm font-bold shadow-sm">
-                                    {{ auth()->user()->getFirstLetter() }}
+                                <div class="w-9 h-9 min-w-[36px] rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm shrink-0" style="background:{{ $avatarBg }};box-shadow:0 0 0 2px {{ $avatarRing }}, 0 2px 6px rgba(0,0,0,0.08)">
+                                    {{ $avatarInitials ?: '?' }}
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <div class="text-sm font-bold text-gray-900 leading-tight truncate">{{ auth()->user()->name }}</div>

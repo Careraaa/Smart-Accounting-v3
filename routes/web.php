@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PinnedItemController;
+use App\Http\Controllers\QRLoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RemittanceClerk\DriverController;
 use App\Http\Controllers\RemittanceClerk\PAOController;
@@ -275,6 +276,10 @@ Route::middleware(['auth', 'check-status', 'role:employee,superadmin,remittance_
     // My Attendance Calendar
     Route::get('/my/attendance', [EmployeeAttendanceController::class, 'index'])->name('employee.attendance.index');
 });
+
+// ===== QR LOGIN (guest — scan from phone camera) =====
+Route::get('/attendance/login/{token}', [QRLoginController::class, 'showLoginForm'])->name('attendance.qr.login');
+Route::post('/attendance/login/{token}', [QRLoginController::class, 'login']);
 
 // ===== SHARED ATTENDANCE ROUTES (all authenticated users) =====
 Route::middleware(['auth'])->group(function () {
