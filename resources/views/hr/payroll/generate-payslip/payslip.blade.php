@@ -375,7 +375,7 @@
                             <tbody>
                                 <tr>
                                     <td>Basic Pay</td>
-                                    <td class="mono right">{{ $payroll->hours_worked ?? 0 }}</td>
+                                    <td class="mono right">{{ ($payroll->days_worked ?? 0) * 8 }}</td>
                                     <td class="mono">₱{{ number_format($payroll->basic_salary, 2) }}</td>
                                 </tr>
 

@@ -22,8 +22,8 @@
     {{-- Header --}}
     <div class="fade-up flex items-start justify-between gap-4 flex-wrap">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $batch->display_name }}</h1>
-            <p class="text-sm text-gray-400 mt-0.5 font-mono">{{ $batch->period_start->format('M d, Y') }} – {{ $batch->period_end->format('M d, Y') }} · {{ $batch->payrolls->count() }} employees</p>
+            <h1 class="text-xl font-bold text-gray-900 tracking-tight">{{ $batch->display_name }}</h1>
+            <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $batch->period_start->format('M d, Y') }} – {{ $batch->period_end->format('M d, Y') }} · {{ $batch->payrolls->count() }} employees</p>
         </div>
     </div>
 
@@ -33,55 +33,52 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Salary</th>
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross Pay</th>
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net Pay</th>
-                        <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Addl. Earnings</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deductions</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                 @forelse($batch->payrolls as $payroll)
                     @php
                         $initials = strtoupper(substr($payroll->user->first_name ?? 'U', 0, 1) . substr($payroll->user->last_name ?? '', 0, 1));
-                        $badgeCls = match($payroll->status) {
-                            'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                            'released','paid' => 'bg-blue-50 text-blue-700 border-blue-200',
-                            'submitted' => 'bg-violet-50 text-violet-700 border-violet-200',
-                            'prepared' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                            default => 'bg-gray-50 text-gray-600 border-gray-200',
-                        };
-                        $dotCls = match($payroll->status) {
-                            'approved' => 'bg-emerald-500',
-                            'released','paid' => 'bg-blue-500',
-                            'submitted' => 'bg-violet-500',
-                            'prepared' => 'bg-emerald-500',
-                            default => 'bg-gray-400',
+                        $ps = match($payroll->status) {
+                            'pending' => ['label'=>'Pending','dot'=>'bg-amber-400'],
+                            'prepared' => ['label'=>'Prepared','dot'=>'bg-blue-400'],
+                            'submitted' => ['label'=>'Submitted','dot'=>'bg-violet-400'],
+                            'approved' => ['label'=>'Approved','dot'=>'bg-emerald-400'],
+                            'completed' => ['label'=>'Completed','dot'=>'bg-emerald-400'],
+                            'released','paid' => ['label'=>'Released','dot'=>'bg-blue-400'],
+                            'on-hold' => ['label'=>'Hold','dot'=>'bg-sky-400'],
+                            default => ['label'=>'Pending','dot'=>'bg-amber-400'],
                         };
                         $payslipUrl = route('payroll.generatePayslip', $payroll);
                     @endphp
                     <tr onclick="window.open('{{ $payslipUrl }}', '_blank')" class="hover:bg-gray-50/40 transition-colors cursor-pointer">
                         <td class="px-4 py-3">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">{{ $initials }}</span>
-                                <div>
-                                    <div class="text-xs font-semibold text-gray-900">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</div>
-                                    <div class="text-[0.55rem] text-gray-400">{{ $payroll->user->position ?? '—' }} · {{ $payroll->user->department ?? '—' }}</div>
-                                </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-gray-900 truncate">{{ $payroll->user->last_name }}, {{ $payroll->user->first_name }}</p>
+                                <p class="text-[0.55rem] text-gray-400 truncate font-mono">{{ $payroll->user->position ?? '—' }}</p>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs text-gray-500">₱{{ number_format($payroll->basic_salary, 2) }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-emerald-600">₱{{ number_format($payroll->gross_pay, 2) }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
-                        <td class="px-4 py-3 text-center">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border {{ $badgeCls }}">
-                                <span class="w-1 h-1 rounded-full {{ $dotCls }}"></span>
-                                {{ in_array($payroll->status, ['released', 'paid'], true) ? 'Released' : ucfirst($payroll->status) }}
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format(($payroll->basic_salary ?? 0), 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format(($payroll->total_allowances ?? 0) + ($payroll->total_bonuses ?? 0) + ($payroll->holiday_pay ?? 0) + ($payroll->holiday_ot_pay ?? 0), 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($payroll->gross_pay, 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($payroll->total_deductions ?? 0, 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payroll->net_pay, 2) }}</td>
+                        <td class="px-4 py-3 text-left">
+                            <span class="inline-flex items-center gap-1 text-[0.5rem] font-semibold uppercase tracking-wide text-gray-500">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $ps['dot'] }}"></span>
+                                {{ $ps['label'] }}
                             </span>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5">
+                    <tr><td colspan="7">
                         <div class="flex flex-col items-center py-12 text-center">
                             <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

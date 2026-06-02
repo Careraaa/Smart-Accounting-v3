@@ -109,7 +109,7 @@ class PayrollBatch extends Model
 
     public function isEditable(): bool
     {
-        return in_array($this->status, ['draft', 'rejected'], true);
+        return in_array($this->status, ['draft', 'submitted', 'rejected'], true);
     }
 
     /* ── Static helpers ────────────────────────────────────────── */

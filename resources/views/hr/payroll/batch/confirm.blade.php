@@ -13,6 +13,7 @@
 .stat-card:nth-child(3) { animation-delay:0.15s; }
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .slide-right { animation:slideInRight 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.sticky-actions { position: sticky; top: 65px; z-index: 50; }
 </style>
 @endpush
 
@@ -77,7 +78,7 @@
     </div>
 
     {{-- Actions --}}
-    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="fade-up sticky-actions bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
             <div class="flex items-center gap-1.5">
                 <input type="checkbox" id="selectAll" onchange="toggleAll(this)" class="w-3.5 h-3.5 rounded border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-300 cursor-pointer">
@@ -91,7 +92,6 @@
             @endif
             <button type="button" onclick="showDeleteModal()" id="deleteSelectedBtn" disabled class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-gray-400 border border-gray-200 transition-all cursor-not-allowed">Remove</button>
             @if($batch->isEditable())
-            <button type="button" onclick="addEmployeePanel()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-900 text-white transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add Employee</button>
             <button type="button" onclick="prepareSelected()" id="prepareSelectedBtn" disabled class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-gray-400 border border-gray-200 transition-all cursor-not-allowed">Prepare</button>
             <span class="w-px h-5 bg-gray-200"></span>
             <button type="button" onclick="document.getElementById('finalizeModal').classList.remove('hidden')" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer">
@@ -107,41 +107,43 @@
         <div id="prepareInputs"></div>
     </form>
 
-    {{-- Add employee panel (hidden by default) --}}
-    <div id="addEmployeePanel" class="hidden fade-up">
+    {{-- Add employee panel --}}
+    <div id="addEmployeePanel" class="fade-up">
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-semibold text-gray-900">Add Employee</h3>
-                <button type="button" onclick="document.getElementById('addEmployeePanel').classList.add('hidden')" class="text-gray-300 hover:text-gray-500 transition-colors cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+            <div class="mb-4">
+                <h3 class="text-sm font-semibold text-gray-900">Add Employees</h3>
             </div>
-            <form action="{{ route('payroll.batch.add-employee', $batch) }}" method="POST" class="flex gap-2">
-                @csrf
-                <select name="user_id" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
-                    <option value="">Select employee&hellip;</option>
-                    @foreach($availableEmployees as $employee)
-                    <option value="{{ $employee->id }}">{{ $employee->last_name }}, {{ $employee->first_name }}</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add</button>
-            </form>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mt-3">
-            <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-semibold text-gray-900">Add by Department</h3>
+            <div class="grid grid-cols-2 gap-4">
+                {{-- Add Employee --}}
+                <div>
+                    <p class="text-xs text-gray-500 font-medium mb-2">By Individual</p>
+                    <form action="{{ route('payroll.batch.add-employee', $batch) }}" method="POST" class="flex gap-2">
+                        @csrf
+                        <select name="user_id" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
+                            <option value="">Select employee&hellip;</option>
+                            @foreach($availableEmployees->sortBy(fn($e) => [$e->last_name, $e->first_name]) as $employee)
+                            <option value="{{ $employee->id }}">{{ $employee->last_name }}, {{ $employee->first_name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer whitespace-nowrap">Add</button>
+                    </form>
+                </div>
+                {{-- Add by Department --}}
+                <div>
+                    <p class="text-xs text-gray-500 font-medium mb-2">By Department</p>
+                    <form action="{{ route('payroll.batch.add-department', $batch) }}" method="POST" class="flex gap-2">
+                        @csrf
+                        <select name="department" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
+                            <option value="">Select department&hellip;</option>
+                            <option value="all">All Departments</option>
+                            @foreach($departments as $dept)
+                            <option value="{{ $dept }}">{{ $dept }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer whitespace-nowrap">Add</button>
+                    </form>
+                </div>
             </div>
-            <form action="{{ route('payroll.batch.add-department', $batch) }}" method="POST" class="flex gap-2">
-                @csrf
-                <select name="department" class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
-                    <option value="">Select department&hellip;</option>
-                    <option value="all">All Departments</option>
-                    @foreach($departments as $dept)
-                    <option value="{{ $dept }}">{{ $dept }}</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Add</button>
-            </form>
         </div>
     </div>
 
@@ -151,14 +153,16 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-50">
-                        <th class="w-10 px-4 py-3"></th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deductions</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Allowances</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
-                        <th class="w-16 px-4 py-3"></th>
+                        <th class="w-10 px-4 py-3">
+
+                        </th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Addl. Earnings</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deductions</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -171,13 +175,14 @@
                         <td class="px-4 py-3">
                             <div class="min-w-0">
                                 <p class="text-xs font-semibold text-gray-900 truncate">{{ $u->last_name }}, {{ $u->first_name }}</p>
-                                <p class="text-[0.55rem] text-gray-400 truncate font-mono">{{ $u->employee_number ?? '—' }}</p>
+                                <p class="text-[0.55rem] text-gray-400 truncate font-mono">{{ $u->position ?? '—' }}</p>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($detail->gross_pay,2) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($detail->total_deductions,2) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format($detail->total_allowances,2) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($detail->net_pay,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($detail->basic_salary ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format(($detail->total_allowances ?? 0) + ($detail->total_bonuses ?? 0) + ($detail->holiday_pay ?? 0) + ($detail->holiday_ot_pay ?? 0),2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($detail->gross_pay ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($detail->total_deductions ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($detail->net_pay,2) }}</td>
                         <td class="px-4 py-3">
                             @php
                                 $ds = match($detail->status) {
@@ -196,11 +201,6 @@
                                 {{ $ds['label'] }}
                             </span>
                         </td>
-                        <td class="px-4 py-3" onclick="event.stopPropagation()">
-                            <button type="button" onclick="confirmRemove({{ $detail->id }}, '{{ addslashes($u->last_name) }}, {{ addslashes($u->first_name) }}')" class="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer" title="Remove">
-                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
-                        </td>
                     </tr>
                     @empty
                     <tr>
@@ -208,32 +208,31 @@
                     </tr>
                     @endforelse
                 </tbody>
+                <tfoot>
+                    <tr class="border-t border-gray-50 bg-gray-50/50">
+                        <td class="w-10 px-4 py-3"></td>
+                        <td class="px-4 py-3">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Batch Totals</p>
+                        </td>
+                        <td class="px-4 py-3 text-left">
+                            <p class="text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($batch->payrolls->sum(fn($p) => $p->basic_salary ?? 0),2) }}</p>
+                        </td>
+                        <td class="px-4 py-3 text-left">
+                            <p class="text-sm font-semibold text-emerald-500 tabular-nums">₱{{ number_format($batch->payrolls->sum(fn($p) => ($p->total_allowances ?? 0) + ($p->total_bonuses ?? 0) + ($p->holiday_pay ?? 0) + ($p->holiday_ot_pay ?? 0)),2) }}</p>
+                        </td>
+                        <td class="px-4 py-3 text-left">
+                            <p class="text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($batch->total_gross_pay ?? 0,2) }}</p>
+                        </td>
+                        <td class="px-4 py-3 text-left">
+                            <p class="text-sm font-semibold text-red-500 tabular-nums">₱{{ number_format($batch->total_deductions ?? 0,2) }}</p>
+                        </td>
+                        <td class="px-4 py-3 text-left">
+                            <p class="text-sm font-bold text-gray-900 tabular-nums">₱{{ number_format($batch->total_net_pay,2) }}</p>
+                        </td>
+                        <td class="px-4 py-3"></td>
+                    </tr>
+                </tfoot>
             </table>
-        </div>
-    </div>
-
-    {{-- Totals --}}
-    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 px-5 py-3.5">
-        <div class="flex items-center justify-between text-sm">
-            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Batch Totals</span>
-            <div class="flex items-center gap-8 font-mono tabular-nums">
-                <div class="text-right">
-                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Gross</p>
-                    <p class="text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($batch->total_gross_pay ?? 0,2) }}</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
-                    <p class="text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($batch->total_deductions ?? 0,2) }}</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Allowances</p>
-                    <p class="text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format($batch->total_allowances ?? 0,2) }}</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Net</p>
-                    <p class="text-sm font-bold text-gray-900 tabular-nums">₱{{ number_format($batch->total_net_pay,2) }}</p>
-                </div>
-            </div>
         </div>
     </div>
 

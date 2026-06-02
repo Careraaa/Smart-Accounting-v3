@@ -304,6 +304,11 @@
         ══════════════════════════════════════════════════════════════ */
         public function batchConfirm(PayrollBatch $batch)
         {
+            // When entering edit mode, revert submitted or rejected batches to draft
+            if (in_array($batch->status, ['submitted', 'rejected'], true)) {
+                $batch->update(['status' => 'draft']);
+            }
+            
             $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
 
             $periodStart = $batch->period_start->toDateString();

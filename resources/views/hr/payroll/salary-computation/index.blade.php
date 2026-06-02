@@ -165,7 +165,7 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
     'month_year' => $b->period_start->format('F Y'),
     'half' => (int) $b->period_start->format('d') <= 15 ? '1st' : '2nd',
     'is_first' => (int) $b->period_start->format('d') <= 15,
-    'status' => $b->status ?? 'submitted',
+    'status' => $b->status ?? 'draft',
     'payrolls_count' => $b->payrolls_count ?? 0,
     'gross_pay' => (float) ($b->payrolls_sum_gross_pay ?? 0),
     'total_deductions' => (float) ($b->payrolls_sum_total_deductions ?? 0),
@@ -203,7 +203,7 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
         } else {
             noRes.classList.add('hidden');
             pageData.forEach(b => {
-                const si = STATUS_MAP[b.status] || STATUS_MAP.submitted;
+                const si = STATUS_MAP[b.status] || STATUS_MAP.draft;
 
                 const div = document.createElement('div');
                 div.innerHTML = `
