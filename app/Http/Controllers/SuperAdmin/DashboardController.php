@@ -70,6 +70,7 @@ class DashboardController extends Controller
         // Payroll status breakdown
         $approvedPayroll = $payrolls->where('status', 'approved')->count();
         $rejectedPayroll = $payrolls->where('status', 'rejected')->count();
+        $processingPayroll = $payrolls->where('status', 'processing')->count();
 
         // Average basic salary
         $averageBasicSalary = $payrolls->avg(fn($p) => $p->basic_salary);
