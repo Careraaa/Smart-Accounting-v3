@@ -91,10 +91,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (!field.value.trim()) {
                     error = "This field is required.";
                 } else if (field.name === "phone") {
-                    const phonePattern = /^(09\d{9}|\+639\d{9})$/;
+                    const phonePattern = /^\d{10}$/;
                     if (!phonePattern.test(field.value.trim())) {
                         error =
-                            "Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.";
+                            "Phone must be exactly 10 digits.";
                     }
                 } else if (field.type === "number") {
                     const val = parseFloat(field.value);
@@ -248,7 +248,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function toggleSpouseField() {
         if (!civilStatusSelect || !spouseField) return;
-        const isMarried = civilStatusSelect.value === "married";
+        const isMarried = civilStatusSelect.value === "Married";
         spouseField.disabled = !isMarried;
         spouseField.classList.toggle("bg-light", !isMarried);
         if (!isMarried) spouseField.value = "";

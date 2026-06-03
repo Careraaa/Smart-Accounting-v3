@@ -150,8 +150,16 @@
             <label for="educational_attainment" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 Educational Attainment <span class="text-red-500 dark:text-red-400">*</span>
             </label>
-            <input type="text" name="educational_attainment" id="educational_attainment" value="{{ old('educational_attainment', $employee->educational_attainment ?? '') }}" required
-                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('educational_attainment') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            <div class="relative">
+                <select name="educational_attainment" id="educational_attainment" required
+                    class="w-full appearance-none border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 pr-9 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 {{ $errors->has('educational_attainment') ? 'border-red-500 dark:border-red-400!' : '' }}">
+                    <option value="" disabled {{ old('educational_attainment', $employee->educational_attainment ?? '') === '' ? 'selected' : '' }}>Select educational attainment</option>
+                    @foreach(['Elementary', 'High School', 'Senior High School', 'Vocational / TESDA', "College (Bachelor's)",] as $opt)
+                        <option value="{{ $opt }}" {{ old('educational_attainment', $employee->educational_attainment ?? '') === $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                    @endforeach
+                </select>
+                <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </div>
             @error('educational_attainment')
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
@@ -167,7 +175,7 @@
             </label>
             <div class="flex items-stretch border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all duration-150 focus-within:border-red-400 dark:focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/10">
                 <span class="flex items-center px-3 bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-sm border-r border-gray-200 dark:border-gray-600 whitespace-nowrap font-mono">+63</span>
-                <input type="text" name="phone" id="phone" value="{{ old('phone', $employee->phone ?? '') }}" required placeholder="9123456789"
+                <input type="text" name="phone" id="phone" value="{{ preg_replace('/^(?:\+63|0)/', '', old('phone', $employee->phone ?? '')) }}" required placeholder="9123456789" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"
                     class="flex-1 border-none! rounded-none! shadow-none! focus:ring-0! px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('phone') ? 'border-red-500 dark:border-red-400!' : '' }}">
             </div>
             @error('phone')
@@ -188,17 +196,17 @@
 
     {{-- Section: Address --}}
     <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Address</div>
-    <div>
-        <label for="address_street" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
-            Street <span class="text-red-500 dark:text-red-400">*</span>
-        </label>
-        <input type="text" name="address_street" id="address_street" value="{{ old('address_street', $employee->address_street ?? '') }}" required
-            class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('address_street') ? 'border-red-500 dark:border-red-400!' : '' }}">
-        @error('address_street')
-            <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
-        @enderror
-    </div>
-    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-4">
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg">
+        <div>
+            <label for="address_street" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Street <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input type="text" name="address_street" id="address_street" value="{{ old('address_street', $employee->address_street ?? '') }}" required
+                class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('address_street') ? 'border-red-500 dark:border-red-400!' : '' }}">
+            @error('address_street')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
         <div>
             <label for="address_barangay" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 Barangay <span class="text-red-500 dark:text-red-400">*</span>
@@ -209,6 +217,9 @@
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
         </div>
+    </div>
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg: mt-4">
+        
         <div>
             <label for="address_city" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 City / Municipality <span class="text-red-500 dark:text-red-400">*</span>

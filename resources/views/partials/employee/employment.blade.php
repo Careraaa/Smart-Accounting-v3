@@ -49,11 +49,6 @@
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
         </div>
-    </div>
-
-    {{-- Section: Status --}}
-    <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Employment Status</div>
-    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <div>
             <label for="status" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 Status <span class="text-red-500 dark:text-red-400">*</span>
