@@ -972,14 +972,17 @@
             $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
             $payroll->setAttribute('per_day_rate', $computed['dailyRate']);
             $payroll->setAttribute('hourly_rate', $computed['hourlyRate']);
+            $payroll->setAttribute('overtime_pay', $computed['otPay']);
             $payroll->setAttribute('holiday_pay', $computed['holidayPay']);
             $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay']);
             $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours']);
             $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
 
+            $overtimeHours = $computed['otHours'];
+
             $this->logActivity('viewed', "Payroll #{$payroll->id}", request()->url(), 'payroll', $payroll->id);
 
-            return view('hr.payroll.salary-computation.show', compact('payroll', 'overtimeUndertimeBreakdown'));
+            return view('hr.payroll.salary-computation.show', compact('payroll', 'overtimeUndertimeBreakdown', 'overtimeHours'));
         }
 
         public function edit(Payroll $payroll)
@@ -1123,7 +1126,11 @@
             $totalDeductions = $computed['totalDeductions'] + $loanTotal;
             $payroll->setAttribute('total_deductions', $totalDeductions);
             $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
-            $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
+            $holidayBreakdown = array_map(fn($hb) => [
+                'label'  => $this->payrollService->buildHolidayLabel($hb),
+                'amount' => round($hb['amount'], 2),
+            ], $computed['holidayBreakdown'] ?? []);
+            $payroll->setAttribute('holiday_breakdown', $holidayBreakdown);
 
             return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
         }

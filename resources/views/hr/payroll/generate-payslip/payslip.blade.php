@@ -378,7 +378,7 @@
                             <tbody>
                                 <tr>
                                     <td>Basic Pay</td>
-                                    <td class="mono right">{{ ($payroll->days_worked ?? 0) * 8 }}</td>
+                                    <td class="mono right">{{ number_format(($payroll->days_worked ?? 0) * 8, 2) }}</td>
                                     <td class="mono">₱{{ number_format($payroll->basic_salary, 2) }}</td>
                                 </tr>
 
@@ -394,7 +394,7 @@
                                 @if ($holidayOTPay > 0)
                                     <tr>
                                         <td>Holiday Overtime Pay</td>
-                                        <td class="mono right">{{ $holidayOTHours }}</td>
+                                        <td class="mono right">{{ number_format($holidayOTHours, 2) }}</td>
                                         <td class="mono">₱{{ number_format($holidayOTPay, 2) }}</td>
                                     </tr>
                                 @endif

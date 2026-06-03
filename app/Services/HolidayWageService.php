@@ -256,7 +256,7 @@ class HolidayWageService
             ];
         }
 
-        $overtimeHours = max(0.0, $hoursWorked - 8);
+        $overtimeHours = round(max(0.0, $hoursWorked - 8) * 2) / 2;
 
         // ============================================================
         // REST DAY + REGULAR HOLIDAY
@@ -363,7 +363,7 @@ class HolidayWageService
             ];
         }
 
-        $overtimeHours = max(0.0, $hoursWorked - 8);
+        $overtimeHours = round(max(0.0, $hoursWorked - 8) * 2) / 2;
 
         // ============================================================
         // REST DAY + SPECIAL HOLIDAY
@@ -468,7 +468,7 @@ class HolidayWageService
             ];
         }
 
-        $overtimeHours = max(0.0, $hoursWorked - 8);
+        $overtimeHours = round(max(0.0, $hoursWorked - 8) * 2) / 2;
 
         // ============================================================
         // REST DAY + DOUBLE HOLIDAY

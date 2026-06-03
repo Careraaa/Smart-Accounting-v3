@@ -75,18 +75,22 @@
                     </a>
                 </div>
                 <div class="p-4">
-                    <div class="grid grid-cols-3 gap-2.5">
+                    <div class="grid grid-cols-2 gap-2.5">
                         <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
                             <p class="text-xs text-gray-400 font-medium">Days Worked</p>
                             <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5" id="ep_days_worked">{{ $payroll->days_worked ?? '—' }}</p>
                         </div>
                         <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
-                            <p class="text-xs text-gray-400 font-medium">Hours</p>
-                            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5" id="ep_hours_worked">{{ $payroll->hours_worked ?? '—' }}</p>
+                            <p class="text-xs text-gray-400 font-medium">Total Hours</p>
+                            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5" id="ep_hours_worked">{{ $payroll->hours_worked ? round($payroll->hours_worked * 2) / 2 : '—' }}</p>
                         </div>
                         <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
                             <p class="text-xs text-gray-400 font-medium">Absent</p>
                             <p class="text-lg font-extrabold text-red-500 tabular-nums mt-0.5" id="ep_days_absent">—</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
+                            <p class="text-xs text-gray-400 font-medium">Work Schedule</p>
+                            <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5">{{ ($payroll->user->work_days_per_week ?? 5) == 6 ? 'Mon - Sat' : 'Mon - Fri' }}</p>
                         </div>
                     </div>
                 </div>
@@ -346,7 +350,7 @@ window._ep = {
 
     function renderAttendance(c) {
         $('ep_days_worked').textContent  = c.daysWorked  ?? '\u2014';
-        $('ep_hours_worked').textContent = c.hoursWorked ?? '\u2014';
+        $('ep_hours_worked').textContent = c.hoursWorked ? (Math.round(c.hoursWorked * 2) / 2) : '\u2014';
         $('ep_days_absent').textContent  = c.daysAbsent  ?? '\u2014';
     }
 

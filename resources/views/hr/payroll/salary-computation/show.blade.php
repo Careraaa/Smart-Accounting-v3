@@ -51,7 +51,6 @@
             default => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
         };
         $overtimePay = (float)($payroll->overtime_pay ?? 0);
-        $overtimeHours = (float)($payroll->allowances->where('allowance_type', 'like', 'Overtime Pay%')->sum('hours') ?? 0);
         $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
         $leavePayTotal = (float)($leavePayAllowances->sum('amount') ?? 0);
         $leavePayDays = (int) $leavePayAllowances->sum('hours');
@@ -103,10 +102,6 @@
                     </div>
                     <div><p class="text-sm font-bold text-gray-900">Attendance</p><p class="text-xs text-gray-400">From records</p></div>
                 </div>
-                <a href="{{ route('attendance.employee.calendar', $payroll->user_id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-xs font-semibold transition-all hover:bg-amber-100 active:scale-[0.97] shrink-0">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/></svg>
-                    Record
-                </a>
             </div>
             <div class="p-4">
                 <div class="grid grid-cols-2 gap-2.5">
@@ -115,8 +110,8 @@
                         <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5">{{ $payroll->days_worked ?? '—' }}</p>
                     </div>
                     <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
-                        <p class="text-xs text-gray-400 font-medium">Hours</p>
-                        <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5">{{ $payroll->hours_worked ?? '—' }}</p>
+                        <p class="text-xs text-gray-400 font-medium">Total Hours</p>
+                        <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5">{{ $payroll->hours_worked ? round($payroll->hours_worked * 2) / 2 : '—' }}</p>
                     </div>
                     <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
                         <p class="text-xs text-gray-400 font-medium">Absent</p>
@@ -149,9 +144,8 @@
                     @foreach($holidayBreakdown as $hb)
                     @php
                         $_hbType = match($hb['type'] ?? '') { 'regular' => 'Regular', 'special' => 'Special', 'double' => 'Double', default => ucfirst($hb['type'] ?? '') };
-                        $_hbRest = !empty($hb['is_rest_day']) ? ', rest day' : '';
-                        $_hbWorked = empty($hb['is_worked']) ? (($hb['type'] === 'regular' || $hb['type'] === 'double') ? 'unworked — statutory entitlement' : 'not worked') : 'worked';
-                        $_hbLabel = 'Holiday Pay — ' . ($hb['holiday'] ?? 'Holiday') . ' (' . $_hbType . $_hbRest . ', ' . $_hbWorked . ')';
+                        $_hbWorked = !empty($hb['is_worked']) ? 'worked' : 'unworked';
+                        $_hbLabel = '(' . $_hbType . ') Holiday Pay - ' . $_hbWorked;
                     @endphp
                     <div class="flex items-center justify-between py-2.5">
                         <span class="text-sm text-emerald-600 flex items-center gap-1.5">
