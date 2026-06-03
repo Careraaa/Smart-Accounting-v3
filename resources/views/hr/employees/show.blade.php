@@ -291,6 +291,10 @@
                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-0.5 font-mono">₱{{ number_format($employee->salary_rate, 2) }}</div>
                     </div>
                     <div>
+                        <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Work Schedule</span>
+                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-0.5">{{ ($employee->work_days_per_week ?? 5) == 6 ? 'Mon - Sat' : 'Mon - Fri' }}</div>
+                    </div>
+                    <div>
                         <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Driver's License</span>
                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-0.5 font-mono">{{ $employee->driver_license_number ?? '—' }}</div>
                     </div>

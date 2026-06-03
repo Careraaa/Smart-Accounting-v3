@@ -157,7 +157,7 @@ class HrReportController extends Controller
                     ->where('max_salary', '>=', $monthlyEquivalent)
                     ->first();
                 if ($sssRecord) {
-                    $empSssShare = $sssRecord->employer_share ?? 0;
+                    $empSssShare = round(($sssRecord->employer_share ?? 0) / 2, 2);
                 }
             }
             
@@ -171,9 +171,10 @@ class HrReportController extends Controller
                 if ($pagibigRecord) {
                     // Use percentage if available, otherwise use fixed share
                     if ($pagibigRecord->percentage_employer) {
-                        $empPagibigShare = $monthlyEquivalent * ($pagibigRecord->percentage_employer / 100);
+                        $monthlyEr = $monthlyEquivalent * ($pagibigRecord->percentage_employer / 100);
+                        $empPagibigShare = round(min($monthlyEr, 200.0) / 2, 2);
                     } else {
-                        $empPagibigShare = $pagibigRecord->employer_share ?? 0;
+                        $empPagibigShare = round(($pagibigRecord->employer_share ?? 0) / 2, 2);
                     }
                 }
             }
@@ -188,9 +189,10 @@ class HrReportController extends Controller
                 if ($philhealthRecord) {
                     // Use fixed share if available, otherwise use percentage
                     if ($philhealthRecord->employer_share) {
-                        $empPhilhealthShare = $philhealthRecord->employer_share;
+                        $empPhilhealthShare = round($philhealthRecord->employer_share / 2, 2);
                     } else if ($philhealthRecord->percentage_employer) {
-                        $empPhilhealthShare = $monthlyEquivalent * ($philhealthRecord->percentage_employer / 100);
+                        $monthlyEr = $monthlyEquivalent * ($philhealthRecord->percentage_employer / 100);
+                        $empPhilhealthShare = round(min($monthlyEr, 2500.0) / 2, 2);
                     }
                 }
             }
@@ -285,7 +287,7 @@ class HrReportController extends Controller
                     ->where('max_salary', '>=', $monthlyEquivalent)
                     ->first();
                 if ($sssRecord) {
-                    $empSssShare = $sssRecord->employer_share ?? 0;
+                    $empSssShare = round(($sssRecord->employer_share ?? 0) / 2, 2);
                 }
             }
             
@@ -299,9 +301,10 @@ class HrReportController extends Controller
                 if ($pagibigRecord) {
                     // Use percentage if available, otherwise use fixed share
                     if ($pagibigRecord->percentage_employer) {
-                        $empPagibigShare = $monthlyEquivalent * ($pagibigRecord->percentage_employer / 100);
+                        $monthlyEr = $monthlyEquivalent * ($pagibigRecord->percentage_employer / 100);
+                        $empPagibigShare = round(min($monthlyEr, 200.0) / 2, 2);
                     } else {
-                        $empPagibigShare = $pagibigRecord->employer_share ?? 0;
+                        $empPagibigShare = round(($pagibigRecord->employer_share ?? 0) / 2, 2);
                     }
                 }
             }
@@ -316,9 +319,10 @@ class HrReportController extends Controller
                 if ($philhealthRecord) {
                     // Use fixed share if available, otherwise use percentage
                     if ($philhealthRecord->employer_share) {
-                        $empPhilhealthShare = $philhealthRecord->employer_share;
+                        $empPhilhealthShare = round($philhealthRecord->employer_share / 2, 2);
                     } else if ($philhealthRecord->percentage_employer) {
-                        $empPhilhealthShare = $monthlyEquivalent * ($philhealthRecord->percentage_employer / 100);
+                        $monthlyEr = $monthlyEquivalent * ($philhealthRecord->percentage_employer / 100);
+                        $empPhilhealthShare = round(min($monthlyEr, 2500.0) / 2, 2);
                     }
                 }
             }

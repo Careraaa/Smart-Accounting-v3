@@ -96,14 +96,20 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {{-- Attendance card --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden stat-card">
-            <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    </div>
+                    <div><p class="text-sm font-bold text-gray-900">Attendance</p><p class="text-xs text-gray-400">From records</p></div>
                 </div>
-                <div><p class="text-sm font-bold text-gray-900">Attendance</p><p class="text-xs text-gray-400">From records</p></div>
+                <a href="{{ route('attendance.employee.calendar', $payroll->user_id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-xs font-semibold transition-all hover:bg-amber-100 active:scale-[0.97] shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5"/></svg>
+                    Record
+                </a>
             </div>
             <div class="p-4">
-                <div class="grid grid-cols-3 gap-2.5">
+                <div class="grid grid-cols-2 gap-2.5">
                     <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
                         <p class="text-xs text-gray-400 font-medium">Days Worked</p>
                         <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5">{{ $payroll->days_worked ?? '—' }}</p>
@@ -115,6 +121,10 @@
                     <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
                         <p class="text-xs text-gray-400 font-medium">Absent</p>
                         <p class="text-lg font-extrabold text-red-500 tabular-nums mt-0.5">{{ \App\Models\Attendance::where('user_id', $payroll->user_id)->whereBetween('date', [$payroll->payroll_period_start, $payroll->payroll_period_end])->where('status', 'absent')->count() }}</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl px-3 py-2.5 text-center">
+                        <p class="text-xs text-gray-400 font-medium">Work Schedule</p>
+                        <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-0.5">{{ ($payroll->user->work_days_per_week ?? 5) == 6 ? 'Mon - Sat' : 'Mon - Fri' }}</p>
                     </div>
                 </div>
             </div>
