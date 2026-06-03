@@ -412,13 +412,6 @@
                         </a>
                     </li>
 
-                    <li class="sidebar-item">
-                        <a href="{{ route('employee.salary-loans.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.salary-loans.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-briefcase" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Salary Loans</span>
-                        </a>
-                    </li>
-
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Time Off</label></li>
 
                     <li class="sidebar-item">
@@ -536,13 +529,6 @@
                         </a>
                     </li>
 
-                    <li class="sidebar-item">
-                        <a href="{{ route('employee.salary-loans.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.salary-loans.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-briefcase" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Salary Loans</span>
-                        </a>
-                    </li>
-
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Time Off</label></li>
 
                     <li class="sidebar-item">
@@ -584,13 +570,6 @@
                         <a href="{{ route('employee.cash-advances.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.cash-advances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center text-emerald-500"><i class="feather-credit-card" style="font-size:18px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Cash Advances</span>
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item">
-                        <a href="{{ route('employee.salary-loans.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.salary-loans.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-briefcase" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Salary Loans</span>
                         </a>
                     </li>
 
@@ -671,13 +650,6 @@
                         <a href="{{ route('employee.cash-advances.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.cash-advances.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center text-emerald-500"><i class="feather-credit-card" style="font-size:18px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Cash Advances</span>
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item">
-                        <a href="{{ route('employee.salary-loans.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.salary-loans.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-briefcase" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Salary Loans</span>
                         </a>
                     </li>
 

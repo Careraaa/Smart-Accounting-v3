@@ -30,25 +30,18 @@ class PayrollReceivablesController extends Controller
         $caApprovedCount   = CashAdvance::where('status', 'approved')->count();
         $caReleasedTotal   = CashAdvance::where('status', 'released')->sum('amount') ?? 0;
 
-        $loanPendingCount   = SalaryLoan::where('status', 'pending')->count();
-        $loanApprovedCount  = SalaryLoan::where('status', 'approved')->count();
-        $loanReleasedTotal  = SalaryLoan::where('status', 'released')->sum('loan_amount') ?? 0;
-
         $totalCashAdvances = CashAdvance::count();
-        $totalSalaryLoans = SalaryLoan::count();
 
-        // Outstanding amount = approved and released remaining balances + approved and released cash advances
-        $approvedLoanRemaining = SalaryLoan::whereIn('status', ['approved', 'released'])->sum('remaining_balance') ?? 0;
-        $approvedCashNotReleased = CashAdvance::where('status', 'approved')->sum('amount') ?? 0;
-        $outstandingAmount = '₱' . number_format($approvedLoanRemaining + $approvedCashNotReleased, 2);
+        // Outstanding amount = approved + released cash advances only
+        $approvedAndReleasedCash = CashAdvance::whereIn('status', ['approved', 'released'])->sum('amount') ?? 0;
+        $outstandingAmount = '₱' . number_format($approvedAndReleasedCash, 2);
 
         $this->logActivity('viewed', 'Payroll receivables', request()->url(), 'payroll_receivable');
 
         return view('hr.payroll.receivables.index', compact(
             'tab', 'allCashAdvances', 'allSalaryLoans',
             'caPendingCount', 'caApprovedCount', 'caReleasedTotal',
-            'loanPendingCount', 'loanApprovedCount', 'loanReleasedTotal',
-            'totalCashAdvances', 'totalSalaryLoans', 'outstandingAmount'
+            'totalCashAdvances', 'outstandingAmount'
         ));
     }
 

@@ -165,21 +165,6 @@ $user = auth()->user();
                 <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </a>
 
-            {{-- Salary Loans --}}
-            <a href="{{ route('employee.salary-loans.index') }}" class="emp-scale-in rounded-xl bg-white px-5 py-3.5 shadow-sm border border-gray-100 flex items-center gap-3.5 no-underline transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] group" style="animation-delay:0.2s">
-                <div class="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-gray-900">Salary Loans</span>
-                        @if($activeLoans > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $activeLoans }}</span>
-                        @endif
-                    </div>
-                    <div class="text-[10px] text-gray-400 mt-0.5">?{{ number_format($totalLoanRemaining, 0) }} remaining</div>
-                </div>
-                <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </a>
         </div>
 

@@ -38,11 +38,11 @@ class LeaveController extends Controller
         $approvedLeaves = Leave::where('user_id', $userId)->where('status', 'approved')->count();
         $rejectedLeaves = Leave::where('user_id', $userId)->where('status', 'rejected')->count();
 
-        // Get leave balances for current year
-        $balances = EmployeeLeaveBalance::where('user_id', $userId)
-            ->where('year', now()->year)
-            ->with('leaveType')
-            ->get();
+        // Ensure current-year leave balances exist for all active leave types
+        $activeLeaveTypes = LeaveType::where('status', 'active')->get();
+        $balances = $activeLeaveTypes->map(function ($leaveType) use ($userId) {
+            return EmployeeLeaveBalance::getBalance($userId, $leaveType->id);
+        })->load('leaveType');
 
         $this->logActivity('viewed', 'Leave', request()->url());
 

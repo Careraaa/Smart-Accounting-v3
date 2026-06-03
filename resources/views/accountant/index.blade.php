@@ -44,7 +44,7 @@
 
 @section('content')
 @php
-$totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvancesCount + $pendingSalaryLoansCount;
+$totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvancesCount;
 @endphp
 
 
@@ -89,15 +89,6 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                     <span class="text-[10px] font-semibold text-gray-700 group-hover:text-blue-700 transition-colors text-center">Cash Advances</span>
                     @if($pendingCashAdvancesCount > 0)
                         <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-blue-100 text-blue-700 text-[0.45rem] font-bold">{{ $pendingCashAdvancesCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('payroll.receivables.index', ['tab' => 'salary_loans']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors text-center">Salary Loans</span>
-                    @if($pendingSalaryLoansCount > 0)
-                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-amber-100 text-amber-700 text-[0.45rem] font-bold">{{ $pendingSalaryLoansCount }}</span>
                     @endif
                 </a>
             </div>
@@ -147,20 +138,6 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 </div>
                 <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
                     <span>{{ number_format($deductionPercentage, 1) }}% of A+D</span>
-                </div>
-            </div>
-            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-purple-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.2s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Outstanding Loans</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.3s">₱{{ number_format($totalOutstandingLoans, 0) }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>{{ $activeSalaryLoans }} active loans</span>
                 </div>
             </div>
             <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
