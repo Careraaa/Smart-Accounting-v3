@@ -12,24 +12,163 @@
         @php
             $user = auth()->user();
             $name = $user->first_name ?? $user->name ?? 'User';
-            $greetings = [
-                "Welcome back, $name. The dashboard is ready when you are.",
-                "Good to see you, $name. Let's see what today has in store.",
-                "Morning, $name. Your tasks arrived before you did.",
-                "Welcome back, $name. The system has been expecting you.",
-                "Hey, $name. Another day, another opportunity to click things professionally.",
-                "Glad you're here, $name. Let's keep things moving.",
-                "Hi, $name. Status: Logged in. Everything else is optional. (Mostly.)",
-                "Welcome back, $name. One login closer to payday.",
-                "Good morning, $name. Coffee first, dashboard second—we won't judge.",
-                "Hello, $name. The dashboard behaved itself while you were away.",
-                "Welcome back, $name. Your attendance has noticed.",
-                "Hey, $name. Ready for whatever today decides to be?",
-                "Good to have you back, $name. Let's make the checklist a little shorter.",
-                "Welcome, $name. Another chapter, same protagonist.",
-                "Hi, $name. Your workspace is ready and waiting.",
+            $role = $user->role;
+
+            $roleGreetings = [
+                'superadmin' => [
+                    "Welcome back, $name. The entire system is ready for your command.",
+                    "Good to see you, $name. Another day of keeping everything running smoothly.",
+                    "The dashboard is looking sharp today, $name.",
+                    "Welcome back, $name. Every great system starts with great leadership.",
+                    "Hello, $name. Your control center is standing by.",
+                    "A successful organization begins with good decisions. Ready for today's, $name?",
+                    "Good day, $name. The team's progress starts here.",
+                    "Welcome, $name. Time to turn plans into results.",
+                    "Your kingdom awaits, $name. Rule wisely.",
+                    "Hello, $name. The gears are turning and the system is ready.",
+                    "Another opportunity to make an impact, $name. Let's get started.",
+                    "Welcome back, $name. Excellence is built one decision at a time.",
+                    "Good day, $name. The dashboard has been expecting you.",
+                    "Your mission control is online, $name.",
+                    "Great leaders inspire progress. Welcome back, $name.",
+                ],
+                'hr' => [
+                    "Welcome back, $name. People are the heart of every organization.",
+                    "Good day, $name. Time to help the team thrive.",
+                    "Hello, $name. Every employee story matters.",
+                    "Welcome back, $name. Building a better workplace starts with you.",
+                    "Great workplaces don't happen by accident. Thanks for being part of it, $name.",
+                    "Good to see you, $name. Your team is counting on your support.",
+                    "Welcome, $name. Another day to make work a little better for everyone.",
+                    "Hello, $name. Behind every successful company is a dedicated HR team.",
+                    "Good day, $name. Let's create positive experiences today.",
+                    "Welcome back, $name. Helping people succeed is a powerful mission.",
+                    "Your HR dashboard is ready, $name.",
+                    "Great culture starts with small actions. Welcome back, $name.",
+                    "Hello, $name. Every great team needs someone looking out for them.",
+                    "Welcome, $name. Let's keep the workplace organized and supported.",
+                    "Another day to empower employees, $name.",
+                ],
+                'accountant' => [
+                    "Welcome back, $name. Every number tells a story.",
+                    "Good day, $name. Let's keep the books balanced and the future bright.",
+                    "Hello, $name. Precision is your superpower.",
+                    "Welcome back, $name. Today's numbers are waiting.",
+                    "Good to see you, $name. Accuracy makes all the difference.",
+                    "Welcome, $name. Turning figures into insights, one entry at a time.",
+                    "Hello, $name. Financial clarity starts here.",
+                    "Another productive day ahead, $name. Let's make every cent count.",
+                    "Good day, $name. Balance sheets and opportunities await.",
+                    "Welcome back, $name. Behind every strong business is solid accounting.",
+                    "Your financial dashboard is ready, $name.",
+                    "Hello, $name. Small details create big results.",
+                    "Welcome, $name. Time to bring order to the numbers.",
+                    "Every transaction matters. Welcome back, $name.",
+                    "Good day, $name. Let's keep everything adding up.",
+                ],
+                'remittance_clerk' => [
+                    "Welcome back, $name. Keeping transactions moving smoothly today.",
+                    "Good day, $name. Every accurate remittance builds trust.",
+                    "Hello, $name. Ready to keep things flowing efficiently?",
+                    "Welcome, $name. Precision and reliability start here.",
+                    "Good to see you, $name. Another day of helping operations run smoothly.",
+                    "Welcome back, $name. Every successful transfer begins with careful work.",
+                    "Hello, $name. Your dashboard is ready for today's transactions.",
+                    "Good day, $name. Accuracy is the key to every successful remittance.",
+                    "Welcome, $name. Making financial processes seamless, one task at a time.",
+                    "Another productive day ahead, $name.",
+                    "Welcome back, $name. Consistency creates confidence.",
+                    "Hello, $name. Small details make a big difference.",
+                    "Good day, $name. Your work helps keep everything connected.",
+                    "Welcome, $name. Efficiency looks good on you.",
+                    "Every completed task helps someone. Welcome back, $name.",
+                ],
+                'employee' => [
+                    "Welcome back, $name. Hope you're having a great day.",
+                    "Good day, $name. Let's make today productive and rewarding.",
+                    "Hello, $name. Your dashboard is ready when you are.",
+                    "Welcome back, $name. Every contribution matters.",
+                    "Good to see you, $name. You're an important part of the team.",
+                    "Welcome, $name. Small steps lead to big achievements.",
+                    "Hello, $name. Another opportunity to do great work today.",
+                    "Good day, $name. Wishing you a smooth and successful day.",
+                    "Welcome back, $name. Progress begins with showing up.",
+                    "Hello, $name. Let's accomplish something great today.",
+                    "Your workspace is ready, $name.",
+                    "Good day, $name. Every task completed is a step forward.",
+                    "Welcome, $name. Success is built one day at a time.",
+                    "Thanks for being part of the team, $name.",
+                    "Welcome back, $name. Today is full of possibilities.",
+                ],
+                'qr_admin' => [
+                    "Welcome back, $name. The QR gates are ready for action.",
+                    "Good day, $name. Attendance scanning is primed and waiting.",
+                    "Hello, $name. Your QR command center is online.",
+                    "Welcome back, $name. Ready to scan the day away.",
+                    "Good to see you, $name. Every scan tells a story.",
+                    "Welcome, $name. The QR codes have been expecting you.",
+                    "Hello, $name. No lines, no delays — just smooth scanning.",
+                    "Good day, $name. Another day of seamless attendance tracking.",
+                    "Welcome back, $name. Your scanner is calibrated and ready.",
+                    "The attendance zone is clear. Ready when you are, $name.",
+                    "Welcome, $name. Making check-ins effortless, one scan at a time.",
+                    "Hello, $name. Your QR dashboard is looking crisp today.",
+                    "Good day, $name. Let's keep those attendance records flawless.",
+                    "Welcome back, $name. Scanning duty awaits.",
+                    "The system is green and ready. Over to you, $name.",
+                ],
             ];
-            $greeting = $greetings[array_rand($greetings)];
+
+            $rareGreetings = [
+                "Welcome back, $name. The coffee machine believes in you.",
+                "Good day, $name. Your keyboard has been patiently waiting.",
+                "Welcome, $name. No bugs were scheduled for today. Hopefully.",
+                "Hello, $name. The dashboard polished itself before you arrived.",
+                "Welcome back, $name. Achievement unlocked: Logged In.",
+                "Good day, $name. The system reports morale levels are stable.",
+                "Welcome, $name. May your loading screens be short and your tasks be easy.",
+                "Hello, $name. Another beautiful day to click buttons professionally.",
+                "Welcome back, $name. The server says hi.",
+                "Good day, $name. Your dashboard missed you. Probably.",
+                "Welcome back, $name. We checked the logs. You're definitely one of the users.",
+                "Hello, $name. The system has successfully located your account. Congratulations.",
+                "Welcome, $name. Today's productivity forecast: somewhere between \"not bad\" and \"legendary.\"",
+                "Good day, $name. The server survived the night. We're off to a strong start.",
+                "Welcome back, $name. No buttons were harmed during the previous session.",
+                "Hello, $name. Your dashboard has been pretending to work while you were away.",
+                "Welcome, $name. A wild workday appeared!",
+                "Good day, $name. The bugs have agreed to behave today. They signed nothing, though.",
+                "Welcome back, $name. Your password remains a mystery to us. As intended.",
+                "Hello, $name. The coffee isn't in the dashboard, but we checked anyway.",
+                "Welcome, $name. You have received +1 experience point for logging in.",
+                "Good day, $name. The system believes in you more than the printer does.",
+                "Welcome back, $name. If nobody told you today, your Caps Lock is probably off.",
+                "Hello, $name. Another day, another carefully organized collection of buttons.",
+                "Welcome, $name. The dashboard cleaned up before you arrived. You're welcome.",
+            ];
+
+            $legendaryGreetings = [
+                "\xf0\x9f\x8e\x89 LEGENDARY LOGIN DETECTED. Welcome, $name. The odds of seeing this message were lower than finding a bug-free project.",
+                "\xf0\x9f\x8f\x86 Congratulations, $name. You rolled the rare greeting. No prizes, only glory.",
+                "\xf0\x9f\x91\x91 The prophecy spoke of your arrival, $name. It was oddly specific.",
+                "\xe2\xad\x90 Rare Event Unlocked: $name has entered the dashboard.",
+                "\xf0\x9f\x8e\xb2 Critical Success! $name logged in and triggered a legendary message.",
+                "\xf0\x9f\x9a\x80 Welcome, $name. Statistically speaking, you're special today.",
+                "\xf0\x9f\xa6\x84 A mythical greeting appears. Hello, $name.",
+                "\xf0\x9f\x93\x9c Achievement Unlocked: Found the message nobody expected to see.",
+                "\xe2\x9a\xa1 System Status: Normal. Greeting Status: Extremely Rare.",
+                "\xf0\x9f\x8f\x85 Welcome, $name. This greeting is rarer than a perfectly formatted spreadsheet.",
+            ];
+
+            $roll = mt_rand(1, 1000);
+            if ($roll <= 1) {
+                $greeting = $legendaryGreetings[array_rand($legendaryGreetings)];
+            } elseif ($roll <= 6) {
+                $greeting = $rareGreetings[array_rand($rareGreetings)];
+            } else {
+                $pool = $roleGreetings[$role] ?? $roleGreetings['employee'];
+                $greeting = $pool[array_rand($pool)];
+            }
         @endphp
         <div class="flex-1 min-w-0 flex items-center h-full ml-2 sm:ml-4">
             <span id="typewriter" class="text-sm sm:text-base font-semibold text-gray-700 truncate"></span>
@@ -53,6 +192,55 @@
             <a href="javascript:void(0);" class="hidden sm:flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors" id="kt-fullscreen-btn">
                 <i class="feather-maximize" style="font-size:16px"></i>
             </a>
+
+            @if(auth()->user()->role === 'superadmin')
+            @php
+                $viewAs = session('view_as_role');
+                $viewLabel = $viewAs ? ucwords(str_replace('_', ' ', $viewAs)) : 'Super Admin';
+                $viewIcon = $viewAs ? 'feather-eye' : 'feather-shield';
+            @endphp
+            <div class="relative" data-dropdown>
+                <button class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors" id="view-switch-btn" type="button">
+                    <i class="{{ $viewIcon }}" style="font-size:14px"></i>
+                    <span class="hidden sm:inline">{{ $viewLabel }}</span>
+                    <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </button>
+                <div id="view-switch-dropdown" class="dropdown-closed sm:absolute sm:top-full sm:right-0 sm:mt-2 sm:w-44 sm:left-auto fixed top-16 right-4 left-4 w-auto bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50" data-dropdown-menu>
+                    <div class="py-1">
+                        <p class="px-4 py-2 text-[0.55rem] font-bold uppercase tracking-widest text-gray-400">Switch View</p>
+                        <form id="view-switch-form" method="POST" action="{{ route('superadmin.switch-view') }}">
+                            @csrf
+                            <input type="hidden" name="role" id="view-switch-role">
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="superadmin" onclick="document.getElementById('view-switch-role').value='superadmin'">
+                                <i class="feather-shield w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>Super Admin</span>
+                                @if(!$viewAs)<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="hr" onclick="document.getElementById('view-switch-role').value='hr'">
+                                <i class="feather-users w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>HR</span>
+                                @if($viewAs === 'hr')<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="employee" onclick="document.getElementById('view-switch-role').value='employee'">
+                                <i class="feather-user w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>Employee</span>
+                                @if($viewAs === 'employee')<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="accountant" onclick="document.getElementById('view-switch-role').value='accountant'">
+                                <i class="feather-bar-chart w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>Accountant</span>
+                                @if($viewAs === 'accountant')<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                            <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 no-underline transition-colors duration-100 hover:bg-gray-50 hover:text-gray-900 group" data-role="remittance_clerk" onclick="document.getElementById('view-switch-role').value='remittance_clerk'">
+                                <i class="feather-dollar-sign w-4 text-center text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+                                <span>Remittance Clerk</span>
+                                @if($viewAs === 'remittance_clerk')<span class="ml-auto text-[0.5rem] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded-full">Active</span>@endif
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             {{-- Notifications --}}
             @php
@@ -562,6 +750,15 @@
                 }
             });
         });
+
+        // View‑switch dropdown toggle
+        var viewSwitchBtn = document.getElementById('view-switch-btn');
+        if (viewSwitchBtn) {
+            viewSwitchBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleDropdown('view-switch-dropdown', viewSwitchBtn);
+            });
+        }
 
         // User dropdown toggle
         var userBtn = document.getElementById('user-dropdown-btn');

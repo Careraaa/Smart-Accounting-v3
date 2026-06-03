@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PinnedItemController;
+use App\Http\Controllers\QRLoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RemittanceClerk\DriverController;
 use App\Http\Controllers\RemittanceClerk\PAOController;
@@ -108,17 +109,19 @@ Route::get('/emergency/maintenance-off', function (Request $request) {
     ->withoutMiddleware([\App\Http\Middleware\AllowSuperAdminInMaintenance::class]);
 
 Route::get('/dashboard', function () {
-    if (auth()->user()->role === 'superadmin') {
+    $viewAs = session('view_as_role');
+    $role = $viewAs ?? auth()->user()->role;
+    if ($role === 'superadmin') {
         return redirect()->route('superadmin.dashboard');
-    } elseif (auth()->user()->role === 'remittance_clerk') {
+    } elseif ($role === 'remittance_clerk') {
         return redirect()->route('remittance-clerk.index');
-    } elseif (auth()->user()->role === 'accountant') {
+    } elseif ($role === 'accountant') {
         return redirect()->route('accountant.index');
-    } elseif (auth()->user()->role === 'hr') {
+    } elseif ($role === 'hr') {
         return redirect()->route('hr.index');
-    } elseif (auth()->user()->role === 'qr_admin') {
+    } elseif ($role === 'qr_admin') {
         return redirect()->route('admin.dashboard');
-    } elseif (auth()->user()->role === 'employee') {
+    } elseif ($role === 'employee') {
         return redirect()->route('employee.index');
     }
     return view('dashboard');
@@ -275,6 +278,10 @@ Route::middleware(['auth', 'check-status', 'role:employee,superadmin,remittance_
     // My Attendance Calendar
     Route::get('/my/attendance', [EmployeeAttendanceController::class, 'index'])->name('employee.attendance.index');
 });
+
+// ===== QR LOGIN (guest — scan from phone camera) =====
+Route::get('/attendance/login/{token}', [QRLoginController::class, 'showLoginForm'])->name('attendance.qr.login');
+Route::post('/attendance/login/{token}', [QRLoginController::class, 'login']);
 
 // ===== SHARED ATTENDANCE ROUTES (all authenticated users) =====
 Route::middleware(['auth'])->group(function () {
@@ -544,6 +551,14 @@ Route::middleware(['auth', 'check-status', 'role:superadmin'])->prefix('superadm
     Route::get('accounts/{account}/reset-password', [\App\Http\Controllers\SuperAdmin\AccountController::class, 'showResetPassword'])->name('accounts.reset-password');
     Route::post('accounts/{account}/reset-password', [\App\Http\Controllers\SuperAdmin\AccountController::class, 'performResetPassword'])->name('accounts.perform-reset-password');
     Route::post('accounts/{account}/toggle-status', [\App\Http\Controllers\SuperAdmin\AccountController::class, 'toggleStatus'])->name('accounts.toggle-status');
+    Route::post('switch-view', function (\Illuminate\Http\Request $request) {
+        $role = $request->input('role');
+        $allowed = ['superadmin', 'hr', 'employee', 'accountant', 'remittance_clerk'];
+        if (in_array($role, $allowed)) {
+            session(['view_as_role' => $role === 'superadmin' ? null : $role]);
+        }
+        return redirect()->route('dashboard');
+    })->name('switch-view');
 });
 
 // ===== CONFIGURATION ROUTES =====

@@ -53,7 +53,7 @@ $user = auth()->user();
     <div class="flex flex-col lg:flex-row gap-5 items-start">
 
         {{-- LEFT COLUMN --}}
-        <div class="flex-1 min-w-0 space-y-5">
+        <div class="flex-1 min-w-0 w-full space-y-5">
 
             {{-- Attendance Status bar --}}
             <div class="emp-fade-up rounded-xl bg-white px-5 py-4 shadow-sm border border-gray-100 flex items-center justify-between transition-all hover:shadow-md hover:-translate-y-0.5">

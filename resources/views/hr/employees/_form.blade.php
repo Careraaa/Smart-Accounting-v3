@@ -50,8 +50,8 @@
         @endif
 
         {{-- Tab Navigation --}}
-        <div class="bg-gray-50 dark:bg-gray-800/50 px-4 sm:px-6 overflow-x-auto tab-nav-scroll">
-            <div class="flex gap-1 min-w-max py-3" id="tabNav">
+        <div class="bg-gray-50 dark:bg-gray-800/50 px-4 sm:px-6 overflow-x-auto">
+            <div class="flex gap-0.5 py-3 w-max" id="tabNav">
                 @php
                     $tabColors = [
                         'personal'        => ['Personal Info',  '1', 'rose',    '#fff1f2', '#4c0519', '#f43f5e', '#fb7185'],
@@ -67,7 +67,7 @@
                 @endphp
                 @foreach($tabColors as $key => [$label, $num, $color, $hoverBg, $darkHoverBg, $hoverText, $darkHoverText])
                     <button type="button" data-tab="{{ $key }}" data-color="{{ $color }}"
-                        class="tab-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-t-xl rounded-b-none text-xs font-semibold whitespace-nowrap transition-all duration-150 border-b-2 border-transparent
+                        class="tab-btn inline-flex items-center gap-1.5 px-2 py-2 rounded-t-xl rounded-b-none text-xs font-semibold whitespace-nowrap transition-all duration-150 border-b-2 border-transparent
                             {{ $loop->first ? 'active text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-900/80' : 'text-gray-500 dark:text-gray-400' }}
                             active:scale-[0.96]"
                         style="--hover-bg: {{ $hoverBg }}; --dark-hover-bg: {{ $darkHoverBg }}; --hover-text: {{ $hoverText }}; --dark-hover-text: {{ $darkHoverText }};">

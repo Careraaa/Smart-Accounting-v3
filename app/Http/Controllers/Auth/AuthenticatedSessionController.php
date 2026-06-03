@@ -40,6 +40,9 @@ class AuthenticatedSessionController extends Controller
             'last_login_at' => now(),
         ]);
 
+        // Flash to trigger sidebar peek animation on first load after login
+        session()->flash('show_sidebar_peek', true);
+
         // Flash notification if user hasn't changed their generated password yet
         if ($user->password_changed === 0 || $user->password_changed === false) {
             session()->flash('info', 'Security reminder: you are using a temporary password. Please change it now in Account Settings.');

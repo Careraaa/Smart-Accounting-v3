@@ -138,6 +138,130 @@ class AttendanceController extends Controller
         return view('attendance.scan');
     }
 
+    public static function processQRAttendance(User $user, AttendanceToken $token): string
+    {
+        $today = today();
+        $currentTime = now();
+
+        $todayLogs = AttendanceLog::where('user_id', $user->id)
+            ->whereDate('logged_at', $today)
+            ->orderBy('logged_at')
+            ->get();
+
+        $isFirstScan = $todayLogs->isEmpty();
+        $type = $isFirstScan ? 'time_in' : 'time_out';
+
+        AttendanceLog::create([
+            'user_id' => $user->id,
+            'type' => $type,
+            'logged_at' => $currentTime,
+        ]);
+
+        $attendance = Attendance::firstOrNew(['user_id' => $user->id, 'date' => $today]);
+        $isManual = (bool) $attendance->is_manual;
+
+        if ($type === 'time_in') {
+            if (empty($attendance->time_in)) {
+                $attendance->time_in = $currentTime->format('H:i:s');
+                $attendance->status = $attendance->status ?? 'present';
+                $attendance->is_manual = false;
+                $attendance->save();
+            }
+        } else {
+            if ($isManual) {
+                if (empty($attendance->time_out)) {
+                    $attendance->time_out = $currentTime->format('H:i:s');
+                    $attendance->save();
+                }
+            } else {
+                $attendance->time_out = $currentTime->format('H:i:s');
+                $attendance->is_manual = false;
+                $attendance->save();
+            }
+        }
+
+        $token->update(['used' => true]);
+
+        try {
+            if ($user && $user->salary_rate) {
+                AttendanceNotification::attendanceRecorded($user, $type, $today);
+            }
+        } catch (\Throwable $e) {
+            logger()->warning('AttendanceNotification failed: ' . $e->getMessage());
+        }
+
+        // Auto OT/UT detection
+        try {
+            $userId = $user->id;
+            if ($attendance && $attendance->time_in && $attendance->time_out) {
+                $dateStr = $attendance->date->format('Y-m-d');
+                $employee = Employee::find($userId);
+                $shift = null;
+                if ($employee && isset($employee->shift_id) && $employee->shift_id) {
+                    $shift = Shift::find($employee->shift_id);
+                }
+                if (!$shift) {
+                    $shift = Shift::where('is_active', true)->first();
+                }
+                if ($shift) {
+                    $attendanceService = new AttendanceService();
+                    $otutResult = $attendanceService->calculateOvertimeAndUndertime($attendance, $shift);
+                    $overtimeHours = $otutResult['overtime_hours'];
+                    $undertimeHours = $otutResult['undertime_hours'];
+                    $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
+                    $hasApprovedRecord = OvertimeUndertime::where('user_id', $userId)
+                        ->where('date', $dateStr)
+                        ->whereIn('type', ['overtime', 'undertime'])
+                        ->where('status', 'approved')
+                        ->exists();
+                    if (!$hasApprovedRecord) {
+                        OvertimeUndertime::where('user_id', $userId)
+                            ->where('date', $dateStr)
+                            ->where('status', 'pending')
+                            ->delete();
+                        if ($overtimeHours > 0) {
+                            $otAmount = $overtimeHours * $hourlyRate * 1.25;
+                            OvertimeUndertime::create([
+                                'user_id' => $userId,
+                                'date' => $dateStr,
+                                'type' => 'overtime',
+                                'hours' => $overtimeHours,
+                                'reason' => "Auto-detected from QR scan (time out: " . Carbon::parse($dateStr . ' ' . $attendance->time_out)->format('g:i A') . ")",
+                                'status' => 'pending',
+                                'amount' => $otAmount,
+                                'hourly_rate_used' => $hourlyRate,
+                            ]);
+                            try {
+                                $otRecord = OvertimeUndertime::where('user_id', $userId)->where('date', $dateStr)->where('type', 'overtime')->latest()->first();
+                                if ($otRecord) { $otRecord->load('employee'); OvertimeNotification::submitted($otRecord); }
+                            } catch (\Throwable $e) { logger()->warning('OvertimeNotification failed: ' . $e->getMessage()); }
+                        } elseif ($undertimeHours > 0) {
+                            $utAmount = -($undertimeHours * $hourlyRate);
+                            OvertimeUndertime::create([
+                                'user_id' => $userId,
+                                'date' => $dateStr,
+                                'type' => 'undertime',
+                                'hours' => $undertimeHours,
+                                'reason' => "Auto-detected from QR scan (time in: " . Carbon::parse($dateStr . ' ' . $attendance->time_in)->format('g:i A') . ")",
+                                'status' => 'pending',
+                                'amount' => $utAmount,
+                                'hourly_rate_used' => $hourlyRate,
+                            ]);
+                            try {
+                                $utRecord = OvertimeUndertime::where('user_id', $userId)->where('date', $dateStr)->where('type', 'undertime')->latest()->first();
+                                if ($utRecord) { $utRecord->load('employee'); OvertimeNotification::submitted($utRecord); }
+                            } catch (\Throwable $e) { logger()->warning('OvertimeNotification failed: ' . $e->getMessage()); }
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            logger()->warning('QR OT/UT detection failed: ' . $e->getMessage());
+        }
+
+        return $type;
+    }
+
     public function submit(Request $request)
     {
         $request->validate(['token' => 'required']);
@@ -152,169 +276,7 @@ class AttendanceController extends Controller
             return response()->json(['message' => 'User not authenticated'], 401);
         }
 
-        // New QR scan rules:
-        // - First scan of the day for employee => time_in
-        // - All subsequent scans => time_out (always overwrite to keep the last scan)
-        // - If an existing attendance was created manually (`is_manual`), do not overwrite any non-null manual fields
-        $today = today();
-        $currentTime = now();
-
-        // Get today's logs to decide if this is the first scan
-        $todayLogs = AttendanceLog::where('user_id', $user->id)
-            ->whereDate('logged_at', $today)
-            ->orderBy('logged_at')
-            ->get();
-
-        $isFirstScan = $todayLogs->isEmpty();
-        $type = $isFirstScan ? 'time_in' : 'time_out';
-
-        // Create a log entry for the scan
-        AttendanceLog::create([
-            'user_id' => $user->id,
-            'type' => $type,
-            'logged_at' => $currentTime,
-        ]);
-
-        // Load or initialize today's attendance record
-        $attendance = Attendance::firstOrNew(['user_id' => $user->id, 'date' => $today]);
-
-        // Respect manual attendance entries: do not overwrite existing manual fields
-        $isManual = (bool) $attendance->is_manual;
-
-        if ($type === 'time_in') {
-            // Only set time_in if it doesn't already exist. Never overwrite a manual time_in.
-            if (empty($attendance->time_in)) {
-                $attendance->time_in = $currentTime->format('H:i:s');
-                $attendance->status = $attendance->status ?? 'present';
-                $attendance->is_manual = false;
-                $attendance->save();
-            }
-        } else {
-            // time_out: set/overwrite the time_out so the last scan is preserved,
-            // but do not overwrite an existing manual time_out.
-            if ($isManual) {
-                if (empty($attendance->time_out)) {
-                    $attendance->time_out = $currentTime->format('H:i:s');
-                    $attendance->save();
-                }
-            } else {
-                // If attendance is brand-new (no record), ensure a record exists with time_out
-                $attendance->time_out = $currentTime->format('H:i:s');
-                $attendance->is_manual = false;
-                $attendance->save();
-            }
-        }
-
-        $token->update(['used' => true]);
-
-        // Notification (safe)
-        try {
-            if ($user && $user->salary_rate) {
-                AttendanceNotification::attendanceRecorded($user, $type, $today);
-            }
-        } catch (\Throwable $e) {
-            logger()->warning('AttendanceNotification failed: ' . $e->getMessage());
-        }
-
-        // ── Auto OT/UT detection (run after QR scan) ────────────────────────
-        // Reuse same logic as manual `store()` to auto-detect OT/UT when both
-        // time_in and time_out are present for the day.
-        try {
-            $userId = $user->id;
-            if ($attendance && $attendance->time_in && $attendance->time_out) {
-                $dateStr = $attendance->date->format('Y-m-d');
-
-                // Get employee and shift
-                $employee = Employee::find($userId);
-                $shift = null;
-                if ($employee && isset($employee->shift_id) && $employee->shift_id) {
-                    $shift = Shift::find($employee->shift_id);
-                }
-                if (!$shift) {
-                    $shift = Shift::where('is_active', true)->first();
-                }
-
-                if ($shift) {
-                    $attendanceService = new AttendanceService();
-                    $otutResult = $attendanceService->calculateOvertimeAndUndertime($attendance, $shift);
-
-                    $overtimeHours = $otutResult['overtime_hours'];
-                    $undertimeHours = $otutResult['undertime_hours'];
-                    $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
-
-                    $hasApprovedRecord = OvertimeUndertime::where('user_id', $userId)
-                        ->where('date', $dateStr)
-                        ->whereIn('type', ['overtime', 'undertime'])
-                        ->where('status', 'approved')
-                        ->exists();
-
-                    if (!$hasApprovedRecord) {
-                        // Remove existing pending OT/UT for the day to avoid duplicates
-                        OvertimeUndertime::where('user_id', $userId)
-                            ->where('date', $dateStr)
-                            ->where('status', 'pending')
-                            ->delete();
-
-                        if ($overtimeHours > 0) {
-                            $otAmount = $overtimeHours * $hourlyRate * 1.25;
-                            OvertimeUndertime::create([
-                                'user_id' => $userId,
-                                'date' => $dateStr,
-                                'type' => 'overtime',
-                                'hours' => $overtimeHours,
-                                'reason' => "Auto-detected from QR scan (time out: " . Carbon::parse($dateStr . ' ' . $attendance->time_out)->format('g:i A') . ")",
-                                'status' => 'pending',
-                                'amount' => $otAmount,
-                                'hourly_rate_used' => $hourlyRate,
-                            ]);
-
-                            try {
-                                $otRecord = OvertimeUndertime::where('user_id', $userId)
-                                    ->where('date', $dateStr)
-                                    ->where('type', 'overtime')
-                                    ->latest()
-                                    ->first();
-                                if ($otRecord) {
-                                    $otRecord->load('employee');
-                                    OvertimeNotification::submitted($otRecord);
-                                }
-                            } catch (\Throwable $e) {
-                                logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
-                            }
-                        } elseif ($undertimeHours > 0) {
-                            $utAmount = -($undertimeHours * $hourlyRate);
-                            OvertimeUndertime::create([
-                                'user_id' => $userId,
-                                'date' => $dateStr,
-                                'type' => 'undertime',
-                                'hours' => $undertimeHours,
-                                'reason' => "Auto-detected from QR scan (time in: " . Carbon::parse($dateStr . ' ' . $attendance->time_in)->format('g:i A') . ")",
-                                'status' => 'pending',
-                                'amount' => $utAmount,
-                                'hourly_rate_used' => $hourlyRate,
-                            ]);
-
-                            try {
-                                $utRecord = OvertimeUndertime::where('user_id', $userId)
-                                    ->where('date', $dateStr)
-                                    ->where('type', 'undertime')
-                                    ->latest()
-                                    ->first();
-                                if ($utRecord) {
-                                    $utRecord->load('employee');
-                                    OvertimeNotification::submitted($utRecord);
-                                }
-                            } catch (\Throwable $e) {
-                                logger()->warning('OvertimeNotification failed: ' . $e->getMessage());
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            logger()->warning('QR OT/UT detection failed: ' . $e->getMessage());
-        }
-        // ─────────────────────────────────────────────────────────────────────
+        $type = self::processQRAttendance($user, $token);
 
         return response()->json([
             'message' => ucfirst(str_replace('_', ' ', $type)) . ' recorded',

@@ -2,159 +2,103 @@
 
 @section('content')
 
-{{-- ================================================================
-     QR ATTENDANCE MONITOR — Knights Transport Fleet System
-     Crimson theme | Minibus attendance terminal
-================================================================ --}}
+<div class="relative w-full h-full flex flex-col overflow-hidden select-none bg-[#f6f5f2]" id="qr-page">
 
-<div class="relative w-full h-full flex flex-col overflow-hidden select-none" id="qr-page">
-
-    {{-- ── Animated gradient background ── --}}
-    <div class="absolute inset-0" id="bg-layer" style="background: linear-gradient(135deg, #fef2f2 0%, #fff1f2 30%, #fef6f6 60%, #fafafa 100%);"></div>
-
-    {{-- ── Slow-drift blob orbs ── --}}
+    {{-- ── Single warm ambient field ── --}}
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="blob blob-a absolute w-[44rem] h-[44rem] rounded-full -top-40 -left-32"
-             style="background: radial-gradient(circle, rgba(244,63,94,0.11) 0%, transparent 65%);"></div>
-        <div class="blob blob-b absolute w-[36rem] h-[36rem] rounded-full -bottom-32 -right-20"
-             style="background: radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 65%);"></div>
-        <div class="blob blob-c absolute w-[28rem] h-[28rem] rounded-full top-1/3 right-1/4"
-             style="background: radial-gradient(circle, rgba(251,146,60,0.06) 0%, transparent 65%);"></div>
+        <div class="absolute w-[70vw] h-[70vw] rounded-full" style="top:-25%; left:-15%; background: radial-gradient(circle, rgba(180,160,130,0.08) 0%, transparent 60%); animation: lightDrift1 35s ease-in-out infinite;"></div>
+        <div class="absolute w-[50vw] h-[50vw] rounded-full" style="bottom:-20%; right:-10%; background: radial-gradient(circle, rgba(167,139,250,0.04) 0%, transparent 55%); animation: lightDrift2 30s ease-in-out infinite reverse;"></div>
     </div>
 
-    {{-- ── Subtle dot grid ── --}}
-    <div class="absolute inset-0 pointer-events-none" style="background-image: radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 1px); background-size: 32px 32px; mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);"></div>
-
-    {{-- ── Floating shapes ── --}}
-    <div class="absolute inset-0 overflow-hidden pointer-events-none" id="float-shapes">
-        <div class="float-shape absolute w-3 h-3 rounded-sm border-2 border-rose-300/40" style="top:12%; left:8%; animation: floatA 8s ease-in-out infinite;"></div>
-        <div class="float-shape absolute w-2 h-2 rounded-full bg-rose-300/30" style="top:25%; right:12%; animation: floatB 10s ease-in-out 1s infinite;"></div>
-        <div class="float-shape absolute w-4 h-4 rounded-full border border-red-300/30" style="bottom:30%; left:6%; animation: floatA 12s ease-in-out 2s infinite;"></div>
-        <div class="float-shape absolute w-2 h-2 rounded-sm bg-orange-300/25" style="bottom:20%; right:8%; animation: floatC 9s ease-in-out 0.5s infinite;"></div>
-        <div class="float-shape absolute w-1.5 h-1.5 rounded-full bg-rose-400/40" style="top:60%; left:14%; animation: floatB 7s ease-in-out 3s infinite;"></div>
-        <div class="float-shape absolute w-3 h-3 rounded border border-rose-200/50" style="top:70%; right:16%; animation: floatC 11s ease-in-out 1.5s infinite;"></div>
-        <div class="float-shape absolute w-2 h-2 rounded-full border border-red-200/40" style="top:40%; left:5%; animation: floatA 9s ease-in-out 4s infinite;"></div>
-        <div class="float-shape absolute w-1.5 h-1.5 bg-orange-200/50 rounded-full" style="top:15%; right:22%; animation: floatB 13s ease-in-out 2.5s infinite;"></div>
-    </div>
-
-    {{-- ─────────────────────────────────────────────────────────────
-         MAIN CONTENT
-    ───────────────────────────────────────────────────────────────── --}}
+    {{-- ── MAIN CONTENT ── --}}
     <div class="relative z-10 flex-1 flex flex-col items-center justify-center gap-6" id="main-content">
 
-        {{-- Headline --}}
-        <div class="text-center animate-title">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm mb-3">
-                <svg class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                </svg>
-                <span class="text-xs font-bold text-gray-500 tracking-widest uppercase">Scan to Log Attendance</span>
-            </div>
+        {{-- Clock --}}
+        <div class="animate-headline inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/70 border border-gray-200/50 shadow-sm">
+            <span class="relative flex w-2.5 h-2.5">
+                <span class="absolute inset-0 rounded-full bg-emerald-400" style="animation: pulseDot 1.2s ease-in-out infinite;"></span>
+                <span class="absolute inset-0 rounded-full bg-emerald-400/30" style="animation: rippleDot 2s ease-out infinite;"></span>
+            </span>
+            <span id="live-clock" class="text-xs font-mono font-semibold text-gray-500 tabular-nums tracking-wide"></span>
+            <span class="w-px h-3 bg-gray-200"></span>
+            <span class="text-[0.55rem] font-semibold text-gray-400 tracking-[0.2em] uppercase">Terminal</span>
         </div>
 
         {{-- ── QR Code Card ── --}}
-        <div class="relative animate-qr">
+        <div class="relative animate-qr" id="qr-card">
 
-            {{-- Outer glow ring --}}
-            <div class="absolute -inset-3 rounded-[2rem] opacity-60 glow-ring"
-                 style="background: conic-gradient(from 0deg, #f43f5e, #fb7185, #fda4af, #f43f5e); filter: blur(18px); z-index: 0;"></div>
+            <div class="relative bg-white rounded-2xl shadow-xl border border-gray-100/80" id="qr-card-inner"
+                 style="box-shadow: 0 8px 30px -6px rgba(0,0,0,0.04), 0 2px 8px -4px rgba(0,0,0,0.02);">
 
-            {{-- Rotating border --}}
-            <div class="absolute -inset-[2px] rounded-[26px] z-0 rotate-border"
-                 style="background: conic-gradient(from 0deg, #f43f5e 0%, #fda4af 25%, transparent 50%, #fb7185 75%, #f43f5e 100%); padding: 2px; border-radius: 26px;"></div>
+                <div class="relative rounded-2xl overflow-hidden bg-white p-5">
 
-            {{-- Card --}}
-            <div class="relative z-10 bg-white rounded-[24px] p-2 shadow-2xl shadow-rose-100/80" style="box-shadow: 0 32px 64px -12px rgba(244,63,94,0.18), 0 8px 24px -6px rgba(0,0,0,0.08);">
+                    {{-- Block overlay --}}
+                    <div id="block-overlay" class="hidden absolute inset-0 z-20 rounded-2xl bg-white"></div>
 
-                {{-- Inner QR frame --}}
-                <div class="relative rounded-[18px] overflow-hidden bg-gray-50" style="padding: 2px;">
-                    <div class="relative rounded-[17px] overflow-hidden bg-white">
-
-                        {{-- Block overlay --}}
-                        <div id="block-overlay" class="hidden absolute inset-0 z-20 rounded-[17px] bg-white"></div>
-
-                        {{-- Sweep overlay --}}
-                        <div id="sweep-overlay" class="absolute inset-0 z-20 rounded-[17px] pointer-events-none opacity-0"
-                             style="background: radial-gradient(circle at center, rgba(225,29,72,0.92) 0%, rgba(244,63,94,0.75) 40%, rgba(251,113,133,0.4) 100%);"></div>
-
-                        {{-- QR inner --}}
-                        <div id="qr-inner" class="p-4 relative">
-                            {{-- Scan line --}}
-                            <div id="scan-line" class="absolute left-6 right-6 h-0.5 z-10 pointer-events-none"
-                                 style="background: linear-gradient(90deg, transparent, #f43f5e, #fb7185, #f43f5e, transparent); border-radius: 9999px; animation: scanLineLight 2.6s ease-in-out infinite; top: 50%;"></div>
-                            <div id="qrcode"></div>
+                    {{-- QR inner --}}
+                    <div id="qr-inner" class="relative">
+                        {{-- Scan line --}}
+                        <div id="scan-line" class="absolute left-12 right-12 h-px z-10 pointer-events-none"
+                             style="background: linear-gradient(90deg, transparent, rgba(100,100,100,0.25), rgba(120,120,120,0.3), rgba(100,100,100,0.25), transparent); animation: scanLine 2.5s ease-in-out infinite; top: 48%;"></div>
+                        {{-- Loading shimmer (shown during refresh) --}}
+                        <div id="qr-loading" class="hidden absolute inset-0 z-15 flex flex-col items-center justify-center gap-4 rounded-2xl bg-white/85 backdrop-blur-[2px]">
+                            <div class="flex items-center gap-2.5">
+                                <span class="block w-2.5 h-2.5 rounded-full bg-gray-400 shadow-[0_0_8px_rgba(0,0,0,0.08)]" style="animation: loadDot 0.9s ease-in-out infinite;"></span>
+                                <span class="block w-2.5 h-2.5 rounded-full bg-gray-400 shadow-[0_0_8px_rgba(0,0,0,0.08)]" style="animation: loadDot 0.9s ease-in-out 0.15s infinite;"></span>
+                                <span class="block w-2.5 h-2.5 rounded-full bg-gray-400 shadow-[0_0_8px_rgba(0,0,0,0.08)]" style="animation: loadDot 0.9s ease-in-out 0.3s infinite;"></span>
+                            </div>
+                            <span class="text-[0.55rem] font-bold text-gray-400 tracking-widest uppercase">Refreshing</span>
                         </div>
+                        <div id="qrcode" class="relative"></div>
+                    </div>
 
-                        {{-- Success overlay --}}
-                        <div id="scan-success" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 rounded-[17px]"
-                             style="background: linear-gradient(135deg, rgba(225,29,72,0.95), rgba(244,63,94,0.9));">
-                            <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm shadow-lg">
-                                <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    {{-- Success overlay --}}
+                    <div id="scan-success" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center gap-5 rounded-2xl bg-[#e74c3c]"
+                         style="clip-path: circle(0% at 50% 50%);">
+                        <div class="flex flex-col items-center justify-center gap-4" style="opacity: 0; transform: scale(0.88);">
+                            <div class="w-28 h-28 rounded-full bg-white/20 flex items-center justify-center shadow-xl">
+                                <svg class="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path id="check-path" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                 </svg>
                             </div>
                             <div class="text-center">
-                                <p class="text-sm font-extrabold text-white tracking-wide">Attendance Recorded!</p>
-                                <p class="text-[0.62rem] text-white/70 mt-1 tracking-wide">Generating new code…</p>
+                                <p class="text-xl font-bold text-white tracking-tight">Attendance Recorded</p>
+                                <p class="text-[0.7rem] text-white/60 mt-1">Generating new code…</p>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {{-- Corner brackets inside card --}}
-                <div class="absolute inset-4 pointer-events-none z-10">
-                    <div class="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-rose-400 rounded-tl-md"></div>
-                    <div class="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-rose-400 rounded-tr-md"></div>
-                    <div class="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-rose-400 rounded-bl-md"></div>
-                    <div class="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-rose-400 rounded-br-md"></div>
                 </div>
             </div>
         </div>
 
         {{-- ── Token + Timer ── --}}
-        <div class="flex flex-col items-center gap-4 animate-token">
-
-            {{-- Token chip --}}
+        <div class="flex flex-col items-center gap-3 animate-token">
             <div class="flex flex-col items-center gap-1.5">
-                <div class="text-[0.55rem] font-bold uppercase tracking-[0.35em] text-gray-400">Manual Entry Token</div>
-                <div class="relative flex items-center gap-1">
-                    <div class="token-glow absolute inset-0 rounded-xl bg-rose-300/30 blur-md"></div>
-                    <div id="token-display"
-                         class="relative px-6 py-2.5 rounded-xl bg-white border border-gray-200 shadow-sm text-2xl font-mono font-bold tracking-[0.4em] text-gray-700 select-all tabular-nums"
-                         style="letter-spacing: 0.5em; min-width: 14rem; text-align: center;">——</div>
-                </div>
+                <span class="text-[0.55rem] font-semibold uppercase tracking-[0.3em] text-gray-400">Manual Entry Token</span>
+                <div id="token-display"
+                     class="px-8 py-4 rounded-xl bg-white/80 border border-gray-100/80 text-4xl font-black tracking-[0.5em] text-gray-600 select-all tabular-nums shadow-sm"
+                     style="min-width: 18rem; text-align: center; letter-spacing: 0.5em;">——</div>
             </div>
 
-            {{-- Timer bar --}}
-            <div class="flex items-center gap-3 w-56">
-                <div class="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+            <div class="flex items-center gap-3 w-60">
+                <div class="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden shadow-inner">
                     <div id="timer-bar" class="h-full rounded-full"
-                         style="width: 100%; background: linear-gradient(90deg, #e11d48, #f43f5e, #fb7185); transition: width 1s linear;"></div>
+                         style="width: 100%; transition: width 1s linear; background: linear-gradient(90deg, #6ee7b7, #34d399, #10b981);"></div>
                 </div>
-                <div id="timer-text" class="text-xs font-mono font-bold text-gray-400 tabular-nums w-7 text-center shrink-0">—</div>
+                <div id="timer-text" class="text-xs font-mono font-semibold text-gray-400 tabular-nums w-7 text-center shrink-0">—</div>
             </div>
         </div>
-
     </div>
 
-    {{-- ─────────────────────────────────────────────────────────────
-         BOTTOM BAR
-    ───────────────────────────────────────────────────────────────── --}}
-    <div class="relative z-10 flex items-center justify-between px-8 py-4">
-        <div class="flex items-center gap-2">
-            <div class="w-1.5 h-1.5 rounded-full bg-rose-400/60"></div>
-            <span class="text-[0.58rem] font-semibold text-gray-400 uppercase tracking-widest">Attendance Terminal</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="text-[0.58rem] font-mono text-gray-300">Auto-refresh: 60s</span>
-            <div class="w-px h-3 bg-gray-200"></div>
-            <span class="text-[0.58rem] font-mono text-gray-200">v2.0</span>
-        </div>
+    {{-- ── Bottom bar ── --}}
+    <div class="relative z-10 flex items-center justify-between px-8 py-3 animate-bottom">
+        <span class="text-[0.45rem] font-semibold text-gray-300 uppercase tracking-widest">Knights Transport</span>
+        <span class="text-[0.45rem] font-mono text-gray-300">60s refresh</span>
     </div>
 
 </div>
 
-{{-- ─────────────────────────────────────────────────────────────── --}}
+<audio id="qr-success-sound" src="{{ asset('sounds/qr-success.mp3') }}" preload="auto"></audio>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 (function () {
@@ -167,62 +111,78 @@
 
     const qrDiv    = document.getElementById('qrcode');
     const qrInner  = document.getElementById('qr-inner');
+    const qrCard   = document.getElementById('qr-card-inner');
+    const qrLoad   = document.getElementById('qr-loading');
     const tokenEl  = document.getElementById('token-display');
     const blockEl  = document.getElementById('block-overlay');
-    const sweepEl  = document.getElementById('sweep-overlay');
     const overlay  = document.getElementById('scan-success');
     const timerTxt = document.getElementById('timer-text');
     const timerBar = document.getElementById('timer-bar');
 
-    // ── QR size ──
+    function updateClock() {
+        var now = new Date();
+        var h = now.getHours();
+        var m = String(now.getMinutes()).padStart(2, '0');
+        var ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        var el = document.getElementById('live-clock');
+        if (el) el.textContent = h + ':' + m + ' ' + ampm;
+    }
+    updateClock();
+    setInterval(updateClock, 10000);
+
     function getQRSize() {
-        return Math.max(200, Math.min(320, Math.min(window.innerWidth - 140, 300)));
+        var w = window.innerWidth - 200;
+        var h = window.innerHeight - 340;
+        var s = Math.min(w, h);
+        return Math.max(220, Math.min(s, 400));
     }
 
-    // ── Render QR ──
     function renderQR(token) {
         if (!token || token === '——') return;
         qrDiv.innerHTML = '';
-        const size = getQRSize();
+        var size = getQRSize();
         qrDiv.style.width  = size + 'px';
         qrDiv.style.height = size + 'px';
         new QRCode(qrDiv, {
             text: token,
             width: size, height: size,
-            colorDark: '#111827',
+            colorDark: '#292524',
             colorLight: '#ffffff',
             correctLevel: QRCode.CorrectLevel.H
         });
     }
 
-    // ── Animate refresh ──
     function animateRefresh() {
-        qrInner.style.transition = 'transform 0.2s ease, opacity 0.16s ease';
-        qrInner.style.transform = 'scale(0.92) rotate(-2deg)';
-        qrInner.style.opacity = '0';
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-            qrInner.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.32s ease 0.04s';
-            qrInner.style.transform = 'scale(1) rotate(0deg)';
-            qrInner.style.opacity = '1';
-        }));
-        setTimeout(() => { qrInner.style.transition = ''; }, 600);
+        qrCard.style.transition = 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1), opacity 0.12s ease';
+        qrCard.style.transform = 'scale(0.85) rotate(-2deg)';
+        qrCard.style.opacity = '0';
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                qrCard.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.25s ease 0.06s';
+                qrCard.style.transform = 'scale(1) rotate(0deg)';
+                qrCard.style.opacity = '1';
+            });
+        });
+        setTimeout(function () { qrCard.style.transition = ''; }, 600);
     }
 
-    // ── Reset overlays ──
     function resetOverlays() {
         blockEl.classList.add('hidden');
-        sweepEl.style.transition = 'none';
-        sweepEl.style.opacity = '0';
-        sweepEl.style.clipPath = '';
+        overlay.style.transition = 'none';
+        overlay.style.clipPath = 'circle(0% at 50% 50%)';
+        var content = overlay.querySelector('div');
+        if (content) { content.style.opacity = '0'; content.style.transform = 'scale(0.88)'; content.style.transition = ''; }
+        var check = document.getElementById('check-path');
+        if (check) { check.style.animation = 'none'; void check.offsetWidth; }
         overlay.classList.add('hidden');
     }
 
-    // ── Load QR ──
     function loadQR() {
         reloadPending = false;
         resetOverlays();
-        qrInner.style.opacity = '1';
-        qrInner.style.transform = '';
+        qrCard.style.opacity = '1';
+        qrCard.style.transform = '';
         timerTxt.textContent = '—';
         timerBar.style.transition = 'none';
         timerBar.style.width = '100%';
@@ -230,10 +190,10 @@
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
         })
-        .then(r => r.json())
-        .then(data => {
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
             animateRefresh();
-            setTimeout(() => renderQR(data.token), 50);
+            setTimeout(function () { renderQR(data.token); }, 60);
             revealToken(data.token);
             qrCountdown = QR_REFRESH_SECONDS;
             timerTxt.textContent = qrCountdown + 's';
@@ -243,69 +203,81 @@
             refreshInt    = setInterval(tick, 1000);
             tokenCheckInt = setInterval(checkToken, 2000);
         })
-        .catch(() => {
+        .catch(function () {
             timerTxt.textContent = '…';
             setTimeout(loadQR, 4000);
         });
     }
 
-    // ── Token reveal animation ──
     function revealToken(token) {
         tokenEl.textContent = '';
-        let i = 0;
-        const interval = setInterval(() => {
-            tokenEl.textContent = token.slice(0, i + 1) + (i < token.length - 1 ? '·'.repeat(token.length - i - 1) : '');
+        var i = 0;
+        function typeChar() {
+            if (i >= token.length) return;
+            tokenEl.textContent = token.slice(0, i + 1);
+            tokenEl.style.transition = 'transform 0.1s ease-out';
+            tokenEl.style.transform = 'scale(1.03)';
+            setTimeout(function () { tokenEl.style.transform = 'scale(1)'; }, 80);
             i++;
-            if (i >= token.length) {
-                clearInterval(interval);
-                tokenEl.textContent = token;
-            }
-        }, 55);
+            setTimeout(typeChar, 60 + (i === token.length ? 0 : 0));
+        }
+        typeChar();
     }
 
-    // ── Tick ──
     function tick() {
         if (reloadPending) return;
         qrCountdown--;
         timerTxt.textContent = qrCountdown + 's';
-        const pct = (qrCountdown / QR_REFRESH_SECONDS) * 100;
+        var pct = (qrCountdown / QR_REFRESH_SECONDS) * 100;
         timerBar.style.width = pct + '%';
-        // Color shift: rose → deeper red as time runs out
         if (qrCountdown <= 10) {
-            timerBar.style.background = 'linear-gradient(90deg, #9f1239, #be123c)';
+            timerBar.style.background = '#10b981';
         } else if (qrCountdown <= 20) {
-            timerBar.style.background = 'linear-gradient(90deg, #be123c, #e11d48, #f43f5e)';
+            timerBar.style.background = '#34d399';
         } else {
-            timerBar.style.background = 'linear-gradient(90deg, #e11d48, #f43f5e, #fb7185)';
+            timerBar.style.background = '#6ee7b7';
         }
         if (qrCountdown <= 0) { clearInterval(refreshInt); loadQR(); }
     }
 
-    // ── Check token ──
     function checkToken() {
         if (reloadPending) return;
         fetch("{{ route('api.qr.token-status') }}")
-            .then(r => r.json())
-            .then(d => { if (d.used) { reloadPending = true; stopAll(); triggerSweep(); } })
-            .catch(() => {});
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.used) {
+                    reloadPending = true;
+                    stopAll();
+                    triggerSweep();
+                }
+            })
+            .catch(function () {});
     }
 
-    // ── Sweep ──
     function triggerSweep() {
         timerTxt.textContent = '✓';
         timerBar.style.transition = 'none';
         timerBar.style.width = '0%';
-        qrInner.style.transition = 'none';
-        qrInner.style.opacity = '0';
-        blockEl.classList.remove('hidden');
-        sweepEl.style.transition = 'clip-path 0.4s cubic-bezier(0.22,1,0.36,1)';
-        sweepEl.style.opacity = '1';
-        sweepEl.style.clipPath = 'circle(150% at 50% 50%)';
-        setTimeout(() => {
-            overlay.classList.remove('hidden');
-            overlay.style.animation = 'successIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both';
-        }, 440);
-        setTimeout(() => loadQR(), 2200);
+        document.getElementById('qr-success-sound').play().catch(function(){});
+        overlay.classList.remove('hidden');
+        requestAnimationFrame(function () {
+            overlay.style.transition = 'clip-path 0.35s cubic-bezier(0.34,1.56,0.64,1)';
+            overlay.style.clipPath = 'circle(150% at 50% 50%)';
+        });
+        var content = overlay.querySelector('div');
+        if (content) {
+            content.style.transform = 'scale(0.88)';
+            setTimeout(function () {
+                content.style.transition = 'opacity 0.18s ease, transform 0.28s cubic-bezier(0.34,1.56,0.64,1)';
+                content.style.opacity = '1';
+                content.style.transform = 'scale(1)';
+            }, 220);
+            setTimeout(function () {
+                var check = document.getElementById('check-path');
+                if (check) check.style.animation = 'drawCheck 0.25s ease-out 0.05s forwards';
+            }, 260);
+        }
+        setTimeout(function () { loadQR(); }, 1800);
     }
 
     function stopAll() {
@@ -315,12 +287,12 @@
         refreshInt = null;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function () {
         loadQR();
-        window.addEventListener('resize', () => {
+        window.addEventListener('resize', function () {
             clearTimeout(resizeDeb);
-            resizeDeb = setTimeout(() => {
-                const t = tokenEl.textContent.replace(/·/g, '').trim();
+            resizeDeb = setTimeout(function () {
+                var t = tokenEl.textContent.replace(/·/g, '').trim();
                 if (t && t !== '——') renderQR(t);
             }, 150);
         });
@@ -330,118 +302,82 @@
 
 <style>
 /* ── QR image fill ── */
-#qrcode > img,
-#qrcode > canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
-    border-radius: 10px;
-}
+#qrcode > img, #qrcode > canvas { width: 100% !important; height: 100% !important; display: block; border-radius: 10px; }
 
-/* ── Page entrance ── */
-#main-content {
-    animation: mainFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) both;
-}
-.animate-title {
-    animation: mainFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both;
-}
-.animate-qr {
-    animation: qrPop 0.9s cubic-bezier(0.16,1,0.3,1) 0.2s both;
-}
-.animate-token {
-    animation: mainFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) 0.4s both;
-}
+/* ── Page entrance stagger ── */
+#main-content { animation: mainFadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-headline { animation: slideDown 0.5s cubic-bezier(0.16,1,0.3,1) 0.08s both; }
+.animate-qr { animation: qrEntrance 0.7s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+.animate-token { animation: fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.35s both; }
+.animate-bottom { animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.5s both; }
 
 @keyframes mainFadeUp {
-    0%   { opacity: 0; transform: translateY(18px) scale(0.98); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
 }
-@keyframes qrPop {
-    0%   { opacity: 0; transform: scale(0.88) translateY(20px); }
+@keyframes slideDown {
+    0%   { opacity: 0; transform: translateY(-8px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+    0%   { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes qrEntrance {
+    0%   { opacity: 0; transform: scale(0.9) translateY(16px); }
     100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* ── Blob drift ── */
-.blob-a { animation: blobA 18s ease-in-out infinite; }
-.blob-b { animation: blobB 22s ease-in-out infinite; }
-.blob-c { animation: blobC 16s ease-in-out infinite; }
-@keyframes blobA {
-    0%, 100% { transform: translate(0,0) scale(1); }
-    33%       { transform: translate(50px,-30px) scale(1.06); }
-    66%       { transform: translate(-30px,25px) scale(0.94); }
+/* ── Ambient light drift ── */
+@keyframes lightDrift1 {
+    0%, 100% { transform: translate(0, 0); }
+    33%      { transform: translate(40px, -20px); }
+    66%      { transform: translate(-25px, 15px); }
 }
-@keyframes blobB {
-    0%, 100% { transform: translate(0,0) scale(1); }
-    40%       { transform: translate(-40px,30px) scale(1.07); }
-    70%       { transform: translate(30px,-20px) scale(0.96); }
-}
-@keyframes blobC {
-    0%, 100% { transform: translate(0,0) scale(1); }
-    50%       { transform: translate(25px,-35px) scale(1.1); }
+@keyframes lightDrift2 {
+    0%, 100% { transform: translate(0, 0); }
+    50%      { transform: translate(-35px, 25px); }
 }
 
-/* ── Floating shapes ── */
-@keyframes floatA {
-    0%, 100% { transform: translate(0,0) rotate(0deg); }
-    50%       { transform: translate(8px,-14px) rotate(12deg); }
+/* ── Headline dot pulse + ripple ── */
+@keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.4; transform: scale(0.65); }
 }
-@keyframes floatB {
-    0%, 100% { transform: translate(0,0) scale(1); }
-    50%       { transform: translate(-6px,-10px) scale(1.15); }
-}
-@keyframes floatC {
-    0%, 100% { transform: translate(0,0) rotate(0deg); }
-    33%       { transform: translate(5px,-12px) rotate(-8deg); }
-    66%       { transform: translate(-5px,-6px) rotate(6deg); }
-}
-
-/* ── Rotating glow ring ── */
-.rotate-border {
-    animation: rotateBorder 6s linear infinite;
-    border-radius: 26px;
-}
-@keyframes rotateBorder {
-    to { transform: rotate(360deg); }
-}
-.glow-ring {
-    animation: glowPulse 4s ease-in-out infinite;
-}
-@keyframes glowPulse {
-    0%, 100% { opacity: 0.45; transform: scale(0.98); }
-    50%       { opacity: 0.7;  transform: scale(1.02); }
+@keyframes rippleDot {
+    0%   { transform: scale(1); opacity: 0.4; }
+    100% { transform: scale(2.8); opacity: 0; }
 }
 
 /* ── Scan line ── */
-@keyframes scanLineLight {
-    0%   { top: 4%; opacity: 0; }
-    8%   { opacity: 0.9; }
-    92%  { opacity: 0.9; }
-    100% { top: 96%; opacity: 0; }
+@keyframes scanLine {
+    0%   { top: 6%; opacity: 0; }
+    15%  { opacity: 0.4; }
+    85%  { opacity: 0.35; }
+    100% { top: 94%; opacity: 0; }
 }
 
-
-/* ── Token glow pulse ── */
-.token-glow {
-    animation: tokenGlow 2.5s ease-in-out infinite;
-}
-@keyframes tokenGlow {
-    0%, 100% { opacity: 0.4; transform: scale(0.97); }
-    50%       { opacity: 0.75; transform: scale(1.03); }
+/* ── Loading dots ── */
+@keyframes loadDot {
+    0%, 80%, 100% { transform: scale(0.5); opacity: 0.25; }
+    40%           { transform: scale(1.15); opacity: 0.9; }
 }
 
 /* ── Success overlay ── */
-@keyframes successIn {
-    0%   { opacity: 0; transform: scale(0.82); }
+@keyframes successCircle {
+    0%   { opacity: 0; transform: scale(0.4); }
+    60%  { transform: scale(1.1); }
     100% { opacity: 1; transform: scale(1); }
+}
+@keyframes successFadeUp {
+    0%   { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 #scan-success:not(.hidden) svg path {
     stroke-dasharray: 22;
     stroke-dashoffset: 22;
-    animation: drawCheck 0.38s ease-out 0.14s forwards;
 }
-@keyframes drawCheck {
-    to { stroke-dashoffset: 0; }
-}
+@keyframes drawCheck { to { stroke-dashoffset: 0; } }
 </style>
 
 @endsection
