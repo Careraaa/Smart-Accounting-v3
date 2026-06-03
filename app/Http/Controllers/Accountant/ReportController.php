@@ -32,7 +32,7 @@ class ReportController extends Controller
     {
         $this->logActivity('viewed', 'Payslips Report', request()->url());
 
-        $payrolls = Payroll::with('employee')->whereIn('status', ['approved', 'released', 'paid'])->get();
+        $payrolls = Payroll::with('employee')->where('status', 'approved')->get();
         return view('accountant.reports.payslips', compact('payrolls'));
     }
 

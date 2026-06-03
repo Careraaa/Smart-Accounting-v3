@@ -38,10 +38,11 @@ class PayrollHistoryController extends Controller
 
         // Safe total payroll calculation (net_pay is an accessor)
         $totalPayroll = Payroll::with(['allowances', 'deductions'])
+                               ->whereHas('batch', fn($q) => $q->where('status', 'approved'))
                                ->get()
                                ->sum('net_pay') ?? 0;
 
-        $totalReleased = Payroll::whereIn('status', ['released', 'paid'])->count();
+        $totalReleased = PayrollBatch::where('status', 'approved')->count();
 
         $activeEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
             ->where('status', 'active')
@@ -150,8 +151,8 @@ class PayrollHistoryController extends Controller
         $totalDeductions = $payrolls->sum('total_deductions');
         $totalNetPay     = $payrolls->sum('net_pay');
 
-        $releasedCount = $payrolls->whereIn('status', ['released', 'paid'])->count();
-        $pendingCount = $payrolls->whereNotIn('status', ['released', 'paid'])->count();
+        $approvedCount = $payrolls->where('status', 'approved')->count();
+        $pendingCount = $payrolls->where('status', '!=', 'approved')->count();
 
         $batch = PayrollBatch::whereDate('period_start', $startDate->toDateString())
             ->whereDate('period_end', $endDate->toDateString())
@@ -168,7 +169,7 @@ class PayrollHistoryController extends Controller
             'totalGross', 
             'totalDeductions', 
             'totalNetPay', 
-            'releasedCount', 
+            'approvedCount', 
             'pendingCount'
         ));
     }

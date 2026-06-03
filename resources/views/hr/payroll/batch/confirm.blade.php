@@ -342,7 +342,7 @@
             </div>
         </div>
         <div class="text-sm text-gray-600 mb-5 bg-emerald-50/50 rounded-xl px-4 py-3 border border-emerald-100 space-y-2">
-            <p>This batch will be <strong class="font-semibold text-gray-900">finalized</strong> and sent to accounting for review.</p>
+            <p>This batch will be <strong class="font-semibold text-gray-900">submitted</strong> and sent to accounting for review.</p>
             <div class="flex items-center gap-2 text-xs text-gray-500 pt-1 border-t border-emerald-100/50">
                 <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                 <span>All payrolls must be <strong>prepared</strong> before finalizing.</span>

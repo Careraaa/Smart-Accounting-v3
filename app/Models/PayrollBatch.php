@@ -23,8 +23,6 @@ class PayrollBatch extends Model
         'rejected_by',
         'rejected_at',
         'rejection_note',
-        'paid_by',
-        'paid_at',
     ];
 
     protected $casts = [
@@ -33,7 +31,6 @@ class PayrollBatch extends Model
         'finalized_at' => 'datetime',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
-        'paid_at' => 'datetime',
     ];
 
     /* ── Relationships ─────────────────────────────────────────── */
@@ -61,11 +58,6 @@ class PayrollBatch extends Model
     public function rejectedBy()
     {
         return $this->belongsTo(User::class, 'rejected_by');
-    }
-
-    public function paidBy()
-    {
-        return $this->belongsTo(User::class, 'paid_by');
     }
 
     public function getDisplayNameAttribute(): string

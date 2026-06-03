@@ -52,7 +52,7 @@
                             'submitted' => ['label'=>'Submitted','dot'=>'bg-violet-400'],
                             'approved' => ['label'=>'Approved','dot'=>'bg-emerald-400'],
                             'completed' => ['label'=>'Completed','dot'=>'bg-emerald-400'],
-                            'released','paid' => ['label'=>'Released','dot'=>'bg-blue-400'],
+
                             'on-hold' => ['label'=>'Hold','dot'=>'bg-sky-400'],
                             default => ['label'=>'Pending','dot'=>'bg-amber-400'],
                         };

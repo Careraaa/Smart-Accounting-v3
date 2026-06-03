@@ -40,7 +40,6 @@
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
-            <option value="released">Released</option>
             <option value="rejected">Rejected</option>
         </select>
     </div>
@@ -65,19 +64,15 @@
                         $initials = strtoupper(substr($payroll->user->first_name ?? 'U', 0, 1) . substr($payroll->user->last_name ?? '', 0, 1));
                         $badgeCls = match($payroll->status) {
                             'pending'   => 'bg-amber-50 text-amber-700 border-amber-200',
-                            'finalized' => 'bg-blue-50 text-blue-700 border-blue-200',
                             'submitted' => 'bg-violet-50 text-violet-700 border-violet-200',
                             'approved'  => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                            'released','paid' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                             'rejected'  => 'bg-red-50 text-red-700 border-red-200',
                             default     => 'bg-gray-50 text-gray-600 border-gray-200',
                         };
                         $dotCls = match($payroll->status) {
                             'pending'   => 'bg-amber-500',
-                            'finalized' => 'bg-blue-500',
                             'submitted' => 'bg-violet-500',
                             'approved'  => 'bg-emerald-500',
-                            'released','paid' => 'bg-emerald-500',
                             'rejected'  => 'bg-red-500',
                             default     => 'bg-gray-400',
                         };
@@ -96,7 +91,7 @@
                         <td class="px-4 py-3 text-center">
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border {{ $badgeCls }}">
                                 <span class="w-1 h-1 rounded-full {{ $dotCls }}"></span>
-                                {{ in_array($payroll->status, ['released', 'paid'], true) ? 'Released' : ucfirst($payroll->status) }}
+                                {{ ucfirst($payroll->status) }}
                             </span>
                         </td>
                     </tr>
@@ -124,7 +119,7 @@
             <div class="flex items-center gap-5">
                 <div class="flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span class="text-[0.55rem] text-gray-400 font-mono bat-count" style="animation-delay:0.1s">{{ $releasedCount }} released</span>
+                    <span class="text-[0.55rem] text-gray-400 font-mono bat-count" style="animation-delay:0.1s">{{ $approvedCount }} approved</span>
                 </div>
                 <div class="flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-amber-400"></span>

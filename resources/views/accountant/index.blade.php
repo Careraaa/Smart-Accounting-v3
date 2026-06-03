@@ -118,7 +118,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                     </div>
                 </div>
                 <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Approved + released</span>
+                    <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Approved</span>
                 </div>
             </div>
             <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-blue-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
@@ -333,7 +333,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
             $pipeVals = $pipelineBar['values'] ?? [];
             $pipeLabels = $pipelineBar['labels'] ?? [];
             $pipeMax = count($pipeVals) > 0 ? max($pipeVals) : 1;
-            $pipeColors = ['#f59e0b','#8b5cf6','#22c55e','#f43f5e'];
+            $pipeColors = ['#f59e0b','#8b5cf6','#f43f5e'];
         @endphp
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {{-- Allowances vs Deductions (CSS donut) --}}
@@ -383,7 +383,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
             <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <h2 class="text-[11px] font-semibold text-gray-900">Pipeline</h2>
-                    <span class="text-[9px] text-gray-400 font-medium">Awaiting � approved � released � rejected</span>
+                    <span class="text-[9px] text-gray-400 font-medium">Awaiting &rarr; approved &rarr; rejected</span>
                 </div>
                 <div class="px-4 py-4 space-y-3">
                     @forelse($pipeVals as $i => $val)

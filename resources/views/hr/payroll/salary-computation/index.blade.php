@@ -36,9 +36,9 @@
     @php
         $metrics = [
             ['label'=>'Active Employees','value'=>$activeEmployees,'accent'=>'rose'],
-            ['label'=>'Pending Payrolls','value'=>$payrollCount,'accent'=>'amber'],
-            ['label'=>'Released','value'=>$releasedCount,'accent'=>'emerald'],
-            ['label'=>'Total Payroll','value'=>'₱'.number_format($totalPayroll,2),'accent'=>'blue'],
+            ['label'=>'Pending Batches','value'=>$payrollCount,'accent'=>'amber'],
+            ['label'=>'Approved','value'=>$releasedCount,'accent'=>'emerald'],
+            ['label'=>'Total Net Pay','value'=>'₱'.number_format($totalPayroll,2),'accent'=>'blue'],
         ];
         $accentMap = ['rose'=>['icon'=>'bg-rose-50 text-rose-500','dot'=>'bg-rose-500'],'amber'=>['icon'=>'bg-amber-50 text-amber-500','dot'=>'bg-amber-500'],'emerald'=>['icon'=>'bg-emerald-50 text-emerald-500','dot'=>'bg-emerald-500'],'blue'=>['icon'=>'bg-blue-50 text-blue-500','dot'=>'bg-blue-500']];
     @endphp
@@ -219,20 +219,20 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
                             <p class="text-xs text-gray-400 mt-0.5 font-mono">${b.period_start_display} &ndash; ${b.period_end_display}</p>
                         </div>
                         <div class="hidden sm:flex items-center gap-6 shrink-0">
-                            <div class="text-right min-w-[44px]">
-                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Count</p>
+                            <div class="text-left min-w-[44px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Employees</p>
                                 <p class="text-sm font-semibold text-gray-900 tabular-nums">${b.payrolls_count}</p>
                             </div>
-                            <div class="text-right min-w-[88px]">
-                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Gross</p>
+                            <div class="text-left min-w-[88px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Gross Pay</p>
                                 <p class="text-sm font-semibold text-gray-900 tabular-nums">₱${b.gross_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
                             </div>
-                            <div class="text-right min-w-[88px]">
+                            <div class="text-left min-w-[88px]">
                                 <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
                                 <p class="text-sm font-semibold text-red-500 tabular-nums">₱${b.total_deductions.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
                             </div>
-                            <div class="text-right min-w-[88px]">
-                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net</p>
+                            <div class="text-left min-w-[88px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net Pay</p>
                                 <p class="text-sm font-bold text-emerald-600 tabular-nums">₱${b.net_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
                             </div>
                         </div>

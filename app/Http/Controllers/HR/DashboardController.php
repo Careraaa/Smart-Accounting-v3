@@ -157,15 +157,9 @@ class DashboardController extends Controller
         $totalBatches   = $batchCounts->sum();
         $batchSubmitted = (int) ($batchCounts['submitted'] ?? 0);
         $batchApproved  = (int) ($batchCounts['approved'] ?? 0);
-        $batchPaid      = (int) ($batchCounts['paid'] ?? 0);
         $batchRejected  = (int) ($batchCounts['rejected'] ?? 0);
 
         $currentInProgress = PayrollBatch::inProgressForCurrentPeriod();
-
-        $totalReleasedPayroll = PayrollBatch::where('status', 'paid')
-            ->withSum('payrolls', 'net_pay')
-            ->get()
-            ->sum('payrolls_sum_net_pay') ?? 0;
 
         // ── Receivables Totals ──
         $totalApprovedCA = CashAdvance::where('status', 'approved')->sum('amount') ?? 0;
@@ -199,10 +193,8 @@ class DashboardController extends Controller
             'totalBatches',
             'batchSubmitted',
             'batchApproved',
-            'batchPaid',
             'batchRejected',
             'currentInProgress',
-            'totalReleasedPayroll',
             'totalApprovedCA',
             'totalApprovedLoans',
             'totalPaidCA',

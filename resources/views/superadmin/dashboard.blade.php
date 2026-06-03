@@ -153,7 +153,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pipeline</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.35s">{{ $releasedPayroll }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.35s">{{ $approvedPayroll }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center transition-all duration-300 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
@@ -428,19 +428,19 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             <div class="sad-fade-up bg-white border border-gray-200 rounded-xl overflow-hidden" style="animation-delay:0.15s">
                 <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
                     <span class="text-xs font-bold text-gray-900">Payroll status</span>
-                    <span class="text-[9px] text-gray-400">{{ $releasedPayroll + $approvedPayroll + $processingPayroll + $rejectedPayroll }} total</span>
+                    <span class="text-[9px] text-gray-400">{{ $approvedPayroll + $approvedPayroll + $processingPayroll + $rejectedPayroll }} total</span>
                 </div>
                 <div class="px-5 py-4 space-y-3">
-                    @php $pipelineTotal = max(1, $releasedPayroll + $approvedPayroll + $processingPayroll + $rejectedPayroll); @endphp
+                    @php $pipelineTotal = max(1, $approvedPayroll + $approvedPayroll + $processingPayroll + $rejectedPayroll); @endphp
                     <div class="flex items-center gap-3">
                         <div class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-gray-900">Released</span>
-                                <span class="text-xs font-extrabold text-gray-900 tabular-nums">{{ $releasedPayroll }}</span>
+                                <span class="text-xs font-extrabold text-gray-900 tabular-nums">{{ $approvedPayroll }}</span>
                             </div>
                             <div class="w-full h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
-                                <div class="h-full rounded-full bg-emerald-500" style="width: {{ ($releasedPayroll / $pipelineTotal) * 100 }}%"></div>
+                                <div class="h-full rounded-full bg-emerald-500" style="width: {{ ($approvedPayroll / $pipelineTotal) * 100 }}%"></div>
                             </div>
                         </div>
                     </div>

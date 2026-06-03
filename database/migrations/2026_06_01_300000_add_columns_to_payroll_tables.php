@@ -28,20 +28,14 @@ return new class extends Migration
                 $table->timestamp('rejected_at')->nullable()->after('rejected_by');
                 $table->text('rejection_note')->nullable()->after('rejected_at');
             }
-            if (!Schema::hasColumn('payroll_batches', 'paid_by')) {
-                $table->unsignedBigInteger('paid_by')->nullable()->after('rejection_note');
-                $table->timestamp('paid_at')->nullable()->after('paid_by');
-            }
-
             // Foreign keys
             try { $table->foreign('approved_by')->references('id')->on('users')->nullOnDelete(); } catch (\Throwable $e) {}
             try { $table->foreign('rejected_by')->references('id')->on('users')->nullOnDelete(); } catch (\Throwable $e) {}
-            try { $table->foreign('paid_by')->references('id')->on('users')->nullOnDelete(); } catch (\Throwable $e) {}
         });
 
-        // Status enum: final state ('draft','submitted','approved','rejected','paid')
+        // Status enum: final state ('draft','submitted','approved','rejected')
         try {
-            DB::statement("ALTER TABLE `payroll_batches` MODIFY `status` ENUM('draft','submitted','approved','rejected','paid') NOT NULL DEFAULT 'draft'");
+            DB::statement("ALTER TABLE `payroll_batches` MODIFY `status` ENUM('draft','submitted','approved','rejected') NOT NULL DEFAULT 'draft'");
         } catch (\Throwable $e) {}
 
         // Add batch_id to payrolls
@@ -161,14 +155,14 @@ return new class extends Migration
 
         // Payroll batches: revert status and drop columns
         try {
-            DB::statement("ALTER TABLE `payroll_batches` MODIFY `status` ENUM('draft','finalized','submitted','paid') NOT NULL DEFAULT 'draft'");
+            DB::statement("ALTER TABLE `payroll_batches` MODIFY `status` ENUM('draft','submitted','approved','rejected') NOT NULL DEFAULT 'draft'");
         } catch (\Throwable $e) {}
 
         Schema::table('payroll_batches', function (Blueprint $table) {
-            foreach (['approved_by', 'rejected_by', 'paid_by'] as $fk) {
+            foreach (['approved_by', 'rejected_by'] as $fk) {
                 try { $table->dropForeign([$fk]); } catch (\Throwable $e) {}
             }
-            $cols = ['paid_at', 'paid_by', 'rejection_note', 'rejected_at', 'rejected_by',
+            $cols = ['rejection_note', 'rejected_at', 'rejected_by',
                      'approved_at', 'approved_by'];
             foreach ($cols as $col) {
                 if (Schema::hasColumn('payroll_batches', $col)) {

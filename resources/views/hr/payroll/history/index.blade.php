@@ -40,7 +40,7 @@
     <div class="fade-up flex items-start justify-between gap-4 flex-wrap">
         <div class="flex items-center gap-2">
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Payroll History</h1>
-            <p class="text-sm text-gray-400 mt-0.5">View all finalized and released payroll batches</p>
+            <p class="text-sm text-gray-400 mt-0.5">View all submitted and paid payroll batches</p>
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('hr.reports.print.payroll-history-report') }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all hover:border-gray-400 hover:text-gray-900 active:scale-[0.97 no-underline">
@@ -82,7 +82,7 @@
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </div>
                 <div class="min-w-0">
-                    <p class="text-xs text-gray-400 font-medium">Released Payrolls</p>
+                    <p class="text-xs text-gray-400 font-medium">Approved Payrolls</p>
                     <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">{{ $totalReleased }}</p>
                     <p class="text-[0.55rem] text-gray-400 font-mono mt-0.5">across all batches</p>
                 </div>
@@ -180,11 +180,8 @@ window.allHistoryBatches = {!! json_encode($allBatches->map(fn($b) => [
 
     const S_COLORS = {
         draft:     { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500', label: 'Draft' },
-        finalized: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500', label: 'Finalized' },
         submitted: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', dot: 'bg-violet-500', label: 'Submitted' },
         approved:  { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Approved' },
-        released:  { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Released' },
-        paid:      { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Paid' },
     };
 
     function applyFilters() {

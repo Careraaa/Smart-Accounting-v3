@@ -57,7 +57,7 @@ return new class extends Migration
                 $table->id();
                 $table->date('period_start');
                 $table->date('period_end');
-                $table->enum('status', ['draft', 'submitted', 'approved', 'rejected', 'paid'])->default('draft');
+                $table->enum('status', ['draft', 'submitted', 'approved', 'rejected'])->default('draft');
                 $table->unsignedBigInteger('generated_by')->nullable();
                 $table->unsignedBigInteger('finalized_by')->nullable();
                 $table->timestamp('finalized_at')->nullable();

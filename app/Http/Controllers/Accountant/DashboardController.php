@@ -14,8 +14,8 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     use LogsUserActivity;
-    // Statuses that represent finalized / actionable payrolls for the accountant view.
-    private const ACTIVE_STATUSES = ['submitted', 'approved', 'released', 'paid'];
+        // Statuses that represent finalized / actionable payrolls for the accountant view.
+        private const ACTIVE_STATUSES = ['submitted', 'approved'];
 
     public function index()
     {
@@ -31,7 +31,7 @@ class DashboardController extends Controller
             ->get();
 
         // ── Monetary totals (approved + released only) ──────────────────────
-        $approvedPayrolls = $payrolls->whereIn('status', ['approved', 'released', 'paid']);
+        $approvedPayrolls = $payrolls->whereIn('status', ['approved']);
 
         $totalPayroll       = $approvedPayrolls->sum(fn($p) => $p->net_pay);
         $totalAllowances    = $approvedPayrolls->sum(fn($p) => $p->total_allowances);
@@ -42,7 +42,6 @@ class DashboardController extends Controller
         // Count by BATCH, not individual payroll rows — one batch = one approval request
         $processingPayroll = \App\Models\PayrollBatch::where('status', 'submitted')->count();
         $approvedPayroll   = \App\Models\PayrollBatch::where('status', 'approved')->count();
-        $releasedPayroll   = \App\Models\PayrollBatch::whereIn('status', ['released', 'paid'])->count();
         // Rejected is outside the active set; query separately for the pipeline bar.
         $rejectedPayroll   = \App\Models\PayrollBatch::where('status', 'rejected')->count();
 
@@ -75,7 +74,7 @@ class DashboardController extends Controller
         }
 
         // ── Status-mix donut (by batch count) ───────────────────────────────
-        $statusOrder = ['submitted', 'approved', 'released', 'paid', 'rejected'];
+        $statusOrder = ['submitted', 'approved', 'rejected'];
         $payrollStatusChartLabels = [];
         $payrollStatusChartSeries = [];
         foreach ($statusOrder as $st) {
@@ -88,11 +87,10 @@ class DashboardController extends Controller
 
         // ── Pipeline bar ─────────────────────────────────────────────────────
         $pipelineBar = [
-            'labels' => ['Awaiting action', 'Approved', 'Released', 'Rejected'],
+            'labels' => ['Awaiting action', 'Approved', 'Rejected'],
             'values' => [
                 $processingPayroll,
                 $approvedPayroll,
-                $releasedPayroll,
                 $rejectedPayroll,
             ],
         ];
@@ -172,7 +170,6 @@ class DashboardController extends Controller
             'totalDeductions',
             'processingPayroll',
             'approvedPayroll',
-            'releasedPayroll',
             'rejectedPayroll',
             'totalOutstandingLoans',
             'activeSalaryLoans',

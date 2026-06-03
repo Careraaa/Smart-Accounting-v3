@@ -453,8 +453,6 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
             Route::get('/', [PayrollReceivablesController::class, 'index'])->name('index');
             Route::get('/cash-advances/{cashAdvance}', [PayrollReceivablesController::class, 'showCashAdvance'])->name('cash-advances.show');
             Route::get('/salary-loans/{salaryLoan}', [PayrollReceivablesController::class, 'showSalaryLoan'])->name('salary-loans.show');
-            Route::post('/{payroll}/mark-paid', [PayrollReceivablesController::class, 'markAsPaid'])->name('mark-paid');
-            Route::post('/batch-paid', [PayrollReceivablesController::class, 'markBatchPaid'])->name('batch-paid');
             // HR approval routes
             Route::post('/cash-advances/{cashAdvance}/approve', [PayrollReceivablesController::class, 'approveCashAdvance'])->name('cash-advances.approve');
             Route::post('/cash-advances/{cashAdvance}/reject', [PayrollReceivablesController::class, 'rejectCashAdvance'])->name('cash-advances.reject');

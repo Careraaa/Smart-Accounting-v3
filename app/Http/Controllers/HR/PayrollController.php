@@ -87,11 +87,11 @@
             $attendanceRate    = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
             $cutoffSchedules   = PayrollCutoffSchedule::orderBy('cutoff_day')->get();
             $cutoffInfo        = PayrollCutoffSchedule::getCurrentCutoffPeriod();
-            $releasedCount     = Payroll::whereIn('status', ['released', 'paid'])->count();
+            $releasedCount     = PayrollBatch::where('status', 'approved')->count();
 
-            $pendingPayrolls = Payroll::where('status', 'pending');
-            $totalPayroll    = $pendingPayrolls->sum('net_pay');
-            $payrollCount    = (clone $pendingPayrolls)->count();
+            $payrollCount    = PayrollBatch::where('status', 'submitted')->count();
+
+            $totalPayroll    = Payroll::whereHas('batch', fn($q) => $q->where('status', 'approved'))->sum('net_pay');
 
             $this->logActivity('viewed', 'Payroll dashboard', request()->url(), 'payroll');
 
@@ -654,7 +654,7 @@
         ══════════════════════════════════════════════════════════════ */
         public function batchFinalize(PayrollBatch $batch)
         {
-            abort_if(!$batch->isEditable(), 403, 'Batch is already finalized.');
+            abort_if(!$batch->isEditable(), 403, 'Batch cannot be finalized.');
 
             $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
 
@@ -731,7 +731,7 @@
             // Notify accountants that payroll batch is ready for approval
             PayrollNotification::notifyAccountantsPayrollGenerated($periodStart, $periodEnd, $batch->payrolls->count());
 
-            $this->logActivity('submitted', "Payroll batch #{$batch->id} finalized", request()->url(), 'payroll', $batch->id);
+            $this->logActivity('submitted', "Payroll batch #{$batch->id} submitted", request()->url(), 'payroll', $batch->id);
 
             return redirect()->route('payroll.salary-computation.index')
                 ->with('success', 'Payroll batch submitted to accounting.');
@@ -742,7 +742,7 @@
         ══════════════════════════════════════════════════════════════ */
         public function batchSubmit(PayrollBatch $batch)
         {
-            abort_if($batch->status !== 'finalized', 403, 'Batch must be finalized before submitting.');
+            abort_if(!$batch->isEditable(), 403, 'Batch cannot be submitted.');
 
             $batch->payrolls()->update(['status' => 'submitted']);
             $batch->update(['status' => 'submitted']);
