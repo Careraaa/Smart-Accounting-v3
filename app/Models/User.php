@@ -40,6 +40,7 @@ class User extends Authenticatable
         'department',
         'status',
         'salary_rate',
+        'work_days_per_week',
         'bank_name',
         'bank_account_number',
         'has_sss',

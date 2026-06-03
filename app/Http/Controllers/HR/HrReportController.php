@@ -142,15 +142,19 @@ class HrReportController extends Controller
             $empPagibig = $payroll->pagibig ?? 0;
             $empPhilhealth = $payroll->philhealth ?? 0;
 
-            // Calculate employer contributions based on salary bracket lookup
-            $baseSalary = $payroll->basic_salary ?? 0;
+            // Use monthly equivalent salary for government bracket lookups.
+            //   5-day workweek: dailyRate × 21.75
+            //   6-day workweek: dailyRate × 26.08
+            $dailyRate = (float) ($employee->salary_rate ?? 0);
+            $workDaysPerWeek = (int) ($employee->work_days_per_week ?? 5);
+            $monthlyEquivalent = $workDaysPerWeek === 6 ? $dailyRate * 26.08 : $dailyRate * 21.75;
             
             // SSS Employer: Only calculate if employee has enrolled for SSS
             $empSssShare = 0;
             if ($employee->has_sss) {
                 $sssRecord = StatutoryDeduction::where('name', 'SSS')
-                    ->where('min_salary', '<=', $baseSalary)
-                    ->where('max_salary', '>=', $baseSalary)
+                    ->where('min_salary', '<=', $monthlyEquivalent)
+                    ->where('max_salary', '>=', $monthlyEquivalent)
                     ->first();
                 if ($sssRecord) {
                     $empSssShare = $sssRecord->employer_share ?? 0;
@@ -161,13 +165,13 @@ class HrReportController extends Controller
             $empPagibigShare = 0;
             if ($employee->has_pagibig) {
                 $pagibigRecord = StatutoryDeduction::where('name', 'Pag-IBIG')
-                    ->where('min_salary', '<=', $baseSalary)
-                    ->where('max_salary', '>=', $baseSalary)
+                    ->where('min_salary', '<=', $monthlyEquivalent)
+                    ->where('max_salary', '>=', $monthlyEquivalent)
                     ->first();
                 if ($pagibigRecord) {
                     // Use percentage if available, otherwise use fixed share
                     if ($pagibigRecord->percentage_employer) {
-                        $empPagibigShare = $baseSalary * ($pagibigRecord->percentage_employer / 100);
+                        $empPagibigShare = $monthlyEquivalent * ($pagibigRecord->percentage_employer / 100);
                     } else {
                         $empPagibigShare = $pagibigRecord->employer_share ?? 0;
                     }
@@ -178,15 +182,15 @@ class HrReportController extends Controller
             $empPhilhealthShare = 0;
             if ($employee->has_philhealth) {
                 $philhealthRecord = StatutoryDeduction::where('name', 'PhilHealth')
-                    ->where('min_salary', '<=', $baseSalary)
-                    ->where('max_salary', '>=', $baseSalary)
+                    ->where('min_salary', '<=', $monthlyEquivalent)
+                    ->where('max_salary', '>=', $monthlyEquivalent)
                     ->first();
                 if ($philhealthRecord) {
                     // Use fixed share if available, otherwise use percentage
                     if ($philhealthRecord->employer_share) {
                         $empPhilhealthShare = $philhealthRecord->employer_share;
                     } else if ($philhealthRecord->percentage_employer) {
-                        $empPhilhealthShare = $baseSalary * ($philhealthRecord->percentage_employer / 100);
+                        $empPhilhealthShare = $monthlyEquivalent * ($philhealthRecord->percentage_employer / 100);
                     }
                 }
             }
@@ -266,15 +270,19 @@ class HrReportController extends Controller
             $empPagibig = $payroll->pagibig ?? 0;
             $empPhilhealth = $payroll->philhealth ?? 0;
 
-            // Calculate employer contributions based on salary bracket lookup
-            $baseSalary = $payroll->basic_salary ?? 0;
+            // Use monthly equivalent salary for government bracket lookups.
+            //   5-day workweek: dailyRate × 21.75
+            //   6-day workweek: dailyRate × 26.08
+            $dailyRate = (float) ($employee->salary_rate ?? 0);
+            $workDaysPerWeek = (int) ($employee->work_days_per_week ?? 5);
+            $monthlyEquivalent = $workDaysPerWeek === 6 ? $dailyRate * 26.08 : $dailyRate * 21.75;
             
             // SSS Employer: Only calculate if employee has enrolled for SSS
             $empSssShare = 0;
             if ($employee->has_sss) {
                 $sssRecord = StatutoryDeduction::where('name', 'SSS')
-                    ->where('min_salary', '<=', $baseSalary)
-                    ->where('max_salary', '>=', $baseSalary)
+                    ->where('min_salary', '<=', $monthlyEquivalent)
+                    ->where('max_salary', '>=', $monthlyEquivalent)
                     ->first();
                 if ($sssRecord) {
                     $empSssShare = $sssRecord->employer_share ?? 0;
@@ -285,13 +293,13 @@ class HrReportController extends Controller
             $empPagibigShare = 0;
             if ($employee->has_pagibig) {
                 $pagibigRecord = StatutoryDeduction::where('name', 'Pag-IBIG')
-                    ->where('min_salary', '<=', $baseSalary)
-                    ->where('max_salary', '>=', $baseSalary)
+                    ->where('min_salary', '<=', $monthlyEquivalent)
+                    ->where('max_salary', '>=', $monthlyEquivalent)
                     ->first();
                 if ($pagibigRecord) {
                     // Use percentage if available, otherwise use fixed share
                     if ($pagibigRecord->percentage_employer) {
-                        $empPagibigShare = $baseSalary * ($pagibigRecord->percentage_employer / 100);
+                        $empPagibigShare = $monthlyEquivalent * ($pagibigRecord->percentage_employer / 100);
                     } else {
                         $empPagibigShare = $pagibigRecord->employer_share ?? 0;
                     }
@@ -302,15 +310,15 @@ class HrReportController extends Controller
             $empPhilhealthShare = 0;
             if ($employee->has_philhealth) {
                 $philhealthRecord = StatutoryDeduction::where('name', 'PhilHealth')
-                    ->where('min_salary', '<=', $baseSalary)
-                    ->where('max_salary', '>=', $baseSalary)
+                    ->where('min_salary', '<=', $monthlyEquivalent)
+                    ->where('max_salary', '>=', $monthlyEquivalent)
                     ->first();
                 if ($philhealthRecord) {
                     // Use fixed share if available, otherwise use percentage
                     if ($philhealthRecord->employer_share) {
                         $empPhilhealthShare = $philhealthRecord->employer_share;
                     } else if ($philhealthRecord->percentage_employer) {
-                        $empPhilhealthShare = $baseSalary * ($philhealthRecord->percentage_employer / 100);
+                        $empPhilhealthShare = $monthlyEquivalent * ($philhealthRecord->percentage_employer / 100);
                     }
                 }
             }

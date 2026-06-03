@@ -105,6 +105,7 @@ class EmployeeController extends Controller
                 'department' => 'required|string|max:150',
                 'status' => 'required|string|in:active,inactive',
                 'salary_rate' => 'required|numeric|between:0,999999.99', // DAILY RATE
+                'work_days_per_week' => 'required|integer|in:5,6',
                 'sss_number' => 'nullable|string|max:50',
                 'tin_number' => 'nullable|string|max:50',
                 'pagibig_number' => 'nullable|string|max:50',
@@ -119,6 +120,7 @@ class EmployeeController extends Controller
             [
                 'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
                 'salary_rate.between' => 'Daily rate must be between 0.00 and 999,999.99.',
+                'work_days_per_week.in' => 'Work days per week must be 5 or 6.',
                 'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
                 'attachments_files.*.max' => 'Each attachment must not exceed 5MB.',
             ],
@@ -214,6 +216,7 @@ class EmployeeController extends Controller
                 'department' => 'required|string|max:150',
                 'status' => 'required|string|in:active,inactive',
                 'salary_rate' => 'required|numeric|between:0,999999.99', // DAILY RATE
+                'work_days_per_week' => 'required|integer|in:5,6',
                 'sss_number' => 'nullable|string|max:50',
                 'tin_number' => 'nullable|string|max:50',
                 'pagibig_number' => 'nullable|string|max:50',
@@ -226,6 +229,7 @@ class EmployeeController extends Controller
             [
                 'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
                 'salary_rate.between' => 'Daily rate must be between 0.00 and 999,999.99.',
+                'work_days_per_week.in' => 'Work days per week must be 5 or 6.',
                 'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
                 'attachments_files.*.max' => 'Each attachment must not exceed 5MB.',
             ],

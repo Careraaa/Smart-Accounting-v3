@@ -40,6 +40,7 @@ class Employee extends Model
         'department',
         'status',
         'salary_rate',
+        'work_days_per_week',
         'has_sss',
         'has_pagibig',
         'has_philhealth',

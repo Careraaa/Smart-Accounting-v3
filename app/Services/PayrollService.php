@@ -151,7 +151,6 @@ class PayrollService
         // ── Step 2: Salary rates ──────────────────────────────────────────────
         // salary_rate on the user record is the daily rate (not monthly).
         $dailyRate     = (float) ($employee->salary_rate ?? 0);
-        $monthlySalary = $dailyRate * 22; // 22 working days/month — used for statutory bracket lookups only
         $hourlyRate    = $dailyRate / 8;
 
         // Basic salary = what the employee earns for the days they actually worked.
@@ -256,25 +255,28 @@ class PayrollService
         $grossPay         = $basicSalary + $otPay + $holidayOTPay + $holidayPay + $manualAllowTotal;
 
         // ── Step 6: Statutory deductions (SSS, Pag-IBIG, PhilHealth) ─────────
-        // Bracket lookup is based on basic salary for this period × 2 (annualized).
-        // This excludes OT and holiday pay, which are temporary/irregular and should
-        // not inflate the permanent bracket classification.
+        // Bracket lookup is based on monthly equivalent salary (daily rate ×
+        // standard monthly factor). This gives a stable bracket classification
+        // regardless of actual days worked in the period.
+        //   5-day workweek: dailyRate × 21.75
+        //   6-day workweek: dailyRate × 26.08
         // Gate: employee must have income this period (worked days OR holiday pay).
         $contributionBasis = $basicSalary + $holidayPay + $otPay + $holidayOTPay;
 
         $hasIncome = $contributionBasis > 0;
-        $monthlySalaryForBracket = $basicSalary * 2; // Annualize basic salary (excludes OT, holiday)
+        $workDaysPerWeek = (int) ($employee->work_days_per_week ?? 5);
+        $monthlyEquivalent = $workDaysPerWeek === 6 ? $dailyRate * 26.08 : $dailyRate * 21.75;
 
         $sss = ($employee->has_sss && $hasIncome)
-            ? $this->getStatutoryDeduction('SSS', $monthlySalaryForBracket)
+            ? $this->getStatutoryDeduction('SSS', $monthlyEquivalent)
             : 0;
 
         $pagibig = ($employee->has_pagibig && $hasIncome)
-            ? $this->getStatutoryDeduction('Pag-IBIG', $monthlySalaryForBracket)
+            ? $this->getStatutoryDeduction('Pag-IBIG', $monthlyEquivalent)
             : 0;
 
         $philhealth = ($employee->has_philhealth && $hasIncome)
-            ? $this->getStatutoryDeduction('PhilHealth', $monthlySalaryForBracket)
+            ? $this->getStatutoryDeduction('PhilHealth', $monthlyEquivalent)
             : 0;
 
         // ── Step 7: Withholding Tax (BIR) ─────────────────────────────────────
