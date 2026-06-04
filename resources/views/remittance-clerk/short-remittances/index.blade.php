@@ -144,10 +144,8 @@
     </div>
 @endsection
 
-@push('scripts')
-<script>
-(function () {
-    var pendingData = @json($pendingRemittances->map(fn($r) => [
+@php
+    $jsPendingData = $pendingRemittances->map(fn($r) => [
         'id' => $r->id,
         'date' => $r->remittance_date?->format('M d, Y'),
         'driver' => $r->driver->name ?? 'N/A',
@@ -157,8 +155,8 @@
         'show_url' => route('short-remittances.show', $r),
         'driver_status' => $r->driver_status,
         'pao_status' => $r->pao_status,
-    ]));
-    var resolvedData = @json($fullyPaidRemittances->map(fn($r) => [
+    ]);
+    $jsResolvedData = $fullyPaidRemittances->map(fn($r) => [
         'id' => $r->id,
         'date' => $r->remittance_date?->format('M d, Y'),
         'driver' => $r->driver->name ?? 'N/A',
@@ -166,7 +164,13 @@
         'vehicle' => $r->vehicle->plate_number ?? '—',
         'short_amount' => (float) $r->short_amount,
         'show_url' => route('short-remittances.show', $r),
-    ]));
+    ]);
+@endphp
+@push('scripts')
+<script>
+(function () {
+    var pendingData = @json($jsPendingData);
+    var resolvedData = @json($jsResolvedData);
 
     var PER_PAGE = 10;
 
