@@ -155,7 +155,7 @@
         'show_url' => route('short-remittances.show', $r),
         'driver_status' => $r->driver_status,
         'pao_status' => $r->pao_status,
-    ]);
+    ])->values()->toArray();
     $jsResolvedData = $fullyPaidRemittances->map(fn($r) => [
         'id' => $r->id,
         'date' => $r->remittance_date?->format('M d, Y'),
@@ -164,7 +164,7 @@
         'vehicle' => $r->vehicle->plate_number ?? '—',
         'short_amount' => (float) $r->short_amount,
         'show_url' => route('short-remittances.show', $r),
-    ]);
+    ])->values()->toArray();
 @endphp
 @push('scripts')
 <script>
