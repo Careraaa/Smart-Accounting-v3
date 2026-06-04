@@ -51,7 +51,7 @@ class DriverController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string',
-            'license_number' => 'required|unique:drivers',
+            'license_number' => ['required', 'unique:drivers', 'regex:/^[A-Za-z]\d{2}-\d{2}-\d{6}$/'],
             'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
             'email' => 'required|email|unique:drivers',
             'gender' => 'required|string',
@@ -60,6 +60,7 @@ class DriverController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
+        $validated['license_number'] = strtoupper($validated['license_number']);
         $driver = Driver::create($validated);
 
         $this->logActivity('created', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
@@ -87,7 +88,7 @@ class DriverController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string',
-            'license_number' => 'required|unique:drivers,license_number,' . $driver->id,
+            'license_number' => ['required', 'unique:drivers,license_number,' . $driver->id, 'regex:/^[A-Za-z]\d{2}-\d{2}-\d{6}$/'],
             'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
             'email' => 'required|email|unique:drivers,email,' . $driver->id,
             'gender' => 'required|string',
@@ -96,6 +97,7 @@ class DriverController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
+        $validated['license_number'] = strtoupper($validated['license_number']);
         $driver->update($validated);
 
         $this->logActivity('updated', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
