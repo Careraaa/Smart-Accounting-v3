@@ -323,15 +323,25 @@ class AttendanceService
         $actualStart = Carbon::parse($dateStr . ' ' . $attendance->time_in);
         $actualEnd = Carbon::parse($dateStr . ' ' . $attendance->time_out);
 
-        // If employee times in within grace period, use scheduled start time for OT/UT calculation.
-        // This ensures employees who arrive within the grace period receive credit for scheduled hours.
-        // Example: Shift starts 8:00 AM, grace period 5 mins, employee times in 8:03 AM
-        //   → Marked as present, but OT/UT calculation uses 8:00 AM as start reference.
+        // Get configurable grace period for late arrivals
         $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
-        $minutesLate = $actualStart->diffInMinutes($expectedStart);
-        if ($minutesLate >= 0 && $minutesLate <= $gracePeriodMinutes) {
-            // Employee is within grace period; use scheduled start for OT/UT computation
+
+        // If employee arrives before shift start, clamp to shift start time.
+        // This prevents early time-in from inflating overtime calculations.
+        // Example: Shift starts 8:00 AM, employee times in 6:00 AM
+        //   → OT/UT calculation uses 8:00 AM as start reference.
+        if ($actualStart->isBefore($expectedStart)) {
             $actualStart = $expectedStart->copy();
+        } else {
+            // If employee times in within grace period, use scheduled start time.
+            // This ensures employees who arrive within the grace period receive credit
+            // for scheduled hours.
+            // Example: Shift starts 8:00 AM, grace period 5 mins, employee times in 8:03 AM
+            //   → Marked as present, but OT/UT calculation uses 8:00 AM as start reference.
+            $minutesLate = $actualStart->diffInMinutes($expectedStart);
+            if ($minutesLate >= 0 && $minutesLate <= $gracePeriodMinutes) {
+                $actualStart = $expectedStart->copy();
+            }
         }
 
         // Calculate scheduled work hours (shift duration minus break)

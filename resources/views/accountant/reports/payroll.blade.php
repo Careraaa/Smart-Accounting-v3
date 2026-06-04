@@ -36,7 +36,8 @@
 }
 .modal-close:hover { border-color:#9ca3af; color:#111827; background:#f9fafb; }
 .modal-body { overflow-y:auto; padding:20px 24px; flex:1; }
-.modal-body table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+.modal-body table { width:100%; border-collapse:separate; border-spacing:0; font-size:0.8rem; }
+.modal-body tfoot td { padding:10px 8px; border-top:2px solid #d1d5db; font-weight:700; font-size:0.8rem; background:#f3f4f6; }
 .modal-body thead { position:sticky; top:0; z-index:1; }
 .modal-body th {
     text-align:left; padding:10px 8px; font-size:0.55rem; font-weight:700;
@@ -180,16 +181,24 @@ $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? da
                 <thead>
                     <tr>
                         <th>Employee</th>
-                        <th class="text-right">Basic</th>
-                        <th class="text-right">Allow.</th>
-                        <th class="text-right">Bonus</th>
-                        <th class="text-right">Holiday</th>
-                        <th class="text-right">Gross</th>
-                        <th class="text-right text-red-600">Ded.</th>
-                        <th class="text-right">Net</th>
+                        <th class="text-left">Basic Pay</th>
+                        <th class="text-left">Addl. Earnings</th>
+                        <th class="text-left">Gross Pay</th>
+                        <th class="text-left text-red-600">Deductions</th>
+                        <th class="text-left">Net Pay</th>
                     </tr>
                 </thead>
                 <tbody id="modalBody"></tbody>
+                <tfoot id="modalTotals" class="hidden">
+                    <tr>
+                        <td style="font-weight:600;color:#111827;">Total</td>
+                        <td class="text-left" id="totalBasic"></td>
+                        <td class="text-left" id="totalAddl"></td>
+                        <td class="text-left" id="totalGross" style="font-weight:600;"></td>
+                        <td class="text-left" id="totalDed" style="color:#dc2626;"></td>
+                        <td class="text-left" id="totalNet" style="font-weight:700;color:#16a34a;"></td>
+                    </tr>
+                </tfoot>
             </table>
             <div id="modalEmpty" class="hidden text-center py-8 text-xs text-gray-400">No employee data available.</div>
         </div>
@@ -242,24 +251,38 @@ function showBatchModal(idx) {
     modalTitle.textContent = b.period + ' — Employee Breakdown';
     var emp = b.employees || [];
     modalBody.innerHTML = '';
+    document.getElementById('modalTotals').classList.add('hidden');
     if (emp.length === 0) {
         modalEmpty.classList.remove('hidden');
     } else {
         modalEmpty.classList.add('hidden');
+        var sumBasic = 0, sumAddl = 0, sumGross = 0, sumDed = 0, sumNet = 0;
         emp.forEach(function (e) {
             var fmt = function(n) { return '₱' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
             var tr = document.createElement('tr');
+            var addl = (e.total_allowances || 0) + (e.total_bonuses || 0) + (e.holiday_pay || 0);
+            sumBasic += e.basic_salary || 0;
+            sumAddl += addl;
+            sumGross += e.gross_pay || 0;
+            sumDed += e.total_deductions || 0;
+            sumNet += e.net_pay || 0;
             tr.innerHTML =
                 '<td style="font-weight:600;color:#111827;">' + e.name + '</td>' +
-                '<td class="text-right">' + fmt(e.basic_salary) + '</td>' +
-                '<td class="text-right">' + fmt(e.total_allowances) + '</td>' +
-                '<td class="text-right">' + fmt(e.total_bonuses) + '</td>' +
-                '<td class="text-right">' + fmt(e.holiday_pay) + '</td>' +
-                '<td class="text-right" style="font-weight:600;">' + fmt(e.gross_pay) + '</td>' +
-                '<td class="text-right" style="color:#dc2626;">' + fmt(e.total_deductions) + '</td>' +
-                '<td class="text-right" style="font-weight:700;color:#16a34a;">' + fmt(e.net_pay) + '</td>';
+                '<td class="text-left">' + fmt(e.basic_salary) + '</td>' +
+                '<td class="text-left">' + fmt(addl) + '</td>' +
+                '<td class="text-left" style="font-weight:600;">' + fmt(e.gross_pay) + '</td>' +
+                '<td class="text-left" style="color:#dc2626;">' + fmt(e.total_deductions) + '</td>' +
+                '<td class="text-left" style="font-weight:700;color:#16a34a;">' + fmt(e.net_pay) + '</td>';
             modalBody.appendChild(tr);
         });
+        (function(s) {
+            document.getElementById('totalBasic').textContent = s.fmt(s.sumBasic);
+            document.getElementById('totalAddl').textContent = s.fmt(s.sumAddl);
+            document.getElementById('totalGross').textContent = s.fmt(s.sumGross);
+            document.getElementById('totalDed').textContent = s.fmt(s.sumDed);
+            document.getElementById('totalNet').textContent = s.fmt(s.sumNet);
+        })({ fmt: function(n) { return '₱' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }, sumBasic: sumBasic, sumAddl: sumAddl, sumGross: sumGross, sumDed: sumDed, sumNet: sumNet });
+        document.getElementById('modalTotals').classList.remove('hidden');
     }
     batchModal.classList.add('open');
 }
