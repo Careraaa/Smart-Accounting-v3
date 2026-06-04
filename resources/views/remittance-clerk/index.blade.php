@@ -164,7 +164,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Collections</p>
-                        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.15s">₱{{ number_format($totalCollections, 0) }}</p>
+                        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.15s">₱{{ number_format($totalCollections, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center transition-all duration-300 group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
@@ -181,19 +181,19 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Expenses</p>
-                        <p class="text-lg font-bold text-red-500 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.2s">₱{{ number_format($totalExpenses, 0) }}</p>
+                        <p class="text-lg font-bold text-red-500 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.2s">₱{{ number_format($totalExpenses, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-red-50 text-red-500 flex items-center justify-center transition-all duration-300 group-hover:bg-red-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
                     </div>
                 </div>
-                <div class="mt-2 text-[9px] text-gray-400">Avg ₱{{ number_format($averageExpenses, 0) }} / record</div>
+                <div class="mt-2 text-[9px] text-gray-400">Avg ₱{{ number_format($averageExpenses, 2) }} / record</div>
             </div>
             <div class="group rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 no-underline" style="animation-delay:0.15s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-                        <p class="text-lg font-bold text-blue-600 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.25s">₱{{ number_format($totalNetRemittance, 0) }}</p>
+                        <p class="text-lg font-bold text-blue-600 tabular-nums mt-0.5 rc-count-num" style="animation-delay:0.25s">₱{{ number_format($totalNetRemittance, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
@@ -233,12 +233,12 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                     <div class="grid grid-cols-2 gap-3">
                         <div class="rounded-lg bg-gray-900 px-3.5 py-2.5">
                             <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400">Collections</p>
-                            <p class="text-sm font-bold text-white tabular-nums mt-0.5">₱{{ number_format($totalCollections, 0) }}</p>
+                            <p class="text-sm font-bold text-white tabular-nums mt-0.5">₱{{ number_format($totalCollections, 2) }}</p>
                             <p class="text-[9px] text-gray-500 mt-0.5">{{ $cvePct($totalCollections) }}% of total</p>
                         </div>
                         <div class="rounded-lg bg-gray-50 border border-gray-200 px-3.5 py-2.5">
                             <p class="text-[9px] font-bold uppercase tracking-wider text-gray-400">Expenses</p>
-                            <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($totalExpenses, 0) }}</p>
+                            <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($totalExpenses, 2) }}</p>
                             <p class="text-[9px] text-gray-400 mt-0.5">{{ $cvePct($totalExpenses) }}% of total</p>
                         </div>
                     </div>
@@ -255,7 +255,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                     <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3.5 py-2.5">
                         <div>
                             <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-                            <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($totalNetRemittance, 0) }}</p>
+                            <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($totalNetRemittance, 2) }}</p>
                         </div>
                         <div class="text-right">
                             <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Margin</p>
@@ -292,7 +292,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                     <div class="flex items-center justify-between bg-gray-50 rounded-lg px-3.5 py-2.5 transition-opacity" id="mct-detail">
                         <div>
                             <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider" id="mct-detail-month">{{ $monthlyCollectionTrend[$mctActive]['month'] ?? '–' }}</p>
-                            <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5" id="mct-detail-val">₱{{ number_format($monthlyCollectionTrend[$mctActive]['total_collection'] ?? 0, 0) }}</p>
+                            <p class="text-xs font-bold text-gray-900 tabular-nums mt-0.5" id="mct-detail-val">₱{{ number_format($monthlyCollectionTrend[$mctActive]['total_collection'] ?? 0, 2) }}</p>
                         </div>
                         <div class="text-right">
                             <p class="text-[9px] text-gray-400">Total collection</p>
@@ -329,7 +329,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
     const detMonth = document.getElementById('mct-detail-month');
     const detVal = document.getElementById('mct-detail-val');
     if (cols.length && detMonth) {
-        function fmt(n) { return '₱' + Number(n).toLocaleString('en-PH', { maximumFractionDigits: 0 }); }
+        function fmt(n) { return '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
         function activate(el) {
             cols.forEach(c => {
                 c.querySelector('div:first-child')?.classList.remove('bg-gray-900');
@@ -363,14 +363,15 @@ $mctActive = count($monthlyCollectionTrend) - 1;
     document.querySelectorAll('.rc-count-num').forEach(el => {
         const text = el.textContent.trim();
         const prefix = text.startsWith('₱') ? '₱' : '';
-        const target = parseInt(text.replace(/[₱?,]/g, '')) || 0;
+        const target = parseFloat(text.replace(/[₱?,]/g, '')) || 0;
         if (target === 0) return;
         const steps = 24, dur = 500;
         let cur = 0;
         const inc = target / steps;
         const t = setInterval(() => {
             cur++;
-            el.textContent = prefix + Math.round(inc * cur).toLocaleString('en-PH');
+            const val = inc * cur;
+            el.textContent = prefix + val.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             if (cur >= steps) { el.textContent = text; clearInterval(t); }
         }, dur / steps);
     });

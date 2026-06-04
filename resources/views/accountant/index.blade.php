@@ -102,7 +102,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Payroll</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.15s">₱{{ number_format($totalPayroll, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.15s">₱{{ number_format($totalPayroll, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -116,7 +116,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Allowances</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.2s">₱{{ number_format($totalAllowances, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.2s">₱{{ number_format($totalAllowances, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -130,7 +130,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Deductions</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.25s">₱{{ number_format($totalDeductions, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.25s">₱{{ number_format($totalDeductions, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
@@ -144,7 +144,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Avg. Basic</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.35s">₱{{ number_format($averageBasicSalary ?? 0, 0) }}</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.35s">₱{{ number_format($averageBasicSalary ?? 0, 2) }}</p>
                     </div>
                     <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
@@ -239,7 +239,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                             Net pay trend
                         </span>
                         <span>
-                            Peak: <strong class="text-gray-700 font-mono">₱{{ number_format($chartMax, 0) }}</strong>
+                            Peak: <strong class="text-gray-700 font-mono">₱{{ number_format($chartMax, 2) }}</strong>
                         </span>
                     </div>
                     @else
@@ -332,20 +332,20 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                                 <circle cx="50" cy="50" r="36" fill="none" stroke="#f43f5e" stroke-width="8" stroke-dasharray="{{ $circ - $allowOffset }} {{ $circ }}" stroke-dashoffset="{{ -$allowOffset }}" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ $circ - $allowOffset }};animation-delay:0.3s"/>
                             </svg>
                             <div class="absolute inset-0 flex items-center justify-center">
-                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">₱{{ number_format($adTotal/1000,0) }}k</span>
+                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">₱{{ number_format($adTotal/1000,2) }}k</span>
                             </div>
                         </div>
                         <div class="flex-1 space-y-2 w-full">
                             <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-emerald-50 transition-colors">
                                 <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-emerald-500"></span>
                                 <span class="text-[10px] font-semibold text-gray-700 flex-1">Allowances</span>
-                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">₱{{ number_format($ta,0) }}</span>
+                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">₱{{ number_format($ta,2) }}</span>
                                 <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adAllowPct }}%</span>
                             </div>
                             <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-rose-50 transition-colors">
                                 <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-rose-500"></span>
                                 <span class="text-[10px] font-semibold text-gray-700 flex-1">Deductions</span>
-                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">₱{{ number_format($td,0) }}</span>
+                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">₱{{ number_format($td,2) }}</span>
                                 <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adDeducPct }}%</span>
                             </div>
                         </div>
