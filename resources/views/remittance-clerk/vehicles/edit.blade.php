@@ -37,12 +37,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Operator <span class="text-amber-600">*</span></label>
-                    <select name="operator" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('operator') border-red-300 @enderror" required>
-                        <option value="">-- Select Operator --</option>
-                        @foreach($operators as $operator)
-                        <option value="{{ $operator }}" {{ old('operator', $vehicle->operator) === $operator ? 'selected' : '' }}>{{ $operator }}</option>
-                        @endforeach
-                    </select>
+                    <input type="text" name="operator" value="{{ old('operator', $vehicle->operator) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('operator') border-red-300 @enderror" placeholder="e.g., Juan Dela Cruz" required>
                     @error('operator') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>

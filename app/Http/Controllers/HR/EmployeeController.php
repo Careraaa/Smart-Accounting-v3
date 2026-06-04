@@ -87,7 +87,7 @@ class EmployeeController extends Controller
                 'last_name' => 'required|string|max:100',
                 'gender' => 'required|string|in:male,female,prefer_not_to_say',
                 'email' => 'nullable|email|unique:users,email',
-                'phone' => ['required', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+                'phone' => ['required', 'regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/'],
                 'address_street' => 'required|string|max:150',
                 'address_barangay' => 'required|string|max:100',
                 'address_city' => 'required|string|max:100',
@@ -118,7 +118,7 @@ class EmployeeController extends Controller
                 'bank_account_number' => 'nullable|string|max:50',
             ],
             [
-                'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
+                'phone.regex' => 'Phone must be 09XXXXXXXXX, +639XXXXXXXXX, or 9XXXXXXXXX format.',
                 'salary_rate.between' => 'Daily rate must be between 0.00 and 999,999.99.',
                 'work_days_per_week.in' => 'Work days per week must be 5 or 6.',
                 'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
@@ -198,7 +198,7 @@ class EmployeeController extends Controller
                 'last_name' => 'required|string|max:100',
                 'gender' => 'required|string|in:male,female,prefer_not_to_say',
                 'email' => 'nullable|email|unique:users,email,' . $employee->id,
-                'phone' => ['required', 'regex:/^(09\d{9}|\+639\d{9})$/'],
+                'phone' => ['required', 'regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/'],
                 'address_street' => 'required|string|max:150',
                 'address_barangay' => 'required|string|max:100',
                 'address_city' => 'required|string|max:100',
@@ -227,7 +227,7 @@ class EmployeeController extends Controller
                 'bank_account_number' => 'nullable|string|max:50',
             ],
             [
-                'phone.regex' => 'Phone must be 09XXXXXXXXX or +639XXXXXXXXX format.',
+                'phone.regex' => 'Phone must be 09XXXXXXXXX, +639XXXXXXXXX, or 9XXXXXXXXX format.',
                 'salary_rate.between' => 'Daily rate must be between 0.00 and 999,999.99.',
                 'work_days_per_week.in' => 'Work days per week must be 5 or 6.',
                 'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
@@ -374,6 +374,8 @@ class EmployeeController extends Controller
         $phone = preg_replace('/[^0-9+]/', '', $phone);
         if (str_starts_with($phone, '+63')) {
             $phone = '0' . substr($phone, 3);
+        } elseif (strlen($phone) === 10 && str_starts_with($phone, '9')) {
+            $phone = '0' . $phone;
         }
         return $phone;
     }

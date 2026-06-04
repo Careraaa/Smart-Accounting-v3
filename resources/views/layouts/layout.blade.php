@@ -822,8 +822,16 @@
 
     {{-- Page-specific scripts --}}
     @yield('scripts')
+
     @stack('scripts')
 
+    <script>
+        document.addEventListener('keydown', function(e) {
+            if (e.target.matches('input[type="number"]') && e.key === '-') {
+                e.preventDefault();
+            }
+        });
+    </script>
     {{-- Global confirm modal (replaces browser confirm for payroll flows) --}}
     <div id="sa-confirm-overlay" style="display:none;">
         <div id="sa-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="saConfirmTitle">

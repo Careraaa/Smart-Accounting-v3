@@ -14,6 +14,26 @@
 .att-stat:nth-child(6) { animation-delay:0.3s; }
 .att-nav { animation:attFadeUp 0.35s ease-out 0.05s both; }
 .att-section { animation:attFadeUp 0.4s ease-out 0.1s both; }
+.att-tooltip-dynamic {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+}
+.att-tooltip-dynamic .att-tip-inner {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.2s cubic-bezier(0.16,1,0.3,1), transform 0.2s cubic-bezier(0.16,1,0.3,1);
+    transform-origin: center bottom;
+}
+.att-tooltip-dynamic.att-tooltip--show .att-tip-inner {
+    opacity: 1;
+    transform: scale(1);
+}
+.att-tooltip-dynamic.att-tooltip--below .att-tip-inner {
+    transform-origin: center top;
+}
+.att-tooltip-dynamic.att-tooltip--below .tip-arrow-down { display: none; }
+.att-tooltip-dynamic.att-tooltip--below .tip-arrow-up { display: block; }
 @media (max-width: 639px) {
     .att-section .grid-cols-7 > div { min-height:60px !important; }
 }
@@ -184,7 +204,7 @@
         </div>
 
         {{-- Calendar Grid --}}
-        <div class="att-section bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mb-6">
+        <div class="att-section bg-white border border-gray-200 rounded-2xl shadow-sm mb-6">
 
             @php
                 function renderHalfEmp($days, $label) {
@@ -236,6 +256,9 @@
                                         $isFuture = $day->isAfter($today);
                                         $isWeekend = $day->isSaturday() || $day->isSunday();
                                         $hasOtut = $otHours > 0 || $utHours > 0;
+                                        $timeIn = $att && $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:ia') : null;
+                                        $timeOut = $att && $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:ia') : null;
+                                        $hrsWorked = $att ? $att->hours_worked : null;
 
                                         if ($att) {
                                             $bgClass = match($att->status) {
@@ -279,7 +302,7 @@
                                             $statusColor = '';
                                         }
                                     @endphp
-                                    <div class="rounded-xl min-h-[82px] p-2 border-2 flex flex-col gap-0.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md {{ $bgClass }} {{ $isToday ? '!border-rose-500 shadow-md shadow-rose-100' : '' }}">
+                                    <div class="rounded-xl min-h-[82px] p-2 border-2 flex flex-col gap-0.5 transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md group relative {{ $bgClass }} {{ $isToday ? '!border-rose-500 shadow-md shadow-rose-100' : '' }}">
                                         {{-- Top row: day number + status dot/label --}}
                                         <div class="flex items-center justify-between gap-0.5">
                                             <span class="text-sm font-extrabold text-gray-700 leading-none {{ $isToday ? '!text-rose-600' : '' }}">{{ $day->day }}</span>
@@ -293,10 +316,6 @@
 
                                         {{-- Time range (only when attendance record exists) --}}
                                         @if($att && !$isFuture)
-                                            @php
-                                                $timeIn = $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:ia') : null;
-                                                $timeOut = $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:ia') : null;
-                                            @endphp
                                             <div class="text-[11px] font-mono text-gray-500 leading-tight -mt-0.5">
                                                 @if($timeIn && $timeOut)
                                                     <span>{{ $timeIn }} → {{ $timeOut }}</span>
@@ -329,6 +348,45 @@
                                             @endif
                                         </div>
                                         @endif
+
+                                        {{-- Hover tooltip template (cloned to body on hover) --}}
+                                        @if($att && !$isFuture)
+                                        <template class="att-tip-tpl">
+                                            <div class="att-tip-inner bg-white border border-gray-200 rounded-xl shadow-xl p-4 min-w-[250px]">
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <span class="w-3 h-3 rounded-full {{ $dotClass }} shrink-0"></span>
+                                                    <span class="text-sm font-bold uppercase tracking-wider {{ $statusColor }}">{{ $statusText }}</span>
+                                                    <span class="text-sm text-gray-400 ml-auto font-medium">{{ $day->format('D, M j') }}</span>
+                                                </div>
+                                                <div class="space-y-1.5">
+                                                    @if($timeIn || $timeOut)
+                                                    <div class="flex items-center gap-1.5 text-[15px] text-gray-600">
+                                                        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                        <span class="font-mono">{{ $timeIn ?? '—' }} → {{ $timeOut ?? '—' }}</span>
+                                                    </div>
+                                                    @endif
+                                                    @if($hrsWorked !== null)
+                                                    <div class="flex items-center gap-1.5 text-[15px] text-gray-600">
+                                                        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                        <span>{{ number_format($hrsWorked, 1) }} hrs worked</span>
+                                                    </div>
+                                                    @endif
+                                                    @if($hasOtut)
+                                                    <div class="flex items-center gap-1.5 pt-1.5 mt-1.5 border-t border-gray-100">
+                                                        @if($otHours > 0)
+                                                        <span class="inline-flex items-center gap-0.5 text-sm font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">+{{ number_format($otHours, 1) }}h OT</span>
+                                                        @endif
+                                                        @if($utHours > 0)
+                                                        <span class="inline-flex items-center gap-0.5 text-sm font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-200">{{ number_format($utHours, 1) }}h UT</span>
+                                                        @endif
+                                                    </div>
+                                                    @endif
+                                                </div>
+                                                <div class="tip-arrow-down absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-r border-b border-gray-200 rotate-45"></div>
+                                                <div class="tip-arrow-up absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-l border-t border-gray-200 rotate-45 hidden"></div>
+                                            </div>
+                                        </template>
+                                        @endif
                                     </div>
                                 @endif
                             @endforeach
@@ -343,4 +401,45 @@
 
     </div>
 </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var activeTip = null;
+    document.querySelectorAll('.group').forEach(function(cell) {
+        var tpl = cell.querySelector('.att-tip-tpl');
+        if (!tpl) return;
+        cell.addEventListener('mouseenter', function() {
+            if (activeTip) { activeTip.remove(); activeTip = null; }
+            var cr = cell.getBoundingClientRect();
+            var wrapper = document.createElement('div');
+            wrapper.className = 'att-tooltip-dynamic';
+            wrapper.innerHTML = tpl.innerHTML;
+            document.body.appendChild(wrapper);
+            var inner = wrapper.querySelector('.att-tip-inner');
+            var th = inner.offsetHeight || 180;
+            var above = cr.top - th - 10;
+            wrapper.style.left = (cr.left + cr.width / 2) + 'px';
+            wrapper.style.transform = 'translateX(-50%)';
+            if (above < 6) {
+                wrapper.classList.add('att-tooltip--below');
+                wrapper.style.top = (cr.bottom + 10) + 'px';
+            } else {
+                wrapper.style.top = (above) + 'px';
+            }
+            activeTip = wrapper;
+            requestAnimationFrame(function() { wrapper.classList.add('att-tooltip--show'); });
+        });
+        cell.addEventListener('mouseleave', function() {
+            if (!activeTip) return;
+            var el = activeTip;
+            el.classList.remove('att-tooltip--show');
+            setTimeout(function() {
+                if (el.parentNode) el.remove();
+                if (activeTip === el) activeTip = null;
+            }, 250);
+        });
+    });
+});
+</script>
+@endpush
 @endsection

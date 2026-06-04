@@ -175,7 +175,7 @@
             </label>
             <div class="flex items-stretch border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all duration-150 focus-within:border-red-400 dark:focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/10">
                 <span class="flex items-center px-3 bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-sm border-r border-gray-200 dark:border-gray-600 whitespace-nowrap font-mono">+63</span>
-                <input type="text" name="phone" id="phone" value="{{ preg_replace('/^(?:\+63|0)/', '', old('phone', $employee->phone ?? '')) }}" required placeholder="9123456789" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"
+                <input type="text" name="phone" id="phone" value="{{ preg_replace('/^(?:\+63|0)/', '', old('phone', $employee->phone ?? '')) }}" required placeholder="9123456789" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'').replace(/^0+/,'')"
                     class="flex-1 border-none! rounded-none! shadow-none! focus:ring-0! px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 placeholder-gray-400 dark:placeholder-gray-500 {{ $errors->has('phone') ? 'border-red-500 dark:border-red-400!' : '' }}">
             </div>
             @error('phone')
