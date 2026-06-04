@@ -110,6 +110,26 @@
 
         .mono { font-family: var(--font-mono); }
 
+        /* Signatures */
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-rule);
+        }
+
+        .signature-block {
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .signature-label { font-size: 9px; font-weight: 600; color: var(--gray-mid); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+        .signature-name { font-size: 14px; font-weight: 700; color: var(--black); }
+        .signature-title { font-size: 9px; color: var(--gray-mid); margin-top: 4px; }
+
+        .report-generated { margin-top: 16px; text-align: center; font-size: 9px; color: var(--gray-mid); }
+
         /* Print */
         @media print {
             body { background: #fff; }
@@ -201,6 +221,23 @@
             </tfoot>
             @endif
         </table>
+
+        {{-- Signatures --}}
+        <div class="signatures">
+            <div class="signature-block">
+                <p class="signature-label">Prepared by:</p>
+                <p class="signature-name">{{ $preparedBy?->name ?? '________________________' }}</p>
+                <p class="signature-title">{{ $preparedBy?->position ?? '________________________' }}</p>
+            </div>
+            <div class="signature-block">
+                <p class="signature-label">Checked by:</p>
+                <p class="signature-name">{{ $checkedBy?->name ?? '________________________' }}</p>
+                <p class="signature-title">{{ $checkedBy?->position ?? '________________________' }}</p>
+            </div>
+        </div>
+        <div class="report-generated">
+            <p>Report generated on {{ date('M d, Y \a\t h:i A') }}</p>
+        </div>
     </div>
 
 </body>
