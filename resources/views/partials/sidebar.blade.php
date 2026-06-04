@@ -312,13 +312,6 @@
                         </ul>
                     </li>
 
-                    <li class="sidebar-item">
-                        <a href="{{ route('bonuses.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center text-yellow-500"><i class="feather-award" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Bonuses</span>
-                        </a>
-                    </li>
-
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('payroll-approval.*', 'remittance-approval.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center text-indigo-500"><i class="feather-check-circle" style="font-size:18px"></i></span>
@@ -490,13 +483,6 @@
                             <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.statutory-deductions.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.statutory-deductions.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-green-600"><i class="feather-shield" style="font-size:13px"></i></span><span>Statutory Deductions</span></a></li>
                             <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('payroll.receivables.*') ? 'active' : 'text-gray-500' }}" href="{{ route('payroll.receivables.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-green-600"><i class="feather-inbox" style="font-size:13px"></i></span><span>Employee Receivables</span></a></li>
                         </ul>
-                    </li>
-
-                    <li class="sidebar-item">
-                        <a href="{{ route('bonuses.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
-                            <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('bonuses.*', 'payroll.thirteenth-month-pay.*') ? 'text-yellow-500' : 'text-yellow-500' }}"><i class="feather-award" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Bonuses</span>
-                        </a>
                     </li>
 
                     <li class="sidebar-item has-sub">

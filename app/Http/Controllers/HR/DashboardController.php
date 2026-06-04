@@ -5,7 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Traits\LogsUserActivity;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
-use App\Models\Bonus;
+
 use App\Models\CashAdvance;
 use App\Models\Holiday;
 use App\Models\Leave;
@@ -172,9 +172,6 @@ class DashboardController extends Controller
             ->where('date', '<=', now()->addDays(30))
             ->count();
 
-        // ── Bonus Stats ──
-        $activeBonuses = Bonus::where('status', 'active')->count();
-
         return view('hr.index', compact(
             'totalEmployees',
             'newHiresThisMonth',
@@ -200,7 +197,6 @@ class DashboardController extends Controller
             'totalPaidCA',
             'totalPaidLoans',
             'upcomingHolidays',
-            'activeBonuses',
             'pendingItems',
             'totalPending',
         ));

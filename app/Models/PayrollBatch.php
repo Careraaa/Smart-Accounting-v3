@@ -12,6 +12,7 @@ class PayrollBatch extends Model
     use HasFactory;
 
     protected $fillable = [
+        'type',
         'period_start',
         'period_end',
         'status',
@@ -40,6 +41,11 @@ class PayrollBatch extends Model
         return $this->hasMany(Payroll::class, 'batch_id');
     }
 
+    public function thirteenthMonthPays()
+    {
+        return $this->hasMany(ThirteenthMonthPay::class, 'batch_id');
+    }
+
     public function generatedBy()
     {
         return $this->belongsTo(User::class, 'generated_by');
@@ -62,6 +68,11 @@ class PayrollBatch extends Model
 
     public function getDisplayNameAttribute(): string
     {
+        if ($this->isThirteenthMonth()) {
+            $year = $this->period_start?->format('Y') ?? now()->year;
+            return "13th Month Pay {$year}";
+        }
+
         if (!$this->period_start) {
             return 'Payroll Batch';
         }
@@ -102,6 +113,23 @@ class PayrollBatch extends Model
     public function isEditable(): bool
     {
         return in_array($this->status, ['draft', 'submitted', 'rejected'], true);
+    }
+
+    /* ── Scopes ────────────────────────────────────────────────── */
+
+    public function scopeRegular($query)
+    {
+        return $query->where('type', 'regular');
+    }
+
+    public function scopeThirteenthMonth($query)
+    {
+        return $query->where('type', 'thirteenth_month');
+    }
+
+    public function isThirteenthMonth(): bool
+    {
+        return $this->type === 'thirteenth_month';
     }
 
     /* ── Static helpers ────────────────────────────────────────── */

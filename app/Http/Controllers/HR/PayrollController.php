@@ -14,6 +14,7 @@
     use App\Services\PayrollService;
     use App\Services\LeaveService;
     use App\Services\PayrollDeductionService;
+    use App\Services\ThirteenthMonthPayService;
     use App\Notifications\PayrollNotification;
     use App\Traits\LogsUserActivity;
     use Illuminate\Http\Request;
@@ -27,12 +28,14 @@
         protected $attendanceService;
         protected $payrollService;
         protected $leaveService;
+        protected $thirteenthMonthService;
 
-        public function __construct(AttendanceService $attendanceService, PayrollService $payrollService, LeaveService $leaveService)
+        public function __construct(AttendanceService $attendanceService, PayrollService $payrollService, LeaveService $leaveService, ThirteenthMonthPayService $thirteenthMonthService)
         {
             $this->attendanceService = $attendanceService;
             $this->payrollService = $payrollService;
             $this->leaveService = $leaveService;
+            $this->thirteenthMonthService = $thirteenthMonthService;
         }
 
         /* ══════════════════════════════════════════════════════════════
@@ -45,14 +48,25 @@
                 ->count();
 
             // All batches, newest period first — main list
-            $allBatches = PayrollBatch::withCount('payrolls')
+            $allBatches = PayrollBatch::regular()
+                ->withCount('payrolls')
                 ->withSum('payrolls', 'gross_pay')
                 ->withSum('payrolls', 'total_deductions')
                 ->withSum('payrolls', 'net_pay')
                 ->with(['generatedBy'])
                 ->orderByDesc('period_start')
                 ->orderByDesc('period_end')
-                ->get();
+                ->get()
+                ->concat(
+                    PayrollBatch::thirteenthMonth()
+                        ->withCount('thirteenthMonthPays')
+                        ->withSum('thirteenthMonthPays', 'thirteenth_month_pay')
+                        ->with(['generatedBy'])
+                        ->orderByDesc('period_start')
+                        ->get()
+                )
+                ->sortByDesc(fn ($b) => $b->period_start)
+                ->values();
 
             // Sidebar: last 5 batches (only need count, not full payrolls relation)
             $recentBatches = PayrollBatch::withCount('payrolls')
@@ -258,23 +272,27 @@
         ══════════════════════════════════════════════════════════════ */
         public function batchGenerate(Request $request)
         {
+            $type = $request->input('type', 'regular');
+
+            if ($type === 'thirteenth_month') {
+                return $this->generateThirteenthMonthBatch($request);
+            }
+
             // Get period from request or use current period
             $period = $request->input('period');
-            
+
             if ($period) {
-                // Period is sent as "start|end" from the dropdown
                 [$periodStart, $periodEnd] = explode('|', $period);
                 $period = [
                     'start' => $periodStart,
                     'end' => $periodEnd,
                 ];
             } else {
-                // Fallback to current period
                 $period = PayrollBatch::resolvePeriod();
             }
 
-            // Check if a draft batch already exists for this period
-            $existing = PayrollBatch::where('period_start', $period['start'])
+            $existing = PayrollBatch::regular()
+                ->where('period_start', $period['start'])
                 ->where('period_end', $period['end'])
                 ->where('status', 'draft')
                 ->first();
@@ -297,6 +315,30 @@
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
                 ->with('success', 'Batch created. Add employees, review, then finalize.')
+                ->with('_sound_success', true);
+        }
+
+        protected function generateThirteenthMonthBatch(Request $request)
+        {
+            $year = (int) $request->input('year', now()->year);
+
+            $existing = PayrollBatch::thirteenthMonth()
+                ->whereYear('period_start', $year)
+                ->first();
+
+            if ($existing) {
+                return redirect()
+                    ->route('payroll.thirteenth-month-pay.batch.details', $existing)
+                    ->with('info', 'A 13th month pay batch for ' . $year . ' already exists (status: ' . $existing->status . '). Only one batch per year is allowed.');
+            }
+
+            $batch = $this->thirteenthMonthService->generateBatch($year, auth()->id());
+
+            $this->logActivity('created', "13th month pay batch #{$batch->id} for {$year}", request()->url(), 'thirteenth_month', $batch->id);
+
+            return redirect()
+                ->route('payroll.thirteenth-month-pay.batch.details', $batch)
+                ->with('success', "13th month pay batch for {$year} generated. Review the records below.")
                 ->with('_sound_success', true);
         }
 
@@ -403,9 +445,14 @@
 
         public function generatePayslipIndex(Request $request)
         {
-            $allBatches = PayrollBatch::withCount('payrolls')
-                ->with('payrolls')
-                ->whereHas('payrolls')
+            $allBatches = PayrollBatch::withCount(['payrolls', 'thirteenthMonthPays'])
+                ->with(['payrolls', 'thirteenthMonthPays'])
+                ->where(function ($q) {
+                    $q->whereHas('payrolls')
+                      ->orWhere(function ($q) {
+                          $q->where('type', 'thirteenth_month')->whereHas('thirteenthMonthPays');
+                      });
+                })
                 ->orderByDesc('created_at')
                 ->get();
 

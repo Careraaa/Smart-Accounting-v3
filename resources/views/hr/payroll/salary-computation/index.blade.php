@@ -117,18 +117,45 @@
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('generateModal')"></div>
     <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
         <h3 class="text-base font-bold text-gray-900">Generate Batch</h3>
-        <p class="text-xs text-gray-400 mt-1 mb-4">Select a payroll period to create a new batch.</p>
+        <p class="text-xs text-gray-400 mt-1 mb-4">Select batch type and period.</p>
         <form action="{{ route('payroll.batch.generate') }}" method="POST">
             @csrf
-            <select name="period" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white" required>
-                <option value="">Select a period&hellip;</option>
-                @foreach($availablePeriods as $period)
-                <option value="{{ $period['start'] }}|{{ $period['end'] }}"
-                        @if($period['start'] === $currentPeriod['start'] && $period['end'] === $currentPeriod['end']) selected @endif>
-                    {{ $period['display'] }}
-                </option>
-                @endforeach
-            </select>
+            <div class="mb-3">
+                <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Batch Type</label>
+                <div class="flex gap-2">
+                    <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 border-2 rounded-xl text-sm font-semibold cursor-pointer transition-all has-[:checked]:border-gray-900 has-[:checked]:bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300" onclick="toggleBatchType('regular')">
+                        <input type="radio" name="type" value="regular" checked class="hidden">
+                        <span class="w-2 h-2 rounded-full border-2 border-gray-300 has-[:checked]:bg-gray-900" id="regularDot"></span>
+                        Regular Payroll
+                    </label>
+                    <label class="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 border-2 rounded-xl text-sm font-semibold cursor-pointer transition-all has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-50 border-gray-200 text-gray-500 hover:border-gray-300" onclick="toggleBatchType('thirteenth_month')">
+                        <input type="radio" name="type" value="thirteenth_month" class="hidden">
+                        <span class="w-2 h-2 rounded-full border-2 border-gray-300" id="thirteenthDot"></span>
+                        13th Month
+                    </label>
+                </div>
+            </div>
+            <div id="regularFields">
+                <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Payroll Period</label>
+                <select name="period" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white">
+                    <option value="">Select a period&hellip;</option>
+                    @foreach($availablePeriods as $period)
+                    <option value="{{ $period['start'] }}|{{ $period['end'] }}"
+                            @if($period['start'] === $currentPeriod['start'] && $period['end'] === $currentPeriod['end']) selected @endif>
+                        {{ $period['display'] }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+            <div id="thirteenthFields" class="hidden">
+                <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">Calendar Year</label>
+                <select name="year" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white">
+                    @foreach(range(now()->year, now()->year - 5) as $y)
+                    <option value="{{ $y }}" @if($y == now()->year) selected @endif>{{ $y }}</option>
+                    @endforeach
+                </select>
+                <p class="text-xs text-gray-400 mt-1.5">Generates 13th month pay for all eligible employees for the selected year.</p>
+            </div>
             <div class="flex gap-2 mt-4">
                 <button type="button" onclick="closeModal('generateModal')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Cancel</button>
                 <button type="submit" class="flex-1 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer">Generate</button>
@@ -156,8 +183,25 @@
 
 @push('scripts')
 <script>
-window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
+window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => $b->isThirteenthMonth() ? [
     'id' => $b->id,
+    'type' => 'thirteenth_month',
+    'period_start' => $b->period_start->format('Y-m-d'),
+    'period_end' => $b->period_end->format('Y-m-d'),
+    'period_start_display' => $b->period_start->format('Y'),
+    'period_end_display' => '',
+    'month_year' => $b->period_start->format('Y'),
+    'half' => '13th Month',
+    'is_first' => true,
+    'status' => $b->status ?? 'draft',
+    'payrolls_count' => $b->thirteenth_month_pays_count ?? 0,
+    'gross_pay' => (float) ($b->thirteenth_month_pays_sum_thirteenth_month_pay ?? 0),
+    'total_deductions' => 0,
+    'net_pay' => (float) ($b->thirteenth_month_pays_sum_thirteenth_month_pay ?? 0),
+    'url' => route('payroll.thirteenth-month-pay.batch.details', $b),
+] : [
+    'id' => $b->id,
+    'type' => 'regular',
     'period_start' => $b->period_start->format('Y-m-d'),
     'period_end' => $b->period_end->format('Y-m-d'),
     'period_start_display' => $b->period_start->format('M d'),
@@ -204,6 +248,7 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
             noRes.classList.add('hidden');
             pageData.forEach(b => {
                 const si = STATUS_MAP[b.status] || STATUS_MAP.draft;
+                const periodLine = b.type === 'thirteenth_month' ? `Calendar Year ${b.month_year}` : `${b.period_start_display} &ndash; ${b.period_end_display}`;
 
                 const div = document.createElement('div');
                 div.innerHTML = `
@@ -216,7 +261,7 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
                                     ${si.label}
                                 </span>
                             </div>
-                            <p class="text-xs text-gray-400 mt-0.5 font-mono">${b.period_start_display} &ndash; ${b.period_end_display}</p>
+                            <p class="text-xs text-gray-400 mt-0.5 font-mono">${periodLine}</p>
                         </div>
                         <div class="hidden sm:flex items-center gap-6 shrink-0">
                             <div class="text-left min-w-[44px]">
@@ -282,6 +327,19 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => [
     render();
 })();
 
+            function toggleBatchType(type) {
+                const isRegular = type === 'regular';
+                document.getElementById('regularFields').classList.toggle('hidden', !isRegular);
+                document.getElementById('thirteenthFields').classList.toggle('hidden', isRegular);
+                document.querySelectorAll('input[name="type"]').forEach(r => r.checked = r.value === type);
+                document.getElementById('regularDot').className = 'w-2 h-2 rounded-full border-2 ' + (isRegular ? 'bg-gray-900 border-gray-900' : 'border-gray-300');
+                document.getElementById('thirteenthDot').className = 'w-2 h-2 rounded-full border-2 ' + (!isRegular ? 'bg-yellow-500 border-yellow-500' : 'border-gray-300');
+                document.querySelectorAll('label:has(input[name="type"])').forEach(l => {
+                    const isActive = l.querySelector('input')?.value === type;
+                    l.className = 'flex-1 flex items-center justify-center gap-2 px-3 py-2.5 border-2 rounded-xl text-sm font-semibold cursor-pointer transition-all ' +
+                        (isActive ? (isRegular ? 'border-gray-900 bg-gray-50 text-gray-900' : 'border-yellow-500 bg-yellow-50 text-yellow-700') : 'border-gray-200 text-gray-500 hover:border-gray-300');
+                });
+            }
             function openGenerateModal() { openModal('generateModal'); }
             function openModal(id) {
                 document.querySelectorAll('[id$="Modal"]').forEach(function(el) { el.classList.add('hidden'); });

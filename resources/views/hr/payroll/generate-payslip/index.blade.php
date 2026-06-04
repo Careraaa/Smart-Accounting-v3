@@ -59,14 +59,26 @@
 
 @push('scripts')
 <script>
-window.allBatches = {!! json_encode($allBatches->map(fn($b) => [
+window.allBatches = {!! json_encode($allBatches->map(fn($b) => $b->type === 'thirteenth_month' ? [
+    'id' => $b->id,
+    'period_start' => $b->period_start->format('Y-m-d'),
+    'period_end' => $b->period_end->format('Y-m-d'),
+    'period_start_display' => $b->period_start->format('Y'),
+    'period_end_display' => '',
+    'month_year' => $b->period_start->format('Y'),
+    'half' => '13th Month',
+    'status' => $b->status,
+    'payrolls_count' => (int) ($b->thirteenth_month_pays_count ?? $b->thirteenthMonthPays->count()),
+    'total_net_pay' => (float) ($b->thirteenthMonthPays->sum('thirteenth_month_pay')),
+    'url' => route('payroll.thirteenth-month-pay.batch.payslips', $b),
+] : [
     'id' => $b->id,
     'period_start' => $b->period_start->format('Y-m-d'),
     'period_end' => $b->period_end->format('Y-m-d'),
     'period_start_display' => $b->period_start->format('M d'),
     'period_end_display' => $b->period_end->format('M d, Y'),
     'month_year' => $b->period_start->format('F Y'),
-    'is_first' => (int) $b->period_start->format('d') <= 15,
+    'half' => (int) $b->period_start->format('d') <= 15 ? '1st half' : '2nd half',
     'status' => $b->status,
     'payrolls_count' => (int) ($b->payrolls_count ?? $b->payrolls->count()),
     'total_net_pay' => (float) ($b->total_net_pay ?? $b->payrolls->sum('net_pay')),
@@ -114,15 +126,15 @@ window.allBatches = {!! json_encode($allBatches->map(fn($b) => [
             noRes.classList.add('hidden');
             pageData.forEach(b => {
                 const si = STATUS_MAP[b.status] || STATUS_MAP.submitted;
-                const halfLabel = b.is_first ? '1st' : '2nd';
+                const halfLabel = b.half ?? (b.is_first ? '1st half' : '2nd half');
 
                 const card = document.createElement('div');
                 card.innerHTML = `
                     <a href="${b.url}" class="block no-underline text-inherit">
                         <div class="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50/60">
                             <div class="min-w-0 flex-1">
-                                <p class="text-sm font-semibold text-gray-900">${b.month_year} — ${halfLabel} half</p>
-                                <p class="text-[0.55rem] font-mono text-gray-400 mt-0.5">${b.period_start_display} – ${b.period_end_display}</p>
+                                <p class="text-sm font-semibold text-gray-900">${b.month_year}${halfLabel === '13th Month' ? ' — 13th Month' : ` — ${halfLabel}`}</p>
+                                <p class="text-[0.55rem] font-mono text-gray-400 mt-0.5">${b.period_start_display}${b.period_end_display ? ' – ' + b.period_end_display : ''}</p>
                             </div>
                             <div class="flex items-center gap-5 shrink-0">
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.55rem] font-semibold border ${si.bg} ${si.text} ${si.border}">
