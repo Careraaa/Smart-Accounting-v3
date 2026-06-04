@@ -91,15 +91,67 @@
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     Edit Vehicle
                 </a>
-                <form action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" class="inline" data-sa-confirm="Delete this vehicle?">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-all border-0 cursor-pointer">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        Delete
-                    </button>
-                </form>
+                <button type="button" onclick="openVehicleDeleteModal()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-all border-0 cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Delete
+                </button>
+                <form id="deleteVehicleForm" action="{{ route('vehicles.destroy', $vehicle) }}" method="POST" class="hidden">@csrf @method('DELETE')</form>
             </div>
         </div>
     </div>
 </div>
+{{-- Delete Confirmation Modal --}}
+<div id="vehicleDeleteModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closeVehicleDeleteModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-sm mx-4 p-6 transform transition-all duration-200 scale-95" id="vehicleDeleteModalContent">
+        <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                <svg class="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">Delete Vehicle</h3>
+            <p class="text-sm text-gray-500 mb-6">Delete <strong class="text-gray-700">&quot;{{ $vehicle->plate_number }}&quot;</strong>? This cannot be undone.</p>
+            <div class="flex items-center gap-3 w-full">
+                <button type="button" onclick="closeVehicleDeleteModal()" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all border-0 cursor-pointer">Cancel</button>
+                <button type="button" onclick="confirmVehicleDelete()" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25 transition-all border-0 cursor-pointer">Yes, delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function openVehicleDeleteModal() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 600;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.15);
+        document.getElementById('vehicleDeleteModal').classList.remove('hidden');
+        document.getElementById('vehicleDeleteModalContent').classList.remove('scale-95');
+        document.getElementById('vehicleDeleteModalContent').classList.add('scale-100');
+    }
+    function closeVehicleDeleteModal() {
+        document.getElementById('vehicleDeleteModalContent').classList.remove('scale-100');
+        document.getElementById('vehicleDeleteModalContent').classList.add('scale-95');
+        setTimeout(() => {
+            document.getElementById('vehicleDeleteModal').classList.add('hidden');
+        }, 150);
+    }
+    function confirmVehicleDelete() {
+        document.getElementById('deleteVehicleForm').submit();
+    }
+    document.getElementById('vehicleDeleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeVehicleDeleteModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeVehicleDeleteModal();
+    });
+</script>
+@endpush
 @endsection
