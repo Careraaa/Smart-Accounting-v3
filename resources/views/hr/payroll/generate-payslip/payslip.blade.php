@@ -400,9 +400,10 @@
                                 @endif
 
                                 @forelse ($payroll->allowances as $allow)
+                                    @php $isLeavePay = str_starts_with((string)($allow->allowance_type ?? ''), 'Leave Pay'); @endphp
                                     <tr>
                                         <td>{{ $allow->allowance_type }}</td>
-                                        <td class="mono right">{{ $allow->hours ?? '—' }}</td>
+                                        <td class="mono right">{{ $isLeavePay ? ((int)($allow->hours ?? 0)) . ' day' . ((int)($allow->hours ?? 0) !== 1 ? 's' : '') : ($allow->hours ?? '—') }}</td>
                                         <td class="mono">₱{{ number_format($allow->amount, 2) }}</td>
                                     </tr>
                                 @empty @endforelse
