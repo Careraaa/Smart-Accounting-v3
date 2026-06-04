@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Employee;
 use App\Models\Holiday;
+use App\Models\Shift;
 use App\Models\User;
 use App\Models\Attendance;
 use Carbon\Carbon;
@@ -116,6 +118,18 @@ class HolidayWageService
             ->get()
             ->keyBy(fn($a) => Carbon::parse($a->date)->toDateString());
 
+        // Load the employee's shift (or active fallback) to properly cap hours.
+        // This ensures early time-in (before shift start) does not inflate
+        // holiday overtime — only hours within or after the shift are counted.
+        $shift = null;
+        $employeeRecord = Employee::find($employee->id);
+        if ($employeeRecord && isset($employeeRecord->shift_id) && $employeeRecord->shift_id) {
+            $shift = Shift::find($employeeRecord->shift_id);
+        }
+        if (!$shift) {
+            $shift = Shift::where('is_active', true)->first();
+        }
+
         $totalHolidayPay           = 0.0;
         $totalHolidayOvertimePay   = 0.0;
         $totalHolidayOvertimeHours = 0.0;
@@ -131,6 +145,17 @@ class HolidayWageService
             // Look up attendance from the preloaded map — no extra DB query.
             $attendance  = $attendanceMap[$dateStr] ?? null;
             $hoursWorked = $attendance ? (float) ($attendance->hours_worked ?? 0) : 0.0;
+
+            // If employee clocked in before the shift's scheduled start,
+            // exclude the early hours so they don't trigger phantom holiday OT.
+            if ($attendance && $shift && $attendance->time_in) {
+                $expectedStart = Carbon::parse($dateStr . ' ' . $shift->start_time);
+                $actualStart   = Carbon::parse($dateStr . ' ' . $attendance->time_in);
+                if ($actualStart->isBefore($expectedStart)) {
+                    $earlyMinutes = $actualStart->diffInMinutes($expectedStart);
+                    $hoursWorked  = max(0, $hoursWorked - ($earlyMinutes / 60));
+                }
+            }
             $isWorked    = $hoursWorked > 0;
 
             // Pick the right pay rule based on holiday type.

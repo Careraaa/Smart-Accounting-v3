@@ -628,20 +628,22 @@ class AttendanceController extends Controller
         // Get grace period from settings
         $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
 
-        if ($shift && $shift->break_start && $shift->break_end) {
+        if ($shift) {
             return response()->json([
-                'break_start' => $shift->break_start,
-                'break_end' => $shift->break_end,
-                'start_time' => $shift->start_time,
+                'break_start' => $shift->break_start ?? '12:00:00',
+                'break_end' => $shift->break_end ?? '13:00:00',
+                'start_time' => $shift->start_time ?? '08:00:00',
+                'end_time' => $shift->end_time ?? '17:00:00',
                 'grace_period_minutes' => $gracePeriodMinutes,
             ]);
         }
 
-        // Fallback: 1 hour break (12:00-13:00), shift starts at 8:00 AM
+        // Fallback: 8:00 AM - 5:00 PM, break 12:00-13:00
         return response()->json([
             'break_start' => '12:00:00',
             'break_end' => '13:00:00',
             'start_time' => '08:00:00',
+            'end_time' => '17:00:00',
             'grace_period_minutes' => $gracePeriodMinutes,
         ]);
     }
