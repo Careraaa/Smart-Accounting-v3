@@ -44,7 +44,7 @@
                 <div>
                     <div class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">Pending</div>
                     <div class="text-lg font-extrabold text-gray-900 leading-tight">{{ $pendingRemittances->count() }}</div>
-                    <div class="text-[0.65rem] text-gray-400">pending resolution</div>
+                    <div class="text-[0.65rem] text-gray-400">pending</div>
                 </div>
             </div>
         </div>
@@ -56,7 +56,7 @@
                 </div>
                 <div>
                     <div class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">Total Short Amount</div>
-                    <div class="text-lg font-extrabold text-gray-900 leading-tight">₱{{ number_format($pendingRemittances->sum('short_amount'), 0) }}</div>
+                    <div class="text-lg font-extrabold text-gray-900 leading-tight">₱{{ number_format($pendingRemittances->sum('short_amount') + $fullyPaidRemittances->sum('short_amount'), 0) }}</div>
                     <div class="text-[0.65rem] text-gray-400">total shortage</div>
                 </div>
             </div>
@@ -69,7 +69,7 @@
                 </div>
                 <div>
                     <div class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">Driver Shares</div>
-                    <div class="text-lg font-extrabold text-gray-900 leading-tight">₱{{ number_format($pendingRemittances->sum('driver_share'), 0) }}</div>
+                    <div class="text-lg font-extrabold text-gray-900 leading-tight">₱{{ number_format($pendingRemittances->sum('driver_share') + $fullyPaidRemittances->sum('driver_share'), 0) }}</div>
                     <div class="text-[0.65rem] text-gray-400">total driver liability</div>
                 </div>
             </div>
@@ -82,7 +82,7 @@
                 </div>
                 <div>
                     <div class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">PAO Shares</div>
-                    <div class="text-lg font-extrabold text-gray-900 leading-tight">₱{{ number_format($pendingRemittances->sum('pao_share'), 0) }}</div>
+                    <div class="text-lg font-extrabold text-gray-900 leading-tight">₱{{ number_format($pendingRemittances->sum('pao_share') + $fullyPaidRemittances->sum('pao_share'), 0) }}</div>
                     <div class="text-[0.65rem] text-gray-400">total PAO liability</div>
                 </div>
             </div>
