@@ -235,9 +235,6 @@
                 <p class="signature-title">{{ $checkedBy?->position ?? '________________________' }}</p>
             </div>
         </div>
-        <div class="report-generated">
-            <p>Report generated on {{ date('M d, Y \a\t h:i A') }}</p>
-        </div>
     </div>
 
 </body>
