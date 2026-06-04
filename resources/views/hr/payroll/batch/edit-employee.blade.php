@@ -113,22 +113,7 @@
                         <div id="ep_holiday_rows">
                             {{-- Holiday rows are rendered by JavaScript from window._ep.initComputed.holidayBreakdown --}}
                         </div>
-                        <div id="ep_leave_pay_rows">
-                            @php
-                                $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
-                            @endphp
-                            @forelse($leavePayAllowances as $la)
-                            @php
-                                $_laName = str_replace(['Leave Pay (', ')'], '', $la->allowance_type);
-                                $_laDays = (int)($la->hours ?? 0);
-                            @endphp
-                            <div class="flex items-center justify-between py-2.5">
-                                <span class="text-sm text-emerald-600 flex items-center gap-1.5">{{ $_laName }} <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">{{ $_laDays }} day{{ $_laDays !== 1 ? 's' : '' }}</span></span>
-                                <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+₱{{ number_format($la->amount, 2) }}</span>
-                            </div>
-                            @empty
-                            @endforelse
-                        </div>
+                        <div id="ep_leave_pay_rows"></div>
                         <div class="flex items-center justify-between py-2.5" id="ep_ot_row" style="display:none;">
                             <span class="text-sm text-emerald-600 flex items-center gap-1.5">Overtime Pay <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded" id="ep_ot_hrs_badge"></span></span>
                             <span class="text-sm font-bold text-emerald-600 tabular-nums font-mono" id="ep_ot_display">+₱0.00</span>
@@ -148,22 +133,18 @@
                         <div id="ep_gov_contrib_rows"></div>
                         @php
                             $caDeduction = (float)($payroll->cash_advance_deduction ?? 0);
-                            $slDeduction = (float)($payroll->salary_loan_deduction ?? 0);
                         @endphp
                         <div class="flex items-center justify-between py-2.5" id="ep_ca_deduct_row" style="display:{{ $caDeduction > 0 ? '' : 'none' }};">
                             <span class="text-sm text-red-500 flex items-center gap-1.5">Cash Advance <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">loan</span></span>
                             <span class="text-sm font-bold text-red-500 tabular-nums font-mono" id="ep_ca_deduct_display">-₱{{ number_format($caDeduction, 2) }}</span>
                         </div>
-                        <div class="flex items-center justify-between py-2.5" id="ep_sl_deduct_row" style="display:{{ $slDeduction > 0 ? '' : 'none' }};">
-                            <span class="text-sm text-red-500 flex items-center gap-1.5">Salary Loan <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">loan</span></span>
-                            <span class="text-sm font-bold text-red-500 tabular-nums font-mono" id="ep_sl_deduct_display">-₱{{ number_format($slDeduction, 2) }}</span>
-                        </div>
+
                         <div class="flex items-center justify-between py-2.5">
                             <span class="text-sm font-bold text-gray-900">Initial Net Pay</span>
                             @php
                                 $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
                                 $computedLeavePay = (float)($leavePayAllowances->sum('amount') ?? 0);
-                                $initialNetPay = max(0, ($payroll->basic_salary??0) + ($payroll->holiday_pay??0) + ($payroll->holiday_ot_pay??0) + $computedLeavePay - ($payroll->undertime_deduction??0) - ($payroll->deductions->where('deduction_type','Late Deduction')->sum('amount')??0) - ($payroll->sss??0) - ($payroll->pagibig??0) - ($payroll->phil_health??$payroll->philhealth??0) - ($payroll->withholding_tax??0) - ($payroll->cash_advance_deduction??0) - ($payroll->salary_loan_deduction??0));
+                                $initialNetPay = max(0, ($payroll->basic_salary??0) + ($payroll->holiday_pay??0) + ($payroll->holiday_ot_pay??0) + $computedLeavePay - ($payroll->undertime_deduction??0) - ($payroll->deductions->where('deduction_type','Late Deduction')->sum('amount')??0) - ($payroll->sss??0) - ($payroll->pagibig??0) - ($payroll->phil_health??$payroll->philhealth??0) - ($payroll->withholding_tax??0) - ($payroll->cash_advance_deduction??0));
                             @endphp
                             <span class="text-base font-bold text-gray-900 tabular-nums font-mono" id="ep_adjusted">₱{{ number_format($initialNetPay, 2) }}</span>
                         </div>
@@ -289,9 +270,13 @@
     $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
     $leavePay = (float)($leavePayAllowances->sum('amount') ?? 0);
     $leavePayDays = (int) $leavePayAllowances->sum('hours');
+    $leaveBreakdown = $leavePayAllowances->map(fn($la) => [
+        'type_name' => str_replace(['Leave Pay (', ')'], '', $la->allowance_type),
+        'amount'    => round((float)$la->amount, 2),
+        'paid_days' => (int)($la->hours ?? 0),
+    ])->values();
     $holidayPay = (float)($payroll->holiday_pay ?? 0);
     $caDeduction = (float)($payroll->cash_advance_deduction ?? 0);
-    $slDeduction = (float)($payroll->salary_loan_deduction ?? 0);
 @endphp
 <script>
 window._ep = {
@@ -310,6 +295,7 @@ window._ep = {
         holidayOTPay:   {{ (float)($payroll->holiday_ot_pay ?? 0) }},
         holidayOTHours: {{ (float)($payroll->holiday_ot_hours ?? 0) }},
         holidayBreakdown: @json($payroll->holiday_breakdown ?? []),
+        leaveBreakdown:  @json($leaveBreakdown),
         leavePay:       {{ round($leavePay, 2) }},
         leavePayDays:   {{ $leavePayDays }},
         netPay:         {{ (float)($payroll->net_pay ?? 0) }},
@@ -320,7 +306,7 @@ window._ep = {
         late_deduction:  {{ (float)($payroll->deductions->where('deduction_type', 'Late Deduction')->sum('amount') ?? 0) }},
         late_minutes:    {{ (int)($payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description ? preg_match('/^(\\d+)/', $payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description, $m) ? $m[1] : 0 : 0) }},
         caDeduction:    {{ round($caDeduction, 2) }},
-        slDeduction:    {{ round($slDeduction, 2) }},
+
         sss:            {{ (float)($payroll->sss ?? 0) }},
         pagibig:        {{ (float)($payroll->pagibig ?? 0) }},
         philhealth:     {{ (float)($payroll->phil_health ?? $payroll->philhealth ?? 0) }},
@@ -366,7 +352,7 @@ window._ep = {
         const totalEarnings = (c.basicSalary ?? 0) + (c.holidayPay ?? 0) + (c.holidayOTPay ?? 0) + (c.leavePay ?? 0) + (c.otPay ?? 0);
         const manualAllowTotal = allowances.reduce((s,a) => s + a.amount, 0);
         const bonusTotal = bonuses.reduce((s,b) => s + b.amount, 0);
-        const totalDeductions = (c.utDeduction ?? 0) + (c.late_deduction ?? 0) + (c.sss ?? 0) + (c.pagibig ?? 0) + (c.philhealth ?? 0) + (c.withholdingTax ?? 0) + (c.caDeduction ?? 0) + (c.slDeduction ?? 0);
+        const totalDeductions = (c.utDeduction ?? 0) + (c.late_deduction ?? 0) + (c.sss ?? 0) + (c.pagibig ?? 0) + (c.philhealth ?? 0) + (c.withholdingTax ?? 0) + (c.caDeduction ?? 0);
         $('ep_adjusted').textContent      = fmt(Math.max(0, totalEarnings + manualAllowTotal + bonusTotal - totalDeductions));
 
         const holidayContainer = $('ep_holiday_rows');
@@ -400,12 +386,11 @@ window._ep = {
             holidayOtRow.style.display = '';
         } else { holidayOtRow.style.display = 'none'; }
         const leavePayContainer = $('ep_leave_pay_rows');
-        leavePayContainer.querySelectorAll('[data-leave-item]').forEach(el => el.remove());
+        leavePayContainer.innerHTML = '';
         const leaveBreakdown = c.leaveBreakdown ?? [];
         leaveBreakdown.forEach(lb => {
             if (lb.amount > 0) {
                 const row = document.createElement('div');
-                row.setAttribute('data-leave-item','');
                 row.className = 'flex items-center justify-between py-2.5';
                 row.innerHTML = '<span class="text-sm text-emerald-600 flex items-center gap-1.5">' + lb.type_name + ' <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">' + lb.paid_days + ' day' + (lb.paid_days !== 1 ? 's' : '') + '</span></span>'
                               + '<span class="text-sm font-bold text-emerald-600 tabular-nums font-mono">+' + fmt(lb.amount) + '</span>';
@@ -451,18 +436,14 @@ window._ep = {
             $('ep_ca_deduct_display').textContent = '-' + fmt(c.caDeduction);
             caRow.style.display = '';
         } else { caRow.style.display = 'none'; }
-        const slRow = $('ep_sl_deduct_row');
-        if (c.slDeduction > 0) {
-            $('ep_sl_deduct_display').textContent = '-' + fmt(c.slDeduction);
-            slRow.style.display = '';
-        } else { slRow.style.display = 'none'; }
+
     }
 
     function recalcNet() {
         const allowTotal = allowances.reduce((s,a) => s + a.amount, 0);
         const deductTotal = deductions.reduce((s,d) => s + d.amount, 0);
         const bonusTotal = bonuses.reduce((s,b) => s + b.amount, 0);
-        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.holidayOTPay ?? 0) + (computed.leavePay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.late_deduction ?? 0) - (computed.caDeduction ?? 0) - (computed.slDeduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
+        const adjustedTotal = (computed.basicSalary ?? 0) + (computed.holidayPay ?? 0) + (computed.holidayOTPay ?? 0) + (computed.leavePay ?? 0) + (computed.otPay ?? 0) - (computed.utDeduction ?? 0) - (computed.late_deduction ?? 0) - (computed.caDeduction ?? 0) - (computed.sss ?? 0) - (computed.pagibig ?? 0) - (computed.philhealth ?? 0) - (computed.withholdingTax ?? 0);
         const finalNetPay = adjustedTotal + allowTotal - deductTotal + bonusTotal;
         computed.netPay = finalNetPay;
         $('ep_net_salary').textContent = fmt(finalNetPay);
@@ -588,7 +569,7 @@ window._ep = {
                 utDeduction:data.undertime_deduction??0, utHours:data.undertime_hours??0,
                 late_deduction:data.late_deduction??0, late_minutes:data.late_minutes??0,
                 caDeduction:data.cash_advance_deduction??0,
-                slDeduction:data.salary_loan_deduction??0,
+
                 sss:data.sss??0, pagibig:data.pagibig??0, philhealth:data.phil_health??data.philhealth??0, withholdingTax:data.withholding_tax??0,
             };
             render();

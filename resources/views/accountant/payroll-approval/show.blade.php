@@ -35,7 +35,6 @@ $regularAllowances   = $payroll->allowances->reject(fn($a) => str_starts_with($a
 $undertimeDeductions = $payroll->deductions->filter(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
 $regularDeductions   = $payroll->deductions->reject(fn($d) => str_starts_with($d->deduction_type, 'Undertime Deduction'));
 $caDeduction  = (float) ($payroll->cash_advance_deduction ?? 0);
-$slDeduction  = (float) ($payroll->salary_loan_deduction ?? 0);
 $otAllowanceTotal = $overtimeAllowances->sum('amount');
 $leavePayTotal = $leavePayAllowances->sum('amount');
 $leavePayDays = (int) $leavePayAllowances->sum('hours');
@@ -233,17 +232,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             </div>
             @endif
 
-            @if($slDeduction > 0)
-            <div class="flex items-center justify-between py-2.5">
-                <span class="text-sm text-red-500 flex items-center gap-1.5">
-                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-                    Salary Loan <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">loan</span>
-                </span>
-                <span class="text-sm font-semibold text-red-500 tabular-nums font-mono">−₱{{ number_format($slDeduction, 2) }}</span>
-            </div>
-            @endif
-
-            @if($regularDeductions->isEmpty() && $undertimeDeductions->isEmpty() && $caDeduction <= 0 && $slDeduction <= 0)
+            @if($regularDeductions->isEmpty() && $undertimeDeductions->isEmpty() && $caDeduction <= 0)
             <div class="flex items-center justify-between py-2.5">
                 <span class="text-sm text-gray-300 italic">No deductions</span>
                 <span></span>

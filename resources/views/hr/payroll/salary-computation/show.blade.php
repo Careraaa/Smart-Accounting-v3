@@ -63,7 +63,6 @@
         $lateDeduction = (float)($payroll->deductions->where('deduction_type', 'Late Deduction')->sum('amount') ?? 0);
         $lateMinutes = (int)($payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description ? (preg_match('/^(\d+)/', $payroll->deductions->where('deduction_type', 'Late Deduction')->first()?->description, $m) ? $m[1] : 0) : 0);
         $caDeduction = (float)($payroll->cash_advance_deduction ?? 0);
-        $slDeduction = (float)($payroll->salary_loan_deduction ?? 0);
         $sss = (float)($payroll->sss ?? 0);
         $pagibig = (float)($payroll->pagibig ?? 0);
         $philhealth = (float)($payroll->phil_health ?? $payroll->philhealth ?? 0);
@@ -210,17 +209,11 @@
                     @endif
                     @endforeach
 
-                    {{-- CA / SL --}}
+                    {{-- Cash Advance --}}
                     @if($caDeduction > 0)
                     <div class="flex items-center justify-between py-2.5">
                         <span class="text-sm text-red-500 flex items-center gap-1.5">Cash Advance <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">loan</span></span>
                         <span class="text-sm font-bold text-red-500 tabular-nums font-mono">-&#x20B1;{{ number_format($caDeduction, 2) }}</span>
-                    </div>
-                    @endif
-                    @if($slDeduction > 0)
-                    <div class="flex items-center justify-between py-2.5">
-                        <span class="text-sm text-red-500 flex items-center gap-1.5">Salary Loan <span class="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">loan</span></span>
-                        <span class="text-sm font-bold text-red-500 tabular-nums font-mono">-&#x20B1;{{ number_format($slDeduction, 2) }}</span>
                     </div>
                     @endif
 

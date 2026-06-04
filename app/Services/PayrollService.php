@@ -366,11 +366,8 @@ class PayrollService
             'amount' => round($hb['amount'], 2),
         ], $values['holidayBreakdown'] ?? []);
 
-        // Preserve existing loan deduction columns (set by applyLoanDeductions)
-        // so that subsequent updatePayroll calls don't lose them.
         $existingCa = (float) $payroll->cash_advance_deduction;
-        $existingSl = (float) $payroll->salary_loan_deduction;
-        $loanTotal  = $existingCa + $existingSl;
+        $loanTotal  = $existingCa;
 
         $payroll->update([
             'user_id'                 => $employee->id,
@@ -381,7 +378,6 @@ class PayrollService
             'days_worked'             => $values['daysWorked'],
             'hours_worked'            => round($values['hoursWorked'], 2),
             'cash_advance_deduction'  => $existingCa,
-            'salary_loan_deduction'   => $existingSl,
             // total_allowances = OT + manual allowances (holiday pay excluded)
             'total_allowances'        => round($values['grossPay'] - $values['basicSalary'] - $holidayPay - $holidayOTPay, 2),
             'total_bonuses'           => round($totalBonuses, 2),

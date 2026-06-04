@@ -411,13 +411,6 @@
                     <span class="prl-brow-val c-red" id="prl_ca_deduct_val">₱0.00</span>
                 </div>
 
-                <div class="prl-brow" id="prl_sl_deduct_row" style="display:none;">
-                    <span class="prl-brow-lbl c-red">
-                        − Salary Loan <span class="prl-badge">loan deduction</span>
-                    </span>
-                    <span class="prl-brow-val c-red" id="prl_sl_deduct_val">₱0.00</span>
-                </div>
-
                 <div class="prl-brow" id="prl_loading_row" style="display:none;">
                     <span class="prl-loading-hint">Computing from attendance records…</span>
                     <span></span>

@@ -429,20 +429,12 @@
                             <tbody>
                                 @php
                                     $caDed = (float)($payroll->cash_advance_deduction ?? 0);
-                                    $slDed = (float)($payroll->salary_loan_deduction ?? 0);
                                 @endphp
                                 @if ($caDed > 0)
                                     <tr>
                                         <td>Cash Advance <span style="font-size:10px;font-weight:600;color:var(--gray-light);">loan</span></td>
                                         <td class="mono right">—</td>
                                         <td class="mono">₱{{ number_format($caDed, 2) }}</td>
-                                    </tr>
-                                @endif
-                                @if ($slDed > 0)
-                                    <tr>
-                                        <td>Salary Loan <span style="font-size:10px;font-weight:600;color:var(--gray-light);">loan</span></td>
-                                        <td class="mono right">—</td>
-                                        <td class="mono">₱{{ number_format($slDed, 2) }}</td>
                                     </tr>
                                 @endif
                                 @forelse ($payroll->deductions as $ded)
