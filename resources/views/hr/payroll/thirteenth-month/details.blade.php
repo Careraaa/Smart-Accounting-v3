@@ -146,7 +146,7 @@
                     <tr class="border-t border-gray-100 bg-gray-50/50">
                         <td class="px-4 py-3 text-xs font-bold text-gray-900">Totals</td>
                         <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($records->sum('total_basic_salary_earned'), 2) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">{{ $records->sum('months_worked') }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums"></td>
                         <td class="px-4 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($totalPayable, 2) }}</td>
                     </tr>
                 </tfoot>

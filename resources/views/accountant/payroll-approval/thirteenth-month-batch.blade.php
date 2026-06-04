@@ -77,7 +77,7 @@
     </div>
 </div>
 
-<div class="grid grid-cols-4 gap-3">
+<div class="grid grid-cols-2 gap-3">
     <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <p class="text-xs text-gray-400 font-medium">Employees</p>
         <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">{{ $records->count() }}</p>
@@ -86,79 +86,64 @@
         <p class="text-xs text-gray-400 font-medium">Total Payable</p>
         <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">₱{{ number_format($totalPayable, 2) }}</p>
     </div>
-    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <p class="text-xs text-gray-400 font-medium">Total Paid</p>
-        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalPaid, 2) }}</p>
-    </div>
-    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <p class="text-xs text-gray-400 font-medium">Remaining</p>
-        <p class="text-lg font-bold text-violet-600 tabular-nums mt-1">₱{{ number_format($totalRemaining, 2) }}</p>
-    </div>
 </div>
 
 <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-        <span class="text-sm font-semibold text-gray-900">Employee 13th Month Pay Records</span>
-        <span class="text-xs text-gray-400 tabular-nums">{{ $records->count() }} records</span>
-    </div>
+        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+            <span class="text-sm font-semibold text-gray-900">Employee Records</span>
+            <span class="text-xs text-gray-400 tabular-nums">{{ $records->count() }} records</span>
+        </div>
 
-    @if($records->isEmpty())
-    <div class="flex flex-col items-center py-12 text-center">
-        <p class="text-sm font-semibold text-gray-500">No records in this batch</p>
-    </div>
-    @else
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="bg-gray-50/50">
-                    <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee</th>
-                    <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Basic Salary</th>
-                    <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">13th Month Pay</th>
-                    <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Paid</th>
-                    <th class="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payslip</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50">
-                @foreach($records as $r)
-                @php
-                    $ps = match($r->status) {
-                        'paid' => ['label'=>'Paid','dot'=>'bg-emerald-400','text'=>'text-emerald-700','bg'=>'bg-emerald-50'],
-                        'partial' => ['label'=>'Partial','dot'=>'bg-blue-400','text'=>'text-blue-700','bg'=>'bg-blue-50'],
-                        default => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-700','bg'=>'bg-amber-50'],
-                    };
-                @endphp
-                <tr class="hover:bg-gray-50/40 transition-colors cursor-pointer" onclick="window.open('{{ route('payroll.thirteenth-month-pay.batch.payslip', ['batch' => $batch, 'record' => $r]) }}', '_blank')">
-                    <td class="px-5 py-3">
-                        <div class="flex items-center gap-2">
-                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-[11px] font-bold text-gray-600 uppercase shrink-0">
-                                {{ substr($r->user?->first_name ?? '?', 0, 1) }}{{ substr($r->user?->last_name ?? '?', 0, 1) }}
+        @if($records->isEmpty())
+        <div class="flex flex-col items-center py-12 text-center">
+            <p class="text-sm font-semibold text-gray-500">No records in this batch</p>
+        </div>
+        @else
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-50">
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
+                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Salary</th>
+                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Months Worked</th>
+                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">13th Month Pay</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    @foreach($records as $record)
+                    @php $u = $record->user; @endphp
+                    <tr class="hover:bg-gray-50/40 transition-colors cursor-pointer" onclick="window.open('{{ route('payroll.thirteenth-month-pay.batch.payslip', ['batch' => $batch, 'record' => $record]) }}', '_blank')">
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-[11px] font-bold text-gray-600 uppercase shrink-0">
+                                    {{ substr($u->first_name ?? '?', 0, 1) }}{{ substr($u->last_name ?? '?', 0, 1) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-semibold text-gray-900 truncate">{{ $u->last_name ?? '' }}, {{ $u->first_name ?? '' }}</p>
+                                    <p class="text-[0.55rem] text-gray-400 truncate font-mono">{{ $u->position ?? '—' }}</p>
+                                </div>
                             </div>
-                            <span class="text-sm font-semibold text-gray-900">{{ $r->user?->name ?? 'Deleted User' }}</span>
-                        </div>
-                    </td>
-                    <td class="px-5 py-3 text-right text-sm text-gray-900 tabular-nums">₱{{ number_format($r->total_basic_salary_earned, 2) }}</td>
-                    <td class="px-5 py-3 text-right text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($r->thirteenth_month_pay, 2) }}</td>
-                    <td class="px-5 py-3 text-right text-sm text-emerald-600 tabular-nums">₱{{ number_format($r->amount_paid ?? 0, 2) }}</td>
-                    <td class="px-5 py-3 text-center">
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide {{ $ps['bg'] }} {{ $ps['text'] }}">
-                            <span class="w-1.5 h-1.5 rounded-full {{ $ps['dot'] }}"></span>
-                            {{ $ps['label'] }}
-                        </span>
-                    </td>
-                    <td class="px-5 py-3 text-center">
-                        <a href="{{ route('payroll.thirteenth-month-pay.batch.payslip', ['batch' => $batch, 'record' => $r]) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-1 bg-gray-50 border border-gray-200 rounded-md text-[0.6rem] font-semibold text-gray-500 hover:bg-gray-100 transition-colors no-underline">
-                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                            View
-                        </a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+                        </td>
+                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($record->total_basic_salary_earned, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">{{ $record->months_worked }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($record->thirteenth_month_pay, 2) }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+                @if($records->isNotEmpty())
+                <tfoot>
+                    <tr class="border-t border-gray-100 bg-gray-50/50">
+                        <td class="px-4 py-3 text-xs font-bold text-gray-900">Totals</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($records->sum('total_basic_salary_earned'), 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums"></td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($totalPayable, 2) }}</td>
+                    </tr>
+                </tfoot>
+                @endif
+            </table>
+        </div>
+        @endif
     </div>
-    @endif
-</div>
 
 </div>
 

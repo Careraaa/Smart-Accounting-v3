@@ -192,7 +192,7 @@ window.batchData = {!! json_encode($batches) !!};
                     <a href="${b.url}" class="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/60 group">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
-                                <span class="text-sm font-semibold text-gray-900">${b.month_year} &mdash; ${b.half} Half</span>
+                                <span class="text-sm font-semibold text-gray-900">${b.month_year} &mdash; ${b.type === 'thirteenth_month' ? '13th Month' : b.half + ' Half'}</span>
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide ${si.bg} ${si.text}">
                                     <span class="w-1.5 h-1.5 rounded-full ${si.dot}"></span>
                                     ${si.label}
