@@ -163,49 +163,73 @@
         .emp-btn-nav {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            padding: 10px 20px;
-            border-radius: 10px;
+            gap: 8px;
+            padding: 11px 22px;
+            border-radius: 12px;
             font-family: 'Sora', sans-serif;
-            font-size: 0.845rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s ease;
             border: none;
             text-decoration: none;
+            white-space: nowrap;
         }
 
         .emp-btn-prev {
             background: #fff;
             color: #374151;
-            border: 1px solid #e5e7eb;
+            border: 1.5px solid #d1d5db;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
         }
 
         .emp-btn-prev:hover {
-            border-color: #c8292a;
-            color: #c8292a;
-            background: #fff5f5;
+            border-color: #9ca3af;
+            color: #111827;
+            background: #f9fafb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transform: translateY(-1px);
+        }
+
+        .emp-btn-prev:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
         }
 
         .emp-btn-next {
-            background: #111827;
+            background: linear-gradient(135deg, #1f2937, #111827);
             color: #fff;
+            box-shadow: 0 4px 12px rgba(17, 24, 39, 0.25);
         }
 
         .emp-btn-next:hover {
-            background: #000;
+            background: linear-gradient(135deg, #111827, #000);
             color: #fff;
+            box-shadow: 0 6px 20px rgba(17, 24, 39, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .emp-btn-next:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(17, 24, 39, 0.2);
         }
 
         .emp-btn-submit {
-            background: #c8292a;
+            background: linear-gradient(135deg, #059669, #10b981);
             color: #fff;
-            box-shadow: 0 4px 14px rgba(200, 41, 42, 0.35);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
         }
 
         .emp-btn-submit:hover {
-            background: #a81f20;
+            background: linear-gradient(135deg, #047857, #059669);
             color: #fff;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .emp-btn-submit:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
         }
 
         /* ── Shared form field styles (used by all partials) ────────── */
