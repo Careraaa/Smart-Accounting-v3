@@ -99,14 +99,7 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">
-                            <a href="{{ route('short-remittances.index', ['sort_by' => 'remittance_date', 'sort_order' => ($sortBy === 'remittance_date' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="flex items-center gap-1 text-gray-400 no-underline hover:text-gray-600">
-                                Date
-                                @if($sortBy === 'remittance_date')
-                                <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>
-                                @endif
-                            </a>
-                        </th>
+                        <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Date</th>
                         <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Driver</th>
                         <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">PAO</th>
                         <th class="text-left px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Vehicle</th>
@@ -114,36 +107,12 @@
                         <th class="text-center px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
-                @forelse($pendingRemittances as $shortRemittance)
-                    @php
-                        $driverPartial = $shortRemittance->driver_status === 'partial';
-                        $paoPartial    = $shortRemittance->pao_status === 'partial';
-                        $sc = ($driverPartial || $paoPartial) ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200';
-                        $label = ($driverPartial || $paoPartial) ? 'Partial' : 'Pending';
-                    @endphp
-                    <tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location='{{ route('short-remittances.show', $shortRemittance) }}'">
-                        <td class="px-4 py-3.5 text-xs text-gray-400 font-mono">{{ $shortRemittance->remittance_date?->format('M d, Y') }}</td>
-                        <td class="px-4 py-3.5 text-xs text-gray-700 font-semibold">{{ $shortRemittance->driver->name ?? 'N/A' }}</td>
-                        <td class="px-4 py-3.5 text-xs text-gray-700 font-semibold">{{ $shortRemittance->pao->name ?? 'N/A' }}</td>
-                        <td class="px-4 py-3.5 text-xs text-gray-500 font-mono">{{ $shortRemittance->vehicle->plate_number }}</td>
-                        <td class="px-4 py-3.5 text-xs text-right font-mono font-bold text-red-600">₱{{ number_format($shortRemittance->short_amount, 2) }}</td>
-                        <td class="px-4 py-3.5 text-center">
-                            <span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md {{ $sc }}">{{ $label }}</span>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center py-12">
-                            <div class="flex flex-col items-center gap-2">
-                                <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <p class="text-xs text-gray-400">No pending short remittances</p>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-                </tbody>
+                <tbody class="divide-y divide-gray-50" id="pendingTbody"></tbody>
             </table>
+        </div>
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50 bg-gray-50/30" id="pendingPagination">
+            <p class="text-[0.65rem] text-gray-400" id="pendingInfo">Showing 0–0 of 0</p>
+            <div class="flex items-center gap-1" id="pendingBtns"></div>
         </div>
     </div>
 
@@ -165,29 +134,105 @@
                         <th class="text-center px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
-                @forelse($fullyPaidRemittances as $shortRemittance)
-                    <tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location='{{ route('short-remittances.show', $shortRemittance) }}'">
-                        <td class="px-4 py-3.5 text-xs text-gray-400 font-mono">{{ $shortRemittance->remittance_date?->format('M d, Y') }}</td>
-                        <td class="px-4 py-3.5 text-xs text-gray-700 font-semibold">{{ $shortRemittance->driver->name ?? 'N/A' }}</td>
-                        <td class="px-4 py-3.5 text-xs text-gray-700 font-semibold">{{ $shortRemittance->pao->name ?? 'N/A' }}</td>
-                        <td class="px-4 py-3.5 text-xs text-gray-500 font-mono">{{ $shortRemittance->vehicle->plate_number }}</td>
-                        <td class="px-4 py-3.5 text-xs text-right font-mono font-bold text-emerald-600">₱{{ number_format($shortRemittance->short_amount, 2) }}</td>
-                        <td class="px-4 py-3.5 text-center">
-                            <span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Fully Paid</span>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="text-center py-12">
-                            <div class="flex flex-col items-center gap-2">
-                                <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                <p class="text-xs text-gray-400">No fully paid remittances</p>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-                </tbody>
+                <tbody class="divide-y divide-gray-50" id="resolvedTbody"></tbody>
             </table>
         </div>
-    </div>@endsection
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50 bg-gray-50/30" id="resolvedPagination">
+            <p class="text-[0.65rem] text-gray-400" id="resolvedInfo">Showing 0–0 of 0</p>
+            <div class="flex items-center gap-1" id="resolvedBtns"></div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+<script>
+(function () {
+    var pendingData = @json($pendingRemittances->map(fn($r) => [
+        'id' => $r->id,
+        'date' => $r->remittance_date?->format('M d, Y'),
+        'driver' => $r->driver->name ?? 'N/A',
+        'pao' => $r->pao->name ?? 'N/A',
+        'vehicle' => $r->vehicle->plate_number ?? '—',
+        'short_amount' => (float) $r->short_amount,
+        'show_url' => route('short-remittances.show', $r),
+        'driver_status' => $r->driver_status,
+        'pao_status' => $r->pao_status,
+    ]));
+    var resolvedData = @json($fullyPaidRemittances->map(fn($r) => [
+        'id' => $r->id,
+        'date' => $r->remittance_date?->format('M d, Y'),
+        'driver' => $r->driver->name ?? 'N/A',
+        'pao' => $r->pao->name ?? 'N/A',
+        'vehicle' => $r->vehicle->plate_number ?? '—',
+        'short_amount' => (float) $r->short_amount,
+        'show_url' => route('short-remittances.show', $r),
+    ]));
+
+    var PER_PAGE = 10;
+
+    function renderSection(data, tbodyId, infoId, btnsId, statusFn) {
+        var tbody = document.getElementById(tbodyId);
+        var info = document.getElementById(infoId);
+        var btns = document.getElementById(btnsId);
+        var total = data.length;
+        var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+        var page = 1;
+
+        function render() {
+            if (page > totalPages) page = totalPages;
+            var start = (page - 1) * PER_PAGE;
+            var end = Math.min(start + PER_PAGE, total);
+            var pageData = data.slice(start, end);
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-12"><div class="flex flex-col items-center gap-2">' +
+                    '<svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' +
+                    '<p class="text-xs text-gray-400">No records</p></div></td></tr>';
+            } else {
+                var html = '';
+                pageData.forEach(function (r) {
+                    var statusHtml = statusFn ? statusFn(r) : '<span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Fully Paid</span>';
+                    html += '<tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location=\'' + r.show_url + '\'">' +
+                        '<td class="px-4 py-3.5 text-xs text-gray-400 font-mono">' + r.date + '</td>' +
+                        '<td class="px-4 py-3.5 text-xs text-gray-700 font-semibold">' + r.driver + '</td>' +
+                        '<td class="px-4 py-3.5 text-xs text-gray-700 font-semibold">' + r.pao + '</td>' +
+                        '<td class="px-4 py-3.5 text-xs text-gray-500 font-mono">' + r.vehicle + '</td>' +
+                        '<td class="px-4 py-3.5 text-xs text-right font-mono font-bold text-red-600">₱' + Number(r.short_amount).toLocaleString('en-PH', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+                        '<td class="px-4 py-3.5 text-center">' + statusHtml + '</td></tr>';
+                });
+                tbody.innerHTML = html;
+            }
+
+            info.textContent = total > 0 ? 'Showing ' + (start + 1) + '–' + end + ' of ' + total : 'Showing 0–0 of 0';
+
+            var bhtml = '';
+            if (totalPages > 1) {
+                var half = 2, ws = Math.max(1, page - half), we = Math.min(totalPages, ws + 4);
+                if (we - ws + 1 < 5) ws = Math.max(we - 4, 1);
+                for (var p = ws; p <= we; p++) {
+                    bhtml += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold border cursor-pointer ' +
+                        (p === page ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 hover:bg-gray-100 border-gray-200') +
+                        '" data-page="' + p + '">' + p + '</button>';
+                }
+            }
+            btns.innerHTML = bhtml;
+            btns.querySelectorAll('button').forEach(function (btn) {
+                btn.addEventListener('click', function () { page = parseInt(this.dataset.page); render(); });
+            });
+        }
+
+        render();
+    }
+
+    function fmtStatus(r) {
+        var partial = r.driver_status === 'partial' || r.pao_status === 'partial';
+        var cls = partial ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200';
+        var lbl = partial ? 'Partial' : 'Pending';
+        return '<span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md ' + cls + '">' + lbl + '</span>';
+    }
+
+    renderSection(pendingData, 'pendingTbody', 'pendingInfo', 'pendingBtns', fmtStatus);
+    renderSection(resolvedData, 'resolvedTbody', 'resolvedInfo', 'resolvedBtns', null);
+})();
+</script>
+@endpush

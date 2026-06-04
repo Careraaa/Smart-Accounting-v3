@@ -199,7 +199,7 @@ class PayrollApprovalController extends Controller
             );
         }
 
-        return redirect()->route('payroll-approval.batch', $batch)
+        return redirect()->route('payroll-approval.index')
             ->with('success', "Batch approved — {$updated} record(s) approved.");
     }
 
@@ -240,7 +240,7 @@ class PayrollApprovalController extends Controller
             );
         }
 
-        return redirect()->route('payroll-approval.batch', $batch)
+        return redirect()->route('payroll-approval.index')
             ->with('success', "Batch rejected — {$updated} record(s) rejected.");
     }
 
