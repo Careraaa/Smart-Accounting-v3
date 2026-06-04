@@ -4,14 +4,12 @@
 <style>
 @keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
 @keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
-@keyframes countUp { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-.bat-count { animation:countUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
-@keyframes modalFadeIn { 0%{opacity:0} 100%{opacity:1} }
-@keyframes modalScaleIn { 0%{opacity:0;transform:scale(0.92) translateY(8px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
-.modal-overlay { animation:modalFadeIn 0.2s ease-out both; }
-.modal-panel { animation:modalScaleIn 0.25s cubic-bezier(0.16,1,0.3,1) both; }
+.stat-card:nth-child(1) { animation-delay:0.05s; }
+.stat-card:nth-child(2) { animation-delay:0.1s; }
+.stat-card:nth-child(3) { animation-delay:0.15s; }
+.stat-card:nth-child(4) { animation-delay:0.2s; }
 </style>
 @endpush
 
@@ -33,17 +31,13 @@
 @endphp
 
 {{-- Flash --}}
-@if(session('success'))
-    <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium bg-green-50 text-green-700 fade-up">
-        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-        {{ session('success') }}
+@foreach(['success','error'] as $t)
+    @if(session($t))
+    <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium animate-[fadeSlideUp_0.3s_ease] @switch($t) @case('success') bg-green-50 text-green-700 @break @case('error') bg-red-50 text-red-700 @break @endswitch">
+        <span>{{ session($t) }}</span>
     </div>
-@elseif(session('error'))
-    <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 fade-up">
-        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
-        {{ session('error') }}
-    </div>
-@endif
+    @endif
+@endforeach
 
 {{-- Rejection banner --}}
 @if($status === 'rejected' && $batch->rejection_note)
@@ -54,7 +48,7 @@
         <div class="min-w-0 flex-1">
             <p class="text-sm font-bold text-red-700">Batch Rejected</p>
             <p class="text-xs text-red-500 mt-0.5">
-                @if($batch->approved_at) &middot; {{ $batch->approved_at->format('M d, Y \a\t h:i A') }} @endif
+                @if($batch->rejected_at) &middot; {{ $batch->rejected_at->format('M d, Y \a\t h:i A') }} @endif
             </p>
             <p class="text-xs text-red-600 mt-2 bg-red-100/60 rounded-lg px-3 py-2">{{ $batch->rejection_note }}</p>
         </div>
@@ -91,48 +85,38 @@
     </div>
 </div>
 
-{{-- Batch Summary Card --}}
-<div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-50 bg-gray-50/30">
-        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Batch Summary</span>
+{{-- Stats --}}
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <p class="text-xs text-gray-400 font-medium">Employees</p>
+        <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">{{ $payrolls->count() }}</p>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-50">
-        <div class="bg-white p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Employees</p>
-            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1 bat-count" style="animation-delay:0.05s">{{ $payrolls->count() }}</p>
-        </div>
-        <div class="bg-white p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Gross Pay</p>
-            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1 bat-count" style="animation-delay:0.1s">₱{{ number_format($totalGross, 0) }}</p>
-        </div>
-        <div class="bg-white p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
-            <p class="text-lg font-bold text-amber-600 tabular-nums mt-1 bat-count" style="animation-delay:0.15s">₱{{ number_format($totalDeductions, 0) }}</p>
-        </div>
-        <div class="bg-white p-4">
-            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net Pay</p>
-            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1 bat-count" style="animation-delay:0.2s">₱{{ number_format($totalNet, 0) }}</p>
-        </div>
+    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <p class="text-xs text-gray-400 font-medium">Gross Pay</p>
+        <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($totalGross, 2) }}</p>
+    </div>
+    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <p class="text-xs text-gray-400 font-medium">Deductions</p>
+        <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">₱{{ number_format($totalDeductions, 2) }}</p>
+    </div>
+    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+        <p class="text-xs text-gray-400 font-medium">Net Pay</p>
+        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalNet, 2) }}</p>
     </div>
 </div>
 
-{{-- Employees Card --}}
+{{-- Employees Table --}}
 <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-5 py-3 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
-        <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Employees</span>
-        <span class="text-xs text-gray-400 tabular-nums bat-count" style="animation-delay:0.25s">{{ $payrolls->count() }} records</span>
-    </div>
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-gray-50">
-                    <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
-                    <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Department</th>
-                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Days</th>
-                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic</th>
-                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross</th>
-                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deductions</th>
-                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net</th>
+                    <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
+                    <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Pay</th>
+                    <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Addl. Earnings</th>
+                    <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross Pay</th>
+                    <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deductions</th>
+                    <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net Pay</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -143,31 +127,31 @@
                     <tr onclick="window.location='{{ route('payroll-approval.show', $payroll) }}'" class="transition-colors hover:bg-gray-50/40 cursor-pointer">
                         <td class="px-4 py-3">
                             <div class="min-w-0">
-                                <p class="text-xs font-semibold text-gray-900 truncate">{{ $user->first_name }} {{ $user->last_name }}</p>
-                                <p class="text-[0.55rem] text-gray-400 mt-0.5 font-mono truncate">{{ $user->position ?? '—' }}</p>
+                                <p class="text-xs font-semibold text-gray-900 truncate">{{ $user->last_name }}, {{ $user->first_name }}</p>
+                                <p class="text-[0.55rem] text-gray-400 truncate font-mono">{{ $user->position ?? '—' }}</p>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-xs text-gray-500">{{ $user->department ?? 'N/A' }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums bat-count">{{ $payroll->days_worked ?? '—' }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums bat-count" style="animation-delay:0.05s">₱{{ number_format($payroll->basic_salary, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums bat-count" style="animation-delay:0.1s">₱{{ number_format($payroll->gross_pay, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-amber-600 tabular-nums bat-count" style="animation-delay:0.15s">₱{{ number_format($payroll->total_deductions, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-emerald-600 tabular-nums bat-count" style="animation-delay:0.2s">₱{{ number_format($payroll->net_pay, 0) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($payroll->basic_salary ?? 0, 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format(($payroll->total_allowances ?? 0) + ($payroll->total_bonuses ?? 0) + ($payroll->holiday_pay ?? 0) + ($payroll->holiday_ot_pay ?? 0),2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($payroll->gross_pay ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($payroll->total_deductions ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payroll->net_pay,2) }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-12 text-center text-xs text-gray-400">No employees in this batch.</td>
+                        <td colspan="6" class="px-4 py-12 text-center text-xs text-gray-400">No employees in this batch.</td>
                     </tr>
                 @endforelse
             </tbody>
             @if($payrolls->isNotEmpty())
                 <tfoot>
                     <tr class="border-t border-gray-100 bg-gray-50/50">
-                        <td colspan="3" class="px-4 py-3 text-xs font-bold text-gray-900">Totals</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums bat-count" style="animation-delay:0.1s">₱{{ number_format($payrolls->sum('basic_salary'), 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums bat-count" style="animation-delay:0.15s">₱{{ number_format($totalGross, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-amber-600 tabular-nums bat-count" style="animation-delay:0.2s">₱{{ number_format($totalDeductions, 0) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-emerald-600 tabular-nums bat-count" style="animation-delay:0.25s">₱{{ number_format($totalNet, 0) }}</td>
+                        <td class="px-4 py-3 text-xs font-bold text-gray-900">Totals</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payrolls->sum('basic_salary'), 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-emerald-500 tabular-nums">₱{{ number_format(($payrolls->sum('total_allowances') ?? 0) + ($payrolls->sum('total_bonuses') ?? 0) + ($payrolls->sum('holiday_pay') ?? 0) + ($payrolls->sum('holiday_ot_pay') ?? 0),2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalGross, 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-red-500 tabular-nums">₱{{ number_format($totalDeductions, 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalNet, 2) }}</td>
                     </tr>
                 </tfoot>
             @endif

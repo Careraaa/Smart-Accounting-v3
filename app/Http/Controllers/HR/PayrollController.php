@@ -44,13 +44,14 @@
                 ->where('status', 'active')
                 ->count();
 
-            // All batches, newest first — main list
+            // All batches, newest period first — main list
             $allBatches = PayrollBatch::withCount('payrolls')
                 ->withSum('payrolls', 'gross_pay')
                 ->withSum('payrolls', 'total_deductions')
                 ->withSum('payrolls', 'net_pay')
                 ->with(['generatedBy'])
-                ->orderByDesc('created_at')
+                ->orderByDesc('period_start')
+                ->orderByDesc('period_end')
                 ->get();
 
             // Sidebar: last 5 batches (only need count, not full payrolls relation)

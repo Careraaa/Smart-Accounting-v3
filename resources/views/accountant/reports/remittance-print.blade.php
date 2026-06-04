@@ -1,55 +1,105 @@
 <!DOCTYPE html>
-<html><head>
-<meta charset="utf-8">
-<title>Remittance Report — {{ date('F', mktime(0,0,0,$month,1)) }} {{ $year }}</title>
-<style>
-body{font-family:'Segoe UI',Arial,sans-serif;font-size:10px;color:#1f2937;padding:30px;margin:0}
-h1{font-size:18px;margin:0 0 4px;color:#111827}
-.sub{font-size:10px;color:#6b7280;margin:0 0 20px}
-table{width:100%;border-collapse:collapse}
-th{background:#f3f4f6;text-align:left;font-size:7px;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;padding:6px 8px;border-bottom:1px solid #e5e7eb}
-td{padding:6px 8px;border-bottom:1px solid #f3f4f6;font-size:10px}
-tr.total td{font-weight:700;border-top:2px solid #374151;background:#f9fafb}
-.txt-right{text-align:right}
-.tabular{font-variant-numeric:tabular-nums}
-.mono{font-family:'Courier New',monospace}
-</style>
-</head><body>
-<h1>Remittance Report</h1>
-<p class="sub">{{ date('F', mktime(0,0,0,$month,1)) }} {{ $year }} &middot; {{ $remittances->count() }} approved {{ Str::plural('record', $remittances->count()) }}</p>
-<table>
-<thead>
-<tr>
-<th>Date</th>
-<th>Driver</th>
-<th>Route</th>
-<th class="txt-right">Collection</th>
-<th class="txt-right">Expenses</th>
-<th class="txt-right">Net Remittance</th>
-</tr>
-</thead>
-<tbody>
-@php $tCol=0;$tExp=0;$tNet=0; @endphp
-@forelse($remittances as $r)
-@php $tCol+=$r->total_collection;$tExp+=$r->total_expenses;$tNet+=$r->net_remittance; @endphp
-<tr>
-<td>{{ $r->remittance_date?->format('M d, Y') ?? '—' }}</td>
-<td>{{ $r->driver?->name ?? '—' }}</td>
-<td>{{ $r->route?->route_name ?? '—' }}</td>
-<td class="txt-right tabular mono">₱{{ number_format($r->total_collection,2) }}</td>
-<td class="txt-right tabular mono">₱{{ number_format($r->total_expenses,2) }}</td>
-<td class="txt-right tabular mono">₱{{ number_format($r->net_remittance,2) }}</td>
-</tr>
-@empty
-<tr><td colspan="6" style="text-align:center;padding:30px;color:#9ca3af">No approved remittance records.</td></tr>
-@endforelse
-<tr class="total">
-<td colspan="3">TOTALS ({{ $remittances->count() }} records)</td>
-<td class="txt-right tabular mono">₱{{ number_format($tCol,2) }}</td>
-<td class="txt-right tabular mono">₱{{ number_format($tExp,2) }}</td>
-<td class="txt-right tabular mono">₱{{ number_format($tNet,2) }}</td>
-</tr>
-</tbody>
-</table>
-<script>window.print();</script>
-</body></html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remittance Report – {{ $period }} – {{ date('M d, Y') }}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights-icon.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Sora', sans-serif; font-size: 12px; color: #0a0a0a; background: #efefef; line-height: 1.55; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .print-page { margin: 0; box-shadow: none; max-width: 100%; padding: 12mm; }
+        }
+        @page { size: A4 landscape; margin: 12mm; }
+    </style>
+</head>
+<body>
+    <div class="no-print max-w-[900px] mx-auto mt-7 mb-3 flex justify-end gap-2">
+        <a href="{{ route('reports.remittance') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-semibold bg-white text-gray-700 border border-gray-200 no-underline cursor-pointer hover:opacity-80 transition-opacity">← Back</a>
+        <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-semibold text-white cursor-pointer border-none hover:opacity-80 transition-opacity" style="background:#0a0a0a;">Print Report</button>
+    </div>
+
+    <div class="print-page bg-white max-w-[900px] mx-auto mb-10 shadow-sm p-10" style="box-shadow:0 2px 24px rgba(0,0,0,.08);">
+        <div class="flex items-end justify-between pb-6 mb-7" style="border-bottom:2px solid #0a0a0a;">
+            <div class="flex items-center gap-3">
+                <img src="{{ asset('images/knights-icon.png') }}" alt="Logo" class="w-10 h-10 object-contain rounded-lg">
+                <div>
+                    <div class="text-sm font-bold text-gray-900">Smart Accounting</div>
+                    <div class="text-[10px] text-gray-500 uppercase mt-0.5">Remittance Management</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <h1 class="text-xl font-bold text-gray-900 mb-1">REMITTANCE REPORT</h1>
+                <div class="text-[11px] text-gray-500">
+                    @if ($period === 'weekly')
+                        {{ 'Week ' . $week . ' - ' . date('Y') }}
+                    @elseif ($period === 'monthly')
+                        {{ date('F Y', mktime(0, 0, 0, $month, 1, $year)) }}
+                    @elseif ($period === 'daily')
+                        {{ date('F j, Y', mktime(0, 0, 0, $month, $day, $year)) }}
+                    @else
+                        {{ 'Year ' . $year }}
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="p-4 rounded text-center bg-blue-100">
+                <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1.5">Total collection</div>
+                <div class="text-lg font-bold text-gray-900 font-mono">₱{{ number_format($totalCollection, 2) }}</div>
+            </div>
+            <div class="p-4 rounded text-center bg-emerald-100">
+                <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1.5">Total expenses</div>
+                <div class="text-lg font-bold text-gray-900 font-mono">₱{{ number_format($totalExpenses, 2) }}</div>
+            </div>
+            <div class="p-4 rounded text-center bg-orange-100">
+                <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1.5">Net remittance</div>
+                <div class="text-lg font-bold text-gray-900 font-mono">₱{{ number_format($totalNetRemittance, 2) }}</div>
+            </div>
+            <div class="p-4 rounded text-center bg-red-100">
+                <div class="text-[10px] text-gray-500 uppercase font-semibold mb-1.5">Short remittances</div>
+                <div class="text-lg font-bold text-gray-900 font-mono">{{ $shortRemittances }}</div>
+            </div>
+        </div>
+
+        <div>
+            <table class="w-full text-[11px] border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-300" style="background:#f7f7f7;">
+                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Date</th>
+                        <th class="text-right px-2.5 py-2.5 font-semibold text-gray-700">Collection</th>
+                        <th class="text-right px-2.5 py-2.5 font-semibold text-gray-700">Expenses</th>
+                        <th class="text-right px-2.5 py-2.5 font-semibold text-gray-700">Net Remittance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($groupedRemittances as $remittance)
+                        <tr class="border-b border-gray-200">
+                            <td class="px-2.5 py-2.5">{{ $remittance['remittance_date']->format('M d, Y') }}</td>
+                            <td class="px-2.5 py-2.5 text-right text-emerald-700 font-semibold">₱{{ number_format($remittance['total_collection'], 2) }}</td>
+                            <td class="px-2.5 py-2.5 text-right text-gray-500">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
+                            <td class="px-2.5 py-2.5 text-right font-semibold {{ $remittance['is_short_remittance'] ? 'text-red-600' : 'text-emerald-600' }}">₱{{ number_format($remittance['net_remittance'], 2) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-gray-400">No remittances found for the selected period.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-10 pt-5 text-center text-[10px] text-gray-500" style="border-top:1px solid #e0e0e0;">
+            <p>Report generated on {{ date('M d, Y \a\t h:i A') }}</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -35,48 +35,40 @@ $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? da
         </a>
     </div>
 
-    {{-- Filter form --}}
-    <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6">
-        <form method="get" action="{{ route('reports.payroll') }}" class="flex items-end gap-4 flex-wrap">
-            <div>
-                <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Period</label>
-                <select name="period" id="period" onchange="this.form.submit()"
-                    class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
-                    <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
-                    <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
-                    <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
-                </select>
-            </div>
-            <div id="weekSelectWrap" style="display:{{ $period === 'weekly' ? 'block' : 'none' }}">
-                <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Week</label>
-                <select name="week" onchange="this.form.submit()"
-                    class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
-                    @for ($i = 1; $i <= 52; $i++)
-                        <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
-                    @endfor
-                </select>
-            </div>
-            <div id="monthSelectWrap" style="display:{{ $period === 'monthly' ? 'block' : 'none' }}">
-                <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Month</label>
-                <select name="month" onchange="this.form.submit()"
-                    class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
-                    @for ($i = 1; $i <= 12; $i++)
-                        <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>
-                            {{ date('F', mktime(0, 0, 0, $i, 1)) }}
-                        </option>
-                    @endfor
-                </select>
-            </div>
-            <div>
-                <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Year</label>
-                <select name="year" onchange="this.form.submit()"
-                    class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
-                    @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
-                        <option value="{{ $i }}" {{ (int) $year === $i ? 'selected' : '' }}>{{ $i }}</option>
-                    @endfor
-                </select>
-            </div>
-        </form>
+    {{-- Filter bar --}}
+    <div class="fade-up bg-white border border-gray-200 rounded-xl p-4 flex items-end gap-3 mb-5 flex-wrap">
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Period</label>
+            <select id="period" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
+                <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
+                <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
+            </select>
+        </div>
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }}">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Week</label>
+            <select id="week" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                @for ($i = 1; $i <= 52; $i++)
+                    <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
+                @endfor
+            </select>
+        </div>
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="monthSelect" style="display:{{ $period === 'monthly' ? 'flex' : 'none' }}">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Month</label>
+            <select id="month" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                @for ($i = 1; $i <= 12; $i++)
+                    <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
+                @endfor
+            </select>
+        </div>
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Year</label>
+            <select id="year" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
+                    <option value="{{ $i }}" {{ (int) $year === $i ? 'selected' : '' }}>{{ $i }}</option>
+                @endfor
+            </select>
+        </div>
     </div>
 
     {{-- Stats --}}
@@ -88,17 +80,17 @@ $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? da
         </div>
         <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
             <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Gross</p>
-            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($sumGross, 0) }}</p>
+            <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($sumGross, 2) }}</p>
             <p class="text-[10px] text-gray-400 mt-0.5">Gross pay summed</p>
         </div>
         <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300">
             <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Deductions</p>
-            <p class="text-lg font-bold text-red-600 tabular-nums mt-1">₱{{ number_format($sumDed, 0) }}</p>
+            <p class="text-lg font-bold text-red-600 tabular-nums mt-1">₱{{ number_format($sumDed, 2) }}</p>
             <p class="text-[10px] text-gray-400 mt-0.5">Deductions summed</p>
         </div>
         <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
             <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Net</p>
-            <p class="text-lg font-bold text-blue-600 tabular-nums mt-1">₱{{ number_format($sumNet, 0) }}</p>
+            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($sumNet, 2) }}</p>
             <p class="text-[10px] text-gray-400 mt-0.5">Take-home total</p>
         </div>
     </div>
@@ -116,7 +108,7 @@ $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? da
                     <tr class="border-b border-gray-50 bg-gray-50/50">
                         <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Period</th>
                         <th class="text-center px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Employees</th>
-                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Gross</th>
+                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Gross Pay</th>
                         <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Deductions</th>
                         <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net Pay</th>
                     </tr>
@@ -150,6 +142,35 @@ window.payrollData = {!! json_encode(array_map(function($b) {
 window.payrollTotals = { gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $sumNet }} };
 
 (function () {
+    const periodSelect = document.getElementById('period');
+    const weekSelectEl = document.getElementById('weekSelect');
+    const monthSelectEl = document.getElementById('monthSelect');
+
+    function toggleFilters() {
+        const period = periodSelect.value;
+        weekSelectEl.style.display = period === 'weekly' ? 'flex' : 'none';
+        monthSelectEl.style.display = period === 'monthly' ? 'flex' : 'none';
+    }
+
+    function updateReport() {
+        const period = periodSelect.value;
+        const week = document.getElementById('week').value;
+        const month = document.getElementById('month').value;
+        const year = document.getElementById('year').value;
+        let url = '{{ route('reports.payroll') }}?period=' + period + '&year=' + year;
+        if (period === 'weekly') url += '&week=' + week;
+        if (period === 'monthly') url += '&month=' + month;
+        window.location.href = url;
+    }
+
+    periodSelect.addEventListener('change', function () {
+        toggleFilters();
+        updateReport();
+    });
+    document.getElementById('week').addEventListener('change', updateReport);
+    document.getElementById('month').addEventListener('change', updateReport);
+    document.getElementById('year').addEventListener('change', updateReport);
+
     var grid   = document.getElementById('payrollGrid');
     var noRes  = document.getElementById('payrollNoResults');
     var info   = document.getElementById('payrollInfo');
@@ -170,12 +191,13 @@ window.payrollTotals = { gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $su
             pageData.forEach(function (b) {
                 var tr = document.createElement('tr');
                 tr.className = 'transition-colors hover:bg-gray-50/50';
+                var fmt = function(n) { return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
                 tr.innerHTML =
                     '<td class="px-5 py-3.5 text-xs font-semibold text-gray-900">' + b.period + '</td>' +
                     '<td class="px-4 py-3.5 text-center text-xs font-semibold text-gray-700 tabular-nums">' + b.count + '</td>' +
-                    '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-600">\u20b1' + b.gross.toLocaleString('en-US') + '</td>' +
-                    '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-400">\u20b1' + b.ded.toLocaleString('en-US') + '</td>' +
-                    '<td class="px-5 py-3.5 text-right text-xs font-bold tabular-nums text-emerald-600">\u20b1' + b.net.toLocaleString('en-US') + '</td>';
+                    '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-900">\u20b1' + fmt(b.gross) + '</td>' +
+                    '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-red-600">\u20b1' + fmt(b.ded) + '</td>' +
+                    '<td class="px-5 py-3.5 text-right text-xs font-bold tabular-nums text-emerald-600">\u20b1' + fmt(b.net) + '</td>';
                 grid.appendChild(tr);
             });
             // totals row
@@ -184,9 +206,9 @@ window.payrollTotals = { gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $su
             tr.innerHTML =
                 '<td class="px-5 py-3.5 text-xs font-bold text-gray-900">Totals</td>' +
                 '<td class="px-4 py-3.5 text-center text-xs font-bold text-gray-900 tabular-nums">' + total + '</td>' +
-                '<td class="px-4 py-3.5 text-right text-xs font-bold text-gray-900 tabular-nums">\u20b1' + window.payrollTotals.gross.toLocaleString('en-US') + '</td>' +
-                '<td class="px-4 py-3.5 text-right text-xs font-bold text-amber-600 tabular-nums">\u20b1' + window.payrollTotals.ded.toLocaleString('en-US') + '</td>' +
-                '<td class="px-5 py-3.5 text-right text-xs font-bold text-emerald-700 tabular-nums">\u20b1' + window.payrollTotals.net.toLocaleString('en-US') + '</td>';
+                '<td class="px-4 py-3.5 text-right text-xs font-bold text-gray-900 tabular-nums">\u20b1' + fmt(window.payrollTotals.gross) + '</td>' +
+                '<td class="px-4 py-3.5 text-right text-xs font-bold text-amber-600 tabular-nums">\u20b1' + fmt(window.payrollTotals.ded) + '</td>' +
+                '<td class="px-5 py-3.5 text-right text-xs font-bold text-emerald-700 tabular-nums">\u20b1' + fmt(window.payrollTotals.net) + '</td>';
             grid.appendChild(tr);
         }
 

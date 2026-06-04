@@ -100,29 +100,6 @@
         .report-title h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
         .report-period { font-size: 11px; color: var(--gray-mid); }
 
-        /* Summary strip */
-        .summary-strip {
-            display: flex;
-            gap: 24px;
-            background: var(--gray-bg);
-            border-radius: 6px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-        }
-
-        .summary-item { display: flex; flex-direction: column; gap: 2px; }
-
-        .summary-label {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--gray-mid);
-            letter-spacing: 0.5px;
-        }
-
-        .summary-value { font-size: 18px; font-weight: 700; color: var(--black); }
-        .summary-divider { width: 1px; background: var(--gray-rule); margin: 0 4px; }
-
         /* Table */
         table { width: 100%; border-collapse: collapse; font-size: 11px; }
         thead { background: var(--gray-bg); border-bottom: 1.5px solid var(--gray-rule); }
@@ -148,7 +125,6 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <a href="{{ route('reports.payroll') }}" class="btn btn-ghost">← Back</a>
         <button class="btn btn-primary" onclick="window.print()">Print Report</button>
     </div>
 
@@ -173,40 +149,16 @@
                     @else
                         {{ $year }}
                     @endif
-                    &nbsp;·&nbsp; Generated {{ date('M d, Y') }}
                 </div>
             </div>
         </div>
 
-        {{-- Summary Strip --}}
         @php
             $totalBatches    = count($batchData);
             $totalGross      = collect($batchData)->sum('total_gross');
             $totalDeductions = collect($batchData)->sum('total_deductions');
             $totalNet        = collect($batchData)->sum('total_net');
         @endphp
-
-        <div class="summary-strip">
-            <div class="summary-item">
-                <span class="summary-label">Total Batches</span>
-                <span class="summary-value">{{ $totalBatches }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Gross</span>
-                <span class="summary-value" style="color: #0369a1;">₱{{ number_format($totalGross, 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Deductions</span>
-                <span class="summary-value" style="color: #ea580c;">₱{{ number_format($totalDeductions, 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Net Pay</span>
-                <span class="summary-value" style="color: #16a34a;">₱{{ number_format($totalNet, 2) }}</span>
-            </div>
-        </div>
 
         {{-- Table --}}
         <table>
@@ -228,7 +180,7 @@
                         </td>
                         <td class="text-right"><strong>{{ $batch['count'] }}</strong></td>
                         <td class="text-right mono">₱{{ number_format($batch['total_gross'], 2) }}</td>
-                        <td class="text-right mono" style="color: #ea580c;">₱{{ number_format($batch['total_deductions'], 2) }}</td>
+                        <td class="text-right mono" style="color: #dc2626;">₱{{ number_format($batch['total_deductions'], 2) }}</td>
                         <td class="text-right mono"><strong style="color: #16a34a;">₱{{ number_format($batch['total_net'], 2) }}</strong></td>
                     </tr>
                 @empty
@@ -237,13 +189,18 @@
                     </tr>
                 @endforelse
             </tbody>
+            @if($totalBatches > 0)
+            <tfoot>
+                <tr style="border-top: 2px solid #e0e0e0; background: #f7f7f7; font-weight: 700;">
+                    <td style="padding: 10px;">TOTAL</td>
+                    <td class="text-right" style="padding: 10px;"></td>
+                    <td class="text-right mono" style="padding: 10px;">₱{{ number_format($totalGross, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; color: #dc2626;">₱{{ number_format($totalDeductions, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; color: #16a34a;">₱{{ number_format($totalNet, 2) }}</td>
+                </tr>
+            </tfoot>
+            @endif
         </table>
-
-        {{-- Footer --}}
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--gray-rule); text-align: center; font-size: 10px; color: var(--gray-mid);">
-            <p>Report generated on {{ date('M d, Y \a\t h:i A') }}</p>
-        </div>
-
     </div>
 
 </body>

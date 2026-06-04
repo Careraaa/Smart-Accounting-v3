@@ -18,7 +18,7 @@
 $sumCol = $remittances->sum('total_collection');
 $sumExp = $remittances->sum('total_expenses');
 $sumNet = $remittances->sum('net_remittance');
-$monthLabel = date('F', mktime(0, 0, 0, $month, 1));
+$periodLabel = $period === 'daily' ? date('F j, Y', mktime(0,0,0,$month,$day,$year)) : ($period === 'weekly' ? 'Week '.$week.', '.$year : ($period === 'monthly' ? date('F', mktime(0,0,0,$month,1)).' '.$year : $year));
 @endphp
 
 {{-- Header --}}
@@ -26,7 +26,7 @@ $monthLabel = date('F', mktime(0, 0, 0, $month, 1));
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Remittance Reports</h1>
             <p class="text-sm text-gray-500 mt-0.5">Approved daily remittances — collections, expenses, and net amounts across all routes.</p>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[0.55rem] font-semibold mt-2">{{ $remittances->count() }} approved {{ Str::plural('record', $remittances->count()) }} · {{ $monthLabel }} {{ $year }}</span>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[0.55rem] font-semibold mt-2">{{ $remittances->count() }} approved {{ Str::plural('record', $remittances->count()) }} · {{ $periodLabel }}</span>
         </div>
         <a href="{{ route('reports.print.remittance-report', request()->query()) }}" target="_blank" rel="noopener"
            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 transition-all no-underline">
@@ -35,30 +35,49 @@ $monthLabel = date('F', mktime(0, 0, 0, $month, 1));
         </a>
     </div>
 
-    {{-- Filter form --}}
-    <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-6">
-        <form method="get" action="{{ route('reports.remittance') }}" class="flex items-end gap-4 flex-wrap">
-            <div>
-                <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Month</label>
-                <select name="month" onchange="this.form.submit()"
-                    class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
-                    @for ($i = 1; $i <= 12; $i++)
-                        <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>
-                            {{ date('F', mktime(0, 0, 0, $i, 1)) }}
-                        </option>
-                    @endfor
-                </select>
-            </div>
-            <div>
-                <label class="block text-[0.55rem] font-bold uppercase tracking-wider text-gray-400 mb-1">Year</label>
-                <select name="year" onchange="this.form.submit()"
-                    class="text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
-                    @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
-                        <option value="{{ $i }}" {{ (int) $year === $i ? 'selected' : '' }}>{{ $i }}</option>
-                    @endfor
-                </select>
-            </div>
-        </form>
+    {{-- Filter bar --}}
+    <div class="fade-up bg-white border border-gray-200 rounded-xl p-4 flex items-end gap-3 mb-5 flex-wrap">
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Period</label>
+            <select id="period" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                <option value="daily" {{ $period === 'daily' ? 'selected' : '' }}>Daily</option>
+                <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
+                <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
+                <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
+            </select>
+        </div>
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }}">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Week</label>
+            <select id="week" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                @for ($i = 1; $i <= 52; $i++)
+                    <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
+                @endfor
+            </select>
+        </div>
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="daySelect" style="display:{{ $period === 'daily' ? 'flex' : 'none' }}">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Day</label>
+            <select id="day" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                @for ($i = 1; $i <= 31; $i++)
+                    <option value="{{ $i }}" {{ (int) $day === $i ? 'selected' : '' }}>{{ $i }}</option>
+                @endfor
+            </select>
+        </div>
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="monthSelect" style="display:{{ in_array($period, ['daily', 'monthly']) ? 'flex' : 'none' }}">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Month</label>
+            <select id="month" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                @for ($i = 1; $i <= 12; $i++)
+                    <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
+                @endfor
+            </select>
+        </div>
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Year</label>
+            <select id="year" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
+                    <option value="{{ $i }}" {{ (int) $year === $i ? 'selected' : '' }}>{{ $i }}</option>
+                @endfor
+            </select>
+        </div>
     </div>
 
     {{-- Stats --}}
@@ -131,6 +150,40 @@ window.remittanceReportData = {!! json_encode($remittances->map(fn($r) => [
 window.remittanceReportTotals = { collection: {{ $sumCol }}, expenses: {{ $sumExp }}, net: {{ $sumNet }} };
 
 (function () {
+    const periodSelect = document.getElementById('period');
+    const weekSelectEl = document.getElementById('weekSelect');
+    const monthSelectEl = document.getElementById('monthSelect');
+    const daySelectEl = document.getElementById('daySelect');
+
+    function toggleFilters() {
+        const period = periodSelect.value;
+        weekSelectEl.style.display = period === 'weekly' ? 'flex' : 'none';
+        monthSelectEl.style.display = (period === 'daily' || period === 'monthly') ? 'flex' : 'none';
+        daySelectEl.style.display = period === 'daily' ? 'flex' : 'none';
+    }
+
+    function updateReport() {
+        const period = periodSelect.value;
+        const week = document.getElementById('week').value;
+        const month = document.getElementById('month').value;
+        const year = document.getElementById('year').value;
+        const day = document.getElementById('day').value;
+        let url = '{{ route('reports.remittance') }}?period=' + period + '&year=' + year;
+        if (period === 'weekly') url += '&week=' + week;
+        if (period === 'daily') { url += '&month=' + month + '&day=' + day; }
+        else if (period === 'monthly') url += '&month=' + month;
+        window.location.href = url;
+    }
+
+    periodSelect.addEventListener('change', function () {
+        toggleFilters();
+        updateReport();
+    });
+    document.getElementById('week').addEventListener('change', updateReport);
+    document.getElementById('month').addEventListener('change', updateReport);
+    document.getElementById('year').addEventListener('change', updateReport);
+    document.getElementById('day').addEventListener('change', updateReport);
+
     var grid   = document.getElementById('remittanceGrid');
     var noRes  = document.getElementById('remittanceNoResults');
     var info   = document.getElementById('remittanceInfo');

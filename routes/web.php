@@ -226,7 +226,6 @@ Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])-
     Route::get('/reports/remittance-report', [RemittanceClerkReportController::class, 'remittanceReport'])->name('reports.remittance-report');
 
     // Print Routes
-    Route::get('/remittance-clerk/reports/print/remittance-report', [RemittanceClerkReportController::class, 'printRemittanceReport'])->name('reports.print.remittance-report-clerk');
     Route::get('/remittance-clerk/reports/print/driver-report', [RemittanceClerkReportController::class, 'printDriverReport'])->name('reports.print.driver-report');
     Route::get('/remittance-clerk/reports/print/pao-report', [RemittanceClerkReportController::class, 'printPaoReport'])->name('reports.print.pao-report');
     Route::get('/remittance-clerk/reports/print/vehicle-route-report', [RemittanceClerkReportController::class, 'printVehicleRouteReport'])->name('reports.print.vehicle-route-report');
@@ -499,11 +498,6 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
     Route::get('/hr/reports/print/payroll-history-report', [HrReportController::class, 'printPayrollHistoryReport'])->name('hr.reports.print.payroll-history-report');
 });
 
-// ===== PAYROLL REPORTS (all authenticated users) =====
-Route::middleware(['auth', 'check-status'])->group(function () {
-    Route::get('/reports/payroll', fn() => view('reports.payroll'))->name('reports.payroll');
-});
-
 // ===== ACCOUNTANT ROUTES =====
 Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group(function () {
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
@@ -532,8 +526,6 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
 
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');
     Route::get('/reports/payroll-approval', fn() => view('accountant.reports.payroll-approval'))->name('reports.payroll-approval');
-    Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
-
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
     Route::get('/reports/print/payroll-report', [ReportController::class, 'printPayrollReport'])->name('reports.print.payroll-report');
     Route::get('/reports/print/remittance-report', [ReportController::class, 'printRemittanceReport'])->name('reports.print.remittance-report');

@@ -75,8 +75,9 @@ class ReportController extends Controller
         $month = $request->get('month', date('m'));
         $year = $request->get('year', date('Y'));
         $week = $request->get('week', 1);
+        $day = $request->get('day', date('d'));
 
-        $remittances = $this->filterRemittances($period, $month, $year, $week);
+        $remittances = $this->filterRemittances($period, $month, $year, $week, $day);
         
         // Group remittances by date and paginate
         $groupedRemittances = collect($remittances)->groupBy(function ($item) {
@@ -114,52 +115,23 @@ class ReportController extends Controller
             'month',
             'year',
             'week',
+            'day',
             'remittances'
-        ) + $totals);
-    }
-
-    public function printRemittanceReport(Request $request)
-    {
-        $period = $request->get('period', 'monthly');
-        $month = $request->get('month', date('m'));
-        $year = $request->get('year', date('Y'));
-        $week = $request->get('week', 1);
-
-        $remittances = $this->filterRemittances($period, $month, $year, $week);
-        
-        // Group remittances by date for printing
-        $groupedRemittances = $remittances->groupBy(function($item) {
-            return $item->remittance_date->format('Y-m-d');
-        })->map(function($group) {
-            return [
-                'remittance_date' => $group->first()->remittance_date,
-                'total_collection' => $group->sum('total_collection'),
-                'total_expenses' => $group->sum('total_expenses'),
-                'net_remittance' => $group->sum('net_remittance'),
-                'is_short_remittance' => $group->where('is_short_remittance', true)->count() > 0,
-            ];
-        })->sortBy('remittance_date')->values();
-
-        $totals = $this->calculateTotals($remittances);
-
-        return view('remittance-clerk.reports.print.remittance-report-print', compact(
-            'groupedRemittances',
-            'period',
-            'month',
-            'year',
-            'week'
         ) + $totals);
     }
 
     /**
      * Filter remittances based on period parameters
      */
-    private function filterRemittances($period, $month, $year, $week)
+    private function filterRemittances($period, $month, $year, $week, $day = null)
     {
         $query = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
             ->where('status', 'approved');
 
-        if ($period === 'weekly') {
+        if ($period === 'daily') {
+            $date = Carbon::createFromDate($year, $month, $day);
+            return $query->whereDate('remittance_date', $date)->get();
+        } elseif ($period === 'weekly') {
             $startDate = Carbon::now()->setISODate($year, $week)->startOfWeek();
             $endDate = $startDate->copy()->endOfWeek();
             return $query->whereBetween('remittance_date', [$startDate, $endDate])->get();

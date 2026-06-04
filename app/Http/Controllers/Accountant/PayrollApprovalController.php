@@ -34,11 +34,25 @@ class PayrollApprovalController extends Controller
             ->orderByDesc('period_start')
             ->get();
 
-        $pendingStats = $allBatches->where('status', 'submitted');
+        $pendingStats  = $allBatches->where('status', 'submitted');
+        $approvedStats = $allBatches->where('status', 'approved');
+        $rejectedStats = $allBatches->where('status', 'rejected');
+
         $pendingCount  = $pendingStats->count();
-        $totalEmpInPending = $pendingStats->sum(fn ($b) => $b->payrolls->count());
-        $totalGrossAll     = $pendingStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->gross_pay));
-        $totalNetAll       = $pendingStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->net_pay));
+        $approvedCount = $approvedStats->count();
+        $rejectedCount = $rejectedStats->count();
+
+        $totalGrossAll       = $pendingStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->gross_pay));
+        $totalDeductionsAll  = $pendingStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->total_deductions));
+        $totalNetAll         = $pendingStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->net_pay));
+
+        $totalGrossApproved       = $approvedStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->gross_pay));
+        $totalDeductionsApproved  = $approvedStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->total_deductions));
+        $totalNetApproved         = $approvedStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->net_pay));
+
+        $totalGrossRejected       = $rejectedStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->gross_pay));
+        $totalDeductionsRejected  = $rejectedStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->total_deductions));
+        $totalNetRejected         = $rejectedStats->sum(fn ($b) => $b->payrolls->sum(fn ($p) => $p->net_pay));
 
         $batches = $allBatches->map(function (PayrollBatch $b) {
             $payrolls = $b->payrolls;
@@ -53,15 +67,20 @@ class PayrollApprovalController extends Controller
                 'half_label'  => $isFirst ? 'first' : 'second',
                 'period_dates'=> $start->format('M d').' – '.$b->period_end->format('M d, Y'),
                 'count'       => $payrolls->count(),
-                'total_gross' => (float) $payrolls->sum(fn ($p) => $p->gross_pay),
-                'total_net'   => (float) $payrolls->sum(fn ($p) => $p->net_pay),
+                'total_gross'      => (float) $payrolls->sum(fn ($p) => $p->gross_pay),
+                'total_deductions' => (float) $payrolls->sum(fn ($p) => $p->total_deductions),
+                'total_net'        => (float) $payrolls->sum(fn ($p) => $p->net_pay),
                 'status'      => $b->status,
                 'url'         => route('payroll-approval.batch', $b),
             ];
         })->values()->all();
 
         return view('accountant.payroll-approval.index', compact(
-            'batches', 'pendingCount', 'totalEmpInPending', 'totalGrossAll', 'totalNetAll'
+            'batches',
+            'pendingCount', 'approvedCount', 'rejectedCount',
+            'totalGrossAll', 'totalDeductionsAll', 'totalNetAll',
+            'totalGrossApproved', 'totalDeductionsApproved', 'totalNetApproved',
+            'totalGrossRejected', 'totalDeductionsRejected', 'totalNetRejected',
         ));
     }
 

@@ -22,18 +22,12 @@
 @section('content')
 @php
     $periodLabel = match ($period) {
+        'daily' => \Carbon\Carbon::createFromDate($year, $month, $day)->format('F j, Y'),
         'weekly' => 'Week ' . $week . ', ' . $year,
         'monthly' => \Carbon\Carbon::createFromDate($year, $month, 1)->format('F Y'),
         'yearly' => (string) $year,
         default => '',
     };
-
-    $printUrl = route('reports.print.remittance-report-clerk', [
-        'period' => $period,
-        'week' => $week,
-        'month' => $month,
-        'year' => $year,
-    ]);
 
     $remittancesJson = $remittances->groupBy(fn($r) => $r->remittance_date->format('Y-m-d'))->map(function ($group) {
         return $group->map(fn($r) => [
@@ -56,10 +50,7 @@
             <p class="text-xs text-gray-400 max-w-[520px] leading-relaxed m-0 mt-0.5">Filter weekly, monthly, or yearly totals and print a summary for the selected period.</p>
             <span class="inline-block text-[0.65rem] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md mt-2">{{ $periodLabel }}</span>
         </div>
-        <a href="{{ $printUrl }}" target="_blank" rel="noopener" class="rc-bounce inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white no-underline cursor-pointer whitespace-nowrap bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all" style="animation-delay:0.2s">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            Print report
-        </a>
+
     </div>
 
     {{-- Filter bar --}}
@@ -67,6 +58,7 @@
         <div class="flex flex-col gap-1 min-w-[130px] flex-1">
             <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Period</label>
             <select id="period" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
+                <option value="daily" {{ $period === 'daily' ? 'selected' : '' }}>Daily</option>
                 <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
                 <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
                 <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
@@ -80,7 +72,15 @@
                 @endfor
             </select>
         </div>
-        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="monthSelect" style="display:{{ $period === 'monthly' ? 'flex' : 'none' }};">
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="daySelect" style="display:{{ $period === 'daily' ? 'flex' : 'none' }};">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Day</label>
+            <select id="day" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
+                @for ($i = 1; $i <= 31; $i++)
+                    <option value="{{ $i }}" {{ (int) ($day ?? now()->day) === $i ? 'selected' : '' }}>{{ $i }}</option>
+                @endfor
+            </select>
+        </div>
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="monthSelect" style="display:{{ in_array($period, ['daily', 'monthly']) ? 'flex' : 'none' }};">
             <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Month</label>
             <select id="month" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
                 @for ($i = 1; $i <= 12; $i++)
@@ -276,11 +276,13 @@ function fmt(n) {
     const periodSelect = document.getElementById('period');
     const weekSelectEl = document.getElementById('weekSelect');
     const monthSelectEl = document.getElementById('monthSelect');
+    const daySelectEl = document.getElementById('daySelect');
 
     function toggleFilters() {
         const period = periodSelect.value;
         weekSelectEl.style.display = period === 'weekly' ? 'flex' : 'none';
-        monthSelectEl.style.display = period === 'monthly' ? 'flex' : 'none';
+        monthSelectEl.style.display = (period === 'daily' || period === 'monthly') ? 'flex' : 'none';
+        daySelectEl.style.display = period === 'daily' ? 'flex' : 'none';
     }
 
     function updateReport() {
@@ -288,9 +290,11 @@ function fmt(n) {
         const week = document.getElementById('week').value;
         const month = document.getElementById('month').value;
         const year = document.getElementById('year').value;
+        const day = document.getElementById('day').value;
         let url = '{{ route('reports.remittance-report') }}?period=' + period + '&year=' + year;
         if (period === 'weekly') url += '&week=' + week;
-        if (period === 'monthly') url += '&month=' + month;
+        if (period === 'daily') { url += '&month=' + month + '&day=' + day; }
+        else if (period === 'monthly') url += '&month=' + month;
         window.location.href = url;
     }
 
@@ -301,6 +305,7 @@ function fmt(n) {
     document.getElementById('week').addEventListener('change', updateReport);
     document.getElementById('month').addEventListener('change', updateReport);
     document.getElementById('year').addEventListener('change', updateReport);
+    document.getElementById('day').addEventListener('change', updateReport);
 })();
 </script>
 @endpush
