@@ -128,7 +128,7 @@ class ReportController extends Controller
             $query->whereYear('payroll_period_start', $year);
         }
 
-        $payrolls = $query->orderBy('payroll_period_start')->get();
+        $payrolls = $query->with('user:id,name')->orderBy('payroll_period_start')->get();
 
         // Group into batches keyed by period start–end
         $batchData = $payrolls
@@ -140,6 +140,16 @@ class ReportController extends Controller
                 'total_gross'      => $group->sum('gross_pay'),
                 'total_deductions' => $group->sum('total_deductions'),
                 'total_net'        => $group->sum('net_pay'),
+                'employees'        => $group->map(fn($p) => [
+                    'name'             => $p->user->name ?? 'Unknown',
+                    'basic_salary'     => (float) $p->basic_salary,
+                    'total_allowances' => (float) $p->total_allowances,
+                    'total_bonuses'    => (float) $p->total_bonuses,
+                    'holiday_pay'      => (float) $p->holiday_pay,
+                    'gross_pay'        => (float) $p->gross_pay,
+                    'total_deductions' => (float) $p->total_deductions,
+                    'net_pay'          => (float) $p->net_pay,
+                ])->values()->toArray(),
             ])
             ->values()
             ->toArray();

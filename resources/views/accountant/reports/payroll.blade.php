@@ -10,6 +10,45 @@
 .stat-card:nth-child(2) { animation-delay:0.1s; }
 .stat-card:nth-child(3) { animation-delay:0.15s; }
 .stat-card:nth-child(4) { animation-delay:0.2s; }
+.modal-overlay {
+    position: fixed; inset:0; z-index:9999;
+    background: rgba(0,0,0,0.45); backdrop-filter:blur(4px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden; transition:opacity 0.25s, visibility 0.25s;
+}
+.modal-overlay.open { opacity:1; visibility:visible; }
+.modal-box {
+    background:#fff; border-radius:16px; width:92%; max-width:780px;
+    max-height:85vh; display:flex; flex-direction:column;
+    box-shadow:0 25px 60px rgba(0,0,0,0.25);
+    transform:scale(0.93) translateY(12px); transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.modal-overlay.open .modal-box { transform:scale(1) translateY(0); }
+.modal-head {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 24px; border-bottom:1px solid #f3f4f6; flex-shrink:0;
+}
+.modal-head h2 { font-size:0.95rem; font-weight:700; color:#111827; margin:0; }
+.modal-close {
+    width:32px; height:32px; border-radius:8px; border:1px solid #e5e7eb;
+    background:#fff; color:#6b7280; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.15s; font-size:16px; line-height:1;
+}
+.modal-close:hover { border-color:#9ca3af; color:#111827; background:#f9fafb; }
+.modal-body { overflow-y:auto; padding:20px 24px; flex:1; }
+.modal-body table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+.modal-body thead { position:sticky; top:0; z-index:1; }
+.modal-body th {
+    text-align:left; padding:10px 8px; font-size:0.55rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.08em; color:#6b7280;
+    background:#f9fafb; border-bottom:1px solid #f3f4f6;
+}
+.modal-body th.text-right, .modal-body td.text-right { text-align:right; }
+.modal-body td {
+    padding:10px 8px; border-bottom:1px solid #f3f4f6;
+    color:#374151; font-size:0.8rem; white-space:nowrap;
+}
+.modal-body tbody tr:hover { background:#f9fafb; }
 </style>
 @endpush
 
@@ -129,6 +168,34 @@ $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? da
     </div>
 </div>
 
+{{-- Batch detail modal --}}
+<div class="modal-overlay" id="batchModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h2 id="modalTitle">Batch Details</h2>
+            <button class="modal-close" id="modalCloseBtn" type="button">&times;</button>
+        </div>
+        <div class="modal-body">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th class="text-right">Basic</th>
+                        <th class="text-right">Allow.</th>
+                        <th class="text-right">Bonus</th>
+                        <th class="text-right">Holiday</th>
+                        <th class="text-right">Gross</th>
+                        <th class="text-right text-red-600">Ded.</th>
+                        <th class="text-right">Net</th>
+                    </tr>
+                </thead>
+                <tbody id="modalBody"></tbody>
+            </table>
+            <div id="modalEmpty" class="hidden text-center py-8 text-xs text-gray-400">No employee data available.</div>
+        </div>
+    </div>
+</div>
+
 <script>
 window.payrollData = {!! json_encode(array_map(function($b) {
     return [
@@ -137,9 +204,65 @@ window.payrollData = {!! json_encode(array_map(function($b) {
         'gross'     => (float) $b['total_gross'],
         'ded'       => (float) $b['total_deductions'],
         'net'       => (float) $b['total_net'],
+        'employees' => $b['employees'] ?? [],
     ];
 }, $batchData)) !!};
 window.payrollTotals = { gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $sumNet }} };
+
+function playPop() {
+    try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(800, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.12);
+    } catch(e) {}
+}
+
+var batchModal = document.getElementById('batchModal');
+var modalTitle = document.getElementById('modalTitle');
+var modalBody  = document.getElementById('modalBody');
+var modalEmpty = document.getElementById('modalEmpty');
+
+document.getElementById('modalCloseBtn').addEventListener('click', function () { batchModal.classList.remove('open'); });
+batchModal.addEventListener('click', function (e) { if (e.target === batchModal) batchModal.classList.remove('open'); });
+
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && batchModal.classList.contains('open')) batchModal.classList.remove('open'); });
+
+function showBatchModal(idx) {
+    var b = window.payrollData[idx];
+    if (!b) return;
+    playPop();
+    modalTitle.textContent = b.period + ' — Employee Breakdown';
+    var emp = b.employees || [];
+    modalBody.innerHTML = '';
+    if (emp.length === 0) {
+        modalEmpty.classList.remove('hidden');
+    } else {
+        modalEmpty.classList.add('hidden');
+        emp.forEach(function (e) {
+            var fmt = function(n) { return '₱' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td style="font-weight:600;color:#111827;">' + e.name + '</td>' +
+                '<td class="text-right">' + fmt(e.basic_salary) + '</td>' +
+                '<td class="text-right">' + fmt(e.total_allowances) + '</td>' +
+                '<td class="text-right">' + fmt(e.total_bonuses) + '</td>' +
+                '<td class="text-right">' + fmt(e.holiday_pay) + '</td>' +
+                '<td class="text-right" style="font-weight:600;">' + fmt(e.gross_pay) + '</td>' +
+                '<td class="text-right" style="color:#dc2626;">' + fmt(e.total_deductions) + '</td>' +
+                '<td class="text-right" style="font-weight:700;color:#16a34a;">' + fmt(e.net_pay) + '</td>';
+            modalBody.appendChild(tr);
+        });
+    }
+    batchModal.classList.add('open');
+}
 
 (function () {
     const periodSelect = document.getElementById('period');
@@ -188,9 +311,11 @@ window.payrollTotals = { gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $su
             noRes.classList.remove('hidden');
         } else {
             noRes.classList.add('hidden');
-            pageData.forEach(function (b) {
+            pageData.forEach(function (b, idx) {
                 var tr = document.createElement('tr');
-                tr.className = 'transition-colors hover:bg-gray-50/50';
+                tr.className = 'transition-colors hover:bg-gray-50/50 cursor-pointer';
+                tr.style.cursor = 'pointer';
+                tr.dataset.batchIdx = start + idx;
                 var fmt = function(n) { return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
                 tr.innerHTML =
                     '<td class="px-5 py-3.5 text-xs font-semibold text-gray-900">' + b.period + '</td>' +
@@ -198,6 +323,9 @@ window.payrollTotals = { gross: {{ $sumGross }}, ded: {{ $sumDed }}, net: {{ $su
                     '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-900">\u20b1' + fmt(b.gross) + '</td>' +
                     '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-red-600">\u20b1' + fmt(b.ded) + '</td>' +
                     '<td class="px-5 py-3.5 text-right text-xs font-bold tabular-nums text-emerald-600">\u20b1' + fmt(b.net) + '</td>';
+                tr.addEventListener('click', function () {
+                    showBatchModal(start + idx);
+                });
                 grid.appendChild(tr);
             });
             // totals row
