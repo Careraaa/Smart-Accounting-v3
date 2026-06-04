@@ -207,8 +207,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
             </div>
 
-        {{-- STAT CARDS: Employees, Attendance, Holidays, Bonuses --}}
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {{-- STAT CARDS: Employees, Attendance, Holidays --}}
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
             <a href="{{ route('employees.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
                 <div class="flex items-center justify-between">
                     <div>
@@ -254,20 +254,6 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
             </a>
 
-            <a href="{{ route('bonuses.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-yellow-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Bonuses</p>
-                        <p class="text-xl font-bold text-gray-900 tabular-nums mt-0.5 hrd-count-num" style="animation-delay:0.4s">{{ $activeBonuses }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-yellow-50 text-yellow-500 flex items-center justify-center transition-all duration-300 group-hover:bg-yellow-500 group-hover:text-white group-hover:scale-110">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
-                    </div>
-                </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span>Active bonuses</span>
-                </div>
-            </a>
         </div>
 
     </div>

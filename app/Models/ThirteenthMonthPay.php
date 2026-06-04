@@ -11,6 +11,7 @@ class ThirteenthMonthPay extends Model
     use SoftDeletes;
 
     protected $fillable = [
+        'batch_id',
         'user_id',
         'calendar_year',
         'total_basic_salary_earned',
@@ -46,6 +47,11 @@ class ThirteenthMonthPay extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(PayrollBatch::class, 'batch_id');
     }
 
     public function computedBy(): BelongsTo

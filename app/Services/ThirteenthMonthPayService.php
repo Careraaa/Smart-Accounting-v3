@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Payroll;
+use App\Models\PayrollBatch;
 use App\Models\ThirteenthMonthPay;
 use App\Models\User;
 use Carbon\Carbon;
@@ -10,16 +11,27 @@ use Illuminate\Support\Collection;
 
 class ThirteenthMonthPayService
 {
-    public function __construct(
-        protected BonusFormulaEngine $formulaEngine
-    ) {}
-
-    /**
-     * Payroll statuses that count toward 13th month basic salary totals.
-     *
-     * @var list<string>
-     */
     protected array $countableStatuses = ['released', 'paid', 'approved'];
+
+    public function generateBatch(int $year, int $generatedBy): PayrollBatch
+    {
+        $batch = PayrollBatch::create([
+            'type' => 'thirteenth_month',
+            'period_start' => Carbon::create($year, 1, 1),
+            'period_end' => Carbon::create($year, 12, 31),
+            'status' => 'draft',
+            'generated_by' => $generatedBy,
+            'generated_at' => now(),
+        ]);
+
+        $records = $this->computeForYear($year, $generatedBy);
+
+        foreach ($records as $record) {
+            $record->update(['batch_id' => $batch->id]);
+        }
+
+        return $batch->fresh();
+    }
 
     public function computeForYear(int $year, ?int $computedBy = null): Collection
     {
@@ -37,37 +49,49 @@ class ThirteenthMonthPayService
     {
         $breakdown = $this->buildComputationBreakdown($employee, $year);
         $totalBasic = $breakdown['total_basic_salary'];
-        $monthsWorked = $breakdown['months_worked'];
 
-        $formula = '(total_basic_salary / 12)';
-        $thirteenthPay = $this->formulaEngine->evaluate($formula, [
-            'total_basic_salary' => $totalBasic,
-            'months_worked' => $monthsWorked,
-            'basic_salary' => $breakdown['latest_basic_salary'],
-            'gross_pay' => $breakdown['latest_gross_pay'],
-            'attendance_days' => $breakdown['attendance_days'],
-        ]);
+        $thirteenthPay = $totalBasic / 12;
 
-        $record = ThirteenthMonthPay::firstOrNew([
-            'user_id' => $employee->id,
-            'calendar_year' => $year,
-        ]);
+        $existing = ThirteenthMonthPay::withTrashed()
+            ->where('user_id', $employee->id)
+            ->where('calendar_year', $year)
+            ->first();
 
-        $amountPaid = (float) ($record->amount_paid ?? 0);
-
-        $record->fill([
-            'total_basic_salary_earned' => $totalBasic,
-            'thirteenth_month_pay' => $thirteenthPay,
-            'months_worked' => $monthsWorked,
-            'is_eligible' => $totalBasic > 0,
-            'amount_remaining' => max(0, $thirteenthPay - $amountPaid),
-            'status' => $this->resolvePaymentStatus($thirteenthPay, $amountPaid),
-            'computed_by' => $computedBy,
-            'computed_at' => now(),
-            'computation_breakdown' => $breakdown,
-        ]);
-
-        $record->save();
+        if ($existing) {
+            $amountPaid = (float) $existing->amount_paid;
+            $existing->fill([
+                'batch_id' => null,
+                'total_basic_salary_earned' => $totalBasic,
+                'thirteenth_month_pay' => $thirteenthPay,
+                'months_worked' => $breakdown['months_worked'],
+                'is_eligible' => $totalBasic > 0,
+                'amount_remaining' => max(0, $thirteenthPay - $amountPaid),
+                'status' => $this->resolvePaymentStatus($thirteenthPay, $amountPaid),
+                'computed_by' => $computedBy,
+                'computed_at' => now(),
+                'computation_breakdown' => $breakdown,
+            ]);
+            if ($existing->trashed()) {
+                $existing->restore();
+            }
+            $existing->save();
+            $record = $existing->fresh(['user']);
+        } else {
+            $amountPaid = 0;
+            $record = ThirteenthMonthPay::create([
+                'user_id' => $employee->id,
+                'calendar_year' => $year,
+                'total_basic_salary_earned' => $totalBasic,
+                'thirteenth_month_pay' => $thirteenthPay,
+                'months_worked' => $breakdown['months_worked'],
+                'is_eligible' => $totalBasic > 0,
+                'amount_remaining' => max(0, $thirteenthPay),
+                'status' => 'pending',
+                'computed_by' => $computedBy,
+                'computed_at' => now(),
+                'computation_breakdown' => $breakdown,
+            ]);
+        }
 
         return $record->fresh(['user']);
     }
@@ -139,6 +163,12 @@ class ThirteenthMonthPayService
         Carbon $periodStart,
         Carbon $periodEnd
     ): float {
+        $hasAnyPayrolls = Payroll::query()
+            ->where('user_id', $employee->id)
+            ->whereIn('status', $this->countableStatuses)
+            ->whereYear('payroll_period_start', $year)
+            ->exists();
+
         $distinctMonths = Payroll::query()
             ->where('user_id', $employee->id)
             ->whereIn('status', $this->countableStatuses)
@@ -154,23 +184,37 @@ class ThirteenthMonthPayService
             return (float) min(12, $distinctMonths);
         }
 
-        if ($periodStart->greaterThan($periodEnd)) {
+        if ($hasAnyPayrolls || !$employee->date_of_hire) {
             return 0;
         }
 
-        $months = $periodStart->diffInMonths($periodEnd) + 1;
+        $hireYear = (int) Carbon::parse($employee->date_of_hire)->format('Y');
+
+        if ($hireYear < $year) {
+            return 0;
+        }
+
+        $effectiveEnd = $year === (int) now()->year
+            ? min($periodEnd, now()->endOfMonth())
+            : $periodEnd;
+
+        $months = $periodStart->diffInMonths($effectiveEnd) + 1;
 
         return (float) min(12, max(0, $months));
     }
 
     protected function eligibleEmployees(int $year): Collection
     {
+        $userIdsWithSalary = Payroll::query()
+            ->whereIn('status', $this->countableStatuses)
+            ->whereYear('payroll_period_start', $year)
+            ->where('basic_salary', '>', 0)
+            ->distinct()
+            ->pluck('user_id');
+
         return User::query()
+            ->whereIn('id', $userIdsWithSalary)
             ->whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
-            ->where(function ($query) use ($year) {
-                $query->whereNull('date_of_hire')
-                    ->orWhereYear('date_of_hire', '<=', $year);
-            })
             ->orderBy('first_name')
             ->orderBy('last_name')
             ->get();

@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         $this->call([NotificationSeeder::class]);
         $this->call([RemittanceSeeder::class]);
         $this->call([HolidaySeeder::class]);
-        $this->call([BonusSeeder::class]);
+
+
     }
 }

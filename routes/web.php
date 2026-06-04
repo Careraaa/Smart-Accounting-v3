@@ -41,7 +41,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\HR\HolidayController as HRHolidayController;
-use App\Http\Controllers\HR\BonusController;
+
 use App\Http\Controllers\HR\ThirteenthMonthPayController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
@@ -414,18 +414,19 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::post('/payroll/batch/{batch}/submit', [PayrollController::class, 'batchSubmit'])->name('payroll.batch.submit');
         Route::post('/payroll/cutoff/update', [PayrollController::class, 'updateCutoffSchedule'])->name('payroll.cutoff.update');
 
-        Route::resource('bonuses', BonusController::class)->except(['show']);
-
         Route::prefix('payroll/thirteenth-month-pay')
             ->name('payroll.thirteenth-month-pay.')
             ->group(function () {
-                Route::get('/', [ThirteenthMonthPayController::class, 'index'])->name('index');
-                Route::post('/compute', [ThirteenthMonthPayController::class, 'compute'])->name('compute');
-                Route::get('/{thirteenthMonthPay}/record-payment', [ThirteenthMonthPayController::class, 'recordPaymentForm'])->name('record-payment');
-                Route::post('/{thirteenthMonthPay}/record-payment', [ThirteenthMonthPayController::class, 'recordPayment'])->name('record-payment.store');
+                Route::get('/', function () { return redirect()->route('payroll.salary-computation.index'); })->name('index');
+                Route::post('/generate', [ThirteenthMonthPayController::class, 'generate'])->name('generate');
+                Route::get('/batch/{batch}', [ThirteenthMonthPayController::class, 'batchDetails'])->name('batch.details');
+                Route::get('/batch/{batch}/edit', [ThirteenthMonthPayController::class, 'batchConfirm'])->name('batch.confirm');
+                Route::post('/batch/{batch}/submit', [ThirteenthMonthPayController::class, 'submit'])->name('batch.submit');
+                Route::get('/batch/{batch}/payslips', [ThirteenthMonthPayController::class, 'batchPayslips'])->name('batch.payslips');
+                Route::get('/batch/{batch}/payslip/{record}', [ThirteenthMonthPayController::class, 'payslip'])->name('batch.payslip');
+                Route::post('/batch/{batch}/reopen', [ThirteenthMonthPayController::class, 'reopen'])->name('batch.reopen');
+                Route::delete('/batch/{batch}/destroy', [ThirteenthMonthPayController::class, 'destroyBatch'])->name('batch.destroy');
                 Route::post('/{thirteenthMonthPay}/recompute', [ThirteenthMonthPayController::class, 'recompute'])->name('recompute');
-                Route::get('/{thirteenthMonthPay}/edit', [ThirteenthMonthPayController::class, 'edit'])->name('edit');
-                Route::put('/{thirteenthMonthPay}', [ThirteenthMonthPayController::class, 'update'])->name('update');
                 Route::get('/{thirteenthMonthPay}', [ThirteenthMonthPayController::class, 'show'])->name('show');
             });
     });
