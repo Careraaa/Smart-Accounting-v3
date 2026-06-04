@@ -535,9 +535,6 @@
         html.dark .bg-gray-100 { background: #10101c; }
 
         /* Pagination */
-        html.dark .page-link { background: #0a0a14; border-color: #18182a; color: #b0b0cc; }
-        html.dark .page-link:hover { background: #10101c; }
-        html.dark .page-item.active .page-link { background: #c8292a; border-color: #c8292a; }
     </style>
 
     @stack('styles')

@@ -650,7 +650,11 @@
 
             var h = '';
             h += '<button data-p="' + (page - 1) + '" class="' + (page === 1 ? dis : def) + '">‹</button>';
-            for (var i = 1; i <= pages; i++) {
+            var half = 2;
+            var winStart = Math.max(1, page - half);
+            var winEnd = Math.min(pages, winStart + 4);
+            if (winEnd - winStart + 1 < 5) { winStart = Math.max(winEnd - 4, 1); }
+            for (var i = winStart; i <= winEnd; i++) {
                 h += '<button data-p="' + i + '" class="' + (i === page ? act : def) + '">' + i + '</button>';
             }
             h += '<button data-p="' + (page + 1) + '" class="' + (page === pages ? dis : def) + '">›</button>';

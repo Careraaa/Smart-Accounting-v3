@@ -390,7 +390,11 @@ window.allOtRequests = {!! json_encode($allRequests->map(fn($r) => [
         if (pages <= 1) { nav.innerHTML = ''; return; }
 
         var html = '<button class="otp-page-btn" data-p="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + '>&lsaquo;</button>';
-        for (var i = 1; i <= pages; i++) {
+        var half = 2;
+        var winStart = Math.max(1, page - half);
+        var winEnd = Math.min(pages, winStart + 4);
+        if (winEnd - winStart + 1 < 5) { winStart = Math.max(winEnd - 4, 1); }
+        for (var i = winStart; i <= winEnd; i++) {
             html += '<button class="otp-page-btn' + (i === page ? ' active' : '') + '" data-p="' + i + '">' + i + '</button>';
         }
         html += '<button class="otp-page-btn" data-p="' + (page + 1) + '"' + (page === pages ? ' disabled' : '') + '>&rsaquo;</button>';

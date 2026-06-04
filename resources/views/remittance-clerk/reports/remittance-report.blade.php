@@ -173,7 +173,7 @@
                 of
                 <strong class="text-gray-700">{{ $groupedRemittances->total() }}</strong> daily totals
             </div>
-            {{ $groupedRemittances->withQueryString()->links('pagination::bootstrap-5') }}
+            {{ $groupedRemittances->withQueryString()->links('pagination::tailwind') }}
         </div>
         @endif
     </div>

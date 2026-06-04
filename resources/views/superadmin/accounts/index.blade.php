@@ -376,7 +376,13 @@ const ROLE_BADGE_MAP = {
 
         let html = '';
         html += `<button data-p="${page-1}" class="${page===1?disClass:defClass}">&lsaquo;</button>`;
-        for(let i=1;i<=pages;i++){
+        const half = 2;
+        let winStart = Math.max(1, page - half);
+        let winEnd = Math.min(pages, winStart + 4);
+        if (winEnd - winStart + 1 < 5) {
+            winStart = Math.max(winEnd - 4, 1);
+        }
+        for(let i=winStart;i<=winEnd;i++){
             html += `<button data-p="${i}" class="${i===page?activeClass:defClass}">${i}</button>`;
         }
         html += `<button data-p="${page+1}" class="${page===pages?disClass:defClass}">&rsaquo;</button>`;

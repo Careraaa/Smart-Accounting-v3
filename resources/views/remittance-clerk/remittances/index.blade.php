@@ -207,11 +207,11 @@
 
     function renderPagination(totalPages, cur) {
         var html = '';
-        var startP = Math.max(1, cur - 2);
-        var endP = Math.min(totalPages, cur + 2);
-        if (startP > 1) { html += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold bg-white text-gray-500 hover:bg-gray-100 border border-gray-200 cursor-pointer" data-page="1">1</button>'; if (startP > 2) html += '<span class="px-1 text-[0.55rem] text-gray-400">…</span>'; }
-        for (var p = startP; p <= endP; p++) { html += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold border cursor-pointer ' + (p === cur ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 hover:bg-gray-100 border-gray-200') + '" data-page="' + p + '">' + p + '</button>'; }
-        if (endP < totalPages) { if (endP < totalPages - 1) html += '<span class="px-1 text-[0.55rem] text-gray-400">…</span>'; html += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold bg-white text-gray-500 hover:bg-gray-100 border border-gray-200 cursor-pointer" data-page="' + totalPages + '">' + totalPages + '</button>'; }
+        var half = 2;
+        var winStart = Math.max(1, cur - half);
+        var winEnd = Math.min(totalPages, winStart + 4);
+        if (winEnd - winStart + 1 < 5) { winStart = Math.max(winEnd - 4, 1); }
+        for (var p = winStart; p <= winEnd; p++) { html += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold border cursor-pointer ' + (p === cur ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 hover:bg-gray-100 border-gray-200') + '" data-page="' + p + '">' + p + '</button>'; }
         paginationBtns.innerHTML = html;
 
         paginationBtns.querySelectorAll('button').forEach(function (btn) {

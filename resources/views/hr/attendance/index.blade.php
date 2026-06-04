@@ -161,52 +161,38 @@
     padding:0;
     list-style:none;
 }
-
-.att-pagination-strip .page-item {
-    display:flex;
-}
-
-.att-pagination-strip .page-item .page-link {
-    width:28px;
-    height:28px;
-
-    border-radius:7px !important;
-    border:1px solid #e5e7eb;
-
-    background:#fff;
-    color:#6b7280;
-
-    font-size:0.74rem;
-    font-weight:600;
-
-    display:flex;
+.att-pagination-strip .pagination a,
+.att-pagination-strip .pagination span.page-btn {
+    display:inline-flex;
     align-items:center;
     justify-content:center;
-
-    padding:0;
+    width:28px;
+    height:28px;
+    border-radius:7px;
+    border:1px solid #e5e7eb;
+    font-size:0.74rem;
+    font-weight:600;
     text-decoration:none;
-
     transition:all .15s ease;
 }
-
-.att-pagination-strip .page-item .page-link:hover {
+.att-pagination-strip .pagination a:hover {
     background:#f3f4f6;
     border-color:#d1d5db;
     color:#111827;
 }
-
-.att-pagination-strip .page-item.active .page-link {
+.att-pagination-strip .pagination a.active-page {
     background:#c8292a;
     border-color:#c8292a;
     color:#fff;
 }
-
-.att-pagination-strip .page-item.disabled .page-link {
+.att-pagination-strip .pagination a.disabled-page {
     background:#f9fafb;
     color:#d1d5db;
     pointer-events:none;
     cursor:not-allowed;
 }
+
+
 </style>
 @endpush
 
@@ -532,38 +518,29 @@ window.todayAttendance = {!! json_encode($todayAttendance->map(fn($a) => [
             return;
         }
 
-        let html = `<ul class="pagination mb-0">`;
+        let html = `<div class="flex items-center gap-1">`;
 
         // Previous button
-        html += `
-            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage - 1}">
-                    ‹
-                </a>
-            </li>
-        `;
+        const prevClass = currentPage === 1 ? 'disabled-page' : '';
+        html += `<a href="#" class="${prevClass}" data-page="${currentPage - 1}">‹</a>`;
 
         // Page numbers
-        for (let i = 1; i <= totalPages; i++) {
-            html += `
-                <li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">
-                        ${i}
-                    </a>
-                </li>
-            `;
+        const half = 2;
+        let winStart = Math.max(1, currentPage - half);
+        let winEnd = Math.min(totalPages, winStart + 4);
+        if (winEnd - winStart + 1 < 5) {
+            winStart = Math.max(winEnd - 4, 1);
+        }
+        for (let i = winStart; i <= winEnd; i++) {
+            const activeClass = i === currentPage ? 'active-page' : '';
+            html += `<a href="#" class="${activeClass}" data-page="${i}">${i}</a>`;
         }
 
         // Next button
-        html += `
-            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                <a class="page-link" href="#" data-page="${currentPage + 1}">
-                    ›
-                </a>
-            </li>
-        `;
+        const nextClass = currentPage === totalPages ? 'disabled-page' : '';
+        html += `<a href="#" class="${nextClass}" data-page="${currentPage + 1}">›</a>`;
 
-        html += `</ul>`;
+        html += `</div>`;
 
         nav.innerHTML = html;
 

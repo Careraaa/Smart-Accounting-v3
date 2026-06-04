@@ -547,7 +547,13 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
 
             let html = '<div class="flex items-center gap-1">';
             html += `<button class="w-7 h-7 rounded-lg border border-gray-200 bg-white text-gray-500 text-xs font-semibold flex items-center justify-center hover:bg-gray-100 transition-colors ${currentPage === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>\u2039</button>`;
-            for (let i = 1; i <= totalPages; i++) {
+            const half = 2;
+            let winStart = Math.max(1, currentPage - half);
+            let winEnd = Math.min(totalPages, winStart + 4);
+            if (winEnd - winStart + 1 < 5) {
+                winStart = Math.max(winEnd - 4, 1);
+            }
+            for (let i = winStart; i <= winEnd; i++) {
                 html += `<button class="w-7 h-7 rounded-lg text-xs font-semibold flex items-center justify-center transition-colors ${i === currentPage ? 'bg-gray-900 text-white' : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-100'}" data-page="${i}">${i}</button>`;
             }
             html += `<button class="w-7 h-7 rounded-lg border border-gray-200 bg-white text-gray-500 text-xs font-semibold flex items-center justify-center hover:bg-gray-100 transition-colors ${currentPage === totalPages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>\u203a</button>`;
@@ -690,7 +696,11 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
             if (pages <= 1) { nav.innerHTML = ''; return; }
             var html = '<div class="flex items-center gap-1">';
             html += '<button class="w-7 h-7 rounded-lg border border-gray-200 bg-white text-gray-500 text-xs font-semibold flex items-center justify-center hover:bg-gray-100 transition-colors ' + (page === 1 ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer') + '" data-p="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + '>\u2039</button>';
-            for (var i = 1; i <= pages; i++) {
+            var half = 2;
+            var winStart = Math.max(1, page - half);
+            var winEnd = Math.min(pages, winStart + 4);
+            if (winEnd - winStart + 1 < 5) { winStart = Math.max(winEnd - 4, 1); }
+            for (var i = winStart; i <= winEnd; i++) {
                 html += '<button class="w-7 h-7 rounded-lg text-xs font-semibold flex items-center justify-center transition-colors ' + (i === page ? 'bg-gray-900 text-white' : 'border border-gray-200 bg-white text-gray-500 hover:bg-gray-100') + '" data-p="' + i + '">' + i + '</button>';
             }
             html += '<button class="w-7 h-7 rounded-lg border border-gray-200 bg-white text-gray-500 text-xs font-semibold flex items-center justify-center hover:bg-gray-100 transition-colors ' + (page === pages ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer') + '" data-p="' + (page + 1) + '"' + (page === pages ? ' disabled' : '') + '>\u203a</button>';

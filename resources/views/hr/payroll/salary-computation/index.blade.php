@@ -308,7 +308,13 @@ window.allPayrollBatches = {!! json_encode($allBatches->map(fn($b) => $b->isThir
 
         let html = '';
         html += `<button data-p="${page - 1}" class="${page === 1 ? dis : def}">‹</button>`;
-        for (let i = 1; i <= pages; i++) {
+        const half = 2;
+        let winStart = Math.max(1, page - half);
+        let winEnd = Math.min(pages, winStart + 4);
+        if (winEnd - winStart + 1 < 5) {
+            winStart = Math.max(winEnd - 4, 1);
+        }
+        for (let i = winStart; i <= winEnd; i++) {
             html += `<button data-p="${i}" class="${i === page ? act : def}">${i}</button>`;
         }
         html += `<button data-p="${page + 1}" class="${page === pages ? dis : def}">›</button>`;
