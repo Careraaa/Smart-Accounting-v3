@@ -406,6 +406,14 @@
                                         <td class="mono">₱{{ number_format($allow->amount, 2) }}</td>
                                     </tr>
                                 @empty @endforelse
+
+                                @foreach ($payroll->bonuses as $bonus)
+                                    <tr>
+                                        <td>{{ ucfirst($bonus->bonus_type) }}{{ $bonus->description ? ' — ' . $bonus->description : '' }}</td>
+                                        <td class="mono right">—</td>
+                                        <td class="mono">₱{{ number_format($bonus->amount, 2) }}</td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
 

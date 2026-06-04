@@ -69,6 +69,10 @@
         $withholdingTax = (float)($payroll->withholding_tax ?? 0);
         $manualAllowances = $payroll->allowances->filter(fn($a) => !str_starts_with((string)($a->allowance_type ?? ''), 'Overtime Pay') && !str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
         $manualDeductions = $payroll->deductions->filter(fn($d) => !in_array($d->deduction_type, ['SSS','Pag-IBIG','PhilHealth','Withholding Tax','Late Deduction']) && !str_starts_with((string)($d->deduction_type ?? ''), 'Undertime Deduction'));
+        $bonusTotal = (float)($payroll->bonuses->sum('amount') ?? 0);
+        $initialNetPay = max(0, ($payroll->basic_salary ?? 0) + $holidayPay + $holidayOTPay + $leavePayTotal + $overtimePay - $undertimeDeduction - $lateDeduction - $sss - $pagibig - $philhealth - $withholdingTax - $caDeduction);
+        $manualAllowTotal = (float) $manualAllowances->sum('amount');
+        $manualDeductTotal = (float) $manualDeductions->sum('amount');
     @endphp
 
     {{-- Employee header --}}
@@ -220,7 +224,7 @@
                     {{-- Initial Net Pay --}}
                     <div class="flex items-center justify-between py-2.5">
                         <span class="text-sm font-bold text-gray-900">Initial Net Pay</span>
-                        <span class="text-base font-bold text-gray-900 tabular-nums font-mono">&#x20B1;{{ number_format($payroll->net_pay ?? 0, 2) }}</span>
+                        <span class="text-base font-bold text-gray-900 tabular-nums font-mono">&#x20B1;{{ number_format($initialNetPay, 2) }}</span>
                     </div>
                 </div>
             </div>

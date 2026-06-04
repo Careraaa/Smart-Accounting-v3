@@ -432,9 +432,8 @@
 
                 $payroll->setAttribute('basic_salary', $computed['basicSalary']);
                 $payroll->setAttribute('gross_pay', $fullGrossPay);
-                // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
-                $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
-                           + (float)($payroll->salary_loan_deduction ?? 0);
+            // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0);
                 $totalDeductions = $computed['totalDeductions'] + $loanTotal;
                 $payroll->setAttribute('total_deductions', $totalDeductions);
                 $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
