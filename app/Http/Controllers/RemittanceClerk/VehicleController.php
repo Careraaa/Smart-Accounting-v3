@@ -58,18 +58,10 @@ class VehicleController extends Controller
 
     public function store(Request $request)
     {
-        $operatorOptions = Driver::query()
-            ->where('status', 'active')
-            ->pluck('name')
-            ->merge(PAO::query()->where('status', 'active')->pluck('name'))
-            ->unique()
-            ->values()
-            ->all();
-
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles',
             'route_id' => 'required|exists:routes,id',
-            'operator' => ['required', 'string', Rule::in($operatorOptions)],
+            'operator' => 'required|string|max:255',
             'status' => 'required|in:active,under_maintenance',
         ]);
 
@@ -110,19 +102,10 @@ class VehicleController extends Controller
 
     public function update(Request $request, Vehicle $vehicle)
     {
-        $operatorOptions = Driver::query()
-            ->where('status', 'active')
-            ->pluck('name')
-            ->merge(PAO::query()->where('status', 'active')->pluck('name'))
-            ->push($vehicle->operator)
-            ->unique()
-            ->values()
-            ->all();
-
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles,plate_number,' . $vehicle->id,
             'route_id' => 'required|exists:routes,id',
-            'operator' => ['required', 'string', Rule::in($operatorOptions)],
+            'operator' => 'required|string|max:255',
             'status' => 'required|in:active,under_maintenance',
         ]);
 

@@ -64,12 +64,12 @@ $user = auth()->user();
                     <div>
                         <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Today's Status</span>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span id="dash-status-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500">�</span>
-                            <span id="dash-status-time" class="text-[11px] font-mono text-gray-400"></span>
+                            <span id="attendance-status-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500">—</span>
+                            <span id="attendance-status-time" class="text-[11px] font-mono text-gray-400"></span>
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('employee.attendance.index') }}" class="btn-uv-pill">View all ?</a>
+                <a href="{{ route('employee.attendance.index') }}" class="btn-uv-pill">View all &rarr;</a>
             </div>
 
             {{-- Quick Actions --}}
@@ -126,7 +126,7 @@ $user = auth()->user();
                             <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $pendingLeaves }}</span>
                         @endif
                     </div>
-                    <div class="text-[10px] text-gray-400 mt-0.5">{{ $totalLeaves }} total � {{ $approvedLeaves }} approved</div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">{{ $totalLeaves }} total &middot; {{ $approvedLeaves }} approved</div>
                 </div>
                 <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </a>
@@ -143,7 +143,7 @@ $user = auth()->user();
                             <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $pendingOT + $pendingUT }}</span>
                         @endif
                     </div>
-                    <div class="text-[10px] text-gray-400 mt-0.5">{{ $pendingOT }} OT � {{ $pendingUT }} UT pending</div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">{{ $pendingOT }} OT &middot; {{ $pendingUT }} UT pending</div>
                 </div>
                 <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </a>
@@ -160,7 +160,7 @@ $user = auth()->user();
                             <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[9px] font-bold px-1">{{ $pendingCashAdvances }}</span>
                         @endif
                     </div>
-                    <div class="text-[10px] text-gray-400 mt-0.5">?{{ number_format($totalBorrowed, 0) }} borrowed total</div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">₱{{ number_format($totalBorrowed, 0) }} borrowed total</div>
                 </div>
                 <svg class="w-3.5 h-3.5 text-gray-300 shrink-0 group-hover:text-gray-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </a>
