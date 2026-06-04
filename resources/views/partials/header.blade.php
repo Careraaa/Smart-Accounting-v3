@@ -160,10 +160,10 @@
                 "\xf0\x9f\x8f\x85 Welcome, $name. This greeting is rarer than a perfectly formatted spreadsheet.",
             ];
 
-            $roll = mt_rand(1, 1000);
-            if ($roll <= 1) {
+            $roll = mt_rand(1, 100);
+            if ($roll == 1) {
                 $greeting = $legendaryGreetings[array_rand($legendaryGreetings)];
-            } elseif ($roll <= 6) {
+            } elseif ($roll <= 5) {
                 $greeting = $rareGreetings[array_rand($rareGreetings)];
             } else {
                 $pool = $roleGreetings[$role] ?? $roleGreetings['employee'];
