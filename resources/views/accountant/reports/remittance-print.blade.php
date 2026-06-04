@@ -143,7 +143,6 @@
 
     {{-- Controls --}}
     <div class="controls">
-        <a href="{{ route('reports.remittance') }}" class="btn btn-ghost">← Back</a>
         <button class="btn btn-primary" onclick="window.print()">Print Report</button>
     </div>
 
