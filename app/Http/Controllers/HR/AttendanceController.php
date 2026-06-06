@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\AttendanceLog;
+use App\Models\Leave;
 use App\Models\AttendanceToken;
 use App\Models\Employee;
 use App\Models\OvertimeUndertime;
@@ -592,6 +593,117 @@ class AttendanceController extends Controller
         return redirect()->route('attendance.index')->with('success', $successMsg);
     }
 
+    /**
+     * Quick-add attendance for testing mode — no page reload needed
+     */
+    public function quickAdd(Request $request)
+    {
+        if (Setting::get('testing_mode', 'disabled') !== 'enabled') {
+            return response()->json(['error' => 'Testing mode is not enabled'], 403);
+        }
+
+        $request->validate([
+            'user_id'  => 'required|exists:users,id',
+            'date'     => 'required|date',
+            'time_in'  => 'nullable|date_format:H:i',
+            'time_out' => 'nullable|date_format:H:i',
+        ]);
+
+        $userId = $request->user_id;
+        $data = ['is_manual' => true];
+
+        $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
+
+        if ($request->time_in) {
+            $data['time_in'] = $request->time_in . ':00';
+            try {
+                $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
+                $officeStart = Carbon::createFromFormat('H:i', '08:00');
+                $data['status'] = $timeIn->isAfter($officeStart->copy()->addMinutes($gracePeriodMinutes)) ? 'late' : 'present';
+            } catch (\Throwable $e) {
+                $data['status'] = 'present';
+            }
+        }
+
+        if ($request->time_out) {
+            $data['time_out'] = $request->time_out . ':00';
+        }
+
+        if ($request->time_in && $request->time_out) {
+            try {
+                $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
+                $officeStart = Carbon::createFromFormat('H:i', '08:00');
+                $data['status'] = $timeIn->isAfter($officeStart->copy()->addMinutes($gracePeriodMinutes)) ? 'late' : 'present';
+            } catch (\Throwable $e) {
+                $data['status'] = $data['status'] ?? 'present';
+            }
+        }
+
+        $attendance = Attendance::firstOrNew(['user_id' => $userId, 'date' => $request->date]);
+        $attendance->fill($data);
+        $attendance->is_manual = true;
+        $attendance->save();
+
+        // ── Auto OT/UT detection (same logic as store()) ──
+        if ($attendance->time_in && $attendance->time_out) {
+            $dateStr = $attendance->date->format('Y-m-d');
+            $employee = Employee::find($userId);
+
+            $shift = null;
+            if ($employee && isset($employee->shift_id) && $employee->shift_id) {
+                $shift = Shift::find($employee->shift_id);
+            }
+            if (!$shift) {
+                $shift = Shift::where('is_active', true)->first();
+            }
+
+            if ($shift) {
+                $attendanceService = new AttendanceService();
+                $otutResult = $attendanceService->calculateOvertimeAndUndertime($attendance, $shift);
+
+                $overtimeHours = $otutResult['overtime_hours'];
+                $undertimeHours = $otutResult['undertime_hours'];
+                $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
+
+                OvertimeUndertime::where('user_id', $userId)
+                    ->where('date', $dateStr)
+                    ->delete();
+
+                if ($overtimeHours > 0) {
+                    $otAmount = $overtimeHours * $hourlyRate * 1.25;
+                    OvertimeUndertime::create([
+                        'user_id'          => $userId,
+                        'date'             => $dateStr,
+                        'type'             => 'overtime',
+                        'hours'            => $overtimeHours,
+                        'reason'           => 'Testing — auto-detected',
+                        'status'           => 'approved',
+                        'amount'           => $otAmount,
+                        'hourly_rate_used' => $hourlyRate,
+                        'approved_by'      => auth()->id(),
+                    ]);
+                }
+
+                if ($undertimeHours > 0) {
+                    $utAmount = -($undertimeHours * $hourlyRate);
+                    OvertimeUndertime::create([
+                        'user_id'          => $userId,
+                        'date'             => $dateStr,
+                        'type'             => 'undertime',
+                        'hours'            => $undertimeHours,
+                        'reason'           => 'Testing — auto-detected',
+                        'status'           => 'approved',
+                        'amount'           => $utAmount,
+                        'hourly_rate_used' => $hourlyRate,
+                        'approved_by'      => auth()->id(),
+                    ]);
+                }
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Attendance saved']);
+    }
+
     public function getAttendanceTableRows()
     {
         $attendances = Attendance::with('employee')
@@ -647,4 +759,5 @@ class AttendanceController extends Controller
             'grace_period_minutes' => $gracePeriodMinutes,
         ]);
     }
+
 }

@@ -1,5 +1,7 @@
 @extends('layouts.layout')
 
+@php use App\Models\Setting; $testingMode = Setting::get('testing_mode', 'disabled') === 'enabled'; @endphp
+
 @push('styles')
 <style>
 @keyframes attFadeUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
@@ -387,6 +389,9 @@
                                             </div>
                                         </template>
                                         @endif
+                                        @if($testingMode && !$isFuture && (!$isWeekend || $isToday))
+                                        <button type="button" class="att-quick-edit absolute bottom-1 right-1 z-10 w-5 h-5 bg-white border border-gray-200 rounded text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-150 hover:border-gray-900 hover:text-gray-900 hover:shadow-sm active:scale-90" data-user-id="{{ auth()->id() }}" data-date="{{ $day->format('Y-m-d') }}" title="Quick add">+</button>
+                                        @endif
                                     </div>
                                 @endif
                             @endforeach
@@ -401,9 +406,53 @@
 
     </div>
 </div>
+@if($testingMode)
+{{-- Testing mode quick-edit modal --}}
+<div id="att-quick-modal" class="fixed inset-0 z-[100001] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm" style="display:none;">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-gray-200 scale-in mx-4">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span class="text-sm font-bold text-gray-900">Quick Attendance</span>
+            </div>
+            <button type="button" class="att-quick-close w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="p-6">
+            <form id="att-quick-form">
+                @csrf
+                <input type="hidden" name="user_id" id="att-q-user-id" value="{{ auth()->id() }}">
+                <input type="hidden" name="date" id="att-q-date" value="">
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Time In</label>
+                        <input type="time" name="time_in" id="att-q-time-in" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-150 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10">
+                    </div>
+                    <div>
+                        <label class="block text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 mb-1.5">Time Out</label>
+                        <input type="time" name="time_out" id="att-q-time-out" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-150 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10">
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" class="att-quick-close flex-1 px-4 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all duration-200 active:scale-[0.97]">Cancel</button>
+                    <button type="submit" class="flex-1 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all duration-200 active:scale-[0.97]">Save</button>
+                </div>
+            </form>
+            <div id="att-q-status" class="mt-3 text-xs text-center font-medium" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+@endif
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Teleport modal to body so backdrop covers sidebar/navbar
+    var modalEl = document.getElementById('att-quick-modal');
+    if (modalEl) document.body.appendChild(modalEl);
+
     var activeTip = null;
     document.querySelectorAll('.group').forEach(function(cell) {
         var tpl = cell.querySelector('.att-tip-tpl');
@@ -439,6 +488,80 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 250);
         });
     });
+
+    // Quick-edit modal
+    var qModal = document.getElementById('att-quick-modal');
+    var qForm = document.getElementById('att-quick-form');
+    var qUserId = document.getElementById('att-q-user-id');
+    var qDate = document.getElementById('att-q-date');
+    var qTimeIn = document.getElementById('att-q-time-in');
+    var qTimeOut = document.getElementById('att-q-time-out');
+    var qStatus = document.getElementById('att-q-status');
+
+    if (qModal) {
+        function sndPlay() {
+            var a = document.getElementById('notifSound');
+            if (a) { a.currentTime = 0; a.play().catch(function(){}); }
+        }
+
+        function qOpen(uid, date) {
+            qUserId.value = uid;
+            qDate.value = date;
+            qTimeIn.value = '';
+            qTimeOut.value = '';
+            qStatus.style.display = 'none';
+            if (qStatus) { qStatus.style.display = 'none'; qStatus.className = 'mt-3 text-xs text-center font-medium'; }
+            qModal.style.display = 'flex';
+            sndPlay();
+        }
+
+        var qCloseBtns = qModal.querySelectorAll('.att-quick-close');
+        for (var i = 0; i < qCloseBtns.length; i++) {
+            qCloseBtns[i].addEventListener('click', function() { qModal.style.display = 'none'; });
+        }
+        qModal.addEventListener('click', function(e) { if (e.target === qModal) qModal.style.display = 'none'; });
+
+        document.querySelectorAll('.att-quick-edit').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                qOpen(this.getAttribute('data-user-id'), this.getAttribute('data-date'));
+            });
+        });
+
+        qForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            qStatus.style.display = 'none';
+            var sp = new URLSearchParams(new FormData(qForm));
+            sp.set('_token', document.querySelector('input[name="_token"]').value);
+            fetch('{{ route('testing.attendance.quick-add') }}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                body: sp
+            }).then(function(r) {
+                return r.text().then(function(t) { return { status: r.status, body: t }; });
+            }).then(function(resp) {
+                qStatus.style.display = 'block';
+                try {
+                    var d = JSON.parse(resp.body);
+                    if (d.success) {
+                        qStatus.className = 'mt-3 text-xs text-center font-medium text-emerald-600';
+                        qStatus.textContent = d.message || 'Attendance saved!';
+                        setTimeout(function() { location.reload(); }, 800);
+                    } else {
+                        qStatus.className = 'mt-3 text-xs text-center font-medium text-rose-600';
+                        qStatus.textContent = d.message || 'Save failed.';
+                    }
+                } catch(e) {
+                    qStatus.className = 'mt-3 text-xs text-center font-medium text-rose-600';
+                    qStatus.textContent = 'HTTP ' + resp.status + ': ' + resp.body.substring(0, 300);
+                }
+            }).catch(function() {
+                qStatus.style.display = 'block';
+                qStatus.className = 'mt-3 text-xs text-center font-medium text-rose-600';
+                qStatus.textContent = 'Network error.';
+            });
+        });
+    }
 });
 </script>
 @endpush

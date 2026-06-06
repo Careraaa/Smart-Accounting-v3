@@ -38,7 +38,7 @@ class BackupRun extends Command
                 mkdir($backupPath, 0755, true);
             }
 
-            $timestamp = now()->format('Y-m-d_H-i-s');
+            $timestamp = now()->format('Y-M-d_H-i-s');
 
             // Option 1: Only files backup
             if ($this->option('only-files')) {
@@ -70,7 +70,7 @@ class BackupRun extends Command
     private function backupFiles($backupFilePath, $timestamp = null)
     {
         if (!$timestamp) {
-            $timestamp = now()->format('Y-m-d_H-i-s');
+            $timestamp = now()->format('Y-M-d_H-i-s');
         }
 
         $backupPath = storage_path('backups');

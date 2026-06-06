@@ -242,6 +242,13 @@
             </div>
             @endif
 
+            @if(auth()->user()->role === 'superadmin' && \App\Models\Setting::get('testing_mode', 'disabled') === 'enabled')
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-200 text-amber-700 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                Testing Mode
+            </div>
+            @endif
+
             {{-- Notifications --}}
             @php
                 $notifData = cache()->remember('notif.'.auth()->id(), 30, function() {

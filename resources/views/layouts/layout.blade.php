@@ -1107,8 +1107,10 @@
     @php
         $playSuccess = session('_sound_success');
         $playError = session('_sound_error') || session('error');
+        $playBackup = session('_sound_backup');
+        $playTesting = session('_sound_testing');
 
-        if (!$playSuccess) {
+        if (!$playSuccess && !$playBackup && !$playTesting) {
             $msg = session('success');
             if ($msg) {
                 $actionWords = ['created', 'updated', 'deleted', 'added', 'removed', 'saved', 'submitted', 'cancelled', 'approved', 'rejected', 'released', 'restored', 'cleared', 'resolved', 'recomputed', 'changed'];
@@ -1118,10 +1120,28 @@
             }
         }
     @endphp
-    @if($playSuccess || $playError)
+    @if($playBackup || $playTesting || $playSuccess || $playError)
     <script>
         (function(){
-            @if($playSuccess)
+            @if($playBackup)
+            var backupSnd = new Audio('{{ asset('sounds/backup-sound.mp3') }}');
+            backupSnd.preload = 'auto';
+            var playBackup = function(){ try { backupSnd.currentTime=0; backupSnd.play(); } catch(e){} };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', playBackup);
+            } else {
+                playBackup();
+            }
+            @elseif($playTesting)
+            var testSnd = new Audio('{{ asset('sounds/Testing-sound.mp3') }}');
+            testSnd.preload = 'auto';
+            var playTest = function(){ try { testSnd.currentTime=0; testSnd.play(); } catch(e){} };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', playTest);
+            } else {
+                playTest();
+            }
+            @elseif($playSuccess)
             var okSnd = new Audio('{{ asset('sounds/success_created-sound.mp3') }}');
             okSnd.preload = 'auto';
             var playOk = function(){ try { okSnd.currentTime=0; okSnd.play(); } catch(e){} };

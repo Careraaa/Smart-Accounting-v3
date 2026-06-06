@@ -29,6 +29,7 @@ class SystemConfigurationController extends Controller
             'backup_frequency' => Setting::get('backup_frequency', 'daily'),
             'backup_retention' => Setting::get('backup_retention', 30),
             'maintenance_mode' => $maintenanceModeActive,
+            'testing_mode' => Setting::get('testing_mode', 'disabled'),
         ];
 
         return view('superadmin.configuration.index', compact('settings'));
@@ -80,7 +81,7 @@ class SystemConfigurationController extends Controller
         try {
             Artisan::call('backup:run');
             $this->logActivity('updated', 'configuration');
-            return redirect()->route('configuration.index')->with('success', 'Backup created successfully!');
+            return redirect()->route('configuration.index')->with('success', 'Backup created successfully!')->with('_sound_backup', true);
         } catch (\Exception $e) {
             return redirect()->route('configuration.index')->with('error', 'Backup failed: ' . $e->getMessage());
         }
@@ -253,6 +254,23 @@ class SystemConfigurationController extends Controller
             return redirect()->route('configuration.index')->with('success', $message);
         } catch (\Exception $e) {
             return redirect()->route('configuration.index')->with('error', 'Failed to toggle maintenance mode: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Toggle testing mode (quick-add attendance in calendar views)
+     */
+    public function toggleTestingMode()
+    {
+        try {
+            $current = Setting::get('testing_mode', 'disabled');
+            $enabling = $current !== 'enabled';
+            Setting::set('testing_mode', $enabling ? 'enabled' : 'disabled');
+            $this->logActivity('updated', 'configuration');
+            $flash = $enabling ? ['success' => 'Testing mode enabled.', '_sound_testing' => true] : ['success' => 'Testing mode disabled.'];
+            return redirect()->route('configuration.index')->with($flash);
+        } catch (\Exception $e) {
+            return redirect()->route('configuration.index')->with('error', 'Failed to toggle testing mode: ' . $e->getMessage());
         }
     }
 

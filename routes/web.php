@@ -499,6 +499,11 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
     Route::get('/hr/reports/print/payroll-history-report', [HrReportController::class, 'printPayrollHistoryReport'])->name('hr.reports.print.payroll-history-report');
 });
 
+// ===== TESTING MODE ROUTES (accessible by all roles when testing mode is enabled) =====
+Route::middleware(['auth', 'check-status'])->group(function () {
+    Route::post('/testing/attendance/quick-add', [AttendanceController::class, 'quickAdd'])->name('testing.attendance.quick-add');
+});
+
 // ===== ACCOUNTANT ROUTES =====
 Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group(function () {
     Route::get('/accountant', [AccountantDashboardController::class, 'index'])->name('accountant.index');
@@ -568,6 +573,7 @@ Route::middleware(['auth', 'check-status', 'role:superadmin'])->group(function (
     Route::post('/configuration/toggle-maintenance', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'toggleMaintenanceMode'])->name('configuration.toggle-maintenance');
     Route::post('/configuration/clear-cache', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'clearCache'])->name('configuration.clear-cache');
     Route::post('/configuration/clear-logs', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'clearLogs'])->name('configuration.clear-logs');
+    Route::post('/configuration/toggle-testing', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'toggleTestingMode'])->name('configuration.toggle-testing');
 });
 
 //HOLIDAY ROUTES - API
