@@ -131,7 +131,7 @@
         </div>
     </div>
 
-    <div>
+    <div id="spouse_name_container" class="{{ old('civil_status', $employee->civil_status ?? '') !== 'Married' ? 'hidden' : '' }}">
             <label for="spouse_name" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
                 Spouse Name <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span>
             </label>
@@ -142,6 +142,23 @@
             @enderror
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const civilStatusSelect = document.getElementById('civil_status');
+            const spouseNameContainer = document.getElementById('spouse_name_container');
+
+            function toggleSpouseName() {
+                if (civilStatusSelect.value === 'Married') {
+                    spouseNameContainer.classList.remove('hidden');
+                } else {
+                    spouseNameContainer.classList.add('hidden');
+                }
+            }
+
+            civilStatusSelect.addEventListener('change', toggleSpouseName);
+        });
+    </script>
 
     {{-- Section: Education --}}
     <div class="text-[0.68rem] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-800 pb-2.5 mt-6 mb-4">Education</div>

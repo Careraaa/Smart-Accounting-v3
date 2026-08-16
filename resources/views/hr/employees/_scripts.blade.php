@@ -153,6 +153,68 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize first tab's number badge color
     updateUI(0);
 
+    const departmentSelect = document.getElementById('department');
+    const positionSelect = document.getElementById('position');
+    const salaryInput = document.getElementById('salary_rate');
+
+    if (positionSelect && salaryInput) {
+        const allPositionOptions = Array.from(positionSelect.options);
+
+        const syncDailyRate = () => {
+            const selectedOption = positionSelect.options[positionSelect.selectedIndex];
+            const dailyRate = selectedOption?.dataset.dailyRate;
+
+            if (dailyRate !== undefined && dailyRate !== '') {
+                salaryInput.value = dailyRate;
+            } else {
+                salaryInput.value = '';
+            }
+        };
+
+        const filterPositionsByDepartment = () => {
+            const selectedDepartment = departmentSelect?.value || '';
+            const currentValue = positionSelect.value;
+
+            positionSelect.innerHTML = '';
+
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = 'Select position';
+            placeholderOption.disabled = true;
+            placeholderOption.selected = true;
+            positionSelect.appendChild(placeholderOption);
+
+            allPositionOptions.forEach((option) => {
+                if (!option.value) {
+                    return;
+                }
+
+                const optionDepartmentName = option.dataset.departmentName || '';
+                const matchesDepartment = !selectedDepartment || !optionDepartmentName || optionDepartmentName === selectedDepartment;
+                const shouldKeepCurrentValue = option.value === currentValue;
+
+                if (matchesDepartment || shouldKeepCurrentValue) {
+                    const clonedOption = option.cloneNode(true);
+                    positionSelect.appendChild(clonedOption);
+                }
+            });
+
+            const availableValues = Array.from(positionSelect.options).slice(1).map((option) => option.value);
+            if (!availableValues.includes(currentValue)) {
+                positionSelect.value = '';
+                salaryInput.value = '';
+            } else {
+                positionSelect.value = currentValue;
+            }
+
+            syncDailyRate();
+        };
+
+        positionSelect.addEventListener('change', syncDailyRate);
+        departmentSelect?.addEventListener('change', filterPositionsByDepartment);
+        filterPositionsByDepartment();
+    }
+
     document.addEventListener('keydown', function (e) {
         if ((e.ctrlKey || e.metaKey) && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
             e.preventDefault();

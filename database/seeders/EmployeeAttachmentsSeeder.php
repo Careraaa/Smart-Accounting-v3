@@ -31,7 +31,7 @@ class EmployeeAttachmentsSeeder extends Seeder
 
         $types = EmployeeAttachment::attachmentTypes();
         $statusCycle = ['approved', 'pending', 'approved', 'rejected'];
-        $seedKeys = ['drivers_license', 'valid_id_1', 'barangay_clearance', 'medical_cert'];
+        $seedKeys = ['resume', 'psa_birth_certificate', 'nbi_clearance', 'medical_certificate'];
 
         $rows = [];
         $now = now();

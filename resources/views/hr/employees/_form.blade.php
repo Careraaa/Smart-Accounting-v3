@@ -3,10 +3,6 @@
     {{-- Top Bar --}}
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-            <a href="{{ url()->previous() }}"
-                class="inline-flex items-center justify-center w-8 h-8 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-150 active:scale-[0.92]">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            </a>
             <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
                 {{ ($isEdit ?? false) ? 'Edit Employee' : 'Add New Employee' }}
             </h1>

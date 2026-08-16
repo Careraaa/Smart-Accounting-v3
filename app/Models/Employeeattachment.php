@@ -74,17 +74,13 @@ class EmployeeAttachment extends Model
     public static function attachmentTypes(): array
     {
         return [
-            'drivers_license'    => "Driver's License",
-            'valid_id_1'         => 'Valid ID 1',
-            'valid_id_2'         => 'Valid ID 2',
-            '2x2_picture'        => '2x2 Picture',
-            '1x1_picture'        => '1x1 Picture',
-            'police_clearance'   => 'Police Clearance',
-            'barangay_clearance' => 'Barangay Clearance',
-            'house_sketch'       => 'House Sketch',
-            'medical_cert'       => 'Medical Certificate',
-            'drug_test'          => 'Drug Test Result',
-            'x_ray'              => 'X-Ray Result',
+            'resume'                 => 'Resume',
+            'psa_birth_certificate'  => 'PSA Birth Certificate',
+            'nbi_clearance'          => 'NBI Clearance',
+            'medical_certificate'    => 'Medical Certificate',
+            'government_id'          => 'Valid Government ID (Front & Back)',
+            'diploma'                => 'Diploma',
+            'contract'               => 'Contract',
         ];
     }
 }

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
 use App\Models\EmployeeAttachment;
+use App\Models\PositionRate;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -69,13 +71,15 @@ class EmployeeController extends Controller
     public function create()
     {
         $employee = new User();
-        $departments = User::whereNotIn('role', ['superadmin', 'qr_admin'])
-            ->whereNotNull('department')
-            ->distinct()
-            ->pluck('department')
-            ->sort()
-            ->values();
-        return view('hr.employees.create', compact('employee', 'departments'));
+        $departments = Department::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+        $positions = PositionRate::where('is_active', true)
+            ->with('department')
+            ->orderBy('name')
+            ->get();
+
+        return view('hr.employees.create', compact('employee', 'departments', 'positions'));
     }
 
     public function store(Request $request)
@@ -180,13 +184,15 @@ class EmployeeController extends Controller
     public function edit(User $employee)
     {
         $employee->load(['workExperiences', 'specialSkills', 'beneficiaries', 'charRefs']);
-        $departments = User::whereNotIn('role', ['superadmin', 'qr_admin'])
-            ->whereNotNull('department')
-            ->distinct()
-            ->pluck('department')
-            ->sort()
-            ->values();
-        return view('hr.employees.edit', compact('employee', 'departments'));
+        $departments = Department::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+        $positions = PositionRate::where('is_active', true)
+            ->with('department')
+            ->orderBy('name')
+            ->get();
+
+        return view('hr.employees.edit', compact('employee', 'departments', 'positions'));
     }
 
     public function update(Request $request, User $employee)

@@ -358,6 +358,16 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::post('/settings/shifts', [\App\Http\Controllers\HR\ConfigurationController::class, 'storeShift'])->name('settings.shift.store');
         Route::put('/settings/shifts/{shift}', [\App\Http\Controllers\HR\ConfigurationController::class, 'updateShift'])->name('settings.shift.update');
         Route::delete('/settings/shifts/{shift}', [\App\Http\Controllers\HR\ConfigurationController::class, 'destroyShift'])->name('settings.shift.destroy');
+
+        // Department routes
+        Route::post('/settings/departments', [\App\Http\Controllers\HR\ConfigurationController::class, 'storeDepartment'])->name('settings.department.store');
+        Route::put('/settings/departments/{department}', [\App\Http\Controllers\HR\ConfigurationController::class, 'updateDepartment'])->name('settings.department.update');
+        Route::delete('/settings/departments/{department}', [\App\Http\Controllers\HR\ConfigurationController::class, 'destroyDepartment'])->name('settings.department.destroy');
+
+        // Position routes
+        Route::post('/settings/positions', [\App\Http\Controllers\HR\ConfigurationController::class, 'storePosition'])->name('settings.position.store');
+        Route::put('/settings/positions/{position}', [\App\Http\Controllers\HR\ConfigurationController::class, 'updatePosition'])->name('settings.position.update');
+        Route::delete('/settings/positions/{position}', [\App\Http\Controllers\HR\ConfigurationController::class, 'destroyPosition'])->name('settings.position.destroy');
         
         // Payroll Cutoff routes
         Route::post('/settings/payroll-cutoff', [\App\Http\Controllers\HR\ConfigurationController::class, 'updatePayrollCutoff'])->name('settings.payroll-cutoff.update');
