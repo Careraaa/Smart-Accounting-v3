@@ -23,7 +23,7 @@ class EmployeeController extends Controller
 
         $allowedColumns = ['first_name', 'last_name', 'gender', 'position', 'department', 'salary_rate', 'status'];
         if (!in_array($sortBy, $allowedColumns)) {
-            $sortBy = 'first_name';
+            $sortBy = 'last_name';
         }
         if (!in_array($sortOrder, ['asc', 'desc'])) {
             $sortOrder = 'asc';
@@ -44,7 +44,9 @@ class EmployeeController extends Controller
         } elseif ($tab === 'inactive') {
             $query->where('status', 'inactive');
         }
-        $employees = $query->orderBy($sortBy, $sortOrder)->paginate(10);
+        $employees = $query->orderBy($sortBy, $sortOrder)
+            ->orderBy('first_name', $sortOrder)
+            ->paginate(10);
 
         $this->logActivity('viewed', 'Employee list', request()->url(), 'employee');
 
@@ -55,7 +57,9 @@ class EmployeeController extends Controller
         } elseif ($tab === 'inactive') {
             $allQuery->where('status', 'inactive');
         }
-        $allEmployees = $allQuery->orderBy($sortBy, $sortOrder)->get();
+        $allEmployees = $allQuery->orderBy($sortBy, $sortOrder)
+            ->orderBy('first_name', $sortOrder)
+            ->get();
 
         // Get unique departments for filter
         $departments = User::whereNotIn('role', ['superadmin', 'qr_admin'])

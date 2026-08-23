@@ -27,14 +27,14 @@ class AttendanceController extends Controller
         $tab = $request->query('tab', 'records');
         // All employees (excluding system roles) - paginated for display
         $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
-            ->orderBy('department')
             ->orderBy('last_name')
+            ->orderBy('first_name')
             ->paginate(10);
 
         // ALL employees (excluding system roles) for search - unpaginated
         $allEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
-            ->orderBy('department')
             ->orderBy('last_name')
+            ->orderBy('first_name')
             ->get();
 
         // All distinct departments from database
