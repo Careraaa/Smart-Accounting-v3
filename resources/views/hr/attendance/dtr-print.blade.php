@@ -39,6 +39,7 @@
         .signature-line { border-top: 1px solid #333; padding-top: 3px; }
         .signature + .signature { margin-top: 22px; }
         .muted { color: #777; }
+        .day-label { color: #e00; font-weight: 600; text-transform: uppercase; }
         @media print { body { background: white; } .controls { display: none !important; } .page { width: var(--page-w); min-height: var(--page-h); margin: 0; box-shadow: none; padding: .22in .2in; } }
         @page { size: 3.2in 8.5in; margin: 0; }
     </style>
@@ -70,8 +71,17 @@
             <tbody>
                 @for($dayNumber = 1; $dayNumber <= $month->daysInMonth; $dayNumber++)
                     @php
-                        $dateKey = $month->copy()->setDay($dayNumber)->format('Y-m-d');
+                        $date = $month->copy()->setDay($dayNumber);
+                        $dateKey = $date->format('Y-m-d');
                         $attendance = $attendances[$dateKey] ?? null;
+                        $holiday = $holidays[$dateKey] ?? null;
+                        $dayLabel = $holiday
+                            ? 'Holiday'
+                            : ($date->isSaturday()
+                                ? 'Saturday'
+                                : ($date->isSunday()
+                                    ? 'Sunday'
+                                    : (($attendance?->status === 'absent') ? 'Absent' : null)));
                         $timeIn = $attendance && $attendance->time_in ? Carbon\Carbon::parse($attendance->time_in)->format('g:i') : '';
                         $timeOut = $attendance && $attendance->time_out ? Carbon\Carbon::parse($attendance->time_out)->format('g:i') : '';
                         $worked = $attendance ? $attendance->hours_worked : null;
@@ -80,7 +90,12 @@
                         if ($worked !== null) { $totalHours += (int) $hours; $totalMinutes += (int) $minutes; }
                     @endphp
                     <tr>
-                        <td>{{ $dayNumber }}</td><td>{{ $timeIn }}</td><td></td><td></td><td>{{ $timeOut }}</td><td>{{ $hours }}</td><td>{{ $minutes }}</td>
+                        <td>{{ $dayNumber }}</td>
+                        @if($dayLabel)
+                            <td colspan="6" class="day-label">{{ $dayLabel }}</td>
+                        @else
+                            <td>{{ $timeIn }}</td><td></td><td></td><td>{{ $timeOut }}</td><td>{{ $hours }}</td><td>{{ $minutes }}</td>
+                        @endif
                     </tr>
                 @endfor
                 @php $totalHours += intdiv($totalMinutes, 60); $totalMinutes %= 60; @endphp

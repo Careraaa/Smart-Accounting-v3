@@ -8,6 +8,7 @@ use App\Models\AttendanceLog;
 use App\Models\Leave;
 use App\Models\AttendanceToken;
 use App\Models\Employee;
+use App\Models\Holiday;
 use App\Models\OvertimeUndertime;
 use App\Models\Setting;
 use App\Models\Shift;
@@ -123,12 +124,16 @@ class AttendanceController extends Controller
             ->get()
             ->keyBy(fn($a) => $a->date->format('Y-m-d'));
 
+        $holidays = Holiday::whereBetween('date', [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()])
+            ->get()
+            ->keyBy(fn($holiday) => $holiday->date->format('Y-m-d'));
+
         $shift = Shift::where('is_active', true)->first() ?? Shift::orderBy('created_at')->first();
         $officeHours = $shift
             ? Carbon::parse($shift->start_time)->format('g:i A') . ' - ' . Carbon::parse($shift->end_time)->format('g:i A')
             : 'Not configured';
 
-        return view('hr.attendance.dtr-print', compact('employee', 'month', 'attendances', 'officeHours'));
+        return view('hr.attendance.dtr-print', compact('employee', 'month', 'attendances', 'holidays', 'officeHours'));
     }
 
     public function generateQR()
