@@ -108,6 +108,29 @@ class AttendanceController extends Controller
         return view('hr.attendance.calendar', compact('employee', 'month', 'attendances', 'otutRecords', 'prevMonth', 'nextMonth'));
     }
 
+    /**
+     * Show a print-ready CS Form 48 daily time record for an employee.
+     */
+    public function printDtr(Request $request, $employeeId)
+    {
+        $employee = Employee::findOrFail($employeeId);
+
+        $monthParam = $request->query('month');
+        $month = $monthParam ? Carbon::createFromFormat('Y-m', $monthParam)->startOfMonth() : now()->startOfMonth();
+
+        $attendances = Attendance::where('user_id', $employeeId)
+            ->whereBetween('date', [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()])
+            ->get()
+            ->keyBy(fn($a) => $a->date->format('Y-m-d'));
+
+        $shift = Shift::where('is_active', true)->first() ?? Shift::orderBy('created_at')->first();
+        $officeHours = $shift
+            ? Carbon::parse($shift->start_time)->format('g:i A') . ' - ' . Carbon::parse($shift->end_time)->format('g:i A')
+            : 'Not configured';
+
+        return view('hr.attendance.dtr-print', compact('employee', 'month', 'attendances', 'officeHours'));
+    }
+
     public function generateQR()
     {
         AttendanceToken::where('expires_at', '<', now())->delete();

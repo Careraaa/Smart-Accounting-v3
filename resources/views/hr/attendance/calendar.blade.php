@@ -86,7 +86,7 @@
                 {{ $initials }}
             </div>
             <div>
-                <h1 class="text-xl font-bold text-gray-900 tracking-tight">{{ $employee->first_name }} {{ $employee->last_name }}</h1>
+                <h1 class="text-xl font-bold text-gray-900 tracking-tight">{{ $employee->last_name }}, {{ $employee->first_name }}</h1>
                 <div class="flex items-center gap-2 mt-0.5 text-sm text-gray-500">
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">
                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -96,10 +96,16 @@
                 </div>
             </div>
         </div>
-        <a href="{{ route('attendance.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Back to Employees
-        </a>
+        <div class="flex flex-col items-stretch gap-2">
+            <a href="{{ route('attendance.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Back to Employees
+            </a>
+            <a href="{{ route('attendance.employee.dtr', [$employee->id, 'month' => $month->format('Y-m')]) }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gray-900 text-white border border-gray-900 rounded-xl text-xs font-semibold no-underline hover:bg-gray-700 transition-colors whitespace-nowrap cursor-pointer">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>
+                Print DTR
+            </a>
+        </div>
     </div>
 
     {{-- Month navigation --}}

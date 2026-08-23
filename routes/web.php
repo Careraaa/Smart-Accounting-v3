@@ -321,6 +321,7 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
 
     Route::resource('attendance', AttendanceController::class);
     Route::get('/attendance/employee/{employee}/calendar', [AttendanceController::class, 'employeeCalendar'])->name('attendance.employee.calendar');
+    Route::get('/attendance/employee/{employee}/dtr', [AttendanceController::class, 'printDtr'])->name('attendance.employee.dtr');
     Route::get('/hr/attendance/qr', [AttendanceController::class, 'showQR'])->name('hr.qr');
     Route::get('/hr/attendance/monitor', [AttendanceController::class, 'showMonitorDisplay'])->name('hr.attendance.monitor');
     Route::post('/hr/attendance/qr/generate', [AttendanceController::class, 'generateQR'])->name('hr.qr.generate');
