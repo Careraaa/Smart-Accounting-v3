@@ -58,7 +58,7 @@
 $sumGross = collect($batchData)->sum('total_gross');
 $sumDed   = collect($batchData)->sum('total_deductions');
 $sumNet   = collect($batchData)->sum('total_net');
-$periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? date('F', mktime(0,0,0,$month,1)) : "Year $year");
+$periodLabel = $period === 'monthly' ? date('F', mktime(0,0,0,$month,1)) : "Year $year";
 @endphp
 
 {{-- Header --}}
@@ -80,17 +80,8 @@ $periodLabel = $period === 'weekly' ? "Week $week" : ($period === 'monthly' ? da
         <div class="flex flex-col gap-1 min-w-[130px] flex-1">
             <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Period</label>
             <select id="period" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
-                <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
                 <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
                 <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
-            </select>
-        </div>
-        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }}">
-            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Week</label>
-            <select id="week" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
-                @for ($i = 1; $i <= 52; $i++)
-                    <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
-                @endfor
             </select>
         </div>
         <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="monthSelect" style="display:{{ $period === 'monthly' ? 'flex' : 'none' }}">
@@ -289,22 +280,18 @@ function showBatchModal(idx) {
 
 (function () {
     const periodSelect = document.getElementById('period');
-    const weekSelectEl = document.getElementById('weekSelect');
     const monthSelectEl = document.getElementById('monthSelect');
 
     function toggleFilters() {
         const period = periodSelect.value;
-        weekSelectEl.style.display = period === 'weekly' ? 'flex' : 'none';
         monthSelectEl.style.display = period === 'monthly' ? 'flex' : 'none';
     }
 
     function updateReport() {
         const period = periodSelect.value;
-        const week = document.getElementById('week').value;
         const month = document.getElementById('month').value;
         const year = document.getElementById('year').value;
         let url = '{{ route('reports.payroll') }}?period=' + period + '&year=' + year;
-        if (period === 'weekly') url += '&week=' + week;
         if (period === 'monthly') url += '&month=' + month;
         window.location.href = url;
     }
@@ -313,7 +300,6 @@ function showBatchModal(idx) {
         toggleFilters();
         updateReport();
     });
-    document.getElementById('week').addEventListener('change', updateReport);
     document.getElementById('month').addEventListener('change', updateReport);
     document.getElementById('year').addEventListener('change', updateReport);
 
