@@ -352,7 +352,17 @@ function scanQRCode() {
 function handleQRCode(data) {
     scannerRunning = false;
     cancelAnimationFrame(scanFrameId);
-    submitAttendance(data);
+    submitAttendance(extractAttendanceToken(data));
+}
+
+function extractAttendanceToken(data) {
+    try {
+        var url = new URL(data);
+        var match = url.pathname.match(/\/attendance\/login\/([^/]+)/);
+        if (match) return decodeURIComponent(match[1]);
+    } catch (e) {}
+
+    return data.trim();
 }
 
 function stopCamera() {

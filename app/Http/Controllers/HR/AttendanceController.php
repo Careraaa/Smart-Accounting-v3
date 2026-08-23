@@ -149,7 +149,10 @@ class AttendanceController extends Controller
 
         cache()->put('current_qr_token', $token, 65);
 
-        return response()->json(['token' => $token]);
+        return response()->json([
+            'token' => $token,
+            'login_url' => route('attendance.qr.login', ['token' => $token]),
+        ]);
     }
 
     public function showQR()
