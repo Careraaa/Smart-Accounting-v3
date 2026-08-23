@@ -353,6 +353,10 @@
             }
             
             $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
+            $batch->setRelation('payrolls', $batch->payrolls->sortBy([
+                ['user.last_name', 'asc'],
+                ['user.first_name', 'asc'],
+            ])->values());
 
             $periodStart = $batch->period_start->toDateString();
             $periodEnd = $batch->period_end->toDateString();
@@ -383,6 +387,10 @@
         public function batchDetails(PayrollBatch $batch)
         {
             $batch->load(['payrolls.user', 'rejectedBy']);
+            $batch->setRelation('payrolls', $batch->payrolls->sortBy([
+                ['user.last_name', 'asc'],
+                ['user.first_name', 'asc'],
+            ])->values());
 
             return view('hr.payroll.batch.details', compact('batch'));
         }
@@ -390,6 +398,10 @@
         public function batchPayslips(PayrollBatch $batch)
         {
             $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
+            $batch->setRelation('payrolls', $batch->payrolls->sortBy([
+                ['user.last_name', 'asc'],
+                ['user.first_name', 'asc'],
+            ])->values());
 
             // Recompute each payroll so the list shows live values, not stale DB zeros
             foreach ($batch->payrolls as $payroll) {
