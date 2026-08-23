@@ -431,15 +431,14 @@ class AttendanceController extends Controller
                 ->withInput();
         }
 
-        // Require at least one time value
-        if (!$request->time_in && !$request->time_out) {
-            return back()
-                ->withErrors(['time_in' => 'Please set at least Time In or Time Out.'])
-                ->withInput();
-        }
-
         // Build data to save — only include provided fields so we don't overwrite existing values
         $data = ['is_manual' => true];
+
+        if (!$request->time_in && !$request->time_out) {
+            $data['time_in'] = null;
+            $data['time_out'] = null;
+            $data['status'] = 'absent';
+        }
 
         // Determine status when time_in is provided (and optionally time_out).
         // If both provided, compute status using both; if only time_in provided, compute late/present.
