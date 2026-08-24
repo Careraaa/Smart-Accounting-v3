@@ -1,59 +1,81 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Smart Accounting v3
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Payroll, HR, and remittance management system for transport operations — employees, drivers, routes, attendance, loans/cash advances, statutory deductions, payroll batches, 13th month pay, and reports.
 
-## About Laravel
+**Stack:** Laravel 12 · PHP 8.3 · MySQL · Tailwind CSS 4 · Vite
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Live (production):** https://smartaccounting-v3.freedev.app
+**Sandbox:** https://test.smartaccounting-v3.freedev.app *(deploy-test branch only)*
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ⚡ TL;DR for teammates
 
-## Learning Laravel
+| Branch | Deploys to | Purpose |
+|---|---|---|
+| `deploy-test` | Sandbox site | Break things here freely |
+| `main` | Production site | Only tested code goes here |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Push → GitHub Actions auto-builds & uploads. First deploy ~15–40 min, later ones faster.
+Full runbook: **[DEPLOYMENT.md](DEPLOYMENT.md)**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 💻 Local development
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+composer install
+npm install
+cp .env.example .env        # then fill DB creds + run: php artisan key:generate
+php artisan migrate --seed  # optional seeders
+php artisan serve           # http://127.0.0.1:8000
+npm run dev                 # separate terminal, for live CSS/JS
+```
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🔑 GitHub Secrets (repo owner sets these once)
 
-## Contributing
+`FTP_USERNAME` · `FTP_PASSWORD` · `FTP_SERVER_DIR_PROD` · `FTP_SERVER_DIR_TEST` · `PROD_ENV_FILE` · `TEST_ENV_FILE`
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Details: [DEPLOYMENT.md §2–3](DEPLOYMENT.md)
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🚫 InfinityFree free-hosting limits — KNOW THESE
 
-## Security Vulnerabilities
+| Limit | Impact on us |
+|---|---|
+| **PHP scripts killed after 20 seconds** | Payroll on large batches dies mid-run → always test with SMALL employee sets |
+| **`exec()` disabled** | Backup/Restore buttons in Super Admin will error — known, accepted |
+| **No cron jobs** | Nightly cleanup tasks never run — old logs/notifications just accumulate |
+| **SMTP ports blocked** | App cannot send real emails |
+| **~50k visits/day** | Exceeding = site sleeps until midnight |
+| **10 MB max per uploaded file** | Employee attachments above this fail |
+| **~30,000 file limit** | Two installs ≈ 22k files — delete sandbox copy when idle |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## ✅ What works fine
 
-## License
+Everything else: login, employees, attendance, leaves, loans, cash advances, payroll generation (small batches), reports, dashboards.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🔒 Security rules — non-negotiable
+
+1. **NEVER commit `.env`** — it holds DB passwords. It is gitignored; keep it that way.
+2. **Never commit credential files** (`username_password.txt` was removed from tracking for this reason).
+3. Production `.env` lives ONLY in the GitHub secret `PROD_ENV_FILE`.
+4. `APP_DEBUG=false` in production secrets — never leak stack traces.
+
+---
+
+## 🆘 Deploy broke? Quick triage
+
+| Symptom | Fix |
+|---|---|
+| Blank page | composer step failed — check Actions log |
+| No styles | Vite build failed — check Actions log |
+| Error 500 | Temporarily set `APP_DEBUG=true` in the env secret, redeploy, read message |
+| Login loops back | `sessions` table missing → re-import DB dump |
+
+More: [DEPLOYMENT.md §6](DEPLOYMENT.md)

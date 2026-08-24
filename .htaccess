@@ -1,0 +1,26 @@
+# =============================================================
+#  ROOT .htaccess  (lives inside htdocs/ on InfinityFree)
+#  Purpose: protect sensitive files + serve the app from
+#  /public WITHOUT showing /public in the URL.
+# =============================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # ---- Block sensitive paths FIRST (403 Forbidden) ----
+    RewriteRule ^\.env(\..*)?$ - [F,L]
+    RewriteRule ^\.git - [F,L]
+    RewriteRule ^\.github - [F,L]
+    RewriteRule ^storage/ - [F,L]
+    RewriteRule ^tests(/.*)?$ - [F,L]
+    RewriteRule ^(composer\.(json|lock)|package(-lock)?\.json|vite\.config\.js|phpunit\.xml|\.editorconfig|artisan|check-employees\.php|username_password\.txt)$ - [F,L]
+
+    # ---- Silently route every request into /public ----
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# ---- Extra belt-and-suspenders: deny .env anywhere below ----
+<FilesMatch "^\.env">
+    Require all denied
+</FilesMatch>

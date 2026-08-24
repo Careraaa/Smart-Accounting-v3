@@ -1,0 +1,110 @@
+# =============================================================
+#  Auto-deploy to InfinityFree via FTP
+#
+#  Branches:
+#    push to main        -> PRODUCTION  (secrets: *_PROD)
+#    push to deploy-test -> SANDBOX     (secrets: *_TEST)
+#
+#  Required GitHub repo Secrets (Settings > Secrets and variables > Actions):
+#    FTP_USERNAME          - InfinityFree FTP user   (epiz_XXXX)
+#    FTP_PASSWORD          - InfinityFree FTP password
+#    FTP_SERVER_DIR_PROD   - e.g. /htdocs/
+#    FTP_SERVER_DIR_TEST   - e.g. /test.yoursub.epizy.com/htdocs/
+#    PROD_ENV_FILE         - full production .env content
+#    TEST_ENV_FILE         - full test .env content
+# =============================================================
+
+name: Deploy
+
+on:
+  push:
+    branches: [main, deploy-test]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build & upload (${{ github.ref_name }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ---------- Pick destination based on branch ----------
+      - name: Select deployment target
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_PROD }}" >> "$GITHUB_ENV"
+          else
+            echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_TEST }}" >> "$GITHUB_ENV"
+          fi
+
+      # ---------- Create .env from secret (never committed!) ----------
+      - name: Create .env (production)
+        if: github.ref_name == 'main'
+        run: |
+          cat > .env <<'ENVEOF'
+          ${{ secrets.PROD_ENV_FILE }}
+          ENVEOF
+
+      - name: Create .env (test)
+        if: github.ref_name == 'deploy-test'
+        run: |
+          cat > .env <<'ENVEOF'
+          ${{ secrets.TEST_ENV_FILE }}
+          ENVEOF
+
+      # ---------- PHP dependencies (vendor/ is NOT in git) ----------
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, pdo_mysql, openssl, tokenizer, xml, ctype, json, bcmath, gd, zip, fileinfo
+          coverage: none
+
+      - name: Install Composer dependencies (production only)
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-progress
+
+      # ---------- Frontend build (public/build is NOT in git) ----------
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install npm dependencies & build Vite assets
+        run: |
+          npm ci
+          npm run build
+
+      # ---------- Upload everything over FTP ----------
+      - name: Upload to InfinityFree
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.5
+        with:
+          server: ftpupload.net
+          port: 21
+          protocol: ftp
+          security: loose
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ env.SERVER_DIR }}
+          log-level: standard
+          exclude: |
+            **/.git/**
+            **/.git*
+            **/node_modules/**
+            **/.github/**
+            **/tests/**
+            **/storage/logs/*.log
+            **/storage/framework/cache/data/**
+            **/storage/framework/sessions/*
+            **/storage/framework/views/*
+            **/storage/framework/testing/**
+            **/database/database.sqlite
+            *.md
+            package.json
+            package-lock.json
+            vite.config.js
+            phpunit.xml
+            .env.example
+            check-employees.php
+            username_password.txt
