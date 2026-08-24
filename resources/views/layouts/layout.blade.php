@@ -1289,11 +1289,6 @@
         })();
     </script>
 <script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.flash-bar,.bn-flash').forEach(function(el){if(el.offsetParent===null)return;setTimeout(function(){el.style.transition='opacity 0.5s ease,transform 0.5s ease';el.style.opacity='0';el.style.transform='translateY(-8px)';setTimeout(function(){el.remove()},500);},5000);});});</script>
-        {{-- TEMP: deployment test badge — remove before final demo --}}
-        <a href="{{ route('deploy.test') }}"
-           style="position:fixed;top:14px;right:14px;z-index:99999;padding:8px 18px;border-radius:999px;background:#f59e0b;color:#1e293b;font-size:13px;font-weight:800;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.35);">
-            🚀 DEPLOY TEST
-        </a>
     </body>
 
 </html>

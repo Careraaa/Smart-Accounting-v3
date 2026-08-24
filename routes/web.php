@@ -58,11 +58,6 @@ Route::get('/', function () {
     return view('auth/login');
 });
 
-// ── TEMP: deployment pipeline test page (safe to delete) ──────────
-Route::get('/deploy-test', function () {
-    return view('deploy-test');
-})->name('deploy.test');
-
 
 Route::get('/partials/calendar-full', function (Request $request) {
     $month = $request->query('month');
