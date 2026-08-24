@@ -9,6 +9,6 @@ class WorkExperience extends Model
     protected $table = 'employee_experiences';
 
     protected $fillable = [
-        'employee_id', 'company_name', 'position', 'duration', 'responsibilities', 'sequence',
+        'user_id', 'company_name', 'position', 'duration', 'responsibilities', 'sequence',
     ];
 }

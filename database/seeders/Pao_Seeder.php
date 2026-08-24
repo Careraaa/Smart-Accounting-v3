@@ -18,8 +18,8 @@ class Pao_Seeder extends Seeder
             [
                 'name' => 'Pedro Reyes',
                 'contact_number' => '09151111111',
-                'email' => 'pedro.reyes@example.com',
-                'address' => '789 Pine Street, Makati City',
+                'email' => 'pedro.reyes@gmail.com',
+                'address' => '789 Pine Street, Brgy. Poblacion, Makati City, Metro Manila',
                 'date_of_hire' => '2024-03-01',
                 'status' => 'active',
                 'created_at' => now(),
@@ -28,8 +28,8 @@ class Pao_Seeder extends Seeder
             [
                 'name' => 'Rosa Garcia',
                 'contact_number' => '09162222222',
-                'email' => 'rosa.garcia@example.com',
-                'address' => '321 Maple Drive, Pasig City',
+                'email' => 'rosa.garcia@gmail.com',
+                'address' => '321 Maple Drive, Brgy. San Antonio, Pasig City, Metro Manila',
                 'date_of_hire' => '2024-03-15',
                 'status' => 'active',
                 'created_at' => now(),

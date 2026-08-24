@@ -1,93 +1,149 @@
 @extends('layouts.layout')
-
 @section('content')
-<div class="col-md-10 offset-md-1">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-5">
+    {{-- Back --}}
+    <div>
+        <a href="{{ route('paos.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to PAOs
+        </a>
+    </div>
 
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h5 class="fw-bold mb-0" style="color:#1c1c1e;">{{ $pao->name }}</h5>
-            <span class="emp-view-label">PAO / Conductor</span>
+    {{-- Header Card --}}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start justify-between flex-wrap gap-4">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">PAO / Conductor profile</p>
+                <h1 class="text-xl font-bold text-gray-900">{{ $pao->name }}</h1>
+
+            </div>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('paos.edit', $pao) }}" class="emp-action-btn emp-action-edit">
-                <i class="feather-edit-2 me-1"></i> Edit
+        <div class="flex items-center gap-2">
+            <a href="{{ route('paos.edit', $pao) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-all no-underline">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Edit
             </a>
-            <form action="{{ route('paos.destroy', $pao) }}" method="POST"
-                onsubmit="return confirm('Are you sure you want to delete this PAO?')" class="d-inline">
-                @csrf @method('DELETE')
-                <button type="submit" class="emp-action-btn emp-action-danger">
-                    <i class="feather-trash-2 me-1"></i> Delete
-                </button>
-            </form>
-            <a href="{{ route('paos.index') }}" class="emp-action-btn emp-action-back">
-                <i class="feather-arrow-left me-1"></i> Back
-            </a>
+            <button type="button" onclick="openPaoDeleteModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition-all border-0 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Delete
+            </button>
+            <form id="deleteForm" action="{{ route('paos.destroy', $pao) }}" method="POST" class="hidden">@csrf @method('DELETE')</form>
         </div>
     </div>
 
-    {{-- PAO Information --}}
-    <div class="card mb-3">
-        <div class="card-header"><span class="card-title mb-0">PAO Information</span></div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Name</span>
-                    <div class="emp-field-value">{{ $pao->name ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Contact Number</span>
-                    <div class="emp-field-value">{{ $pao->contact_number ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Email</span>
-                    <div class="emp-field-value">{{ $pao->email ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Date of Hire</span>
-                    <div class="emp-field-value">{{ $pao->date_of_hire?->format('F d, Y') ?? '—' }}</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <span class="emp-field-label">Status</span>
-                    <div class="mt-1">
-                        @if ($pao->status === 'active')
-                            <span class="emp-badge emp-badge-active">Active</span>
-                        @elseif ($pao->status === 'pending')
-                            <span class="emp-badge emp-badge-pending">Pending</span>
-                        @else
-                            <span class="emp-badge emp-badge-inactive">Inactive</span>
-                        @endif
-                    </div>
-                </div>
-                @if ($pao->address)
-                <div class="col-md-12 mb-3">
-                    <span class="emp-field-label">Address</span>
-                    <div class="emp-field-value">{{ $pao->address }}</div>
-                </div>
-                @endif
+    {{-- Stat chips --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Date of Hire</p>
+                <p class="text-sm font-bold text-gray-900">{{ $pao->date_of_hire?->format('M d, Y') ?? '—' }}</p>
             </div>
         </div>
     </div>
 
+    {{-- PAO Information Card --}}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <span class="text-xs font-bold text-gray-700">PAO Information</span>
+        </div>
+        <div class="p-5">
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-xs font-semibold text-gray-500">Full Name</span>
+                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->name ?? '—' }}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-xs font-semibold text-gray-500">Contact Number</span>
+                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->contact_number ?? '—' }}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-xs font-semibold text-gray-500">Email</span>
+                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->email ?? '—' }}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-xs font-semibold text-gray-500">Gender</span>
+                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ ucfirst(str_replace('_', ' ', $pao->gender ?? '—')) }}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-xs font-semibold text-gray-500">Date of Hire</span>
+                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->date_of_hire?->format('F d, Y') ?? '—' }}</span>
+            </div>
+            @if($pao->address)
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-xs font-semibold text-gray-500">Address</span>
+                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->address }}</span>
+            </div>
+            @endif
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-semibold text-gray-500">Status</span>
+                <span class="text-xs text-gray-700 text-right">
+                    @php $sc = match($pao->status) { 'active' => 'bg-emerald-500/10 text-emerald-600 border-emerald-200/30', 'pending' => 'bg-amber-500/10 text-amber-600 border-amber-200/30', default => 'bg-red-500/10 text-red-600 border-red-200/30' }; @endphp
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border {{ $sc }}">{{ ucfirst($pao->status) }}</span>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- Delete Confirmation Modal --}}
+<div id="paoDeleteModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onclick="closePaoDeleteModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-sm mx-4 p-6 transform transition-all duration-200 scale-95" id="paoDeleteModalContent">
+        <div class="flex flex-col items-center text-center">
+            <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
+                <svg class="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-1">Delete PAO</h3>
+            <p class="text-sm text-gray-500 mb-6">Delete <strong class="text-gray-700">&quot;{{ $pao->name }}&quot;</strong>? This cannot be undone.</p>
+            <div class="flex items-center gap-3 w-full">
+                <button type="button" onclick="closePaoDeleteModal()" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all border-0 cursor-pointer">Cancel</button>
+                <button type="button" onclick="confirmPaoDelete()" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/25 transition-all border-0 cursor-pointer">Yes, delete</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<style>
-.emp-field-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #9898a8; display: block; margin-bottom: 3px; }
-.emp-field-value { font-size: 0.875rem; color: #4a4a58; }
-.emp-view-label  { font-size: 0.8rem; color: #9898a8; margin-top: 2px; display: block; }
-.emp-badge { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.4px; padding: 3px 10px; border-radius: 20px; }
-.emp-badge-active   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
-.emp-badge-inactive { background: #fff5f5; color: #c8292a; border: 1px solid #fcd0d0; }
-.emp-badge-pending  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
-.emp-action-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    height: 30px; padding: 0 12px; border-radius: 6px;
-    background: #f4f5f7; border: none; color: #9898a8;
-    font-size: 0.815rem; font-weight: 500; cursor: pointer;
-    text-decoration: none; transition: background 0.13s, color 0.13s; white-space: nowrap;
-}
-.emp-action-btn.emp-action-edit:hover   { background: #fffbeb; color: #d97706; }
-.emp-action-btn.emp-action-danger:hover { background: #fff1f2; color: #e11d48; }
-.emp-action-btn.emp-action-back:hover   { background: #f0f9ff; color: #3b82f6; }
-</style>
+@push('scripts')
+<script>
+    function openPaoDeleteModal() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 600;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.15);
+        document.getElementById('paoDeleteModal').classList.remove('hidden');
+        document.getElementById('paoDeleteModalContent').classList.remove('scale-95');
+        document.getElementById('paoDeleteModalContent').classList.add('scale-100');
+    }
+    function closePaoDeleteModal() {
+        document.getElementById('paoDeleteModalContent').classList.remove('scale-100');
+        document.getElementById('paoDeleteModalContent').classList.add('scale-95');
+        setTimeout(() => {
+            document.getElementById('paoDeleteModal').classList.add('hidden');
+        }, 150);
+    }
+    function confirmPaoDelete() {
+        document.getElementById('deleteForm').submit();
+    }
+    document.getElementById('paoDeleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closePaoDeleteModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closePaoDeleteModal();
+    });
+</script>
+@endpush
 @endsection

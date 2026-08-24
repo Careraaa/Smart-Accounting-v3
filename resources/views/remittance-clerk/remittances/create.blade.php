@@ -1,112 +1,208 @@
 @extends('layouts.layout')
 
 @section('content')
-<div class="col-md-8 offset-md-2">
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title mb-0">Create Remittance</span>
+<div class="flex items-start justify-between flex-wrap gap-4 mb-6 fade-up">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Create Remittance</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Encode daily collections and expenses. Short remittance split appears automatically when net is negative.</p>
         </div>
-        <div class="card-body">
-            <form action="{{ route('remittances.store') }}" method="POST">
-                @csrf
+        <a href="{{ route('remittances.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 transition-all no-underline">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back
+        </a>
+    </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="remittance_date" class="form-label">Remittance Date <span class="text-danger">*</span></label>
-                        <input type="date" name="remittance_date" id="remittance_date"
-                            class="form-control @error('remittance_date') is-invalid @enderror"
-                            value="{{ old('remittance_date') }}" required>
-                        @error('remittance_date')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="driver_id" class="form-label">Driver <span class="text-danger">*</span></label>
-                        <select name="driver_id" id="driver_id"
-                            class="form-control @error('driver_id') is-invalid @enderror" required>
-                            <option value="">— Select Driver —</option>
-                            @foreach ($drivers as $driver)
-                                <option value="{{ $driver->id }}" {{ old('driver_id') == $driver->id ? 'selected' : '' }}>
-                                    {{ $driver->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('driver_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-3xl">
+        <form action="{{ route('remittances.store') }}" method="POST">
+            @csrf
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Remittance Date <span class="text-amber-600">*</span></label>
+                    <input type="date" name="remittance_date" value="{{ old('remittance_date') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('remittance_date') border-red-300 @enderror" required>
+                    @error('remittance_date') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Driver <span class="text-amber-600">*</span></label>
+                    <select name="driver_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('driver_id') border-red-300 @enderror" required>
+                        <option value="">— Select Driver —</option>
+                        @foreach ($drivers as $driver)
+                            <option value="{{ $driver->id }}" {{ old('driver_id') == $driver->id ? 'selected' : '' }}>{{ $driver->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('driver_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">PAO <span class="text-amber-600">*</span></label>
+                    <select name="pao_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('pao_id') border-red-300 @enderror" required>
+                        <option value="">— Select PAO —</option>
+                        @foreach ($paos as $pao)
+                            <option value="{{ $pao->id }}" {{ old('pao_id') == $pao->id ? 'selected' : '' }}>{{ $pao->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('pao_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Vehicle <span class="text-amber-600">*</span></label>
+                    <select name="vehicle_id" id="vehicle_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('vehicle_id') border-red-300 @enderror" required>
+                        <option value="">— Select Vehicle —</option>
+                        @foreach ($vehicles as $vehicle)
+                            <option value="{{ $vehicle->id }}" data-boundary="{{ $vehicle->route->boundary ?? 0 }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>{{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})</option>
+                        @endforeach
+                    </select>
+                    @error('vehicle_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-6 mb-4">Financials</div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Total Collection <span class="text-amber-600">*</span></label>
+                    <input type="number" name="total_collection" min="0" step="0.1" value="{{ old('total_collection') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('total_collection') border-red-300 @enderror" required>
+                    @error('total_collection') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Total Expenses <span class="text-amber-600">*</span></label>
+                    <input type="number" name="total_expenses" min="0" step="1" value="{{ old('total_expenses') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('total_expenses') border-red-300 @enderror" required>
+                    @error('total_expenses') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Boundary Rate</label>
+                    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-300 transition-all">
+                        <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
+                        <input type="text" id="boundary_display" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" placeholder="0.00" readonly>
                     </div>
                 </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Net Remittance <span class="text-amber-600">*</span></label>
+                    <input type="number" name="net_remittance" id="net_remittance" min="0" step="1" value="{{ old('net_remittance') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('net_remittance') border-red-300 @enderror" required>
+                    @error('net_remittance') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+            </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="pao_id" class="form-label">PAO <span class="text-danger">*</span></label>
-                        <select name="pao_id" id="pao_id"
-                            class="form-control @error('pao_id') is-invalid @enderror" required>
-                            <option value="">— Select PAO —</option>
-                            @foreach ($paos as $pao)
-                                <option value="{{ $pao->id }}" {{ old('pao_id') == $pao->id ? 'selected' : '' }}>
-                                    {{ $pao->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('pao_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="vehicle_id" class="form-label">Vehicle <span class="text-danger">*</span></label>
-                        <select name="vehicle_id" id="vehicle_id"
-                            class="form-control @error('vehicle_id') is-invalid @enderror" required>
-                            <option value="">— Select Vehicle —</option>
-                            @foreach ($vehicles as $vehicle)
-                                <option value="{{ $vehicle->id }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>
-                                    {{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('vehicle_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+            <div id="short-remittance-section" class="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-5" style="display: none;">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Short Amount</label>
+                    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                        <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
+                        <input type="text" id="short_amount_display" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" placeholder="0.00" readonly>
                     </div>
                 </div>
-
-                <div class="prl-section-divider">Financials</div>
-
-                <div class="row">
-                    <div class="col-md-4 mb-4">
-                        <label for="total_collection" class="form-label">Total Collection <span class="text-danger">*</span></label>
-                        <input type="number" name="total_collection" id="total_collection" min="0" step="0.1"
-                            class="form-control @error('total_collection') is-invalid @enderror"
-                            value="{{ old('total_collection') }}" required>
-                        @error('total_collection')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <label for="total_expenses" class="form-label">Total Expenses <span class="text-danger">*</span></label>
-                        <input type="number" name="total_expenses" id="total_expenses" min="0" step="1"
-                            class="form-control @error('total_expenses') is-invalid @enderror"
-                            value="{{ old('total_expenses') }}" required>
-                        @error('total_expenses')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <label for="net_remittance" class="form-label">Net Remittance <span class="text-danger">*</span></label>
-                        <input type="number" name="net_remittance" id="net_remittance" min="0" step="1"
-                            class="form-control @error('net_remittance') is-invalid @enderror"
-                            value="{{ old('net_remittance') }}" required>
-                        @error('net_remittance')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Driver Share</label>
+                    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                        <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
+                        <input type="text" id="driver_share_display" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" placeholder="0.00" readonly>
                     </div>
                 </div>
-
-                <div class="d-flex gap-2 pt-3 border-top">
-                    <button type="submit" class="btn btn-primary btn-sm">Create Remittance</button>
-                    <a href="{{ route('remittances.index') }}" class="btn btn-secondary btn-sm">Cancel</a>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">PAO Share</label>
+                    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                        <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
+                        <input type="text" id="pao_share_display" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" placeholder="0.00" readonly>
+                    </div>
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="flex gap-2.5 justify-end pt-5 border-t border-gray-100 mt-6">
+                <button type="submit" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gray-900 transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer border-none">Create Remittance</button>
+            </div>
+        </form>
     </div>
 </div>
 
-<style>
-.prl-section-divider {
-    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.2px; color: #9898a8;
-    border-bottom: 1px solid #e8e8ef;
-    padding-bottom: 8px; margin-bottom: 14px;
-}
-</style>
-
 @push('scripts')
-    <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const vehicleSelect = document.getElementById('vehicle_id');
+            const boundaryDisplay = document.getElementById('boundary_display');
+            const netRemittanceInput = document.getElementById('net_remittance');
+            const shortRemittanceSection = document.getElementById('short-remittance-section');
+            const shortAmountDisplay = document.getElementById('short_amount_display');
+            const driverShareDisplay = document.getElementById('driver_share_display');
+            const paoShareDisplay = document.getElementById('pao_share_display');
+
+            function updateShortRemittance() {
+                const netRemittance = parseFloat(netRemittanceInput.value) || 0;
+
+                if (netRemittance < 0) {
+                    shortRemittanceSection.style.display = 'grid';
+                    
+                    const shortAmount = Math.abs(netRemittance);
+                    const share = shortAmount / 2;
+
+                    shortAmountDisplay.value = shortAmount.toFixed(2);
+                    driverShareDisplay.value = share.toFixed(2);
+                    paoShareDisplay.value = share.toFixed(2);
+
+                    if (!document.getElementById('is_short_hidden')) {
+                        const form = netRemittanceInput.closest('form');
+                        const shortInput = document.createElement('input');
+                        shortInput.type = 'hidden';
+                        shortInput.id = 'is_short_hidden';
+                        shortInput.name = 'is_short_remittance';
+                        shortInput.value = '1';
+                        form.appendChild(shortInput);
+
+                        const shortAmountInput = document.createElement('input');
+                        shortAmountInput.type = 'hidden';
+                        shortAmountInput.id = 'short_amount_hidden';
+                        shortAmountInput.name = 'short_amount';
+                        shortAmountInput.value = shortAmount.toFixed(2);
+                        form.appendChild(shortAmountInput);
+
+                        const driverShareInput = document.createElement('input');
+                        driverShareInput.type = 'hidden';
+                        driverShareInput.id = 'driver_share_hidden';
+                        driverShareInput.name = 'driver_share';
+                        driverShareInput.value = share.toFixed(2);
+                        form.appendChild(driverShareInput);
+
+                        const paoShareInput = document.createElement('input');
+                        paoShareInput.type = 'hidden';
+                        paoShareInput.id = 'pao_share_hidden';
+                        paoShareInput.name = 'pao_share';
+                        paoShareInput.value = share.toFixed(2);
+                        form.appendChild(paoShareInput);
+                    } else {
+                        document.getElementById('is_short_hidden').value = '1';
+                        document.getElementById('short_amount_hidden').value = shortAmount.toFixed(2);
+                        document.getElementById('driver_share_hidden').value = share.toFixed(2);
+                        document.getElementById('pao_share_hidden').value = share.toFixed(2);
+                    }
+                } else {
+                    shortRemittanceSection.style.display = 'none';
+                    
+                    const isShortInput = document.getElementById('is_short_hidden');
+                    const shortAmountInput = document.getElementById('short_amount_hidden');
+                    const driverShareInput = document.getElementById('driver_share_hidden');
+                    const paoShareInput = document.getElementById('pao_share_hidden');
+                    
+                    if (isShortInput) isShortInput.remove();
+                    if (shortAmountInput) shortAmountInput.remove();
+                    if (driverShareInput) driverShareInput.remove();
+                    if (paoShareInput) paoShareInput.remove();
+                }
+            }
+
+            vehicleSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const boundary = selectedOption.getAttribute('data-boundary');
+                
+                if (boundary && boundary !== '' && boundary !== 'null' && boundary !== '0') {
+                    boundaryDisplay.value = parseFloat(boundary).toFixed(2);
+                } else {
+                    boundaryDisplay.value = '0.00';
+                }
+            });
+
+            netRemittanceInput.addEventListener('input', updateShortRemittance);
+
+            if (vehicleSelect.value) {
+                vehicleSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
 @endpush
 @endsection

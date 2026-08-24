@@ -1,64 +1,86 @@
 @extends('layouts.layout')
-
 @section('content')
-<div class="col-md-8 offset-md-2">
-    <div class="card">
-        <div class="card-header">
-            <span class="card-title mb-0">Create PAO</span>
+<div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Create PAO</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Add a Passenger Assistant Officer / Conductor profile.</p>
         </div>
-        <div class="card-body">
-            <form action="{{ route('paos.store') }}" method="POST">
-                @csrf
+        <a href="{{ route('paos.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to List
+        </a>
+    </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" id="name"
-                            class="form-control @error('name') is-invalid @enderror"
-                            value="{{ old('name') }}" required>
-                        @error('name')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
-                        <input type="text" name="contact_number" id="contact_number"
-                            class="form-control @error('contact_number') is-invalid @enderror"
-                            value="{{ old('contact_number') }}" required>
-                        @error('contact_number')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                </div>
+    @if(session('success'))
+    <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-500/15 border border-emerald-500/25 rounded-lg text-emerald-700 text-xs font-semibold mb-4">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        {{ session('success') }}
+    </div>
+    @endif
+    @if($errors->any())
+    <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-500/15 border border-red-500/25 rounded-lg text-red-700 text-xs font-semibold mb-4">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+        Please fix the errors below.
+    </div>
+    @endif
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                        <input type="email" name="email" id="email"
-                            class="form-control @error('email') is-invalid @enderror"
-                            value="{{ old('email') }}" required>
-                        @error('email')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="date_of_hire" class="form-label">Date of Hire <span class="text-danger">*</span></label>
-                        <input type="date" name="date_of_hire" id="date_of_hire"
-                            class="form-control @error('date_of_hire') is-invalid @enderror"
-                            value="{{ old('date_of_hire') }}" required>
-                        @error('date_of_hire')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                </div>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-3xl">
+        <form method="POST" action="{{ route('paos.store') }}">
+            @csrf
 
-                <div class="mb-4">
-                    <label for="address" class="form-label">Address</label>
-                    <textarea name="address" id="address" class="form-control" rows="3">{{ old('address') }}</textarea>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Name <span class="text-amber-600">*</span></label>
+                    <input type="text" name="name" value="{{ old('name') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('name') border-red-300 @enderror" required>
+                    @error('name') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Contact Number <span class="text-amber-600">*</span></label>
+                    <input type="tel" name="contact_number" value="{{ old('contact_number') }}" placeholder="09192846375" inputmode="numeric" autocomplete="tel" maxlength="11" pattern="09\d{9}" data-digits-only class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('contact_number') border-red-300 @enderror" required>
+                    @error('contact_number') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Email <span class="text-amber-600">*</span></label>
+                    <input type="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('email') border-red-300 @enderror" required>
+                    @error('email') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Gender <span class="text-amber-600">*</span></label>
+                    <select name="gender" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" required>
+                        <option value="">-- Select --</option>
+                        <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Male</option>
+                        <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
+                        <option value="prefer_not_to_say" {{ old('gender') === 'prefer_not_to_say' ? 'selected' : '' }}>Prefer not to say</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Status <span class="text-amber-600">*</span></label>
+                    <select name="status" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('status') border-red-300 @enderror" required>
+                        <option value="">-- Select Status --</option>
+                        <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                    @error('status') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Date of Hire <span class="text-amber-600">*</span></label>
+                    <input type="date" name="date_of_hire" value="{{ old('date_of_hire') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('date_of_hire') border-red-300 @enderror" required>
+                    @error('date_of_hire') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Address <span class="text-amber-600">*</span></label>
+                    <textarea name="address" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" required>{{ old('address') }}</textarea>
+                </div>
+            </div>
 
-                <div class="d-flex gap-2 pt-3 border-top">
-                    <button type="submit" class="btn btn-primary btn-sm">Create PAO</button>
-                    <a href="{{ route('paos.index') }}" class="btn btn-secondary btn-sm">Cancel</a>
-                </div>
-            </form>
-        </div>
+            <div class="flex gap-2.5 justify-end pt-5 border-t border-gray-100 mt-6">
+                <a href="{{ route('paos.index') }}" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-gray-100 text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97] cursor-pointer no-underline">Cancel</a>
+                <button type="submit" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gray-900 transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer border-none">Create</button>
+            </div>
+        </form>
     </div>
 </div>
 
 @push('scripts')
-    <script src="{{ asset('js/global/global-datepicker.js') }}"></script>
 @endpush
 @endsection

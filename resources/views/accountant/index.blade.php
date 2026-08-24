@@ -1,292 +1,433 @@
 @extends('layouts.layout')
 
+@push('styles')
+<style>
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes scaleIn { 0%{opacity:0;transform:scale(0.92)} 100%{opacity:1;transform:scale(1)} }
+@keyframes slideInRight { 0%{opacity:0;transform:translateX(16px)} 100%{opacity:1;transform:translateX(0)} }
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+@keyframes fadeInDot { to { opacity: 1; } }
+@keyframes fillArea { to { opacity: 1; } }
+@keyframes bounceIn { 0%{opacity:0;transform:scale(0.6)} 60%{transform:scale(1.05)} 80%{transform:scale(0.95)} 100%{opacity:1;transform:scale(1)} }
+@keyframes pulseGlow { 0%,100%{box-shadow:0 0 0 0 rgba(200,41,42,0.4)} 50%{box-shadow:0 0 0 8px rgba(200,41,42,0)} }
+@keyframes floatSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+@keyframes countUp { 0%{opacity:0;transform:translateY(8px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes slideUpBounce { 0%{opacity:0;transform:translateY(24px)} 60%{transform:translateY(-4px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes growBar { 0%{transform:scaleY(0);opacity:0} 100%{transform:scaleY(1);opacity:1} }
+@keyframes donutFill { 0%{stroke-dasharray:0 999} 100%{stroke-dasharray:var(--pct) 999} }
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes pulseDot { 0%,100%{opacity:0.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
+.stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.slide-right { animation:slideInRight 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-chart-line { stroke-dasharray: 800; stroke-dashoffset: 800; animation: drawLine 1.2s cubic-bezier(0.16,1,0.3,1) 0.2s forwards; }
+.acd-chart-line-delay { stroke-dasharray: 600; stroke-dashoffset: 600; animation: drawLine 1s cubic-bezier(0.16,1,0.3,1) 0.6s forwards; }
+.acd-chart-dot { opacity: 0; animation: fadeInDot 0.3s ease both; }
+.acd-chart-dot:nth-child(1) { animation-delay: 0.4s; }
+.acd-chart-dot:nth-child(2) { animation-delay: 0.5s; }
+.acd-chart-dot:nth-child(3) { animation-delay: 0.6s; }
+.acd-chart-dot:nth-child(4) { animation-delay: 0.7s; }
+.acd-chart-dot:nth-child(5) { animation-delay: 0.8s; }
+.acd-chart-dot:nth-child(6) { animation-delay: 0.9s; }
+.acd-chart-dot:nth-child(7) { animation-delay: 1s; }
+.acd-chart-fill { opacity: 0; animation: fillArea 0.6s ease 1.1s forwards; }
+.acd-bounce { animation:bounceIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-float { animation:floatSlow 3s ease-in-out infinite; }
+.acd-pulse { animation:pulseGlow 2s ease-in-out infinite; }
+.acd-count-num { animation:countUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-slide-bounce { animation:slideUpBounce 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-bar { transform-origin:bottom; animation:growBar 0.7s cubic-bezier(0.16,1,0.3,1) both; }
+.acd-donut-ring { fill:none;stroke-width:28;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center; }
+.acd-donut-seg { animation:donutFill 1s cubic-bezier(0.16,1,0.3,1) both; }
+</style>
+@endpush
+
 @section('content')
-<div class="col-md-12">
+@php
+$totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvancesCount;
+@endphp
 
-    {{-- Top stat cards --}}
-    <div class="row g-3 mb-4">
 
-        <div class="col-xxl-2 col-lg-4 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="dash-label">Total Employees</span>
-                        <span class="dash-icon"><i class="feather-users"></i></span>
+<div class="flex flex-col lg:flex-row gap-5 items-start">
+
+    {{-- LEFT COLUMN (2/3) --}}
+    <div class="flex-1 min-w-0 w-full space-y-5">
+        {{-- Quick Actions / Shortcuts --}}
+        <div class="acd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
+            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm acd-float">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
-                    <div class="dash-value">{{ $totalEmployees }}</div>
+                    <span class="text-xs font-semibold text-gray-900">Quick Actions</span>
+                </div>
+                <span class="text-[0.55rem] font-mono text-gray-400">Accountant modules</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
+                <a href="{{ route('payroll-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Payroll Approval</span>
+                    @if($processingPayroll > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $processingPayroll }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('remittance-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-violet-700 transition-colors text-center">Remittance Approval</span>
+                    @if($pendingRemittances > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.45rem] font-bold">{{ $pendingRemittances }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-blue-50 hover:border-blue-200 hover:shadow-sm no-underline">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center transition-all group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-200/50">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
+                    </div>
+                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-blue-700 transition-colors text-center">Cash Advances</span>
+                    @if($pendingCashAdvancesCount > 0)
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-blue-100 text-blue-700 text-[0.45rem] font-bold">{{ $pendingCashAdvancesCount }}</span>
+                    @endif
+                </a>
+            </div>
+        </div>
+
+
+
+        {{-- Stat cards --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Payroll</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.15s">₱{{ number_format($totalPayroll, 2) }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Approved</span>
+                </div>
+            </div>
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-blue-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Allowances</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.2s">₱{{ number_format($totalAllowances, 2) }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span>{{ number_format($allowancePercentage, 1) }}% of A+D</span>
+                </div>
+            </div>
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-red-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Deductions</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.25s">₱{{ number_format($totalDeductions, 2) }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span>{{ number_format($deductionPercentage, 1) }}% of A+D</span>
+                </div>
+            </div>
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Avg. Basic</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.35s">₱{{ number_format($averageBasicSalary ?? 0, 2) }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span>Per payroll row</span>
+                </div>
+            </div>
+            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-slate-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Headcount</p>
+                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 acd-count-num" style="animation-delay:0.4s">{{ $totalEmployees }}</p>
+                    </div>
+                    <div class="w-9 h-9 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center group-hover:bg-slate-500 group-hover:text-white group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                </div>
+                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                    <span>Excl. admin roles</span>
                 </div>
             </div>
         </div>
 
-        <div class="col-xxl-2 col-lg-4 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="dash-label">Total Payroll</span>
-                        <span class="dash-icon di-green"><i class="feather-arrow-up-circle"></i></span>
+        {{-- Charts row 1 --}}
+        @php
+            $trendPts = $monthlyPayrollTrend;
+            $trendCount = count($trendPts);
+            $stLabels = $payrollStatusChartLabels ?? [];
+            $stSeries = $payrollStatusChartSeries ?? [];
+            $stTotal = array_sum($stSeries);
+        @endphp
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {{-- Net Payroll Trend (SVG line chart � clerk style) --}}
+            @php
+            $chartMax = $trendCount > 0 ? max(array_column($trendPts, 'total')) : 1;
+            $chartH = 160;
+            $chartW = 600;
+            $padL = 0; $padR = 0; $padT = 8; $padB = 24;
+            $plotW = $chartW - $padL - $padR;
+            $plotH = $chartH - $padT - $padB;
+            $cnt = $trendCount;
+            $step = $cnt > 1 ? $plotW / ($cnt - 1) : 0;
+            $points = [];
+            foreach ($trendPts as $i => $pt) {
+                $x = $i * $step;
+                $y = $plotH - ($chartMax > 0 ? ($pt['total'] / $chartMax) * $plotH : 0);
+                $points[] = round($x + $padL, 1) . ',' . round($y + $padT, 1);
+            }
+            @endphp
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                    <h2 class="text-[11px] font-semibold text-gray-900">Net Payroll Trend</h2>
+                    <span class="text-[9px] text-gray-400 font-medium">Last 6 months</span>
+                </div>
+                <div class="p-4">
+                    @if($trendCount > 0)
+                    <svg viewBox="0 0 {{ $chartW }} {{ $chartH }}" class="w-full h-auto" style="max-height:180px">
+                        {{-- Grid lines --}}
+                        @for ($g = 0; $g <= 4; $g++)
+                        @php $gy = $padT + ($plotH / 4) * $g; @endphp
+                        <line x1="{{ $padL }}" y1="{{ $gy }}" x2="{{ $chartW - $padR }}" y2="{{ $gy }}" stroke="#f0f0f0" stroke-width="1"/>
+                        @endfor
+                        {{-- Area fill --}}
+                        <path d="M{{ $points[0] }} L{{ implode(' L', $points) }} L{{ $padL + ($cnt - 1) * $step }},{{ $padT + $plotH }} L{{ $padL }},{{ $padT + $plotH }} Z"
+                              fill="url(#acChartGrad)" opacity="0.15"/>
+                        {{-- Line --}}
+                        <polyline points="{{ implode(' ', $points) }}" fill="none" stroke="#c8292a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                  class="acd-chart-line"/>
+                        {{-- Dots --}}
+                        @foreach ($trendPts as $i => $pt)
+                        @php $dx = $i * $step + $padL; $dy = $plotH - ($chartMax > 0 ? ($pt['total'] / $chartMax) * $plotH : 0) + $padT; @endphp
+                        <circle cx="{{ $dx }}" cy="{{ $dy }}" r="3.5" fill="#c8292a" stroke="white" stroke-width="2" class="acd-chart-dot"
+                                style="animation-delay:{{ 0.1 + $i * 0.05 }}s"/>
+                        @endforeach
+                        {{-- X-axis labels --}}
+                        @foreach ($trendPts as $i => $pt)
+                        @php $lx = $i * $step + $padL; @endphp
+                        <text x="{{ $lx }}" y="{{ $chartH - 4 }}" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="monospace">{{ $pt['month'] ?? \Carbon\Carbon::parse($pt['label'])->format('M') }}</text>
+                        @endforeach
+                        <defs>
+                            <linearGradient id="acChartGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#c8292a"/>
+                                <stop offset="100%" stop-color="#c8292a" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="flex items-center justify-between mt-2 text-[10px] text-gray-400">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+                            Net pay trend
+                        </span>
+                        <span>
+                            Peak: <strong class="text-gray-700 font-mono">₱{{ number_format($chartMax, 2) }}</strong>
+                        </span>
                     </div>
-                    <div class="dash-value">₱{{ number_format($totalPayroll, 0) }}</div>
-                    <div class="dash-sub">+5.2% this period</div>
+                    @else
+                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No trend data yet.</div>
+                    @endif
                 </div>
             </div>
-        </div>
 
-        <div class="col-xxl-2 col-lg-4 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="dash-label">Total Allowances</span>
-                        <span class="dash-icon di-green"><i class="feather-plus-circle"></i></span>
-                    </div>
-                    <div class="dash-value">₱{{ number_format($totalAllowances, 0) }}</div>
+            {{-- Payroll Status Mix (CSS donut) --}}
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                    <h2 class="text-[11px] font-semibold text-gray-900">Payroll Status Mix</h2>
+                    <span class="text-[9px] text-gray-400 font-medium">By batch count</span>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-xxl-2 col-lg-4 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="dash-label">Total Deductions</span>
-                        <span class="dash-icon di-red"><i class="feather-minus-circle"></i></span>
-                    </div>
-                    <div class="dash-value">₱{{ number_format($totalDeductions, 0) }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xxl-2 col-lg-4 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="dash-label">Avg. Basic Salary</span>
-                        <span class="dash-icon di-blue"><i class="feather-trending-up"></i></span>
-                    </div>
-                    <div class="dash-value">₱{{ number_format($averageBasicSalary, 0) }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xxl-2 col-lg-4 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <span class="dash-label">Outstanding Loans</span>
-                        <span class="dash-icon di-amber"><i class="feather-alert-circle"></i></span>
-                    </div>
-                    <div class="dash-value">₱{{ number_format($totalOutstandingLoans, 0) }}</div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    {{-- Status cards --}}
-    <div class="row g-3 mb-4">
-
-        <div class="col-xxl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <span class="dash-label">Processing Payroll</span>
-                    <div class="dash-value mt-3">{{ $processingPayroll }}</div>
-                    <div class="progress dash-progress mt-3">
-                        <div class="progress-bar bg-warning" style="width: {{ $totalEmployees > 0 ? ($processingPayroll/$totalEmployees)*100 : 0 }}%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xxl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <span class="dash-label">Approved Payroll</span>
-                    <div class="dash-value mt-3">{{ $approvedPayroll }}</div>
-                    <div class="progress dash-progress mt-3">
-                        <div class="progress-bar bg-info" style="width: {{ $totalEmployees > 0 ? ($approvedPayroll/$totalEmployees)*100 : 0 }}%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xxl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <span class="dash-label">Paid Payroll</span>
-                    <div class="dash-value mt-3">{{ $paidPayroll }}</div>
-                    <div class="progress dash-progress mt-3">
-                        <div class="progress-bar bg-success" style="width: {{ $totalEmployees > 0 ? ($paidPayroll/$totalEmployees)*100 : 0 }}%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xxl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <span class="dash-label">Active Salary Loans</span>
-                    <div class="dash-value mt-3">{{ $activeSalaryLoans }}</div>
-                    <div class="dash-sub mt-1">
-                        <a href="#" style="font-size:.8rem; color:#c8292a; font-weight:600; text-decoration:none;">View Details →</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    {{-- Allowances vs Deductions + Monthly Trend --}}
-    <div class="row g-3 mb-4">
-
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <span class="card-title mb-0">Allowances vs Deductions</span>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span class="dash-label" style="text-transform:none; letter-spacing:0;">Allowances</span>
-                            <span style="font-size:.82rem; font-weight:700; color:#16a34a;">{{ number_format($allowancePercentage, 1) }}%</span>
-                        </div>
-                        <div class="progress dash-progress">
-                            <div class="progress-bar bg-success" style="width: {{ $allowancePercentage }}%"></div>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span class="dash-label" style="text-transform:none; letter-spacing:0;">Deductions</span>
-                            <span style="font-size:.82rem; font-weight:700; color:#e11d48;">{{ number_format($deductionPercentage, 1) }}%</span>
-                        </div>
-                        <div class="progress dash-progress">
-                            <div class="progress-bar bg-danger" style="width: {{ $deductionPercentage }}%"></div>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-top">
-                        <div class="row text-center">
-                            <div class="col">
-                                <div class="dash-label">Total Allowances</div>
-                                <div style="font-size:.95rem; font-weight:700; color:#16a34a; margin-top:4px;">₱{{ number_format($totalAllowances, 0) }}</div>
+                <div class="px-4 py-4">
+                    @if($stTotal > 0)
+                    @php
+                        $stColors = ['#f59e0b','#8b5cf6','#64748b','#2563eb','#22c55e','#15803d','#f43f5e'];
+                        $cumulPct = 0;
+                    @endphp
+                    <div class="flex flex-col sm:flex-row items-center gap-5">
+                        <div class="relative w-[120px] h-[120px] shrink-0">
+                            <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+                                @foreach($stSeries as $i => $val)
+                                @php
+                                    $pct = $val / $stTotal * 100;
+                                    $circ = 2 * pi() * 36;
+                                    $offset = $cumulPct / 100 * $circ;
+                                    $cumulPct += $pct;
+                                @endphp
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="{{ $stColors[$i % count($stColors)] }}" stroke-width="8" stroke-dasharray="{{ ($pct/100)*$circ }} {{ $circ }}" stroke-dashoffset="0" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ ($pct/100)*$circ }};animation-delay:{{ 0.1*$i }}s;transform-origin:center;transform:rotate({{ $offset }}deg)"/>
+                                @endforeach
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-xs font-bold text-gray-900 tabular-nums">{{ $stTotal }}</span>
                             </div>
-                            <div class="col">
-                                <div class="dash-label">Total Deductions</div>
-                                <div style="font-size:.95rem; font-weight:700; color:#e11d48; margin-top:4px;">₱{{ number_format($totalDeductions, 0) }}</div>
-                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <span class="card-title mb-0">Monthly Payroll Trend</span>
-                </div>
-                <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <tbody>
-                            @foreach($monthlyPayrollTrend as $trend)
-                                <tr>
-                                    <td class="ps-4" style="font-size:.82rem; font-weight:600; color:#4a4a58; width:100px;">
-                                        {{ $trend['month'] }}
-                                    </td>
-                                    <td>
-                                        <div class="progress dash-progress">
-                                            <div class="progress-bar" style="background:#c8292a; width: {{ $totalPayroll > 0 ? ($trend['total']/$totalPayroll)*100 : 0 }}%"></div>
-                                        </div>
-                                    </td>
-                                    <td class="text-end pe-4" style="font-size:.82rem; font-weight:700; color:#1c1c1e; width:110px;">
-                                        ₱{{ number_format($trend['total'], 0) }}
-                                    </td>
-                                </tr>
+                        <div class="flex-1 grid grid-cols-2 gap-1.5 w-full">
+                            @foreach($stSeries as $i => $val)
+                            @php
+                                $pct = $stTotal > 0 ? round(($val/$stTotal)*100) : 0;
+                            @endphp
+                            <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
+                                <span class="w-2 h-2 rounded-sm shrink-0" style="background:{{ $stColors[$i % count($stColors)] }}"></span>
+                                <span class="text-[10px] text-gray-600 flex-1 truncate">{{ $stLabels[$i] ?? '�' }}</span>
+                                <span class="text-[10px] font-bold text-gray-900 tabular-nums">{{ $val }}</span>
+                                <span class="text-[8px] text-gray-400 min-w-[24px] text-right">{{ $pct }}%</span>
+                            </div>
                             @endforeach
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
+                    @else
+                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No status data yet.</div>
+        @endif
+        </div>
+        </div>
+    </div>
+
+
+        {{-- Charts row 2 --}}
+        @php
+            $ta = (float) ($totalAllowances ?? 0);
+            $td = (float) ($totalDeductions ?? 0);
+            $adTotal = $ta + $td;
+            $adAllowPct = $adTotal > 0 ? round(($ta/$adTotal)*100) : 0;
+            $adDeducPct = $adTotal > 0 ? round(($td/$adTotal)*100) : 0;
+
+            $pipeVals = $pipelineBar['values'] ?? [];
+            $pipeLabels = $pipelineBar['labels'] ?? [];
+            $pipeMax = count($pipeVals) > 0 ? max($pipeVals) : 1;
+            $pipeColors = ['#f59e0b','#8b5cf6','#f43f5e'];
+        @endphp
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {{-- Allowances vs Deductions (CSS donut) --}}
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                    <h2 class="text-[11px] font-semibold text-gray-900">Allowances vs Deductions</h2>
+                    <span class="text-[9px] text-gray-400 font-medium">Aggregate amounts</span>
+                </div>
+                <div class="px-4 py-4">
+                    @if($adTotal > 0)
+                    @php
+                        $circ = 2 * pi() * 36;
+                        $allowOffset = $adAllowPct / 100 * $circ;
+                    @endphp
+                    <div class="flex flex-col sm:flex-row items-center gap-5">
+                        <div class="relative w-[120px] h-[120px] shrink-0">
+                            <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="#22c55e" stroke-width="8" stroke-dasharray="{{ $allowOffset }} {{ $circ }}" stroke-dashoffset="0" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ $allowOffset }}"/>
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="#f43f5e" stroke-width="8" stroke-dasharray="{{ $circ - $allowOffset }} {{ $circ }}" stroke-dashoffset="{{ -$allowOffset }}" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ $circ - $allowOffset }};animation-delay:0.3s"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">₱{{ number_format($adTotal/1000,2) }}k</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 space-y-2 w-full">
+                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-emerald-50 transition-colors">
+                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-emerald-500"></span>
+                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Allowances</span>
+                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">₱{{ number_format($ta,2) }}</span>
+                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adAllowPct }}%</span>
+                            </div>
+                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-rose-50 transition-colors">
+                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-rose-500"></span>
+                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Deductions</span>
+                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">₱{{ number_format($td,2) }}</span>
+                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adDeducPct }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No data yet.</div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Pipeline (horizontal bars) --}}
+            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                    <h2 class="text-[11px] font-semibold text-gray-900">Pipeline</h2>
+                    <span class="text-[9px] text-gray-400 font-medium">Awaiting &rarr; approved &rarr; rejected</span>
+                </div>
+                <div class="px-4 py-4 space-y-3">
+                    @forelse($pipeVals as $i => $val)
+                    @php $barW = $pipeMax > 0 ? ($val / $pipeMax) * 100 : 0; @endphp
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-semibold text-gray-600">{{ $pipeLabels[$i] ?? '�' }}</span>
+                            <span class="text-[10px] font-bold text-gray-900 tabular-nums">{{ $val }} <span class="text-[8px] text-gray-400 font-medium">batch{{ $val !== 1 ? 'es' : '' }}</span></span>
+                        </div>
+                        <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full acd-bar transition-all duration-700" style="width:{{ $barW }}%;background:{{ $pipeColors[$i % count($pipeColors)] }};animation-delay:{{ 0.1 * $i }}s"></div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="flex items-center justify-center h-[140px] text-xs text-gray-400">No pipeline data yet.</div>
+                    @endforelse
                 </div>
             </div>
         </div>
 
     </div>
 
-    {{-- Recent Payroll --}}
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="card-title mb-0">Recent Payroll Records</span>
-            <a href="#" class="btn btn-primary btn-sm">View All</a>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead>
-                        <tr>
-                            <th>Employee</th>
-                            <th>Basic Salary</th>
-                            <th>Allowances</th>
-                            <th>Deductions</th>
-                            <th>Gross Pay</th>
-                            <th>Net Pay</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($recentPayroll as $payroll)
-                            <tr>
-                                <td><strong>{{ $payroll->employee->name ?? 'N/A' }}</strong></td>
-                                <td>₱{{ number_format($payroll->basic_salary, 2) }}</td>
-                                <td style="color:#16a34a;">₱{{ number_format($payroll->total_allowances, 2) }}</td>
-                                <td style="color:#e11d48;">₱{{ number_format($payroll->total_deductions, 2) }}</td>
-                                <td>₱{{ number_format($payroll->gross_pay, 2) }}</td>
-                                <td><strong>₱{{ number_format($payroll->net_pay, 2) }}</strong></td>
-                                <td class="text-center">
-                                    @php
-                                        $statusMap = [
-                                            'paid'     => ['bg' => '#f0fdf4', 'color' => '#16a34a'],
-                                            'approved' => ['bg' => '#f0f9ff', 'color' => '#0284c7'],
-                                            'pending'  => ['bg' => '#fffbeb', 'color' => '#d97706'],
-                                        ];
-                                        $st = $statusMap[$payroll->status] ?? ['bg' => '#f4f5f7', 'color' => '#9898a8'];
-                                    @endphp
-                                    <span style="display:inline-block; background:{{ $st['bg'] }}; color:{{ $st['color'] }}; font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:0.4px; text-transform:uppercase;">
-                                        {{ ucfirst($payroll->status) }}
-                                    </span>
-                                </td>
-                                <td class="text-center">
-                                    <a href="#" class="emp-action-btn emp-action-view" title="View">
-                                        <i class="feather-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-4">No payroll records found</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+    {{-- RIGHT COLUMN: Calendar + To-Do --}}
+    <div class="w-full lg:w-[280px] lg:shrink-0 space-y-5">
+        <div class="lg:sticky lg:top-24 space-y-5">
+
+        {{-- Calendar Card --}}
+        @include('partials.dashboard-calendar')
+
+        {{-- To-Do Card --}}
+        <div class="slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.1s">
+            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    <span class="text-xs font-semibold text-gray-900">To Do</span>
+                </div>
+                @if($totalPendingTodo > 0)
+                    <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-amber-100 text-amber-700 text-[0.5rem] font-bold px-1">{{ $totalPendingTodo }}</span>
+                @endif
             </div>
+            @if($totalPendingTodo > 0)
+            <div class="divide-y divide-gray-50">
+                @foreach($pendingItems as $item)
+                <a href="{{ $item['url'] }}" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50 no-underline">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background:{{ $item['color'] }};color:{{ $item['iconColor'] }}">
+                        <i class="{{ $item['icon'] }}" style="font-size:14px"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold text-gray-900">{{ $item['text'] }}</p>
+                    </div>
+                    @if($item['count'] > 0)
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 rounded-full text-[0.5rem] font-bold px-1.5" style="background:{{ $item['color'] }};color:{{ $item['iconColor'] }}">{{ $item['count'] }}</span>
+                    @endif
+                    <svg class="w-3.5 h-3.5 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </a>
+                @endforeach
+            </div>
+            @else
+            <div class="flex flex-col items-center justify-center py-8 text-center">
+                <svg class="w-8 h-8 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-sm font-semibold text-gray-400">No to do</p>
+                <p class="text-xs text-gray-400 mt-0.5">All caught up!</p>
+            </div>
+            @endif
         </div>
     </div>
-
 </div>
 
-<style>
-.dash-label   { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#9898a8; }
-.dash-value   { font-size:1.75rem; font-weight:800; color:#1c1c1e; line-height:1; }
-.dash-sub     { font-size:.75rem; color:#9898a8; margin-top:4px; }
-.dash-icon    { width:34px; height:34px; border-radius:8px; background:#f4f5f7; display:flex; align-items:center; justify-content:center; color:#9898a8; font-size:15px; flex-shrink:0; }
-.dash-icon.di-green { background:#f0fdf4; color:#16a34a; }
-.dash-icon.di-red   { background:#fff5f5; color:#c8292a; }
-.dash-icon.di-amber { background:#fffbeb; color:#d97706; }
-.dash-icon.di-blue  { background:#f0f9ff; color:#0284c7; }
-.dash-progress { height:4px; border-radius:4px; background:#f4f5f7; }
-.emp-action-btn {
-    display:inline-flex; align-items:center; justify-content:center;
-    width:30px; height:30px; border-radius:6px;
-    background:#f4f5f7; border:none; color:#9898a8;
-    font-size:13px; cursor:pointer; text-decoration:none;
-    transition:background 0.13s, color 0.13s; padding:0;
-}
-.emp-action-btn.emp-action-view:hover { background:#eff6ff; color:#3b82f6; }
-</style>
+</div>
 @endsection

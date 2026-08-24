@@ -4,14 +4,38 @@ namespace App\Http\Controllers\RemittanceClerk;
 
 use App\Http\Controllers\Controller;
 use App\Models\Driver;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class DriverController extends Controller
 {
-    public function index()
+    use LogsUserActivity;
+    public function index(Request $request)
     {
-        $drivers = Driver::all();
-        return view('remittance-clerk.drivers.index', compact('drivers'));
+        $sortBy = $request->get('sort_by', 'name');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['name', 'contact_number', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'name';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+        
+        $drivers = Driver::orderBy($sortBy, $sortOrder)->get();
+        
+        // Calculate statistics
+        $totalDrivers = Driver::count();
+        $activeDrivers = Driver::where('status', 'active')->count();
+        $inactiveDrivers = Driver::where('status', 'inactive')->count();
+        
+        $this->logActivity('viewed', 'Drivers list', request()->url(), 'driver');
+
+        return view('remittance-clerk.drivers.index', compact('drivers', 'sortBy', 'sortOrder', 'totalDrivers', 'activeDrivers', 'inactiveDrivers'));
     }
 
     public function create()
@@ -21,22 +45,33 @@ class DriverController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'license_number' => 'required|unique:drivers',
-            'contact_number' => 'required',
-            'email' => 'required|email|unique:drivers',
-            'address' => 'nullable|string',
-            'date_of_hire' => 'required|date',
+        $request->merge([
+            'contact_number' => preg_replace('/\D/', '', (string) $request->contact_number),
         ]);
 
-        Driver::create($validated);
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'license_number' => ['required', 'unique:drivers', 'regex:/^[A-Za-z]\d{2}-\d{2}-\d{6}$/'],
+            'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
+            'email' => 'required|email|unique:drivers',
+            'gender' => 'required|string',
+            'address' => 'required|string',
+            'date_of_hire' => 'required|date',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $validated['license_number'] = strtoupper($validated['license_number']);
+        $driver = Driver::create($validated);
+
+        $this->logActivity('created', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
 
         return redirect()->route('drivers.index')->with('success', 'Driver created successfully.');
     }
 
     public function show(Driver $driver)
     {
+        $this->logActivity('viewed', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
+
         return view('remittance-clerk.drivers.show', compact('driver'));
     }
 
@@ -47,22 +82,33 @@ class DriverController extends Controller
 
     public function update(Request $request, Driver $driver)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'license_number' => 'required|unique:drivers,license_number,' . $driver->id,
-            'contact_number' => 'required',
-            'email' => 'required|email|unique:drivers,email,' . $driver->id,
-            'address' => 'nullable|string',
-            'date_of_hire' => 'required|date',
+        $request->merge([
+            'contact_number' => preg_replace('/\D/', '', (string) $request->contact_number),
         ]);
 
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'license_number' => ['required', 'unique:drivers,license_number,' . $driver->id, 'regex:/^[A-Za-z]\d{2}-\d{2}-\d{6}$/'],
+            'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
+            'email' => 'required|email|unique:drivers,email,' . $driver->id,
+            'gender' => 'required|string',
+            'address' => 'required|string',
+            'date_of_hire' => 'required|date',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $validated['license_number'] = strtoupper($validated['license_number']);
         $driver->update($validated);
+
+        $this->logActivity('updated', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
 
         return redirect()->route('drivers.index')->with('success', 'Driver updated successfully.');
     }
 
     public function destroy(Driver $driver)
     {
+        $this->logActivity('deleted', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);
+
         $driver->delete();
         return redirect()->route('drivers.index')->with('success', 'Driver deleted successfully.');
     }

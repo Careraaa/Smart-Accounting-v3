@@ -16,6 +16,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('attendance:delete-old-logs')
             ->daily()
             ->at('02:00'); // Run at 2 AM daily to check and delete old logs
+
+        // Delete notifications older than 30 days
+        $schedule->command('notifications:prune')
+            ->daily()
+            ->at('02:30');
     }
 
     /**

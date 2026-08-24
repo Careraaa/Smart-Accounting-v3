@@ -1,217 +1,1243 @@
 <?php
 
-namespace App\Http\Controllers\HR;
+    namespace App\Http\Controllers\HR;
 
-use App\Http\Controllers\Controller;
-use App\Models\Payroll;
-use App\Models\Employee;
-use App\Models\Attendance;
-use App\Models\Leave;
-use Illuminate\Http\Request;
-use App\Models\StatutoryDeduction;
+    use App\Http\Controllers\Controller;
+    use App\Models\Payroll;
+    use App\Models\PayrollBatch;
+    use App\Models\PayrollCutoffSchedule;
+    use App\Models\User;
+    use App\Models\Attendance;
+    use App\Models\Leave;
+    use App\Models\OvertimeUndertime;
+    use App\Services\AttendanceService;
+    use App\Services\PayrollService;
+    use App\Services\LeaveService;
+    use App\Services\PayrollDeductionService;
+    use App\Services\ThirteenthMonthPayService;
+    use App\Notifications\PayrollNotification;
+    use App\Traits\LogsUserActivity;
+    use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\DB;
+    use Carbon\Carbon;
 
-class PayrollController extends Controller
-{
-    public function index()
+    class PayrollController extends Controller
     {
-        $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])->get();
+        use LogsUserActivity;
 
-        $totalEmployees = Employee::count();
-        $activeEmployees = Employee::where('status', 'active')->count();
-        $inactiveEmployees = $totalEmployees - $activeEmployees;
+        protected $attendanceService;
+        protected $payrollService;
+        protected $leaveService;
+        protected $thirteenthMonthService;
 
-        $presentToday = Attendance::whereDate('date', now())->where('status', 'present')->count();
-        $absentToday = Attendance::whereDate('date', now())->where('status', 'absent')->count();
-        $lateToday = Attendance::whereDate('date', now())->where('status', 'late')->count();
+        public function __construct(AttendanceService $attendanceService, PayrollService $payrollService, LeaveService $leaveService, ThirteenthMonthPayService $thirteenthMonthService)
+        {
+            $this->attendanceService = $attendanceService;
+            $this->payrollService = $payrollService;
+            $this->leaveService = $leaveService;
+            $this->thirteenthMonthService = $thirteenthMonthService;
+        }
 
-        $onLeaveEmployees = Leave::where('status', 'approved')->whereDate('start_date', '<=', now())->whereDate('end_date', '>=', now())->count();
+        /* ══════════════════════════════════════════════════════════════
+        |  INDEX
+        ══════════════════════════════════════════════════════════════ */
+        public function index(Request $request)
+        {
+            $activeEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+                ->where('status', 'active')
+                ->count();
 
-        $totalLeaves = Leave::count();
-        $pendingLeaves = Leave::where('status', 'pending')->count();
-        $approvedLeaves = Leave::where('status', 'approved')->count();
+            // All batches, newest period first — main list
+            $allBatches = PayrollBatch::regular()
+                ->withCount('payrolls')
+                ->withSum('payrolls', 'gross_pay')
+                ->withSum('payrolls', 'total_deductions')
+                ->withSum('payrolls', 'net_pay')
+                ->with(['generatedBy'])
+                ->orderByDesc('period_start')
+                ->orderByDesc('period_end')
+                ->get()
+                ->concat(
+                    PayrollBatch::thirteenthMonth()
+                        ->withCount('thirteenthMonthPays')
+                        ->withSum('thirteenthMonthPays', 'thirteenth_month_pay')
+                        ->with(['generatedBy'])
+                        ->orderByDesc('period_start')
+                        ->get()
+                )
+                ->sortByDesc(fn ($b) => $b->period_start)
+                ->values();
 
-        $attendanceRate = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
+            // Sidebar: last 5 batches (only need count, not full payrolls relation)
+            $recentBatches = PayrollBatch::withCount('payrolls')
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get();
 
-        $attendanceTrend = Attendance::whereDate('date', '>=', now()->subDays(6))
-            ->get()
-            ->groupBy(fn($item) => $item->date->format('Y-m-d'))
-            ->map(
-                fn($group) => [
-                    'date' => $group->first()->date->format('M d, Y'),
-                    'present' => $group->where('status', 'present')->count(),
-                    'absent' => $group->where('status', 'absent')->count(),
-                    'late' => $group->where('status', 'late')->count(),
-                ],
-            )
-            ->values();
+            // Individual payroll records (non-draft) for the records table
+            $payrolls = Payroll::with(['user', 'batch', 'allowances', 'deductions'])
+                ->whereNotIn('status', ['draft'])
+                ->orderByDesc('created_at')
+                ->get();
 
-        return view('hr.payroll.salary-computation.index', compact('payrolls', 'totalEmployees', 'activeEmployees', 'inactiveEmployees', 'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees', 'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate', 'attendanceTrend'));
-    }
+            $nextCutoffDate      = PayrollCutoffSchedule::getNextCutoffDate();
+            $currentPeriod       = PayrollBatch::resolvePeriod();
+            $availablePeriods    = PayrollBatch::getAvailablePeriods();
+            $currentInProgressBatch = PayrollBatch::inProgressForCurrentPeriod();
+            $finalizedCurrentBatch = PayrollBatch::finalizedForCurrentPeriod();
+            $batchAlreadyExists    = $finalizedCurrentBatch !== null;
 
-    public function create()
-    {
-        $employees = Employee::where('status', 'active')->get();
-        return view('hr.payroll.salary-computation.create', compact('employees'));
-    }
+            $totalEmployees    = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])->count();
+            $inactiveEmployees = $totalEmployees - $activeEmployees;
+            $attendanceCounts  = Attendance::whereDate('date', now())
+                ->selectRaw("COALESCE(SUM(status='present'),0) as present, COALESCE(SUM(status='absent'),0) as absent, COALESCE(SUM(status='late'),0) as late")
+                ->first();
+            $presentToday      = (int)($attendanceCounts->present ?? 0);
+            $absentToday       = (int)($attendanceCounts->absent ?? 0);
+            $lateToday         = (int)($attendanceCounts->late ?? 0);
+            $onLeaveEmployees  = Leave::whereIn('status', ['approved', 'paid'])->whereDate('start_date', '<=', now())->whereDate('end_date', '>=', now())->count();
+            $totalLeaves       = Leave::count();
+            $pendingLeaves     = Leave::where('status', 'pending')->count();
+            $approvedLeaves    = Leave::whereIn('status', ['approved', 'paid'])->count();
+            $attendanceRate    = $totalEmployees > 0 ? ($presentToday / $totalEmployees) * 100 : 0;
+            $cutoffSchedules   = PayrollCutoffSchedule::orderBy('cutoff_day')->get();
+            $cutoffInfo        = PayrollCutoffSchedule::getCurrentCutoffPeriod();
+            $releasedCount     = PayrollBatch::where('status', 'approved')->count();
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'payroll_period_start' => 'required|date',
-            'payroll_period_end' => 'required|date',
-            'total_allowances' => 'required|numeric|min:0',
-            'total_deductions' => 'required|numeric|min:0',
-            'allowances.*.name' => 'nullable|string',
-            'allowances.*.amount' => 'nullable|numeric|min:0',
-            'deductions.*.name' => 'nullable|string',
-            'deductions.*.amount' => 'nullable|numeric|min:0',
-        ]);
+            $payrollCount    = PayrollBatch::where('status', 'submitted')->count();
 
-        $payroll = Payroll::create([
-            'employee_id' => $validated['employee_id'],
-            'payroll_period_start' => $validated['payroll_period_start'],
-            'payroll_period_end' => $validated['payroll_period_end'],
-            'total_allowances' => $validated['total_allowances'],
-            'total_deductions' => $validated['total_deductions'],
-            'status' => 'pending',
-        ]);
+            $totalPayroll    = Payroll::whereHas('batch', fn($q) => $q->where('status', 'approved'))->sum('net_pay');
 
-        foreach ($request->allowances ?? [] as $allowance) {
-            if (!empty($allowance['name']) && $allowance['amount'] > 0) {
-                $payroll->allowances()->create([
-                    'allowance_type' => $allowance['name'],
-                    'amount' => $allowance['amount'],
+            $this->logActivity('viewed', 'Payroll dashboard', request()->url(), 'payroll');
+
+            return view('hr.payroll.salary-computation.index', compact(
+                'allBatches',
+                'payrolls',
+                'totalEmployees', 'activeEmployees', 'inactiveEmployees',
+                'presentToday', 'absentToday', 'lateToday', 'onLeaveEmployees',
+                'pendingLeaves', 'approvedLeaves', 'totalLeaves', 'attendanceRate',
+                'cutoffSchedules', 'cutoffInfo', 'nextCutoffDate',
+                'totalPayroll', 'payrollCount', 'releasedCount',
+                'recentBatches', 'currentPeriod', 'availablePeriods', 'batchAlreadyExists',
+                'currentInProgressBatch', 'finalizedCurrentBatch'
+            ));
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  CREATE / STORE
+        ══════════════════════════════════════════════════════════════ */
+        public function create()
+        {
+            $employees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+                ->where('status', 'active')
+                ->get();
+            return view('hr.payroll.salary-computation.create', compact('employees'));
+        }
+
+        public function store(Request $request)
+        {
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'payroll_period_start' => 'required|date',
+                'payroll_period_end' => 'required|date|after_or_equal:payroll_period_start',
+                'allowances' => 'array',
+                'allowances.*.name' => 'string',
+                'allowances.*.amount' => 'numeric',
+                'deductions' => 'array',
+                'deductions.*.name' => 'string',
+                'deductions.*.amount' => 'numeric',
+            ]);
+
+            $employee = User::findOrFail($validated['user_id']);
+            $periodStart = Carbon::parse($validated['payroll_period_start']);
+            $periodEnd = Carbon::parse($validated['payroll_period_end']);
+
+            $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, $validated['allowances'] ?? [], $validated['deductions'] ?? []);
+
+            // BUG FIX: call only once — generatePayrollForEmployee no longer calls it internally
+            PayrollDeductionService::applyLoanDeductions($payroll);
+            PayrollNotification::payrollCreated($payroll);
+
+            $this->logActivity('created', "Payroll for {$employee->first_name} {$employee->last_name}", request()->url(), 'payroll', $payroll->id);
+
+            return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll created successfully.');
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  PREVIEW  (called by payroll-form.js on every field change)
+        ══════════════════════════════════════════════════════════════ */
+        public function preview(Request $request)
+        {
+            $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'period_start' => 'required|date',
+                'period_end' => 'required|date|after_or_equal:period_start',
+                'allowances' => 'array',
+                'allowances.*.name' => 'string',
+                'allowances.*.amount' => 'numeric',
+                'deductions' => 'array',
+                'deductions.*.name' => 'string',
+                'deductions.*.amount' => 'numeric',
+            ]);
+
+            $employee = User::findOrFail($request->user_id);
+            $periodStart = Carbon::parse($request->period_start);
+            $periodEnd = Carbon::parse($request->period_end);
+
+            $v = $this->payrollService->computePayroll($employee, $periodStart, $periodEnd, $request->allowances ?? [], $request->deductions ?? []);
+
+            // Calculate leave pay separately (not included in computePayroll)
+            $dailyRate = (float) ($employee->salary_rate ?? 0);
+            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances($employee->id, $periodStart, $periodEnd, $dailyRate);
+            $leavePay = collect($leaveAllowances)->sum('amount');
+            $leavePayDays = collect($leaveAllowances)->sum('paid_days');
+            $leaveBreakdown = array_map(fn($la) => [
+                'type_name' => $la['type_name'] ?? $la['name'] ?? 'Leave',
+                'amount'    => round($la['amount'], 2),
+                'paid_days' => $la['paid_days'] ?? 0,
+            ], $leaveAllowances);
+
+            // BUG FIX: return overtime_hours, undertime_hours, and adjusted_gross
+            // so payroll-form.js can display OT/UT rows and the adjusted gross line.
+
+            // If a payroll already exists (edit flow), return its loan deduction values.
+            // Otherwise (create flow), compute pending deductions from source records.
+            $existingPayroll = \App\Models\Payroll::where('user_id', $employee->id)
+                ->where('payroll_period_start', $periodStart)
+                ->where('payroll_period_end', $periodEnd)
+                ->first();
+
+            if ($existingPayroll) {
+                $previewCaDeduction = (float)($existingPayroll->cash_advance_deduction ?? 0);
+                $previewSlDeduction = (float)($existingPayroll->salary_loan_deduction ?? 0);
+            } else {
+                $previewCaDeduction = 0;
+                $previewSlDeduction = 0;
+                $previewAdvances = \App\Models\CashAdvance::where('user_id', $employee->id)
+                    ->where('status', 'released')
+                    ->whereColumn('amount_deducted', '<', 'amount')
+                    ->get();
+                foreach ($previewAdvances as $adv) {
+                    $semiMonthly = $adv->monthly_deduction > 0 ? $adv->monthly_deduction / 2 : 0;
+                    $previewCaDeduction += $adv->monthly_deduction > 0
+                        ? min($semiMonthly, $adv->amount - $adv->amount_deducted)
+                        : $adv->amount;
+                }
+                $previewLoans = \App\Models\SalaryLoan::where('user_id', $employee->id)
+                    ->where('status', 'released')
+                    ->where('remaining_balance', '>', 0)
+                    ->get();
+                foreach ($previewLoans as $ln) {
+                    $previewSlDeduction += min($ln->monthly_deduction / 2, $ln->remaining_balance);
+                }
+            }
+
+            return response()->json([
+                'days_worked' => $v['daysWorked'],
+                'days_absent' => $v['daysAbsent'],
+                'hours_worked' => round($v['hoursWorked'], 2),
+                'basic_salary' => round($v['basicSalary'], 2),
+                'daily_rate' => round($v['dailyRate'], 2),
+                'overtime_hours' => round($v['otHours'], 2),
+                'undertime_hours' => round($v['utHours'], 2),
+                'overtime_pay' => round($v['otPay'], 2),
+                'undertime_deduction' => round($v['utDeduction'], 2),
+                'late_deduction' => round($v['lateDeductionData']['total_late_deduction'], 2),
+                'late_minutes' => $v['lateDeductionData']['total_minutes_late'],
+                'holiday_pay' => round($v['holidayPay'], 2),
+                'holiday_overtime_hours' => round($v['holidayOTHours'] ?? 0, 2),
+                'holiday_overtime_pay' => round($v['holidayOTPay'] ?? 0, 2),
+                'holiday_breakdown' => array_map(fn($hb) => [
+                    'label'  => $this->payrollService->buildHolidayLabel($hb),
+                    'amount' => round($hb['amount'], 2),
+                ], $v['holidayBreakdown']),
+                'leave_breakdown' => $leaveBreakdown,
+                'leave_pay' => round($leavePay, 2),
+                'leave_paid_days' => $leavePayDays,
+                'sss' => round($v['sss'], 2),
+                'pagibig' => round($v['pagibig'], 2),
+                'phil_health' => round($v['philhealth'] ?? 0, 2),
+                'withholding_tax' => round($v['withholdingTax'] ?? 0, 2),
+                'adjusted_gross' => round($v['adjustedGross'] + $leavePay, 2),
+                'gross_pay' => round($v['grossPay'] + $leavePay, 2),
+                'total_deductions' => round($v['totalDeductions'] + $previewCaDeduction + $previewSlDeduction, 2),
+                'net_pay' => round($v['netPay'] + $leavePay - $previewCaDeduction - $previewSlDeduction, 2),
+                'cash_advance_deduction' => round($previewCaDeduction, 2),
+                'salary_loan_deduction' => round($previewSlDeduction, 2),
+            ]);
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — GENERATE
+        ══════════════════════════════════════════════════════════════ */
+        public function batchGenerate(Request $request)
+        {
+            $type = $request->input('type', 'regular');
+
+            if ($type === 'thirteenth_month') {
+                return $this->generateThirteenthMonthBatch($request);
+            }
+
+            // Get period from request or use current period
+            $period = $request->input('period');
+
+            if ($period) {
+                [$periodStart, $periodEnd] = explode('|', $period);
+                $period = [
+                    'start' => $periodStart,
+                    'end' => $periodEnd,
+                ];
+            } else {
+                $period = PayrollBatch::resolvePeriod();
+            }
+
+            $existing = PayrollBatch::regular()
+                ->where('period_start', $period['start'])
+                ->where('period_end', $period['end'])
+                ->where('status', 'draft')
+                ->first();
+
+            if ($existing) {
+                return redirect()
+                    ->route('payroll.batch.confirm', $existing)
+                    ->with('info', 'A payroll batch for this period is already in progress. Continue it or cancel it to start over.');
+            }
+
+            $batch = PayrollBatch::create([
+                'period_start' => $period['start'],
+                'period_end'   => $period['end'],
+                'status'       => 'draft',
+                'generated_by' => auth()->id(),
+            ]);
+
+            $this->logActivity('created', "Payroll batch #{$batch->id}", request()->url(), 'payroll', $batch->id);
+
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', 'Batch created. Add employees, review, then finalize.')
+                ->with('_sound_success', true);
+        }
+
+        protected function generateThirteenthMonthBatch(Request $request)
+        {
+            $year = (int) $request->input('year', now()->year);
+
+            $existing = PayrollBatch::thirteenthMonth()
+                ->whereYear('period_start', $year)
+                ->first();
+
+            if ($existing) {
+                return redirect()
+                    ->route('payroll.thirteenth-month-pay.batch.details', $existing)
+                    ->with('info', 'A 13th month pay batch for ' . $year . ' already exists (status: ' . $existing->status . '). Only one batch per year is allowed.');
+            }
+
+            $batch = $this->thirteenthMonthService->generateBatch($year, auth()->id());
+
+            $this->logActivity('created', "13th month pay batch #{$batch->id} for {$year}", request()->url(), 'thirteenth_month', $batch->id);
+
+            return redirect()
+                ->route('payroll.thirteenth-month-pay.batch.details', $batch)
+                ->with('success', "13th month pay batch for {$year} generated. Review the records below.")
+                ->with('_sound_success', true);
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — CONFIRM PAGE
+        ══════════════════════════════════════════════════════════════ */
+        public function batchConfirm(PayrollBatch $batch)
+        {
+            // When entering edit mode, revert submitted or rejected batches to draft
+            if (in_array($batch->status, ['submitted', 'rejected'], true)) {
+                $batch->update(['status' => 'draft']);
+            }
+            
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
+
+            $periodStart = $batch->period_start->toDateString();
+            $periodEnd = $batch->period_end->toDateString();
+
+            $availableEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+                ->where('status', 'active')
+                ->whereNotIn('id', function ($q) use ($periodStart, $periodEnd) {
+                    $q->select('user_id')
+                        ->from('payrolls')
+                        ->whereDate('payroll_period_start', $periodStart)
+                        ->whereDate('payroll_period_end', $periodEnd);
+                })
+                ->orderBy('first_name')
+                ->orderBy('last_name')
+                ->get(['id', 'first_name', 'last_name', 'position']);
+
+            $departments = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+                ->where('status', 'active')
+                ->whereNotNull('department')
+                ->distinct()
+                ->pluck('department')
+                ->sort()
+                ->values();
+
+            return view('hr.payroll.batch.confirm', compact('batch', 'availableEmployees', 'departments'));
+        }
+
+        public function batchDetails(PayrollBatch $batch)
+        {
+            $batch->load(['payrolls.user', 'rejectedBy']);
+
+            return view('hr.payroll.batch.details', compact('batch'));
+        }
+
+        public function batchPayslips(PayrollBatch $batch)
+        {
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
+
+            // Recompute each payroll so the list shows live values, not stale DB zeros
+            foreach ($batch->payrolls as $payroll) {
+                $manualAllowances = $payroll->allowances
+                    ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay')
+                        || str_starts_with((string) ($a->allowance_type ?? ''), 'Leave Pay'))
+                    ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                    ->values()
+                    ->toArray();
+
+                $manualDeductions = $payroll->deductions
+                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
+                        || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                    ->values()
+                    ->toArray();
+
+                $computed = $this->payrollService->computePayroll(
+                    $payroll->user,
+                    $payroll->payroll_period_start,
+                    $payroll->payroll_period_end,
+                    $manualAllowances,
+                    $manualDeductions,
+                );
+
+                // Recompute leave pay (same as generatePayrollForEmployee does)
+                $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
+                $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
+                    $payroll->user_id,
+                    $payroll->payroll_period_start,
+                    $payroll->payroll_period_end,
+                    $dailyRate
+                );
+                $leavePay = collect($leaveAllowances)->sum('amount');
+
+                // Sum bonuses from stored records
+                $bonusTotal = (float) $payroll->bonuses->sum('amount');
+
+                $fullGrossPay = $computed['grossPay'] + $leavePay + $bonusTotal;
+
+                $payroll->setAttribute('basic_salary', $computed['basicSalary']);
+                $payroll->setAttribute('gross_pay', $fullGrossPay);
+            // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0);
+                $totalDeductions = $computed['totalDeductions'] + $loanTotal;
+                $payroll->setAttribute('total_deductions', $totalDeductions);
+                $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
+            }
+
+            return view('hr.payroll.batch.payslips', compact('batch'));
+        }
+
+        public function generatePayslipIndex(Request $request)
+        {
+            $allBatches = PayrollBatch::withCount(['payrolls', 'thirteenthMonthPays'])
+                ->with(['payrolls', 'thirteenthMonthPays'])
+                ->where(function ($q) {
+                    $q->whereHas('payrolls')
+                      ->orWhere(function ($q) {
+                          $q->where('type', 'thirteenth_month')->whereHas('thirteenthMonthPays');
+                      });
+                })
+                ->orderByDesc('created_at')
+                ->get();
+
+            return view('hr.payroll.generate-payslip.index', compact('allBatches'));
+        }
+
+        public function batchAddDepartment(Request $request, PayrollBatch $batch)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+
+            $validated = $request->validate([
+                'department' => 'required|string',
+            ]);
+
+            $periodStart = Carbon::parse($batch->period_start);
+            $periodEnd   = Carbon::parse($batch->period_end);
+
+            // Get all active employees in the selected department(s) not yet in this batch period
+            $query = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+                ->where('status', 'active');
+
+            // If not "all", filter by specific department
+            if ($validated['department'] !== 'all') {
+                $query->where('department', $validated['department']);
+            }
+
+            $employees = $query->whereNotIn('id', function ($q) use ($periodStart, $periodEnd) {
+                $q->select('user_id')
+                    ->from('payrolls')
+                    ->whereDate('payroll_period_start', $periodStart->toDateString())
+                    ->whereDate('payroll_period_end', $periodEnd->toDateString());
+            })
+            ->get();
+
+            $deptLabel = $validated['department'] === 'all' ? 'All departments' : $validated['department'];
+
+            if ($employees->isEmpty()) {
+                return redirect()
+                    ->route('payroll.batch.confirm', $batch)
+                    ->with('info', "All {$deptLabel} employees already have payroll for this period.");
+            }
+
+            $added = 0;
+            foreach ($employees as $employee) {
+                $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
+                $payroll->forceFill([
+                    'batch_id' => $batch->id,
+                ])->save();
+                PayrollDeductionService::applyLoanDeductions($payroll);
+                $added++;
+            }
+
+            $this->logActivity('created', "Payroll batch #{$batch->id} added {$added} employee(s) from {$deptLabel}", request()->url(), 'payroll', $batch->id);
+
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', "{$added} employee" . ($added !== 1 ? 's' : '') . " added to batch.")
+                ->with('_sound_success', true);
+        }
+
+        public function batchAddEmployee(Request $request, PayrollBatch $batch)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+            ]);
+
+            $employeeId = (int) $validated['user_id'];
+            $periodStart = Carbon::parse($batch->period_start);
+            $periodEnd = Carbon::parse($batch->period_end);
+
+            $alreadyExists = Payroll::where('user_id', $employeeId)
+                ->whereDate('payroll_period_start', $periodStart)
+                ->whereDate('payroll_period_end', $periodEnd)
+                ->exists();
+
+            if ($alreadyExists) {
+                return redirect()
+                    ->route('payroll.batch.confirm', $batch)
+                    ->with('error', 'Employee already has generated payroll for this period.')
+                    ->with('_sound_error', true);
+            }
+
+            $employee = User::findOrFail($employeeId);
+            $payroll = $this->payrollService->generatePayrollForEmployee($employee, $periodStart, $periodEnd, [], []);
+            $payroll->forceFill([
+                'batch_id' => $batch->id,
+            ])->save();
+            PayrollDeductionService::applyLoanDeductions($payroll);
+
+            $this->logActivity('created', "Payroll for {$employee->first_name} {$employee->last_name} in batch #{$batch->id}", request()->url(), 'payroll', $payroll->id);
+
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', "{$employee->first_name} {$employee->last_name} added to batch.")
+                ->with('_sound_success', true);
+        }
+
+        public function batchRemoveEmployee(PayrollBatch $batch, Payroll $payroll)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+            abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
+
+            $payroll->loadMissing('user');
+            $employeeName = trim(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? ''));
+
+            // Remove line items first to avoid orphans if FK cascade isn't set up.
+            $payroll->allowances()->delete();
+            $payroll->deductions()->delete();
+            $payroll->bonuses()->delete();
+            $this->logActivity('deleted', "Payroll #{$payroll->id} ({$employeeName}) removed from batch #{$batch->id}", request()->url(), 'payroll', $payroll->id);
+            $payroll->delete();
+
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', ($employeeName ? "{$employeeName} removed from batch." : 'Employee removed from batch.'));
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — EDIT SINGLE EMPLOYEE
+        ══════════════════════════════════════════════════════════════ */
+        public function batchEditEmployee(PayrollBatch $batch, Payroll $payroll)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+            abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
+
+            $payroll->load(['user', 'allowances', 'deductions', 'bonuses']);
+
+            return view('hr.payroll.batch.edit-employee', compact('batch', 'payroll'));
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — SAVE SINGLE EMPLOYEE
+        ══════════════════════════════════════════════════════════════ */
+        public function batchUpdateEmployee(Request $request, PayrollBatch $batch, Payroll $payroll)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+            abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
+
+            $validated = $request->validate([
+                'allowances' => 'array',
+                'allowances.*.name' => 'required|string',
+                'allowances.*.amount' => 'required|numeric|min:0',
+                'deductions' => 'array',
+                'deductions.*.name' => 'required|string',
+                'deductions.*.amount' => 'required|numeric|min:0',
+                'bonuses' => 'array',
+                'bonuses.*.type' => 'required|in:performance,holiday,attendance,special',
+                'bonuses.*.description' => 'nullable|string|max:255',
+                'bonuses.*.amount' => 'required|numeric|min:0',
+            ]);
+
+            $employee = $payroll->user;
+            $periodStart = Carbon::parse($batch->period_start);
+            $periodEnd = Carbon::parse($batch->period_end);
+
+            // After HR saves changes for an employee, mark it as prepared for batch submission.
+            $extraData = [
+                'status' => 'prepared',
+            ];
+
+            // Revert old loan deductions on source records first, so
+            // applyLoanDeductions below doesn't double-count them.
+            PayrollDeductionService::revertLoanDeductions($payroll);
+
+            // Clear loan columns so updatePayroll doesn't preserve stale values.
+            $payroll->update([
+                'cash_advance_deduction' => 0,
+                'salary_loan_deduction' => 0,
+                'loan_deduction_data' => null,
+            ]);
+            $payroll->refresh();
+
+            $updatedPayroll = $this->payrollService->updatePayroll(
+                $payroll,
+                $employee,
+                $periodStart,
+                $periodEnd,
+                $validated['allowances'] ?? [],
+                $validated['deductions'] ?? [],
+                $extraData,
+                $validated['bonuses'] ?? [],
+            );
+
+            PayrollDeductionService::applyLoanDeductions($updatedPayroll);
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', "{$employee->first_name} {$employee->last_name}'s payroll saved and marked as prepared.")
+                ->with('_sound_success', true);
+        }
+
+        public function batchMarkPrepared(PayrollBatch $batch, Payroll $payroll)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+            abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
+
+            $payroll->loadMissing(['user', 'allowances', 'deductions', 'bonuses']);
+
+            // Recompute so any OT/UT approved after initial generation is picked up,
+            // while preserving any manual allowances/deductions HR already added.
+            $periodStart = Carbon::parse($batch->period_start);
+            $periodEnd   = Carbon::parse($batch->period_end);
+
+            $manualAllowances = $payroll->allowances
+                ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay'))
+                ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                ->values()
+                ->toArray();
+
+            // Preserve manual + loan deductions; statutory and undertime are recomputed.
+            $manualDeductions = $payroll->deductions
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
+                    || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->values()
+                ->toArray();
+
+            $manualBonuses = $payroll->bonuses
+                ->map(fn ($b) => ['type' => $b->bonus_type, 'description' => $b->description, 'amount' => $b->amount])
+                ->values()
+                ->toArray();
+
+            $updatedPayroll = $this->payrollService->updatePayroll(
+                $payroll,
+                $payroll->user,
+                $periodStart,
+                $periodEnd,
+                $manualAllowances,
+                $manualDeductions,
+                ['status' => 'prepared'],
+                $manualBonuses,
+            );
+
+            // Only apply loan deductions if they weren't already applied
+            // (updatePayroll preserves them via manualDeductions above, so skip re-applying).
+
+            $name = trim(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? ''));
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', ($name ? "{$name} recomputed and marked as prepared." : 'Employee recomputed and marked as prepared.'))
+                ->with('_sound_success', true);
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — FINALIZE
+        ══════════════════════════════════════════════════════════════ */
+        public function batchFinalize(PayrollBatch $batch)
+        {
+            abort_if(!$batch->isEditable(), 403, 'Batch cannot be finalized.');
+
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
+
+            if ($batch->payrolls->isEmpty()) {
+                return redirect()
+                    ->route('payroll.batch.confirm', $batch)
+                    ->with('error', 'Cannot finalize an empty batch. Add at least one employee.')
+                    ->with('_sound_error', true);
+            }
+
+            $notPrepared = $batch->payrolls
+                ->filter(fn ($p) => $p->status !== 'prepared')
+                ->map(function ($p) {
+                    $u = $p->user;
+                    return trim(($u->first_name ?? '') . ' ' . ($u->last_name ?? ''));
+                })
+                ->filter()
+                ->values();
+
+            if ($notPrepared->isNotEmpty()) {
+                $names = $notPrepared->implode(', ');
+                return redirect()
+                    ->route('payroll.batch.confirm', $batch)
+                    ->with('error', "Cannot finalize batch. Some employees are not marked as prepared yet.")
+                    ->with('_sound_error', true);
+            }
+
+            // Recompute every payroll to pick up any OT/UT approved after initial generation.
+            $periodStart = Carbon::parse($batch->period_start);
+            $periodEnd   = Carbon::parse($batch->period_end);
+
+            foreach ($batch->payrolls as $payroll) {
+                // Preserve any manual allowances the HR added via the edit screen.
+                $manualAllowances = $payroll->allowances
+                    ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay'))
+                    ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                    ->values()
+                    ->toArray();
+
+                // Preserve manual + loan deductions (everything except statutory and undertime,
+                // which are recomputed by updatePayroll automatically).
+                $manualDeductions = $payroll->deductions
+                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
+                        || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                    ->values()
+                    ->toArray();
+
+                $manualBonuses = $payroll->bonuses
+                    ->map(fn ($b) => ['type' => $b->bonus_type, 'description' => $b->description, 'amount' => $b->amount])
+                    ->values()
+                    ->toArray();
+
+                $this->payrollService->updatePayroll(
+                    $payroll,
+                    $payroll->user,
+                    $periodStart,
+                    $periodEnd,
+                    $manualAllowances,
+                    $manualDeductions,
+                    ['status' => 'submitted'],
+                    $manualBonuses,
+                );
+                // Note: applyLoanDeductions is NOT called here — it was already applied
+                // during batchMarkPrepared and the loan deductions are preserved above.
+            }
+
+            $batch->update([
+                'status'       => 'submitted',
+                'finalized_by' => auth()->id(),
+                'finalized_at' => now(),
+            ]);
+
+            // Notify accountants that payroll batch is ready for approval
+            PayrollNotification::notifyAccountantsPayrollGenerated($periodStart, $periodEnd, $batch->payrolls->count());
+
+            $this->logActivity('submitted', "Payroll batch #{$batch->id} submitted", request()->url(), 'payroll', $batch->id);
+
+            return redirect()->route('payroll.salary-computation.index')
+                ->with('success', 'Payroll batch submitted to accounting.');
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — SUBMIT
+        ══════════════════════════════════════════════════════════════ */
+        public function batchSubmit(PayrollBatch $batch)
+        {
+            abort_if(!$batch->isEditable(), 403, 'Batch cannot be submitted.');
+
+            $batch->payrolls()->update(['status' => 'submitted']);
+            $batch->update(['status' => 'submitted']);
+
+            foreach ($batch->payrolls as $payroll) {
+                PayrollNotification::payrollCreated($payroll);
+            }
+
+            $this->logActivity('submitted', "Payroll batch #{$batch->id} submitted for approval", request()->url(), 'payroll', $batch->id);
+
+            return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll batch submitted for approval.');
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — CANCEL (delete entirely — no draft saved)
+        ══════════════════════════════════════════════════════════════ */
+        public function batchCancel(PayrollBatch $batch)
+        {
+            abort_if(
+                $batch->status !== 'draft',
+                403,
+                'Only draft batches can be deleted.'
+            );
+
+            DB::transaction(function () use ($batch) {
+                $batch->load('payrolls');
+
+                foreach ($batch->payrolls as $payroll) {
+                    $payroll->allowances()->delete();
+                    $payroll->deductions()->delete();
+                    $payroll->bonuses()->delete();
+                    $payroll->delete();
+                }
+
+                $batch->delete();
+            });
+
+            $this->logActivity('deleted', "Payroll batch #{$batch->id} cancelled", request()->url(), 'payroll', $batch->id);
+
+            return redirect()
+                ->route('payroll.salary-computation.index')
+                ->with('success', 'Batch deleted.');
+        }
+
+        public function batchReopen(PayrollBatch $batch)
+        {
+            // Allow reopening both rejected AND submitted batches
+            abort_if(
+                !in_array($batch->status, ['rejected', 'submitted']),
+                403,
+                'Only rejected or submitted batches can be reopened for editing.'
+            );
+
+            $previousStatus = $batch->status;
+
+            // Bring payrolls back to prepared so HR can review/edit then resubmit.
+            $batch->payrolls()->update(['status' => 'prepared']);
+
+            $batch->update([
+                'status'         => 'draft',
+                'finalized_by'   => null,
+                'finalized_at'   => null,
+                'rejected_by'    => null,
+                'rejected_at'    => null,
+                'rejection_note' => null,
+            ]);
+
+            $msg = $previousStatus === 'rejected'
+                ? 'Rejected batch reopened. Review employees and finalize to resubmit.'
+                : 'Batch reopened for editing. Make your changes and finalize to resubmit.';
+
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', $msg);
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — PREPARE ALL (or selected) EMPLOYEES AT ONCE
+        ══════════════════════════════════════════════════════════════ */
+        public function batchPrepareAll(Request $request, PayrollBatch $batch)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
+
+            $periodStart = Carbon::parse($batch->period_start);
+            $periodEnd   = Carbon::parse($batch->period_end);
+
+            // If specific IDs were posted, prepare only those; otherwise prepare all
+            $selectedIds = array_filter((array) $request->input('payroll_ids', []));
+            $payrolls = count($selectedIds)
+                ? $batch->payrolls->whereIn('id', $selectedIds)
+                : $batch->payrolls;
+
+            $count = 0;
+            foreach ($payrolls as $payroll) {
+                if ($payroll->status === 'prepared') continue;
+
+                $manualAllowances = $payroll->allowances
+                    ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay'))
+                    ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                    ->values()->toArray();
+
+                $manualDeductions = $payroll->deductions
+                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
+                        || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                    ->values()->toArray();
+
+                $manualBonuses = $payroll->bonuses
+                    ->map(fn ($b) => ['type' => $b->bonus_type, 'description' => $b->description, 'amount' => $b->amount])
+                    ->values()->toArray();
+
+                $this->payrollService->updatePayroll(
+                    $payroll,
+                    $payroll->user,
+                    $periodStart,
+                    $periodEnd,
+                    $manualAllowances,
+                    $manualDeductions,
+                    ['status' => 'prepared'],
+                    $manualBonuses,
+                );
+                $count++;
+            }
+
+            $label = $count === 1 ? '1 employee' : "{$count} employees";
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', "Recomputed and marked {$label} as prepared.")
+                ->with('_sound_success', true);
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  BATCH — DELETE SELECTED (or all) EMPLOYEES AT ONCE
+        ══════════════════════════════════════════════════════════════ */
+        public function batchRemoveSelected(Request $request, PayrollBatch $batch)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+
+            $batch->load(['payrolls.user']);
+
+            // Get specific IDs if posted; otherwise delete all
+            $selectedIds = array_filter((array) $request->input('payroll_ids', []));
+            $payrolls = count($selectedIds)
+                ? $batch->payrolls->whereIn('id', $selectedIds)
+                : $batch->payrolls;
+
+            $count = 0;
+            foreach ($payrolls as $payroll) {
+                // Remove line items first to avoid orphans if FK cascade isn't set up.
+                $payroll->allowances()->delete();
+                $payroll->deductions()->delete();
+                $payroll->bonuses()->delete();
+                $payroll->delete();
+                $count++;
+            }
+
+            $label = $count === 1 ? '1 employee' : "{$count} employees";
+            $this->logActivity('deleted', "Removed {$label} from payroll batch #{$batch->id}", request()->url(), 'payroll', $batch->id);
+            return redirect()
+                ->route('payroll.batch.confirm', $batch)
+                ->with('success', "Removed {$label} from batch.");
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  INDIVIDUAL — SHOW / EDIT / UPDATE / DESTROY
+        ══════════════════════════════════════════════════════════════ */
+        public function show(Payroll $payroll)
+        {
+            $payroll->load(['user', 'allowances', 'deductions', 'bonuses']);
+
+            $overtimeUndertimeBreakdown = OvertimeUndertime::where('user_id', $payroll->user_id)
+                ->whereBetween('date', [$payroll->payroll_period_start, $payroll->payroll_period_end])
+                ->where('status', 'approved')
+                ->orderBy('date')
+                ->get();
+
+            // Recompute so the show page always reflects current attendance, holiday,
+            // and OT/UT data — matching what the edit preview endpoint returns.
+            $manualAllowances = $payroll->allowances
+                ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay')
+                    || str_starts_with((string) ($a->allowance_type ?? ''), 'Leave Pay'))
+                ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                ->values()
+                ->toArray();
+
+            $manualDeductions = $payroll->deductions
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
+                    || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->values()
+                ->toArray();
+
+            $computed = $this->payrollService->computePayroll(
+                $payroll->user,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $manualAllowances,
+                $manualDeductions,
+            );
+
+            // Recompute leave pay (same as generatePayrollForEmployee does)
+            $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
+            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
+                $payroll->user_id,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $dailyRate
+            );
+            $leavePay = collect($leaveAllowances)->sum('amount');
+
+            // Sum bonuses from stored records
+            $bonusTotal = (float) $payroll->bonuses->sum('amount');
+
+            $fullGrossPay = $computed['grossPay'] + $leavePay + $bonusTotal;
+
+            // Override model attributes with live-computed values (in-memory only)
+            $payroll->setAttribute('days_worked', $computed['daysWorked']);
+            $payroll->setAttribute('basic_salary', $computed['basicSalary']);
+            $payroll->setAttribute('gross_pay', $fullGrossPay);
+            // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
+                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $totalDeductions = $computed['totalDeductions'] + $loanTotal;
+            $payroll->setAttribute('total_deductions', $totalDeductions);
+            $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
+            $payroll->setAttribute('per_day_rate', $computed['dailyRate']);
+            $payroll->setAttribute('hourly_rate', $computed['hourlyRate']);
+            $payroll->setAttribute('overtime_pay', $computed['otPay']);
+            $payroll->setAttribute('holiday_pay', $computed['holidayPay']);
+            $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay']);
+            $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours']);
+            $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
+
+            $overtimeHours = $computed['otHours'];
+
+            $this->logActivity('viewed', "Payroll #{$payroll->id}", request()->url(), 'payroll', $payroll->id);
+
+            return view('hr.payroll.salary-computation.show', compact('payroll', 'overtimeUndertimeBreakdown', 'overtimeHours'));
+        }
+
+        public function edit(Payroll $payroll)
+        {
+            $employees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
+                ->where('status', 'active')
+                ->get();
+            $payroll->load(['user', 'allowances', 'deductions']);
+            return view('hr.payroll.salary-computation.edit', compact('payroll', 'employees'));
+        }
+
+        public function update(Request $request, Payroll $payroll)
+        {
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'payroll_period_start' => 'required|date',
+                'payroll_period_end' => 'required|date|after_or_equal:payroll_period_start',
+                'allowances' => 'array',
+                'allowances.*.name' => 'string',
+                'allowances.*.amount' => 'numeric',
+                'deductions' => 'array',
+                'deductions.*.name' => 'string',
+                'deductions.*.amount' => 'numeric',
+            ]);
+
+            $employee = User::findOrFail($validated['user_id']);
+            $periodStart = Carbon::parse($validated['payroll_period_start']);
+            $periodEnd = Carbon::parse($validated['payroll_period_end']);
+
+            // Revert old loan deductions on source records first, so
+            // applyLoanDeductions below doesn't double-count them.
+            PayrollDeductionService::revertLoanDeductions($payroll);
+
+            // Clear loan columns so updatePayroll doesn't preserve stale values.
+            $payroll->update([
+                'cash_advance_deduction' => 0,
+                'salary_loan_deduction' => 0,
+                'loan_deduction_data' => null,
+            ]);
+            $payroll->refresh();
+
+            $payroll = $this->payrollService->updatePayroll($payroll, $employee, $periodStart, $periodEnd, $validated['allowances'] ?? [], $validated['deductions'] ?? []);
+            $payroll->update(['status' => 'pending']);
+
+            PayrollDeductionService::applyLoanDeductions($payroll);
+            PayrollNotification::payrollUpdated($payroll);
+            PayrollNotification::notifyAccountantsPayrollNeedsApproval($payroll);
+
+            $this->logActivity('updated', "Payroll #{$payroll->id}", request()->url(), 'payroll', $payroll->id);
+
+            return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll updated, set to pending, and sent to accountant.');
+        }
+
+        public function destroy(Payroll $payroll)
+        {
+            \App\Services\PayrollDeductionService::revertLoanDeductions($payroll);
+            $this->logActivity('deleted', "Payroll #{$payroll->id}", request()->url(), 'payroll', $payroll->id);
+            $payroll->delete();
+            return redirect()->route('payroll.salary-computation.index')->with('success', 'Payroll deleted successfully.');
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  MISC / LEGACY
+        ══════════════════════════════════════════════════════════════ */
+        public function generateBatch(Request $request)
+        {
+            return $this->batchGenerate($request);
+        }
+
+        public function releasePayroll(Request $request)
+        {
+            $count = Payroll::whereIn('status', ['pending', 'prepared'])->update(['status' => 'submitted']);
+            $this->logActivity('submitted', "Released {$count} payroll(s) for processing", request()->url(), 'payroll');
+            return redirect()
+                ->route('payroll.salary-computation.index')
+                ->with('success', "Released {$count} payroll(s) for processing.");
+        }
+
+        public function exportPdf(Request $request)
+        {
+            return redirect()->route('payroll.salary-computation.index')->with('info', 'PDF export functionality to be implemented.');
+        }
+
+        public function generatePayslip(Payroll $payroll)
+        {
+            $payroll->load(['user', 'allowances', 'deductions', 'bonuses']);
+
+            $manualAllowances = $payroll->allowances
+                ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay')
+                    || str_starts_with((string) ($a->allowance_type ?? ''), 'Leave Pay'))
+                ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
+                ->values()
+                ->toArray();
+
+            $manualDeductions = $payroll->deductions
+                ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
+                    || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->values()
+                ->toArray();
+
+            $computed = $this->payrollService->computePayroll(
+                $payroll->user,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $manualAllowances,
+                $manualDeductions,
+            );
+
+            // Total weekdays in the period (excl. weekends) — for payslip display
+            $ps = Carbon::parse($payroll->payroll_period_start);
+            $pe = Carbon::parse($payroll->payroll_period_end);
+            $totalWeekdays = $ps->diffInDaysFiltered(fn (Carbon $d) => !$d->isWeekend(), $pe);
+            if (!$ps->isWeekend()) $totalWeekdays++;
+
+            // Recompute leave pay (same as generatePayrollForEmployee does)
+            $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
+            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
+                $payroll->user_id,
+                $payroll->payroll_period_start,
+                $payroll->payroll_period_end,
+                $dailyRate
+            );
+            $leavePay = collect($leaveAllowances)->sum('amount');
+
+            // Sum bonuses from stored records
+            $bonusTotal = (float) $payroll->bonuses->sum('amount');
+
+            $fullGrossPay = $computed['grossPay'] + $leavePay + $bonusTotal;
+
+            $payroll->setAttribute('days_worked', $computed['daysWorked']);
+            $payroll->setAttribute('total_weekdays', $totalWeekdays);
+            $payroll->setAttribute('hours_worked', $computed['hoursWorked']);
+            $payroll->setAttribute('basic_salary', $computed['basicSalary']);
+            $payroll->setAttribute('gross_pay', $fullGrossPay);
+            $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay'] ?? 0);
+            $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours'] ?? 0);
+            // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
+                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $totalDeductions = $computed['totalDeductions'] + $loanTotal;
+            $payroll->setAttribute('total_deductions', $totalDeductions);
+            $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
+            $holidayBreakdown = array_map(fn($hb) => [
+                'label'  => $this->payrollService->buildHolidayLabel($hb),
+                'amount' => round($hb['amount'], 2),
+            ], $computed['holidayBreakdown'] ?? []);
+            $payroll->setAttribute('holiday_breakdown', $holidayBreakdown);
+
+            return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+        |  CUTOFF SCHEDULE — UPDATE
+        ══════════════════════════════════════════════════════════════ */
+        public function updateCutoffSchedule(Request $request)
+        {
+            $validated = $request->validate([
+                'schedule_id' => 'required|array',
+                'schedule_id.*' => 'required|exists:payroll_cutoff_schedules,id',
+                'active' => 'sometimes|array',
+                'period_start' => 'sometimes|array',
+                'period_end' => 'sometimes|array',
+            ]);
+
+            try {
+                $scheduleIds = $validated['schedule_id'];
+                $active = $request->input('active', []);
+                $periodStarts = $request->input('period_start', []);
+                $periodEnds = $request->input('period_end', []);
+
+                foreach ($scheduleIds as $scheduleId) {
+                    $scheduleId = (int) $scheduleId;
+                    $schedule = PayrollCutoffSchedule::findOrFail($scheduleId);
+
+                    $data = [];
+
+                    // Update active status
+                    $data['is_active'] = isset($active[$scheduleId]) && $active[$scheduleId] == '1' ? true : false;
+
+                    // Update period start date if provided
+                    if (isset($periodStarts[$scheduleId]) && !empty($periodStarts[$scheduleId])) {
+                        $data['payroll_period_start'] = Carbon::parse($periodStarts[$scheduleId])->toDateString();
+                    }
+
+                    // Update period end date if provided
+                    if (isset($periodEnds[$scheduleId]) && !empty($periodEnds[$scheduleId])) {
+                        $data['payroll_period_end'] = Carbon::parse($periodEnds[$scheduleId])->toDateString();
+                    }
+
+                    // Only update if there's data to update
+                    if (!empty($data)) {
+                        $schedule->update($data);
+                    }
+                }
+
+                $this->logActivity('updated', 'Payroll cutoff schedule', request()->url(), 'configuration');
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cutoff schedules updated successfully.'
                 ]);
+            } catch (\Exception $e) {
+                \Log::error('Cutoff schedule update error: ' . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 400);
             }
         }
-
-        foreach ($request->deductions ?? [] as $deduction) {
-            if (!empty($deduction['name']) && $deduction['amount'] > 0) {
-                $payroll->deductions()->create([
-                    'deduction_type' => $deduction['name'],
-                    'amount' => $deduction['amount'],
-                ]);
-            }
-        }
-
-        return redirect()->route('payroll.index')->with('success', 'Payroll created successfully.');
     }
-
-    public function show(Payroll $payroll)
-    {
-        $payroll->load('employee', 'allowances', 'deductions');
-        return view('hr.payroll.salary-computation.show', compact('payroll'));
-    }
-
-    public function edit(Payroll $payroll)
-    {
-        // Include all employees so payrolls linked to inactive employees still show correctly
-        $employees = Employee::all();
-        $payroll->load('allowances', 'deductions');
-        return view('hr.payroll.salary-computation.edit', compact('payroll', 'employees'));
-    }
-
-    public function update(Request $request, Payroll $payroll)
-    {
-        $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'payroll_period_start' => 'required|date',
-            'payroll_period_end' => 'required|date',
-            'allowances.*.name' => 'nullable|string',
-            'allowances.*.amount' => 'nullable|numeric|min:0',
-            'deductions.*.name' => 'nullable|string',
-            'deductions.*.amount' => 'nullable|numeric|min:0',
-        ]);
-
-        $totalAllowances = 0;
-        foreach ($request->allowances ?? [] as $allowance) {
-            $totalAllowances += floatval($allowance['amount'] ?? 0);
-        }
-
-        $totalDeductions = 0;
-        foreach ($request->deductions ?? [] as $deduction) {
-            $totalDeductions += floatval($deduction['amount'] ?? 0);
-        }
-
-        $payroll->update([
-            'employee_id' => $validated['employee_id'],
-            'payroll_period_start' => $validated['payroll_period_start'],
-            'payroll_period_end' => $validated['payroll_period_end'],
-            'total_allowances' => $totalAllowances,
-            'total_deductions' => $totalDeductions,
-            'status' => 'pending',
-        ]);
-
-        $payroll->allowances()->delete();
-        $payroll->deductions()->delete();
-
-        foreach ($request->allowances ?? [] as $allowance) {
-            if (!empty($allowance['name']) && $allowance['amount'] > 0) {
-                $payroll->allowances()->create([
-                    'allowance_type' => $allowance['name'],
-                    'amount' => $allowance['amount'],
-                ]);
-            }
-        }
-
-        foreach ($request->deductions ?? [] as $deduction) {
-            if (!empty($deduction['name']) && $deduction['amount'] > 0) {
-                $payroll->deductions()->create([
-                    'deduction_type' => $deduction['name'],
-                    'amount' => $deduction['amount'],
-                ]);
-            }
-        }
-
-        return redirect()->route('payroll.index')->with('success', 'Payroll updated successfully.');
-    }
-
-    public function destroy(Payroll $payroll)
-    {
-        $payroll->allowances()->delete();
-        $payroll->deductions()->delete();
-        $payroll->delete();
-
-        return redirect()->route('payroll.index')->with('success', 'Payroll deleted successfully.');
-    }
-
-    public function generatePayslip(Payroll $payroll)
-    {
-        $payroll->load('employee', 'allowances', 'deductions');
-        return view('hr.payroll.payslip', compact('payroll'));
-    }
-
-    public function computeStatutory(Request $request)
-    {
-        $request->validate([
-            'basic_salary' => 'required|numeric|min:0',
-            'has_sss' => 'required|boolean',
-            'has_pagibig' => 'required|boolean',
-        ]);
-
-        $semiMonthlySalary = $request->basic_salary;
-        $monthlySalary = $semiMonthlySalary * 2;
-        $results = [];
-
-        if ($request->has_sss) {
-            $sss = StatutoryDeduction::where('name', 'SSS')->where('min_salary', '<=', $monthlySalary)->where('max_salary', '>=', $monthlySalary)->first();
-
-            if ($sss) {
-                $amount = $sss->employee_share ?? $monthlySalary * ($sss->percentage_employee / 100);
-                $results[] = ['name' => 'SSS', 'amount' => round($amount / 2, 2)];
-            }
-        }
-
-        if ($request->has_pagibig) {
-            $pagibig = StatutoryDeduction::where('name', 'Pag-IBIG')->where('min_salary', '<=', $monthlySalary)->where('max_salary', '>=', $monthlySalary)->first();
-
-            if ($pagibig) {
-                $amount = $pagibig->employee_share ?? $monthlySalary * ($pagibig->percentage_employee / 100);
-                $results[] = ['name' => 'Pag-IBIG', 'amount' => round($amount / 2, 2)];
-            }
-        }
-
-        return response()->json($results);
-    }
-}

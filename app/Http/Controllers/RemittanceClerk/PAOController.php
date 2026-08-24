@@ -4,14 +4,38 @@ namespace App\Http\Controllers\RemittanceClerk;
 
 use App\Http\Controllers\Controller;
 use App\Models\PAO;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class PAOController extends Controller
 {
-    public function index()
+    use LogsUserActivity;
+    public function index(Request $request)
     {
-        $paos = PAO::all();
-        return view('remittance-clerk.paos.index', compact('paos'));
+        $sortBy = $request->get('sort_by', 'name');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['name', 'contact_number', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'name';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+        
+        $paos = PAO::orderBy($sortBy, $sortOrder)->get();
+        
+        // Calculate statistics
+        $totalPAOs = PAO::count();
+        $activePAOs = PAO::where('status', 'active')->count();
+        $inactivePAOs = PAO::where('status', 'inactive')->count();
+        
+        $this->logActivity('viewed', 'PAO/Conductors list', request()->url(), 'pao');
+
+        return view('remittance-clerk.paos.index', compact('paos', 'sortBy', 'sortOrder', 'totalPAOs', 'activePAOs', 'inactivePAOs'));
     }
 
     public function create()
@@ -21,21 +45,31 @@ class PAOController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'contact_number' => 'required',
-            'email' => 'required|email|unique:paos',
-            'address' => 'nullable|string',
-            'date_of_hire' => 'required|date',
+        $request->merge([
+            'contact_number' => preg_replace('/\D/', '', (string) $request->contact_number),
         ]);
 
-        PAO::create($validated);
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
+            'email' => 'required|email|unique:paos',
+            'gender' => 'required|string',
+            'address' => 'required|string',
+            'date_of_hire' => 'required|date',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $pao = PAO::create($validated);
+
+        $this->logActivity('created', "PAO/Conductor: {$pao->name}", request()->url(), 'pao', $pao->id);
 
         return redirect()->route('paos.index')->with('success', 'PAO/Conductor created successfully.');
     }
 
     public function show(PAO $pao)
     {
+        $this->logActivity('viewed', "PAO/Conductor: {$pao->name}", request()->url(), 'pao', $pao->id);
+
         return view('remittance-clerk.paos.show', compact('pao'));
     }
 
@@ -46,21 +80,31 @@ class PAOController extends Controller
 
     public function update(Request $request, PAO $pao)
     {
+        $request->merge([
+            'contact_number' => preg_replace('/\D/', '', (string) $request->contact_number),
+        ]);
+
         $validated = $request->validate([
             'name' => 'required|string',
-            'contact_number' => 'required',
+            'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
             'email' => 'required|email|unique:paos,email,' . $pao->id,
-            'address' => 'nullable|string',
+            'gender' => 'required|string',
+            'address' => 'required|string',
             'date_of_hire' => 'required|date',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $pao->update($validated);
+
+        $this->logActivity('updated', "PAO/Conductor: {$pao->name}", request()->url(), 'pao', $pao->id);
 
         return redirect()->route('paos.index')->with('success', 'PAO/Conductor updated successfully.');
     }
 
     public function destroy(PAO $pao)
     {
+        $this->logActivity('deleted', "PAO/Conductor: {$pao->name}", request()->url(), 'pao', $pao->id);
+
         $pao->delete();
         return redirect()->route('paos.index')->with('success', 'PAO/Conductor deleted successfully.');
     }

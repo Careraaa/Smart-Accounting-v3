@@ -9,6 +9,6 @@ class SpecialSkill extends Model
     protected $table = 'employee_skills';
 
     protected $fillable = [
-        'employee_id', 'skill_name', 'proficiency', 'sequence',
+        'user_id', 'skill_name', 'proficiency', 'sequence',
     ];
 }

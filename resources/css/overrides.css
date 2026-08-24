@@ -1,0 +1,714 @@
+/* ================================================================
+   Knights Transport — KeroUI Red Sidebar Theme
+   overrides.css
+================================================================ */
+
+/* -- Variables ------------------------------------------------- */
+:root {
+    --kt-red: #c8292a;
+    --kt-red-dark: #a81f20;
+    --kt-white: #ffffff;
+    --kt-surface: #f4f5f7;
+    --kt-border: #e8e8ef;
+    --kt-border-med: #d4d4de;
+    --kt-dark: #1c1c1e;
+    --kt-body: #4a4a58;
+    --kt-muted: #9898a8;
+
+    --kt-shadow-xs: 0 1px 4px rgba(0, 0, 0, 0.06);
+    --kt-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.08);
+    --kt-shadow-md: 0 6px 24px rgba(0, 0, 0, 0.1);
+    --kt-shadow-red: 0 4px 16px rgba(200, 41, 42, 0.28);
+
+    --kt-radius-xs: 5px;
+    --kt-radius-sm: 8px;
+    --kt-radius: 12px;
+    --kt-radius-lg: 16px;
+    --kt-header-h: 64px;
+}
+
+/* -- Base ------------------------------------------------------ */
+body {
+    background: var(--kt-surface) !important;
+    color: var(--kt-body) !important;
+    font-size: 0.875rem !important;
+    -webkit-font-smoothing: antialiased;
+}
+/* nxl-container, nxl-content, main-content — now pure Tailwind in layout.blade.php */
+
+/* -- Header — now pure Tailwind in header.blade.php -- */
+
+/* Notification badge dot */
+.kt-notif-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--kt-red);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    min-width: 15px;
+    height: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    line-height: 1;
+}
+
+/* -- Dropdown position fix ------------------------------------- */
+.kt-user-dropdown.dropdown-menu-end {
+    right: 0 !important;
+    left: auto !important;
+    margin-top: 8px !important;
+}
+
+#notification-dropdown.kt-notif-dropdown {
+    top: calc(100% + 12px) !important;
+    right: -8px !important;
+}
+
+@media (max-width: 767px) {
+    .kt-user-dropdown,
+    #notification-dropdown.kt-notif-dropdown {
+        position: fixed !important;
+        right: 12px !important;
+        left: 12px !important;
+        width: auto !important;
+        min-width: unset !important;
+        max-width: calc(100vw - 24px) !important;
+        top: calc(var(--kt-header-h) + 6px) !important;
+    }
+}
+
+/* -- Shared Table Components ----------------------------------- */
+
+.emp-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.emp-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: #f4f5f7;
+    border: none;
+    color: #9898a8;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+        background 0.13s,
+        color 0.13s;
+    padding: 0;
+}
+.emp-action-btn.emp-action-view:hover {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+.emp-action-btn.emp-action-edit:hover {
+    background: #fffbeb;
+    color: #d97706;
+}
+.emp-action-btn.emp-action-danger:hover {
+    background: #fff1f2;
+    color: #e11d48;
+}
+.emp-action-btn.emp-action-pay:hover {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+.card-statistic {
+    border: 1px solid #e8e8ef;
+    box-shadow: none;
+}
+.stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9898a8;
+    margin-bottom: 6px;
+}
+
+/* -- Compact Pagination ---------------------------------------- */
+.pagination {
+    margin: 0;
+    gap: 2px;
+}
+.pagination .page-link {
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    border-radius: 4px !important;
+    border: 1px solid #e8e8ef;
+    color: #9898a8;
+    background: #f4f5f7;
+    line-height: 1.6;
+    min-width: 28px;
+    text-align: center;
+}
+.pagination .page-link:hover {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-color: #bae6fd;
+}
+.pagination .page-item.active .page-link {
+    background: #1c1c1e;
+    border-color: #1c1c1e;
+    color: #fff;
+}
+.pagination .page-item.disabled .page-link {
+    background: #f4f5f7;
+    color: #d1d1db;
+    border-color: #e8e8ef;
+}
+
+.emp-badge-active {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+.emp-badge-inactive {
+    background: #fff5f5;
+    color: #c8292a;
+    border: 1px solid #fcd0d0;
+}
+
+/* -- Employee view fields -------------------------------------- */
+.emp-field-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9898a8;
+    display: block;
+    margin-bottom: 3px;
+}
+.emp-field-value {
+    font-size: 0.875rem;
+    color: #4a4a58;
+}
+.emp-view-label {
+    font-size: 0.8rem;
+    color: #9898a8;
+    margin-top: 2px;
+    display: block;
+}
+.emp-action-btn.emp-action-back:hover {
+    background: #f0f9ff;
+    color: #3b82f6;
+}
+
+/* -- Payroll form components ----------------------------------- */
+.prl-hint {
+    font-size: 0.8rem;
+    color: #9898a8;
+}
+.prl-computed {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1c1c1e;
+    margin: 0;
+}
+.prl-section-divider {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #9898a8;
+    border-bottom: 1px solid #e8e8ef;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+}
+.prl-list {
+    border-radius: 8px;
+    overflow: hidden;
+}
+.prl-list .list-group-item {
+    border-color: #e8e8ef;
+    font-size: 0.845rem;
+    padding: 8px 14px;
+    background: #fafafa;
+}
+.prl-net-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1c1c1e;
+    border-radius: 10px;
+    padding: 16px 20px;
+}
+.prl-net-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.prl-net-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.emp-action-btn.emp-action-approve:hover {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+
+/* -- Payroll show/detail components ---------------------------- */
+.prl-field-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9898a8;
+    display: block;
+    margin-bottom: 3px;
+}
+.prl-field-value {
+    font-size: 0.9rem;
+    color: #1c1c1e;
+}
+.prl-field-sub {
+    font-size: 0.78rem;
+    color: #9898a8;
+}
+.prl-section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #9898a8;
+}
+.prl-sub-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #9898a8;
+}
+.prl-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 0.845rem;
+    color: #4a4a58;
+}
+.prl-line-val {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Shared button base */
+.prl-btn-create,
+.prl-btn-batch {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 34px;
+    line-height: 1;
+    transition: all 0.15s ease;
+}
+
+.prl-btn-create {
+    background: #111827;
+    border: 1px solid #1f2937 !important; /* force visibility */
+    color: #fff !important; /* white text */
+}
+
+.prl-btn-create:hover {
+    background: #000 !important;
+    border-color: #000 !important;
+    color: #fff !important;
+}
+
+/* Batch Button */
+.prl-btn-batch {
+    background: #fff;
+    border: 1px solid var(--kt-border-med);
+    color: var(--kt-body);
+}
+
+.prl-btn-batch:hover {
+    background: #fff5f5;
+    border-color: var(--kt-red);
+    color: var(--kt-red);
+}
+
+.prl-btn-batch i {
+    color: var(--kt-muted);
+    transition: color 0.15s ease;
+}
+
+.prl-btn-batch:hover i {
+    color: var(--kt-red);
+}
+
+/* -- Dashboard stat card components --------------------------- */
+.dash-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9898a8;
+}
+.dash-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1c1c1e;
+    line-height: 1;
+}
+.dash-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #f4f5f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9898a8;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+.dash-icon.di-green {
+    background: #f0fdf4;
+    color: #16a34a;
+}
+.dash-icon.di-red {
+    background: #fff5f5;
+    color: #c8292a;
+}
+.dash-icon.di-amber {
+    background: #fffbeb;
+    color: #d97706;
+}
+.dash-icon.di-blue {
+    background: #f0f9ff;
+    color: #0284c7;
+}
+
+/* -- Attendance steps list ------------------------------------- */
+
+.emp-badge-pending {
+    background: #fffbeb;
+    color: #d97706;
+    border: 1px solid #fde68a;
+}
+
+.emp-badge-approved {
+    background: #f0f9ff;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+}
+
+/* Fix modal backdrop blue tint */
+.modal-backdrop {
+    background-color: #1c1c1e !important;
+}
+.modal-backdrop.show {
+    opacity: 0.45 !important;
+}
+
+/* ================================================================
+   Payroll Create — list row styles
+   REPLACES the old "#allowance_list li" block at the bottom
+================================================================ */
+
+/* Remove any Bootstrap list-group interference on payroll lists */
+#allowance_list,
+#deduction_list {
+    padding: 0 !important;
+    margin: 0 0 6px 0 !important;
+    list-style: none !important;
+    border: 1px solid #e8e8ef !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+
+/* The item row — flex, no wrap, no min-height override */
+.prl-item-row {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 12px !important;
+    padding: 10px 14px !important;
+    border-bottom: 1px solid #e8e8ef !important;
+    background: #fafafa !important;
+    min-height: 0 !important;
+}
+.prl-item-row:last-child {
+    border-bottom: none !important;
+}
+
+/* Name — takes all available space */
+.prl-item-name {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    font-size: 0.845rem !important;
+    color: #1c1c1e !important;
+    word-break: break-word !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    border: none !important;
+}
+
+/* Amount — never shrinks, never wraps */
+.prl-item-amount {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 0.845rem !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums !important;
+    color: #1c1c1e !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    border: none !important;
+}
+
+/* Remove button — fixed circle, never pushed down */
+.prl-item-remove {
+    flex-shrink: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    max-width: 22px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: #dc3545 !important;
+    color: #fff !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+}
+.prl-item-remove:hover {
+    background: #b02a37 !important;
+}
+
+/* ================================================================
+   Payroll Create / Show Consistency + Gray Create Button
+================================================================ */
+
+/* Make Show page use the same centered narrow layout as Create */
+.payroll-show-wrapper {
+    max-width: 760px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+}
+
+/* Make the main card on Show look identical to Create's .prl-card */
+.payroll-show-wrapper .card {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+}
+
+.payroll-show-wrapper .card-header {
+    background: #fff !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 20px 22px !important;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.payroll-show-wrapper .card-body {
+    padding: 20px 22px !important;
+}
+
+/* Gray "Create Payroll" button on the Create page */
+.prl-btn-submit {
+    background: #6b7280 !important; /* neutral gray */
+    border-color: #6b7280 !important;
+}
+
+.prl-btn-submit:hover {
+    background: #4b5563 !important;
+}
+
+/* Make Show page typography & spacing match Create */
+.prl-field-label,
+.prl-section-label,
+.prl-sub-label {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: #9ca3af !important;
+    margin-bottom: 6px !important;
+}
+
+.prl-field-value,
+.prl-line-key,
+.prl-line-val {
+    font-size: 0.875rem !important;
+    color: #111827 !important;
+}
+
+.prl-net-box {
+    background: #1c1c1e !important;
+    border-radius: 12px !important;
+    padding: 18px 22px !important;
+    margin-top: 20px !important;
+}
+
+/* Improve action buttons on Show to feel more consistent */
+.payroll-show-wrapper .emp-action-btn {
+    height: 38px;
+    padding: 0 16px;
+    font-size: 0.815rem;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Small cleanup for the status badge on Show */
+.payroll-show-wrapper .card-body .row .mt-1 span[style*="border-radius:20px"] {
+    font-size: 0.7rem !important;
+    padding: 3px 10px !important;
+}
+
+
+
+/* ── Uiverse-inspired "View all" pill button ── */
+.btn-uv-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #e0f2fe;
+  background: #075985;
+  text-decoration: none;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  line-height: 1.4;
+  isolation: isolate;
+}
+.btn-uv-pill::before {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #38bdf8;
+  top: -4px;
+  right: -4px;
+  border-radius: 50%;
+  filter: blur(5px);
+  transition: all 0.5s ease;
+  z-index: -1;
+  opacity: 0.8;
+}
+.btn-uv-pill::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #0891b2;
+  bottom: -5px;
+  left: -5px;
+  border-radius: 50%;
+  filter: blur(6px);
+  transition: all 0.5s ease;
+  z-index: -1;
+  opacity: 0.6;
+}
+.btn-uv-pill:hover {
+  background: #7dd3fc;
+  color: #0c4a6e;
+}
+.btn-uv-pill:hover::before {
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  opacity: 1;
+}
+.btn-uv-pill:hover::after {
+  bottom: -10px;
+  left: -10px;
+  width: 28px;
+  height: 28px;
+  opacity: 1;
+}
+.btn-uv-pill:active {
+  scale: 0.95;
+}
+
+/* ── Calendar card fade in ── */
+@keyframes calFadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+.cal-fade-in {
+    animation: calFadeIn 0.3s ease both;
+}
+
+/* ── Holiday cell base ── */
+.cal-cell-holiday {
+    position: relative;
+}
+
+/* ================================================================
+   Global UI refinements — darker gray text & bigger fonts
+   ================================================================ */
+
+/* Darken gray-400 text site-wide for readability */
+.text-gray-400 {
+    color: #8890a0;
+}
+
+/* Bump tiny stat-label text from 9px → 10px */
+.text-\[9px\] {
+    font-size: 10px !important;
+}
+
+/* Shift common muted/label text one shade darker */
+.stat-label,
+.dash-label,
+.emp-field-label,
+.emp-view-label,
+.prl-hint,
+.prl-field-label,
+.prl-section-label,
+.prl-sub-label,
+.prl-section-divider {
+    color: #6b7280 !important;
+    font-size: 0.75rem !important;
+}
+
+/* Darken field values */
+.prl-field-value,
+.prl-line-key,
+.prl-line-val,
+.prl-line {
+    color: #374151 !important;
+}

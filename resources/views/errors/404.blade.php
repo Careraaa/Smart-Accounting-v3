@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>404 - Page Not Found | Smart Accounting</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights-icon.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    @vite(['resources/css/tailwind.css', 'resources/js/app.js'])
+    <style>
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse-glow { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.6; } }
+        @keyframes slide-up { 0% { opacity: 0; transform: translateY(16px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-float { animation: float 5s ease-in-out infinite; }
+        .animate-glow { animation: pulse-glow 3s ease-in-out infinite; }
+        .animate-slide { animation: slide-up 0.5s ease-out forwards; }
+        .animate-slide-delay { animation: slide-up 0.5s ease-out 0.1s forwards; opacity: 0; }
+        .animate-slide-delay-2 { animation: slide-up 0.5s ease-out 0.2s forwards; opacity: 0; }
+    </style>
+</head>
+<body class="font-[Sora,sans-serif] antialiased min-h-screen flex items-center justify-center bg-gray-50 p-5 md:p-8">
+    <div class="relative w-full max-w-[1100px]">
+        <div class="absolute w-[280px] h-[280px] md:w-[380px] md:h-[380px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.07)_0%,transparent_70%)] top-[-80px] left-[-80px] md:top-[-120px] md:left-[-120px] pointer-events-none z-0 hidden md:block animate-glow"></div>
+        <div class="absolute w-[240px] h-[240px] md:w-[320px] md:h-[320px] rounded-full bg-[radial-gradient(circle,rgba(17,24,39,0.03)_0%,transparent_70%)] bottom-[-60px] right-[-60px] md:bottom-[-100px] md:right-[-100px] pointer-events-none z-0 hidden md:block animate-glow" style="animation-delay: 1.5s;"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-6 md:gap-8 relative z-10">
+            <div class="order-2 md:order-1 text-center md:text-left">
+                <div class="animate-slide inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[0.65rem] font-bold uppercase tracking-[1px] bg-indigo-50 text-indigo-600 border border-indigo-100 mb-3 md:mb-4">Lost</div>
+                <h1 class="animate-slide-delay text-[clamp(3.5rem,12vw,9rem)] font-black leading-none text-indigo-600 mb-1">404</h1>
+                <h2 class="animate-slide-delay text-base md:text-xl font-bold text-gray-900 mb-2 md:mb-3">I have failed this quest...</h2>
+                <p class="animate-slide-delay-2 text-gray-500 leading-relaxed max-w-[480px] text-sm md:text-base mb-1">
+                    The page you're looking for has been moved, removed, or typed incorrectly.
+                </p>
+                <p class="animate-slide-delay-2 text-gray-400 text-xs max-w-[480px] mb-4 md:mb-5">Report the page URL to your system administrator if this keeps happening.</p>
+                <div class="animate-slide-delay-2 flex gap-3 flex-wrap justify-center md:justify-start">
+                    <a href="{{ auth()->check() ? route('dashboard') : url('/') }}" class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold text-sm bg-indigo-600 text-white shadow-[0_4px_16px_rgba(99,102,241,0.3)] hover:bg-indigo-700 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 no-underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                        Return Home
+                    </a>
+                    <a href="javascript:history.back()" class="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold text-sm border border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 transition-all duration-150 no-underline">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        Go Back
+                    </a>
+                </div>
+            </div>
+            <div class="order-1 md:order-2 flex justify-center items-center py-2 md:py-4">
+                <img src="{{ url('images/404%20icon.png') }}" alt="Kneeling Knight" class="w-28 h-28 md:w-[380px] md:h-[380px] object-contain animate-float">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

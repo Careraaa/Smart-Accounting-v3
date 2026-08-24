@@ -8,14 +8,76 @@ use App\Models\Driver;
 use App\Models\PAO;
 use App\Models\Route;
 use App\Models\Vehicle;
+use App\Notifications\RemittanceNotification;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
 class DailyRemittanceController extends Controller
 {
-    public function index()
+    use LogsUserActivity;
+    public function index(Request $request)
     {
-        $remittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')->get();
-        return view('remittance-clerk.remittances.index', compact('remittances'));
+        $sortBy = $request->get('sort_by', 'remittance_date');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['remittance_date', 'net_remittance', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'remittance_date';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'desc';
+        }
+        
+        // Get all pending remittances
+        $pendingRemittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
+            ->where('status', 'pending')
+            ->orderBy($sortBy, $sortOrder)
+            ->get();
+
+        // Get all approved remittances
+        $approvedRemittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
+            ->where('status', 'approved')
+            ->orderBy($sortBy, $sortOrder)
+            ->get();
+        
+        // Tab parameter
+        $tab = $request->get('tab', 'pending');
+        
+        // Pre-map data for client-side JS
+        $pendingData = $pendingRemittances->map(fn($r) => [
+            'id' => $r->id,
+            'date' => $r->remittance_date?->format('M d, Y'),
+            'route' => $r->route->route_name ?? '—',
+            'vehicle' => $r->vehicle->plate_number ?? '—',
+            'net' => (float) $r->net_remittance,
+            'is_short' => (bool) $r->is_short_remittance,
+            'status' => 'pending',
+            'show_url' => route('remittances.show', $r),
+        ])->values();
+        
+        $approvedData = $approvedRemittances->map(fn($r) => [
+            'id' => $r->id,
+            'date' => $r->remittance_date?->format('M d, Y'),
+            'route' => $r->route->route_name ?? '—',
+            'vehicle' => $r->vehicle->plate_number ?? '—',
+            'net' => (float) $r->net_remittance,
+            'is_short' => (bool) $r->is_short_remittance,
+            'status' => 'approved',
+            'show_url' => route('remittances.show', $r),
+        ])->values();
+        
+        // Calculate statistics
+        $totalRemittances = DailyRemittance::count();
+        $approvedCount = DailyRemittance::where('status', 'approved')->count();
+        $pendingCount = DailyRemittance::where('status', 'pending')->count();
+        $rejectedRemittances = DailyRemittance::where('status', 'rejected')->count();
+        
+        $this->logActivity('viewed', 'Daily Remittances list', request()->url(), 'daily_remittance');
+
+        return view('remittance-clerk.remittances.index', compact('pendingRemittances', 'approvedRemittances', 'pendingData', 'approvedData', 'sortBy', 'sortOrder', 'totalRemittances', 'approvedCount', 'pendingCount', 'rejectedRemittances', 'tab'));
     }
 
     public function create()
@@ -35,15 +97,42 @@ class DailyRemittanceController extends Controller
             'remittance_date' => 'required|date',
             'total_collection' => 'required|numeric',
             'total_expenses' => 'required|numeric',
+            'net_remittance' => 'required|numeric',
+            'is_short_remittance' => 'nullable|boolean',
+            'short_amount' => 'nullable|numeric',
+            'driver_share' => 'nullable|numeric',
+            'pao_share' => 'nullable|numeric',
         ]);
 
         // Get the vehicle and its associated route
         $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
         $validated['route_id'] = $vehicle->route_id;
-        $validated['net_remittance'] = $validated['total_collection'] - $validated['total_expenses'];
+        $boundary = $vehicle->route->boundary ?? 0;
+        $validated['boundary'] = $boundary;
+
+        // Check if net remittance is less than the boundary
+        $netRemittance = $validated['net_remittance'];
+        
+        if ($netRemittance < $boundary) {
+            $validated['is_short_remittance'] = true;
+            $validated['short_amount'] = $boundary - $netRemittance;
+            $validated['driver_share'] = ($boundary - $netRemittance) / 2;
+            $validated['pao_share'] = ($boundary - $netRemittance) / 2;
+        } else {
+            $validated['is_short_remittance'] = false;
+            $validated['short_amount'] = null;
+            $validated['driver_share'] = null;
+            $validated['pao_share'] = null;
+        }
+
         $validated['status'] = 'pending'; // Set default status to pending
         
-        DailyRemittance::create($validated);
+        $remittance = DailyRemittance::create($validated);
+        $remittance->load('driver', 'pao', 'vehicle');
+
+        RemittanceNotification::remittanceCreated($remittance);
+
+        $this->logActivity('created', "Daily Remittance #{$remittance->id} - {$remittance->remittance_date?->format('Y-m-d')}", request()->url(), 'daily_remittance', $remittance->id);
 
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance created successfully.');
     }
@@ -51,6 +140,9 @@ class DailyRemittanceController extends Controller
     public function show(DailyRemittance $remittance)
     {
         $remittance->load('driver', 'pao', 'route', 'vehicle');
+
+        $this->logActivity('viewed', "Daily Remittance #{$remittance->id}", request()->url(), 'daily_remittance', $remittance->id);
+
         return view('remittance-clerk.remittances.show', compact('remittance'));
     }
 
@@ -71,12 +163,33 @@ class DailyRemittanceController extends Controller
             'remittance_date' => 'required|date',
             'total_collection' => 'required|numeric',
             'total_expenses' => 'required|numeric',
+            'net_remittance' => 'required|numeric',
+            'is_short_remittance' => 'nullable|boolean',
+            'short_amount' => 'nullable|numeric',
+            'driver_share' => 'nullable|numeric',
+            'pao_share' => 'nullable|numeric',
         ]);
 
         // Get the vehicle and its associated route
         $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
         $validated['route_id'] = $vehicle->route_id;
-        $validated['net_remittance'] = $validated['total_collection'] - $validated['total_expenses'];
+        $boundary = $vehicle->route->boundary ?? 0;
+        $validated['boundary'] = $boundary;
+
+        // Check if net remittance is less than the boundary
+        $netRemittance = $validated['net_remittance'];
+        
+        if ($netRemittance < $boundary) {
+            $validated['is_short_remittance'] = true;
+            $validated['short_amount'] = $boundary - $netRemittance;
+            $validated['driver_share'] = ($boundary - $netRemittance) / 2;
+            $validated['pao_share'] = ($boundary - $netRemittance) / 2;
+        } else {
+            $validated['is_short_remittance'] = false;
+            $validated['short_amount'] = null;
+            $validated['driver_share'] = null;
+            $validated['pao_share'] = null;
+        }
         
         // If remittance is approved or rejected, reset status to pending when changes are made
         if (in_array($remittance->status, ['approved', 'rejected'])) {
@@ -84,12 +197,23 @@ class DailyRemittanceController extends Controller
         }
         
         $remittance->update($validated);
+        $remittance->load('driver', 'pao', 'vehicle');
+
+        RemittanceNotification::remittanceUpdated($remittance);
+
+        $this->logActivity('updated', "Daily Remittance #{$remittance->id}", request()->url(), 'daily_remittance', $remittance->id);
 
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance updated successfully.');
     }
 
     public function destroy(DailyRemittance $remittance)
     {
+        $remittance->load('driver', 'pao', 'vehicle');
+        
+        RemittanceNotification::remittanceDeleted($remittance);
+
+        $this->logActivity('deleted', "Daily Remittance #{$remittance->id}", request()->url(), 'daily_remittance', $remittance->id);
+        
         $remittance->delete();
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance deleted successfully.');
     }

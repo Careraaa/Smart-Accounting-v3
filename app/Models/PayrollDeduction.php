@@ -7,13 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class PayrollDeduction extends Model
 {
+    use HasFactory;
+
+    protected $table = 'payroll_deductions';
+
     protected $fillable = [
         'payroll_id',
-        'employee_id',
         'deduction_type',
+        'hours',
         'amount',
-        'effective_date',
-        'status'
+        'description',
+    ];
+
+    protected $casts = [
+        'amount' => 'float',
     ];
 
     public function payroll()

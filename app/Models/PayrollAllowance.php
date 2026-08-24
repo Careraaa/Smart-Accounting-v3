@@ -7,13 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class PayrollAllowance extends Model
 {
+    use HasFactory;
+
+    protected $table = 'payroll_allowances';
+
     protected $fillable = [
         'payroll_id',
-        'employee_id',
         'allowance_type',
+        'hours',
         'amount',
-        'effective_date',
-        'status'
+    ];
+
+    protected $casts = [
+        'amount' => 'float',
     ];
 
     public function payroll()

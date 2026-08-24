@@ -5,112 +5,128 @@ namespace App\Http\Controllers\RemittanceClerk;
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use App\Models\Route;
+use App\Models\Driver;
+use App\Models\PAO;
+use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class VehicleController extends Controller
 {
-    public function index()
+    use LogsUserActivity;
+    public function index(Request $request)
     {
+        $sortBy = $request->get('sort_by', 'plate_number');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['plate_number', 'status'];
+        if (!in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'plate_number';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+        
         $routes = Route::all();
-        $vehicles = Vehicle::all();
-        return view('remittance-clerk.management.index', compact('routes', 'vehicles'));
+        $vehicles = Vehicle::with('route')->orderBy($sortBy, $sortOrder)->get();
+        
+        // Calculate statistics
+        $totalVehicles = Vehicle::count();
+        $activeVehicles = Vehicle::where('status', 'active')->count();
+        $underMaintenanceVehicles = Vehicle::where('status', 'under_maintenance')->count();
+        
+        $this->logActivity('viewed', 'Vehicles list', request()->url(), 'vehicle');
+
+        return view('remittance-clerk.vehicles.index', compact('routes', 'vehicles', 'sortBy', 'sortOrder', 'totalVehicles', 'activeVehicles', 'underMaintenanceVehicles'));
     }
 
     public function create()
     {
-        return view('remittance-clerk.management.vehicles-create');
+        $routes = Route::all();
+        $operators = Driver::query()
+            ->where('status', 'active')
+            ->pluck('name')
+            ->merge(PAO::query()->where('status', 'active')->pluck('name'))
+            ->unique()
+            ->sort()
+            ->values();
+        return view('remittance-clerk.vehicles.create', compact('routes', 'operators'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles',
-            'origin' => 'required|string',
-            'destination' => 'required|string',
-            'operator' => 'required|string',
-            'vehicle_type' => 'nullable|string',
-            'make' => 'nullable|string',
-            'model' => 'nullable|string',
-            'year' => 'nullable|integer',
+            'route_id' => 'required|exists:routes,id',
+            'operator' => 'required|string|max:255',
+            'status' => 'required|in:active,under_maintenance',
         ]);
-
-        // Find or create route with the given origin and destination
-        $route = Route::firstOrCreate(
-            [
-                'origin' => $validated['origin'],
-                'destination' => $validated['destination'],
-            ],
-            [
-                'route_name' => $validated['origin'] . ' - ' . $validated['destination'],
-            ],
-        );
 
         $vehicleData = [
             'plate_number' => $validated['plate_number'],
             'operator' => $validated['operator'],
-            'route_id' => $route->id,
-            'vehicle_type' => $validated['vehicle_type'] ?? null,
-            'make' => $validated['make'] ?? null,
-            'model' => $validated['model'] ?? null,
-            'year' => $validated['year'] ?? null,
+            'route_id' => $validated['route_id'],
+            'status' => $validated['status'],
         ];
 
-        Vehicle::create($vehicleData);
+        $vehicle = Vehicle::create($vehicleData);
 
-        return redirect()->route('routes.index')->with('success', 'Vehicle created successfully.');
+        $this->logActivity('created', "Vehicle: {$vehicle->plate_number}", request()->url(), 'vehicle', $vehicle->id);
+
+        return redirect()->route('vehicles.index')->with('success', 'Vehicle created successfully.');
     }
 
     public function show(Vehicle $vehicle)
     {
-        return view('remittance-clerk.management.vehicles-show', compact('vehicle'));
+        $this->logActivity('viewed', "Vehicle: {$vehicle->plate_number}", request()->url(), 'vehicle', $vehicle->id);
+
+        return view('remittance-clerk.vehicles.show', compact('vehicle'));
     }
 
     public function edit(Vehicle $vehicle)
     {
-        return view('remittance-clerk.management.vehicles-edit', compact('vehicle'));
+        $routes = Route::all();
+        $operators = Driver::query()
+            ->where('status', 'active')
+            ->pluck('name')
+            ->merge(PAO::query()->where('status', 'active')->pluck('name'))
+            ->push($vehicle->operator)
+            ->unique()
+            ->sort()
+            ->values();
+        return view('remittance-clerk.vehicles.edit', compact('vehicle', 'routes', 'operators'));
     }
 
     public function update(Request $request, Vehicle $vehicle)
     {
         $validated = $request->validate([
             'plate_number' => 'required|string|unique:vehicles,plate_number,' . $vehicle->id,
-            'origin' => 'required|string',
-            'destination' => 'required|string',
-            'operator' => 'required|string',
-            'vehicle_type' => 'nullable|string',
-            'make' => 'nullable|string',
-            'model' => 'nullable|string',
-            'year' => 'nullable|integer',
+            'route_id' => 'required|exists:routes,id',
+            'operator' => 'required|string|max:255',
+            'status' => 'required|in:active,under_maintenance',
         ]);
-
-        // Find or create route with the given origin and destination
-        $route = Route::firstOrCreate(
-            [
-                'origin' => $validated['origin'],
-                'destination' => $validated['destination'],
-            ],
-            [
-                'route_name' => $validated['origin'] . ' - ' . $validated['destination'],
-            ],
-        );
 
         $vehicleData = [
             'plate_number' => $validated['plate_number'],
             'operator' => $validated['operator'],
-            'route_id' => $route->id,
-            'vehicle_type' => $validated['vehicle_type'] ?? null,
-            'make' => $validated['make'] ?? null,
-            'model' => $validated['model'] ?? null,
-            'year' => $validated['year'] ?? null,
+            'route_id' => $validated['route_id'],
+            'status' => $validated['status'],
         ];
 
         $vehicle->update($vehicleData);
 
-        return redirect()->route('routes.index')->with('success', 'Vehicle updated successfully.');
+        $this->logActivity('updated', "Vehicle: {$vehicle->plate_number}", request()->url(), 'vehicle', $vehicle->id);
+
+        return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
     }
 
     public function destroy(Vehicle $vehicle)
     {
+        $this->logActivity('deleted', "Vehicle: {$vehicle->plate_number}", request()->url(), 'vehicle', $vehicle->id);
+
         $vehicle->delete();
         return redirect()->route('vehicles.index')->with('success', 'Vehicle deleted successfully.');
     }

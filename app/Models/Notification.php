@@ -1,0 +1,284 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+
+class Notification extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'type',
+        'title',
+        'message',
+        'data',
+        'read_at',
+        'deleted_at',
+    ];
+
+    protected $casts = [
+        'data' => 'array',
+        'read_at' => 'datetime',
+        'deleted_at' => 'datetime',
+    ];
+
+    /**
+     * Get the user that this notification belongs to
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Mark notification as read
+     */
+    public function markAsRead()
+    {
+        if ($this->read_at === null) {
+            $this->update(['read_at' => Carbon::now()]);
+        }
+        return $this;
+    }
+
+    /**
+     * Mark notification as unread
+     */
+    public function markAsUnread()
+    {
+        $this->update(['read_at' => null]);
+        return $this;
+    }
+
+    /**
+     * Check if notification is read
+     */
+    public function isRead()
+    {
+        return $this->read_at !== null;
+    }
+
+    /**
+     * Check if notification is unread
+     */
+    public function isUnread()
+    {
+        return $this->read_at === null;
+    }
+
+    /**
+     * Scope to get unread notifications
+     */
+    public function scopeUnread($query)
+    {
+        return $query->whereNull('read_at');
+    }
+
+    /**
+     * Scope to get read notifications
+     */
+    public function scopeRead($query)
+    {
+        return $query->whereNotNull('read_at');
+    }
+
+    /**
+     * Scope to filter by type
+     */
+    public function scopeByType($query, $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    /**
+     * Get recent notifications
+     */
+    public function scopeRecent($query)
+    {
+        return $query->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Scope to get only non-deleted notifications
+     */
+    public function scopeNotDeleted($query)
+    {
+        return $query->whereNull('deleted_at');
+    }
+
+    /**
+     * Scope to get only deleted notifications
+     */
+    public function scopeDeleted($query)
+    {
+        return $query->whereNotNull('deleted_at');
+    }
+
+    /**
+     * Soft-delete notification by setting deleted_at
+     */
+    public function markAsDeleted()
+    {
+        if ($this->deleted_at === null) {
+            $this->update(['deleted_at' => Carbon::now()]);
+        }
+        return $this;
+    }
+
+    /**
+     * Restore soft-deleted notification
+     */
+    public function restoreDeleted()
+    {
+        $this->update(['deleted_at' => null]);
+        return $this;
+    }
+
+    /**
+     * Get the action URL for this notification based on its type
+     */
+    public function getActionUrl()
+    {
+        $type = $this->type;
+        $data = $this->data ?? [];
+        $authUser = Auth::user();
+        $recipientRole = $this->relationLoaded('user') ? $this->user?->role : $this->user()->value('role');
+        $isAccountant = ($recipientRole === 'accountant') || ($authUser && $authUser->role === 'accountant');
+
+        switch ($type) {
+            // Payroll related notifications
+            case 'payroll_processed':
+            case 'payroll_released':
+            case 'payroll_created':
+            case 'payroll_updated':
+            case 'payroll_deleted':
+            case 'payroll_recalculated':
+                // Route accountants to payroll-approval
+                if ($isAccountant) {
+                    return route('payroll-approval.index');
+                }
+                if ($data['payroll_id'] ?? null) {
+                    return route('payroll.salary-computation.show', ['payroll' => $data['payroll_id']]);
+                }
+                return route('payroll.salary-computation.index');
+
+            case 'payroll_generated':
+            case 'payroll_ready_review':
+            case 'payroll_approved':
+            case 'payroll_rejected':
+                // Route accountants to payroll-approval
+                if ($isAccountant) {
+                    return route('payroll-approval.index');
+                }
+                return route('payroll.salary-computation.index');
+
+            // Leave related notifications
+            case 'leave_submitted':
+            case 'leave_approved':
+            case 'leave_rejected':
+            case 'leave_updated':
+            case 'leave_deleted':
+                // Accountants should not see leave notifications
+                if ($isAccountant) {
+                    return null;
+                }
+                // Route employees to their own leave page; HR/superadmin to HR leave page
+                if ($authUser && $authUser->role === 'employee') {
+                    if ($data['leave_id'] ?? null) {
+                        return route('employee.leaves.show', ['leave' => $data['leave_id']]);
+                    }
+                    return route('employee.leaves.index');
+                }
+                if ($data['leave_id'] ?? null) {
+                    return route('leave.show', ['leave' => $data['leave_id']]);
+                }
+                return route('leave.pending');
+
+            case 'leave_pending_approval':
+                // Accountants should not see leave notifications
+                if ($isAccountant) {
+                    return null;
+                }
+                return route('leave.pending');
+
+            // Attendance related notifications
+            case 'attendance_issue':
+            case 'employee_absent':
+            case 'employee_late':
+            case 'attendance_recorded':
+                // Route employees to their own attendance page
+                if ($authUser && $authUser->role === 'employee') {
+                    return route('employee.attendance.index');
+                }
+                if ($data['employee_id'] ?? null) {
+                    return route('employees.show', ['employee' => $data['employee_id']]);
+                }
+                return route('employees.index');
+
+            // Overtime related notifications
+            case 'overtime_submitted':
+            case 'overtime_approved':
+            case 'overtime_rejected':
+            case 'overtime_updated':
+            case 'overtime_deleted':
+                if ($data['record_id'] ?? null) {
+                    return route('overtime.show', ['overtime' => $data['record_id']]);
+                }
+                return route('overtime.index');
+
+            case 'overtime_pending_approval':
+                return route('attendance.index', ['tab' => 'otut']);
+
+            // Remittance related notifications
+            case 'remittance_created':
+            case 'remittance_updated':
+            case 'remittance_deleted':
+            case 'remittance_approved':
+            case 'remittance_rejected':
+                // Route accountants to remittance approval
+                if ($isAccountant) {
+                    return route('remittance-approval.index');
+                }
+                if ($data['remittance_id'] ?? null) {
+                    return route('remittances.show', ['remittance' => $data['remittance_id']]);
+                }
+                return route('remittances.index');
+
+            // Cash advance related notifications
+            case 'cash_advance_pending':
+                // Accountants/superadmins see the receivables page
+                return route('payroll.receivables.index', ['tab' => 'cash_advances']);
+
+            case 'cash_advance_submitted':
+            case 'cash_advance_approved':
+            case 'cash_advance_rejected':
+                // Employees go to their own cash advances page
+                if ($authUser && $authUser->role === 'employee') {
+                    return route('employee.cash-advances.index');
+                }
+                return route('payroll.receivables.index', ['tab' => 'cash_advances']);
+
+            // Salary loan related notifications
+            case 'salary_loan_pending':
+                return route('payroll.receivables.index', ['tab' => 'salary_loans']);
+
+            case 'salary_loan_submitted':
+            case 'salary_loan_approved':
+            case 'salary_loan_rejected':
+                // Employees go to their own salary loans page
+                if ($authUser && $authUser->role === 'employee') {
+                    return route('employee.salary-loans.index');
+                }
+                return route('payroll.receivables.index', ['tab' => 'salary_loans']);
+
+            // Default: no action
+            default:
+                return null;
+        }
+    }
+}

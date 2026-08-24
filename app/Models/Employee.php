@@ -7,9 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Employee extends Model
 {
+    // This model is now an alias for User model with employee-specific data
+    // All employee data is contained in the users table
     use HasFactory;
 
+    protected $table = 'users';
+
     protected $fillable = [
+        // Authentication fields
+        'name',
+        'username',
+        'password',
+        'role',
+        'profile_picture',
+        // Employee information fields
         'first_name',
         'middle_name',
         'last_name',
@@ -17,6 +28,7 @@ class Employee extends Model
         'phone',
         'address',
         'civil_status',
+        'gender',
         'spouse_name',
         'date_of_birth',
         'place_of_birth',
@@ -28,12 +40,15 @@ class Employee extends Model
         'department',
         'status',
         'salary_rate',
+        'work_days_per_week',
         'has_sss',
         'has_pagibig',
+        'has_philhealth',
         'has_tin',
         'sss_number',
         'tin_number',
         'pagibig_number',
+        'philhealth_number',
         'signature_path',
         'attachments',
     ];
@@ -43,42 +58,97 @@ class Employee extends Model
         'date_of_hire'            => 'date',
         'driver_license_validity' => 'date',
         'attachments'             => 'array',
+        'password'                => 'hashed',
     ];
 
-    // Accessor
+    // Accessors
     public function getNameAttribute()
     {
-        return "{$this->first_name} {$this->last_name}";
+        if ($this->first_name && $this->last_name) {
+            return "{$this->first_name} {$this->last_name}";
+        }
+        return $this->attributes['name'] ?? '';
+    }
+
+    public function getDepartmentAttribute()
+    {
+        $dept = $this->attributes['department'] ?? '';
+        return $dept ? ucfirst($dept) : '';
     }
 
     // Relationships
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
     public function attendances()
     {
-        return $this->hasMany(Attendance::class);
+        return $this->hasMany(Attendance::class, 'user_id');
+    }
+
+    public function payrolls()
+    {
+        return $this->hasMany(Payroll::class, 'user_id');
     }
 
     public function beneficiaries()
     {
-        return $this->hasMany(Beneficiary::class);
+        return $this->hasMany(Beneficiary::class, 'user_id');
     }
 
     public function workExperiences()
     {
-        return $this->hasMany(WorkExperience::class);
+        return $this->hasMany(WorkExperience::class, 'user_id');
     }
 
     public function specialSkills()
     {
-        return $this->hasMany(SpecialSkill::class);
+        return $this->hasMany(SpecialSkill::class, 'user_id');
+    }
+
+    public function charRefs()
+    {
+        return $this->hasMany(CharacterReference::class, 'user_id');
     }
 
     public function characterReferences()
     {
-        return $this->hasMany(CharacterReference::class);
+        return $this->hasMany(CharacterReference::class, 'user_id');
+    }
+
+    public function leaves()
+    {
+        return $this->hasMany(Leave::class, 'user_id');
+    }
+
+    public function leaveBalances()
+    {
+        return $this->hasMany(EmployeeLeaveBalance::class, 'user_id');
+    }
+
+    public function allowances()
+    {
+        return $this->hasMany(Allowance::class, 'user_id');
+    }
+
+    public function deductions()
+    {
+        return $this->hasMany(Deduction::class, 'user_id');
+    }
+
+    public function salaryLoans()
+    {
+        return $this->hasMany(SalaryLoan::class, 'user_id');
+    }
+
+    public function cashAdvances()
+    {
+        return $this->hasMany(CashAdvance::class, 'user_id');
+    }
+
+    public function overtimeUndertimes()
+    {
+        return $this->hasMany(OvertimeUndertime::class, 'user_id');
+    }
+
+    public function employeeAttachments()
+    {
+        return $this->hasMany(EmployeeAttachment::class, 'user_id')->orderBy('attachment_key')->orderByDesc('created_at');
     }
 }

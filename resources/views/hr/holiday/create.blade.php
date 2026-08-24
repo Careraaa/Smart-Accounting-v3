@@ -1,0 +1,132 @@
+@extends('layouts.layout')
+
+@push('styles')
+<style>
+@keyframes fadeSlideUp {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+    0% { opacity: 0; transform: scale(0.92); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.anim-header { animation: fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+.anim-card { animation: scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+</style>
+@endpush
+
+@section('content')
+<div class="max-w-full">
+
+    {{-- Error flash --}}
+    @if($errors->any())
+    <div class="flex items-start gap-2.5 px-4 py-3 mb-5 rounded-xl text-sm font-medium bg-red-50 border border-red-200 text-red-700" style="animation:fadeSlideUp 0.35s ease both;">
+        <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4m0-4h.01"/></svg>
+        <div>
+            <strong>Please fix the errors:</strong>
+            <ul class="mt-1 list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+    @endif
+
+    {{-- Header --}}
+    <div class="anim-header flex items-start justify-between mb-6 flex-wrap gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Add Holiday</h1>
+            <p class="text-sm text-gray-500 mt-0.5">Create a new company holiday for payroll processing</p>
+        </div>
+        <a href="{{ route('holiday.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm transition-all duration-200">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back
+        </a>
+    </div>
+
+    {{-- Form card --}}
+    <div class="anim-card max-w-[600px] mx-auto">
+        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+
+            <div class="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
+                <div class="w-10 h-10 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center shrink-0 border border-gray-200">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-gray-900">Holiday Details</p>
+                    <p class="text-xs text-gray-400">All fields marked <span class="text-rose-500">*</span> are required</p>
+                </div>
+            </div>
+
+            <div class="px-6 py-6">
+                <form method="POST" action="{{ route('holiday.store') }}" id="hldForm" novalidate>
+                    @csrf
+
+                    {{-- Name --}}
+                    <div class="mb-5">
+                        <label for="name" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Holiday Name <span class="text-rose-500">*</span></label>
+                        <input type="text" name="name" id="name"
+                            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 placeholder:text-gray-400 @error('name') border-red-400 @enderror"
+                            placeholder="e.g., Christmas Day"
+                            value="{{ old('name') }}" required>
+                        @error('name')
+                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    {{-- Date --}}
+                    <div class="mb-5">
+                        <label for="date" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Holiday Date <span class="text-rose-500">*</span></label>
+                        <input type="date" name="date" id="date"
+                            class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none transition-all duration-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 @error('date') border-red-400 @enderror"
+                            value="{{ old('date') }}" required>
+                        @error('date')
+                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    {{-- Divider --}}
+                    <div class="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2.5 mb-5">Classification</div>
+
+                    {{-- Type --}}
+                    <div class="mb-5">
+                        <label for="type" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Holiday Type <span class="text-rose-500">*</span></label>
+                        <div class="relative">
+                            <select name="type" id="type"
+                                class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 bg-white outline-none appearance-none transition-all duration-200 focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 @error('type') border-red-400 @enderror"
+                                required>
+                                <option value="">— Select Type —</option>
+                                <option value="regular" @selected(old('type') === 'regular')>Regular Holiday (Full pay when worked)</option>
+                                <option value="special" @selected(old('type') === 'special')>Special Non-Working (No work, no pay)</option>
+                            </select>
+                            <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                        @error('type')
+                            <span class="text-xs text-red-500 mt-1 block">{{ $message }}</span>
+                        @enderror
+                        <div class="text-xs text-gray-400 mt-2 leading-relaxed">
+                            <strong>Regular:</strong> Employees receive full pay even if not worked (if worked previous day).<br>
+                            <strong>Special:</strong> Only paid if worked on that day.
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-gray-100 bg-gray-50">
+                <a href="{{ route('holiday.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Cancel
+                </a>
+                <button type="submit" form="hldForm" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 active:scale-[0.97] transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    Create Holiday
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+@endsection

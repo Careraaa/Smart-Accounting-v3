@@ -13,7 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'check-status' => \App\Http\Middleware\CheckUserStatus::class,
         ]);
+
+        // Add maintenance mode middleware with superadmin bypass
+        $middleware->web(\App\Http\Middleware\AllowSuperAdminInMaintenance::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

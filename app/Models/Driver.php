@@ -13,6 +13,7 @@ class Driver extends Model
         'name',
         'license_number',
         'contact_number',
+        'gender',
         'email',
         'address',
         'date_of_hire',
