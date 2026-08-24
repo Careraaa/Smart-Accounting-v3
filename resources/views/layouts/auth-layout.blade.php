@@ -210,6 +210,11 @@
             });
         })();
     </script>
-</body>
+        {{-- TEMP: deployment test badge — remove before final demo --}}
+        <a href="{{ route('deploy.test') }}"
+           style="position:fixed;top:14px;right:14px;z-index:99999;padding:8px 18px;border-radius:999px;background:#f59e0b;color:#1e293b;font-size:13px;font-weight:800;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.35);">
+            🚀 DEPLOY TEST
+        </a>
+    </body>
 
 </html>
