@@ -23,3 +23,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+username_password.txt
+*.ftp-deploy-sync-state.json
