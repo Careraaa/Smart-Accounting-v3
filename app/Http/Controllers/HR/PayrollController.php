@@ -213,16 +213,11 @@
             } else {
                 $previewCaDeduction = 0;
                 $previewSlDeduction = 0;
-                $previewAdvances = \App\Models\CashAdvance::where('user_id', $employee->id)
-                    ->where('status', 'released')
-                    ->whereColumn('amount_deducted', '<', 'amount')
-                    ->get();
-                foreach ($previewAdvances as $adv) {
-                    $semiMonthly = $adv->monthly_deduction > 0 ? $adv->monthly_deduction / 2 : 0;
-                    $previewCaDeduction += $adv->monthly_deduction > 0
-                        ? min($semiMonthly, $adv->amount - $adv->amount_deducted)
-                        : $adv->amount;
-                }
+                [$previewCaDeduction] = PayrollDeductionService::calculateAffordableCashAdvances(
+                    $employee->id,
+                    (float) ($v['grossPay'] + $leavePay),
+                    (float) $v['totalDeductions']
+                );
                 $previewLoans = \App\Models\SalaryLoan::where('user_id', $employee->id)
                     ->where('status', 'released')
                     ->where('remaining_balance', '>', 0)
@@ -1024,8 +1019,7 @@
             $payroll->setAttribute('basic_salary', $computed['basicSalary']);
             $payroll->setAttribute('gross_pay', $fullGrossPay);
             // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
-            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
-                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0);
             $totalDeductions = $computed['totalDeductions'] + $loanTotal;
             $payroll->setAttribute('total_deductions', $totalDeductions);
             $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
@@ -1180,8 +1174,7 @@
             $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay'] ?? 0);
             $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours'] ?? 0);
             // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
-            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
-                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0);
             $totalDeductions = $computed['totalDeductions'] + $loanTotal;
             $payroll->setAttribute('total_deductions', $totalDeductions);
             $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);

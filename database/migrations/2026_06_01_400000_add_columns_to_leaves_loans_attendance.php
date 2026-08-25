@@ -45,13 +45,6 @@ return new class extends Migration
             }
         });
 
-        // --- salary_loans table ---
-        Schema::table('salary_loans', function (Blueprint $table) {
-            if (!Schema::hasColumn('salary_loans', 'total_months')) {
-                $table->integer('total_months')->default(12)->after('loan_amount');
-            }
-        });
-
         // --- attendance table ---
         if (DB::getDriverName() === 'mysql') {
             try {
@@ -101,13 +94,6 @@ return new class extends Migration
                 DB::statement("ALTER TABLE `attendance` MODIFY `status` ENUM('present', 'late', 'absent') NULL");
             } catch (\Throwable $e) {}
         }
-
-        // Salary loans
-        Schema::table('salary_loans', function (Blueprint $table) {
-            if (Schema::hasColumn('salary_loans', 'total_months')) {
-                $table->dropColumn('total_months');
-            }
-        });
 
         // Cash advances
         Schema::table('cash_advances', function (Blueprint $table) {

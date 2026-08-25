@@ -9,10 +9,44 @@ use App\Models\Payroll;
 class PayrollDeductionService
 {
     /**
-     * Apply pending cash advance and salary loan deductions to a payroll.
-     * Stores the amounts in dedicated columns (cash_advance_deduction,
-     * salary_loan_deduction) on the payrolls table so they appear in
-     * the Salary Computation section — not as manual PayrollDeduction records.
+     * Calculate cash advance instalments that fit within the payroll's
+     * remaining gross pay after ordinary deductions.
+     */
+    public static function calculateAffordableCashAdvances(int $userId, float $grossPay, float $existingDeductions): array
+    {
+        $total = 0.0;
+        $details = [];
+        $availablePay = max(0.0, $grossPay - $existingDeductions);
+
+        $advances = CashAdvance::where('user_id', $userId)
+            ->where('status', 'released')
+            ->whereColumn('amount_deducted', '<', 'amount')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($advances as $advance) {
+            $semiMonthlyDeduction = $advance->monthly_deduction > 0
+                ? $advance->monthly_deduction / 2
+                : 0;
+            $instalment = $advance->monthly_deduction > 0
+                ? min($semiMonthlyDeduction, $advance->amount - $advance->amount_deducted)
+                : $advance->amount;
+
+            if ($instalment > $availablePay) {
+                continue;
+            }
+
+            $total += $instalment;
+            $availablePay -= $instalment;
+            $details[] = ['id' => $advance->id, 'amount' => $instalment];
+        }
+
+        return [round($total, 2), $details];
+    }
+
+    /**
+    * Apply released cash advance deductions to a payroll.
+    * Salary loan deductions are no longer applied by the payroll system.
      *
      * Call this ONCE per payroll, after generatePayrollForEmployee() or
      * updatePayroll(). Never call it from inside those methods — the
@@ -21,31 +55,24 @@ class PayrollDeductionService
     public static function applyLoanDeductions(Payroll $payroll): void
     {
         $userId    = $payroll->user_id;
-        $caTotal   = 0;
-        $slTotal   = 0;
-        $caDetails = [];
-        $slDetails = [];
+        [, $caDetails] = self::calculateAffordableCashAdvances(
+            $userId,
+            (float) $payroll->gross_pay,
+            (float) $payroll->total_deductions
+        );
 
         // ── Cash Advances ─────────────────────────────────────────
         // Status flow: pending → approved (HR) → released (accountant).
         // Only deductible once released (funds disbursed).
-        $advances = CashAdvance::where('user_id', $userId)
-            ->where('status', 'released')
-            ->whereColumn('amount_deducted', '<', 'amount')
-            ->get();
+        $appliedTotal = 0.0;
+        $appliedDetails = [];
+        foreach ($caDetails as $caDetail) {
+            $advance = CashAdvance::find($caDetail['id']);
+            if (!$advance) {
+                continue;
+            }
 
-        foreach ($advances as $advance) {
-            // Payroll is semi-monthly, so monthly deduction is divided by 2
-            $semiMonthlyDeduction = $advance->monthly_deduction > 0
-                ? $advance->monthly_deduction / 2
-                : 0;
-            $instalment = $advance->monthly_deduction > 0
-                ? min($semiMonthlyDeduction, $advance->amount - $advance->amount_deducted)
-                : $advance->amount;
-
-            $caTotal += $instalment;
-            $caDetails[] = ['id' => $advance->id, 'amount' => $instalment];
-
+            $instalment = $caDetail['amount'];
             $newDeducted = $advance->amount_deducted + $instalment;
 
             $updateData = [
@@ -58,40 +85,25 @@ class PayrollDeductionService
             }
 
             $advance->update($updateData);
+            $appliedTotal += $instalment;
+            $appliedDetails[] = $caDetail;
         }
 
-        // ── Salary Loans ──────────────────────────────────────────
-        // Status flow: pending → approved (HR) → released (accountant).
-        // Only deductible once released (funds have been disbursed).
-        $loans = SalaryLoan::where('user_id', $userId)
-            ->where('status', 'released')
-            ->where('remaining_balance', '>', 0)
-            ->get();
-
-        foreach ($loans as $loan) {
-            // Payroll is semi-monthly, so monthly deduction is divided by 2
-            $semiMonthlyDeduction = $loan->monthly_deduction / 2;
-            $instalment = min($semiMonthlyDeduction, $loan->remaining_balance);
-            $slTotal   += $instalment;
-            $slDetails[] = ['id' => $loan->id, 'amount' => $instalment];
-            $loan->deductInstalment($instalment);
-        }
-
-        $totalDeducted = round($caTotal + $slTotal, 2);
+        $totalDeducted = round($appliedTotal, 2);
 
         // ── Persist on payroll dedicated columns ──────────────────
         if ($totalDeducted > 0) {
-            $payroll->increment('cash_advance_deduction', round($caTotal, 2));
-            $payroll->increment('salary_loan_deduction', round($slTotal, 2));
+            $payroll->increment('cash_advance_deduction', $totalDeducted);
             $payroll->increment('total_deductions', $totalDeducted);
 
             $payroll->refresh();
             $payroll->update([
                 'net_pay' => round($payroll->gross_pay - $payroll->total_deductions, 2),
-                'loan_deduction_data' => [
-                    'cash_advances' => $caDetails,
-                    'salary_loans'  => $slDetails,
-                ],
+                'loan_deduction_data' => ['cash_advances' => $appliedDetails],
+            ]);
+        } else {
+            $payroll->update([
+                'loan_deduction_data' => ['cash_advances' => []],
             ]);
         }
     }
