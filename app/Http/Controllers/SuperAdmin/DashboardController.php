@@ -9,7 +9,6 @@ use App\Models\Attendance;
 use App\Models\Leave;
 use App\Models\OvertimeUndertime;
 use App\Models\Payroll;
-use App\Models\SalaryLoan;
 use App\Models\CashAdvance;
 use App\Models\DailyRemittance;
 use Illuminate\Http\Request;
@@ -80,11 +79,7 @@ class DashboardController extends Controller
         $deductionPercentage = $baseAmount > 0 ? ($totalDeductions / $baseAmount) * 100 : 0;
         $allowancePercentage = $baseAmount > 0 ? ($totalAllowances / $baseAmount) * 100 : 0;
 
-        // ============ SALARY LOAN & CASH ADVANCE STATISTICS ============
-        $totalOutstandingLoans = SalaryLoan::where('status', '!=', 'fully_paid')->sum('remaining_balance') ?? 0;
-        $activeSalaryLoans = SalaryLoan::where('status', 'active')->count();
-        $pendingSalaryLoansCount = SalaryLoan::where('status', 'pending')->count();
-        
+        // ============ CASH ADVANCE STATISTICS ============
         $totalCashAdvances = CashAdvance::sum('amount') ?? 0;
         $pendingCashAdvances = CashAdvance::where('status', 'pending')->sum('amount') ?? 0;
         $pendingCashAdvancesCount = CashAdvance::where('status', 'pending')->count();
@@ -169,19 +164,6 @@ class DashboardController extends Controller
             ];
         }
 
-        if ($pendingSalaryLoansCount > 0) {
-            $pendingItems[] = [
-                'text' => $pendingSalaryLoansCount === 1
-                    ? '1 Salary Loan Needs Approval'
-                    : "{$pendingSalaryLoansCount} Salary Loans Need Approval",
-                'count' => $pendingSalaryLoansCount,
-                'url' => route('payroll.receivables.index', ['tab' => 'salary_loans']),
-                'icon' => 'feather-credit-card',
-                'color' => '#e0f2fe',
-                'iconColor' => '#0284c7'
-            ];
-        }
-
         if ($pendingLeaves > 0) {
             $pendingItems[] = [
                 'text' => $pendingLeaves === 1
@@ -209,7 +191,7 @@ class DashboardController extends Controller
             ];
         }
 
-        $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvancesCount + $pendingSalaryLoansCount;
+        $totalPending = $pendingLeaves + $pendingOT + $pendingUT + $pendingCashAdvancesCount;
 
         // ============ RECENT RECORDS ============
         $recentLeaves = Leave::with('employee')
@@ -251,9 +233,6 @@ class DashboardController extends Controller
             'averageBasicSalary',
             'deductionPercentage',
             'allowancePercentage',
-            'totalOutstandingLoans',
-            'activeSalaryLoans',
-            'pendingSalaryLoansCount',
             'totalCashAdvances',
             'pendingCashAdvances',
             'pendingCashAdvancesCount',

@@ -99,6 +99,7 @@
 
                     {{-- Time In / Out --}}
                     <div class="text-[11px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-100 pb-2.5 mb-5">Time</div>
+                    <p class="text-xs text-gray-400 mb-3">Leave both fields blank to mark the employee absent for this date.</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                         <div>
                             <label for="time_in" class="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">Time In</label>

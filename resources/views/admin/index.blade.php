@@ -108,6 +108,7 @@
     let tokenCheckInt = null;
     let refreshInt    = null;
     let resizeDeb     = null;
+    let currentLoginUrl = null;
 
     const qrDiv    = document.getElementById('qrcode');
     const qrInner  = document.getElementById('qr-inner');
@@ -138,14 +139,14 @@
         return Math.max(220, Math.min(s, 400));
     }
 
-    function renderQR(token) {
-        if (!token || token === '——') return;
+    function renderQR(url) {
+        if (!url) return;
         qrDiv.innerHTML = '';
         var size = getQRSize();
         qrDiv.style.width  = size + 'px';
         qrDiv.style.height = size + 'px';
         new QRCode(qrDiv, {
-            text: token,
+            text: url,
             width: size, height: size,
             colorDark: '#292524',
             colorLight: '#ffffff',
@@ -192,8 +193,9 @@
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
+            currentLoginUrl = data.login_url;
             animateRefresh();
-            setTimeout(function () { renderQR(data.token); }, 60);
+            setTimeout(function () { renderQR(data.login_url); }, 60);
             revealToken(data.token);
             qrCountdown = QR_REFRESH_SECONDS;
             timerTxt.textContent = qrCountdown + 's';
@@ -292,8 +294,7 @@
         window.addEventListener('resize', function () {
             clearTimeout(resizeDeb);
             resizeDeb = setTimeout(function () {
-                var t = tokenEl.textContent.replace(/·/g, '').trim();
-                if (t && t !== '——') renderQR(t);
+                if (currentLoginUrl) renderQR(currentLoginUrl);
             }, 150);
         });
     });

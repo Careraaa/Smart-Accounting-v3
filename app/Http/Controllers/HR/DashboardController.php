@@ -11,7 +11,6 @@ use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\OvertimeUndertime;
 use App\Models\PayrollBatch;
-use App\Models\SalaryLoan;
 use App\Models\User;
 use Carbon\Carbon;
 
@@ -92,7 +91,6 @@ class DashboardController extends Controller
 
         // ── Pending Approvals ──
         $pendingCashAdvances = CashAdvance::where('status', 'pending')->count();
-        $pendingSalaryLoans  = SalaryLoan::where('status', 'pending')->count();
 
         // ── Pending To-Do Items ──────────────────────────────────────────────
         $pendingItems = [];
@@ -107,19 +105,6 @@ class DashboardController extends Controller
                 'icon' => 'feather-dollar-sign',
                 'color' => '#fef3c7',
                 'iconColor' => '#d97706'
-            ];
-        }
-
-        if ($pendingSalaryLoans > 0) {
-            $pendingItems[] = [
-                'text' => $pendingSalaryLoans === 1
-                    ? '1 Salary Loan Needs Approval'
-                    : "{$pendingSalaryLoans} Salary Loans Need Approval",
-                'count' => $pendingSalaryLoans,
-                'url' => route('payroll.receivables.index', ['tab' => 'salary_loans']),
-                'icon' => 'feather-credit-card',
-                'color' => '#e0f2fe',
-                'iconColor' => '#0284c7'
             ];
         }
 
@@ -163,9 +148,7 @@ class DashboardController extends Controller
 
         // ── Receivables Totals ──
         $totalApprovedCA = CashAdvance::where('status', 'approved')->sum('amount') ?? 0;
-        $totalApprovedLoans = SalaryLoan::where('status', 'approved')->sum('loan_amount') ?? 0;
         $totalPaidCA = CashAdvance::where('status', 'paid')->sum('amount') ?? 0;
-        $totalPaidLoans = SalaryLoan::where('status', 'paid')->sum('loan_amount') ?? 0;
 
         // ── Holiday Stats ──
         $upcomingHolidays = Holiday::where('date', '>=', now())
@@ -186,16 +169,13 @@ class DashboardController extends Controller
             'otHoursThisWeek',
             'totalOTRecords',
             'pendingCashAdvances',
-            'pendingSalaryLoans',
             'totalBatches',
             'batchSubmitted',
             'batchApproved',
             'batchRejected',
             'currentInProgress',
             'totalApprovedCA',
-            'totalApprovedLoans',
             'totalPaidCA',
-            'totalPaidLoans',
             'upcomingHolidays',
             'pendingItems',
             'totalPending',

@@ -458,7 +458,7 @@
                                         <td class="mono">₱{{ number_format($ded->amount, 2) }}</td>
                                     </tr>
                                 @empty
-                                    @if ($caDed <= 0 && $slDed <= 0)
+                                    @if ($caDed <= 0)
                                         <tr><td class="dim" colspan="3">No deductions this period</td></tr>
                                     @endif
                                 @endforelse

@@ -27,8 +27,9 @@ class ReportController extends Controller
         if ($period === 'daily') {
             $query->whereDate('remittance_date', $year.'-'.$month.'-'.$day);
         } elseif ($period === 'weekly') {
-            $query->whereYear('remittance_date', $year)
-                  ->whereRaw('WEEK(remittance_date) = ?', [$week]);
+            $startDate = \Carbon\Carbon::now()->setISODate($year, $week)->startOfWeek();
+            $endDate = $startDate->copy()->endOfWeek();
+            $query->whereBetween('remittance_date', [$startDate, $endDate]);
         } elseif ($period === 'monthly') {
             $query->whereYear('remittance_date', $year)
                   ->whereMonth('remittance_date', $month);

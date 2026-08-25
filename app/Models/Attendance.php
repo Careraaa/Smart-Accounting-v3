@@ -39,14 +39,19 @@ class Attendance extends Model
     public function getHoursWorkedAttribute()
     {
         if ($this->time_in && $this->time_out) {
-            // Combine the date with time values to get full datetime
-            $timeIn = \Carbon\Carbon::parse($this->date->format('Y-m-d') . ' ' . $this->time_in);
+            // Count regular-day work from 8:00 AM, even when the employee arrives earlier.
+            $date = $this->date->format('Y-m-d');
+            $timeIn = \Carbon\Carbon::parse($date . ' ' . $this->time_in);
+            $officeStart = \Carbon\Carbon::parse($date . ' 08:00:00');
             $timeOut = \Carbon\Carbon::parse($this->date->format('Y-m-d') . ' ' . $this->time_out);
+
+            if ($timeIn->lt($officeStart)) {
+                $timeIn = $officeStart;
+            }
             
-            // Calculate hours using timestamp difference to avoid sign issues, use absolute value
-            $hoursWorked = abs(($timeOut->timestamp - $timeIn->timestamp) / 3600);
+            // Calculate hours using timestamp difference and subtract the one-hour break.
+            $hoursWorked = ($timeOut->timestamp - $timeIn->timestamp) / 3600;
             
-            // Subtract 1-hour break from total time
             $hoursWorked = max(0, $hoursWorked - 1);
             
             return round($hoursWorked, 2);

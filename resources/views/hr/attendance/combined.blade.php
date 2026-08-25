@@ -186,7 +186,7 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
                                     <div class="flex items-center gap-2.5">
                                         <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 uppercase shrink-0">{{ $initials }}</div>
                                         <div>
-                                            <div class="font-semibold text-gray-900 text-sm">{{ $emp->first_name }} {{ $emp->last_name }}</div>
+                                            <div class="font-semibold text-gray-900 text-sm">{{ $emp->last_name }}, {{ $emp->first_name }}</div>
                                             <div class="text-xs text-gray-400">{{ $emp->position ?? '—' }}</div>
                                         </div>
                                     </div>
@@ -502,7 +502,7 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                             <div class="flex items-center gap-2.5">
                                 <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 uppercase shrink-0">${initials}</div>
                                 <div>
-                                    <div class="font-semibold text-gray-900 text-sm">${emp.firstName} ${emp.lastName}</div>
+                                    <div class="font-semibold text-gray-900 text-sm">${emp.lastName}, ${emp.firstName}</div>
                                     <div class="text-xs text-gray-400">${emp.position || '—'}</div>
                                 </div>
                             </div>

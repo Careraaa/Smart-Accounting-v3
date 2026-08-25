@@ -333,23 +333,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('salary_loans', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->decimal('loan_amount', 10, 2)->default(0);
-            $table->decimal('monthly_deduction', 10, 2)->default(0);
-            $table->decimal('remaining_balance', 10, 2)->default(0);
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->string('status')->default('active');
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('approved_at')->nullable();
-            $table->text('rejection_reason')->nullable();
-            $table->unsignedInteger('months_paid')->default(0);
-            $table->text('notes')->nullable();
-            $table->timestamps();
-        });
-
         Schema::create('cash_advances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -385,7 +368,6 @@ return new class extends Migration {
         // Drop in reverse order
         Schema::dropIfExists('notifications');
         Schema::dropIfExists('cash_advances');
-        Schema::dropIfExists('salary_loans');
         Schema::dropIfExists('payroll_deductions');
         Schema::dropIfExists('payroll_allowances');
         Schema::dropIfExists('deductions');

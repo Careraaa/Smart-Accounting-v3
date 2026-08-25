@@ -212,24 +212,11 @@
                 $previewSlDeduction = (float)($existingPayroll->salary_loan_deduction ?? 0);
             } else {
                 $previewCaDeduction = 0;
-                $previewSlDeduction = 0;
-                $previewAdvances = \App\Models\CashAdvance::where('user_id', $employee->id)
-                    ->where('status', 'released')
-                    ->whereColumn('amount_deducted', '<', 'amount')
-                    ->get();
-                foreach ($previewAdvances as $adv) {
-                    $semiMonthly = $adv->monthly_deduction > 0 ? $adv->monthly_deduction / 2 : 0;
-                    $previewCaDeduction += $adv->monthly_deduction > 0
-                        ? min($semiMonthly, $adv->amount - $adv->amount_deducted)
-                        : $adv->amount;
-                }
-                $previewLoans = \App\Models\SalaryLoan::where('user_id', $employee->id)
-                    ->where('status', 'released')
-                    ->where('remaining_balance', '>', 0)
-                    ->get();
-                foreach ($previewLoans as $ln) {
-                    $previewSlDeduction += min($ln->monthly_deduction / 2, $ln->remaining_balance);
-                }
+                [$previewCaDeduction] = PayrollDeductionService::calculateAffordableCashAdvances(
+                    $employee->id,
+                    (float) ($v['grossPay'] + $leavePay),
+                    (float) $v['totalDeductions']
+                );
             }
 
             return response()->json([
@@ -260,10 +247,9 @@
                 'withholding_tax' => round($v['withholdingTax'] ?? 0, 2),
                 'adjusted_gross' => round($v['adjustedGross'] + $leavePay, 2),
                 'gross_pay' => round($v['grossPay'] + $leavePay, 2),
-                'total_deductions' => round($v['totalDeductions'] + $previewCaDeduction + $previewSlDeduction, 2),
-                'net_pay' => round($v['netPay'] + $leavePay - $previewCaDeduction - $previewSlDeduction, 2),
+                'total_deductions' => round($v['totalDeductions'] + $previewCaDeduction, 2),
+                'net_pay' => round($v['netPay'] + $leavePay - $previewCaDeduction, 2),
                 'cash_advance_deduction' => round($previewCaDeduction, 2),
-                'salary_loan_deduction' => round($previewSlDeduction, 2),
             ]);
         }
 
@@ -353,6 +339,10 @@
             }
             
             $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
+            $batch->setRelation('payrolls', $batch->payrolls->sortBy([
+                ['user.last_name', 'asc'],
+                ['user.first_name', 'asc'],
+            ])->values());
 
             $periodStart = $batch->period_start->toDateString();
             $periodEnd = $batch->period_end->toDateString();
@@ -383,6 +373,10 @@
         public function batchDetails(PayrollBatch $batch)
         {
             $batch->load(['payrolls.user', 'rejectedBy']);
+            $batch->setRelation('payrolls', $batch->payrolls->sortBy([
+                ['user.last_name', 'asc'],
+                ['user.first_name', 'asc'],
+            ])->values());
 
             return view('hr.payroll.batch.details', compact('batch'));
         }
@@ -390,6 +384,10 @@
         public function batchPayslips(PayrollBatch $batch)
         {
             $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
+            $batch->setRelation('payrolls', $batch->payrolls->sortBy([
+                ['user.last_name', 'asc'],
+                ['user.first_name', 'asc'],
+            ])->values());
 
             // Recompute each payroll so the list shows live values, not stale DB zeros
             foreach ($batch->payrolls as $payroll) {
@@ -1012,8 +1010,7 @@
             $payroll->setAttribute('basic_salary', $computed['basicSalary']);
             $payroll->setAttribute('gross_pay', $fullGrossPay);
             // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
-            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
-                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0);
             $totalDeductions = $computed['totalDeductions'] + $loanTotal;
             $payroll->setAttribute('total_deductions', $totalDeductions);
             $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
@@ -1168,8 +1165,7 @@
             $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay'] ?? 0);
             $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours'] ?? 0);
             // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
-            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0)
-                       + (float)($payroll->salary_loan_deduction ?? 0);
+            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0);
             $totalDeductions = $computed['totalDeductions'] + $loanTotal;
             $payroll->setAttribute('total_deductions', $totalDeductions);
             $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);

@@ -14,6 +14,8 @@
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .slide-right { animation:slideInRight 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .sticky-actions { position: sticky; top: 65px; z-index: 50; }
+.modal-overlay.hidden { display: none !important; }
+.modal-overlay:not(.hidden) { display: flex !important; }
 </style>
 @endpush
 
@@ -88,13 +90,13 @@
         </div>
         <div class="flex items-center gap-2">
             @if($batch->isEditable())
-            <button type="button" onclick="document.getElementById('deleteBatchModal').classList.remove('hidden')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-red-500 border border-red-200 transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">Delete Batch</button>
+            <button type="button" onclick="openModal('deleteBatchModal')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-red-500 border border-red-200 transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">Delete Batch</button>
             @endif
             <button type="button" onclick="showDeleteModal()" id="deleteSelectedBtn" disabled class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-gray-400 border border-gray-200 transition-all cursor-not-allowed">Remove</button>
             @if($batch->isEditable())
             <button type="button" onclick="prepareSelected()" id="prepareSelectedBtn" disabled class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white text-gray-400 border border-gray-200 transition-all cursor-not-allowed">Prepare</button>
             <span class="w-px h-5 bg-gray-200"></span>
-            <button type="button" onclick="document.getElementById('finalizeModal').classList.remove('hidden')" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer">
+            <button type="button" onclick="openModal('finalizeModal')" class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                 Finalize &amp; Submit
             </button>
@@ -240,7 +242,7 @@
 </div>
 
 {{-- Remove single confirmation modal --}}
-<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="removeSingleModal">
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="removeSingleModal" style="display:none">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('removeSingleModal')"></div>
     <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
         <div class="flex items-center gap-3 mb-4">
@@ -269,7 +271,7 @@
 </div>
 
 {{-- Bulk delete modal --}}
-<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="deleteBulkModal">
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="deleteBulkModal" style="display:none">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('deleteBulkModal')"></div>
     <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
         <div class="flex items-center gap-3 mb-4">
@@ -299,8 +301,8 @@
 </div>
 
 {{-- Delete batch confirmation modal --}}
-<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="deleteBatchModal">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('deleteBatchModal').classList.add('hidden')"></div>
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="deleteBatchModal" style="display:none">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('deleteBatchModal')"></div>
     <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
@@ -317,7 +319,7 @@
         <form action="{{ route('payroll.batch.cancel', $batch) }}" method="POST">
             @csrf @method('DELETE')
             <div class="flex gap-2">
-                <button type="button" onclick="document.getElementById('deleteBatchModal').classList.add('hidden')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Never mind</button>
+                <button type="button" onclick="closeModal('deleteBatchModal')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Never mind</button>
                 <button type="submit" class="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold transition-all hover:bg-red-700 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14m-9 3v6m4-6v6m-6-10V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
                     Yes, delete it
@@ -329,8 +331,8 @@
 @endsection
 
 {{-- Finalize confirmation modal --}}
-<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="finalizeModal">
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="document.getElementById('finalizeModal').classList.add('hidden')"></div>
+<div class="fixed inset-0 z-[9999] flex items-center justify-center p-5 hidden modal-overlay" id="finalizeModal" style="display:none">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal('finalizeModal')"></div>
     <div class="relative bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl modal-card">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
@@ -351,7 +353,7 @@
         <form action="{{ route('payroll.batch.finalize', $batch) }}" method="POST">
             @csrf
             <div class="flex gap-2">
-                <button type="button" onclick="document.getElementById('finalizeModal').classList.add('hidden')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Cancel</button>
+                <button type="button" onclick="closeModal('finalizeModal')" class="flex-1 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">Cancel</button>
                 <button type="submit" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer flex items-center justify-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     Yes, finalize
@@ -435,6 +437,7 @@ function openModal(id) {
     var m = document.getElementById(id);
     if (!m) return;
     m.classList.remove('hidden');
+    m.style.display = 'flex';
     var card = m.querySelector('.modal-card');
     if (card) { card.style.animation = 'none'; void card.offsetWidth; card.style.animation = ''; }
 }
@@ -442,6 +445,7 @@ function closeModal(id) {
     var m = document.getElementById(id);
     if (!m) return;
     m.classList.add('hidden');
+    m.style.display = 'none';
 }
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {

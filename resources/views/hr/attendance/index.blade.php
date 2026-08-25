@@ -306,7 +306,7 @@
                                         <div class="att-emp-cell">
                                             <div class="att-emp-avatar">{{ $initials }}</div>
                                             <div>
-                                                <div class="att-emp-name">{{ $emp->first_name }} {{ $emp->last_name }}</div>
+                                                <div class="att-emp-name">{{ $emp->last_name }}, {{ $emp->first_name }}</div>
                                                 <div class="att-emp-pos">{{ $emp->position ?? '—' }}</div>
                                             </div>
                                         </div>
@@ -471,7 +471,7 @@ window.todayAttendance = {!! json_encode($todayAttendance->map(fn($a) => [
                         <div class="att-emp-cell">
                             <div class="att-emp-avatar">${initials}</div>
                             <div>
-                                <div class="att-emp-name">${emp.firstName} ${emp.lastName}</div>
+                                <div class="att-emp-name">${emp.lastName}, ${emp.firstName}</div>
                                 <div class="att-emp-pos">${emp.position || '—'}</div>
                             </div>
                         </div>

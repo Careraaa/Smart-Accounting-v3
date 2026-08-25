@@ -12,19 +12,13 @@
     {{-- Existing Attachments --}}
     @php
         $attTypes = [
-            'resume'          => 'Resume / CV',
-            'birth_certificate' => 'Birth Certificate',
-            'marriage_certificate' => 'Marriage Certificate',
-            'sss_id'          => 'SSS ID / E-1 Form',
-            'pagibig_id'      => 'Pag-IBIG ID / Registration',
-            'philhealth_id'   => 'PhilHealth ID / MDR',
-            'tin_id'          => 'TIN ID / Form 1902',
-            'drivers_license' => "Driver's License",
-            'passport'        => 'Passport',
-            'diploma'         => 'Diploma / Transcript',
-            'certificate'     => 'Other Certificates',
-            'contract'        => 'Employment Contract',
-            'other'           => 'Other Documents',
+            'resume'                 => 'Resume',
+            'psa_birth_certificate'  => 'PSA Birth Certificate',
+            'nbi_clearance'          => 'NBI Clearance',
+            'medical_certificate'    => 'Medical Certificate',
+            'government_id'          => 'Valid Government ID (Front & Back)',
+            'diploma'                => 'Diploma',
+            'contract'               => 'Contract',
         ];
     @endphp
 

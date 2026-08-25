@@ -58,7 +58,6 @@ class SearchController extends Controller
 
         $employee = [
             ['label' => 'Cash Advances',    'route' => 'employee.cash-advances.index',      'icon' => 'feather-credit-card'],
-            ['label' => 'Salary Loans',     'route' => 'employee.salary-loans.index',       'icon' => 'feather-briefcase'],
             ['label' => 'My Leaves',        'route' => 'employee.leaves.index',             'icon' => 'feather-calendar'],
             ['label' => 'OT / UT Requests', 'route' => 'employee.overtime-undertime.index', 'icon' => 'feather-clock'],
         ];

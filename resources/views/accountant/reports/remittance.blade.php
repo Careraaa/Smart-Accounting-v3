@@ -30,6 +30,21 @@ $periodLabel = match ($period) {
     default => '',
 };
 
+$weekCount = \Carbon\Carbon::create($year, 12, 28)->isoWeek();
+$weekOptions = collect(range(1, $weekCount))->map(function ($weekNumber) use ($year) {
+    $startOfWeek = \Carbon\Carbon::now()->setISODate($year, $weekNumber)->startOfWeek();
+
+    return [
+        'number' => $weekNumber,
+        'label' => sprintf(
+            'Week %d (%s - %s)',
+            $weekNumber,
+            $startOfWeek->format('M j'),
+            $startOfWeek->copy()->endOfWeek()->format('M j')
+        ),
+    ];
+});
+
 $remittancesJson = $remittances->groupBy(fn($r) => $r->remittance_date->format('Y-m-d'))->map(function ($group) {
     return $group->map(fn($r) => [
         'driver' => $r->driver?->name ?? ($r->driver?->first_name.' '.$r->driver?->last_name ?? 'N/A'),
@@ -72,8 +87,16 @@ $remittancesJson = $remittances->groupBy(fn($r) => $r->remittance_date->format('
         <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }}">
             <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Week</label>
             <select id="week" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
-                @for ($i = 1; $i <= 52; $i++)
-                    <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
+                @foreach ($weekOptions as $weekOption)
+                    <option value="{{ $weekOption['number'] }}" {{ (int) $week === $weekOption['number'] ? 'selected' : '' }}>{{ $weekOption['label'] }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="monthSelect" style="display:{{ in_array($period, ['daily', 'monthly']) ? 'flex' : 'none' }}">
+            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Month</label>
+            <select id="month" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                @for ($i = 1; $i <= 12; $i++)
+                    <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
                 @endfor
             </select>
         </div>
@@ -82,14 +105,6 @@ $remittancesJson = $remittances->groupBy(fn($r) => $r->remittance_date->format('
             <select id="day" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
                 @for ($i = 1; $i <= 31; $i++)
                     <option value="{{ $i }}" {{ (int) $day === $i ? 'selected' : '' }}>{{ $i }}</option>
-                @endfor
-            </select>
-        </div>
-        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="monthSelect" style="display:{{ in_array($period, ['daily', 'monthly']) ? 'flex' : 'none' }}">
-            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Month</label>
-            <select id="month" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
-                @for ($i = 1; $i <= 12; $i++)
-                    <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
                 @endfor
             </select>
         </div>

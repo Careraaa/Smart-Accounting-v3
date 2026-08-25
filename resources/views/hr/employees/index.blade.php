@@ -213,7 +213,7 @@
                                 onclick="if(!event.target.closest('a,button,form'))window.location=this.dataset.href">
                                 <td class="px-5 py-3.5">
                                     <div>
-                                        <div class="font-semibold text-gray-900">{{ $employee->first_name }} {{ $employee->last_name }}</div>
+                                        <div class="font-semibold text-gray-900">{{ $employee->last_name }}, {{ $employee->first_name }}</div>
                                         <div class="text-xs text-gray-400 mt-0.5">{{ $employee->position ?? '—' }}</div>
                                     </div>
                                 </td>
@@ -571,7 +571,7 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                     tr.dataset.href = href;
                     tr.onclick = function(e) { if(!e.target.closest('a,button,form')) window.location = href; };
                     tr.innerHTML = [
-                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + r.firstName + ' ' + r.lastName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (r.position||'—') + '</div></div></td>',
+                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + r.lastName + ', ' + r.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (r.position||'—') + '</div></div></td>',
                         '<td class="px-5 py-3.5 text-gray-500 text-sm">' + gender + '</td>',
                         '<td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
                         '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (r.phone||'—') + '</td>',
@@ -681,7 +681,7 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                     row.dataset.href   = href;
                     row.onclick = e => { if(!e.target.closest('a,button,form')) window.location = href; };
                     row.innerHTML = [
-                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + emp.firstName + ' ' + emp.lastName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (emp.position||'—') + '</div></div></td>',
+                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + emp.lastName + ', ' + emp.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (emp.position||'—') + '</div></div></td>',
                         '<td class="px-5 py-3.5 text-gray-500 text-sm">' + gender + '</td>',
                         '<td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
                         '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (emp.phone||'—') + '</td>',

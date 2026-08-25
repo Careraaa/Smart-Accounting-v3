@@ -8,6 +8,7 @@ use App\Models\AttendanceLog;
 use App\Models\Leave;
 use App\Models\AttendanceToken;
 use App\Models\Employee;
+use App\Models\Holiday;
 use App\Models\OvertimeUndertime;
 use App\Models\Setting;
 use App\Models\Shift;
@@ -27,14 +28,14 @@ class AttendanceController extends Controller
         $tab = $request->query('tab', 'records');
         // All employees (excluding system roles) - paginated for display
         $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
-            ->orderBy('department')
             ->orderBy('last_name')
+            ->orderBy('first_name')
             ->paginate(10);
 
         // ALL employees (excluding system roles) for search - unpaginated
         $allEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
-            ->orderBy('department')
             ->orderBy('last_name')
+            ->orderBy('first_name')
             ->get();
 
         // All distinct departments from database
@@ -108,6 +109,33 @@ class AttendanceController extends Controller
         return view('hr.attendance.calendar', compact('employee', 'month', 'attendances', 'otutRecords', 'prevMonth', 'nextMonth'));
     }
 
+    /**
+     * Show a print-ready CS Form 48 daily time record for an employee.
+     */
+    public function printDtr(Request $request, $employeeId)
+    {
+        $employee = Employee::findOrFail($employeeId);
+
+        $monthParam = $request->query('month');
+        $month = $monthParam ? Carbon::createFromFormat('Y-m', $monthParam)->startOfMonth() : now()->startOfMonth();
+
+        $attendances = Attendance::where('user_id', $employeeId)
+            ->whereBetween('date', [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()])
+            ->get()
+            ->keyBy(fn($a) => $a->date->format('Y-m-d'));
+
+        $holidays = Holiday::whereBetween('date', [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()])
+            ->get()
+            ->keyBy(fn($holiday) => $holiday->date->format('Y-m-d'));
+
+        $shift = Shift::where('is_active', true)->first() ?? Shift::orderBy('created_at')->first();
+        $officeHours = $shift
+            ? Carbon::parse($shift->start_time)->format('g:i A') . ' - ' . Carbon::parse($shift->end_time)->format('g:i A')
+            : 'Not configured';
+
+        return view('hr.attendance.dtr-print', compact('employee', 'month', 'attendances', 'holidays', 'officeHours'));
+    }
+
     public function generateQR()
     {
         AttendanceToken::where('expires_at', '<', now())->delete();
@@ -126,7 +154,10 @@ class AttendanceController extends Controller
 
         cache()->put('current_qr_token', $token, 65);
 
-        return response()->json(['token' => $token]);
+        return response()->json([
+            'token' => $token,
+            'login_url' => route('attendance.qr.login', ['token' => $token]),
+        ]);
     }
 
     public function showQR()
@@ -408,15 +439,14 @@ class AttendanceController extends Controller
                 ->withInput();
         }
 
-        // Require at least one time value
-        if (!$request->time_in && !$request->time_out) {
-            return back()
-                ->withErrors(['time_in' => 'Please set at least Time In or Time Out.'])
-                ->withInput();
-        }
-
         // Build data to save — only include provided fields so we don't overwrite existing values
         $data = ['is_manual' => true];
+
+        if (!$request->time_in && !$request->time_out) {
+            $data['time_in'] = null;
+            $data['time_out'] = null;
+            $data['status'] = 'absent';
+        }
 
         // Determine status when time_in is provided (and optionally time_out).
         // If both provided, compute status using both; if only time_in provided, compute late/present.

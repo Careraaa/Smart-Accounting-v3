@@ -5,7 +5,6 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\Payroll;
 use App\Models\CashAdvance;
-use App\Models\SalaryLoan;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
@@ -18,10 +17,6 @@ class PayrollReceivablesController extends Controller
 
         // Load ALL data upfront so tabs can switch client-side
         $allCashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $allSalaryLoans = SalaryLoan::with('user')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -39,7 +34,7 @@ class PayrollReceivablesController extends Controller
         $this->logActivity('viewed', 'Payroll receivables', request()->url(), 'payroll_receivable');
 
         return view('hr.payroll.receivables.index', compact(
-            'tab', 'allCashAdvances', 'allSalaryLoans',
+            'tab', 'allCashAdvances',
             'caPendingCount', 'caApprovedCount', 'caReleasedTotal',
             'totalCashAdvances', 'outstandingAmount'
         ));
