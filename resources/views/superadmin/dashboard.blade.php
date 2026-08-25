@@ -147,8 +147,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
         </div>
 
-        {{-- STAT CARDS ROW 2: Pipeline, OT/UT, Loans, Advances --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {{-- STAT CARDS ROW 2: Pipeline, OT/UT, Advances --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
                 <div class="flex items-center justify-between">
                     <div>
@@ -179,20 +179,6 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span>{{ $totalOvertimeRecords }} records</span>
                     <span class="text-gray-300">·</span>
                     <span>{{ number_format($totalUndertimeHours, 1) }}h UT</span>
-                </div>
-            </div>
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-blue-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.35s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Salary Loans</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.45s">₱{{ number_format($totalOutstandingLoans, 2) }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    </div>
-                </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span>{{ $activeSalaryLoans }} active</span>
                 </div>
             </div>
             <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-teal-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.4s">

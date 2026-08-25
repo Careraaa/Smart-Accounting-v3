@@ -13,7 +13,6 @@ use App\Http\Controllers\RemittanceClerk\ReportController as RemittanceClerkRepo
 use App\Http\Controllers\RemittanceClerk\DashboardController as RemittanceClerkDashboardController;
 use App\Http\Controllers\Accountant\DashboardController as AccountantDashboardController;
 use App\Http\Controllers\Accountant\AccountantCashAdvanceController;
-use App\Http\Controllers\Accountant\AccountantSalaryLoanController;
 use App\Http\Controllers\HR\DashboardController as HRDashboardController;
 use App\Http\Controllers\HR\EmployeeController;
 use App\Http\Controllers\HR\EmployeeAttachmentController;
@@ -31,7 +30,6 @@ use App\Http\Controllers\Accountant\PayrollApprovalController;
 use App\Http\Controllers\Accountant\ReportController;
 use App\Http\Controllers\Accountant\RemittanceApprovalController;
 use App\Http\Controllers\Employee\CashAdvanceController as EmployeeCashAdvanceController;
-use App\Http\Controllers\Employee\SalaryLoanController as EmployeeSalaryLoanController;
 use App\Http\Controllers\Employee\AttachmentController as EmployeeSelfAttachmentController;
 use App\Http\Controllers\Employee\ProfileController as EmployeeProfileController;
 use App\Http\Controllers\Employee\LeaveController as EmployeeLeaveController;
@@ -47,7 +45,6 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperAdminDashboardController;
 use App\Models\Holiday;
 use App\Models\CashAdvance;
-use App\Models\SalaryLoan;
 use App\Models\Leave;
 use App\Models\OvertimeUndertime;
 use Carbon\Carbon;
@@ -243,18 +240,12 @@ Route::middleware(['auth', 'check-status', 'role:employee,superadmin,remittance_
             'pendingUT'           => OvertimeUndertime::where('user_id', $user->id)->where('type', 'undertime')->where('status', 'pending')->count(),
             'pendingCashAdvances' => CashAdvance::where('user_id', $user->id)->where('status', 'pending')->count(),
             'totalBorrowed'       => CashAdvance::where('user_id', $user->id)->whereIn('status', ['approved', 'deducted'])->sum('amount'),
-            'activeLoans'         => SalaryLoan::where('user_id', $user->id)->whereIn('status', ['pending', 'active'])->count(),
-            'totalLoanRemaining'  => SalaryLoan::where('user_id', $user->id)->where('status', 'active')->sum('remaining_balance'),
         ]);
     })->name('employee.index');
 
     // Cash Advances
     Route::get('/my/cash-advances', [EmployeeCashAdvanceController::class, 'index'])->name('employee.cash-advances.index');
     Route::post('/my/cash-advances', [EmployeeCashAdvanceController::class, 'store'])->name('employee.cash-advances.store');
-
-    // Salary Loans
-    Route::get('/my/salary-loans', [EmployeeSalaryLoanController::class, 'index'])->name('employee.salary-loans.index');
-    Route::post('/my/salary-loans', [EmployeeSalaryLoanController::class, 'store'])->name('employee.salary-loans.store');
 
     // Leave Management
     Route::get('/my/leaves', [EmployeeLeaveController::class, 'index'])->name('employee.leaves.index');
@@ -294,8 +285,6 @@ Route::middleware(['auth'])->group(function () {
             'pendingUT'           => OvertimeUndertime::where('user_id', $user->id)->where('type', 'undertime')->where('status', 'pending')->count(),
             'pendingCashAdvances' => CashAdvance::where('user_id', $user->id)->where('status', 'pending')->count(),
             'totalBorrowed'       => CashAdvance::where('user_id', $user->id)->whereIn('status', ['approved', 'deducted'])->sum('amount'),
-            'activeLoans'         => SalaryLoan::where('user_id', $user->id)->whereIn('status', ['pending', 'active'])->count(),
-            'totalLoanRemaining'  => SalaryLoan::where('user_id', $user->id)->where('status', 'active')->sum('remaining_balance'),
         ]);
     })->name('employee.dashboard');
     Route::get('/attendance/scan', [AttendanceController::class, 'scanPage'])->name('attendance.scan');
@@ -470,12 +459,9 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         ->group(function () {
             Route::get('/', [PayrollReceivablesController::class, 'index'])->name('index');
             Route::get('/cash-advances/{cashAdvance}', [PayrollReceivablesController::class, 'showCashAdvance'])->name('cash-advances.show');
-            Route::get('/salary-loans/{salaryLoan}', [PayrollReceivablesController::class, 'showSalaryLoan'])->name('salary-loans.show');
             // HR approval routes
             Route::post('/cash-advances/{cashAdvance}/approve', [PayrollReceivablesController::class, 'approveCashAdvance'])->name('cash-advances.approve');
             Route::post('/cash-advances/{cashAdvance}/reject', [PayrollReceivablesController::class, 'rejectCashAdvance'])->name('cash-advances.reject');
-            Route::post('/salary-loans/{salaryLoan}/approve', [PayrollReceivablesController::class, 'approveSalaryLoan'])->name('salary-loans.approve');
-            Route::post('/salary-loans/{salaryLoan}/reject', [PayrollReceivablesController::class, 'rejectSalaryLoan'])->name('salary-loans.reject');
         });
 
     Route::post('/payroll/statutory-deductions/compute', [PayrollController::class, 'computeStatutory'])->name('payroll.statutory.compute');
@@ -537,9 +523,6 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::get('/cash-advances/{cashAdvance}', [AccountantCashAdvanceController::class, 'show'])->name('cash-advances.show');
     Route::post('/cash-advances/{cashAdvance}/release', [AccountantCashAdvanceController::class, 'release'])->name('cash-advances.release');
     Route::post('/cash-advances/{cashAdvance}/reject', [AccountantCashAdvanceController::class, 'reject'])->name('cash-advances.reject');
-    Route::get('/salary-loans/{salaryLoan}', [AccountantSalaryLoanController::class, 'show'])->name('salary-loans.show');
-    Route::post('/salary-loans/{salaryLoan}/release', [AccountantSalaryLoanController::class, 'release'])->name('salary-loans.release');
-    Route::post('/salary-loans/{salaryLoan}/reject', [AccountantSalaryLoanController::class, 'reject'])->name('salary-loans.reject');
 
     Route::get('/reports/remittance', [ReportController::class, 'remittanceReports'])->name('reports.remittance');
     Route::get('/reports/payroll-approval', fn() => view('accountant.reports.payroll-approval'))->name('reports.payroll-approval');

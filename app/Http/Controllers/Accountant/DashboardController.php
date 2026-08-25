@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Accountant;
 use App\Http\Controllers\Controller;
 use App\Models\Payroll;
 use App\Models\Employee;
-use App\Models\SalaryLoan;
 use App\Models\DailyRemittance;
 use App\Models\CashAdvance;
 use App\Traits\LogsUserActivity;
@@ -44,10 +43,6 @@ class DashboardController extends Controller
         $approvedPayroll   = \App\Models\PayrollBatch::where('status', 'approved')->count();
         // Rejected is outside the active set; query separately for the pipeline bar.
         $rejectedPayroll   = \App\Models\PayrollBatch::where('status', 'rejected')->count();
-
-        // ── Salary Loan Statistics ───────────────────────────────────────────
-        $totalOutstandingLoans = SalaryLoan::where('status', 'active')->sum('remaining_balance') ?? 0;
-        $activeSalaryLoans     = SalaryLoan::where('status', 'active')->count();
 
         // ── Deduction vs Allowance ratio ─────────────────────────────────────
         $baseAmount          = $totalAllowances + $totalDeductions;
@@ -142,21 +137,6 @@ class DashboardController extends Controller
             ];
         }
         
-        // Pending Salary Loans
-        $pendingSalaryLoansCount = SalaryLoan::where('status', 'pending')->count();
-        if ($pendingSalaryLoansCount > 0) {
-            $pendingItems[] = [
-                'text' => $pendingSalaryLoansCount === 1
-                    ? '1 Salary Loan Needs Approval'
-                    : "{$pendingSalaryLoansCount} Salary Loans Need Approval",
-                'count' => $pendingSalaryLoansCount,
-                'url' => route('payroll.receivables.index', ['tab' => 'salary_loans']),
-                'icon' => 'feather-credit-card',
-                'color' => '#e0f2fe',
-                'iconColor' => '#0284c7'
-            ];
-        }
-
         // Calendar data
         $calMonth = now()->month;
         $calYear  = now()->year;
@@ -171,8 +151,6 @@ class DashboardController extends Controller
             'processingPayroll',
             'approvedPayroll',
             'rejectedPayroll',
-            'totalOutstandingLoans',
-            'activeSalaryLoans',
             'averageBasicSalary',
             'deductionPercentage',
             'allowancePercentage',
@@ -184,7 +162,6 @@ class DashboardController extends Controller
             'pendingItems',
             'pendingRemittances',
             'pendingCashAdvancesCount',
-            'pendingSalaryLoansCount',
             'calMonth',
             'calYear',
             'totalPendingItems'

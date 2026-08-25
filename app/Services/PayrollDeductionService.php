@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\CashAdvance;
-use App\Models\SalaryLoan;
 use App\Models\Payroll;
 
 class PayrollDeductionService
@@ -139,28 +138,5 @@ class PayrollDeductionService
             }
         }
 
-        // Revert salary loans
-        if (!empty($data['salary_loans'])) {
-            foreach ($data['salary_loans'] as $sl) {
-                $loan = SalaryLoan::find($sl['id']);
-                if (!$loan) continue;
-
-                $newBalance = $loan->remaining_balance + $sl['amount'];
-                $newMonthsPaid = max(0, $loan->months_paid - 1);
-
-                $updateData = [
-                    'remaining_balance' => round($newBalance, 2),
-                    'months_paid'       => $newMonthsPaid,
-                ];
-
-                // If it was marked as settled by this deduction, revert
-                if ($loan->status === 'settled') {
-                    $updateData['status'] = 'released';
-                    $updateData['end_date'] = null;
-                }
-
-                $loan->update($updateData);
-            }
-        }
     }
 }

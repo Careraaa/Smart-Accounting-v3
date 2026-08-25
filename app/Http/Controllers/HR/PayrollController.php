@@ -212,19 +212,11 @@
                 $previewSlDeduction = (float)($existingPayroll->salary_loan_deduction ?? 0);
             } else {
                 $previewCaDeduction = 0;
-                $previewSlDeduction = 0;
                 [$previewCaDeduction] = PayrollDeductionService::calculateAffordableCashAdvances(
                     $employee->id,
                     (float) ($v['grossPay'] + $leavePay),
                     (float) $v['totalDeductions']
                 );
-                $previewLoans = \App\Models\SalaryLoan::where('user_id', $employee->id)
-                    ->where('status', 'released')
-                    ->where('remaining_balance', '>', 0)
-                    ->get();
-                foreach ($previewLoans as $ln) {
-                    $previewSlDeduction += min($ln->monthly_deduction / 2, $ln->remaining_balance);
-                }
             }
 
             return response()->json([
@@ -255,10 +247,9 @@
                 'withholding_tax' => round($v['withholdingTax'] ?? 0, 2),
                 'adjusted_gross' => round($v['adjustedGross'] + $leavePay, 2),
                 'gross_pay' => round($v['grossPay'] + $leavePay, 2),
-                'total_deductions' => round($v['totalDeductions'] + $previewCaDeduction + $previewSlDeduction, 2),
-                'net_pay' => round($v['netPay'] + $leavePay - $previewCaDeduction - $previewSlDeduction, 2),
+                'total_deductions' => round($v['totalDeductions'] + $previewCaDeduction, 2),
+                'net_pay' => round($v['netPay'] + $leavePay - $previewCaDeduction, 2),
                 'cash_advance_deduction' => round($previewCaDeduction, 2),
-                'salary_loan_deduction' => round($previewSlDeduction, 2),
             ]);
         }
 

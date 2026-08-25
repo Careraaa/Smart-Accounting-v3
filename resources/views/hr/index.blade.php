@@ -86,8 +86,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                         </div>
                         <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Receivables</span>
-                        @if($pendingCashAdvances + $pendingSalaryLoans > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $pendingCashAdvances + $pendingSalaryLoans }}</span>
+                        @if($pendingCashAdvances > 0)
+                            <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $pendingCashAdvances }}</span>
                         @endif
                     </a>
                 </div>
