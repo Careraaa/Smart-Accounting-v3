@@ -335,6 +335,22 @@
                             <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('reports.payroll') ? 'active' : 'text-gray-500' }}" href="{{ route('reports.payroll') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-sky-500"><i class="feather-file-text" style="font-size:13px"></i></span><span>Payroll Reports</span></a></li>
                         </ul>
                     </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Accounting</label></li>
+
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('accounting.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-book" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Accounting</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
+                        </a>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('accounting.chart-of-accounts.*') ? 'active' : 'text-gray-500' }}" href="{{ route('accounting.chart-of-accounts.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-amber-500"><i class="feather-grid" style="font-size:13px"></i></span><span>Chart of Accounts</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('accounting.journal-entries.*') ? 'active' : 'text-gray-500' }}" href="{{ route('accounting.journal-entries.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-amber-500"><i class="feather-file-text" style="font-size:13px"></i></span><span>Journal Entries</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('accounting.general-ledger.*') ? 'active' : 'text-gray-500' }}" href="{{ route('accounting.general-ledger.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-amber-500"><i class="feather-book-open" style="font-size:13px"></i></span><span>General Ledger</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('accounting.account-mappings.*') ? 'active' : 'text-gray-500' }}" href="{{ route('accounting.account-mappings.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-amber-500"><i class="feather-link" style="font-size:13px"></i></span><span>Account Mappings</span></a></li>
+                        </ul>
+                    </li>
                 @endif
 
                 {{-- non-superadmin base items --}}
@@ -613,6 +629,22 @@
                             <span class="sidebar-icon flex items-center justify-center text-emerald-500"><i class="feather-inbox" style="font-size:18px"></i></span>
                             <span class="sidebar-text truncate min-w-0">Receivables &amp; Loans</span>
                         </a>
+                    </li>
+
+                    <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Accounting</label></li>
+
+                    <li class="sidebar-item has-sub">
+                        <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('accounting.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                            <span class="sidebar-icon flex items-center justify-center text-amber-500"><i class="feather-book" style="font-size:18px"></i></span>
+                            <span class="sidebar-text truncate min-w-0">Accounting</span>
+                            <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
+                        </a>
+                        <ul class="sidebar-sub">
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('accounting.chart-of-accounts.*') ? 'active' : 'text-gray-500' }}" href="{{ route('accounting.chart-of-accounts.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-amber-500"><i class="feather-grid" style="font-size:13px"></i></span><span>Chart of Accounts</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('accounting.journal-entries.*') ? 'active' : 'text-gray-500' }}" href="{{ route('accounting.journal-entries.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-amber-500"><i class="feather-file-text" style="font-size:13px"></i></span><span>Journal Entries</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('accounting.general-ledger.*') ? 'active' : 'text-gray-500' }}" href="{{ route('accounting.general-ledger.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-amber-500"><i class="feather-book-open" style="font-size:13px"></i></span><span>General Ledger</span></a></li>
+                            <li class="sidebar-item"><a class="sidebar-link flex items-center gap-2 px-7 py-1.5 text-sm no-underline {{ request()->routeIs('accounting.account-mappings.*') ? 'active' : 'text-gray-500' }}" href="{{ route('accounting.account-mappings.index') }}"><span class="sidebar-icon submenu-icon flex items-center justify-center text-amber-500"><i class="feather-link" style="font-size:13px"></i></span><span>Account Mappings</span></a></li>
+                        </ul>
                     </li>
 
                     <li class="sidebar-item sidebar-caption pl-2 pr-2 pt-3 pb-1"><label class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Reports</label></li>

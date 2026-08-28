@@ -530,6 +530,29 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::get('/reports/payroll', [ReportController::class, 'payrollReports'])->name('reports.payroll');
     Route::get('/reports/print/payroll-report', [ReportController::class, 'printPayrollReport'])->name('reports.print.payroll-report');
     Route::get('/reports/print/remittance-report', [ReportController::class, 'printRemittanceReport'])->name('reports.print.remittance-report');
+
+    // ===== ACCOUNTING MODULE =====
+    Route::prefix('accounting')->name('accounting.')->group(function () {
+        // Chart of Accounts
+        Route::resource('chart-of-accounts', \App\Http\Controllers\Accounting\ChartOfAccountController::class);
+        Route::patch('chart-of-accounts/{chartOfAccount}/toggle-status', [\App\Http\Controllers\Accounting\ChartOfAccountController::class, 'toggleStatus'])->name('chart-of-accounts.toggle-status');
+
+        // Journal Entries
+        Route::resource('journal-entries', \App\Http\Controllers\Accounting\JournalEntryController::class)->except(['destroy']);
+        Route::post('journal-entries/{journalEntry}/post', [\App\Http\Controllers\Accounting\JournalEntryController::class, 'post'])->name('journal-entries.post');
+        Route::patch('journal-entries/{journalEntry}/void', [\App\Http\Controllers\Accounting\JournalEntryController::class, 'void'])->name('journal-entries.void');
+
+        // General Ledger
+        Route::get('general-ledger', [\App\Http\Controllers\Accounting\GeneralLedgerController::class, 'index'])->name('general-ledger.index');
+        Route::get('general-ledger/summary', [\App\Http\Controllers\Accounting\GeneralLedgerController::class, 'summary'])->name('general-ledger.summary');
+
+        // Account Mappings
+        Route::get('account-mappings', [\App\Http\Controllers\Accounting\AccountMappingController::class, 'index'])->name('account-mappings.index');
+        Route::post('account-mappings', [\App\Http\Controllers\Accounting\AccountMappingController::class, 'store'])->name('account-mappings.store');
+
+        // Payroll Journal Generation
+        Route::post('payroll-journal/{batch}/generate', [\App\Http\Controllers\Accounting\PayrollJournalController::class, 'generate'])->name('payroll-journal.generate');
+    });
 });
 
 // ===== QR ATTENDANCE ADMIN ROUTES =====
