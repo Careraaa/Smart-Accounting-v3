@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             StatutoryDeductions_Seeder::class,
             WithholdingTaxSeeder::class,
             HolidaySeeder::class,
+            PositionRateSeeder::class,
+            ChartOfAccountsSeeder::class,
         ]);
     }
 }

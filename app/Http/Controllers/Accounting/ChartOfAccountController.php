@@ -57,8 +57,9 @@ class ChartOfAccountController extends Controller
     public function show(ChartOfAccount $chartOfAccount)
     {
         $journalLines = $chartOfAccount->journalEntryLines()
+            ->join('journal_entries', 'journal_entry_lines.journal_entry_id', '=', 'journal_entries.id')
             ->with('journalEntry')
-            ->whereHas('journalEntry', fn ($q) => $q->where('status', 'Posted'))
+            ->where('journal_entries.status', 'Posted')
             ->orderByDesc('journal_entries.transaction_date')
             ->get();
 

@@ -128,7 +128,7 @@
     const raw = {!! json_encode($transactions->map(fn($t) => [
         'id' => $t->id,
         'journal_entry_id' => $t->journal_entry_id,
-        'transaction_date' => $t->journalEntry->transaction_date,
+        'transaction_date' => optional($t->journalEntry)->transaction_date?->toDateString(),
         'journal_number' => $t->journalEntry->journal_number,
         'description' => $t->description ?? $t->journalEntry->description,
         'debit' => $t->debit,

@@ -22,16 +22,18 @@ class GeneralLedgerController extends Controller
 
             if ($selectedAccount) {
                 $query = JournalEntryLine::where('account_id', $selectedAccount->id)
-                    ->whereHas('journalEntry', fn ($q) => $q->where('status', 'Posted'))
+                    ->join('journal_entries', 'journal_entry_lines.journal_entry_id', '=', 'journal_entries.id')
                     ->with('journalEntry');
 
                 if ($request->filled('date_from')) {
-                    $query->whereHas('journalEntry', fn ($q) => $q->where('transaction_date', '>=', $request->input('date_from')));
+                    $query->where('journal_entries.transaction_date', '>=', $request->input('date_from'));
                 }
 
                 if ($request->filled('date_to')) {
-                    $query->whereHas('journalEntry', fn ($q) => $q->where('transaction_date', '<=', $request->input('date_to')));
+                    $query->where('journal_entries.transaction_date', '<=', $request->input('date_to'));
                 }
+
+                $query->where('journal_entries.status', 'Posted');
 
                 $transactions = $query->orderBy('journal_entries.transaction_date')
                     ->orderBy('journal_entries.id')
