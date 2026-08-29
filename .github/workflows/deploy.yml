@@ -65,15 +65,11 @@ jobs:
       - name: Install Composer dependencies (production only)
         run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-progress
 
-      # ---------- Sync DB schema & lookup data (idempotent, no data wipe) ----------
-      # Creates any missing tables (departments, position_rates, accounting) and
-      # fills the lookup tables. Uses updateOrCreate/firstOrCreate seeds only —
-      # NEVER runs the full DatabaseSeeder (it truncates users/demo data).
-      - name: Run database migrations & seed lookup tables
-        run: |
-          php artisan migrate --force --no-interaction
-          php artisan db:seed --force --class=PositionRateSeeder --no-interaction
-          php artisan db:seed --force --class=ChartOfAccountsSeeder --no-interaction
+      # NOTE: InfinityFree DB is only reachable from their own network, so
+      # running php artisan migrate from this GitHub runner is impossible
+      # (connectivity is blocked). New/dropped tables must be imported
+      # manually via phpMyAdmin instead. See DEPLOYMENT.md.
+
 
       # ---------- Frontend build (public/build is NOT in git) ----------
       - name: Setup Node.js 22
