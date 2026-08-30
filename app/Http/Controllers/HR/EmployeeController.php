@@ -110,7 +110,7 @@ class EmployeeController extends Controller
                 'driver_license_validity' => 'nullable|date',
                 'date_of_hire' => 'required|date',
                 'position' => 'required|string|max:150',
-                'department' => 'required|string|max:150',
+                'department' => 'nullable|string|max:150',
                 'status' => 'required|string|in:active,inactive',
                 'salary_rate' => 'required|numeric|between:0,999999.99', // DAILY RATE
                 'work_days_per_week' => 'required|integer|in:5,6',
@@ -141,6 +141,8 @@ class EmployeeController extends Controller
         $validated['has_philhealth'] = $request->has('has_philhealth');
         $validated['role'] = 'employee';
         $validated['address'] = $this->assembleAddress($request);
+
+        $validated['department'] = $this->resolveDepartmentFromPosition($validated['position'] ?? '');
 
         if (!$validated['has_sss']) $validated['sss_number'] = null;
         if (!$validated['has_tin']) $validated['tin_number'] = null;
@@ -223,7 +225,7 @@ class EmployeeController extends Controller
                 'driver_license_validity' => 'nullable|date',
                 'date_of_hire' => 'required|date',
                 'position' => 'required|string|max:150',
-                'department' => 'required|string|max:150',
+                'department' => 'nullable|string|max:150',
                 'status' => 'required|string|in:active,inactive',
                 'salary_rate' => 'required|numeric|between:0,999999.99', // DAILY RATE
                 'work_days_per_week' => 'required|integer|in:5,6',
@@ -257,6 +259,8 @@ class EmployeeController extends Controller
         if (!$validated['has_tin']) $validated['tin_number'] = null;
         if (!$validated['has_pagibig']) $validated['pagibig_number'] = null;
         if (!$validated['has_philhealth']) $validated['philhealth_number'] = null;
+
+        $validated['department'] = $this->resolveDepartmentFromPosition($validated['position'] ?? '');
 
         $employee->update($validated);
 
@@ -317,6 +321,15 @@ class EmployeeController extends Controller
             'city' => $request->input('address_city', ''),
             'province' => $request->input('address_province', ''),
         ]);
+    }
+
+    private function resolveDepartmentFromPosition(string $position): ?string
+    {
+        $positionRate = PositionRate::with('department')
+            ->where('name', $position)
+            ->first();
+
+        return $positionRate?->department?->name;
     }
 
     private function handleAttachments(Request $request, User $employee): void

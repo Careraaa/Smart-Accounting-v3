@@ -186,7 +186,7 @@ class User extends Authenticatable
         if (!$this->profile_picture) {
             return null;
         }
-        return route('files.show', ['path' => $this->profile_picture], false);
+        return '/storage/' . ltrim($this->profile_picture, '/');
     }
 
     /**

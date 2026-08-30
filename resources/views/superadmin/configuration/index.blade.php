@@ -38,6 +38,7 @@ $descClass  = 'text-[0.6rem] text-gray-400 mt-1 leading-relaxed';
 
     <div class="flex gap-1 p-1 bg-gray-100/80 border border-gray-200 rounded-xl fade-in tab-bar">
         <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-gray-900 shadow-sm" data-tab="general">General</button>
+        <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="positions">Positions</button>
         <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="backup">Backup</button>
         <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="maintenance">Maintenance</button>
         <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="testing">Testing</button>
@@ -112,6 +113,120 @@ $descClass  = 'text-[0.6rem] text-gray-400 mt-1 leading-relaxed';
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- ════════════════════════════════ --}}
+    {{-- POSITIONS TAB --}}
+    {{-- ════════════════════════════════ --}}
+    <div id="tab-positions" class="tab-panel hidden space-y-4">
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5" style="animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;">
+            <div class="flex items-center justify-between gap-3 mb-5">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7H4l2-3h8l2 3z"/><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M8 12h8"/></svg>
+                    <h3 class="text-sm font-bold text-gray-900">Manage Departments & Positions</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openModal('addDepartmentModal')" class="inline-flex items-center gap-1.5 px-3.5 py-2 border border-gray-200 text-gray-700 rounded-lg text-xs font-bold transition-all hover:bg-gray-50 active:scale-[0.97] cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        Add New Department
+                    </button>
+                    <button onclick="openModal('addPositionModal')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-gray-900 text-white rounded-lg text-xs font-bold transition-all hover:bg-black active:scale-[0.97] cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        Add New Position
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid gap-4 xl:grid-cols-2">
+                <div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-500">Departments</h4>
+                        <span class="text-[0.65rem] text-gray-400">{{ $departments->count() }} configured</span>
+                    </div>
+                    @if($departments->isEmpty())
+                        <div class="py-10 text-center text-sm text-gray-500">No departments configured yet.</div>
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-white border-b border-gray-100">
+                                        <th class="px-3 py-2 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Department</th>
+                                        <th class="px-3 py-2 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50">
+                                    @foreach($departments as $department)
+                                    <tr class="bg-white">
+                                        <td class="px-3 py-2 text-sm font-semibold text-gray-900">{{ $department->name }}</td>
+                                        <td class="px-3 py-2 text-right">
+                                            <div class="flex items-center justify-end gap-1">
+                                                <button onclick="openEditDepartmentModal({{ $department->id }})" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer" title="Edit">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                                </button>
+                                                <form action="{{ route('settings.department.destroy', $department) }}" method="POST" data-sa-confirm="Are you sure you want to delete this department?" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" title="Delete">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="rounded-xl border border-gray-100 bg-gray-50/70 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-gray-500">Positions</h4>
+                        <span class="text-[0.65rem] text-gray-400">{{ $positions->count() }} configured</span>
+                    </div>
+                    @if($positions->isEmpty())
+                        <div class="py-10 text-center text-sm text-gray-500">No positions configured yet.</div>
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-white border-b border-gray-100">
+                                        <th class="px-3 py-2 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Position</th>
+                                        <th class="px-3 py-2 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Department</th>
+                                        <th class="px-3 py-2 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Daily Rate</th>
+                                        <th class="px-3 py-2 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50">
+                                    @foreach($positions as $position)
+                                    <tr class="bg-white">
+                                        <td class="px-3 py-2 text-sm font-semibold text-gray-900">{{ $position->name }}</td>
+                                        <td class="px-3 py-2 text-sm text-gray-600">{{ $position->department?->name ?? '—' }}</td>
+                                        <td class="px-3 py-2 text-sm text-gray-600">₱{{ number_format($position->daily_rate, 2) }}</td>
+                                        <td class="px-3 py-2 text-right">
+                                            <div class="flex items-center justify-end gap-1">
+                                                <button onclick="openEditPositionModal({{ $position->id }})" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer" title="Edit">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                                </button>
+                                                <form action="{{ route('settings.position.destroy', $position) }}" method="POST" data-sa-confirm="Are you sure you want to delete this position?" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer" title="Delete">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -295,11 +410,139 @@ $descClass  = 'text-[0.6rem] text-gray-400 mt-1 leading-relaxed';
     </div>
 </div>
 
+{{-- ════════════════════════════════ --}}
+{{-- ADD DEPARTMENT MODAL --}}
+{{-- ════════════════════════════════ --}}
+<div id="addDepartmentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,0.4)">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden" style="animation:scaleIn 0.2s cubic-bezier(0.16,1,0.3,1) both;">
+        <div class="px-5 py-4 border-b border-gray-50">
+            <h5 class="text-sm font-bold text-gray-900">Add New Department</h5>
+        </div>
+        <form action="{{ route('settings.department.store') }}" method="POST">
+            @csrf
+            <div class="px-5 py-4 space-y-4">
+                <div>
+                    <label class="text-[0.6rem] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Department Name</label>
+                    <input type="text" name="name" placeholder="e.g., Accounting" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+                </div>
+            </div>
+            <div class="px-5 py-4 border-t border-gray-50 flex justify-end gap-2">
+                <button type="button" onclick="closeModal('addDepartmentModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-bold hover:bg-black transition-all cursor-pointer">Add Department</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ════════════════════════════════ --}}
+{{-- ADD POSITION MODAL --}}
+{{-- ════════════════════════════════ --}}
+<div id="addPositionModal" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,0.4)">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden" style="animation:scaleIn 0.2s cubic-bezier(0.16,1,0.3,1) both;">
+        <div class="px-5 py-4 border-b border-gray-50">
+            <h5 class="text-sm font-bold text-gray-900">Add New Position</h5>
+        </div>
+        <form action="{{ route('settings.position.store') }}" method="POST">
+            @csrf
+            <div class="px-5 py-4 space-y-4">
+                <div>
+                    <label class="text-[0.6rem] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Position Name</label>
+                    <input type="text" name="name" placeholder="e.g., Supervisor" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+                </div>
+                <div>
+                    <label class="text-[0.6rem] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Department</label>
+                    <select name="department_id" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+                        <option value="" disabled selected>Select department</option>
+                        @foreach($departments as $department)
+                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[0.6rem] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Daily Rate</label>
+                    <input type="number" step="0.01" name="daily_rate" min="0" placeholder="0.00" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+                </div>
+            </div>
+            <div class="px-5 py-4 border-t border-gray-50 flex justify-end gap-2">
+                <button type="button" onclick="closeModal('addPositionModal')" class="px-4 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-bold hover:bg-black transition-all cursor-pointer">Add Position</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ════════════════════════════════ --}}
+{{-- EDIT DEPARTMENT MODALS --}}
+{{-- ════════════════════════════════ --}}
+@foreach($departments as $department)
+<div id="editDepartmentModal{{ $department->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,0.4)">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden" style="animation:scaleIn 0.2s cubic-bezier(0.16,1,0.3,1) both;">
+        <div class="px-5 py-4 border-b border-gray-50">
+            <h5 class="text-sm font-bold text-gray-900">Edit Department: {{ $department->name }}</h5>
+        </div>
+        <form action="{{ route('settings.department.update', $department) }}" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="px-5 py-4 space-y-4">
+                <div>
+                    <label class="text-[0.6rem] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Department Name</label>
+                    <input type="text" name="name" value="{{ $department->name }}" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+                </div>
+            </div>
+            <div class="px-5 py-4 border-t border-gray-50 flex justify-end gap-2">
+                <button type="button" onclick="closeModal('editDepartmentModal{{ $department->id }}')" class="px-4 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-bold hover:bg-black transition-all cursor-pointer">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endforeach
+
+{{-- ════════════════════════════════ --}}
+{{-- EDIT POSITION MODALS --}}
+{{-- ════════════════════════════════ --}}
+@foreach($positions as $position)
+<div id="editPositionModal{{ $position->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center" style="background:rgba(0,0,0,0.4)">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden" style="animation:scaleIn 0.2s cubic-bezier(0.16,1,0.3,1) both;">
+        <div class="px-5 py-4 border-b border-gray-50">
+            <h5 class="text-sm font-bold text-gray-900">Edit Position: {{ $position->name }}</h5>
+        </div>
+        <form action="{{ route('settings.position.update', $position) }}" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="px-5 py-4 space-y-4">
+                <div>
+                    <label class="text-[0.6rem] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Position Name</label>
+                    <input type="text" name="name" value="{{ $position->name }}" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+                </div>
+                <div>
+                    <label class="text-[0.6rem] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Department</label>
+                    <select name="department_id" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+                        @foreach($departments as $department)
+                            <option value="{{ $department->id }}" {{ $position->department_id == $department->id ? 'selected' : '' }}>{{ $department->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[0.6rem] font-bold uppercase tracking-widest text-gray-500 mb-1 block">Daily Rate</label>
+                    <input type="number" step="0.01" name="daily_rate" value="{{ number_format($position->daily_rate, 2, '.', '') }}" min="0" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
+                </div>
+            </div>
+            <div class="px-5 py-4 border-t border-gray-50 flex justify-end gap-2">
+                <button type="button" onclick="closeModal('editPositionModal{{ $position->id }}')" class="px-4 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-bold hover:bg-black transition-all cursor-pointer">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endforeach
+
 <style>
 @keyframes fadeIn { 0%{opacity:0} 100%{opacity:1} }
 @keyframes slideIn { 0%{opacity:0;transform:translateY(-8px)} 100%{opacity:1;transform:translateY(0)} }
 @keyframes scaleIn { 0%{opacity:0;transform:scale(0.97)} 100%{opacity:1;transform:scale(1)} }
 @keyframes tabFade { 0%{opacity:0;transform:translateY(6px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes fadeSlideUp { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
 .fade-in { animation:fadeIn 0.4s ease-out both; }
 .slide-in { animation:slideIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
 .scale-in { animation:scaleIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
@@ -313,6 +556,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var tabBtns = document.querySelectorAll('.tab-btn');
     var panels = {
         general: document.getElementById('tab-general'),
+        positions: document.getElementById('tab-positions'),
         backup: document.getElementById('tab-backup'),
         maintenance: document.getElementById('tab-maintenance'),
         testing: document.getElementById('tab-testing'),
@@ -383,6 +627,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.checked = false;
             }
         });
+    }
+});
+</script>
+
+<script>
+// ── Modal helpers (departments & positions) ──
+function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.body.style.overflow = '';
+}
+function openEditDepartmentModal(id) {
+    openModal('editDepartmentModal' + id);
+}
+function openEditPositionModal(id) {
+    openModal('editPositionModal' + id);
+}
+// Close modals on backdrop click
+document.querySelectorAll('[id$="Modal"]').forEach(function(el) {
+    if (el.id === 'addDepartmentModal' || el.id.startsWith('editDepartmentModal') || el.id === 'addPositionModal' || el.id.startsWith('editPositionModal')) {
+        el.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+});
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.fixed.inset-0.z-50:not(.hidden)').forEach(function(m) {
+            m.classList.add('hidden');
+        });
+        document.body.style.overflow = '';
     }
 });
 </script>

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\SuperAdmin;
 use App\Traits\LogsUserActivity;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Employee;
+use App\Models\PositionRate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -24,13 +24,12 @@ class AccountController extends Controller
 
     public function create()
     {
-        $departments = Employee::whereNotNull('department')
-            ->distinct('department')
-            ->pluck('department')
-            ->sort()
-            ->values();
+        $positions = PositionRate::where('is_active', true)
+            ->with('department')
+            ->orderBy('name')
+            ->get();
 
-        return view('superadmin.accounts.create', compact('departments'));
+        return view('superadmin.accounts.create', compact('positions'));
     }
 
     public function store(Request $request)
@@ -52,6 +51,8 @@ class AccountController extends Controller
         $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
         $validated['password'] = Hash::make($validated['password']);
         $validated['status'] = 'active';
+
+        $validated['department'] = $this->resolveDepartmentFromPosition($validated['position'] ?? '');
 
         $user = User::create($validated);
 
@@ -80,6 +81,8 @@ class AccountController extends Controller
         ]);
 
         $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
+
+        $validated['department'] = $this->resolveDepartmentFromPosition($validated['position'] ?? '');
 
         $account->update($validated);
 
@@ -120,5 +123,14 @@ class AccountController extends Controller
             'success' => true,
             'status' => $account->status,
         ]);
+    }
+
+    private function resolveDepartmentFromPosition(string $position): ?string
+    {
+        $positionRate = PositionRate::with('department')
+            ->where('name', $position)
+            ->first();
+
+        return $positionRate?->department?->name;
     }
 }
