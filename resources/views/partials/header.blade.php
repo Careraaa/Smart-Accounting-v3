@@ -285,7 +285,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="text-sm font-bold text-gray-900 mb-1">{{ $notification->title }}</div>
                                         <p class="text-sm text-gray-600 mb-1.5 leading-relaxed">{{ $notification->message }}</p>
-                                        <small class="text-xs text-gray-400">{{ $notification->created_at->diffForHumans() }}</small>
+                                        <small class="text-xs text-gray-400">{{ $notification->created_at->format('M d, Y h:i A') }}</small>
                                     </div>
                                 </div>
                             @empty
@@ -904,10 +904,7 @@
                 if (notifications.length > 0) {
                     list.innerHTML = notifications.slice(0, 3).map(n => {
                         const created = new Date(n.created_at);
-                        const mins    = Math.ceil(Math.abs(new Date() - created) / 60000);
-                        const timeText = mins >= 60
-                            ? Math.ceil(mins / 60) + ' hr' + (Math.ceil(mins / 60) > 1 ? 's' : '') + ' ago'
-                            : mins + ' min ago';
+                        const timeText = created.toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
                         const actionUrl = n.action_url || '';
                         return `
                             <div class="flex items-start gap-2.5 px-3.5 py-2.5 rounded-lg cursor-pointer transition-colors duration-100 hover:bg-red-50 ${n.read_at ? '' : 'bg-gray-50/80 font-medium'}" data-notif-id="${n.id}" data-action-url="${actionUrl}">

@@ -118,7 +118,7 @@
                             @else
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500 border border-gray-200 leading-tight">Read</span>
                             @endif
-                            <span class="text-[11px] font-mono text-gray-400">{{ $n->created_at?->diffForHumans() }}</span>
+                            <span class="text-[11px] font-mono text-gray-400">{{ $n->created_at?->format('M d, Y h:i A') }}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
