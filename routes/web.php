@@ -38,6 +38,7 @@ use App\Http\Controllers\Employee\AttendanceController as EmployeeAttendanceCont
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\HR\HolidayController as HRHolidayController;
 
 use App\Http\Controllers\HR\ThirteenthMonthPayController;
@@ -129,6 +130,10 @@ Route::get('/dashboard', function () {
 
 // ===== PROFILE & ACCOUNT ROUTES =====
 Route::middleware(['auth', 'check-status'])->group(function () {
+    Route::get('/files/{path}', [FileController::class, 'show'])
+        ->where('path', '.*')
+        ->name('files.show');
+
     Route::prefix('notifications')
         ->name('notifications.')
         ->group(function () {
