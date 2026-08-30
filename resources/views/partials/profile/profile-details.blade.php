@@ -59,7 +59,8 @@
                     @csrf
                     <label tabindex="0" class="pf-avatar block w-16 h-16 rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm cursor-pointer group relative" id="photo-label" role="button" aria-label="Upload profile photo">
                         @if($u->photo_url)
-                            <img src="{{ $u->photo_url }}" alt="Photo" class="w-full h-full object-cover">
+                            <img src="{{ $u->photo_url }}" alt="Photo" onerror="var el=this; el.style.display='none'; var fb=el.parentNode.querySelector('.pf-avatar-fallback'); if(fb){fb.style.display='flex';}" class="w-full h-full object-cover">
+                            <div class="pf-avatar-fallback w-full h-full bg-gray-50 items-center justify-center text-gray-900 font-bold text-xl" style="display:none">{{ $initials ?: 'U' }}</div>
                         @else
                             <div class="w-full h-full bg-gray-50 flex items-center justify-center text-gray-900 font-bold text-xl">
                                 {{ $initials ?: 'U' }}

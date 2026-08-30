@@ -35,8 +35,9 @@
             <div class="pf2-hero-left">
                 @if($u->photo_url)
                     <div class="pf2-avatar pf2-avatar-img">
-                        <img src="{{ $u->photo_url }}" alt="Photo" class="w-full h-full object-cover">
+                        <img src="{{ $u->photo_url }}" alt="Photo" onerror="var el=this; el.style.display='none'; var fb=el.parentNode.querySelector('.pf-fb'); if(fb){fb.style.display='flex';}" class="w-full h-full object-cover">
                     </div>
+                    <div class="pf-avatar-fallback pf2-avatar" style="display:none">{{ $initials }}</div>
                 @else
                     <div class="pf2-avatar">{{ $initials }}</div>
                 @endif

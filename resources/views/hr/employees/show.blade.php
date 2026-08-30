@@ -59,7 +59,10 @@
         <div class="flex items-center gap-4 min-w-0">
             <div class="relative w-16 h-16 rounded-2xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex-shrink-0 shadow-sm">
                 @if($employee->photo_url)
-                    <img src="{{ $employee->photo_url }}" alt="" class="w-full h-full object-cover">
+                    <img src="{{ $employee->photo_url }}" alt="" onerror="var el=this; el.style.display='none'; var fb=el.parentNode.querySelector('.ph-fb'); if(fb){fb.style.display='flex';}" class="w-full h-full object-cover">
+                    <div class="ph-fb w-full h-full items-center justify-center text-gray-300 dark:text-gray-600" style="display:none">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </div>
                 @else
                     <div class="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600">
                         <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>

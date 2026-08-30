@@ -70,7 +70,8 @@
                         @csrf
                         <label tabindex="0" class="pf-avatar block w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/20 shadow-inner cursor-pointer group relative" role="button" aria-label="Upload profile photo">
                             @if($u->photo_url)
-                                <img src="{{ $u->photo_url }}" alt="Photo" class="w-full h-full object-cover">
+                                <img src="{{ $u->photo_url }}" alt="Photo" onerror="var el=this; el.style.display='none'; var fb=el.parentNode.querySelector('.pf-fb'); if(fb){fb.style.display='flex';}" class="w-full h-full object-cover">
+                                <div class="pf-fb w-full h-full bg-white/10 items-center justify-center text-white font-bold text-xl backdrop-blur-sm" style="display:none">{{ $initials ?: 'U' }}</div>
                             @else
                                 <div class="w-full h-full bg-white/10 flex items-center justify-center text-white font-bold text-xl backdrop-blur-sm">
                                     {{ $initials ?: 'U' }}

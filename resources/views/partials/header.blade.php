@@ -317,19 +317,17 @@
             @endphp
             <div class="relative" data-dropdown>
                 <button class="flex items-center gap-2.5 no-underline rounded-lg py-1.5 pl-2 pr-1.5 transition-all duration-200 hover:bg-gray-50 group" id="user-dropdown-btn" type="button">
-                    @if($avatarPhoto)
-                        <div class="relative w-9 h-9 min-w-[36px] flex-shrink-0">
-                            <div class="w-full h-full rounded-full overflow-hidden shadow-sm transition-transform duration-200 group-hover:scale-105">
-                                <img src="{{ $avatarPhoto }}" alt="Photo" class="w-full h-full object-cover">
+                    <div class="relative w-9 h-9 min-w-[36px] flex-shrink-0">
+                        @if($avatarPhoto)
+                            <div id="avatar-img-wrap" class="w-full h-full rounded-full overflow-hidden shadow-sm transition-transform duration-200 group-hover:scale-105">
+                                <img src="{{ $avatarPhoto }}" alt="Photo" class="w-full h-full object-cover" onerror="this.closest('.relative').querySelector('#avatar-initials').classList.remove('hidden'); this.closest('#avatar-img-wrap').classList.add('hidden');">
                             </div>
-                            <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white"></span>
-                        </div>
-                    @else
-                        <div class="profile-avatar-inner relative w-9 h-9 min-w-[36px] rounded-full flex items-center justify-center text-white text-[13px] font-bold shadow-sm transition-transform duration-200 group-hover:scale-105" style="background:{{ $avatarBg }};box-shadow:0 0 0 2px {{ $avatarRing }}, 0 2px 6px rgba(0,0,0,0.08)">
+                        @endif
+                        <div id="avatar-initials" class="profile-avatar-inner {{ $avatarPhoto ? 'hidden' : '' }} relative w-9 h-9 min-w-[36px] rounded-full flex items-center justify-center text-white text-[13px] font-bold shadow-sm transition-transform duration-200 group-hover:scale-105" style="background:{{ $avatarBg }};box-shadow:0 0 0 2px {{ $avatarRing }}, 0 2px 6px rgba(0,0,0,0.08)">
                             {{ $avatarInitials ?: '?' }}
                             <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white"></span>
                         </div>
-                    @endif
+                    </div>
                     <svg class="hidden md:block text-gray-400 transition-transform duration-200 group-hover:rotate-180" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
                     </svg>
