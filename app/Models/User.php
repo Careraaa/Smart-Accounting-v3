@@ -186,8 +186,7 @@ class User extends Authenticatable
         if (!$this->profile_picture) {
             return null;
         }
-        $request = request();
-        return $request->getSchemeAndHttpHost() . $request->getBasePath() . '/storage/' . ltrim($this->profile_picture, '/');
+        return '/storage/' . ltrim($this->profile_picture, '/');
     }
 
     /**

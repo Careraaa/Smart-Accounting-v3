@@ -76,6 +76,17 @@ class Employee extends Model
         return $dept ? ucfirst($dept) : '';
     }
 
+    /**
+     * Get the URL for the profile photo
+     */
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (!$this->profile_picture) {
+            return null;
+        }
+        return '/storage/' . ltrim($this->profile_picture, '/');
+    }
+
     // Relationships
     public function attendances()
     {
