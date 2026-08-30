@@ -69,13 +69,17 @@
         @endif
 
         @php
-            // Count each document type ONCE by its latest upload's status
-            // (history versions are not tallied in the summary cards).
-            $latestPerKey   = $attachments->map(fn($records) => $records->first());
+            // Only consider attachment keys that are real document types.
+            // (Guards against legacy/mismatched keys skewing the summary.)
+            $knownKeys   = array_keys($attachmentTypes);
+            $known       = $attachments->filter(fn($records, $key) => in_array($key, $knownKeys, true));
+
+            // Count each document type ONCE by its latest upload's status.
+            $latestPerKey   = $known->map(fn($records) => $records->first());
             $approvedCount  = $latestPerKey->where('status', 'approved')->count();
             $pendingCount   = $latestPerKey->where('status', 'pending')->count();
             $rejectedCount  = $latestPerKey->where('status', 'rejected')->count();
-            $uploadedKeys   = $attachments->keys()->count();
+            $uploadedKeys   = $known->keys()->count();
             $totalTypes     = count($attachmentTypes);
             $missingCount   = $totalTypes - $uploadedKeys;
         @endphp
