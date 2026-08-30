@@ -132,18 +132,18 @@ $reqClass   = 'text-red-500 ml-0.5';
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="{{ $labelClass }}">Position</label>
-                        <input type="text" name="position" class="{{ $inputClass }} @error('position') border-red-400 bg-red-50 @enderror" value="{{ old('position') }}" placeholder="Accounting Clerk">
+                        <select name="position" id="position" class="{{ $inputClass }} @error('position') border-red-400 bg-red-50 @enderror">
+                            <option value="">&mdash; Select position &mdash;</option>
+                            @foreach ($positions as $position)
+                                <option value="{{ $position->name }}" data-daily-rate="{{ $position->daily_rate }}" {{ old('position') === $position->name ? 'selected' : '' }}>{{ $position->name }}</option>
+                            @endforeach
+                        </select>
                         @error('position')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                     <div>
-                        <label class="{{ $labelClass }}">Department</label>
-                        <select name="department" class="{{ $inputClass }} @error('department') border-red-400 bg-red-50 @enderror">
-                            <option value="">&mdash; Select &mdash;</option>
-                            @foreach ($departments as $dept)
-                                <option value="{{ $dept }}" {{ old('department') === $dept ? 'selected' : '' }}>{{ $dept }}</option>
-                            @endforeach
-                        </select>
-                        @error('department')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
+                        <label class="{{ $labelClass }}">Daily rate</label>
+                        <input type="number" name="salary_rate" id="salary_rate" class="{{ $inputClass }} @error('salary_rate') border-red-400 bg-red-50 @enderror" value="{{ old('salary_rate') }}" placeholder="Auto-filled from position" inputmode="decimal" step="0.01" min="0" readonly>
+                        @error('salary_rate')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -151,11 +151,6 @@ $reqClass   = 'text-red-500 ml-0.5';
                         <label class="{{ $labelClass }}">Date of hire</label>
                         <input type="date" name="date_of_hire" class="{{ $inputClass }} @error('date_of_hire') border-red-400 bg-red-50 @enderror" value="{{ old('date_of_hire') }}">
                         @error('date_of_hire')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
-                    </div>
-                    <div>
-                        <label class="{{ $labelClass }}">Salary rate</label>
-                        <input type="number" name="salary_rate" class="{{ $inputClass }} @error('salary_rate') border-red-400 bg-red-50 @enderror" value="{{ old('salary_rate') }}" placeholder="25000.00" inputmode="decimal" step="0.01" min="0" data-decimal-only>
-                        @error('salary_rate')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                 </div>
                 <div class="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-gray-100">
@@ -188,6 +183,18 @@ $reqClass   = 'text-red-500 ml-0.5';
         }
         if (el.value !== cleaned) el.value = cleaned;
     };
+
+    const positionSelect = document.getElementById('position');
+    const salaryInput = document.getElementById('salary_rate');
+    if (positionSelect && salaryInput) {
+        const syncSalary = () => {
+            const selectedOption = positionSelect.options[positionSelect.selectedIndex];
+            const dailyRate = selectedOption?.dataset.dailyRate;
+            salaryInput.value = (dailyRate !== undefined && dailyRate !== '') ? dailyRate : '';
+        };
+        positionSelect.addEventListener('change', syncSalary);
+        syncSalary();
+    }
 
     document.addEventListener('input', (e) => {
         const el = e.target;
