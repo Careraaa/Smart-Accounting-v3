@@ -3,14 +3,11 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
-use App\Models\Department;
 use App\Models\PayrollCutoffSchedule;
-use App\Models\PositionRate;
 use App\Models\Setting;
 use App\Models\Shift;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class ConfigurationController extends Controller
 {
@@ -30,19 +27,13 @@ class ConfigurationController extends Controller
         // Get attendance settings from database
         $gracePeriod = (int) Setting::get('attendance.grace_period_minutes', 5);
 
-        // Get configured departments and positions
-        $departments = Department::orderBy('name')->get();
-        $positions = PositionRate::with('department')->orderBy('name')->get();
-
         $this->logActivity('viewed', 'Configuration settings', request()->url(), 'configuration');
 
         return view('hr.configuration.index', compact(
             'shifts',
             'cutoffs',
             'activeCutoff',
-            'gracePeriod',
-            'departments',
-            'positions'
+            'gracePeriod'
         ));
     }
 
@@ -122,112 +113,6 @@ class ConfigurationController extends Controller
         $this->logActivity('deleted', "Shift: {$shift->name}", request()->url(), 'configuration', $shift->id);
         $shift->delete();
         return redirect()->route('settings.index')->with('success', 'Shift deleted successfully!');
-    }
-
-    /**
-     * Store a new department.
-     */
-    public function storeDepartment(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:departments,name',
-        ]);
-
-        $validated['is_active'] = true;
-
-        Department::create($validated);
-
-        $this->logActivity('created', "Department: {$validated['name']}", request()->url(), 'configuration');
-
-        return redirect()->route('settings.index')->with('success', 'Department created successfully!');
-    }
-
-    /**
-     * Update a department.
-     */
-    public function updateDepartment(Request $request, Department $department)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:departments,name,' . $department->id,
-        ]);
-
-        $validated['is_active'] = true;
-
-        $department->update($validated);
-
-        $this->logActivity('updated', "Department: {$department->name}", request()->url(), 'configuration', $department->id);
-
-        return redirect()->route('settings.index')->with('success', 'Department updated successfully!');
-    }
-
-    /**
-     * Delete a department.
-     */
-    public function destroyDepartment(Department $department)
-    {
-        $this->logActivity('deleted', "Department: {$department->name}", request()->url(), 'configuration', $department->id);
-        $department->delete();
-        return redirect()->route('settings.index')->with('success', 'Department deleted successfully!');
-    }
-
-    /**
-     * Store a new position and daily rate.
-     */
-    public function storePosition(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:100',
-                Rule::unique('position_rates')->where(fn ($query) => $query->where('department_id', $request->input('department_id'))),
-            ],
-            'daily_rate' => 'required|numeric|between:0,999999.99',
-            'department_id' => 'required|exists:departments,id',
-        ]);
-
-        $validated['is_active'] = true;
-
-        PositionRate::create($validated);
-
-        $this->logActivity('created', "Position: {$validated['name']}", request()->url(), 'configuration');
-
-        return redirect()->route('settings.index')->with('success', 'Position created successfully!');
-    }
-
-    /**
-     * Update a position and daily rate.
-     */
-    public function updatePosition(Request $request, PositionRate $position)
-    {
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:100',
-                Rule::unique('position_rates')->where(fn ($query) => $query->where('department_id', $request->input('department_id')))->ignore($position->id),
-            ],
-            'daily_rate' => 'required|numeric|between:0,999999.99',
-            'department_id' => 'required|exists:departments,id',
-        ]);
-
-        $validated['is_active'] = true;
-
-        $position->update($validated);
-
-        $this->logActivity('updated', "Position: {$position->name}", request()->url(), 'configuration', $position->id);
-
-        return redirect()->route('settings.index')->with('success', 'Position updated successfully!');
-    }
-
-    /**
-     * Delete a position.
-     */
-    public function destroyPosition(PositionRate $position)
-    {
-        $this->logActivity('deleted', "Position: {$position->name}", request()->url(), 'configuration', $position->id);
-        $position->delete();
-        return redirect()->route('settings.index')->with('success', 'Position deleted successfully!');
     }
 
     /**

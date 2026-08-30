@@ -349,16 +349,6 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::put('/settings/shifts/{shift}', [\App\Http\Controllers\HR\ConfigurationController::class, 'updateShift'])->name('settings.shift.update');
         Route::delete('/settings/shifts/{shift}', [\App\Http\Controllers\HR\ConfigurationController::class, 'destroyShift'])->name('settings.shift.destroy');
 
-        // Department routes
-        Route::post('/settings/departments', [\App\Http\Controllers\HR\ConfigurationController::class, 'storeDepartment'])->name('settings.department.store');
-        Route::put('/settings/departments/{department}', [\App\Http\Controllers\HR\ConfigurationController::class, 'updateDepartment'])->name('settings.department.update');
-        Route::delete('/settings/departments/{department}', [\App\Http\Controllers\HR\ConfigurationController::class, 'destroyDepartment'])->name('settings.department.destroy');
-
-        // Position routes
-        Route::post('/settings/positions', [\App\Http\Controllers\HR\ConfigurationController::class, 'storePosition'])->name('settings.position.store');
-        Route::put('/settings/positions/{position}', [\App\Http\Controllers\HR\ConfigurationController::class, 'updatePosition'])->name('settings.position.update');
-        Route::delete('/settings/positions/{position}', [\App\Http\Controllers\HR\ConfigurationController::class, 'destroyPosition'])->name('settings.position.destroy');
-        
         // Payroll Cutoff routes
         Route::post('/settings/payroll-cutoff', [\App\Http\Controllers\HR\ConfigurationController::class, 'updatePayrollCutoff'])->name('settings.payroll-cutoff.update');
         
@@ -591,6 +581,15 @@ Route::middleware(['auth', 'check-status', 'role:superadmin'])->group(function (
     Route::post('/configuration/clear-cache', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'clearCache'])->name('configuration.clear-cache');
     Route::post('/configuration/clear-logs', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'clearLogs'])->name('configuration.clear-logs');
     Route::post('/configuration/toggle-testing', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'toggleTestingMode'])->name('configuration.toggle-testing');
+
+    // Department & Position routes (superadmin only)
+    Route::post('/settings/departments', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'storeDepartment'])->name('settings.department.store');
+    Route::put('/settings/departments/{department}', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'updateDepartment'])->name('settings.department.update');
+    Route::delete('/settings/departments/{department}', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'destroyDepartment'])->name('settings.department.destroy');
+
+    Route::post('/settings/positions', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'storePosition'])->name('settings.position.store');
+    Route::put('/settings/positions/{position}', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'updatePosition'])->name('settings.position.update');
+    Route::delete('/settings/positions/{position}', [\App\Http\Controllers\SuperAdmin\SystemConfigurationController::class, 'destroyPosition'])->name('settings.position.destroy');
 });
 
 //HOLIDAY ROUTES - API
