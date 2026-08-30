@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400">
+  <rect width="640" height="400" fill="#f3f4f6"/>
+  <rect x="36" y="36" width="568" height="328" rx="16" fill="#fff" stroke="#d1d5db"/>
+  <text x="320" y="180" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#111827">Noel Aquino</text>
+  <text x="320" y="220" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#6b7280">Valid ID 1</text>
+  <text x="320" y="260" text-anchor="middle" font-family="sans-serif" font-size="48" fill="#9ca3af">N</text>
+</svg>
