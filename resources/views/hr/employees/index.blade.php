@@ -214,14 +214,14 @@
                                 <td class="px-5 py-3.5">
                                     <div>
                                         <div class="font-semibold text-gray-900">{{ $employee->last_name }}, {{ $employee->first_name }}</div>
-                                        <div class="text-xs text-gray-400 mt-0.5">{{ $employee->position ?? '—' }}</div>
+                                        <div class="text-xs text-gray-400 mt-0.5">{{ $employee->position ?? 'none' }}</div>
                                     </div>
                                 </td>
-                                <td class="px-5 py-3.5 text-gray-500 text-sm hidden md:table-cell">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : '—' }}</td>
+                                <td class="px-5 py-3.5 text-gray-500 text-sm hidden md:table-cell">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : 'none' }}</td>
                                 <td class="px-5 py-3.5">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ $employee->department ?? '—' }}</span>
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ $employee->department ?? 'none' }}</span>
                                 </td>
-                                <td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums hidden sm:table-cell">{{ $employee->phone ?? '—' }}</td>
+                                <td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums hidden sm:table-cell">{{ $employee->phone ?? 'none' }}</td>
                                 <td class="px-5 py-3.5 text-center">
                                     @if($employee->status === 'active')
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -557,8 +557,8 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                 var empRoute = '{{ route("employees.show", ["employee"=>"__ID__"]) }}';
                 pageData.forEach(function(r) {
                     var href = empRoute.replace('__ID__', r.id);
-                    var dept = r.departmentDisplay || '—';
-                    var gender = r.gender ? r.gender.replace('_',' ').replace(/\b\w/g,function(c){return c.toUpperCase();}) : '—';
+                    var dept = r.departmentDisplay || 'none';
+                    var gender = r.gender ? r.gender.replace('_',' ').replace(/\b\w/g,function(c){return c.toUpperCase();}) : 'none';
                     var statusBadge = r.status === 'active'
                         ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Active</span>'
                         : '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500 border border-gray-200"><span class="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block"></span>Inactive</span>';
@@ -571,10 +571,10 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                     tr.dataset.href = href;
                     tr.onclick = function(e) { if(!e.target.closest('a,button,form')) window.location = href; };
                     tr.innerHTML = [
-                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + r.lastName + ', ' + r.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (r.position||'—') + '</div></div></td>',
+                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + r.lastName + ', ' + r.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (r.position||'none') + '</div></div></td>',
                         '<td class="px-5 py-3.5 text-gray-500 text-sm">' + gender + '</td>',
                         '<td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
-                        '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (r.phone||'—') + '</td>',
+                        '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (r.phone||'none') + '</td>',
                         '<td class="px-5 py-3.5 text-center">' + statusBadge + '</td>'
                     ].join('');
                     tbody.appendChild(tr);
@@ -671,8 +671,8 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                 const empRoute = '{{ route("employees.show", ["employee"=>"__ID__"]) }}';
                 pageData.forEach(emp => {
                     const href = empRoute.replace('__ID__', emp.id);
-                    const dept = emp.departmentDisplay ? emp.departmentDisplay : '—';
-                    const gender = emp.gender ? emp.gender.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase()) : '—';
+                    const dept = emp.departmentDisplay ? emp.departmentDisplay : 'none';
+                    const gender = emp.gender ? emp.gender.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase()) : 'none';
                     const row = document.createElement('tr');
                     row.className = 'em-row-hover border-b border-gray-100 cursor-pointer transition-colors duration-150';
                     row.dataset.name   = emp.name;
@@ -681,10 +681,10 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                     row.dataset.href   = href;
                     row.onclick = e => { if(!e.target.closest('a,button,form')) window.location = href; };
                     row.innerHTML = [
-                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + emp.lastName + ', ' + emp.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (emp.position||'—') + '</div></div></td>',
+                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + emp.lastName + ', ' + emp.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (emp.position||'none') + '</div></div></td>',
                         '<td class="px-5 py-3.5 text-gray-500 text-sm">' + gender + '</td>',
                         '<td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
-                        '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (emp.phone||'—') + '</td>',
+                        '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (emp.phone||'none') + '</td>',
                         '<td class="px-5 py-3.5 text-center">' + (STATUS_BADGE[emp.status]||STATUS_BADGE.inactive) + '</td>'
                     ].join('');
                     tbody.appendChild(row);
