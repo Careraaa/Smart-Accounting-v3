@@ -22,7 +22,6 @@ $apiUrl   = url('api/holidays');
         <div class="grid grid-cols-7 gap-px" id="cal-grid"></div>
         <div class="flex items-center gap-3 mt-3 pt-2.5 border-t border-gray-50">
             <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span class="text-[11px] text-gray-600">Today</span></span>
-            <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-gray-300"></span><span class="text-[11px] text-gray-600">Selected</span></span>
             <span class="flex items-center gap-1" id="cal-holiday-legend"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span><span class="text-[11px] text-gray-600">Holiday</span></span>
         </div>
     </div>
@@ -31,7 +30,7 @@ $apiUrl   = url('api/holidays');
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const calState = { month: {{ $calMonth }}, year: {{ $calYear }}, selected: '{{ $today }}' };
+    const calState = { month: {{ $calMonth }}, year: {{ $calYear }} };
     const todayStr = '{{ $today }}';
     const calGrid = document.getElementById('cal-grid');
     const calLabel = document.getElementById('cal-label');
@@ -60,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function () {
         '</div>';
     document.body.appendChild(calTip);
     var calTipName = document.getElementById('cal-tip-name');
-    var pinnedCell = null;
 
     function showTip(cell, name) {
         calTipName.textContent = name;
@@ -76,19 +74,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function hideTip() {
-        if (pinnedCell) return;
         calTip.style.opacity = '0';
         calTip.style.transform = 'translateY(4px)';
-    }
-
-    function pinTip(cell) {
-        pinnedCell = cell;
-        showTip(cell, cell.dataset.tip);
-    }
-
-    function unpinTip() {
-        pinnedCell = null;
-        hideTip();
     }
 
     // ── Calendar ──
@@ -125,43 +112,23 @@ document.addEventListener('DOMContentLoaded', function () {
             const dayHolidays = holidays[ds];
             const isHoliday = !!dayHolidays;
             const tipText = dayHolidays ? dayHolidays.join(', ') : '';
-            let cls = 'relative text-center py-2 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer select-none ';
+            let cls = 'relative text-center py-2 text-xs font-semibold rounded-lg select-none ';
             if (ds === todayStr) {
                 cls += 'bg-rose-500 text-white shadow-sm shadow-rose-200 ';
-            } else if (ds === calState.selected) {
-                cls += 'bg-rose-50 text-rose-600 ring-1 ring-rose-200 ';
             } else if (isHoliday) {
-                cls += 'text-amber-700 bg-amber-50 cal-cell-holiday hover:bg-amber-100 ';
+                cls += 'text-amber-700 bg-amber-50 cal-cell-holiday ';
             } else {
-                cls += 'text-gray-700 hover:bg-gray-50 ';
+                cls += 'text-gray-700 ';
             }
+            if (isHoliday) cls += 'cal-cell-holiday ';
             html += '<span class="' + cls + '" data-date="' + ds + '"' + (isHoliday ? ' data-tip="' + escHtml(tipText) + '"' : '') + '>' + d + '</span>';
         }
 
         calGrid.innerHTML = html;
 
-        calGrid.querySelectorAll('[data-date]').forEach(function (el) {
-            if (el.matches('.cal-cell-holiday')) {
-                el.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    if (pinnedCell === this) { unpinTip(); return; }
-                    calState.selected = this.dataset.date;
-                    renderCalendar();
-                    pinTip(this);
-                });
-                el.addEventListener('mouseenter', function () { if (this !== pinnedCell) showTip(this, this.dataset.tip); });
-                el.addEventListener('mouseleave', function () { if (this !== pinnedCell) hideTip(); });
-            } else {
-                el.addEventListener('click', function () {
-                    unpinTip();
-                    calState.selected = this.dataset.date;
-                    renderCalendar();
-                });
-            }
-        });
-
-        document.addEventListener('click', function (e) {
-            if (pinnedCell && !pinnedCell.contains(e.target)) unpinTip();
+        calGrid.querySelectorAll('.cal-cell-holiday').forEach(function (el) {
+            el.addEventListener('mouseenter', function () { showTip(this, this.dataset.tip); });
+            el.addEventListener('mouseleave', function () { hideTip(); });
         });
     }
 
