@@ -135,7 +135,8 @@
                             <tbody class="divide-y divide-gray-50">
                                 @forelse($advances as $advance)
                                     @php
-                                        $pillClasses = match($advance->status) {
+                                        $displayStatus = $advance->amount_deducted > 0 ? 'deducted' : $advance->status;
+                                        $pillClasses = match($displayStatus) {
                                             'pending'  => 'bg-amber-50 text-amber-700 border border-amber-200',
                                             'approved' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
                                             'rejected' => 'bg-rose-50 text-rose-700 border border-rose-200',
@@ -152,7 +153,7 @@
                                         </td>
                                         <td class="px-5 py-3.5">
                                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $pillClasses }}">
-                                                {{ ucfirst($advance->status) }}
+                                                {{ ucfirst($displayStatus) }}
                                             </span>
                                         </td>
                                         <td class="px-5 py-3.5 max-w-[200px]">

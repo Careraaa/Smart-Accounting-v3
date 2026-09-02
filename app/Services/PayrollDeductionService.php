@@ -78,9 +78,12 @@ class PayrollDeductionService
                 'amount_deducted' => round($newDeducted, 2),
             ];
 
+            if (is_null($advance->deducted_payroll_id)) {
+                $updateData['deducted_payroll_id'] = $payroll->id;
+            }
+
             if ($newDeducted >= $advance->amount) {
                 $updateData['status'] = 'deducted';
-                $updateData['deducted_payroll_id'] = $payroll->id;
             }
 
             $advance->update($updateData);
@@ -128,9 +131,12 @@ class PayrollDeductionService
 
                 $updateData = ['amount_deducted' => round($newDeducted, 2)];
 
-                // If it was marked as fully deducted by this payroll, revert status
-                if ($advance->status === 'deducted' && $advance->deducted_payroll_id === $payroll->id) {
+                // Reopen a completed advance if removing this payroll makes it incomplete.
+                if ($advance->status === 'deducted' && $newDeducted < $advance->amount) {
                     $updateData['status'] = 'released';
+                }
+
+                if ($advance->deducted_payroll_id === $payroll->id) {
                     $updateData['deducted_payroll_id'] = null;
                 }
 

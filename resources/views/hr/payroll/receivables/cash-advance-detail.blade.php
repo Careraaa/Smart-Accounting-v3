@@ -42,10 +42,12 @@
 
     {{-- Header --}}
     @php
-        $badge = match($cashAdvance->status) {
+        $displayStatus = $cashAdvance->amount_deducted > 0 ? 'deducted' : $cashAdvance->status;
+        $badge = match($displayStatus) {
             'pending'  => ['dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
             'approved' => ['dot'=>'bg-emerald-400','text'=>'text-emerald-600','bg'=>'bg-emerald-50'],
             'released' => ['dot'=>'bg-sky-400','text'=>'text-sky-600','bg'=>'bg-sky-50'],
+            'deducted' => ['dot'=>'bg-violet-400','text'=>'text-violet-600','bg'=>'bg-violet-50'],
             'rejected' => ['dot'=>'bg-red-400','text'=>'text-red-600','bg'=>'bg-red-50'],
             default    => ['dot'=>'bg-gray-400','text'=>'text-gray-600','bg'=>'bg-gray-50'],
         };
@@ -58,7 +60,7 @@
         </div>
         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $badge['bg'] }} {{ $badge['text'] }}">
             <span class="w-2 h-2 rounded-full {{ $badge['dot'] }}"></span>
-            {{ ucfirst($cashAdvance->status) }}
+            {{ ucfirst($displayStatus) }}
         </span>
     </div>
 

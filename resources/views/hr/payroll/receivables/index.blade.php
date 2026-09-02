@@ -225,7 +225,7 @@ window.allCashAdvances = {!! json_encode($allCashAdvances->sortBy(fn($a) => strt
     'repayment_months' => $a->repayment_months ?? 1,
     'monthly_deduction' => (float) ($a->monthly_deduction ?? $a->amount),
     'request_date' => $a->request_date ? \Carbon\Carbon::parse($a->request_date)->format('M d, Y') : '—',
-    'status' => $a->status ?? 'pending',
+    'status' => (float) ($a->amount_deducted ?? 0) > 0 ? 'deducted' : ($a->status ?? 'pending'),
     'deducted_payroll' => $a->deductedPayroll ? \Carbon\Carbon::parse($a->deductedPayroll->payroll_period_end)->format('M d, Y') : null,
     'rejection_reason' => $a->rejection_reason,
     'url' => route('payroll.receivables.cash-advances.show', $a),
@@ -345,8 +345,8 @@ window.allSalaryLoans = [];
             caNR.classList.add('hidden');
             pageData.forEach(r => {
                 const initials = (r.initial_1 || 'U') + (r.initial_2 || '');
-                const badgeCls = { pending: 'bg-amber-50 text-amber-700 border-amber-200', approved: 'bg-blue-50 text-blue-700 border-blue-200', released: 'bg-emerald-50 text-emerald-700 border-emerald-200', rejected: 'bg-red-50 text-red-700 border-red-200' }[r.status] || 'bg-gray-50 text-gray-600 border-gray-200';
-                const dotCls = { pending: 'bg-amber-500', approved: 'bg-blue-500', released: 'bg-emerald-500', rejected: 'bg-red-500' }[r.status] || 'bg-gray-400';
+                const badgeCls = { pending: 'bg-amber-50 text-amber-700 border-amber-200', approved: 'bg-blue-50 text-blue-700 border-blue-200', released: 'bg-emerald-50 text-emerald-700 border-emerald-200', deducted: 'bg-violet-50 text-violet-700 border-violet-200', rejected: 'bg-red-50 text-red-700 border-red-200' }[r.status] || 'bg-gray-50 text-gray-600 border-gray-200';
+                const dotCls = { pending: 'bg-amber-500', approved: 'bg-blue-500', released: 'bg-emerald-500', deducted: 'bg-violet-500', rejected: 'bg-red-500' }[r.status] || 'bg-gray-400';
                 const tr = document.createElement('tr');
                 tr.className = 'pr-row hover:bg-gray-50/40 transition-colors cursor-pointer';
                 tr.dataset.url = r.url;
