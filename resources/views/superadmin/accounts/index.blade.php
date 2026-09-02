@@ -157,11 +157,11 @@
                             <td class="px-5 py-3.5">
                                 <div class="flex items-center gap-2.5">
                                     <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 border border-gray-200 flex-shrink-0 uppercase">{{ $initials }}</div>
-                                    <div class="font-semibold text-gray-900">{{ $user->first_name }} {{ $user->last_name }}</div>
+                                    <div class="font-semibold text-gray-900">{{ $user->first_name ?? 'None' }} {{ $user->last_name ?? 'None' }}</div>
                                 </div>
                             </td>
                             <td class="px-5 py-3.5">
-                                <span class="font-mono text-sm text-gray-600 tabular-nums">{{ $user->email }}</span>
+                                <span class="font-mono text-sm text-gray-600 tabular-nums">{{ $user->email ?? 'None' }}</span>
                             </td>
                             <td class="px-5 py-3.5 text-center">
                                 <span class="inline-flex items-center justify-center px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full min-w-[120px] whitespace-nowrap {{ $roleBadge }}">
@@ -254,10 +254,10 @@
 <script>
 window.allAccountsData = {!! json_encode($allUsers->map(fn($u) => [
     'id'         => $u->id,
-    'firstName'  => $u->first_name,
-    'lastName'   => $u->last_name,
+    'firstName'  => $u->first_name ?? 'None',
+    'lastName'   => $u->last_name ?? 'None',
     'name'       => strtolower(($u->first_name??'').' '.($u->last_name??'').' '.($u->email??'')),
-    'email'      => $u->email,
+    'email'      => $u->email ?? 'None',
     'role'       => $u->role,
     'status'     => $u->status,
     'lastLogin'  => $u->last_login_at ? $u->last_login_at->format('M d, Y H:i') : null,

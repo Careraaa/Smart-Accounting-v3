@@ -23,6 +23,9 @@ class MinimalUsersSeeder extends Seeder
             'id' => 1,
             'name' => 'Super Admin',
             'username' => 'super_admin',
+            'first_name' => 'Super',
+            'middle_name' => null,
+            'last_name' => 'Admin',
             'password' => SeedConfig::PASSWORD_HASH,
             'role' => 'superadmin',
             'status' => 'active',
@@ -30,6 +33,20 @@ class MinimalUsersSeeder extends Seeder
             'updated_at' => $timestamp,
         ]);
 
-        $this->command?->info('MinimalUsersSeeder: 1 superadmin user.');
+        DB::table('users')->insert([
+            'id' => 2,
+            'name' => 'QR Attendance Admin',
+            'username' => 'qr_admin',
+            'first_name' => 'QR',
+            'middle_name' => null,
+            'last_name' => 'Admin',
+            'password' => SeedConfig::PASSWORD_HASH,
+            'role' => 'qr_admin',
+            'status' => 'active',
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+        ]);
+
+        $this->command?->info('MinimalUsersSeeder: 1 superadmin and 1 QR admin user.');
     }
 }
