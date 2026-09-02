@@ -109,7 +109,7 @@
                         <span class="text-sm text-gray-600">Monthly Deduction</span>
                         <span class="text-sm font-semibold text-gray-900 font-mono tabular-nums">₱{{ number_format($cashAdvance->monthly_deduction ?? $cashAdvance->amount, 2) }}</span>
                     </div>
-                    @if ($cashAdvance->status === 'released' && $cashAdvance->deductedPayroll)
+                    @if ($cashAdvance->deductedPayroll)
                     <div class="flex items-center justify-between py-2.5">
                         <span class="text-sm text-gray-600">Deducted On</span>
                         <span class="text-sm text-gray-900">Period ending {{ \Carbon\Carbon::parse($cashAdvance->deductedPayroll->payroll_period_end)->format('F d, Y') }}</span>
