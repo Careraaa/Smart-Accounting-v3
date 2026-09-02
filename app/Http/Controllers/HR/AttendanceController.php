@@ -404,7 +404,7 @@ class AttendanceController extends Controller
 
     public function create()
     {
-        $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->get();
+        $employees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->orderBy('last_name')->orderBy('first_name')->get();
         $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
         return view('hr.attendance.create', compact('employees', 'gracePeriodMinutes'));
     }
