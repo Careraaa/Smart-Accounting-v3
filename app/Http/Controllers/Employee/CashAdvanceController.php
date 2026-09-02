@@ -14,6 +14,7 @@ class CashAdvanceController extends Controller
     public function index()
     {
         $advances = CashAdvance::where('user_id', auth()->id())
+            ->with('deductedPayroll')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

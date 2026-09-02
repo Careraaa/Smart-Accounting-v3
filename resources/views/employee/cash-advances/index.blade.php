@@ -166,8 +166,19 @@
                                             @endif
                                         </td>
                                         <td class="px-5 py-3.5 text-sm text-gray-700">
-                                            @if($advance->deductedPayroll)
-                                                Period ending {{ $advance->deductedPayroll->payroll_period_end ? \Carbon\Carbon::parse($advance->deductedPayroll->payroll_period_end)->format('M d, Y') : '—' }}
+                                            @php($deductionPayrolls = $advance->deductionPayrolls())
+                                            @if($deductionPayrolls->isNotEmpty())
+                                                <details class="group">
+                                                    <summary class="cursor-pointer list-none text-blue-700 hover:text-blue-900">
+                                                        {{ $deductionPayrolls->count() }} deduction date{{ $deductionPayrolls->count() > 1 ? 's' : '' }}
+                                                        <span class="text-[10px] text-gray-400 group-open:hidden">(view)</span>
+                                                    </summary>
+                                                    <div class="mt-1 space-y-0.5 text-xs text-gray-600">
+                                                        @foreach($deductionPayrolls as $deductionPayroll)
+                                                            <div>Period ending {{ $deductionPayroll->payroll_period_end ? \Carbon\Carbon::parse($deductionPayroll->payroll_period_end)->format('M d, Y') : '—' }}</div>
+                                                        @endforeach
+                                                    </div>
+                                                </details>
                                             @else
                                                 <span class="text-gray-400">—</span>
                                             @endif

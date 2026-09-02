@@ -51,6 +51,24 @@ class CashAdvance extends Model
         return $this->belongsTo(Payroll::class, 'deducted_payroll_id');
     }
 
+    public function deductionPayrolls()
+    {
+        $payrolls = Payroll::where('user_id', $this->user_id)
+            ->where('cash_advance_deduction', '>', 0)
+            ->orderBy('payroll_period_end')
+            ->get()
+            ->filter(function (Payroll $payroll) {
+                return collect(data_get($payroll->loan_deduction_data, 'cash_advances', []))
+                    ->contains(fn (array $deduction) => (int) ($deduction['id'] ?? 0) === $this->id);
+            });
+
+        if ($this->deductedPayroll && !$payrolls->contains('id', $this->deductedPayroll->id)) {
+            $payrolls->push($this->deductedPayroll);
+        }
+
+        return $payrolls->sortBy('payroll_period_end')->values();
+    }
+
     // ── Scopes ────────────────────────────────────────────────────────
 
     public function scopePending($query)
