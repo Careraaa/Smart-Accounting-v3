@@ -130,6 +130,8 @@
         {
             $employees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
                 ->where('status', 'active')
+                ->orderBy('last_name')
+                ->orderBy('first_name')
                 ->get();
             return view('hr.payroll.salary-computation.create', compact('employees'));
         }
@@ -355,8 +357,8 @@
                         ->whereDate('payroll_period_start', $periodStart)
                         ->whereDate('payroll_period_end', $periodEnd);
                 })
-                ->orderBy('first_name')
                 ->orderBy('last_name')
+                ->orderBy('first_name')
                 ->get(['id', 'first_name', 'last_name', 'position']);
 
             $departments = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])

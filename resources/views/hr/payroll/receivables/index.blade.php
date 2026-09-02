@@ -214,10 +214,10 @@
 
 @push('scripts')
 <script>
-window.allCashAdvances = {!! json_encode($allCashAdvances?->map(fn($a) => [
+window.allCashAdvances = {!! json_encode($allCashAdvances->sortBy(fn($a) => strtolower($a->user->last_name ?? ''))->values()->map(fn($a) => [
     'id' => $a->id,
-    'name' => $a->user->name ?? '—',
-    'name_lower' => strtolower($a->user->name ?? ''),
+    'name' => trim(($a->user->last_name ?? '') . ', ' . ($a->user->first_name ?? '')) ?: '—',
+    'name_lower' => strtolower(trim(($a->user->last_name ?? '') . ' ' . ($a->user->first_name ?? ''))),
     'position' => $a->user->position ?? '',
     'initial_1' => strtoupper(substr($a->user->first_name ?? ($a->user->name ?? 'U'), 0, 1)),
     'initial_2' => strtoupper(substr($a->user->last_name ?? '', 0, 1)),

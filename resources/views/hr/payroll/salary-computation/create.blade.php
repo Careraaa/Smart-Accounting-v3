@@ -297,7 +297,7 @@
                                 data-has-sss="{{ $emp->has_sss ? 1 : 0 }}"
                                 data-has-pagibig="{{ $emp->has_pagibig ? 1 : 0 }}"
                                 {{ (old('user_id', request('prefill_user')) == $emp->id) ? 'selected' : '' }}>
-                                {{ $emp->first_name }} {{ $emp->last_name }}
+                                {{ $emp->last_name }}, {{ $emp->first_name }}
                             </option>
                         @endforeach
                     </select>

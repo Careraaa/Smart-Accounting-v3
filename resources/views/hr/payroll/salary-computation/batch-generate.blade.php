@@ -502,7 +502,7 @@ html.dark .prl-select-all-btn:hover { color: #fca5a5; }
                         . '&period_start=' . $periodStart->format('Y-m-d')
                         . '&period_end=' . $periodEnd->format('Y-m-d');
                 @endphp
-                <div class="prl-emp-row" data-name="{{ strtolower($emp->first_name . ' ' . $emp->last_name) }}">
+                <div class="prl-emp-row" data-name="{{ strtolower($emp->last_name . ' ' . $emp->first_name) }}">
                     <div class="prl-emp-check-wrap">
                         <input type="checkbox" class="prl-emp-check emp-checkbox"
                                name="employees[]" value="{{ $emp->id }}"
@@ -512,7 +512,7 @@ html.dark .prl-select-all-btn:hover { color: #fca5a5; }
                     <label for="emp_{{ $emp->id }}" class="prl-emp-info" style="cursor:pointer; margin:0;">
                         <div class="prl-emp-avatar">{{ $initials }}</div>
                         <div>
-                            <div class="prl-emp-name">{{ $emp->first_name }} {{ $emp->last_name }}</div>
+                            <div class="prl-emp-name">{{ $emp->last_name }}, {{ $emp->first_name }}</div>
                             <div class="prl-emp-meta">
                                 {{ $emp->department ?? 'No dept.' }}
                                 @if($emp->position) · {{ $emp->position }} @endif
