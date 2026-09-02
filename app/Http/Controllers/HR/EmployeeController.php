@@ -226,7 +226,6 @@ class EmployeeController extends Controller
                 'date_of_hire' => 'required|date',
                 'position' => 'required|string|max:150',
                 'department' => 'nullable|string|max:150',
-                'status' => 'required|string|in:active,inactive',
                 'salary_rate' => 'required|numeric|between:0,999999.99', // DAILY RATE
                 'work_days_per_week' => 'required|integer|in:5,6',
                 'sss_number' => 'nullable|string|max:50',
@@ -252,6 +251,7 @@ class EmployeeController extends Controller
         $validated['has_tin'] = $request->has('has_tin');
         $validated['has_pagibig'] = $request->has('has_pagibig');
         $validated['has_philhealth'] = $request->has('has_philhealth');
+        $validated['status'] = $employee->status ?? 'active';
         $validated['name'] = trim($validated['first_name'] . ' ' . ($validated['middle_name'] ?? '') . ' ' . $validated['last_name']);
         $validated['address'] = $this->assembleAddress($request);
 
