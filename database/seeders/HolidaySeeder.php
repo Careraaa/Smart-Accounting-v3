@@ -15,7 +15,7 @@ class HolidaySeeder extends Seeder
     {
         $holidays = [];
 
-        foreach ([2025, 2026] as $year) {
+        foreach (range((int) date('Y'), (int) date('Y') + 5) as $year) {
             $holidays = array_merge($holidays, [
                 // Regular Holidays
                 ['name' => 'New Year\'s Day', 'date' => "$year-01-01", 'type' => 'regular'],

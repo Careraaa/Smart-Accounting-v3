@@ -278,16 +278,21 @@ function initCalendar() {
     }
     
     let holidays = {};
+    let holidaysLoaded = false;
 
     async function loadHolidaysForCalendar(year) {
+        if (holidaysLoaded) return;
         try {
-            const res = await fetch(`/api/holidays?year=${year}`);
+            const fromYear = year;
+            const toYear = year + 4;
+            const res = await fetch(`/api/holidays?from=${fromYear}&to=${toYear}`);
             if (!res.ok) return;
             const data = await res.json();
             holidays = {};
             data.forEach(h => {
                 holidays[h.date] = h.name;
             });
+            holidaysLoaded = true;
         } catch (error) {
             console.warn('Holiday data unavailable:', error);
             holidays = {};
@@ -301,25 +306,22 @@ function initCalendar() {
         
         upcomingList.innerHTML = '';
         
-        // Load holidays for current year and next year
-        await loadHolidaysForCalendar(today.getFullYear());
-        const nextYearHolidays = {};
+        const fromYear = today.getFullYear();
+        const toYear = fromYear + 4;
+        
+        const allHolidays = {};
         try {
-            const res = await fetch(`/api/holidays?year=${today.getFullYear() + 1}`);
+            const res = await fetch(`/api/holidays?from=${fromYear}&to=${toYear}`);
             if (res.ok) {
                 const data = await res.json();
                 data.forEach(h => {
-                    nextYearHolidays[h.date] = h.name;
+                    allHolidays[h.date] = h.name;
                 });
             }
         } catch (err) {
-            console.warn('Next year holidays unavailable');
+            console.warn('Holiday data unavailable');
         }
         
-        // Combine holidays
-        const allHolidays = { ...holidays, ...nextYearHolidays };
-        
-        // Find upcoming holidays (from today onwards, next 6 months)
         const upcomingHolidays = [];
         const maxDate = new Date(today);
         maxDate.setMonth(maxDate.getMonth() + 6);
@@ -331,10 +333,8 @@ function initCalendar() {
             }
         });
         
-        // Sort by date
         upcomingHolidays.sort((a, b) => a.date - b.date);
         
-        // Display upcoming holidays
         if (upcomingHolidays.length === 0) {
             upcomingList.innerHTML = '<div style="color: #9ca3af; font-size: 0.75rem; padding: 8px 0;">No upcoming holidays</div>';
         } else {

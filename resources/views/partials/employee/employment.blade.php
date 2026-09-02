@@ -36,6 +36,19 @@
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
         </div>
+        <div>
+            <label for="status" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Employment Status <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            @php $selectedStatus = $isEdit ? old('status', $employee->status ?? 'active') : 'active'; @endphp
+            <input type="hidden" name="status" id="status" value="{{ $selectedStatus }}">
+            <div class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800/80">
+                {{ ucfirst($selectedStatus) }}
+            </div>
+            @error('status')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
     </div>
 
     @include('partials.employee.employment_hr')

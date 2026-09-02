@@ -123,12 +123,25 @@ class HolidayController extends Controller
 
     /**
      * Get holidays as JSON (API endpoint).
+     *
+     * Supports:
+     *   ?year=2026          — single year (backward compatible)
+     *   ?from=2025&to=2030  — year range
      */
     public function indexApi(Request $request)
     {
-        $year = $request->get('year', now()->year);
+        $query = Holiday::query();
 
-        $holidays = Holiday::whereYear('date', $year)
+        if ($request->filled('from') && $request->filled('to')) {
+            $from = (int) $request->get('from');
+            $to   = (int) $request->get('to');
+            $query->whereBetween('date', ["$from-01-01", "$to-12-31"]);
+        } else {
+            $year = (int) $request->get('year', now()->year);
+            $query->whereYear('date', $year);
+        }
+
+        $holidays = $query->orderBy('date')
             ->get()
             ->map(function ($holiday) {
                 return [

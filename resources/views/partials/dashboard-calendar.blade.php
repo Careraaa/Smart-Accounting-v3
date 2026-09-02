@@ -79,15 +79,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ── Calendar ──
+    var holidaysFetched = false;
+
     function fetchHolidays(year) {
-        if (Object.keys(holidays).length && year === calState.year) return;
-        fetch('{{ $apiUrl }}?year=' + year)
+        if (holidaysFetched) return;
+        var fromYear = calState.year;
+        var toYear = calState.year + 4;
+        fetch('{{ $apiUrl }}?from=' + fromYear + '&to=' + toYear)
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 data.forEach(function (h) {
                     if (!holidays[h.date]) holidays[h.date] = [];
                     holidays[h.date].push(h.name);
                 });
+                holidaysFetched = true;
                 renderCalendar();
             })
             .catch(function () {});
