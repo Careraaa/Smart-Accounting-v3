@@ -6,6 +6,7 @@ use App\Traits\LogsUserActivity;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\PositionRate;
+use App\Models\Shift;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -28,8 +29,9 @@ class AccountController extends Controller
             ->with('department')
             ->orderBy('name')
             ->get();
+        $shifts = Shift::where('is_active', true)->orderBy('name')->get();
 
-        return view('superadmin.accounts.create', compact('positions'));
+        return view('superadmin.accounts.create', compact('positions', 'shifts'));
     }
 
     public function store(Request $request)
@@ -43,6 +45,7 @@ class AccountController extends Controller
             'role' => 'required|string|in:hr,accountant,remittance_clerk,employee,qr_admin',
             'phone' => ['nullable', 'regex:/^09\d{9}$/'],
             'position' => 'required|string|max:255',
+            'shift_id' => 'required|exists:shifts,id',
             'department' => 'nullable|string|max:255',
             'date_of_hire' => 'required|date',
             'salary_rate' => 'required|numeric|min:0',
@@ -67,7 +70,9 @@ class AccountController extends Controller
 
     public function edit(User $account)
     {
-        return view('superadmin.accounts.edit', ['user' => $account]);
+        $shifts = Shift::where('is_active', true)->orderBy('name')->get();
+
+        return view('superadmin.accounts.edit', ['user' => $account, 'shifts' => $shifts]);
     }
 
     public function update(Request $request, User $account)
@@ -79,6 +84,7 @@ class AccountController extends Controller
             'role' => 'required|string|in:superadmin,hr,accountant,remittance_clerk,employee,qr_admin',
             'phone' => ['nullable', 'regex:/^09\d{9}$/'],
             'position' => 'nullable|string|max:255',
+            'shift_id' => 'required|exists:shifts,id',
             'department' => 'nullable|string|max:255',
             'date_of_hire' => 'nullable|date',
             'salary_rate' => 'nullable|numeric|min:0',

@@ -141,6 +141,16 @@ $reqClass   = 'text-red-500 ml-0.5';
                         <input type="number" name="salary_rate" class="{{ $inputClass }} @error('salary_rate') border-red-400 bg-red-50 @enderror" value="{{ old('salary_rate', $user->salary_rate) }}" placeholder="25000.00" inputmode="decimal" step="0.01" min="0" data-decimal-only>
                         @error('salary_rate')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
+                    <div>
+                        <label class="{{ $labelClass }}">Shift <span class="{{ $reqClass }}">*</span></label>
+                        <select name="shift_id" class="{{ $inputClass }} @error('shift_id') border-red-400 bg-red-50 @enderror" required>
+                            <option value="">&mdash; Select shift &mdash;</option>
+                            @foreach ($shifts as $shift)
+                                <option value="{{ $shift->id }}" {{ (string) old('shift_id', $user->shift_id) === (string) $shift->id ? 'selected' : '' }}>{{ $shift->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('shift_id')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
+                    </div>
                 </div>
                 <div class="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-gray-100">
                     <a href="{{ route('superadmin.accounts.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl text-sm font-semibold hover:border-[#c8292a] hover:text-[#c8292a] hover:bg-red-50 transition-all duration-150 no-underline">Cancel</a>

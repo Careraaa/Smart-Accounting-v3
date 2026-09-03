@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\EmployeeAttachment;
 use App\Models\PositionRate;
+use App\Models\Shift;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -82,8 +83,9 @@ class EmployeeController extends Controller
             ->with('department')
             ->orderBy('name')
             ->get();
+        $shifts = Shift::where('is_active', true)->orderBy('name')->get();
 
-        return view('hr.employees.create', compact('employee', 'departments', 'positions'));
+        return view('hr.employees.create', compact('employee', 'departments', 'positions', 'shifts'));
     }
 
     public function store(Request $request)
@@ -110,6 +112,7 @@ class EmployeeController extends Controller
                 'driver_license_validity' => 'nullable|date',
                 'date_of_hire' => 'required|date',
                 'position' => 'required|string|max:150',
+                'shift_id' => 'required|exists:shifts,id',
                 'department' => 'nullable|string|max:150',
                 'salary_rate' => 'required|numeric|between:0,999999.99', // DAILY RATE
                 'work_days_per_week' => 'required|integer|in:5,6',
@@ -197,8 +200,9 @@ class EmployeeController extends Controller
             ->with('department')
             ->orderBy('name')
             ->get();
+        $shifts = Shift::where('is_active', true)->orderBy('name')->get();
 
-        return view('hr.employees.edit', compact('employee', 'departments', 'positions'));
+        return view('hr.employees.edit', compact('employee', 'departments', 'positions', 'shifts'));
     }
 
     public function update(Request $request, User $employee)
@@ -225,6 +229,7 @@ class EmployeeController extends Controller
                 'driver_license_validity' => 'nullable|date',
                 'date_of_hire' => 'required|date',
                 'position' => 'required|string|max:150',
+                'shift_id' => 'required|exists:shifts,id',
                 'department' => 'nullable|string|max:150',
                 'salary_rate' => 'required|numeric|between:0,999999.99', // DAILY RATE
                 'work_days_per_week' => 'required|integer|in:5,6',

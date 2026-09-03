@@ -36,6 +36,24 @@
                 <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
             @enderror
         </div>
+        <div>
+            <label for="shift_id" class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">
+                Shift <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <div class="relative">
+                <select name="shift_id" id="shift_id" required
+                    class="w-full appearance-none border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 pr-9 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 {{ $errors->has('shift_id') ? 'border-red-500 dark:border-red-400!' : '' }}">
+                    <option value="" disabled {{ old('shift_id', $employee->shift_id ?? '') === '' ? 'selected' : '' }}>Select shift</option>
+                    @foreach(($shifts ?? collect()) as $shiftOption)
+                        <option value="{{ $shiftOption->id }}" {{ (string) old('shift_id', $employee->shift_id ?? '') === (string) $shiftOption->id ? 'selected' : '' }}>{{ $shiftOption->name }} ({{ \Carbon\Carbon::parse($shiftOption->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($shiftOption->end_time)->format('g:i A') }})</option>
+                    @endforeach
+                </select>
+                <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            @error('shift_id')
+                <span class="block text-xs text-red-500 dark:text-red-400 mt-1">{{ $message }}</span>
+            @enderror
+        </div>
     </div>
 
     @include('partials.employee.employment_hr')

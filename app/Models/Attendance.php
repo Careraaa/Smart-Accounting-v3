@@ -39,20 +39,23 @@ class Attendance extends Model
     public function getHoursWorkedAttribute()
     {
         if ($this->time_in && $this->time_out) {
-            // Count regular-day work from 8:00 AM, even when the employee arrives earlier.
             $date = $this->date->format('Y-m-d');
             $timeIn = \Carbon\Carbon::parse($date . ' ' . $this->time_in);
-            $officeStart = \Carbon\Carbon::parse($date . ' 08:00:00');
             $timeOut = \Carbon\Carbon::parse($this->date->format('Y-m-d') . ' ' . $this->time_out);
 
-            if ($timeIn->lt($officeStart)) {
-                $timeIn = $officeStart;
+            $shift = $this->employee?->shift ?? \App\Models\Shift::where('is_active', true)->first();
+            $breakMinutes = 0;
+            if ($shift?->break_start && $shift?->break_end) {
+                $breakStart = \Carbon\Carbon::parse($date . ' ' . $shift->break_start);
+                $breakEnd = \Carbon\Carbon::parse($date . ' ' . $shift->break_end);
+                if ($timeOut->greaterThan($breakStart) && $timeIn->lessThan($breakEnd)) {
+                    $overlapStart = $timeIn->greaterThan($breakStart) ? $timeIn : $breakStart;
+                    $overlapEnd = $timeOut->lessThan($breakEnd) ? $timeOut : $breakEnd;
+                    $breakMinutes = max(0, $overlapEnd->diffInMinutes($overlapStart));
+                }
             }
-            
-            // Calculate hours using timestamp difference and subtract the one-hour break.
-            $hoursWorked = ($timeOut->timestamp - $timeIn->timestamp) / 3600;
-            
-            $hoursWorked = max(0, $hoursWorked - 1);
+
+            $hoursWorked = max(0, ($timeOut->diffInMinutes($timeIn) - $breakMinutes) / 60);
             
             return round($hoursWorked, 2);
         }
