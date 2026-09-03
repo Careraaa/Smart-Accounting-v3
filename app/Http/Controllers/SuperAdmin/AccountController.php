@@ -42,10 +42,14 @@ class AccountController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string|in:hr,accountant,remittance_clerk,employee,qr_admin',
             'phone' => ['nullable', 'regex:/^09\d{9}$/'],
-            'position' => 'nullable|string|max:255',
+            'position' => 'required|string|max:255',
             'department' => 'nullable|string|max:255',
-            'date_of_hire' => 'nullable|date',
-            'salary_rate' => 'nullable|numeric|min:0',
+            'date_of_hire' => 'required|date',
+            'salary_rate' => 'required|numeric|min:0',
+        ], [
+            'position.required' => 'Position is required.',
+            'date_of_hire.required' => 'Date of hire is required.',
+            'salary_rate.required' => 'Daily rate is required.',
         ]);
 
         $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];

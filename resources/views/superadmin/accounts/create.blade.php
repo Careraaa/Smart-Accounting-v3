@@ -8,7 +8,7 @@ $reqClass   = 'text-red-500 ml-0.5';
 @endphp
 
 @section('content')
-<div class="max-w-3xl">
+<div class="max-w-6xl mx-auto">
         <a href="{{ route('superadmin.accounts.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer mb-4">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back to accounts
@@ -141,14 +141,14 @@ $reqClass   = 'text-red-500 ml-0.5';
                 </div>
                 <div>
                     <p class="text-sm font-bold text-gray-900">Employment</p>
-                    <p class="text-xs text-gray-400">Optional HR fields</p>
+                    <p class="text-xs text-gray-400">Required HR fields</p>
                 </div>
             </div>
             <div class="px-5 py-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="{{ $labelClass }}">Position</label>
-                        <select name="position" id="position" class="{{ $inputClass }} @error('position') border-red-400 bg-red-50 @enderror">
+                        <label class="{{ $labelClass }}">Position <span class="{{ $reqClass }}">*</span></label>
+                        <select name="position" id="position" class="{{ $inputClass }} @error('position') border-red-400 bg-red-50 @enderror" required>
                             <option value="">&mdash; Select position &mdash;</option>
                             @foreach ($positions as $position)
                                 <option value="{{ $position->name }}" data-daily-rate="{{ $position->daily_rate }}" {{ old('position') === $position->name ? 'selected' : '' }}>{{ $position->name }}</option>
@@ -157,15 +157,15 @@ $reqClass   = 'text-red-500 ml-0.5';
                         @error('position')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                     <div>
-                        <label class="{{ $labelClass }}">Daily rate</label>
-                        <input type="number" name="salary_rate" id="salary_rate" class="{{ $inputClass }} @error('salary_rate') border-red-400 bg-red-50 @enderror" value="{{ old('salary_rate') }}" placeholder="Auto-filled from position" inputmode="decimal" step="0.01" min="0" readonly>
+                        <label class="{{ $labelClass }}">Daily rate <span class="{{ $reqClass }}">*</span></label>
+                        <input type="number" name="salary_rate" id="salary_rate" class="{{ $inputClass }} @error('salary_rate') border-red-400 bg-red-50 @enderror" value="{{ old('salary_rate') }}" placeholder="Auto-filled from position" inputmode="decimal" step="0.01" min="0" readonly required>
                         @error('salary_rate')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="{{ $labelClass }}">Date of hire</label>
-                        <input type="date" name="date_of_hire" class="{{ $inputClass }} @error('date_of_hire') border-red-400 bg-red-50 @enderror" value="{{ old('date_of_hire') }}">
+                        <label class="{{ $labelClass }}">Date of hire <span class="{{ $reqClass }}">*</span></label>
+                        <input type="date" name="date_of_hire" class="{{ $inputClass }} @error('date_of_hire') border-red-400 bg-red-50 @enderror" value="{{ old('date_of_hire') }}" required>
                         @error('date_of_hire')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                 </div>
