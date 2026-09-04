@@ -2,23 +2,26 @@
 #  Auto-deploy to InfinityFree via FTP
 #
 #  Branches:
-#    push to main        -> PRODUCTION  (secrets: *_PROD)
-#    push to deploy-test -> SANDBOX     (secrets: *_TEST)
+#    push to main          -> PRODUCTION     (secrets: *_PROD)
+#    push to deploy-test   -> SANDBOX #1     (secrets: *_TEST)
+#    push to deploy-test-2 -> SANDBOX #2     (secrets: *_TEST2)
 #
 #  Required GitHub repo Secrets (Settings > Secrets and variables > Actions):
-#    FTP_USERNAME          - InfinityFree FTP user   (epiz_XXXX)
-#    FTP_PASSWORD          - InfinityFree FTP password
-#    FTP_SERVER_DIR_PROD   - e.g. /htdocs/
-#    FTP_SERVER_DIR_TEST   - e.g. /test.yoursub.epizy.com/htdocs/
-#    PROD_ENV_FILE         - full production .env content
-#    TEST_ENV_FILE         - full test .env content
+#    FTP_USERNAME           - InfinityFree FTP user   (epiz_XXXX)
+#    FTP_PASSWORD           - InfinityFree FTP password
+#    FTP_SERVER_DIR_PROD    - e.g. /htdocs/
+#    FTP_SERVER_DIR_TEST    - e.g. /test.yoursub.epizy.com/htdocs/
+#    FTP_SERVER_DIR_TEST2   - e.g. /test2.yoursub.epizy.com/htdocs/
+#    PROD_ENV_FILE          - full production .env content
+#    TEST_ENV_FILE          - full test .env content
+#    TEST2_ENV_FILE         - full test2 .env content
 # =============================================================
 
 name: Deploy
 
 on:
   push:
-    branches: [main, deploy-test]
+    branches: [main, deploy-test, deploy-test-2]
   workflow_dispatch:
 
 jobs:
@@ -35,8 +38,10 @@ jobs:
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_PROD }}" >> "$GITHUB_ENV"
-          else
+          elif [ "${{ github.ref_name }}" = "deploy-test" ]; then
             echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_TEST }}" >> "$GITHUB_ENV"
+          else
+            echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_TEST2 }}" >> "$GITHUB_ENV"
           fi
 
       # ---------- Create .env from secret (never committed!) ----------
@@ -52,6 +57,13 @@ jobs:
         run: |
           cat > .env <<'ENVEOF'
           ${{ secrets.TEST_ENV_FILE }}
+          ENVEOF
+
+      - name: Create .env (test2)
+        if: github.ref_name == 'deploy-test-2'
+        run: |
+          cat > .env <<'ENVEOF'
+          ${{ secrets.TEST2_ENV_FILE }}
           ENVEOF
 
       # ---------- PHP dependencies (vendor/ is NOT in git) ----------
