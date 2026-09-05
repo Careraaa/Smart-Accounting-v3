@@ -67,8 +67,9 @@ class AttendanceService
             ->where('time_out', '!=', null)
             ->get();
 
-        // Get the active shift to determine break times
-        $shift = Shift::where('is_active', true)->first();
+        // Use the employee's assigned shift; retain the active-shift fallback for legacy records.
+        $shift = Employee::find($employeeId)?->shift
+            ?? Shift::where('is_active', true)->first();
 
         $totalHours = 0;
 
@@ -141,8 +142,8 @@ class AttendanceService
         // Determine attendance status based on shift start time
         $status = 'present';
         if ($timeIn) {
-            // Get the active shift (assuming one shift per day)
-            $shift = Shift::where('is_active', true)->first();
+            // Use the employee's assigned shift; retain the active-shift fallback for legacy records.
+            $shift = $employee->shift ?? Shift::where('is_active', true)->first();
             if ($shift) {
                 $shiftStart = Carbon::createFromFormat('H:i:s', $shift->start_time);
                 $expectedTimeIn = today()
@@ -530,9 +531,8 @@ class AttendanceService
             return $result;
         }
 
-        // Get the active shift. If none, try to get any shift as fallback
-        // This handles cases where shifts exist but aren't marked active
-        $shift = Shift::where('is_active', true)->first();
+        // Use the employee's assigned shift; retain the active-shift fallback for legacy records.
+        $shift = Employee::find($employeeId)?->shift ?? Shift::where('is_active', true)->first();
         if (!$shift) {
             // Fallback: get the first shift ordered by created_at
             $shift = Shift::orderBy('created_at')->first();

@@ -37,6 +37,7 @@ class User extends Authenticatable
         'driver_license_validity',
         'date_of_hire',
         'position',
+        'shift_id',
         'department',
         'status',
         'salary_rate',
@@ -74,6 +75,11 @@ class User extends Authenticatable
     public function attendanceLogs()
     {
         return $this->hasMany(AttendanceLog::class);
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class);
     }
 
     public function attendances()

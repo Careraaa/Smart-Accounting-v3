@@ -37,6 +37,7 @@ class Employee extends Model
         'driver_license_validity',
         'date_of_hire',
         'position',
+        'shift_id',
         'department',
         'status',
         'salary_rate',
@@ -91,6 +92,11 @@ class Employee extends Model
     public function attendances()
     {
         return $this->hasMany(Attendance::class, 'user_id');
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class);
     }
 
     public function payrolls()
