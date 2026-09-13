@@ -37,7 +37,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">License Number <span class="text-amber-600">*</span></label>
-                    <input type="text" name="license_number" value="{{ old('license_number', $driver->license_number) }}" placeholder="A12-34-567890" pattern="[A-Za-z]\d{2}-\d{2}-\d{6}" title="Format: 1 letter + 2 digits - 2 digits - 6 digits (e.g. A12-34-567890)" oninput="var v=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,11),m=v.match(/^([A-Z])(\d{0,2})(\d{0,2})(\d{0,6})$/);this.value=m?m[1]+(m[2]?'-'+m[2]:'')+(m[3]?'-'+m[3]:'')+(m[4]?'-'+m[4]:''):(v.charAt(0)||'')" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('license_number') border-red-300 @enderror" required>
+                    <input type="text" name="license_number" value="{{ old('license_number', $driver->license_number) }}" placeholder="A12-34-567890" pattern="[A-Za-z]\d{2}-\d{2}-\d{6}" title="Format: 1 letter + 2 digits - 2 digits - 6 digits (e.g. A12-34-567890)" oninput="var v=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,11),m=v.match(/^([A-Z])(\d{0,2})(\d{0,2})(\d{0,6})$/);this.value=m?m[1]+m[2]+(m[3]?'-'+m[3]:'')+(m[4]?'-'+m[4]:''):(v.charAt(0)||'')" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('license_number') border-red-300 @enderror" required>
                     @error('license_number') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
@@ -46,8 +46,8 @@
                     @error('contact_number') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Gender <span class="text-amber-600">*</span></label>
-                    <select name="gender" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Gender</label>
+                    <select name="gender" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all">
                         <option value="">-- Select --</option>
                         <option value="male" {{ old('gender', $driver->gender) === 'male' ? 'selected' : '' }}>Male</option>
                         <option value="female" {{ old('gender', $driver->gender) === 'female' ? 'selected' : '' }}>Female</option>
@@ -55,13 +55,13 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Email <span class="text-amber-600">*</span></label>
-                    <input type="email" name="email" value="{{ old('email', $driver->email) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('email') border-red-300 @enderror" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Email</label>
+                    <input type="email" name="email" value="{{ old('email', $driver->email) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('email') border-red-300 @enderror">
                     @error('email') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Status <span class="text-amber-600">*</span></label>
-                    <select name="status" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('status') border-red-300 @enderror" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Status</label>
+                    <select name="status" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('status') border-red-300 @enderror">
                         <option value="">-- Select Status --</option>
                         <option value="active" {{ old('status', $driver->status) === 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ old('status', $driver->status) === 'inactive' ? 'selected' : '' }}>Inactive</option>
@@ -69,13 +69,13 @@
                     @error('status') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Date of Hire <span class="text-amber-600">*</span></label>
-                    <input type="date" name="date_of_hire" value="{{ old('date_of_hire', $driver->date_of_hire?->format('Y-m-d')) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('date_of_hire') border-red-300 @enderror" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Date of Hire</label>
+                    <input type="date" name="date_of_hire" value="{{ old('date_of_hire', $driver->date_of_hire?->format('Y-m-d')) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('date_of_hire') border-red-300 @enderror">
                     @error('date_of_hire') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div class="sm:col-span-2">
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Address <span class="text-amber-600">*</span></label>
-                    <textarea name="address" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" required>{{ old('address', $driver->address) }}</textarea>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Address</label>
+                    <textarea name="address" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all">{{ old('address', $driver->address) }}</textarea>
                 </div>
             </div>
 
