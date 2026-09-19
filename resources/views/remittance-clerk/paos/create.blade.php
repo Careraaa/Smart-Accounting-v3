@@ -40,13 +40,13 @@
                     @error('contact_number') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Email <span class="text-amber-600">*</span></label>
-                    <input type="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('email') border-red-300 @enderror" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Email</label>
+                    <input type="email" name="email" value="{{ old('email') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('email') border-red-300 @enderror">
                     @error('email') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Gender <span class="text-amber-600">*</span></label>
-                    <select name="gender" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Gender</label>
+                    <select name="gender" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all">
                         <option value="">-- Select --</option>
                         <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Male</option>
                         <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
@@ -54,22 +54,13 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Status <span class="text-amber-600">*</span></label>
-                    <select name="status" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('status') border-red-300 @enderror" required>
-                        <option value="">-- Select Status --</option>
-                        <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    </select>
-                    @error('status') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Date of Hire <span class="text-amber-600">*</span></label>
-                    <input type="date" name="date_of_hire" value="{{ old('date_of_hire') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('date_of_hire') border-red-300 @enderror" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Date of Hire</label>
+                    <input type="date" name="date_of_hire" value="{{ old('date_of_hire') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('date_of_hire') border-red-300 @enderror">
                     @error('date_of_hire') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div class="sm:col-span-2">
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Address <span class="text-amber-600">*</span></label>
-                    <textarea name="address" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" required>{{ old('address') }}</textarea>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Address</label>
+                    <textarea name="address" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all">{{ old('address') }}</textarea>
                 </div>
             </div>
 

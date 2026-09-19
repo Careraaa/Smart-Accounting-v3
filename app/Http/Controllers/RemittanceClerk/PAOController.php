@@ -52,13 +52,13 @@ class PAOController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
-            'email' => 'required|email|unique:paos',
-            'gender' => 'required|string',
-            'address' => 'required|string',
-            'date_of_hire' => 'required|date',
-            'status' => 'required|in:active,inactive',
+            'email' => 'nullable|email|unique:paos',
+            'gender' => 'nullable|string',
+            'address' => 'nullable|string',
+            'date_of_hire' => 'nullable|date',
         ]);
 
+        $validated['status'] = 'active';
         $pao = PAO::create($validated);
 
         $this->logActivity('created', "PAO/Conductor: {$pao->name}", request()->url(), 'pao', $pao->id);
