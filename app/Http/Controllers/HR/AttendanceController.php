@@ -439,8 +439,12 @@ class AttendanceController extends Controller
                 ->withInput();
         }
 
-        // Build data to save — only include provided fields so we don't overwrite existing values
-        $data = ['is_manual' => true];
+        // Always write both time fields so clearing a time also clears stale OT/UT.
+        $data = [
+            'is_manual' => true,
+            'time_in' => $request->time_in ? $request->time_in . ':00' : null,
+            'time_out' => $request->time_out ? $request->time_out . ':00' : null,
+        ];
 
         if (!$request->time_in && !$request->time_out) {
             $data['time_in'] = null;
@@ -453,8 +457,6 @@ class AttendanceController extends Controller
         $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
 
         if ($request->time_in) {
-            $data['time_in'] = $request->time_in ? $request->time_in . ':00' : null;
-
             try {
                 $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
                 $officeStart = Carbon::createFromFormat('H:i', '08:00');
@@ -464,10 +466,6 @@ class AttendanceController extends Controller
             } catch (\Throwable $e) {
                 $data['status'] = 'present';
             }
-        }
-
-        if ($request->time_out) {
-            $data['time_out'] = $request->time_out ? $request->time_out . ':00' : null;
         }
 
         // If both provided, run the stricter status logic using both times
@@ -513,6 +511,11 @@ class AttendanceController extends Controller
         if ($attendance->time_in && $attendance->time_out) {
             $dateStr = $attendance->date->format('Y-m-d');
 
+            OvertimeUndertime::where('user_id', $userId)
+                ->where('date', $dateStr)
+                ->where('status', 'pending')
+                ->delete();
+
             if ($attendance) {
                 // Get employee to find their shift assignment
                 $employee = Employee::find($userId);
@@ -539,12 +542,6 @@ class AttendanceController extends Controller
                     $overtimeHours = $otutResult['overtime_hours'];
                     $undertimeHours = $otutResult['undertime_hours'];
                     $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
-
-                    // Remove any existing OT/UT records for this day (both pending and approved)
-                    // so they are recalculated based on the updated attendance times.
-                    OvertimeUndertime::where('user_id', $userId)
-                        ->where('date', $dateStr)
-                        ->delete();
 
                     // Create overtime record if applicable
                     if ($overtimeHours > 0) {
@@ -610,6 +607,11 @@ class AttendanceController extends Controller
                     }
                 }
             }
+        } else {
+            OvertimeUndertime::where('user_id', $userId)
+                ->where('date', $attendance->date->format('Y-m-d'))
+                ->where('status', 'pending')
+                ->delete();
         }
         // ─────────────────────────────────────────────────────────────────────
 
@@ -640,12 +642,16 @@ class AttendanceController extends Controller
         ]);
 
         $userId = $request->user_id;
-        $data = ['is_manual' => true];
+        // Always write both time fields so clearing a time also clears stale OT/UT.
+        $data = [
+            'is_manual' => true,
+            'time_in' => $request->time_in ? $request->time_in . ':00' : null,
+            'time_out' => $request->time_out ? $request->time_out . ':00' : null,
+        ];
 
         $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
 
         if ($request->time_in) {
-            $data['time_in'] = $request->time_in . ':00';
             try {
                 $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
                 $officeStart = Carbon::createFromFormat('H:i', '08:00');
@@ -653,10 +659,6 @@ class AttendanceController extends Controller
             } catch (\Throwable $e) {
                 $data['status'] = 'present';
             }
-        }
-
-        if ($request->time_out) {
-            $data['time_out'] = $request->time_out . ':00';
         }
 
         if ($request->time_in && $request->time_out) {
@@ -679,6 +681,11 @@ class AttendanceController extends Controller
             $dateStr = $attendance->date->format('Y-m-d');
             $employee = Employee::find($userId);
 
+            OvertimeUndertime::where('user_id', $userId)
+                ->where('date', $dateStr)
+                ->where('status', 'pending')
+                ->delete();
+
             $shift = null;
             if ($employee && isset($employee->shift_id) && $employee->shift_id) {
                 $shift = Shift::find($employee->shift_id);
@@ -694,10 +701,6 @@ class AttendanceController extends Controller
                 $overtimeHours = $otutResult['overtime_hours'];
                 $undertimeHours = $otutResult['undertime_hours'];
                 $hourlyRate = $employee ? ($employee->salary_rate / 8) : 0;
-
-                OvertimeUndertime::where('user_id', $userId)
-                    ->where('date', $dateStr)
-                    ->delete();
 
                 if ($overtimeHours > 0) {
                     $otAmount = $overtimeHours * $hourlyRate * 1.25;
@@ -729,9 +732,42 @@ class AttendanceController extends Controller
                     ]);
                 }
             }
+        } else {
+            OvertimeUndertime::where('user_id', $userId)
+                ->where('date', $attendance->date->format('Y-m-d'))
+                ->where('status', 'pending')
+                ->delete();
         }
 
         return response()->json(['success' => true, 'message' => 'Attendance saved']);
+    }
+
+    public function update(Request $request, Attendance $attendance)
+    {
+        $request->merge([
+            'user_id' => $request->input('user_id', $attendance->user_id),
+            'date' => $request->input('date', $attendance->date->format('Y-m-d')),
+        ]);
+
+        OvertimeUndertime::where('user_id', $attendance->user_id)
+            ->where('date', $attendance->date->format('Y-m-d'))
+            ->where('status', 'pending')
+            ->delete();
+
+        return $this->store($request);
+    }
+
+    public function destroy(Attendance $attendance)
+    {
+        OvertimeUndertime::where('user_id', $attendance->user_id)
+            ->where('date', $attendance->date->format('Y-m-d'))
+            ->where('status', 'pending')
+            ->delete();
+
+        $attendance->delete();
+
+        return redirect()->route('attendance.index')
+            ->with('success', 'Attendance record and its OT/UT record were removed.');
     }
 
     public function getAttendanceTableRows()

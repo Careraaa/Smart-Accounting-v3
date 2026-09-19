@@ -10,6 +10,16 @@ class Attendance extends Model
     use HasFactory;
     protected $table = 'attendance';
 
+    protected static function booted(): void
+    {
+        static::deleted(function (Attendance $attendance): void {
+            \App\Models\OvertimeUndertime::where('user_id', $attendance->user_id)
+                ->where('date', $attendance->date->format('Y-m-d'))
+                ->where('status', 'pending')
+                ->delete();
+        });
+    }
+
     protected $fillable = [
         'user_id',
         'date',
