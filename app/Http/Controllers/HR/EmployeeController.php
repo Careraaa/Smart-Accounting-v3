@@ -236,6 +236,7 @@ class EmployeeController extends Controller
                 'sss_number' => 'nullable|string|max:50',
                 'tin_number' => 'nullable|string|max:50',
                 'pagibig_number' => 'nullable|string|max:50',
+                'philhealth_number' => 'nullable|string|max:50',
                 'signature_path' => 'nullable|string',
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
