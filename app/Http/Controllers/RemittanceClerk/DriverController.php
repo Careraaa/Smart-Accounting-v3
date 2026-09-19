@@ -57,10 +57,10 @@ class DriverController extends Controller
             'gender' => 'nullable|string',
             'address' => 'nullable|string',
             'date_of_hire' => 'nullable|date',
-            'status' => 'nullable|in:active,inactive',
         ]);
 
         $validated['license_number'] = strtoupper($validated['license_number']);
+        $validated['status'] = 'active';
         $driver = Driver::create($validated);
 
         $this->logActivity('created', "Driver: {$driver->name}", request()->url(), 'driver', $driver->id);

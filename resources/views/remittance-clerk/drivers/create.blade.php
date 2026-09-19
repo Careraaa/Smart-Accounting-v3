@@ -59,15 +59,6 @@
                     @error('email') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Status</label>
-                    <select name="status" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('status') border-red-300 @enderror">
-                        <option value="">-- Select Status --</option>
-                        <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    </select>
-                    @error('status') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
-                </div>
-                <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Date of Hire</label>
                     <input type="date" name="date_of_hire" value="{{ old('date_of_hire') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('date_of_hire') border-red-300 @enderror">
                     @error('date_of_hire') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
