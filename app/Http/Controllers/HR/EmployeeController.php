@@ -375,7 +375,13 @@ class EmployeeController extends Controller
         if ($request->beneficiaries) {
             foreach ($request->beneficiaries as $b) {
                 if (!empty($b['name'])) {
-                    $employee->beneficiaries()->create($b);
+                    $payload = [
+                        'name' => $b['name'],
+                        'relationship' => $b['relationship'] ?? null,
+                        'date_of_birth' => $b['date_of_birth'] ?? ($b['birth_date'] ?? null),
+                    ];
+
+                    $employee->beneficiaries()->create($payload);
                 }
             }
         }
