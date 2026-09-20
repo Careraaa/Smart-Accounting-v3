@@ -16,6 +16,12 @@ class DailyRemittance extends Model
         'vehicle_id',
         'remittance_date',
         'total_collection',
+        'diesel',
+        'parking',
+        'dispatcher',
+        'food_allowance',
+        'barker',
+        'others',
         'total_expenses',
         'boundary',
         'net_remittance',
@@ -34,6 +40,13 @@ class DailyRemittance extends Model
 
     protected $casts = [
         'remittance_date' => 'date',
+        'diesel' => 'decimal:2',
+        'parking' => 'decimal:2',
+        'dispatcher' => 'decimal:2',
+        'food_allowance' => 'decimal:2',
+        'barker' => 'decimal:2',
+        'others' => 'decimal:2',
+        'total_expenses' => 'decimal:2',
         'resolved_at' => 'datetime',
     ];
 

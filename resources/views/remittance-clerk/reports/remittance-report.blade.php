@@ -46,6 +46,7 @@
 
     $remittancesJson = $remittances->groupBy(fn($r) => $r->remittance_date->format('Y-m-d'))->map(function ($group) {
         return $group->map(fn($r) => [
+            'show_url' => route('remittances.show', $r),
             'driver' => $r->driver?->name ?? ($r->driver?->first_name.' '.$r->driver?->last_name ?? 'N/A'),
             'pao' => $r->pao?->name ?? ($r->pao?->first_name.' '.$r->pao?->last_name ?? 'N/A'),
             'route' => $r->route?->route_name ?? 'N/A',
@@ -227,6 +228,7 @@ function openRemittanceModal(dateKey) {
             '<td class="px-3 py-2 text-xs text-right tabular-nums font-medium text-emerald-600">₱' + fmt(r.collection) + '</td>' +
             '<td class="px-3 py-2 text-xs text-right tabular-nums text-gray-400">₱' + fmt(r.expenses) + '</td>' +
             '<td class="px-3 py-2 text-xs text-right tabular-nums font-bold ' + netClass + '">₱' + fmt(r.net) + '</td>' +
+            '<td class="px-3 py-2 text-xs text-center"><a href="' + r.show_url + '" class="text-blue-600 hover:text-blue-800 font-semibold no-underline">Details</a></td>' +
             '<td class="px-3 py-2 text-xs text-center">' + (r.short ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500" title="Short"></span>' : '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" title="OK"></span>') + '</td>' +
         '</tr>';
     }).join('');
@@ -250,6 +252,7 @@ function openRemittanceModal(dateKey) {
                     '<th class="text-right px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Collection</th>' +
                     '<th class="text-right px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Expenses</th>' +
                     '<th class="text-right px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Net</th>' +
+                    '<th class="text-center px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Details</th>' +
                     '<th class="text-center px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Sts</th>' +
                 '</tr></thead>' +
                 '<tbody>' + rows +
@@ -258,6 +261,7 @@ function openRemittanceModal(dateKey) {
                         '<td class="px-3 py-2.5 text-xs text-right tabular-nums font-bold text-emerald-600">₱' + fmt(totalCol) + '</td>' +
                         '<td class="px-3 py-2.5 text-xs text-right tabular-nums text-gray-400">₱' + fmt(totalExp) + '</td>' +
                         '<td class="px-3 py-2.5 text-xs text-right tabular-nums font-bold ' + (hasShort ? 'text-red-600' : 'text-emerald-600') + '">₱' + fmt(totalNet) + '</td>' +
+                        '<td class="px-3 py-2.5 text-xs text-center text-gray-300">—</td>' +
                         '<td class="px-3 py-2.5 text-xs text-center">' + (hasShort ? '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-red-500">Short</span>' : '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-emerald-500">Clear</span>') + '</td>' +
                     '</tr>' +
                 '</tbody>' +

@@ -149,6 +149,24 @@
             </div>
         </div>
 
+        {{-- Expense Breakdown --}}
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden scale-in">
+            <div class="px-5 py-4 border-b border-gray-50 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l2-2 2 2 4-4m-9 8h10M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-900 m-0">Expense Breakdown</p>
+            </div>
+            <div class="p-5 grid grid-cols-2 gap-x-6 gap-y-3">
+                @foreach ([['Diesel', 'diesel'], ['Parking', 'parking'], ['Dispatcher', 'dispatcher'], ['Food Allowance', 'food_allowance'], ['Barker', 'barker'], ['Others', 'others']] as [$label, $field])
+                    <div class="flex items-center justify-between border-b border-gray-50 pb-2">
+                        <span class="text-[0.65rem] font-bold uppercase tracking-wide text-gray-400">{{ $label }}</span>
+                        <span class="text-xs font-semibold text-gray-700">₱{{ number_format((float) ($remittance->{$field} ?? 0), 2) }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
     </div>
 
     {{-- Net Box --}}

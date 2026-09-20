@@ -96,7 +96,12 @@ class DailyRemittanceController extends Controller
             'vehicle_id' => 'required|exists:vehicles,id',
             'remittance_date' => 'required|date',
             'total_collection' => 'required|numeric',
-            'total_expenses' => 'required|numeric',
+            'diesel' => 'nullable|numeric|min:0',
+            'parking' => 'nullable|numeric|min:0',
+            'dispatcher' => 'nullable|numeric|min:0',
+            'food_allowance' => 'nullable|numeric|min:0',
+            'barker' => 'nullable|numeric|min:0',
+            'others' => 'nullable|numeric|min:0',
             'net_remittance' => 'required|numeric',
             'is_short_remittance' => 'nullable|boolean',
             'short_amount' => 'nullable|numeric',
@@ -110,6 +115,7 @@ class DailyRemittanceController extends Controller
         $validated['route_id'] = $vehicle->route_id;
         $boundary = $vehicle->route->boundary ?? 0;
         $validated['boundary'] = $boundary;
+        $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
 
         // Check if net remittance is less than the boundary
         $netRemittance = $validated['net_remittance'];
@@ -164,7 +170,12 @@ class DailyRemittanceController extends Controller
             'vehicle_id' => 'required|exists:vehicles,id',
             'remittance_date' => 'required|date',
             'total_collection' => 'required|numeric',
-            'total_expenses' => 'required|numeric',
+            'diesel' => 'nullable|numeric|min:0',
+            'parking' => 'nullable|numeric|min:0',
+            'dispatcher' => 'nullable|numeric|min:0',
+            'food_allowance' => 'nullable|numeric|min:0',
+            'barker' => 'nullable|numeric|min:0',
+            'others' => 'nullable|numeric|min:0',
             'net_remittance' => 'required|numeric',
             'is_short_remittance' => 'nullable|boolean',
             'short_amount' => 'nullable|numeric',
@@ -178,6 +189,7 @@ class DailyRemittanceController extends Controller
         $validated['route_id'] = $vehicle->route_id;
         $boundary = $vehicle->route->boundary ?? 0;
         $validated['boundary'] = $boundary;
+        $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
 
         // Check if net remittance is less than the boundary
         $netRemittance = $validated['net_remittance'];
@@ -208,6 +220,12 @@ class DailyRemittanceController extends Controller
         $this->logActivity('updated', "Daily Remittance #{$remittance->id}", request()->url(), 'daily_remittance', $remittance->id);
 
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance updated successfully.');
+    }
+
+    private function calculateTotalExpenses(array $values): float
+    {
+        return round(collect(['diesel', 'parking', 'dispatcher', 'food_allowance', 'barker', 'others'])
+            ->sum(fn ($field) => (float) ($values[$field] ?? 0)), 2);
     }
 
     public function destroy(DailyRemittance $remittance)
