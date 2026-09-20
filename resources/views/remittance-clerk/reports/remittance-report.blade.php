@@ -23,11 +23,26 @@
 @php
     $periodLabel = match ($period) {
         'daily' => \Carbon\Carbon::createFromDate($year, $month, $day)->format('F j, Y'),
-        'weekly' => 'Week ' . $week . ', ' . $year,
+        'weekly' => 'Week ' . $week . ' (' . \Carbon\Carbon::now()->setISODate($year, $week)->startOfWeek()->format('M j') . ' - ' . \Carbon\Carbon::now()->setISODate($year, $week)->endOfWeek()->format('M j') . ')',
         'monthly' => \Carbon\Carbon::createFromDate($year, $month, 1)->format('F Y'),
         'yearly' => (string) $year,
         default => '',
     };
+
+    $weekCount = \Carbon\Carbon::create($year, 12, 28)->isoWeek();
+    $weekOptions = collect(range(1, $weekCount))->map(function ($weekNumber) use ($year) {
+        $startOfWeek = \Carbon\Carbon::now()->setISODate($year, $weekNumber)->startOfWeek();
+
+        return [
+            'number' => $weekNumber,
+            'label' => sprintf(
+                'Week %d (%s - %s)',
+                $weekNumber,
+                $startOfWeek->format('M j'),
+                $startOfWeek->copy()->endOfWeek()->format('M j')
+            ),
+        ];
+    });
 
     $remittancesJson = $remittances->groupBy(fn($r) => $r->remittance_date->format('Y-m-d'))->map(function ($group) {
         return $group->map(fn($r) => [
@@ -67,10 +82,9 @@
         <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }};">
             <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Week</label>
             <select id="week" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
-                @php $weekCount = \Carbon\Carbon::create($year, 12, 28)->isoWeek(); @endphp
-                @for ($i = 1; $i <= $weekCount; $i++)
-                    <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
-                @endfor
+                @foreach ($weekOptions as $weekOption)
+                    <option value="{{ $weekOption['number'] }}" {{ (int) $week === $weekOption['number'] ? 'selected' : '' }}>{{ $weekOption['label'] }}</option>
+                @endforeach
             </select>
         </div>
         <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="daySelect" style="display:{{ $period === 'daily' ? 'flex' : 'none' }};">
