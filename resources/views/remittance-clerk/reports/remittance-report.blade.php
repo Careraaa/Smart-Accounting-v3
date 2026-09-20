@@ -67,7 +67,8 @@
         <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }};">
             <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Week</label>
             <select id="week" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
-                @for ($i = 1; $i <= 52; $i++)
+                @php $weekCount = \Carbon\Carbon::create($year, 12, 28)->isoWeek(); @endphp
+                @for ($i = 1; $i <= $weekCount; $i++)
                     <option value="{{ $i }}" {{ (int) $week === $i ? 'selected' : '' }}>Week {{ $i }}</option>
                 @endfor
             </select>

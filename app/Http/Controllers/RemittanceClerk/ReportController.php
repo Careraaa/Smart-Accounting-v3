@@ -18,9 +18,9 @@ class ReportController extends Controller
     public function index()
     {
         $period = 'monthly';
-        $month = date('m');
-        $year = date('Y');
-        $week = 1;
+        $month = now()->month;
+        $year = now()->year;
+        $week = now()->week;
 
         $remittances = $this->filterRemittances($period, $month, $year, $week);
         
@@ -72,10 +72,10 @@ class ReportController extends Controller
     public function remittanceReport(Request $request)
     {
         $period = $request->get('period', 'monthly');
-        $month = $request->get('month', date('m'));
-        $year = $request->get('year', date('Y'));
-        $week = $request->get('week', 1);
-        $day = $request->get('day', date('d'));
+        $month = $request->get('month', now()->month);
+        $year = $request->get('year', now()->year);
+        $week = $request->get('week', now()->week);
+        $day = $request->get('day', now()->day);
 
         $remittances = $this->filterRemittances($period, $month, $year, $week, $day);
         
