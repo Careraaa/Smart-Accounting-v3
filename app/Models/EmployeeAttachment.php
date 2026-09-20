@@ -40,7 +40,7 @@ class EmployeeAttachment extends Model
 
     public function getUrlAttribute(): string
     {
-        return route('files.show', ['path' => $this->file_path], false);
+        return route('files.show', ['path' => $this->file_path]);
     }
 
     public function getFileSizeHumanAttribute(): string

@@ -522,24 +522,33 @@
                             };
                             $tagLabel = $att ? ucfirst($att->status) : 'Missing';
                         @endphp
-                        <div class="rounded-xl p-3.5 text-center flex flex-col items-center justify-between gap-2.5 min-h-[130px] transition-all duration-300 hover:shadow-md {{ $tileCls }}">
+                        <div class="rounded-xl p-3.5 flex flex-col gap-2.5 min-h-[165px] transition-all duration-300 hover:shadow-md {{ $tileCls }}">
                             @if($att)
                                 @if(in_array($att->mime_type, ['image/jpeg','image/png','image/gif','image/webp']))
-                                    <a href="{{ $att->url }}" target="_blank" class="w-full flex justify-center overflow-hidden rounded-lg">
-                                        <img src="{{ $att->url }}" alt="{{ $label }}" class="h-12 w-full object-cover rounded-lg hover:scale-105 transition-transform duration-300">
+                                    <a href="{{ $att->url }}" target="_blank" class="block w-full overflow-hidden rounded-lg border border-gray-100 dark:border-gray-700 group" title="Click to view full image">
+                                        <img src="{{ $att->url }}" alt="{{ $label }}" class="h-24 w-full object-cover rounded-lg group-hover:scale-105 group-hover:opacity-90 transition-transform duration-300">
                                     </a>
                                 @else
-                                    <a href="{{ $att->url }}" target="_blank" class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <a href="{{ $att->url }}" target="_blank" class="w-full h-24 flex flex-col items-center justify-center gap-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" title="Click to view document">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider">View document</span>
                                     </a>
                                 @endif
-                            @else
-                                <div class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100/50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                <div class="text-center min-w-0">
+                                    <div class="text-[11px] font-bold text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">{{ $label }}</div>
+                                    <div class="text-[9px] text-gray-400 dark:text-gray-500 truncate px-1 mt-0.5" title="{{ $att->original_name }}">{{ $att->original_name }}</div>
                                 </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border {{ $tagCls }}">{{ $tagLabel }}</span>
+                            @else
+                                <div class="w-full h-24 flex items-center justify-center rounded-lg bg-gray-100/50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                </div>
+                                <div class="text-center min-w-0">
+                                    <div class="text-[11px] font-bold text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">{{ $label }}</div>
+                                    <div class="text-[9px] text-gray-400 dark:text-gray-500 truncate px-1 mt-0.5">No file uploaded</div>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border {{ $tagCls }}">{{ $tagLabel }}</span>
                             @endif
-                            <div class="text-[11px] font-bold text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">{{ $label }}</div>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border {{ $tagCls }}">{{ $tagLabel }}</span>
                         </div>
                     @endforeach
                 </div>
