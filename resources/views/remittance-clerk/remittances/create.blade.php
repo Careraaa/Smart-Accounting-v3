@@ -104,7 +104,7 @@
                 </div>
             </div>
 
-            <div id="short-remittance-section" class="grid grid-cols-1 sm:grid-cols-4 gap-5 mt-5" style="display: none;">
+            <div id="short-remittance-section" class="grid grid-cols-1 sm:grid-cols-3 gap-5 mt-5" style="display: none;">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Short Amount</label>
                     <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
@@ -113,19 +113,12 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Driver Amount</label>
-                    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                        <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
-                        <input type="number" name="driver_share_amount" id="driver_share_amount" min="0" step="0.01" value="{{ old('driver_share_amount') }}" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" inputmode="decimal">
-                    </div>
-                    @error('driver_share_amount') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
-                </div>
-                <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Driver Share</label>
                     <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
                         <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
-                        <input type="text" id="driver_share_display" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" placeholder="0.00" readonly>
+                        <input type="number" name="driver_share_amount" id="driver_share_amount" min="0" step="0.01" value="{{ old('driver_share_amount') }}" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" placeholder="0.00" inputmode="decimal">
                     </div>
+                    @error('driver_share_amount') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">PAO Share</label>
@@ -151,7 +144,6 @@
             const netRemittanceInput = document.getElementById('net_remittance');
             const shortRemittanceSection = document.getElementById('short-remittance-section');
             const shortAmountDisplay = document.getElementById('short_amount_display');
-            const driverShareDisplay = document.getElementById('driver_share_display');
             const paoShareDisplay = document.getElementById('pao_share_display');
             const driverShareAmountInput = document.getElementById('driver_share_amount');
             const totalExpensesInput = document.getElementById('total_expenses');
@@ -192,7 +184,9 @@
                     const paoShare = shortAmount - driverShare;
 
                     shortAmountDisplay.value = shortAmount.toFixed(2);
-                    driverShareDisplay.value = driverShare.toFixed(2);
+                    if (driverShareAmountInput.value === '' || requestedDriverShare > shortAmount || requestedDriverShare < 0) {
+                        driverShareAmountInput.value = driverShare.toFixed(2);
+                    }
                     paoShareDisplay.value = paoShare.toFixed(2);
 
                     if (!document.getElementById('is_short_hidden')) {
