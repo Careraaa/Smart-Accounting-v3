@@ -128,12 +128,12 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Driver Share (%)</label>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Driver Amount</label>
                     <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                        <input type="number" name="driver_share_percent" id="driver_share_percent" min="0" max="100" step="0.01" value="{{ old('driver_share_percent', $shortRemittance->short_amount > 0 ? round(($shortRemittance->driver_share / $shortRemittance->short_amount) * 100, 2) : 50) }}" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" inputmode="decimal">
-                        <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-l border-gray-200">%</span>
+                        <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
+                        <input type="number" name="driver_share_amount" id="driver_share_amount" min="0" step="0.01" value="{{ old('driver_share_amount', $remittance->short_amount > 0 ? $remittance->driver_share : '') }}" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" inputmode="decimal">
                     </div>
-                    @error('driver_share_percent') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                    @error('driver_share_amount') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Driver Share</label>
@@ -166,7 +166,7 @@
             const boundaryDisplay = document.getElementById('boundary_display');
             const netRemittanceInput = document.getElementById('net_remittance');
             const shortRemittanceSection = document.getElementById('short-remittance-section');
-            const driverSharePercentInput = document.getElementById('driver_share_percent');
+            const driverShareAmountInput = document.getElementById('driver_share_amount');
             const totalExpensesInput = document.getElementById('total_expenses');
 
             function parseMoney(value) {
@@ -198,9 +198,10 @@
                     shortRemittanceSection.style.display = 'grid';
                     
                     const shortAmount = boundary - netRemittance;
-                    const requestedPercent = parseFloat(driverSharePercentInput.value);
-                    const driverSharePercent = Number.isFinite(requestedPercent) ? Math.min(100, Math.max(0, requestedPercent)) : 50;
-                    const driverShare = shortAmount * (driverSharePercent / 100);
+                    const requestedDriverShare = parseMoney(driverShareAmountInput.value);
+                    const driverShare = driverShareAmountInput.value === ''
+                        ? shortAmount / 2
+                        : Math.min(shortAmount, Math.max(0, requestedDriverShare));
                     const paoShare = shortAmount - driverShare;
 
                     const shortAmountDisplay = document.getElementById('short_amount_display_calc');
@@ -286,7 +287,7 @@
             updateTotalExpenses();
 
             netRemittanceInput.addEventListener('input', updateShortRemittance);
-            driverSharePercentInput.addEventListener('input', updateShortRemittance);
+            driverShareAmountInput.addEventListener('input', updateShortRemittance);
 
             if (vehicleSelect.value) {
                 vehicleSelect.dispatchEvent(new Event('change'));

@@ -107,7 +107,7 @@ class DailyRemittanceController extends Controller
             'short_amount' => 'nullable|numeric',
             'driver_share' => 'nullable|numeric',
             'pao_share' => 'nullable|numeric',
-            'driver_share_percent' => 'nullable|numeric|min:0|max:100',
+            'driver_share_amount' => 'nullable|numeric|min:0',
         ]);
 
         // Get the vehicle and its associated route
@@ -123,8 +123,10 @@ class DailyRemittanceController extends Controller
         if ($netRemittance < $boundary) {
             $validated['is_short_remittance'] = true;
             $validated['short_amount'] = round($boundary - $netRemittance, 2);
-            $driverSharePercent = (float) ($validated['driver_share_percent'] ?? 50);
-            $validated['driver_share'] = round($validated['short_amount'] * ($driverSharePercent / 100), 2);
+            $driverShareAmount = array_key_exists('driver_share_amount', $validated) && $validated['driver_share_amount'] !== null
+                ? (float) $validated['driver_share_amount']
+                : $validated['short_amount'] / 2;
+            $validated['driver_share'] = round(min($validated['short_amount'], $driverShareAmount), 2);
             $validated['pao_share'] = round($validated['short_amount'] - $validated['driver_share'], 2);
         } else {
             $validated['is_short_remittance'] = false;
@@ -181,7 +183,7 @@ class DailyRemittanceController extends Controller
             'short_amount' => 'nullable|numeric',
             'driver_share' => 'nullable|numeric',
             'pao_share' => 'nullable|numeric',
-            'driver_share_percent' => 'nullable|numeric|min:0|max:100',
+            'driver_share_amount' => 'nullable|numeric|min:0',
         ]);
 
         // Get the vehicle and its associated route
@@ -197,8 +199,10 @@ class DailyRemittanceController extends Controller
         if ($netRemittance < $boundary) {
             $validated['is_short_remittance'] = true;
             $validated['short_amount'] = round($boundary - $netRemittance, 2);
-            $driverSharePercent = (float) ($validated['driver_share_percent'] ?? 50);
-            $validated['driver_share'] = round($validated['short_amount'] * ($driverSharePercent / 100), 2);
+            $driverShareAmount = array_key_exists('driver_share_amount', $validated) && $validated['driver_share_amount'] !== null
+                ? (float) $validated['driver_share_amount']
+                : $validated['short_amount'] / 2;
+            $validated['driver_share'] = round(min($validated['short_amount'], $driverShareAmount), 2);
             $validated['pao_share'] = round($validated['short_amount'] - $validated['driver_share'], 2);
         } else {
             $validated['is_short_remittance'] = false;
