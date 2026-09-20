@@ -75,11 +75,12 @@
                         $dateKey = $date->format('Y-m-d');
                         $attendance = $attendances[$dateKey] ?? null;
                         $holiday = $holidays[$dateKey] ?? null;
+                        $isRestDay = $date->isSunday() || ($date->isSaturday() && $workDaysPerWeek === 5);
                         $dayLabel = $holiday
                             ? 'Holiday'
-                            : ($date->isSaturday()
+                            : ($isRestDay && $date->isSaturday()
                                 ? 'Saturday'
-                                : ($date->isSunday()
+                                : ($isRestDay && $date->isSunday()
                                     ? 'Sunday'
                                     : (($attendance?->status === 'absent') ? 'Absent' : null)));
                         $timeIn = $attendance && $attendance->time_in ? Carbon\Carbon::parse($attendance->time_in)->format('g:i') : '';

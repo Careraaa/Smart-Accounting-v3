@@ -128,12 +128,16 @@ class AttendanceController extends Controller
             ->get()
             ->keyBy(fn($holiday) => $holiday->date->format('Y-m-d'));
 
-        $shift = Shift::where('is_active', true)->first() ?? Shift::orderBy('created_at')->first();
+        $shift = $employee->shift;
+        if (!$shift) {
+            $shift = Shift::where('is_active', true)->first() ?? Shift::orderBy('created_at')->first();
+        }
         $officeHours = $shift
             ? Carbon::parse($shift->start_time)->format('g:i A') . ' - ' . Carbon::parse($shift->end_time)->format('g:i A')
             : 'Not configured';
+        $workDaysPerWeek = (int) ($employee->work_days_per_week ?: 5);
 
-        return view('hr.attendance.dtr-print', compact('employee', 'month', 'attendances', 'holidays', 'officeHours'));
+        return view('hr.attendance.dtr-print', compact('employee', 'month', 'attendances', 'holidays', 'officeHours', 'workDaysPerWeek'));
     }
 
     public function generateQR()
