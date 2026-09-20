@@ -183,8 +183,8 @@
                         {{-- File preview --}}
                         @if($latest)
                             @if($latest->is_image)
-                                <a href="{{ $latest->url }}" target="_blank" class="block rounded-xl overflow-hidden border border-gray-100">
-                                    <img src="{{ $latest->url }}" alt="{{ $label }}" class="w-full h-24 object-cover hover:scale-105 transition-transform duration-300">
+                                <a href="#" onclick="openHaLightbox(event,'{{ $latest->url }}')" class="block rounded-xl overflow-hidden border border-gray-100 group" title="Click to view full image">
+                                    <img src="{{ $latest->url }}" alt="{{ $label }}" class="w-full h-24 object-cover group-hover:scale-105 group-hover:opacity-90 transition-transform duration-300">
                                 </a>
                             @else
                                 <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
@@ -212,10 +212,17 @@
 
                             {{-- Action buttons --}}
                             <div class="flex flex-wrap items-center gap-1.5">
-                                <a href="{{ $latest->url }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-[0.6rem] font-semibold transition-colors">
-                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                    View
-                                </a>
+                                @if($latest->is_image)
+                                    <a href="#" onclick="openHaLightbox(event,'{{ $latest->url }}')" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-[0.6rem] font-semibold transition-colors">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        View
+                                    </a>
+                                @else
+                                    <a href="{{ $latest->url }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-[0.6rem] font-semibold transition-colors">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        View
+                                    </a>
+                                @endif
 
                                 @if($isPending)
                                     <form method="POST" action="{{ route('employees.attachments.approve', [$employee, $latest]) }}" class="inline">
@@ -244,17 +251,36 @@
 
                         {{-- HR upload form --}}
                         <div class="mt-auto {{ $latest ? 'pt-4 border-t border-gray-100' : '' }}">
-                            <form method="POST" action="{{ route('employees.attachments.store', $employee) }}" enctype="multipart/form-data" class="ha-form">
+                            <form method="POST" action="{{ route('employees.attachments.store', $employee) }}" enctype="multipart/form-data" class="ha-form" id="ha-form-{{ $key }}">
                                 @csrf
                                 <input type="hidden" name="attachment_key" value="{{ $key }}">
                                 <label class="block text-[0.6rem] font-medium text-gray-500 mb-1.5">
                                     {{ $latest ? 'Replace file' : 'Upload file' }}
                                 </label>
+
+                                {{-- Live preview of the chosen file --}}
+                                <div id="ha-prev-{{ $key }}" class="ha-prev hidden items-center gap-3 p-3 mb-2 rounded-xl bg-gray-50 border border-gray-100" style="display:none">
+                                    <a href="#" onclick="openPreviewLightbox(event,'ha-prev-img-{{ $key }}')" class="ha-prev-img-link hidden flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white" title="Click to view full image">
+                                        <img id="ha-prev-img-{{ $key }}" src="" class="w-full h-full object-cover" alt="Preview">
+                                    </a>
+                                    <div class="ha-prev-doc hidden flex-shrink-0 w-16 h-16 rounded-lg bg-white border border-gray-200 flex-col items-center justify-center text-gray-400">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                        <span class="text-[0.5rem] font-bold mt-0.5">PDF/DOC</span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p id="ha-prev-name-{{ $key }}" class="text-sm font-medium text-gray-700 truncate"></p>
+                                        <p id="ha-prev-size-{{ $key }}" class="text-xs text-gray-400"></p>
+                                    </div>
+                                    <button type="button" onclick="clearHrFile('{{ $key }}')" class="flex-shrink-0 text-gray-400 hover:text-rose-500 transition-colors" title="Remove selection">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+
                                 <div class="flex items-center gap-2">
                                     <label class="ha-zone flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 cursor-pointer transition-all duration-300">
                                         <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 3v12"/></svg>
                                         <span class="text-xs text-gray-500 truncate ha-filename">Choose file...</span>
-                                        <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required class="hidden" onchange="this.closest('.ha-form').querySelector('.ha-filename').textContent=this.files[0].name">
+                                        <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required class="hidden" onchange="previewHrFile(this,'{{ $key }}')">
                                     </label>
                                     <button type="submit" class="flex-shrink-0 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold rounded-xl transition-all duration-300">
                                         {{ $latest ? 'Replace' : 'Upload' }}
@@ -360,6 +386,17 @@
 
     </div>
 </div>
+
+{{-- Image lightbox for upload previews --}}
+<div id="haLightbox" class="fixed inset-0 z-[99999] flex items-center justify-center" style="display:none">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeHaLightbox()"></div>
+    <div class="relative max-w-[90vw] max-h-[90vh]">
+        <button onclick="closeHaLightbox()" class="absolute -top-4 -right-4 z-10 w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <img id="haLightboxImg" src="" alt="Image preview" class="max-w-[90vw] max-h-[90vh] rounded-2xl shadow-2xl bg-white object-contain">
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -370,6 +407,62 @@ function openRejectModal(id, label) {
 }
 function closeRejectModal(id) {
     document.getElementById('rejectModal' + id).style.display = 'none';
+}
+function previewHrFile(input, key) {
+    var file = input.files && input.files[0];
+    var box = document.getElementById('ha-prev-' + key);
+    var img = document.getElementById('ha-prev-img-' + key);
+    var imgLink = box.querySelector('.ha-prev-img-link');
+    var doc = box.querySelector('.ha-prev-doc');
+    var nameEl = document.getElementById('ha-prev-name-' + key);
+    var sizeEl = document.getElementById('ha-prev-size-' + key);
+    var filename = document.getElementById('ha-form-' + key).querySelector('.ha-filename');
+
+    if (!file) return;
+
+    if (img._objUrl) URL.revokeObjectURL(img._objUrl);
+    img._objUrl = URL.createObjectURL(file);
+    img.src = img._objUrl;
+
+    var isImg = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].indexOf(file.type) !== -1;
+    imgLink.style.display = isImg ? 'block' : 'none';
+    doc.style.display = isImg ? 'none' : 'flex';
+
+    nameEl.textContent = file.name;
+    sizeEl.textContent = file.size < 1024
+        ? file.size + ' B'
+        : file.size < 1048576
+            ? (file.size / 1024).toFixed(1) + ' KB'
+            : (file.size / 1048576).toFixed(1) + ' MB';
+
+    box.style.display = 'flex';
+    filename.textContent = file.name;
+}
+function clearHrFile(key) {
+    var form = document.getElementById('ha-form-' + key);
+    var input = form.querySelector('input[type=file]');
+    var box = document.getElementById('ha-prev-' + key);
+    var img = document.getElementById('ha-prev-img-' + key);
+    input.value = '';
+    box.style.display = 'none';
+    form.querySelector('.ha-filename').textContent = 'Choose file...';
+    if (img._objUrl) { URL.revokeObjectURL(img._objUrl); img._objUrl = null; }
+}
+function openPreviewLightbox(e, imgId) {
+    e.preventDefault();
+    var img = document.getElementById(imgId);
+    var modal = document.getElementById('haLightbox');
+    document.getElementById('haLightboxImg').src = img.src;
+    modal.style.display = 'flex';
+}
+function openHaLightbox(e, src) {
+    e.preventDefault();
+    var modal = document.getElementById('haLightbox');
+    document.getElementById('haLightboxImg').src = src;
+    modal.style.display = 'flex';
+}
+function closeHaLightbox() {
+    document.getElementById('haLightbox').style.display = 'none';
 }
 </script>
 @endpush
