@@ -26,7 +26,7 @@
     </div>
     @endif
 
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-3xl">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 w-full max-w-10xl">
         <form action="{{ route('remittances.update', $remittance) }}" method="POST">
             @csrf
             @method('PUT')
