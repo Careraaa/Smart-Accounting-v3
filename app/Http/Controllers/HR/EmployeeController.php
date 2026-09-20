@@ -123,7 +123,7 @@ class EmployeeController extends Controller
                 'signature_path' => 'nullable|string',
                 'generated_password' => 'nullable|string',
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
                 'bank_name' => 'nullable|string|max:100',
                 'bank_account_number' => 'nullable|string|max:50',
             ],
@@ -131,8 +131,8 @@ class EmployeeController extends Controller
                 'phone.regex' => 'Phone must be 09XXXXXXXXX, +639XXXXXXXXX, or 9XXXXXXXXX format.',
                 'salary_rate.between' => 'Daily rate must be between 0.00 and 999,999.99.',
                 'work_days_per_week.in' => 'Work days per week must be 5 or 6.',
-                'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
-                'attachments_files.*.max' => 'Each attachment must not exceed 5MB.',
+                'attachments.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
+                'attachments.*.max' => 'Each attachment must not exceed 5MB.',
             ],
         );
 
@@ -239,7 +239,7 @@ class EmployeeController extends Controller
                 'philhealth_number' => 'nullable|string|max:50',
                 'signature_path' => 'nullable|string',
                 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'attachments_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+                'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
                 'bank_name' => 'nullable|string|max:100',
                 'bank_account_number' => 'nullable|string|max:50',
             ],
@@ -247,8 +247,8 @@ class EmployeeController extends Controller
                 'phone.regex' => 'Phone must be 09XXXXXXXXX, +639XXXXXXXXX, or 9XXXXXXXXX format.',
                 'salary_rate.between' => 'Daily rate must be between 0.00 and 999,999.99.',
                 'work_days_per_week.in' => 'Work days per week must be 5 or 6.',
-                'attachments_files.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
-                'attachments_files.*.max' => 'Each attachment must not exceed 5MB.',
+                'attachments.*.mimes' => 'Attachments must be a JPG, PNG, or PDF file.',
+                'attachments.*.max' => 'Each attachment must not exceed 5MB.',
             ],
         );
 
@@ -340,14 +340,14 @@ class EmployeeController extends Controller
 
     private function handleAttachments(Request $request, User $employee): void
     {
-        if (!$request->hasFile('attachments_files')) {
+        if (!$request->hasFile('attachments')) {
             return;
         }
 
         $validKeys = EmployeeAttachment::attachmentTypes();
 
-        foreach ($request->file('attachments_files') as $key => $file) {
-            if (!array_key_exists($key, $validKeys)) {
+        foreach ($request->file('attachments') as $key => $file) {
+            if (!array_key_exists($key, $validKeys) || !$file) {
                 continue;
             }
 
