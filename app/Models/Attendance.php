@@ -61,11 +61,11 @@ class Attendance extends Model
                 if ($timeOut->greaterThan($breakStart) && $timeIn->lessThan($breakEnd)) {
                     $overlapStart = $timeIn->greaterThan($breakStart) ? $timeIn : $breakStart;
                     $overlapEnd = $timeOut->lessThan($breakEnd) ? $timeOut : $breakEnd;
-                    $breakMinutes = max(0, $overlapEnd->diffInMinutes($overlapStart));
+                    $breakMinutes = max(0, abs($overlapEnd->diffInMinutes($overlapStart)));
                 }
             }
 
-            $hoursWorked = max(0, ($timeOut->diffInMinutes($timeIn) - $breakMinutes) / 60);
+            $hoursWorked = max(0, (abs($timeOut->diffInMinutes($timeIn)) - $breakMinutes) / 60);
             
             return round($hoursWorked, 2);
         }
