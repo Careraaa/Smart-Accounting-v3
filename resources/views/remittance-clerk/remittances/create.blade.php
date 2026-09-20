@@ -59,13 +59,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Total Collection <span class="text-amber-600">*</span></label>
-                    <input type="text" name="total_collection" value="{{ old('total_collection') }}" class="money-input w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('total_collection') border-red-300 @enderror" inputmode="decimal" autocomplete="off" required>
+                    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-300 transition-all">
+                        <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
+                        <input type="text" name="total_collection" value="{{ old('total_collection') }}" class="money-input w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" inputmode="decimal" autocomplete="off" required>
+                    </div>
                     @error('total_collection') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Total Expenses</label>
-                    <input type="text" name="total_expenses" id="total_expenses" value="{{ old('total_expenses', 0) }}" class="money-input w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-gray-50 focus:outline-none" readonly>
-                    <p class="text-[10px] text-gray-400 mt-1">Calculated from the expense details below.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Boundary Rate</label>
@@ -73,11 +71,6 @@
                         <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
                         <input type="text" id="boundary_display" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" placeholder="0.00" readonly>
                     </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Net Remittance <span class="text-amber-600">*</span></label>
-                    <input type="text" name="net_remittance" id="net_remittance" value="{{ old('net_remittance') }}" class="money-input w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('net_remittance') border-red-300 @enderror" inputmode="decimal" autocomplete="off" required>
-                    @error('net_remittance') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 
@@ -93,6 +86,22 @@
                         @error($field) <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                     </div>
                 @endforeach
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Total Expenses</label>
+                    <input type="text" name="total_expenses" id="total_expenses" value="{{ old('total_expenses', 0) }}" class="money-input w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-gray-50 focus:outline-none" readonly>
+                    <p class="text-[10px] text-gray-400 mt-1">Calculated from the expense details above.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Net Remittance <span class="text-amber-600">*</span></label>
+                    <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-300 transition-all">
+                        <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
+                        <input type="text" name="net_remittance" id="net_remittance" value="{{ old('net_remittance') }}" class="money-input w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" inputmode="decimal" autocomplete="off" required>
+                    </div>
+                    @error('net_remittance') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             <div id="short-remittance-section" class="grid grid-cols-1 sm:grid-cols-4 gap-5 mt-5" style="display: none;">
