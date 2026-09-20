@@ -459,12 +459,14 @@ class AttendanceController extends Controller
         // Determine status when time_in is provided (and optionally time_out).
         // If both provided, compute status using both; if only time_in provided, compute late/present.
         $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
+        $employee = Employee::find($userId);
+        $shift = $employee?->shift ?? Shift::where('is_active', true)->first();
 
         if ($request->time_in) {
             try {
                 $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
-                $officeStart = Carbon::createFromFormat('H:i', '08:00');
-                $lateThreshold = $officeStart->copy()->addMinutes($gracePeriodMinutes);
+                $shiftStart = $shift ? Carbon::parse($shift->start_time) : Carbon::createFromFormat('H:i', '08:00');
+                $lateThreshold = $shiftStart->copy()->addMinutes($gracePeriodMinutes);
 
                 $data['status'] = $timeIn->isAfter($lateThreshold) ? 'late' : 'present';
             } catch (\Throwable $e) {
@@ -477,8 +479,8 @@ class AttendanceController extends Controller
             try {
                 $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
                 $timeOut = Carbon::createFromFormat('H:i', $request->time_out);
-                $officeStart = Carbon::createFromFormat('H:i', '08:00');
-                $lateThreshold = $officeStart->copy()->addMinutes($gracePeriodMinutes);
+                $shiftStart = $shift ? Carbon::parse($shift->start_time) : Carbon::createFromFormat('H:i', '08:00');
+                $lateThreshold = $shiftStart->copy()->addMinutes($gracePeriodMinutes);
 
                 $data['status'] = $timeIn->isAfter($lateThreshold) ? 'late' : 'present';
             } catch (\Throwable $e) {
@@ -654,12 +656,14 @@ class AttendanceController extends Controller
         ];
 
         $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
+        $employee = Employee::find($userId);
+        $shift = $employee?->shift ?? Shift::where('is_active', true)->first();
 
         if ($request->time_in) {
             try {
                 $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
-                $officeStart = Carbon::createFromFormat('H:i', '08:00');
-                $data['status'] = $timeIn->isAfter($officeStart->copy()->addMinutes($gracePeriodMinutes)) ? 'late' : 'present';
+                $shiftStart = $shift ? Carbon::parse($shift->start_time) : Carbon::createFromFormat('H:i', '08:00');
+                $data['status'] = $timeIn->isAfter($shiftStart->copy()->addMinutes($gracePeriodMinutes)) ? 'late' : 'present';
             } catch (\Throwable $e) {
                 $data['status'] = 'present';
             }
@@ -668,8 +672,8 @@ class AttendanceController extends Controller
         if ($request->time_in && $request->time_out) {
             try {
                 $timeIn = Carbon::createFromFormat('H:i', $request->time_in);
-                $officeStart = Carbon::createFromFormat('H:i', '08:00');
-                $data['status'] = $timeIn->isAfter($officeStart->copy()->addMinutes($gracePeriodMinutes)) ? 'late' : 'present';
+                $shiftStart = $shift ? Carbon::parse($shift->start_time) : Carbon::createFromFormat('H:i', '08:00');
+                $data['status'] = $timeIn->isAfter($shiftStart->copy()->addMinutes($gracePeriodMinutes)) ? 'late' : 'present';
             } catch (\Throwable $e) {
                 $data['status'] = $data['status'] ?? 'present';
             }
