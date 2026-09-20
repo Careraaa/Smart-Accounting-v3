@@ -17,7 +17,7 @@
                     <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 pr-8">
                         <div>
                             <label class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Skill <span class="text-red-500 dark:text-red-400">*</span></label>
-                            <input type="text" name="skills[{{ $loop->index }}][name]" value="{{ old('skills.' . $loop->index . '.name', $skill->name) }}"
+                            <input type="text" name="skills[{{ $loop->index }}][name]" value="{{ old('skills.' . $loop->index . '.name', $skill->skill_name) }}"
                                 class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500">
                         </div>
                         <div>

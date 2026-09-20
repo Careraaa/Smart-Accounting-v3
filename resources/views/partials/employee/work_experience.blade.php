@@ -17,7 +17,7 @@
                     <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 pr-8">
                         <div>
                             <label class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Company <span class="text-red-500 dark:text-red-400">*</span></label>
-                            <input type="text" name="work_experiences[{{ $loop->index }}][company]" value="{{ old('work_experiences.' . $loop->index . '.company', $exp->company) }}"
+                            <input type="text" name="work_experiences[{{ $loop->index }}][company]" value="{{ old('work_experiences.' . $loop->index . '.company', $exp->company_name) }}"
                                 class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500">
                         </div>
                         <div>
@@ -29,19 +29,19 @@
                     <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 mt-3 pr-8">
                         <div>
                             <label class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">From <span class="text-red-500 dark:text-red-400">*</span></label>
-                            <input type="date" name="work_experiences[{{ $loop->index }}][from]" value="{{ old('work_experiences.' . $loop->index . '.from', $exp->from ?? '') }}"
+                            <input type="date" name="work_experiences[{{ $loop->index }}][from]" value="{{ old('work_experiences.' . $loop->index . '.from', '') }}"
                                 class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500">
                         </div>
                         <div>
                             <label class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">To <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span></label>
-                            <input type="date" name="work_experiences[{{ $loop->index }}][to]" value="{{ old('work_experiences.' . $loop->index . '.to', $exp->to ?? '') }}"
+                            <input type="date" name="work_experiences[{{ $loop->index }}][to]" value="{{ old('work_experiences.' . $loop->index . '.to', '') }}"
                                 class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500">
                         </div>
                     </div>
                     <div class="mt-3 pr-8">
                         <label class="block text-[0.72rem] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-1.5">Description <span class="text-gray-400 dark:text-gray-500 font-normal normal-case tracking-normal text-[0.72rem]">(optional)</span></label>
                         <textarea name="work_experiences[{{ $loop->index }}][description]" rows="2"
-                            class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 resize-none">{{ old('work_experiences.' . $loop->index . '.description', $exp->description ?? '') }}</textarea>
+                            class="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-sm font-sans text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 outline-none transition-all duration-150 focus:border-red-400 dark:focus:border-red-500 focus:ring-2 focus:ring-red-500/10 dark:focus:ring-red-400/20 placeholder-gray-400 dark:placeholder-gray-500 resize-none">{{ old('work_experiences.' . $loop->index . '.description', $exp->responsibilities ?? '') }}</textarea>
                     </div>
                 </div>
                 @php $weIndex = $loop->index + 1; @endphp

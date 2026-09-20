@@ -358,17 +358,27 @@ class EmployeeController extends Controller
 
     private function handleRelations(Request $request, User $employee): void
     {
-        if ($request->work_experiences) {
-            foreach ($request->work_experiences as $we) {
-                if (!empty($we['company_name'])) {
-                    $employee->workExperiences()->create($we);
+        if ($request->input('work_experiences')) {
+            foreach ($request->input('work_experiences') as $index => $we) {
+                if (!empty($we['company'])) {
+                    $employee->workExperiences()->create([
+                        'company_name' => $we['company'],
+                        'position' => $we['position'] ?? null,
+                        'duration' => trim(($we['from'] ?? '') . (($we['to'] ?? '') ? ' - ' . $we['to'] : ' - Present')),
+                        'responsibilities' => $we['description'] ?? null,
+                        'sequence' => $index + 1,
+                    ]);
                 }
             }
         }
-        if ($request->special_skills) {
-            foreach ($request->special_skills as $skill) {
-                if (!empty($skill['skill_name'])) {
-                    $employee->specialSkills()->create($skill);
+        if ($request->input('skills')) {
+            foreach ($request->input('skills') as $index => $skill) {
+                if (!empty($skill['name'])) {
+                    $employee->specialSkills()->create([
+                        'skill_name' => $skill['name'],
+                        'proficiency' => $skill['proficiency'] ?? null,
+                        'sequence' => $index + 1,
+                    ]);
                 }
             }
         }
@@ -385,10 +395,15 @@ class EmployeeController extends Controller
                 }
             }
         }
-        if ($request->character_references) {
-            foreach ($request->character_references as $c) {
+        if ($request->input('references')) {
+            foreach ($request->input('references') as $index => $c) {
                 if (!empty($c['name'])) {
-                    $employee->charRefs()->create($c);
+                    $employee->charRefs()->create([
+                        'name' => $c['name'],
+                        'address' => $c['company'] ?? null,
+                        'contact_number' => $c['contact_number'] ?? null,
+                        'sequence' => $index + 1,
+                    ]);
                 }
             }
         }
