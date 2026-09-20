@@ -125,7 +125,7 @@
         </div>
 
         {{-- Document cards --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($attachmentTypes as $key => $label)
                 @php
                     $records    = $attachments->get($key, collect());
@@ -133,112 +133,87 @@
                     $isPending  = $latest?->status === 'pending';
                     $isApproved = $latest?->status === 'approved';
                     $isRejected = $latest?->status === 'rejected';
-                    $hasFile    = $latest !== null;
 
-                    $topBorder = match(true) {
-                        $isApproved => 'bg-emerald-400',
-                        $isPending  => 'bg-amber-400',
-                        $isRejected => 'bg-rose-400',
-                        default     => 'bg-gray-200',
+                    $badgeText  = $isApproved ? 'Approved' : ($isPending ? 'Pending' : ($isRejected ? 'Rejected' : 'Missing'));
+                    $cardTint = match(true) {
+                        $isApproved => 'border-green-500 dark:border-green-400',
+                        $isPending  => 'border-amber-400 dark:border-amber-500',
+                        $isRejected => 'border-rose-400 dark:border-rose-500',
+                        default     => 'border-gray-200 dark:border-gray-700',
                     };
-                    $iconBox = match(true) {
-                        $isApproved => 'bg-emerald-50 text-emerald-500',
-                        $isPending  => 'bg-amber-50 text-amber-500',
-                        $isRejected => 'bg-rose-50 text-rose-500',
-                        default     => 'bg-gray-100 text-gray-400',
-                    };
-                    $badgeClasses = match(true) {
+                    $badgeCls = match(true) {
                         $isApproved => 'bg-emerald-50 text-emerald-600',
                         $isPending  => 'bg-amber-50 text-amber-600',
                         $isRejected => 'bg-rose-50 text-rose-600',
                         default     => 'bg-gray-100 text-gray-500',
                     };
-                    $dotColor = match(true) {
+                    $dotCls = match(true) {
                         $isApproved => 'bg-emerald-500',
                         $isPending  => 'bg-amber-500 animate-pulse',
                         $isRejected => 'bg-rose-500',
                         default     => 'bg-gray-300',
                     };
-                    $badgeText = $isApproved ? 'Approved' : ($isPending ? 'Pending' : ($isRejected ? 'Rejected' : 'Missing'));
+                    $docIconCls = match(true) {
+                        $isApproved => 'bg-emerald-50 text-emerald-500',
+                        $isPending  => 'bg-amber-50 text-amber-500',
+                        $isRejected => 'bg-rose-50 text-rose-500',
+                        default     => 'bg-red-50 text-red-400',
+                    };
                 @endphp
 
-                <div class="ha-card bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col hover:shadow-lg hover:-translate-y-0.5 transition-all duration-[400ms]">
-                    <div class="h-1 rounded-t-2xl transition-colors duration-500 {{ $topBorder }}"></div>
-
-                    <div class="p-5 flex flex-col gap-4 flex-1">
-                        {{-- Title + badge --}}
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-500 {{ $iconBox }}">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-900">{{ $label }}</span>
-                            </div>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[0.6rem] font-semibold {{ $badgeClasses }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ $dotColor }}"></span>
-                                {{ $badgeText }}
-                            </span>
+                <div class="ha-card bg-white dark:bg-gray-800 rounded-xl border p-3.5 flex flex-col gap-2.5 transition-colors duration-200 {{ $cardTint }}" id="ha-card-{{ $key }}">
+                    {{-- Title + status badge --}}
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="text-xs font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5 truncate">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span class="truncate">{{ $label }}</span>
                         </div>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[0.6rem] font-semibold {{ $badgeCls }} flex-shrink-0">
+                            <span class="w-1.5 h-1.5 rounded-full {{ $dotCls }}"></span>
+                            {{ $badgeText }}
+                        </span>
+                    </div>
 
-                        {{-- File preview --}}
-                        @if($latest)
+                    {{-- Existing upload (compact) --}}
+                    @if($latest)
+                        <div class="ha-existing flex items-center gap-2 px-2.5 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             @if($latest->is_image)
-                                <a href="#" onclick="openHaLightbox(event,'{{ $latest->url }}')" class="block rounded-xl overflow-hidden border border-gray-100 group" title="Click to view full image">
-                                    <img src="{{ $latest->url }}" alt="{{ $label }}" class="w-full h-24 object-cover group-hover:scale-105 group-hover:opacity-90 transition-transform duration-300">
+                                <a href="{{ $latest->url }}" target="_blank" rel="noopener" title="Click to view full image" class="flex-shrink-0 block">
+                                    <img src="{{ $latest->url }}" alt="{{ $label }}" class="w-10 h-10 object-cover rounded-lg">
                                 </a>
                             @else
-                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                    <div class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-700 truncate">{{ $latest->original_name }}</p>
-                                        <p class="text-xs text-gray-400">{{ $latest->file_size_human }}</p>
-                                    </div>
-                                </div>
+                                <a href="{{ $latest->url }}" target="_blank" rel="noopener" title="Click to view document" class="w-8 h-8 rounded-lg {{ $docIconCls }} flex items-center justify-center flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2h-5.586a1 1 0 01-.707-.293l-1.414-1.414A1 1 0 008.586 5H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </a>
                             @endif
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{{ $latest->original_name }}</div>
+                                <div class="text-[0.7rem] text-gray-400 dark:text-gray-500">Uploaded {{ $latest->created_at->diffForHumans() }} · {{ ucfirst($latest->uploaded_by_role) }}</div>
+                            </div>
+                        </div>
 
-                            <p class="text-[0.65rem] text-gray-400 -mt-2">
-                                Uploaded {{ $latest->created_at->diffForHumans() }} · by {{ ucfirst($latest->uploaded_by_role) }}
-                            </p>
+                        {{-- Rejection reason --}}
+                        @if($isRejected && $latest->rejection_reason)
+                            <div class="flex items-start gap-1.5 px-2.5 py-2 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 text-[0.7rem] text-rose-600 dark:text-rose-400 leading-snug">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
+                                <span><span class="font-semibold">Rejected:</span> {{ $latest->rejection_reason }}</span>
+                            </div>
+                        @endif
 
-                            {{-- Rejection reason --}}
-                            @if($isRejected && $latest->rejection_reason)
-                                <div class="flex items-start gap-2 p-3 rounded-xl bg-rose-50 border border-rose-100">
-                                    <svg class="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/></svg>
-                                    <p class="text-xs text-rose-600"><span class="font-semibold">Rejected:</span> {{ $latest->rejection_reason }}</p>
-                                </div>
-                            @endif
-
-                            {{-- Action buttons --}}
+                        {{-- Pending actions --}}
+                        @if($isPending)
                             <div class="flex flex-wrap items-center gap-1.5">
-                                @if($latest->is_image)
-                                    <a href="#" onclick="openHaLightbox(event,'{{ $latest->url }}')" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-[0.6rem] font-semibold transition-colors">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        View
-                                    </a>
-                                @else
-                                    <a href="{{ $latest->url }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-[0.6rem] font-semibold transition-colors">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                        View
-                                    </a>
-                                @endif
-
-                                @if($isPending)
-                                    <form method="POST" action="{{ route('employees.attachments.approve', [$employee, $latest]) }}" class="inline">
-                                        @csrf @method('PATCH')
-                                        <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[0.6rem] font-semibold transition-colors">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                            Approve
-                                        </button>
-                                    </form>
-
-                                    <button type="button" onclick="openRejectModal({{ $latest->id }}, '{{ $label }}')" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[0.6rem] font-semibold transition-colors">
-                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                        Reject
+                                <form method="POST" action="{{ route('employees.attachments.approve', [$employee, $latest]) }}" class="inline">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[0.6rem] font-semibold transition-colors">
+                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        Approve
                                     </button>
-                                @endif
-
+                                </form>
+                                <button type="button" onclick="openRejectModal({{ $latest->id }}, '{{ $label }}')" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[0.6rem] font-semibold transition-colors">
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    Reject
+                                </button>
                                 <form method="POST" action="{{ route('employees.attachments.destroy', [$employee, $latest]) }}" class="inline" data-sa-confirm="Delete this file permanently?">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 text-[0.6rem] font-semibold transition-colors" title="Delete">
@@ -248,47 +223,31 @@
                                 </form>
                             </div>
                         @endif
+                    @endif
 
-                        {{-- HR upload form --}}
-                        <div class="mt-auto {{ $latest ? 'pt-4 border-t border-gray-100' : '' }}">
-                            <form method="POST" action="{{ route('employees.attachments.store', $employee) }}" enctype="multipart/form-data" class="ha-form" id="ha-form-{{ $key }}">
-                                @csrf
-                                <input type="hidden" name="attachment_key" value="{{ $key }}">
-                                <label class="block text-[0.6rem] font-medium text-gray-500 mb-1.5">
-                                    {{ $latest ? 'Replace file' : 'Upload file' }}
-                                </label>
+                    {{-- Upload zone (clean, matches add-employee style) --}}
+                    <form method="POST" action="{{ route('employees.attachments.store', $employee) }}" enctype="multipart/form-data" class="ha-form mt-auto flex flex-col gap-2" id="ha-form-{{ $key }}">
+                        @csrf
+                        <input type="hidden" name="attachment_key" value="{{ $key }}">
 
-                                {{-- Live preview of the chosen file --}}
-                                <div id="ha-prev-{{ $key }}" class="ha-prev hidden items-center gap-3 p-3 mb-2 rounded-xl bg-gray-50 border border-gray-100" style="display:none">
-                                    <a href="#" onclick="openPreviewLightbox(event,'ha-prev-img-{{ $key }}')" class="ha-prev-img-link hidden flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-white" title="Click to view full image">
-                                        <img id="ha-prev-img-{{ $key }}" src="" class="w-full h-full object-cover" alt="Preview">
-                                    </a>
-                                    <div class="ha-prev-doc hidden flex-shrink-0 w-16 h-16 rounded-lg bg-white border border-gray-200 flex-col items-center justify-center text-gray-400">
-                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                        <span class="text-[0.5rem] font-bold mt-0.5">PDF/DOC</span>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p id="ha-prev-name-{{ $key }}" class="text-sm font-medium text-gray-700 truncate"></p>
-                                        <p id="ha-prev-size-{{ $key }}" class="text-xs text-gray-400"></p>
-                                    </div>
-                                    <button type="button" onclick="clearHrFile('{{ $key }}')" class="flex-shrink-0 text-gray-400 hover:text-rose-500 transition-colors" title="Remove selection">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 6L6 18M6 6l12 12"/></svg>
-                                    </button>
-                                </div>
+                        @if($latest)
+                            <label class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer transition-all duration-150 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 active:scale-[0.98]">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                <span class="ha-zone-label text-xs font-semibold text-gray-500 dark:text-gray-400">Replace file</span>
+                                <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="previewHrFile(this,'{{ $key }}')">
+                            </label>
+                        @else
+                            <label class="flex flex-col items-center justify-center gap-1.5 px-3 py-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer transition-all duration-150 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 active:scale-[0.98]">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                <span class="ha-zone-label text-[0.65rem] font-semibold text-gray-400 dark:text-gray-500">Click to upload</span>
+                                <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="previewHrFile(this,'{{ $key }}')">
+                            </label>
+                        @endif
 
-                                <div class="flex items-center gap-2">
-                                    <label class="ha-zone flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 cursor-pointer transition-all duration-300">
-                                        <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 3v12"/></svg>
-                                        <span class="text-xs text-gray-500 truncate ha-filename">Choose file...</span>
-                                        <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required class="hidden" onchange="previewHrFile(this,'{{ $key }}')">
-                                    </label>
-                                    <button type="submit" class="flex-shrink-0 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold rounded-xl transition-all duration-300">
-                                        {{ $latest ? 'Replace' : 'Upload' }}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                        <button type="submit" class="w-full py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold rounded-xl transition-all duration-300">
+                            {{ $latest ? 'Replace' : 'Upload' }}
+                        </button>
+                    </form>
                 </div>
 
                 {{-- Reject modal --}}
@@ -386,17 +345,6 @@
 
     </div>
 </div>
-
-{{-- Image lightbox for upload previews --}}
-<div id="haLightbox" class="fixed inset-0 z-[99999] flex items-center justify-center" style="display:none">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeHaLightbox()"></div>
-    <div class="relative max-w-[90vw] max-h-[90vh]">
-        <button onclick="closeHaLightbox()" class="absolute -top-4 -right-4 z-10 w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-        <img id="haLightboxImg" src="" alt="Image preview" class="max-w-[90vw] max-h-[90vh] rounded-2xl shadow-2xl bg-white object-contain">
-    </div>
-</div>
 @endsection
 
 @push('scripts')
@@ -409,60 +357,78 @@ function closeRejectModal(id) {
     document.getElementById('rejectModal' + id).style.display = 'none';
 }
 function previewHrFile(input, key) {
-    var file = input.files && input.files[0];
-    var box = document.getElementById('ha-prev-' + key);
-    var img = document.getElementById('ha-prev-img-' + key);
-    var imgLink = box.querySelector('.ha-prev-img-link');
-    var doc = box.querySelector('.ha-prev-doc');
-    var nameEl = document.getElementById('ha-prev-name-' + key);
-    var sizeEl = document.getElementById('ha-prev-size-' + key);
-    var filename = document.getElementById('ha-form-' + key).querySelector('.ha-filename');
-
-    if (!file) return;
-
-    if (img._objUrl) URL.revokeObjectURL(img._objUrl);
-    img._objUrl = URL.createObjectURL(file);
-    img.src = img._objUrl;
-
-    var isImg = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].indexOf(file.type) !== -1;
-    imgLink.style.display = isImg ? 'block' : 'none';
-    doc.style.display = isImg ? 'none' : 'flex';
-
-    nameEl.textContent = file.name;
-    sizeEl.textContent = file.size < 1024
-        ? file.size + ' B'
-        : file.size < 1048576
-            ? (file.size / 1024).toFixed(1) + ' KB'
-            : (file.size / 1048576).toFixed(1) + ' MB';
-
-    box.style.display = 'flex';
-    filename.textContent = file.name;
-}
-function clearHrFile(key) {
+    var card = document.getElementById('ha-card-' + key);
     var form = document.getElementById('ha-form-' + key);
-    var input = form.querySelector('input[type=file]');
-    var box = document.getElementById('ha-prev-' + key);
-    var img = document.getElementById('ha-prev-img-' + key);
-    input.value = '';
-    box.style.display = 'none';
-    form.querySelector('.ha-filename').textContent = 'Choose file...';
-    if (img._objUrl) { URL.revokeObjectURL(img._objUrl); img._objUrl = null; }
-}
-function openPreviewLightbox(e, imgId) {
-    e.preventDefault();
-    var img = document.getElementById(imgId);
-    var modal = document.getElementById('haLightbox');
-    document.getElementById('haLightboxImg').src = img.src;
-    modal.style.display = 'flex';
-}
-function openHaLightbox(e, src) {
-    e.preventDefault();
-    var modal = document.getElementById('haLightbox');
-    document.getElementById('haLightboxImg').src = src;
-    modal.style.display = 'flex';
-}
-function closeHaLightbox() {
-    document.getElementById('haLightbox').style.display = 'none';
+    if (!card || !form) return;
+
+    var file = input.files && input.files[0];
+
+    var oldPreview = form.querySelector('.ha-prev-inline');
+    if (oldPreview) {
+        if (oldPreview.dataset.url) URL.revokeObjectURL(oldPreview.dataset.url);
+        oldPreview.remove();
+    }
+
+    var existingBlock = card.querySelector('.ha-existing');
+    var zoneLabel = form.querySelector('.ha-zone-label');
+
+    // Reset card state when selection is cleared.
+    if (!file) {
+        card.classList.remove('border-green-500', 'dark:border-green-400');
+        if (zoneLabel) zoneLabel.textContent = existingBlock ? 'Replace file' : 'Click to upload';
+        if (existingBlock) existingBlock.style.display = '';
+        return;
+    }
+
+    // Hide the persisted upload and highlight the card like the add-employee form.
+    if (existingBlock) existingBlock.style.display = 'none';
+    card.classList.add('border-green-500', 'dark:border-green-400');
+    if (zoneLabel) zoneLabel.textContent = file.name;
+
+    var url = URL.createObjectURL(file);
+    var isImage = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/webp';
+    var ext = (file.name.split('.').pop() || '').toUpperCase();
+    var size = file.size < 1048576
+        ? (file.size / 1024).toFixed(1) + ' KB'
+        : (file.size / 1048576).toFixed(1) + ' MB';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'ha-prev-inline flex items-center gap-2 px-2.5 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg';
+    wrap.dataset.url = url;
+
+    var link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.title = isImage ? 'Click to view full image' : 'Click to view document';
+    link.className = isImage
+        ? 'flex-shrink-0 block'
+        : 'w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0';
+
+    if (isImage) {
+        var img = document.createElement('img');
+        img.src = url;
+        img.alt = file.name;
+        img.className = 'w-10 h-10 object-cover rounded-lg';
+        link.appendChild(img);
+    } else {
+        link.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2h-5.586a1 1 0 01-.707-.293l-1.414-1.414A1 1 0 008.586 5H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
+    }
+    wrap.appendChild(link);
+
+    var info = document.createElement('div');
+    info.className = 'flex-1 min-w-0';
+    var name = document.createElement('div');
+    name.className = 'text-xs font-semibold text-gray-700 dark:text-gray-300 truncate';
+    name.textContent = file.name;
+    var meta = document.createElement('div');
+    meta.className = 'text-[0.7rem] text-gray-400 dark:text-gray-500';
+    meta.textContent = (isImage ? 'Image' : ext) + ' · ' + size;
+    info.appendChild(name);
+    info.appendChild(meta);
+    wrap.appendChild(info);
+
+    form.appendChild(wrap);
 }
 </script>
 @endpush
