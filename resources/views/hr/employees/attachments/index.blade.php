@@ -141,56 +141,48 @@
                         $isRejected => 'border-rose-400 dark:border-rose-500',
                         default     => 'border-gray-200 dark:border-gray-700',
                     };
-                    $badgeCls = match(true) {
-                        $isApproved => 'bg-emerald-50 text-emerald-600',
-                        $isPending  => 'bg-amber-50 text-amber-600',
-                        $isRejected => 'bg-rose-50 text-rose-600',
-                        default     => 'bg-gray-100 text-gray-500',
-                    };
-                    $dotCls = match(true) {
-                        $isApproved => 'bg-emerald-500',
-                        $isPending  => 'bg-amber-500 animate-pulse',
-                        $isRejected => 'bg-rose-500',
-                        default     => 'bg-gray-300',
-                    };
-                    $docIconCls = match(true) {
-                        $isApproved => 'bg-emerald-50 text-emerald-500',
-                        $isPending  => 'bg-amber-50 text-amber-500',
-                        $isRejected => 'bg-rose-50 text-rose-500',
-                        default     => 'bg-red-50 text-red-400',
+                    $statusPillCls = match(true) {
+                        $isApproved => 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:border-emerald-800',
+                        $isPending  => 'bg-amber-50 text-amber-600 border-amber-200 dark:border-amber-800',
+                        $isRejected => 'bg-rose-50 text-rose-600 border-rose-200 dark:border-rose-800',
+                        default     => 'bg-gray-100 text-gray-500 border-gray-200 dark:border-gray-700',
                     };
                 @endphp
 
                 <div class="ha-card bg-white dark:bg-gray-800 rounded-xl border p-3.5 flex flex-col gap-2.5 transition-colors duration-200 {{ $cardTint }}" id="ha-card-{{ $key }}">
-                    {{-- Title + status badge --}}
-                    <div class="flex items-center justify-between gap-2">
-                        <div class="text-xs font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5 truncate">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            <span class="truncate">{{ $label }}</span>
-                        </div>
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[0.6rem] font-semibold {{ $badgeCls }} flex-shrink-0">
-                            <span class="w-1.5 h-1.5 rounded-full {{ $dotCls }}"></span>
-                            {{ $badgeText }}
-                        </span>
+                    {{-- Title (matches add-employee attachments tab) --}}
+                    <div class="text-xs font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span class="truncate">{{ $label }}</span>
                     </div>
 
-                    {{-- Existing upload (compact) --}}
                     @if($latest)
-                        <div class="ha-existing flex items-center gap-2 px-2.5 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            @if($latest->is_image)
-                                <a href="{{ $latest->url }}" target="_blank" rel="noopener" title="Click to view full image" class="flex-shrink-0 block">
-                                    <img src="{{ $latest->url }}" alt="{{ $label }}" class="w-10 h-10 object-cover rounded-lg">
-                                </a>
-                            @else
-                                <a href="{{ $latest->url }}" target="_blank" rel="noopener" title="Click to view document" class="w-8 h-8 rounded-lg {{ $docIconCls }} flex items-center justify-center flex-shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2h-5.586a1 1 0 01-.707-.293l-1.414-1.414A1 1 0 008.586 5H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </a>
-                            @endif
-                            <div class="flex-1 min-w-0">
-                                <div class="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{{ $latest->original_name }}</div>
-                                <div class="text-[0.7rem] text-gray-400 dark:text-gray-500">Uploaded {{ $latest->created_at->diffForHumans() }} · {{ ucfirst($latest->uploaded_by_role) }}</div>
+                        {{-- Existing file row (compact, like add-employee tab) --}}
+                        <form method="POST" action="{{ route('employees.attachments.store', $employee) }}" enctype="multipart/form-data" class="ha-form" id="ha-form-{{ $key }}">
+                            @csrf
+                            <input type="hidden" name="attachment_key" value="{{ $key }}">
+                            <div class="ha-existing flex items-center gap-2 px-2.5 py-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                @if($latest->is_image)
+                                    <a href="{{ $latest->url }}" target="_blank" rel="noopener" title="Click to view full image" class="flex-shrink-0 block">
+                                        <img src="{{ $latest->url }}" alt="{{ $label }}" class="w-10 h-10 object-cover rounded-lg">
+                                    </a>
+                                @else
+                                    <a href="{{ $latest->url }}" target="_blank" rel="noopener" title="Click to view document" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9a2 2 0 00-2-2h-5.586a1 1 0 01-.707-.293l-1.414-1.414A1 1 0 008.586 5H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </a>
+                                @endif
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{{ $latest->original_name }}</div>
+                                    <div class="text-[0.7rem] text-gray-400 dark:text-gray-500">{{ $latest->created_at ? $latest->created_at->format('M d, Y h:i A') : '' }}</div>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.55rem] font-bold uppercase tracking-wide border {{ $statusPillCls }} flex-shrink-0">{{ $badgeText }}</span>
+                                <label class="ha-replace inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:border-red-300 dark:hover:border-red-600 text-[0.65rem] font-semibold cursor-pointer transition-all active:scale-[0.95] flex-shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                    Replace
+                                    <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="previewHrFile(this,'{{ $key }}')">
+                                </label>
                             </div>
-                        </div>
+                        </form>
 
                         {{-- Rejection reason --}}
                         @if($isRejected && $latest->rejection_reason)
@@ -205,49 +197,36 @@
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <form method="POST" action="{{ route('employees.attachments.approve', [$employee, $latest]) }}" class="inline">
                                     @csrf @method('PATCH')
-                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[0.6rem] font-semibold transition-colors">
+                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-emerald-600 dark:text-emerald-400 hover:border-emerald-300 dark:hover:border-emerald-600 text-[0.65rem] font-semibold transition-all">
                                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                         Approve
                                     </button>
                                 </form>
-                                <button type="button" onclick="openRejectModal({{ $latest->id }}, '{{ $label }}')" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[0.6rem] font-semibold transition-colors">
+                                <button type="button" onclick="openRejectModal({{ $latest->id }}, '{{ $label }}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-rose-600 dark:text-rose-400 hover:border-rose-300 dark:hover:border-rose-600 text-[0.65rem] font-semibold transition-all">
                                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                     Reject
                                 </button>
                                 <form method="POST" action="{{ route('employees.attachments.destroy', [$employee, $latest]) }}" class="inline" data-sa-confirm="Delete this file permanently?">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 text-[0.6rem] font-semibold transition-colors" title="Delete">
+                                    <button type="submit" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-red-300 dark:hover:border-red-600 hover:text-red-600 dark:hover:text-red-400 text-[0.65rem] font-semibold transition-all" title="Delete">
                                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         Delete
                                     </button>
                                 </form>
                             </div>
                         @endif
-                    @endif
-
-                    {{-- Upload zone (clean, matches add-employee style) --}}
-                    <form method="POST" action="{{ route('employees.attachments.store', $employee) }}" enctype="multipart/form-data" class="ha-form mt-auto flex flex-col gap-2" id="ha-form-{{ $key }}">
-                        @csrf
-                        <input type="hidden" name="attachment_key" value="{{ $key }}">
-
-                        @if($latest)
-                            <label class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer transition-all duration-150 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 active:scale-[0.98]">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                <span class="ha-zone-label text-xs font-semibold text-gray-500 dark:text-gray-400">Replace file</span>
-                                <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="previewHrFile(this,'{{ $key }}')">
-                            </label>
-                        @else
+                    @else
+                        {{-- Click to upload (matches add-employee tab) --}}
+                        <form method="POST" action="{{ route('employees.attachments.store', $employee) }}" enctype="multipart/form-data" class="ha-form" id="ha-form-{{ $key }}">
+                            @csrf
+                            <input type="hidden" name="attachment_key" value="{{ $key }}">
                             <label class="flex flex-col items-center justify-center gap-1.5 px-3 py-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer transition-all duration-150 hover:border-red-300 dark:hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 active:scale-[0.98]">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                                <span class="ha-zone-label text-[0.65rem] font-semibold text-gray-400 dark:text-gray-500">Click to upload</span>
+                                <span class="text-[0.65rem] font-semibold text-gray-400 dark:text-gray-500">Click to upload</span>
                                 <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="previewHrFile(this,'{{ $key }}')">
                             </label>
-                        @endif
-
-                        <button type="submit" class="w-full py-2 bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold rounded-xl transition-all duration-300">
-                            {{ $latest ? 'Replace' : 'Upload' }}
-                        </button>
-                    </form>
+                        </form>
+                    @endif
                 </div>
 
                 {{-- Reject modal --}}
@@ -362,6 +341,7 @@ function previewHrFile(input, key) {
     if (!card || !form) return;
 
     var file = input.files && input.files[0];
+    if (!file) return;
 
     var oldPreview = form.querySelector('.ha-prev-inline');
     if (oldPreview) {
@@ -370,20 +350,8 @@ function previewHrFile(input, key) {
     }
 
     var existingBlock = card.querySelector('.ha-existing');
-    var zoneLabel = form.querySelector('.ha-zone-label');
-
-    // Reset card state when selection is cleared.
-    if (!file) {
-        card.classList.remove('border-green-500', 'dark:border-green-400');
-        if (zoneLabel) zoneLabel.textContent = existingBlock ? 'Replace file' : 'Click to upload';
-        if (existingBlock) existingBlock.style.display = '';
-        return;
-    }
-
-    // Hide the persisted upload and highlight the card like the add-employee form.
     if (existingBlock) existingBlock.style.display = 'none';
     card.classList.add('border-green-500', 'dark:border-green-400');
-    if (zoneLabel) zoneLabel.textContent = file.name;
 
     var url = URL.createObjectURL(file);
     var isImage = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/webp';
@@ -429,6 +397,14 @@ function previewHrFile(input, key) {
     wrap.appendChild(info);
 
     form.appendChild(wrap);
+
+    // No submit button (clean add-employee look) — upload automatically.
+    if (!form.dataset.submitting) {
+        form.dataset.submitting = '1';
+        setTimeout(function () {
+            form.submit();
+        }, 400);
+    }
 }
 </script>
 @endpush
