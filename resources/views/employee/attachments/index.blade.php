@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){do
                                     <p class="text-sm font-medium text-gray-700 truncate">{{ $latest->original_name }}</p>
                                     <p class="text-xs text-gray-400">{{ $latest->created_at->diffForHumans() }}</p>
                                 </div>
-                                <a href="{{ $latest->url }}" target="_blank" class="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-900 hover:text-white flex items-center justify-center transition-all duration-300 animate-bounce hover:animate-none group/dl" title="Download">
+                                <a href="{{ $latest->url }}" target="_blank" class="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-900 hover:text-white flex items-center justify-center transition-all duration-300 hover:animate-bounce group/dl" title="Download">
                                     <svg class="w-4 h-4 transition-transform duration-300 group-hover/dl:scale-110" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" fill="none"><path d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" stroke-linejoin="round" stroke-linecap="round"></path></svg>
                                 </a>
                             </div>
