@@ -31,7 +31,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Plate Number <span class="text-amber-600">*</span></label>
-                    <input type="text" name="plate_number" value="{{ old('plate_number') }}" maxlength="8" pattern="[A-Za-z]{3}[ -]?[0-9]{3,4}" title="3 letters followed by 3-4 digits (e.g., ABC-1234)" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('plate_number') border-red-300 @enderror" placeholder="e.g., ABC-1234" required>
+                    <input type="text" name="plate_number" value="{{ old('plate_number') }}" maxlength="8" pattern="[A-Za-z]{3}[ -]?[0-9]{3,4}" title="3 letters followed by 3-4 digits (e.g., ABC-1234)" oninput="this.value=this.value.replace(/[^A-Za-z0-9 -]/g,'').toUpperCase()" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('plate_number') border-red-300 @enderror" placeholder="e.g., ABC-1234" required>
                     @error('plate_number') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
