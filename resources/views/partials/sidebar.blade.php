@@ -271,7 +271,7 @@
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center text-orange-500"><i class="feather-truck" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Operational Records</span>
+                            <span class="sidebar-text min-w-0 leading-snug">Operational Records</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
                         <ul class="sidebar-sub">
@@ -379,7 +379,7 @@
                     <li class="sidebar-item has-sub">
                         <a href="javascript:void(0);" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('drivers.*', 'paos.*', 'routes.*', 'vehicles.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center text-orange-500"><i class="feather-truck" style="font-size:18px"></i></span>
-                            <span class="sidebar-text truncate min-w-0">Operational Records</span>
+                            <span class="sidebar-text min-w-0 leading-snug">Operational Records</span>
                             <span class="sidebar-arrow ml-auto"><i class="feather-chevron-right" style="font-size:12px"></i></span>
                         </a>
                         <ul class="sidebar-sub">
