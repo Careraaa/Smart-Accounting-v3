@@ -58,11 +58,21 @@ class VehicleController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['plate_number' => mb_strtoupper(trim($request->input('plate_number')))]);
+
         $validated = $request->validate([
-            'plate_number' => 'required|string|unique:vehicles',
+            'plate_number' => [
+                'required',
+                'string',
+                'max:8',
+                'regex:/^[A-Za-z]{3}[\s-]?[0-9]{3,4}$/',
+                'unique:vehicles',
+            ],
             'route_id' => 'required|exists:routes,id',
             'operator' => 'required|string|max:255',
             'status' => 'required|in:active,under_maintenance',
+        ], [
+            'plate_number.regex' => 'Plate Number must follow the standard LTO format (e.g., ABC-1234).',
         ]);
 
         $vehicleData = [
@@ -102,11 +112,21 @@ class VehicleController extends Controller
 
     public function update(Request $request, Vehicle $vehicle)
     {
+        $request->merge(['plate_number' => mb_strtoupper(trim($request->input('plate_number')))]);
+
         $validated = $request->validate([
-            'plate_number' => 'required|string|unique:vehicles,plate_number,' . $vehicle->id,
+            'plate_number' => [
+                'required',
+                'string',
+                'max:8',
+                'regex:/^[A-Za-z]{3}[\s-]?[0-9]{3,4}$/',
+                'unique:vehicles,plate_number,' . $vehicle->id,
+            ],
             'route_id' => 'required|exists:routes,id',
             'operator' => 'required|string|max:255',
             'status' => 'required|in:active,under_maintenance',
+        ], [
+            'plate_number.regex' => 'Plate Number must follow the standard LTO format (e.g., ABC-1234).',
         ]);
 
         $vehicleData = [
