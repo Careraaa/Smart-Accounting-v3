@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){do
                                     <div class="flex items-center gap-2">
                                         <label class="ad-zone flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 hover:bg-gray-100 hover:border-gray-400 cursor-pointer transition-all duration-300">
                                             <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 3v12"/></svg>
-                                            <span class="text-xs text-gray-500 truncate ad-filename">Choose file...</span>
+                                            <span class="flex-1 min-w-0 text-xs text-gray-500 truncate ad-filename">Choose file...</span>
                                             <input type="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required class="hidden" onchange="this.closest('.ad-form').querySelector('.ad-filename').textContent=this.files[0].name">
                                         </label>
                                         <button type="submit" class="flex-shrink-0 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95">
