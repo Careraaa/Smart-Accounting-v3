@@ -139,3 +139,25 @@
     </div>
 
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const search  = document.getElementById('paoSearch');
+    const statusF = document.getElementById('statusFilter');
+    const tbody   = document.getElementById('paoTbody');
+    const noRes   = document.getElementById('paoNoResults');
+    function run() {
+        const q = search.value.toLowerCase().trim();
+        const s = statusF.value;
+        const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
+        const visibleRows = rows.filter(row => (!q || row.dataset.name.includes(q)) && (!s || row.dataset.status === s));
+        rows.forEach(row => row.style.display = 'none');
+        visibleRows.forEach(row => row.style.display = '');
+        noRes.style.display = visibleRows.length === 0 && rows.length > 0 ? 'block' : 'none';
+    }
+    search.addEventListener('input', run);
+    statusF.addEventListener('change', run);
+})();
+</script>
+@endpush
