@@ -798,16 +798,18 @@ class AttendanceController extends Controller
         return response()->json(['rows' => $attendances]);
     }
 
-    public function getShiftBreakTimes()
+    public function getShiftBreakTimes(Request $request)
     {
-        $userId = auth()->id();
+        // Resolve the shift for the employee being logged (user_id query param),
+        // falling back to the authenticated user's own shift, then any active shift.
+        $userId = $request->query('user_id') ?: auth()->id();
         $employee = Employee::find($userId);
 
-        // Try to get shift from employee or use default
         $shift = null;
-        if ($employee && isset($employee->shift_id) && $employee->shift_id) {
+        if ($employee && $employee->shift_id) {
             $shift = Shift::find($employee->shift_id);
-        } else {
+        }
+        if (!$shift) {
             $shift = Shift::where('is_active', true)->first();
         }
 
@@ -816,20 +818,22 @@ class AttendanceController extends Controller
 
         if ($shift) {
             return response()->json([
-                'break_start' => $shift->break_start ?? '12:00:00',
-                'break_end' => $shift->break_end ?? '13:00:00',
+                'has_shift' => true,
+                'break_start' => $shift->break_start,
+                'break_end' => $shift->break_end,
                 'start_time' => $shift->start_time ?? '08:00:00',
                 'end_time' => $shift->end_time ?? '17:00:00',
                 'grace_period_minutes' => $gracePeriodMinutes,
             ]);
         }
 
-        // Fallback: 8:00 AM - 5:00 PM, break 12:00-13:00
+        // No shift configured — report none so the preview stays idle.
         return response()->json([
-            'break_start' => '12:00:00',
-            'break_end' => '13:00:00',
-            'start_time' => '08:00:00',
-            'end_time' => '17:00:00',
+            'has_shift' => false,
+            'break_start' => null,
+            'break_end' => null,
+            'start_time' => null,
+            'end_time' => null,
             'grace_period_minutes' => $gracePeriodMinutes,
         ]);
     }

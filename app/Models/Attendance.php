@@ -51,13 +51,23 @@ class Attendance extends Model
         if ($this->time_in && $this->time_out) {
             $date = $this->date->format('Y-m-d');
             $timeIn = \Carbon\Carbon::parse($date . ' ' . $this->time_in);
-            $timeOut = \Carbon\Carbon::parse($this->date->format('Y-m-d') . ' ' . $this->time_out);
+            $timeOut = \Carbon\Carbon::parse($date . ' ' . $this->time_out);
+            if ($timeOut->lessThan($timeIn)) {
+                $timeOut->addDay();
+            }
 
             $shift = $this->employee?->shift ?? \App\Models\Shift::where('is_active', true)->first();
             $breakMinutes = 0;
             if ($shift?->break_start && $shift?->break_end) {
                 $breakStart = \Carbon\Carbon::parse($date . ' ' . $shift->break_start);
                 $breakEnd = \Carbon\Carbon::parse($date . ' ' . $shift->break_end);
+                if ($breakEnd->lessThanOrEqualTo($breakStart)) {
+                    $breakEnd->addDay();
+                }
+                if ($timeOut->day !== $timeIn->day && $breakStart->lessThan($timeIn)) {
+                    $breakStart->addDay();
+                    $breakEnd->addDay();
+                }
                 if ($timeOut->greaterThan($breakStart) && $timeIn->lessThan($breakEnd)) {
                     $overlapStart = $timeIn->greaterThan($breakStart) ? $timeIn : $breakStart;
                     $overlapEnd = $timeOut->lessThan($breakEnd) ? $timeOut : $breakEnd;

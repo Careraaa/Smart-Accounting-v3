@@ -74,24 +74,34 @@ class AttendanceService
         $totalHours = 0;
 
         foreach ($attendances as $attendance) {
-            $timeIn = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $attendance->time_in);
-            $timeOut = Carbon::parse($attendance->date->format('Y-m-d') . ' ' . $attendance->time_out);
+            $dateStr = $attendance->date->format('Y-m-d');
+            $timeIn = Carbon::parse($dateStr . ' ' . $attendance->time_in);
+            $timeOut = Carbon::parse($dateStr . ' ' . $attendance->time_out);
+            if ($timeOut->lessThan($timeIn)) {
+                $timeOut->addDay();
+            }
 
             $totalMinutes = abs($timeOut->diffInMinutes($timeIn));
             $breakOverlapMinutes = 0;
 
-            if ($shift) {
-                $dateStr = $attendance->date->format('Y-m-d');
-                $breakStartTime = Carbon::parse($dateStr . ' ' . ($shift->break_start ?? '12:00:00'));
-                $breakEndTime = Carbon::parse($dateStr . ' ' . ($shift->break_end ?? '13:00:00'));
+            // Only deduct a break when the assigned shift defines one. Shifts without
+            // a break (part-time / split schedules) must not lose a phantom hour.
+            if ($shift && $shift->break_start && $shift->break_end) {
+                $breakStartTime = Carbon::parse($dateStr . ' ' . $shift->break_start);
+                $breakEndTime = Carbon::parse($dateStr . ' ' . $shift->break_end);
+                if ($breakEndTime->lessThanOrEqualTo($breakStartTime)) {
+                    $breakEndTime->addDay();
+                }
+                if ($timeOut->day !== $timeIn->day && $breakStartTime->lessThan($timeIn)) {
+                    $breakStartTime->addDay();
+                    $breakEndTime->addDay();
+                }
 
                 if ($timeOut->greaterThan($breakStartTime) && $timeIn->lessThan($breakEndTime)) {
                     $overlapStart = $timeIn->greaterThan($breakStartTime) ? $timeIn : $breakStartTime;
                     $overlapEnd = $timeOut->lessThan($breakEndTime) ? $timeOut : $breakEndTime;
                     $breakOverlapMinutes = max(0, abs($overlapEnd->diffInMinutes($overlapStart)));
                 }
-            } else {
-                $breakOverlapMinutes = min(60, $totalMinutes);
             }
 
             $hoursWorked = max(0, ($totalMinutes - $breakOverlapMinutes) / 60);
@@ -273,7 +283,7 @@ class AttendanceService
      */
     public function convertMinutesToHourIncrement($minutes)
     {
-        return round($minutes / 30) * 0.5;
+        return floor($minutes / 30) * 0.5;
     }
 
     /**
@@ -313,16 +323,41 @@ class AttendanceService
             return $result;
         }
 
-        // Create full datetime objects for the day
+        // Create full datetime objects for the day.
+        // Support shifts that cross midnight (e.g. 22:00 → 06:00) by rolling the
+        // end datetime to the next day when it does not come after the start.
         $dateStr = $attendance->date->format('Y-m-d');
         $expectedStart = Carbon::parse($dateStr . ' ' . $shift->start_time);
         $expectedEnd = Carbon::parse($dateStr . ' ' . $shift->end_time);
-        $breakStartTime = Carbon::parse($dateStr . ' ' . ($shift->break_start ?? '12:00:00'));
-        $breakEndTime = Carbon::parse($dateStr . ' ' . ($shift->break_end ?? '13:00:00'));
+        if ($expectedEnd->lessThanOrEqualTo($expectedStart)) {
+            $expectedEnd->addDay();
+        }
 
-        // Parse actual time in and time out
+        // Only deduct a break when the shift actually defines one. Shifts without a
+        // break (e.g. part-time or split schedules) must not lose a phantom hour.
+        $hasBreak = $shift->break_start && $shift->break_end;
+        $breakStartTime = null;
+        $breakEndTime = null;
+        if ($hasBreak) {
+            $breakStartTime = Carbon::parse($dateStr . ' ' . $shift->break_start);
+            $breakEndTime = Carbon::parse($dateStr . ' ' . $shift->break_end);
+            if ($breakEndTime->lessThanOrEqualTo($breakStartTime)) {
+                $breakEndTime->addDay();
+            }
+            // Align a break that belongs to the next day of an overnight shift
+            // (e.g. shift 22:00 → 06:00 with break 02:00 → 03:00).
+            if ($expectedEnd->day !== $expectedStart->day && $breakStartTime->lessThan($expectedStart)) {
+                $breakStartTime->addDay();
+                $breakEndTime->addDay();
+            }
+        }
+
+        // Parse actual time in and time out, rolling to the next day for overnight work.
         $actualStart = Carbon::parse($dateStr . ' ' . $attendance->time_in);
         $actualEnd = Carbon::parse($dateStr . ' ' . $attendance->time_out);
+        if ($actualEnd->lessThan($actualStart)) {
+            $actualEnd->addDay();
+        }
 
         // Get configurable grace period for late arrivals
         $gracePeriodMinutes = (int) Setting::get('attendance.grace_period_minutes', 5);
@@ -339,22 +374,22 @@ class AttendanceService
             // for scheduled hours.
             // Example: Shift starts 8:00 AM, grace period 5 mins, employee times in 8:03 AM
             //   → Marked as present, but OT/UT calculation uses 8:00 AM as start reference.
-            $minutesLate = $actualStart->diffInMinutes($expectedStart);
-            if ($minutesLate >= 0 && $minutesLate <= $gracePeriodMinutes) {
+            $minutesLate = abs($actualStart->diffInMinutes($expectedStart));
+            if ($minutesLate <= $gracePeriodMinutes) {
                 $actualStart = $expectedStart->copy();
             }
         }
 
         // Calculate scheduled work hours (shift duration minus break)
         $scheduledMinutes = abs($expectedEnd->diffInMinutes($expectedStart));
-        $breakMinutes = abs($breakEndTime->diffInMinutes($breakStartTime));
-        $scheduledWorkMinutes = $scheduledMinutes - $breakMinutes;
+        $breakMinutes = $hasBreak ? abs($breakEndTime->diffInMinutes($breakStartTime)) : 0;
+        $scheduledWorkMinutes = max(0, $scheduledMinutes - $breakMinutes);
         $scheduledWorkHours = $scheduledWorkMinutes / 60;
 
         // Calculate actual hours worked (excluding only the break interval that falls within the actual attendance window)
         $totalMinutesWorked = abs($actualEnd->diffInMinutes($actualStart));
         $actualBreakOverlapMinutes = 0;
-        if ($actualEnd->greaterThan($breakStartTime) && $actualStart->lessThan($breakEndTime)) {
+        if ($hasBreak && $actualEnd->greaterThan($breakStartTime) && $actualStart->lessThan($breakEndTime)) {
             $overlapStart = $actualStart->greaterThan($breakStartTime) ? $actualStart : $breakStartTime;
             $overlapEnd = $actualEnd->lessThan($breakEndTime) ? $actualEnd : $breakEndTime;
             $actualBreakOverlapMinutes = max(0, abs($overlapEnd->diffInMinutes($overlapStart)));
@@ -387,7 +422,7 @@ class AttendanceService
         if ($result['overtime_hours'] === 0.0 && $actualWorkHours < $scheduledWorkHours && $actualEnd->isBefore($expectedEnd)) {
             $earlyDepartureMinutes = abs($expectedEnd->diffInMinutes($actualEnd));
             $breakOverlapInDeparture = 0;
-            if ($expectedEnd->greaterThan($breakStartTime) && $actualEnd->lessThan($breakEndTime)) {
+            if ($hasBreak && $expectedEnd->greaterThan($breakStartTime) && $actualEnd->lessThan($breakEndTime)) {
                 $overlapStart = $actualEnd->greaterThan($breakStartTime) ? $actualEnd : $breakStartTime;
                 $overlapEnd = $expectedEnd->lessThan($breakEndTime) ? $expectedEnd : $breakEndTime;
                 $breakOverlapInDeparture = max(0, abs($overlapEnd->diffInMinutes($overlapStart)));

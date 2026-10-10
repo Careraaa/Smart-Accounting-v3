@@ -62,6 +62,13 @@ class AttendanceServiceTest extends TestCase
             $table->string('status')->default('present');
             $table->timestamps();
         });
+
+        // Employee model is an alias for the users table (used to resolve a shift).
+        $capsule->schema()->create('users', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('shift_id')->nullable();
+            $table->timestamps();
+        });
     }
 
     public function test_underTime_should_not_deduct_break_when_attendance_ends_before_break_start()
@@ -117,6 +124,13 @@ class AttendanceServiceTest extends TestCase
             'updated_at' => Carbon::now(),
         ]);
 
+        Capsule::table('users')->insert([
+            'id' => 1,
+            'shift_id' => 1,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
         $date = Carbon::create(2026, 5, 29);
         Capsule::table('attendance')->insert([
             'user_id' => 1,
@@ -151,6 +165,13 @@ class AttendanceServiceTest extends TestCase
             'updated_at' => Carbon::now(),
         ]);
 
+        Capsule::table('users')->insert([
+            'id' => 1,
+            'shift_id' => 1,
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+        ]);
+
         $date = Carbon::create(2026, 5, 29);
         Capsule::table('attendance')->insert([
             'user_id' => 1,
@@ -170,5 +191,88 @@ class AttendanceServiceTest extends TestCase
         );
 
         $this->assertEquals(4.0, $hours);
+    }
+
+    public function test_overtime_rounds_down_to_half_hour_increment()
+    {
+        $attendance = new Attendance();
+        $attendance->date = Carbon::create(2026, 5, 29);
+        $attendance->time_in = '08:00:00';
+        $attendance->time_out = '17:50:00';
+
+        $shift = new Shift();
+        $shift->start_time = '08:00:00';
+        $shift->end_time = '17:00:00';
+        $shift->break_start = '12:00:00';
+        $shift->break_end = '13:00:00';
+
+        $service = new AttendanceService();
+        $result = $service->calculateOvertimeAndUndertime($attendance, $shift);
+
+        // 50 minutes beyond schedule → 0.5h (floor), not 1.0h
+        $this->assertEquals(0.5, $result['overtime_hours']);
+    }
+
+    public function test_shift_without_break_does_not_deduct_phantom_break()
+    {
+        $attendance = new Attendance();
+        $attendance->date = Carbon::create(2026, 5, 29);
+        $attendance->time_in = '08:00:00';
+        $attendance->time_out = '11:00:00';
+
+        $shift = new Shift();
+        $shift->start_time = '08:00:00';
+        $shift->end_time = '12:00:00';
+        $shift->break_start = null;
+        $shift->break_end = null;
+
+        $service = new AttendanceService();
+        $result = $service->calculateOvertimeAndUndertime($attendance, $shift);
+
+        $this->assertEquals(4.0, $result['scheduled_hours']);
+        $this->assertEquals(3.0, $result['actual_hours']);
+        $this->assertEquals(1.0, $result['undertime_hours']);
+    }
+
+    public function test_overnight_shift_detects_overtime()
+    {
+        $attendance = new Attendance();
+        $attendance->date = Carbon::create(2026, 5, 29);
+        $attendance->time_in = '22:00:00';
+        $attendance->time_out = '06:30:00';
+
+        $shift = new Shift();
+        $shift->start_time = '22:00:00';
+        $shift->end_time = '06:00:00';
+        $shift->break_start = '02:00:00';
+        $shift->break_end = '03:00:00';
+
+        $service = new AttendanceService();
+        $result = $service->calculateOvertimeAndUndertime($attendance, $shift);
+
+        $this->assertEquals(7.0, $result['scheduled_hours']);
+        $this->assertEquals(0.5, $result['overtime_hours']);
+        $this->assertEquals(0.0, $result['undertime_hours']);
+    }
+
+    public function test_overnight_shift_detects_undertime()
+    {
+        $attendance = new Attendance();
+        $attendance->date = Carbon::create(2026, 5, 29);
+        $attendance->time_in = '22:00:00';
+        $attendance->time_out = '04:00:00';
+
+        $shift = new Shift();
+        $shift->start_time = '22:00:00';
+        $shift->end_time = '06:00:00';
+        $shift->break_start = '02:00:00';
+        $shift->break_end = '03:00:00';
+
+        $service = new AttendanceService();
+        $result = $service->calculateOvertimeAndUndertime($attendance, $shift);
+
+        $this->assertEquals(7.0, $result['scheduled_hours']);
+        $this->assertEquals(0.0, $result['overtime_hours']);
+        $this->assertEquals(2.0, $result['undertime_hours']);
     }
 }
