@@ -103,6 +103,7 @@ class DailyRemittanceController extends Controller
             'barker' => 'nullable|numeric|min:0',
             'others' => 'nullable|numeric|min:0',
             'net_remittance' => 'required|numeric',
+            'vehicle_status' => 'required|in:active,under_maintenance',
             'is_short_remittance' => 'nullable|boolean',
             'short_amount' => 'nullable|numeric',
             'driver_share' => 'nullable|numeric',
@@ -110,17 +111,29 @@ class DailyRemittanceController extends Controller
             'driver_share_amount' => 'nullable|numeric|min:0',
         ]);
 
+        $vehicleStatus = $validated['vehicle_status'];
+        unset($validated['vehicle_status']);
+
         // Get the vehicle and its associated route
         $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+
+        // Keep the vehicle's status in sync with the clerk's selection
+        if ($vehicle->status !== $vehicleStatus) {
+            $vehicle->update(['status' => $vehicleStatus]);
+        }
+
         $validated['route_id'] = $vehicle->route_id;
-        $boundary = $vehicle->route->boundary ?? 0;
+
+        // Disregard the boundary rate while the vehicle is under maintenance
+        $isMaintenance = $vehicleStatus === 'under_maintenance';
+        $boundary = $isMaintenance ? 0 : ($vehicle->route->boundary ?? 0);
         $validated['boundary'] = $boundary;
         $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
 
         // Check if net remittance is less than the boundary
         $netRemittance = $validated['net_remittance'];
-        
-        if ($netRemittance < $boundary) {
+
+        if (! $isMaintenance && $netRemittance < $boundary) {
             $validated['is_short_remittance'] = true;
             $validated['short_amount'] = round($boundary - $netRemittance, 2);
             $driverShareAmount = array_key_exists('driver_share_amount', $validated) && $validated['driver_share_amount'] !== null
@@ -160,7 +173,7 @@ class DailyRemittanceController extends Controller
     {
         $drivers = Driver::where('status', 'active')->get();
         $paos = PAO::where('status', 'active')->get();
-        $vehicles = Vehicle::where('status', 'active')->get();
+        $vehicles = Vehicle::where('status', 'active')->orWhere('id', $remittance->vehicle_id)->get();
         return view('remittance-clerk.remittances.edit', compact('remittance', 'drivers', 'paos', 'vehicles'));
     }
 
@@ -179,6 +192,7 @@ class DailyRemittanceController extends Controller
             'barker' => 'nullable|numeric|min:0',
             'others' => 'nullable|numeric|min:0',
             'net_remittance' => 'required|numeric',
+            'vehicle_status' => 'required|in:active,under_maintenance',
             'is_short_remittance' => 'nullable|boolean',
             'short_amount' => 'nullable|numeric',
             'driver_share' => 'nullable|numeric',
@@ -186,17 +200,29 @@ class DailyRemittanceController extends Controller
             'driver_share_amount' => 'nullable|numeric|min:0',
         ]);
 
+        $vehicleStatus = $validated['vehicle_status'];
+        unset($validated['vehicle_status']);
+
         // Get the vehicle and its associated route
         $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+
+        // Keep the vehicle's status in sync with the clerk's selection
+        if ($vehicle->status !== $vehicleStatus) {
+            $vehicle->update(['status' => $vehicleStatus]);
+        }
+
         $validated['route_id'] = $vehicle->route_id;
-        $boundary = $vehicle->route->boundary ?? 0;
+
+        // Disregard the boundary rate while the vehicle is under maintenance
+        $isMaintenance = $vehicleStatus === 'under_maintenance';
+        $boundary = $isMaintenance ? 0 : ($vehicle->route->boundary ?? 0);
         $validated['boundary'] = $boundary;
         $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
 
         // Check if net remittance is less than the boundary
         $netRemittance = $validated['net_remittance'];
-        
-        if ($netRemittance < $boundary) {
+
+        if (! $isMaintenance && $netRemittance < $boundary) {
             $validated['is_short_remittance'] = true;
             $validated['short_amount'] = round($boundary - $netRemittance, 2);
             $driverShareAmount = array_key_exists('driver_share_amount', $validated) && $validated['driver_share_amount'] !== null
