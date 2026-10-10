@@ -16,7 +16,7 @@
         <form action="{{ route('remittances.store') }}" method="POST">
             @csrf
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Remittance Date <span class="text-amber-600">*</span></label>
                     <input type="date" name="remittance_date" value="{{ old('remittance_date') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('remittance_date') border-red-300 @enderror" required>
@@ -42,6 +42,9 @@
                     </select>
                     @error('pao_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Vehicle <span class="text-amber-600">*</span></label>
                     <select name="vehicle_id" id="vehicle_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('vehicle_id') border-red-300 @enderror" required>
