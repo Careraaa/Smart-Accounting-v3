@@ -16,7 +16,7 @@
         <form action="{{ route('remittances.store') }}" method="POST">
             @csrf
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Remittance Date <span class="text-amber-600">*</span></label>
                     <input type="date" name="remittance_date" value="{{ old('remittance_date') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('remittance_date') border-red-300 @enderror" required>
@@ -27,7 +27,7 @@
                     <select name="driver_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('driver_id') border-red-300 @enderror" required>
                         <option value="">— Select Driver —</option>
                         @foreach ($drivers as $driver)
-                            <option value="{{ $driver->id }}" {{ old('driver_id') == $driver->id ? 'selected' : '' }}>{{ $driver->name }}</option>
+                            <option value="{{ $driver->id }}" {{ old('driver_id') == $driver->id ? 'selected' : '' }}>{{ $driver->formatted_name }}</option>
                         @endforeach
                     </select>
                     @error('driver_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
@@ -37,20 +37,31 @@
                     <select name="pao_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('pao_id') border-red-300 @enderror" required>
                         <option value="">— Select PAO —</option>
                         @foreach ($paos as $pao)
-                            <option value="{{ $pao->id }}" {{ old('pao_id') == $pao->id ? 'selected' : '' }}>{{ $pao->name }}</option>
+                            <option value="{{ $pao->id }}" {{ old('pao_id') == $pao->id ? 'selected' : '' }}>{{ $pao->formatted_name }}</option>
                         @endforeach
                     </select>
                     @error('pao_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Vehicle <span class="text-amber-600">*</span></label>
                     <select name="vehicle_id" id="vehicle_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('vehicle_id') border-red-300 @enderror" required>
                         <option value="">— Select Vehicle —</option>
                         @foreach ($vehicles as $vehicle)
-                            <option value="{{ $vehicle->id }}" data-boundary="{{ $vehicle->route->boundary ?? 0 }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>{{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})</option>
+                            <option value="{{ $vehicle->id }}" data-boundary="{{ $vehicle->route->boundary ?? 0 }}" data-status="{{ $vehicle->status }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>{{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})</option>
                         @endforeach
                     </select>
                     @error('vehicle_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Vehicle Status</label>
+                    <select name="vehicle_status" id="vehicle_status" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('vehicle_status') border-red-300 @enderror" required>
+                        <option value="active" {{ old('vehicle_status', 'active') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="under_maintenance" {{ old('vehicle_status') == 'under_maintenance' ? 'selected' : '' }}>Under Maintenance</option>
+                    </select>
+                    @error('vehicle_status') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
 
@@ -71,6 +82,7 @@
                         <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
                         <input type="text" id="boundary_display" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" placeholder="0.00" readonly>
                     </div>
+                    <p id="boundary_note" class="text-[10px] text-amber-600 mt-1" style="display: none;">Boundary rate is disregarded while the vehicle is under maintenance.</p>
                 </div>
             </div>
 
@@ -140,7 +152,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const vehicleSelect = document.getElementById('vehicle_id');
+            const vehicleStatusSelect = document.getElementById('vehicle_status');
             const boundaryDisplay = document.getElementById('boundary_display');
+            const boundaryNote = document.getElementById('boundary_note');
             const netRemittanceInput = document.getElementById('net_remittance');
             const shortRemittanceSection = document.getElementById('short-remittance-section');
             const shortAmountDisplay = document.getElementById('short_amount_display');
@@ -168,10 +182,32 @@
                 formatMoney(totalExpensesInput);
             }
 
+            function isMaintenance() {
+                return vehicleStatusSelect.value === 'under_maintenance';
+            }
+
+            function syncBoundaryDisplay() {
+                const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
+                const boundary = parseFloat(selectedOption?.getAttribute('data-boundary')) || 0;
+
+                if (vehicleSelect.value === '') {
+                    boundaryDisplay.value = '0.00';
+                    boundaryNote.style.display = 'none';
+                } else if (isMaintenance()) {
+                    boundaryDisplay.value = '0.00';
+                    boundaryNote.style.display = 'block';
+                } else {
+                    boundaryDisplay.value = boundary.toFixed(2);
+                    boundaryNote.style.display = 'none';
+                }
+            }
+
             function updateShortRemittance() {
                 const netRemittance = parseMoney(netRemittanceInput.value);
                 const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
-                const boundary = parseFloat(selectedOption?.getAttribute('data-boundary')) || 0;
+                const boundary = isMaintenance()
+                    ? 0
+                    : (parseFloat(selectedOption?.getAttribute('data-boundary')) || 0);
 
                 if (boundary > 0 && netRemittance < boundary) {
                     shortRemittanceSection.style.display = 'grid';
@@ -240,14 +276,17 @@
             }
 
             vehicleSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                const boundary = selectedOption.getAttribute('data-boundary');
-                
-                if (boundary && boundary !== '' && boundary !== 'null' && boundary !== '0') {
-                    boundaryDisplay.value = parseFloat(boundary).toFixed(2);
-                } else {
-                    boundaryDisplay.value = '0.00';
+                const status = this.options[this.selectedIndex]?.getAttribute('data-status');
+                if (status) {
+                    vehicleStatusSelect.value = status;
                 }
+                syncBoundaryDisplay();
+                updateShortRemittance();
+            });
+
+            vehicleStatusSelect.addEventListener('change', function() {
+                syncBoundaryDisplay();
+                updateShortRemittance();
             });
 
             document.querySelectorAll('.expense-input').forEach(input => input.addEventListener('input', updateTotalExpenses));
@@ -266,9 +305,7 @@
             netRemittanceInput.addEventListener('input', updateShortRemittance);
             driverShareAmountInput.addEventListener('input', updateShortRemittance);
 
-            if (vehicleSelect.value) {
-                vehicleSelect.dispatchEvent(new Event('change'));
-            }
+            syncBoundaryDisplay();
             updateShortRemittance();
         });
     </script>

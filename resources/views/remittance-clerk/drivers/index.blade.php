@@ -109,11 +109,11 @@
                     @forelse($drivers as $driver)
                     @php $sc = match($driver->status) { 'active' => 'bg-emerald-500/10 text-emerald-600 border-emerald-200/30', 'pending' => 'bg-amber-500/10 text-amber-600 border-amber-200/30', default => 'bg-red-500/10 text-red-600 border-red-200/30' }; @endphp
                     <tr class="transition-colors hover:bg-gray-50/40 cursor-pointer"
-                        data-name="{{ strtolower($driver->name) }}"
+                        data-name="{{ strtolower($driver->formatted_name) }}"
                         data-status="{{ $driver->status }}"
                         onclick="window.location='{{ route('drivers.show', $driver) }}'">
                         <td class="px-4 py-3">
-                            <span class="text-xs font-semibold text-gray-900">{{ $driver->name }}</span>
+                            <span class="text-xs font-semibold text-gray-900">{{ $driver->formatted_name }}</span>
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-500 font-mono">{{ $driver->contact_number }}</td>
                         <td class="px-4 py-3 text-center">

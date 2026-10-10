@@ -24,6 +24,23 @@ class Driver extends Model
         'date_of_hire' => 'date',
     ];
 
+    public function getFormattedNameAttribute(): string
+    {
+        $name = trim((string) $this->name);
+        if ($name === '' || str_contains($name, ',')) {
+            return $name;
+        }
+
+        $parts = preg_split('/\s+/', $name) ?: [];
+        if (count($parts) < 2) {
+            return $name;
+        }
+
+        $lastName = array_pop($parts);
+
+        return $lastName . ', ' . implode(' ', $parts);
+    }
+
     public function dailyRemittances()
     {
         return $this->hasMany(DailyRemittance::class);
