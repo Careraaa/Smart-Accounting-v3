@@ -340,7 +340,17 @@
                 $batch->update(['status' => 'draft']);
             }
             
-            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions']);
+            $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
+
+            // Auto-recompute every payroll from the latest attendance/OT/UT data
+            // so the list is never stale. Manual entries and status are preserved.
+            if ($batch->isEditable()) {
+                foreach ($batch->payrolls as $payroll) {
+                    $this->recomputeBatchPayroll($payroll, $batch->period_start, $batch->period_end);
+                }
+                $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
+            }
+
             $batch->setRelation('payrolls', $batch->payrolls->sortBy([
                 ['user.last_name', 'asc'],
                 ['user.first_name', 'asc'],
@@ -644,17 +654,15 @@
                 ->with('_sound_success', true);
         }
 
-        public function batchMarkPrepared(PayrollBatch $batch, Payroll $payroll)
+        /**
+         * Recompute an existing batch payroll from the latest attendance/OT/UT data,
+         * preserving HR-entered manual allowances, deductions and bonuses.
+         *
+         * @param  string|null  $status  Force a status; null keeps the payroll's current status.
+         */
+        private function recomputeBatchPayroll(Payroll $payroll, Carbon $periodStart, Carbon $periodEnd, ?string $status = null): void
         {
-            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
-            abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
-
             $payroll->loadMissing(['user', 'allowances', 'deductions', 'bonuses']);
-
-            // Recompute so any OT/UT approved after initial generation is picked up,
-            // while preserving any manual allowances/deductions HR already added.
-            $periodStart = Carbon::parse($batch->period_start);
-            $periodEnd   = Carbon::parse($batch->period_end);
 
             $manualAllowances = $payroll->allowances
                 ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay'))
@@ -675,20 +683,33 @@
                 ->values()
                 ->toArray();
 
-            $updatedPayroll = $this->payrollService->updatePayroll(
+            $this->payrollService->updatePayroll(
                 $payroll,
                 $payroll->user,
                 $periodStart,
                 $periodEnd,
                 $manualAllowances,
                 $manualDeductions,
-                ['status' => 'prepared'],
+                $status ? ['status' => $status] : [],
                 $manualBonuses,
             );
+        }
 
-            // Only apply loan deductions if they weren't already applied
-            // (updatePayroll preserves them via manualDeductions above, so skip re-applying).
+        public function batchMarkPrepared(PayrollBatch $batch, Payroll $payroll)
+        {
+            abort_if(!$batch->isEditable(), 403, 'This batch is no longer editable.');
+            abort_if($payroll->batch_id !== $batch->id, 403, 'Payroll does not belong to this batch.');
 
+            // Recompute so any OT/UT approved after initial generation is picked up,
+            // while preserving any manual allowances/deductions HR already added.
+            $this->recomputeBatchPayroll(
+                $payroll,
+                Carbon::parse($batch->period_start),
+                Carbon::parse($batch->period_end),
+                'prepared',
+            );
+
+            $payroll->loadMissing('user');
             $name = trim(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? ''));
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
@@ -886,33 +907,10 @@
 
             $count = 0;
             foreach ($payrolls as $payroll) {
+                // Prepared rows already were refreshed when the confirm page loaded.
                 if ($payroll->status === 'prepared') continue;
 
-                $manualAllowances = $payroll->allowances
-                    ->reject(fn ($a) => str_starts_with((string) ($a->allowance_type ?? ''), 'Overtime Pay'))
-                    ->map(fn ($a) => ['name' => $a->allowance_type, 'amount' => $a->amount])
-                    ->values()->toArray();
-
-                $manualDeductions = $payroll->deductions
-                    ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
-                        || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
-                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
-                    ->values()->toArray();
-
-                $manualBonuses = $payroll->bonuses
-                    ->map(fn ($b) => ['type' => $b->bonus_type, 'description' => $b->description, 'amount' => $b->amount])
-                    ->values()->toArray();
-
-                $this->payrollService->updatePayroll(
-                    $payroll,
-                    $payroll->user,
-                    $periodStart,
-                    $periodEnd,
-                    $manualAllowances,
-                    $manualDeductions,
-                    ['status' => 'prepared'],
-                    $manualBonuses,
-                );
+                $this->recomputeBatchPayroll($payroll, $periodStart, $periodEnd, 'prepared');
                 $count++;
             }
 

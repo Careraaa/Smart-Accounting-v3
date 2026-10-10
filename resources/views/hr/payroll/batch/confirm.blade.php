@@ -185,23 +185,25 @@
                         <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($detail->gross_pay ?? 0,2) }}</td>
                         <td class="px-4 py-3 text-left text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($detail->total_deductions ?? 0,2) }}</td>
                         <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($detail->net_pay,2) }}</td>
-                        <td class="px-4 py-3">
-                            @php
-                                $ds = match($detail->status) {
-                                    'pending' => ['label'=>'Pending','dot'=>'bg-amber-400'],
-                                    'prepared' => ['label'=>'Prepared','dot'=>'bg-blue-400'],
-                                    'submitted' => ['label'=>'Submitted','dot'=>'bg-violet-400'],
-                                    'completed' => ['label'=>'Completed','dot'=>'bg-emerald-400'],
-                                    'on-hold' => ['label'=>'Hold','dot'=>'bg-sky-400'],
-                                    default => ['label'=>'Pending','dot'=>'bg-amber-400'],
-                                };
-                                if($detail->employee_payroll_status === 'completed') { $ds = ['label'=>'Done','dot'=>'bg-emerald-400']; }
-                                elseif($detail->employee_payroll_status === 'on-hold') { $ds = ['label'=>'Hold','dot'=>'bg-sky-400']; }
-                            @endphp
-                            <span class="inline-flex items-center gap-1 text-[0.5rem] font-semibold uppercase tracking-wide text-gray-500">
-                                <span class="w-1.5 h-1.5 rounded-full {{ $ds['dot'] }}"></span>
-                                {{ $ds['label'] }}
-                            </span>
+                        <td class="px-4 py-3" onclick="event.stopPropagation()">
+                            <div class="flex items-center justify-between gap-2">
+                                @php
+                                    $ds = match($detail->status) {
+                                        'pending' => ['label'=>'Pending','dot'=>'bg-amber-400'],
+                                        'prepared' => ['label'=>'Prepared','dot'=>'bg-blue-400'],
+                                        'submitted' => ['label'=>'Submitted','dot'=>'bg-violet-400'],
+                                        'completed' => ['label'=>'Completed','dot'=>'bg-emerald-400'],
+                                        'on-hold' => ['label'=>'Hold','dot'=>'bg-sky-400'],
+                                        default => ['label'=>'Pending','dot'=>'bg-amber-400'],
+                                    };
+                                    if($detail->employee_payroll_status === 'completed') { $ds = ['label'=>'Done','dot'=>'bg-emerald-400']; }
+                                    elseif($detail->employee_payroll_status === 'on-hold') { $ds = ['label'=>'Hold','dot'=>'bg-sky-400']; }
+                                @endphp
+                                <span class="inline-flex items-center gap-1 text-[0.5rem] font-semibold uppercase tracking-wide text-gray-500">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $ds['dot'] }}"></span>
+                                    {{ $ds['label'] }}
+                                </span>
+                            </div>
                         </td>
                     </tr>
                     @empty
