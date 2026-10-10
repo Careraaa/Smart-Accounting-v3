@@ -42,7 +42,7 @@
                     <select name="driver_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('driver_id') border-red-300 @enderror" required>
                         <option value="">— Select Driver —</option>
                         @foreach ($drivers as $driver)
-                            <option value="{{ $driver->id }}" {{ old('driver_id', $remittance->driver_id) == $driver->id ? 'selected' : '' }}>{{ $driver->name }}</option>
+                            <option value="{{ $driver->id }}" {{ old('driver_id', $remittance->driver_id) == $driver->id ? 'selected' : '' }}>{{ $driver->formatted_name }}</option>
                         @endforeach
                     </select>
                     @error('driver_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
@@ -52,7 +52,7 @@
                     <select name="pao_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('pao_id') border-red-300 @enderror" required>
                         <option value="">— Select PAO —</option>
                         @foreach ($paos as $pao)
-                            <option value="{{ $pao->id }}" {{ old('pao_id', $remittance->pao_id) == $pao->id ? 'selected' : '' }}>{{ $pao->name }}</option>
+                            <option value="{{ $pao->id }}" {{ old('pao_id', $remittance->pao_id) == $pao->id ? 'selected' : '' }}>{{ $pao->formatted_name }}</option>
                         @endforeach
                     </select>
                     @error('pao_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror

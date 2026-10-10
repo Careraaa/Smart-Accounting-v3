@@ -26,7 +26,9 @@ class DriverController extends Controller
             $sortOrder = 'asc';
         }
         
-        $drivers = Driver::orderBy($sortBy, $sortOrder)->get();
+        $drivers = $sortBy === 'name'
+            ? Driver::all()->sortBy(fn (Driver $driver) => $driver->formatted_name, SORT_NATURAL | SORT_FLAG_CASE, $sortOrder === 'desc')->values()
+            : Driver::orderBy($sortBy, $sortOrder)->get();
         
         // Calculate statistics
         $totalDrivers = Driver::count();

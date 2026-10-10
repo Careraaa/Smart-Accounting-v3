@@ -104,11 +104,11 @@
                     @forelse($paos as $pao)
                     @php $sc = match($pao->status) { 'active' => 'bg-emerald-500/10 text-emerald-600 border-emerald-200/30', 'pending' => 'bg-amber-500/10 text-amber-600 border-amber-200/30', default => 'bg-red-500/10 text-red-600 border-red-200/30' }; @endphp
                     <tr class="transition-colors hover:bg-gray-50/40 cursor-pointer"
-                        data-name="{{ strtolower($pao->name) }}"
+                        data-name="{{ strtolower($pao->formatted_name) }}"
                         data-status="{{ $pao->status }}"
                         onclick="window.location='{{ route('paos.show', $pao) }}'">
                         <td class="px-4 py-3">
-                            <span class="text-xs font-semibold text-gray-900">{{ $pao->name }}</span>
+                            <span class="text-xs font-semibold text-gray-900">{{ $pao->formatted_name }}</span>
                         </td>
                         <td class="px-4 py-3 text-xs text-gray-500 font-mono">{{ $pao->contact_number }}</td>
                         <td class="px-4 py-3 text-center">

@@ -82,8 +82,8 @@ class DailyRemittanceController extends Controller
 
     public function create()
     {
-        $drivers = Driver::where('status', 'active')->get();
-        $paos = PAO::where('status', 'active')->get();
+        $drivers = Driver::where('status', 'active')->get()->sortBy(fn (Driver $driver) => $driver->formatted_name, SORT_NATURAL | SORT_FLAG_CASE)->values();
+        $paos = PAO::where('status', 'active')->get()->sortBy(fn (PAO $pao) => $pao->formatted_name, SORT_NATURAL | SORT_FLAG_CASE)->values();
         $vehicles = Vehicle::where('status', 'active')->get();
         return view('remittance-clerk.remittances.create', compact('drivers', 'paos', 'vehicles'));
     }
@@ -171,8 +171,8 @@ class DailyRemittanceController extends Controller
 
     public function edit(DailyRemittance $remittance)
     {
-        $drivers = Driver::where('status', 'active')->get();
-        $paos = PAO::where('status', 'active')->get();
+        $drivers = Driver::where('status', 'active')->get()->sortBy(fn (Driver $driver) => $driver->formatted_name, SORT_NATURAL | SORT_FLAG_CASE)->values();
+        $paos = PAO::where('status', 'active')->get()->sortBy(fn (PAO $pao) => $pao->formatted_name, SORT_NATURAL | SORT_FLAG_CASE)->values();
         $vehicles = Vehicle::where('status', 'active')->orWhere('id', $remittance->vehicle_id)->get();
         return view('remittance-clerk.remittances.edit', compact('remittance', 'drivers', 'paos', 'vehicles'));
     }
