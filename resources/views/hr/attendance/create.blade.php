@@ -143,6 +143,7 @@
 @push('scripts')
 <script>
 (function () {
+    const employeeSelect = document.getElementById('user_id');
     const timeIn  = document.getElementById('time_in');
     const timeOut = document.getElementById('time_out');
     const hint    = document.getElementById('otut-hint');
@@ -151,6 +152,7 @@
     let breakEnd     = null;
     let shiftStart   = null;
     let shiftEnd     = null;
+    let hasShift     = false;
     let gracePeriodMin = {{ $gracePeriodMinutes }};
 
     function toMinutes(hhmm) {
@@ -189,25 +191,27 @@
     }
 
     function update() {
-        let inMin  = toMinutes(timeIn.value);
-        const outMin = toMinutes(timeOut.value);
+        hint.classList.add('hidden');
 
-        if (inMin === null || outMin === null || outMin <= inMin) {
-            hint.classList.add('hidden');
-            return;
-        }
+        // Preview only when the selected employee has a configured shift.
+        if (!hasShift || shiftStart === null || shiftEnd === null) return;
+
+        let inMin  = toMinutes(timeIn.value);
+        let outMin = toMinutes(timeOut.value);
+        if (inMin === null || outMin === null) return;
+
+        // Roll an overnight clock-out to the next day (matches server-side logic).
+        if (outMin < inMin) outMin += 24 * 60;
 
         // ── Shift-start clamping (matches AttendanceService.php) ──
-        if (shiftStart !== null) {
-            if (inMin < shiftStart) {
-                // Early arrival: clamp to shift start so early hours don't create phantom OT
+        if (inMin < shiftStart) {
+            // Early arrival: clamp to shift start so early hours don't create phantom OT
+            inMin = shiftStart;
+        } else {
+            // Grace period: clamp slightly-late arrivals to shift start
+            const minutesLate = inMin - shiftStart;
+            if (minutesLate <= gracePeriodMin) {
                 inMin = shiftStart;
-            } else {
-                // Grace period: clamp slightly-late arrivals to shift start
-                const minutesLate = inMin - shiftStart;
-                if (minutesLate >= 0 && minutesLate <= gracePeriodMin) {
-                    inMin = shiftStart;
-                }
             }
         }
 
@@ -215,44 +219,33 @@
         const workedMin = Math.max(0, (outMin - inMin) - breakOverlapMin);
 
         // ── OT/UT detection using shift boundaries (matches server-side logic) ──
-        if (shiftStart !== null && shiftEnd !== null && breakStart !== null && breakEnd !== null) {
-            const breakDuration = Math.max(0, breakEnd - breakStart);
-            const scheduledMin  = Math.max(0, (shiftEnd - shiftStart) - breakDuration);
+        const breakDuration = (breakStart !== null && breakEnd !== null) ? Math.max(0, breakEnd - breakStart) : 0;
+        const scheduledMin  = Math.max(0, (shiftEnd - shiftStart) - breakDuration);
 
-            // Overtime: only when clock-out is AFTER shift end (actualEnd > expectedEnd)
-            if (outMin > shiftEnd) {
-                const minutesBeyond = outMin - shiftEnd;
-                if (minutesBeyond >= 30) {
-                    const otDisplayMin = hoursToMinutes(convertMinutesToHourIncrement(minutesBeyond));
+        // Overtime: only when clock-out is AFTER shift end (actualEnd > expectedEnd)
+        if (outMin > shiftEnd) {
+            const minutesBeyond = outMin - shiftEnd;
+            if (minutesBeyond >= 30) {
+                const otDisplayMin = hoursToMinutes(convertMinutesToHourIncrement(minutesBeyond));
+                if (otDisplayMin > 0) {
                     showHint(true, otDisplayMin);
                     return;
                 }
             }
+        }
 
-            // Undertime: only when clock-out is BEFORE shift end AND actual < scheduled
-            if (outMin < shiftEnd && workedMin < scheduledMin) {
-                const earlyDepartureMin = shiftEnd - outMin;
-                // Subtract any break that falls within the early-departure window
-                const depBreakOverlap = calculateBreakOverlap(outMin, shiftEnd);
-                const undertimeMin = Math.max(0, earlyDepartureMin - depBreakOverlap);
-                const utDisplayMin = hoursToMinutes(convertMinutesToHourIncrement(undertimeMin));
-                if (utDisplayMin > 0) {
-                    showHint(false, utDisplayMin);
-                    return;
-                }
-            }
-        } else {
-            // Fallback: no shift data — use raw 8h threshold
-            const STANDARD_MIN = 480;
-            const diff = workedMin - STANDARD_MIN;
-            const diffHours = convertMinutesToHourIncrement(Math.abs(diff));
-            if (diffHours > 0) {
-                showHint(diff > 0, hoursToMinutes(diffHours));
+        // Undertime: only when clock-out is BEFORE shift end AND actual < scheduled
+        if (outMin < shiftEnd && workedMin < scheduledMin) {
+            const earlyDepartureMin = shiftEnd - outMin;
+            // Subtract any break that falls within the early-departure window
+            const depBreakOverlap = calculateBreakOverlap(outMin, shiftEnd);
+            const undertimeMin = Math.max(0, earlyDepartureMin - depBreakOverlap);
+            const utDisplayMin = hoursToMinutes(convertMinutesToHourIncrement(undertimeMin));
+            if (utDisplayMin > 0) {
+                showHint(false, utDisplayMin);
                 return;
             }
         }
-
-        hint.classList.add('hidden');
     }
 
     function showHint(isOT, displayMin) {
@@ -266,26 +259,53 @@
             : `<svg class="inline align-middle mr-1.5" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg> <strong>Undertime detected:</strong> ${fmt(displayMin)} short of the schedule — a UT record will be auto-created on save.`;
     }
 
-    fetch('{{ route("api.shift.break-times") }}')
-        .then(res => res.json())
-        .then(data => {
-            breakStart   = timeStringToMinutes(data.break_start);
-            breakEnd     = timeStringToMinutes(data.break_end);
-            shiftStart   = timeStringToMinutes(data.start_time);
-            shiftEnd     = timeStringToMinutes(data.end_time);
-            gracePeriodMin = data.grace_period_minutes || 5;
-            update();
-        })
-        .catch(() => {
-            breakStart   = 12 * 60;
-            breakEnd     = 13 * 60;
-            shiftStart   = 8 * 60;
-            shiftEnd     = 17 * 60;
-            gracePeriodMin = 5;
-        });
+    function applyShiftData(data) {
+        hasShift = !!data.has_shift;
+        if (!hasShift) {
+            breakStart = breakEnd = shiftStart = shiftEnd = null;
+            hint.classList.add('hidden');
+            return;
+        }
 
+        shiftStart = timeStringToMinutes(data.start_time);
+        shiftEnd   = timeStringToMinutes(data.end_time);
+        breakStart = timeStringToMinutes(data.break_start);
+        breakEnd   = timeStringToMinutes(data.break_end);
+        gracePeriodMin = data.grace_period_minutes || 5;
+
+        // Normalize overnight shift (e.g. 22:00 → 06:00) and its break.
+        if (shiftStart !== null && shiftEnd !== null && shiftEnd <= shiftStart) {
+            shiftEnd += 24 * 60;
+            if (breakStart !== null && breakStart < shiftStart) breakStart += 24 * 60;
+            if (breakEnd !== null) breakEnd += 24 * 60;
+        }
+        if (breakStart !== null && breakEnd !== null && breakEnd <= breakStart) {
+            breakEnd += 24 * 60;
+        }
+
+        update();
+    }
+
+    function loadShift() {
+        const params = (employeeSelect && employeeSelect.value)
+            ? '?user_id=' + encodeURIComponent(employeeSelect.value)
+            : '';
+        fetch('{{ route("api.shift.break-times") }}' + params)
+            .then(res => res.json())
+            .then(applyShiftData)
+            .catch(() => {
+                hasShift = false;
+                hint.classList.add('hidden');
+            });
+    }
+
+    if (employeeSelect) {
+        employeeSelect.addEventListener('change', loadShift);
+    }
     timeIn.addEventListener('change', update);
     timeOut.addEventListener('change', update);
+
+    loadShift();
 })();
 </script>
 @endpush

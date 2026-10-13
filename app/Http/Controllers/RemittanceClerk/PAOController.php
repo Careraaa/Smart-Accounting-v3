@@ -26,7 +26,9 @@ class PAOController extends Controller
             $sortOrder = 'asc';
         }
         
-        $paos = PAO::orderBy($sortBy, $sortOrder)->get();
+        $paos = $sortBy === 'name'
+            ? PAO::all()->sortBy(fn (PAO $pao) => $pao->formatted_name, SORT_NATURAL | SORT_FLAG_CASE, $sortOrder === 'desc')->values()
+            : PAO::orderBy($sortBy, $sortOrder)->get();
         
         // Calculate statistics
         $totalPAOs = PAO::count();
