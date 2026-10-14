@@ -53,7 +53,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
     {{-- LEFT COLUMN (2/3) --}}
     <div class="flex-1 min-w-0 w-full space-y-5">
         {{-- Quick Actions / Shortcuts --}}
-        <div class="acd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
+        <div class="acd-slide-bounce kpi-card overflow-hidden" style="animation-delay:0.2s">
             <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm acd-float">
@@ -64,7 +64,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 <span class="text-[0.55rem] font-mono text-gray-400">Accountant modules</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-                <a href="{{ route('payroll-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
+                <a href="{{ route('payroll-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
                     <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     </div>
@@ -73,7 +73,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                         <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $processingPayroll }}</span>
                     @endif
                 </a>
-                <a href="{{ route('remittance-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
+                <a href="{{ route('remittance-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
                     <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     </div>
@@ -82,7 +82,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                         <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.45rem] font-bold">{{ $pendingRemittances }}</span>
                     @endif
                 </a>
-                <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-blue-50 hover:border-blue-200 hover:shadow-sm no-underline">
+                <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-blue-50 hover:border-blue-200 hover:shadow-sm no-underline">
                     <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center transition-all group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-200/50">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
                     </div>
@@ -98,7 +98,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
 
         {{-- Stat cards --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
+            <div class="acd-bounce stat-card kpi-card p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Payroll</p>
@@ -112,7 +112,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                     <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Approved</span>
                 </div>
             </div>
-            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-blue-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
+            <div class="acd-bounce stat-card kpi-card p-3.5 group hover:border-blue-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Allowances</p>
@@ -126,7 +126,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                     <span>{{ number_format($allowancePercentage, 1) }}% of A+D</span>
                 </div>
             </div>
-            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-red-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
+            <div class="acd-bounce stat-card kpi-card p-3.5 group hover:border-red-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Deductions</p>
@@ -140,7 +140,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                     <span>{{ number_format($deductionPercentage, 1) }}% of A+D</span>
                 </div>
             </div>
-            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
+            <div class="acd-bounce stat-card kpi-card p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Avg. Basic</p>
@@ -154,7 +154,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                     <span>Per payroll row</span>
                 </div>
             </div>
-            <div class="acd-bounce stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-slate-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
+            <div class="acd-bounce stat-card kpi-card p-3.5 group hover:border-slate-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Headcount</p>
@@ -196,7 +196,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
                 $points[] = round($x + $padL, 1) . ',' . round($y + $padT, 1);
             }
             @endphp
-            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="fade-up kpi-card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <h2 class="text-[11px] font-semibold text-gray-900">Net Payroll Trend</h2>
                     <span class="text-[9px] text-gray-400 font-medium">Last 6 months</span>
@@ -249,7 +249,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
             </div>
 
             {{-- Payroll Status Mix (CSS donut) --}}
-            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="fade-up kpi-card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <h2 class="text-[11px] font-semibold text-gray-900">Payroll Status Mix</h2>
                     <span class="text-[9px] text-gray-400 font-medium">By batch count</span>
@@ -314,7 +314,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
         @endphp
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {{-- Allowances vs Deductions (CSS donut) --}}
-            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="fade-up kpi-card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <h2 class="text-[11px] font-semibold text-gray-900">Allowances vs Deductions</h2>
                     <span class="text-[9px] text-gray-400 font-medium">Aggregate amounts</span>
@@ -357,7 +357,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
             </div>
 
             {{-- Pipeline (horizontal bars) --}}
-            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="fade-up kpi-card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <h2 class="text-[11px] font-semibold text-gray-900">Pipeline</h2>
                     <span class="text-[9px] text-gray-400 font-medium">Awaiting &rarr; approved &rarr; rejected</span>
@@ -391,7 +391,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
         @include('partials.dashboard-calendar')
 
         {{-- To-Do Card --}}
-        <div class="slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.1s">
+        <div class="slide-right kpi-card overflow-hidden" style="animation-delay:0.1s">
             <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>

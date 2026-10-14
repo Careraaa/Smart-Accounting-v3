@@ -39,7 +39,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
     {{-- LEFT COLUMN --}}
     <div class="flex-1 min-w-0 w-full space-y-5">
             {{-- Quick Actions --}}
-            <div class="rc-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
+            <div class="rc-slide-bounce kpi-card overflow-hidden" style="animation-delay:0.2s">
                 <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-sm rc-float">
@@ -50,25 +50,25 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                     <span class="text-[0.55rem] font-mono text-gray-400">Remittance modules</span>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-                    <a href="{{ route('remittances.create') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
+                    <a href="{{ route('remittances.create') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
                         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                         </div>
                         <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Record Remittance</span>
                     </a>
-                    <a href="{{ route('short-remittances.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
+                    <a href="{{ route('short-remittances.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
                         <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                         <span class="text-[10px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors text-center">Short Remittance</span>
                     </a>
-                    <a href="{{ route('drivers.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
+                    <a href="{{ route('drivers.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
                         <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center transition-all group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-indigo-200/50">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                         </div>
                         <span class="text-[10px] font-semibold text-gray-700 group-hover:text-indigo-700 transition-colors text-center">Drivers</span>
                     </a>
-                    <a href="{{ route('paos.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-purple-50 hover:border-purple-200 hover:shadow-sm no-underline">
+                    <a href="{{ route('paos.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-purple-50 hover:border-purple-200 hover:shadow-sm no-underline">
                         <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center transition-all group-hover:bg-purple-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-purple-200/50">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </div>
@@ -78,7 +78,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
             </div>
 
             {{-- Daily Remittance Trend --}}
-            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="fade-up kpi-card overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-2">
                     <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
@@ -160,7 +160,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
 
         {{-- Stat cards --}}
         <div class="grid grid-cols-2 gap-3">
-            <div class="group rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300 no-underline" style="animation-delay:0.05s">
+            <div class="group rc-bounce kpi-card p-3.5 hover:shadow-md hover:border-emerald-200 transition-all duration-300 no-underline" style="animation-delay:0.05s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Collections</p>
@@ -177,7 +177,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                     </span>
                 </div>
             </div>
-            <div class="group rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300 no-underline" style="animation-delay:0.1s">
+            <div class="group rc-bounce kpi-card p-3.5 hover:shadow-md hover:border-red-200 transition-all duration-300 no-underline" style="animation-delay:0.1s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Expenses</p>
@@ -189,7 +189,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                 </div>
                 <div class="mt-2 text-[9px] text-gray-400">Avg ₱{{ number_format($averageExpenses, 2) }} / record</div>
             </div>
-            <div class="group rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 no-underline" style="animation-delay:0.15s">
+            <div class="group rc-bounce kpi-card p-3.5 hover:shadow-md hover:border-blue-200 transition-all duration-300 no-underline" style="animation-delay:0.15s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
@@ -201,7 +201,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                 </div>
                 <div class="mt-2 text-[9px] text-gray-400">{{ $margin }}% margin</div>
             </div>
-            <div class="group rc-bounce bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 no-underline" style="animation-delay:0.2s">
+            <div class="group rc-bounce kpi-card p-3.5 hover:shadow-md hover:border-amber-200 transition-all duration-300 no-underline" style="animation-delay:0.2s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
@@ -218,7 +218,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
         {{-- Charts row 1 --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {{-- Collections vs Expenses --}}
-            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="fade-up kpi-card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
@@ -266,7 +266,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
             </div>
 
             {{-- Monthly Collection Trend --}}
-            <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="fade-up kpi-card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
