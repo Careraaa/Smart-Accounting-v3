@@ -145,7 +145,8 @@ class SystemConfigurationController extends Controller
     {
         $this->logActivity('deleted', "Position: {$position->name}", request()->url(), 'configuration', $position->id);
         $position->delete();
-        return redirect()->route('configuration.index', ['tab' => 'positions'])->with('success', 'Position deleted successfully!');    }
+        return redirect()->route('configuration.index', ['tab' => 'positions'])->with('success', 'Position deleted successfully!');
+    }
 
     /**
      * Update General Settings
