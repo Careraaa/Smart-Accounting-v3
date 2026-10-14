@@ -41,42 +41,37 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
         {{-- Quick Actions / Shortcuts --}}
         <div class="sad-slide-bounce kpi-card overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-sm sad-float">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-900">Quick Actions</span>
-                </div>
-                <span class="text-[0.55rem] font-mono text-gray-400">System modules</span>
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+                <span class="text-[13px] font-semibold text-gray-900">Quick Actions</span>
+                <span class="text-[11px] text-gray-400">System modules</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-                <a href="{{ route('superadmin.accounts.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center transition-all group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-indigo-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <a href="{{ route('superadmin.accounts.index') }}" class="qa-tile group transition-all hover:bg-indigo-50 hover:border-indigo-200 no-underline">
+                    <div class="qa-icon bg-indigo-100 text-indigo-600 transition-colors group-hover:bg-indigo-500 group-hover:text-white">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-indigo-700 transition-colors text-center">Accounts</span>
+                    <span class="qa-label group-hover:text-indigo-700 transition-colors">Accounts</span>
                     @if($totalEmployees - $activeEmployees > 0)
-                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-indigo-100 text-indigo-700 text-[0.45rem] font-bold">{{ $totalEmployees - $activeEmployees }} inactive</span>
+                        <span class="qa-badge bg-indigo-100 text-indigo-700 group-hover:bg-indigo-500 group-hover:text-white transition-colors">{{ $totalEmployees - $activeEmployees }}</span>
                     @endif
                 </a>
-                <a href="{{ route('configuration.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-gray-200 hover:border-gray-300 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center transition-all group-hover:bg-gray-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-gray-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <a href="{{ route('configuration.index') }}" class="qa-tile group transition-all hover:bg-gray-200 hover:border-gray-300 no-underline">
+                    <div class="qa-icon bg-gray-200 text-gray-600 transition-colors group-hover:bg-gray-600 group-hover:text-white">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-gray-700 transition-colors text-center">Configuration</span>
+                    <span class="qa-label group-hover:text-gray-900 transition-colors">Configuration</span>
                 </a>
-                <a href="{{ route('configuration.backup-history') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                <a href="{{ route('configuration.backup-history') }}" class="qa-tile group transition-all hover:bg-emerald-50 hover:border-emerald-200 no-underline">
+                    <div class="qa-icon bg-emerald-100 text-emerald-600 transition-colors group-hover:bg-emerald-500 group-hover:text-white">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Backups</span>
+                    <span class="qa-label group-hover:text-emerald-700 transition-colors">Backups</span>
                 </a>
-                <a href="{{ route('superadmin.accounts.create') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                <a href="{{ route('superadmin.accounts.create') }}" class="qa-tile group transition-all hover:bg-amber-50 hover:border-amber-200 no-underline">
+                    <div class="qa-icon bg-amber-100 text-amber-600 transition-colors group-hover:bg-amber-500 group-hover:text-white">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                     </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors text-center">New Account</span>
+                    <span class="qa-label group-hover:text-amber-700 transition-colors">New Account</span>
                 </a>
             </div>
         </div>

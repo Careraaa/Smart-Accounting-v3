@@ -54,41 +54,36 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
     <div class="flex-1 min-w-0 w-full space-y-5">
         {{-- Quick Actions / Shortcuts --}}
         <div class="acd-slide-bounce kpi-card overflow-hidden" style="animation-delay:0.2s">
-            <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm acd-float">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-900">Quick Actions</span>
-                </div>
-                <span class="text-[0.55rem] font-mono text-gray-400">Accountant modules</span>
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+                <span class="text-[13px] font-semibold text-gray-900">Quick Actions</span>
+                <span class="text-[11px] text-gray-400">Accountant modules</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-                <a href="{{ route('payroll-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                <a href="{{ route('payroll-approval.index') }}" class="qa-tile group transition-all hover:bg-emerald-50 hover:border-emerald-200 no-underline">
+                    <div class="qa-icon bg-emerald-100 text-emerald-600 transition-colors group-hover:bg-emerald-500 group-hover:text-white">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                     </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Payroll Approval</span>
+                    <span class="qa-label group-hover:text-emerald-700 transition-colors">Payroll Approval</span>
                     @if($processingPayroll > 0)
-                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $processingPayroll }}</span>
+                        <span class="qa-badge bg-emerald-100 text-emerald-700 group-hover:bg-\w+-500 group-hover:text-white transition-colors">{{ $processingPayroll }}</span>
                     @endif
                 </a>
-                <a href="{{ route('remittance-approval.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                <a href="{{ route('remittance-approval.index') }}" class="qa-tile group transition-all hover:bg-violet-50 hover:border-violet-200 no-underline">
+                    <div class="qa-icon bg-violet-100 text-violet-600 transition-colors group-hover:bg-violet-500 group-hover:text-white">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                     </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-violet-700 transition-colors text-center">Remittance Approval</span>
+                    <span class="qa-label group-hover:text-violet-700 transition-colors">Remittance Approval</span>
                     @if($pendingRemittances > 0)
-                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.45rem] font-bold">{{ $pendingRemittances }}</span>
+                        <span class="qa-badge bg-violet-100 text-violet-700 group-hover:bg-\w+-500 group-hover:text-white transition-colors">{{ $pendingRemittances }}</span>
                     @endif
                 </a>
-                <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-blue-50 hover:border-blue-200 hover:shadow-sm no-underline">
-                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center transition-all group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-200/50">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
+                <a href="{{ route('payroll.receivables.index', ['tab' => 'cash_advances']) }}" class="qa-tile group transition-all hover:bg-blue-50 hover:border-blue-200 no-underline">
+                    <div class="qa-icon bg-blue-100 text-blue-600 transition-colors group-hover:bg-blue-500 group-hover:text-white">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
                     </div>
-                    <span class="text-[10px] font-semibold text-gray-700 group-hover:text-blue-700 transition-colors text-center">Cash Advances</span>
+                    <span class="qa-label group-hover:text-blue-700 transition-colors">Cash Advances</span>
                     @if($pendingCashAdvancesCount > 0)
-                        <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-blue-100 text-blue-700 text-[0.45rem] font-bold">{{ $pendingCashAdvancesCount }}</span>
+                        <span class="qa-badge bg-blue-100 text-blue-700 group-hover:bg-\w+-500 group-hover:text-white transition-colors">{{ $pendingCashAdvancesCount }}</span>
                     @endif
                 </a>
             </div>

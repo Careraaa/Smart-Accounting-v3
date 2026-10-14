@@ -74,42 +74,40 @@ $user = auth()->user();
 
             {{-- Quick Actions --}}
             <div class="emp-scale-in kpi-card px-5 py-4 transition-all hover:shadow-md hover:-translate-y-0.5" style="animation-delay:0.25s">
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-sm">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <span class="text-xs font-semibold text-gray-900">Quick Actions</span>
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[13px] font-semibold text-gray-900">Quick Actions</span>
+                    <span class="text-[11px] text-gray-400">Employee</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <a href="{{ route('employee.leaves.create') }}" class="group flex flex-col items-center gap-2 px-3 py-3.5 kpi-tile transition-all hover:bg-blue-50 hover:border-blue-200 hover:shadow-sm no-underline">
-                        <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center transition-all group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-blue-200/50">
-                            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <a href="{{ route('employee.leaves.create') }}" class="qa-tile group transition-all hover:bg-blue-50 hover:border-blue-200 no-underline">
+                        <div class="qa-icon bg-blue-100 text-blue-600 transition-colors group-hover:bg-blue-500 group-hover:text-white">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-blue-700 transition-colors">Request Leave</span>
+                        <span class="qa-label group-hover:text-blue-700 transition-colors">Request Leave</span>
                         @if($pendingLeaves > 0)
-                            <span class="inline-flex items-center justify-center min-w-[16px] h-3.5 px-1 rounded-full bg-blue-100 text-blue-700 text-[0.4rem] font-bold">{{ $pendingLeaves }}</span>
+                            <span class="qa-badge bg-blue-100 text-blue-700 group-hover:bg-\2-500 group-hover:text-white transition-colors">{{ $pendingLeaves }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('attendance.scan') }}" class="group flex flex-col items-center gap-2 px-3 py-3.5 kpi-tile transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
-                            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.5a1 1 0 010 2H5v3.5a1 1 0 01-2 0V5zM3 19a2 2 0 002 2h3.5a1 1 0 000-2H5v-3.5a1 1 0 00-2 0V19zM21 5a2 2 0 00-2-2h-3.5a1 1 0 000 2H19v3.5a1 1 0 002 0V5zM21 19a2 2 0 01-2 2h-3.5a1 1 0 010-2H19v-3.5a1 1 0 012 0V19z"/></svg>
+                    <a href="{{ route('attendance.scan') }}" class="qa-tile group transition-all hover:bg-emerald-50 hover:border-emerald-200 no-underline">
+                        <div class="qa-icon bg-emerald-100 text-emerald-600 transition-colors group-hover:bg-emerald-500 group-hover:text-white">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.5a1 1 0 010 2H5v3.5a1 1 0 01-2 0V5zM3 19a2 2 0 002 2h3.5a1 1 0 000-2H5v-3.5a1 1 0 00-2 0V19zM21 5a2 2 0 00-2-2h-3.5a1 1 0 000 2H19v3.5a1 1 0 002 0V5zM21 19a2 2 0 01-2 2h-3.5a1 1 0 010-2H19v-3.5a1 1 0 012 0V19z"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors">Scan QR</span>
+                        <span class="qa-label group-hover:text-emerald-700 transition-colors">Scan QR</span>
                     </a>
-                    <a href="{{ route('employee.overtime-undertime.create') }}" class="group flex flex-col items-center gap-2 px-3 py-3.5 kpi-tile transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
-                        <div class="w-9 h-9 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
-                            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
+                    <a href="{{ route('employee.overtime-undertime.create') }}" class="qa-tile group transition-all hover:bg-violet-50 hover:border-violet-200 no-underline">
+                        <div class="qa-icon bg-violet-100 text-violet-600 transition-colors group-hover:bg-violet-500 group-hover:text-white">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-violet-700 transition-colors">OT / UT</span>
+                        <span class="qa-label group-hover:text-violet-700 transition-colors">OT / UT</span>
                         @if($pendingOT + $pendingUT > 0)
-                            <span class="inline-flex items-center justify-center min-w-[16px] h-3.5 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.4rem] font-bold">{{ $pendingOT + $pendingUT }}</span>
+                            <span class="qa-badge bg-violet-100 text-violet-700 group-hover:bg-\2-500 group-hover:text-white transition-colors">{{ $pendingOT + $pendingUT }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('employee.attendance.index') }}" class="group flex flex-col items-center gap-2 px-3 py-3.5 kpi-tile transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
-                        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
-                            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+                    <a href="{{ route('employee.attendance.index') }}" class="qa-tile group transition-all hover:bg-amber-50 hover:border-amber-200 no-underline">
+                        <div class="qa-icon bg-amber-100 text-amber-600 transition-colors group-hover:bg-amber-500 group-hover:text-white">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors">Attendance</span>
+                        <span class="qa-label group-hover:text-amber-700 transition-colors">Attendance</span>
                     </a>
                 </div>
             </div>
