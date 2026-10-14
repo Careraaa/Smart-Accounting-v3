@@ -12,27 +12,27 @@
 @layer components {
   .kpi-card.kpi-card {
     background-color: #ffffff;
-    border: 1px solid #e4e4e4;
+    border: 1px solid #d8d8d8;
     border-radius: 0.75rem;
     box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.04),
-      0 1px 3px rgba(0, 0, 0, 0.025);
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 2px 6px rgba(0, 0, 0, 0.04);
   }
 
   .kpi-card.kpi-card:hover {
     box-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.05),
-      0 4px 12px rgba(0, 0, 0, 0.045);
+      0 2px 4px rgba(0, 0, 0, 0.06),
+      0 6px 16px rgba(0, 0, 0, 0.07);
   }
 
   .kpi-tile.kpi-tile {
-    background-color: #fafafa;
-    border: 1px solid #e4e4e4;
+    background-color: #f7f7f7;
+    border: 1px solid #dcdcdc;
     border-radius: 0.75rem;
   }
 
   .kpi-tile.kpi-tile:hover {
-    background-color: #f4f4f5;
+    background-color: #eeeeee;
   }
 
   html.dark .kpi-card.kpi-card {
@@ -163,3 +163,13 @@ html.dark .at-late {
   from { transform: scaleY(0); }
   to   { transform: scaleY(1); }
 }
+
+/* Light-mode page canvas.
+   `main` ships with Tailwind's `bg-gray-100` (#f3f4f6), only ~4% darker
+   than the white cards, so the card edge reads as almost nothing. These
+   rules sit outside @layer so they beat the utility class.
+   Scoped to `main` so icon circles, progress bars and badges that also use
+   bg-gray-100 are left alone. */
+html:not(.dark) main.bg-gray-100 { background-color: #eaeaea; }
+html:not(.dark) .main-content { background-color: #eaeaea; }
+html:not(.dark) .table-wrap { background-color: #eaeaea; }
