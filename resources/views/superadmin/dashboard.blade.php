@@ -40,7 +40,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
     <div class="flex-1 min-w-0 w-full space-y-5">
 
         {{-- Quick Actions / Shortcuts --}}
-        <div class="sad-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="sad-slide-bounce kpi-card overflow-hidden">
             <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-sm sad-float">
@@ -51,7 +51,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <span class="text-[0.55rem] font-mono text-gray-400">System modules</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-                <a href="{{ route('superadmin.accounts.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
+                <a href="{{ route('superadmin.accounts.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
                     <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center transition-all group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-indigo-200/50">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     </div>
@@ -60,19 +60,19 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                         <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-indigo-100 text-indigo-700 text-[0.45rem] font-bold">{{ $totalEmployees - $activeEmployees }} inactive</span>
                     @endif
                 </a>
-                <a href="{{ route('configuration.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-gray-200 hover:border-gray-300 hover:shadow-sm no-underline">
+                <a href="{{ route('configuration.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-gray-200 hover:border-gray-300 hover:shadow-sm no-underline">
                     <div class="w-10 h-10 rounded-xl bg-gray-100 text-gray-600 flex items-center justify-center transition-all group-hover:bg-gray-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-gray-200/50">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
                     <span class="text-[10px] font-semibold text-gray-700 group-hover:text-gray-700 transition-colors text-center">Configuration</span>
                 </a>
-                <a href="{{ route('configuration.backup-history') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
+                <a href="{{ route('configuration.backup-history') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
                     <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     </div>
                     <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Backups</span>
                 </a>
-                <a href="{{ route('superadmin.accounts.create') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
+                <a href="{{ route('superadmin.accounts.create') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
                     <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                     </div>
@@ -83,7 +83,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
         {{-- STAT CARDS ROW 1: Workforce, Today, Leaves, Payroll --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Workforce</p>
@@ -99,7 +99,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span>{{ $onLeaveEmployees }} on leave</span>
                 </div>
             </div>
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-cyan-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-cyan-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Today</p>
@@ -115,7 +115,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span>{{ $absentToday }} absent</span>
                 </div>
             </div>
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-violet-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-violet-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Leaves</p>
@@ -131,7 +131,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span>{{ $approvedLeaves }} approved</span>
                 </div>
             </div>
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-indigo-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.2s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-indigo-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.2s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Payroll</p>
@@ -149,7 +149,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
         {{-- STAT CARDS ROW 2: Pipeline, OT/UT, Advances --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pipeline</p>
@@ -165,7 +165,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span>{{ $approvedPayroll }} approved</span>
                 </div>
             </div>
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-rose-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-rose-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">OT / UT</p>
@@ -181,7 +181,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span>{{ number_format($totalUndertimeHours, 1) }}h UT</span>
                 </div>
             </div>
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-teal-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.4s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-teal-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.4s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Cash Advances</p>
@@ -216,7 +216,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 $points[] = round($x + $padL, 1) . ',' . round($y + $padT, 1);
             }
             @endphp
-            <div class="sad-fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="sad-fade-up kpi-card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <span class="text-[11px] font-semibold text-gray-900">Attendance Trend</span>
@@ -280,7 +280,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
 
             {{-- Leave Activity Graph --}}
-            <div class="sad-fade-up bg-white rounded-xl shadow-sm border border-gray-100 p-4" style="animation-delay:0.1s">
+            <div class="sad-fade-up kpi-card p-4" style="animation-delay:0.1s">
                 <div class="flex items-center justify-between mb-3">
                     <div>
                         <span class="text-[9px] font-semibold text-gray-600 uppercase tracking-widest">Leave Activity</span>
@@ -315,7 +315,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
         {{-- REMITTANCE OVERVIEW --}}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Collections</p>
@@ -331,7 +331,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span>Finalized remittances</span>
                 </div>
             </div>
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-red-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-red-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Expenses</p>
@@ -347,7 +347,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span>{{ $totalExpenses > 0 ? round(($totalExpenses / max($totalCollections, 1)) * 100, 1) : 0 }}% of collections</span>
                 </div>
             </div>
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-blue-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-blue-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
@@ -363,7 +363,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span>{{ $totalCollections > 0 ? round(($totalNetRemittance / $totalCollections) * 100, 1) : 0 }}% margin</span>
                 </div>
             </div>
-            <div class="sad-bounce sad-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.2s">
+            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.2s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
@@ -381,7 +381,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
         {{-- Payroll breakdown + Payroll status row --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="sad-fade-up bg-white border border-gray-200 rounded-xl overflow-hidden" style="animation-delay:0.1s">
+            <div class="sad-fade-up kpi-card overflow-hidden" style="animation-delay:0.1s">
                 <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
                     <span class="text-xs font-bold text-gray-900">Payroll breakdown</span>
                     <span class="text-[9px] text-gray-400">Avg ₱{{ number_format($averageBasicSalary ?? 0, 2) }}</span>
@@ -417,7 +417,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     </div>
                 </div>
             </div>
-            <div class="sad-fade-up bg-white border border-gray-200 rounded-xl overflow-hidden" style="animation-delay:0.15s">
+            <div class="sad-fade-up kpi-card overflow-hidden" style="animation-delay:0.15s">
                 <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
                     <span class="text-xs font-bold text-gray-900">Payroll status</span>
                     <span class="text-[9px] text-gray-400">{{ $approvedPayroll + $approvedPayroll + $processingPayroll + $rejectedPayroll }} total</span>
@@ -486,7 +486,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
         @include('partials.dashboard-calendar')
 
         {{-- To-Do Card --}}
-        <div class="sad-slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.1s">
+        <div class="sad-slide-right kpi-card overflow-hidden" style="animation-delay:0.1s">
             <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>

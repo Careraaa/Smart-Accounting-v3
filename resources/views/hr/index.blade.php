@@ -43,7 +43,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
     <div class="flex-1 min-w-0 w-full space-y-5">
 
         {{-- Quick Actions --}}
-        <div class="hrd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
+        <div class="hrd-slide-bounce kpi-card overflow-hidden" style="animation-delay:0.2s">
                 <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-sm hrd-float">
@@ -54,7 +54,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     <span class="text-[0.55rem] font-mono text-gray-400">HR modules</span>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-                    <a href="{{ route('payroll.salary-computation.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
+                    <a href="{{ route('payroll.salary-computation.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
                         <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center transition-all group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-indigo-200/50">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M8 21h8M12 17v4"/></svg>
                         </div>
@@ -63,7 +63,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                             <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-indigo-100 text-indigo-700 text-[0.45rem] font-bold">{{ $batchSubmitted }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('leave.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
+                    <a href="{{ route('leave.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
                         <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
@@ -72,7 +72,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                             <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-amber-100 text-amber-700 text-[0.45rem] font-bold">{{ $pendingLeaves }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('overtime.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
+                    <a href="{{ route('overtime.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
                         <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
                         </div>
@@ -81,7 +81,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                             <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.45rem] font-bold">{{ $pendingOT + $pendingUT }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('payroll.receivables.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
+                    <a href="{{ route('payroll.receivables.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 kpi-tile transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
                         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                         </div>
@@ -110,7 +110,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     $atPoints[] = round($x + $atPadL, 1) . ',' . round($y + $atPadT, 1);
                 }
                 @endphp
-                <div class="hrd-fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="hrd-fade-up kpi-card overflow-hidden">
                     <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="text-[11px] font-semibold text-gray-900">Attendance Trend</span>
@@ -174,7 +174,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
 
                 {{-- Leave Activity --}}
-                <div class="hrd-fade-up bg-white rounded-xl shadow-sm border border-gray-100 p-4" style="animation-delay:0.1s">
+                <div class="hrd-fade-up kpi-card p-4" style="animation-delay:0.1s">
                     <div class="flex items-center justify-between mb-3">
                         <div>
                             <span class="text-[9px] font-semibold text-gray-600 uppercase tracking-widest">Leave Activity</span>
@@ -209,7 +209,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
         {{-- STAT CARDS: Employees, Attendance, Holidays --}}
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            <a href="{{ route('employees.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
+            <a href="{{ route('employees.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-3.5 no-underline group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Employees</p>
@@ -224,7 +224,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
             </a>
 
-            <a href="{{ route('attendance.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-cyan-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
+            <a href="{{ route('attendance.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-3.5 no-underline group hover:border-cyan-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Attendance</p>
@@ -239,7 +239,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
             </a>
 
-            <a href="{{ route('holiday.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-rose-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
+            <a href="{{ route('holiday.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-3.5 no-underline group hover:border-rose-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Holidays</p>
@@ -266,7 +266,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
         @include('partials.dashboard-calendar')
 
         {{-- To-Do Card --}}
-        <div class="hrd-slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.1s">
+        <div class="hrd-slide-right kpi-card overflow-hidden" style="animation-delay:0.1s">
             <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
