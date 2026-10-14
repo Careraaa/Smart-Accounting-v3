@@ -20,7 +20,7 @@
 @endpush
 
 @section('content')
-<div class="ll-page min-h-screen bg-gray-50/60">
+<div class="ll-page min-h-screen">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
 
         {{-- Header --}}
