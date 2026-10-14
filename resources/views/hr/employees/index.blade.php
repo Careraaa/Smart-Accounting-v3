@@ -20,7 +20,7 @@
 .stat-card:nth-child(2) { animation-delay: 0.1s; }
 .stat-card:nth-child(3) { animation-delay: 0.15s; }
 .stat-card:nth-child(4) { animation-delay: 0.2s; }
-.table-wrap { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+.table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
 .filter-bar { animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
 .em-row-hover:hover { background: rgba(99,102,241,0.03); }
 [data-em] input:focus-visible,
@@ -177,7 +177,7 @@
         </div>
 
         {{-- Table --}}
-        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
@@ -211,18 +211,18 @@
                                 data-dept="{{ strtolower($employee->department??'') }}"
                                 data-href="{{ route('employees.show', $employee) }}"
                                 onclick="if(!event.target.closest('a,button,form'))window.location=this.dataset.href">
-                                <td class="px-5 py-3.5">
+                                <td class="px-5 py-3">
                                     <div>
                                         <div class="font-semibold text-gray-900">{{ $employee->last_name }}, {{ $employee->first_name }}</div>
                                         <div class="text-xs text-gray-400 mt-0.5">{{ $employee->position ?? 'none' }}</div>
                                     </div>
                                 </td>
-                                <td class="px-5 py-3.5 text-gray-500 text-sm hidden md:table-cell">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : 'none' }}</td>
-                                <td class="px-5 py-3.5">
+                                <td class="px-5 py-3 text-gray-500 text-sm hidden md:table-cell">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : 'none' }}</td>
+                                <td class="px-5 py-3">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ $employee->department ?? 'none' }}</span>
                                 </td>
-                                <td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums hidden sm:table-cell">{{ $employee->phone ?? 'none' }}</td>
-                                <td class="px-5 py-3.5 text-center">
+                                <td class="px-5 py-3 font-mono text-sm text-gray-600 tabular-nums hidden sm:table-cell">{{ $employee->phone ?? 'none' }}</td>
+                                <td class="px-5 py-3 text-center">
                                     @if($employee->status === 'active')
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Active
@@ -316,7 +316,7 @@
         </div>
 
         {{-- Table --}}
-        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
@@ -396,7 +396,7 @@
         </div>
 
         {{-- Table --}}
-        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
@@ -571,11 +571,11 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                     tr.dataset.href = href;
                     tr.onclick = function(e) { if(!e.target.closest('a,button,form')) window.location = href; };
                     tr.innerHTML = [
-                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + r.lastName + ', ' + r.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (r.position||'none') + '</div></div></td>',
-                        '<td class="px-5 py-3.5 text-gray-500 text-sm">' + gender + '</td>',
-                        '<td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
-                        '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (r.phone||'none') + '</td>',
-                        '<td class="px-5 py-3.5 text-center">' + statusBadge + '</td>'
+                        '<td class="px-5 py-3"><div><div class="font-semibold text-gray-900">' + r.lastName + ', ' + r.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (r.position||'none') + '</div></div></td>',
+                        '<td class="px-5 py-3 text-gray-500 text-sm">' + gender + '</td>',
+                        '<td class="px-5 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
+                        '<td class="px-5 py-3 font-mono text-sm text-gray-600 tabular-nums">' + (r.phone||'none') + '</td>',
+                        '<td class="px-5 py-3 text-center">' + statusBadge + '</td>'
                     ].join('');
                     tbody.appendChild(tr);
                 });
@@ -681,11 +681,11 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                     row.dataset.href   = href;
                     row.onclick = e => { if(!e.target.closest('a,button,form')) window.location = href; };
                     row.innerHTML = [
-                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + emp.lastName + ', ' + emp.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (emp.position||'none') + '</div></div></td>',
-                        '<td class="px-5 py-3.5 text-gray-500 text-sm">' + gender + '</td>',
-                        '<td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
-                        '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (emp.phone||'none') + '</td>',
-                        '<td class="px-5 py-3.5 text-center">' + (STATUS_BADGE[emp.status]||STATUS_BADGE.inactive) + '</td>'
+                        '<td class="px-5 py-3"><div><div class="font-semibold text-gray-900">' + emp.lastName + ', ' + emp.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (emp.position||'none') + '</div></div></td>',
+                        '<td class="px-5 py-3 text-gray-500 text-sm">' + gender + '</td>',
+                        '<td class="px-5 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
+                        '<td class="px-5 py-3 font-mono text-sm text-gray-600 tabular-nums">' + (emp.phone||'none') + '</td>',
+                        '<td class="px-5 py-3 text-center">' + (STATUS_BADGE[emp.status]||STATUS_BADGE.inactive) + '</td>'
                     ].join('');
                     tbody.appendChild(row);
                 });

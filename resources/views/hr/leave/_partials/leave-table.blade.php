@@ -15,15 +15,15 @@ $showRejectedDate = in_array('rejected_date', $columns);
         <table class="w-full text-sm">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
-                    @if($showEmployee)<th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>@endif
-                    @if($showDepartment)<th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>@endif
-                    @if($showLeaveType)<th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Leave Type</th>@endif
-                    @if($showDates)<th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Dates</th>@endif
-                    @if($showDays)<th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Days</th>@endif
-                    @if($showPayStatus)<th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Pay Status</th>@endif
-                    @if($showApplied)<th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Applied</th>@endif
-                    @if($showApprovedDate)<th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Approved Date</th>@endif
-                    @if($showRejectedDate)<th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Rejected Date</th>@endif
+                    @if($showEmployee)<th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>@endif
+                    @if($showDepartment)<th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>@endif
+                    @if($showLeaveType)<th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Leave Type</th>@endif
+                    @if($showDates)<th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Dates</th>@endif
+                    @if($showDays)<th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Days</th>@endif
+                    @if($showPayStatus)<th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Pay Status</th>@endif
+                    @if($showApplied)<th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Applied</th>@endif
+                    @if($showApprovedDate)<th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Approved Date</th>@endif
+                    @if($showRejectedDate)<th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Rejected Date</th>@endif
                 </tr>
             </thead>
             <tbody id="lvTbody_{{ $status }}"></tbody>

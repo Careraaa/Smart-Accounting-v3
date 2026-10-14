@@ -16,7 +16,7 @@
 }
 .fade-up { animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .filter-bar { animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
-.table-wrap { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+.table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
 </style>
 @endpush
 
@@ -50,7 +50,7 @@
     </div>
 
     <div class="grid grid-cols-1 gap-4">
-        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden table-wrap">
+        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             {{-- Card Header --}}
             <div class="px-6 py-5 border-b border-gray-50 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shrink-0">

@@ -22,7 +22,7 @@
 @endpush
 
 @section('content')
-<div class="min-h-screen bg-gray-50/60">
+<div class="min-h-screen">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
 
         {{-- Page header --}}
@@ -124,7 +124,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-100">
+                                <tr class="bg-gray-50 border-b border-gray-200">
                                     <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Date Requested</th>
                                     <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Amount</th>
                                     <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
@@ -145,18 +145,18 @@
                                         };
                                     @endphp
                                     <tr class="hover:bg-gray-50/70 transition-colors">
-                                        <td class="px-5 py-3.5 text-sm text-gray-700">
+                                        <td class="px-5 py-3 text-sm text-gray-700">
                                             {{ $advance->request_date ? $advance->request_date->format('M d, Y') : '—' }}
                                         </td>
-                                        <td class="px-5 py-3.5">
+                                        <td class="px-5 py-3">
                                             <span class="font-mono font-bold text-gray-900">₱{{ number_format($advance->amount, 2) }}</span>
                                         </td>
-                                        <td class="px-5 py-3.5">
+                                        <td class="px-5 py-3">
                                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $pillClasses }}">
                                                 {{ ucfirst($displayStatus) }}
                                             </span>
                                         </td>
-                                        <td class="px-5 py-3.5 max-w-[200px]">
+                                        <td class="px-5 py-3 max-w-[200px]">
                                             <span class="text-gray-500 text-sm block truncate" title="{{ $advance->notes }}">{{ $advance->notes ?: '—' }}</span>
                                             @if($advance->rejection_reason)
                                                 <div class="flex items-center gap-1 mt-1 text-xs text-rose-600">
@@ -165,7 +165,7 @@
                                                 </div>
                                             @endif
                                         </td>
-                                        <td class="px-5 py-3.5 text-sm text-gray-700">
+                                        <td class="px-5 py-3 text-sm text-gray-700">
                                             @php($deductionPayrolls = $advance->deductionPayrolls())
                                             @if($deductionPayrolls->isNotEmpty())
                                                 <details class="group">

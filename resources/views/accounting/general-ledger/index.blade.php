@@ -76,17 +76,17 @@
         </div>
 
         {{-- Transactions --}}
-        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Date</th>
-                            <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Journal #</th>
-                            <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Description</th>
-                            <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Debit</th>
-                            <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Credit</th>
-                            <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Balance</th>
+                            <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>
+                            <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Journal #</th>
+                            <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Description</th>
+                            <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Debit</th>
+                            <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Credit</th>
+                            <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Balance</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50" id="glGrid"></tbody>
@@ -165,12 +165,12 @@
             tr.className = 'transition-colors hover:bg-gray-50/40';
             const balClass = t.running_balance >= 0 ? 'text-gray-900' : 'text-red-600';
             tr.innerHTML =
-                '<td class="px-4 py-3 text-xs text-gray-500">'+fmtDate(t.transaction_date)+'</td>' +
-                '<td class="px-4 py-3"><a href="/accounting/journal-entries/'+t.journal_entry_id+'" class="text-xs font-bold text-gray-900 font-mono no-underline hover:underline">'+t.journal_number+'</a></td>' +
-                '<td class="px-4 py-3 text-xs text-gray-600 max-w-[200px] truncate">'+t.description+'</td>' +
-                '<td class="px-4 py-3 text-right text-xs font-semibold '+(t.debit>0?'text-gray-900':'text-gray-300')+' tabular-nums">'+(t.debit>0?fmtMoney(t.debit):'—')+'</td>' +
-                '<td class="px-4 py-3 text-right text-xs font-semibold '+(t.credit>0?'text-gray-900':'text-gray-300')+' tabular-nums">'+(t.credit>0?fmtMoney(t.credit):'—')+'</td>' +
-                '<td class="px-4 py-3 text-right text-xs font-bold tabular-nums '+balClass+'">'+fmtMoney(t.running_balance)+'</td>';
+                '<td class="px-5 py-3 text-xs text-gray-500">'+fmtDate(t.transaction_date)+'</td>' +
+                '<td class="px-5 py-3"><a href="/accounting/journal-entries/'+t.journal_entry_id+'" class="text-xs font-bold text-gray-900 font-mono no-underline hover:underline">'+t.journal_number+'</a></td>' +
+                '<td class="px-5 py-3 text-xs text-gray-600 max-w-[200px] truncate">'+t.description+'</td>' +
+                '<td class="px-5 py-3 text-right text-xs font-semibold '+(t.debit>0?'text-gray-900':'text-gray-300')+' tabular-nums">'+(t.debit>0?fmtMoney(t.debit):'—')+'</td>' +
+                '<td class="px-5 py-3 text-right text-xs font-semibold '+(t.credit>0?'text-gray-900':'text-gray-300')+' tabular-nums">'+(t.credit>0?fmtMoney(t.credit):'—')+'</td>' +
+                '<td class="px-5 py-3 text-right text-xs font-bold tabular-nums '+balClass+'">'+fmtMoney(t.running_balance)+'</td>';
             tbody.appendChild(tr);
         });
         updatePagination();

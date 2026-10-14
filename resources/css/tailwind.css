@@ -4,3 +4,349 @@
 @layer base {
   html { font-family: 'Inter', system-ui, -apple-system, sans-serif; font-weight: 500; }
 }
+
+/* Doubled class name (.kpi-card.kpi-card) raises specificity above the
+   legacy `html.dark .stat-card { ... !important }` rules that ship later
+   in layout.blade.php. Without it those rules win the cascade and the
+   card reverts to the old near-black surface. */
+@layer components {
+  .kpi-card.kpi-card {
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    border-radius: 0.75rem;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 2px 6px rgba(0, 0, 0, 0.04);
+  }
+
+  .kpi-card.kpi-card:hover {
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.06),
+      0 6px 16px rgba(0, 0, 0, 0.07);
+  }
+
+  .kpi-tile.kpi-tile {
+    background-color: #f7f7f7;
+    border: 1px solid #dcdcdc;
+    border-radius: 0.75rem;
+  }
+
+  .kpi-tile.kpi-tile:hover {
+    background-color: #eeeeee;
+  }
+
+  html.dark .kpi-card.kpi-card {
+    background-color: #171717 !important;
+    border-color: #2a2a2a;
+    box-shadow: none;
+  }
+
+  html.dark .kpi-card.kpi-card:hover {
+    box-shadow: none;
+  }
+
+  html.dark .kpi-tile.kpi-tile {
+    background-color: #141414 !important;
+    border-color: #2a2a2a;
+  }
+
+  html.dark .kpi-tile.kpi-tile:hover {
+    background-color: #1c1c1c !important;
+  }
+
+  /* Quick Actions tiles — horizontal: icon left, label + count right */
+  .qa-tile.qa-tile {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 0.875rem;
+    background-color: #f7f7f7;
+    border: 1px solid #dcdcdc;
+    border-radius: 0.75rem;
+  }
+
+  .qa-icon.qa-icon {
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .qa-label.qa-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+    color: #3f3f3f;
+    min-width: 0;
+  }
+
+  .qa-badge.qa-badge {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.375rem;
+    border-radius: 9999px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    line-height: 1;
+    flex: none;
+  }
+
+  html.dark .qa-tile.qa-tile {
+    background-color: #141414;
+    border-color: #2a2a2a;
+  }
+
+  html.dark .qa-label.qa-label {
+    color: #d4d4d4;
+  }
+
+  /* Stat card internals — label / value / footer, sized for a glance */
+  .kcard-label {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+    color: #737373;
+  }
+
+  .kcard-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: #181818;
+  }
+
+  .kcard-foot {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #8a8a8a;
+  }
+
+  .kcard-icon {
+    width: 2rem;
+    height: 2rem;
+    min-width: 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  html.dark .kcard-label { color: #a3a3a3; }
+  html.dark .kcard-value { color: #fafafa; }
+  html.dark .kcard-foot  { color: #737373; }
+
+  /* Leave Activity — column chart */
+  .lv-plot {
+    position: relative;
+    height: 104px;
+  }
+
+  .lv-grid {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #ececec;
+  }
+
+  .lv-grid-top { background-color: #e0e0e0; }
+
+  .lv-cols {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .lv-col {
+    flex: 1 1 0;
+    height: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .lv-bar {
+    width: 100%;
+    max-width: 26px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px 4px 2px 2px;
+    overflow: hidden;
+    transform-origin: bottom;
+    animation: atGrow 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .lv-approved { background-color: #10b981; }
+  .lv-rest     { background-color: #e4e4e4; }
+  .lv-rest-last{ background-color: #c2c2c2; }
+
+  .lv-days {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .lv-days span {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #a3a3a3;
+  }
+
+  .lv-total { color: #737373; }
+
+  html.dark .lv-grid       { background-color: #232323; }
+  html.dark .lv-grid-top   { background-color: #2e2e2e; }
+  html.dark .lv-rest       { background-color: #262626; }
+  html.dark .lv-rest-last  { background-color: #3a3a3a; }
+  html.dark .lv-approved   { background-color: #059669; }
+  html.dark .lv-days span  { color: #6b6b6b; }
+  html.dark .lv-total      { color: #8a8a8a; }
+}
+
+/* Attendance trend — stacked bar chart (HR + Super Admin dashboards) */
+.at-plot {
+  position: relative;
+  height: 132px;
+}
+
+.at-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #ececec;
+}
+
+.at-grid-top {
+  background-color: #e0e0e0;
+}
+
+.at-max {
+  position: absolute;
+  top: -6px;
+  right: 0;
+  font-size: 10px;
+  line-height: 1;
+  color: #a3a3a3;
+  font-variant-numeric: tabular-nums;
+}
+
+.at-cols {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.at-col {
+  flex: 1 1 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 0;
+}
+
+.at-bar {
+  width: 100%;
+  max-width: 30px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px 5px 3px 3px;
+  overflow: hidden;
+  transform-origin: bottom;
+  animation: atGrow 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.at-seg {
+  width: 100%;
+}
+
+.at-present {
+  background-color: #6366f1;
+}
+
+.at-late {
+  background-color: #fbbf24;
+}
+
+.at-days {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.at-days span {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #a3a3a3;
+}
+
+html.dark .at-grid {
+  background-color: #232323;
+}
+
+html.dark .at-grid-top {
+  background-color: #2e2e2e;
+}
+
+html.dark .at-max,
+html.dark .at-days span {
+  color: #6b6b6b;
+}
+
+html.dark .at-present {
+  background-color: #4f46e5;
+}
+
+html.dark .at-late {
+  background-color: #b45309;
+}
+
+@keyframes atGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+/* Light-mode page canvas.
+   `main` ships with Tailwind's `bg-gray-100` (#f3f4f6), only ~4% darker
+   than the white cards, so the card edge reads as almost nothing. These
+   rules sit outside @layer so they beat the utility class.
+   Scoped to `main` so icon circles, progress bars and badges that also use
+   bg-gray-100 are left alone. */
+html:not(.dark) main.bg-gray-100 { background-color: #eaeaea; }
+html:not(.dark) .main-content { background-color: #eaeaea; }
+
+/* Tables — light mode.
+   Tables live in a white `.table-wrap`, but the row shading shipped at
+   gray-50 (#f9fafb) on white and dividers at gray-100 (#f3f4f6) on white,
+   so the header band and every row line were effectively invisible.
+   Matched to the card palette: #d8d8d8 border, #f4f4f4 header, #e8e8e8 lines. */
+html:not(.dark) .table-wrap { border-color: #d8d8d8; }
+html:not(.dark) table thead > tr { background-color: #f4f4f4; }
+html:not(.dark) thead { background-color: #f4f4f4; }
+html:not(.dark) table tbody > tr > td,
+html:not(.dark) table tbody > tr > th,
+html:not(.dark) table tfoot > tr > td,
+html:not(.dark) table tfoot > tr > th { border-color: #e8e8e8; }

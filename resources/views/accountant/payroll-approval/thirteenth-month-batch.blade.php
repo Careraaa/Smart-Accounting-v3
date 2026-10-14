@@ -102,18 +102,18 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50">
-                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
-                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Salary</th>
-                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Months Worked</th>
-                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">13th Month Pay</th>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Employee</th>
+                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Basic Salary</th>
+                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Months Worked</th>
+                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">13th Month Pay</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @foreach($records as $record)
                     @php $u = $record->user; @endphp
                     <tr class="hover:bg-gray-50/40 transition-colors cursor-pointer" onclick="window.open('{{ route('payroll.thirteenth-month-pay.batch.payslip', ['batch' => $batch, 'record' => $record]) }}', '_blank')">
-                        <td class="px-4 py-3">
+                        <td class="px-5 py-3">
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-[11px] font-bold text-gray-600 uppercase shrink-0">
                                     {{ substr($u->first_name ?? '?', 0, 1) }}{{ substr($u->last_name ?? '?', 0, 1) }}
@@ -124,19 +124,19 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($record->total_basic_salary_earned, 2) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">{{ $record->months_worked }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($record->thirteenth_month_pay, 2) }}</td>
+                        <td class="px-5 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($record->total_basic_salary_earned, 2) }}</td>
+                        <td class="px-5 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">{{ $record->months_worked }}</td>
+                        <td class="px-5 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($record->thirteenth_month_pay, 2) }}</td>
                     </tr>
                     @endforeach
                 </tbody>
                 @if($records->isNotEmpty())
                 <tfoot>
                     <tr class="border-t border-gray-100 bg-gray-50/50">
-                        <td class="px-4 py-3 text-xs font-bold text-gray-900">Totals</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($records->sum('total_basic_salary_earned'), 2) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums"></td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($totalPayable, 2) }}</td>
+                        <td class="px-5 py-3 text-xs font-bold text-gray-900">Totals</td>
+                        <td class="px-5 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($records->sum('total_basic_salary_earned'), 2) }}</td>
+                        <td class="px-5 py-3 text-right text-xs font-bold text-gray-900 tabular-nums"></td>
+                        <td class="px-5 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($totalPayable, 2) }}</td>
                     </tr>
                 </tfoot>
                 @endif

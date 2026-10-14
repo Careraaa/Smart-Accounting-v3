@@ -12,7 +12,7 @@
 .stat-card:nth-child(4) { animation-delay:0.2s; }
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .filter-bar { animation:slideInRight 0.4s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
-.table-wrap { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
+.table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
 </style>
 @endpush
 
@@ -144,20 +144,20 @@
     </div>
 
     {{-- Table --}}
-    <div class="table-wrap bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Amount</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Term</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Monthly</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Requested</th>
-                        <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deducted On</th>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Employee</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Amount</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Term</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Monthly</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Requested</th>
+                        <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Deducted On</th>
                         @if(auth()->user()->role === 'accountant')
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Actions</th>
+                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Actions</th>
                         @endif
                     </tr>
                 </thead>
@@ -351,7 +351,7 @@ window.allSalaryLoans = [];
                 tr.className = 'pr-row hover:bg-gray-50/40 transition-colors cursor-pointer';
                 tr.dataset.url = r.url;
                 tr.innerHTML = `
-                    <td class="px-4 py-3">
+                    <td class="px-5 py-3">
                         <div class="flex items-center gap-2.5">
                             <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">${initials}</span>
                             <div>
@@ -360,18 +360,18 @@ window.allSalaryLoans = [];
                             </div>
                         </div>
                     </td>
-                    <td class="px-4 py-3"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱${r.amount.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
-                    <td class="px-4 py-3 text-xs text-gray-700">${r.repayment_months}mo</td>
-                    <td class="px-4 py-3"><span class="font-mono tabular-nums text-xs text-gray-500">₱${r.monthly_deduction.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
-                    <td class="px-4 py-3 text-xs text-gray-700">${r.request_date}</td>
-                    <td class="px-4 py-3 text-center">
+                    <td class="px-5 py-3"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱${r.amount.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+                    <td class="px-5 py-3 text-xs text-gray-700">${r.repayment_months}mo</td>
+                    <td class="px-5 py-3"><span class="font-mono tabular-nums text-xs text-gray-500">₱${r.monthly_deduction.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+                    <td class="px-5 py-3 text-xs text-gray-700">${r.request_date}</td>
+                    <td class="px-5 py-3 text-center">
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border ${badgeCls}">
                             <span class="w-1 h-1 rounded-full ${dotCls}"></span>
                             ${r.status.charAt(0).toUpperCase() + r.status.slice(1)}
                         </span>
                     </td>
-                    <td class="px-4 py-3 text-xs text-gray-700">${r.deducted_payroll ? 'Period ending ' + r.deducted_payroll : '<span class="text-gray-300">—</span>'}</td>
-                    ${isAcc ? '<td class="px-4 py-3 text-end"></td>' : ''}
+                    <td class="px-5 py-3 text-xs text-gray-700">${r.deducted_payroll ? 'Period ending ' + r.deducted_payroll : '<span class="text-gray-300">—</span>'}</td>
+                    ${isAcc ? '<td class="px-5 py-3 text-end"></td>' : ''}
                 `;
                 caTbody.appendChild(tr);
                 if (r.rejection_reason) {

@@ -15,7 +15,7 @@
 @endpush
 
 @section('content')
-<div class="ou-page min-h-screen bg-gray-50/60">
+<div class="ou-page min-h-screen">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
 
         {{-- Flash --}}
@@ -140,7 +140,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="bg-gray-50 border-b border-gray-100">
+                        <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Date</th>
                             <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Type</th>
                             <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Hours</th>
@@ -164,27 +164,27 @@
                                     : 'bg-yellow-50 text-yellow-700 border border-yellow-200';
                             @endphp
                             <tr class="hover:bg-gray-50/70 transition-colors">
-                                <td class="px-5 py-3.5">
+                                <td class="px-5 py-3">
                                     <div class="font-semibold text-gray-900 text-sm">{{ $request->date->format('M d, Y') }}</div>
                                     <div class="text-xs text-gray-400 mt-0.5">{{ $request->date->format('l') }}</div>
                                 </td>
-                                <td class="px-5 py-3.5">
+                                <td class="px-5 py-3">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $typeClasses }}">
                                         {{ ucfirst($request->type) }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-3.5">
+                                <td class="px-5 py-3">
                                     <span class="font-mono font-bold text-gray-900">{{ number_format($request->hours, 2) }}h</span>
                                 </td>
-                                <td class="px-5 py-3.5">
+                                <td class="px-5 py-3">
                                     <span class="text-gray-500 text-sm">{{ Str::limit($request->reason, 60) }}</span>
                                 </td>
-                                <td class="px-5 py-3.5">
+                                <td class="px-5 py-3">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $pillClasses }}">
                                         {{ ucfirst($request->status) }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-3.5">
+                                <td class="px-5 py-3">
                                     <div class="flex items-center gap-1.5 justify-end">
                                         <a href="{{ route('employee.overtime-undertime.show', $request->id) }}"
                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all">

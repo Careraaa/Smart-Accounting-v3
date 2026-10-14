@@ -99,12 +99,12 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50">
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Date</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Journal #</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Description</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Debit</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Credit</th>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Journal #</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Description</th>
+                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Debit</th>
+                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Credit</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="jlGrid"></tbody>
@@ -162,11 +162,11 @@
             const tr = document.createElement('tr');
             tr.className = 'transition-colors hover:bg-gray-50/40';
             tr.innerHTML =
-                '<td class="px-4 py-3 text-xs text-gray-500">'+fmtDate(l.transaction_date)+'</td>' +
-                '<td class="px-4 py-3"><a href="/accounting/journal-entries/'+l.journal_entry_id+'" class="text-xs font-bold text-gray-900 font-mono no-underline hover:underline">'+l.journal_number+'</a></td>' +
-                '<td class="px-4 py-3 text-xs text-gray-500">'+l.description+'</td>' +
-                '<td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">'+(l.debit>0?fmtMoney(l.debit):'—')+'</td>' +
-                '<td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">'+(l.credit>0?fmtMoney(l.credit):'—')+'</td>';
+                '<td class="px-5 py-3 text-xs text-gray-500">'+fmtDate(l.transaction_date)+'</td>' +
+                '<td class="px-5 py-3"><a href="/accounting/journal-entries/'+l.journal_entry_id+'" class="text-xs font-bold text-gray-900 font-mono no-underline hover:underline">'+l.journal_number+'</a></td>' +
+                '<td class="px-5 py-3 text-xs text-gray-500">'+l.description+'</td>' +
+                '<td class="px-5 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">'+(l.debit>0?fmtMoney(l.debit):'—')+'</td>' +
+                '<td class="px-5 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">'+(l.credit>0?fmtMoney(l.credit):'—')+'</td>';
             tbody.appendChild(tr);
         });
         updatePagination();

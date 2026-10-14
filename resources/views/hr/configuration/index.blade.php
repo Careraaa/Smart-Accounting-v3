@@ -63,40 +63,40 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="bg-gray-50 border-b border-gray-100">
-                            <th class="px-4 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Shift Name</th>
-                            <th class="px-4 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Start Time</th>
-                            <th class="px-4 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">End Time</th>
-                            <th class="px-4 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Break Time</th>
-                            <th class="px-4 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Work Hours</th>
-                            <th class="px-4 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Status</th>
-                            <th class="px-4 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Actions</th>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Shift Name</th>
+                            <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Start Time</th>
+                            <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">End Time</th>
+                            <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Break Time</th>
+                            <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Work Hours</th>
+                            <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Status</th>
+                            <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
                         @foreach($shifts as $shift)
                         <tr class="transition-colors hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm font-semibold text-gray-900">{{ $shift->name }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->start_time)->format('h:i A') }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->end_time)->format('h:i A') }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-600">
+                            <td class="px-5 py-3 text-sm font-semibold text-gray-900">{{ $shift->name }}</td>
+                            <td class="px-5 py-3 text-sm text-gray-600">{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->start_time)->format('h:i A') }}</td>
+                            <td class="px-5 py-3 text-sm text-gray-600">{{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->end_time)->format('h:i A') }}</td>
+                            <td class="px-5 py-3 text-sm text-gray-600">
                                 @if($shift->break_start && $shift->break_end)
                                     {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->break_start)->format('h:i A') }} – {{ \Carbon\Carbon::createFromFormat('H:i:s', $shift->break_end)->format('h:i A') }}
                                 @else
                                     <span class="text-gray-300">-</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-5 py-3">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-[0.6rem] font-bold">{{ $shift->duration }} hrs</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-5 py-3">
                                 @if($shift->is_active)
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 text-[0.55rem] font-bold uppercase tracking-wide">Active</span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 border border-gray-200 text-gray-500 text-[0.55rem] font-bold uppercase tracking-wide">Inactive</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right">
+                            <td class="px-5 py-3 text-right">
                                 <div class="flex items-center justify-end gap-1">
                                     <button onclick="openEditShiftModal({{ $shift->id }})" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer" title="Edit">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
