@@ -7,7 +7,7 @@
 .stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .filter-bar { animation:fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-.table-wrap { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
+.table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.1s both; }
 </style>
 @endpush
 
@@ -36,7 +36,7 @@
     </div>
 
     {{-- Batch cards --}}
-    <div class="table-wrap bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div class="divide-y divide-gray-50" id="psGrid"></div>
         <div id="psNoResults" class="hidden">
             <div class="flex flex-col items-center py-12 text-center">

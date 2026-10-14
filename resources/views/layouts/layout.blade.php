@@ -83,7 +83,7 @@
 
         /* Cards / surfaces — override all bg-white */
         html.dark .bg-white,
-        html.dark .table-wrap,
+        html.dark .table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden,
         html.dark .stat-card,
         html.dark .modal-card,
         html.dark .net-pop,

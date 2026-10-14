@@ -20,7 +20,7 @@
 .stat-card:nth-child(3) { animation-delay: 0.15s; }
 .fade-up { animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .filter-bar { animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
-.table-wrap { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+.table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
 </style>
 @endpush
 
@@ -80,7 +80,7 @@
     </div>
 
     {{-- Employee table --}}
-    <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>

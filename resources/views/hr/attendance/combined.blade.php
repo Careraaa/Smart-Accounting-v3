@@ -19,7 +19,7 @@
 .stat-card:nth-child(1) { animation-delay: 0.05s; }
 .stat-card:nth-child(2) { animation-delay: 0.1s; }
 .stat-card:nth-child(3) { animation-delay: 0.15s; }
-.table-wrap { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+.table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
 .filter-bar { animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
 
 /* OT/UT tab active states — can't use Tailwind since JS toggles .active + data-status dynamically */
@@ -134,7 +134,7 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
         </div>
 
         {{-- Table --}}
-        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
@@ -307,7 +307,7 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
         </div>
 
         {{-- Table --}}
-        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>

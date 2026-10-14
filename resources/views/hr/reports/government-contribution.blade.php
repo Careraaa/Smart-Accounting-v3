@@ -7,7 +7,7 @@
 .stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .filter-bar { animation:fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-.table-wrap { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 </style>
 @endpush
 
@@ -88,7 +88,7 @@
     </div>
 
     {{-- Summary by type table (server-rendered, no pagination needed) --}}
-    <div class="table-wrap bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
             <span class="w-2 h-2 rounded-full bg-gray-900 shrink-0"></span>
             <h2 class="text-xs font-bold text-gray-900">Summary by contribution type</h2>
@@ -131,7 +131,7 @@
     </div>
 
     {{-- Breakdown by employee --}}
-    <div class="table-wrap bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden" style="animation-delay:0.1s">
+    <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden" style="animation-delay:0.1s">
         <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
             <span class="w-2 h-2 rounded-full bg-gray-900 shrink-0"></span>
             <h2 class="text-xs font-bold text-gray-900">Breakdown by employee</h2>

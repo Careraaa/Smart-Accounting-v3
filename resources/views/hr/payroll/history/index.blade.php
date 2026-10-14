@@ -128,7 +128,7 @@
     </div>
 
     {{-- Batch cards --}}
-    <div class="table-wrap bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div class="divide-y divide-gray-50" id="prlGrid"></div>
         <div id="prlNoResults" class="hidden">
             <div class="flex flex-col items-center py-12 text-center">
