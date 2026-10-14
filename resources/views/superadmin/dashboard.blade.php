@@ -256,35 +256,56 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
 
             {{-- Leave Activity Graph --}}
-            <div class="sad-fade-up kpi-card p-4" style="animation-delay:0.1s">
-                <div class="flex items-center justify-between mb-3">
+            @php
+            $lvCnt = count($leaveTrend);
+            $lvH = 104;
+            $lvMax = collect($leaveTrend)->map(fn($m) => $m['total'])->max() ?: 1;
+            $lvApprovedH = [];
+            $lvRestH = [];
+            foreach ($leaveTrend as $i => $m) {
+                $a = $lvMax > 0 ? round(($m['approved'] / $lvMax) * $lvH) : 0;
+                $lvApprovedH[$i] = $a;
+                $lvRestH[$i] = $lvMax > 0 ? round(($m['total'] / $lvMax) * $lvH) - $a : 0;
+            }
+            $lvLast = $lvCnt - 1;
+            @endphp
+            <div class="sad-fade-up kpi-card overflow-hidden" style="animation-delay:0.1s">
+                <div class="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
                     <div>
-                        <span class="text-[9px] font-semibold text-gray-600 uppercase tracking-widest">Leave Activity</span>
-                        <div class="flex items-baseline gap-1.5 mt-0.5">
-                            <span class="text-lg font-bold text-gray-900 tabular-nums">{{ collect($leaveTrend)->sum('total') }}</span>
-                            <span class="text-[10px] text-gray-400">last 6 months</span>
-                        </div>
+                        <p class="kcard-label">Leave Activity</p>
+                        <p class="kcard-value mt-1">{{ collect($leaveTrend)->sum('total') }}</p>
                     </div>
-                    <div class="flex gap-2 text-[9px]">
-                        <span class="flex items-center gap-1 text-gray-400"><span class="w-1.5 h-1.5 rounded-full ring-1 ring-emerald-100 bg-emerald-500"></span> Approved</span>
-                        <span class="flex items-center gap-1 text-gray-400"><span class="w-1.5 h-1.5 rounded-full ring-1 ring-gray-200 bg-gray-300"></span> Total</span>
+                    <div class="flex items-center gap-3 lv-total text-[11px]">
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-emerald-500"></span> Approved</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-gray-300"></span> Total</span>
                     </div>
                 </div>
-                @php $lvMax = collect($leaveTrend)->map(fn($m) => $m['total'])->max() ?: 1; @endphp
-                <div class="flex items-end gap-2" style="height:50px">
-                    @foreach($leaveTrend as $i => $m)
-                    @php
-                    $th = max(4, round(($m['total'] / $lvMax) * 40));
-                    $ah = max(2, round(($m['approved'] / $lvMax) * 40));
-                    @endphp
-                    <div class="flex-1 flex flex-col items-center gap-0.5 h-full justify-end">
-                        <div class="w-full flex flex-col-reverse items-center" style="height:40px">
-                            <div class="w-4/5 bg-emerald-500 rounded-t sad-bar" style="height:{{ $ah }}px;animation-delay:{{ $i * 0.1 + 0.2 }}s" title="Approved: {{ $m['approved'] }}"></div>
-                            <div class="w-4/5 bg-gray-200 rounded-t sad-bar" style="height:{{ max(2, $th - $ah) }}px;animation-delay:{{ $i * 0.1 }}s" title="Total: {{ $m['total'] }}"></div>
+                <div class="px-4 pb-4">
+                    @if($lvCnt > 0)
+                    <div class="lv-plot">
+                        <div class="lv-grid" style="bottom:0"></div>
+                        <div class="lv-grid" style="bottom:50%"></div>
+                        <div class="lv-grid lv-grid-top" style="bottom:100%"></div>
+                        <span class="at-max">{{ $lvMax }}</span>
+                        <div class="lv-cols">
+                            @foreach ($leaveTrend as $i => $m)
+                            <div class="lv-col" title="{{ $m['label'] }} — {{ $m['approved'] }} approved of {{ $m['total'] }} total">
+                                <div class="lv-bar" style="height:{{ $lvApprovedH[$i] + $lvRestH[$i] }}px;animation-delay:{{ 0.05 + $i * 0.05 }}s">
+                                    <div class="lv-approved" style="height:{{ $lvApprovedH[$i] }}px"></div>
+                                    <div class="{{ $i === $lvLast ? 'lv-rest-last' : 'lv-rest' }}" style="height:{{ $lvRestH[$i] }}px"></div>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
-                        <span class="text-[7px] text-gray-400 font-medium mt-0.5">{{ $m['label'] }}</span>
                     </div>
-                    @endforeach
+                    <div class="lv-days">
+                        @foreach ($leaveTrend as $m)
+                        <span>{{ $m['label'] }}</span>
+                        @endforeach
+                    </div>
+                    @else
+                    <div class="flex items-center justify-center h-[104px] text-xs text-gray-400">No leave data yet.</div>
+                    @endif
                 </div>
             </div>
         </div>
