@@ -139,11 +139,11 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Department</th>
-                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Today's Status</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Time In</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Time Out</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Department</th>
+                             class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Today's Status</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Time In</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Time Out</th>
                         </tr>
                     </thead>
                     <tbody id="empTbody">
@@ -182,7 +182,7 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
                                 data-status="{{ $todayStatus }}"
                                 onclick="window.location='{{ route('attendance.employee.calendar', $emp->id) }}'"
                             >
-                                <td class="px-4 py-3.5">
+                                 class="px-5 py-3">
                                     <div class="flex items-center gap-2.5">
                                         <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 uppercase shrink-0">{{ $initials }}</div>
                                         <div>
@@ -191,19 +191,19 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3.5 hidden md:table-cell">
+                                 class="px-5 py-3 hidden md:table-cell">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">{{ $emp->department ?? '—' }}</span>
                                 </td>
-                                <td class="px-4 py-3.5 text-center">
+                                 class="px-5 py-3 text-center">
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold {{ $statusBg }}">
                                         <span class="w-1.5 h-1.5 rounded-full {{ $statusDot }}"></span>
                                         {{ $statusLabel }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3.5 font-mono text-sm text-gray-700">
+                                 class="px-5 py-3 font-mono text-sm text-gray-700">
                                     {{ $att && $att->time_in ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_in)->format('g:i A') : '—' }}
                                 </td>
-                                <td class="px-4 py-3.5 font-mono text-sm text-gray-700 hidden sm:table-cell">
+                                 class="px-5 py-3 font-mono text-sm text-gray-700 hidden sm:table-cell">
                                     {{ $att && $att->time_out ? \Carbon\Carbon::createFromFormat('H:i:s', $att->time_out)->format('g:i A') : '—' }}
                                 </td>
                             </tr>
@@ -312,13 +312,13 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
-                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
-                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Hours</th>
-                            <th class="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Amount</th>
-                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                            <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
+                             class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
+                             class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Hours</th>
+                             class="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Amount</th>
+                             class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                             class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="otutTbody"></tbody>
@@ -498,7 +498,7 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                     row.dataset.status = status;
                     row.onclick = () => window.location = calendarUrl;
                     row.innerHTML = `
-                        <td class="px-4 py-3.5">
+                         class="px-5 py-3">
                             <div class="flex items-center gap-2.5">
                                 <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 uppercase shrink-0">${initials}</div>
                                 <div>
@@ -507,15 +507,15 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                                 </div>
                             </div>
                         </td>
-                        <td class="px-4 py-3.5 hidden md:table-cell"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">${emp.department || '—'}</span></td>
-                        <td class="px-4 py-3.5 text-center">
+                         class="px-5 py-3 hidden md:table-cell"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 border border-gray-200">${emp.department || '—'}</span></td>
+                         class="px-5 py-3 text-center">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusBg}">
                                 <span class="w-1.5 h-1.5 rounded-full ${statusDot}"></span>
                                 ${statusLabel}
                             </span>
                         </td>
-                        <td class="px-4 py-3.5 font-mono text-sm text-gray-700">${timeIn}</td>
-                        <td class="px-4 py-3.5 font-mono text-sm text-gray-700 hidden sm:table-cell">${timeOut}</td>
+                         class="px-5 py-3 font-mono text-sm text-gray-700">${timeIn}</td>
+                         class="px-5 py-3 font-mono text-sm text-gray-700 hidden sm:table-cell">${timeOut}</td>
                     `;
                     tbody.appendChild(row);
                 });
@@ -671,13 +671,13 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                     }
 
                     row.innerHTML =
-                        '<td class="px-4 py-3.5"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 uppercase shrink-0">' + initials + '</div><div class="font-semibold text-gray-900 text-sm">' + r.firstName + ' ' + r.lastName + '</div></div></td>' +
-                        '<td class="px-4 py-3.5 text-center"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ' + typeCls + '"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="' + (isOt ? 'M12 4v16m8-8H4' : 'M20 12H4') + '"/></svg>' + typeLabel + '</span></td>' +
-                        '<td class="px-4 py-3.5 text-sm text-gray-600">' + r.date + '</td>' +
-                        '<td class="px-4 py-3.5 text-center font-mono text-sm font-semibold text-gray-700">' + r.hours.toFixed(1) + 'h</td>' +
-                        '<td class="px-4 py-3.5 text-right font-mono text-sm font-bold text-emerald-600">₱' + r.amount.toFixed(2) + '</td>' +
-                        '<td class="px-4 py-3.5 text-center"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ' + statusCls + '"><span class="w-1.5 h-1.5 rounded-full ' + statusDot + '"></span>' + statusLabel + '</span></td>' +
-                        '<td class="px-4 py-3.5">' + actionsHtml + '</td>';
+                        ' class="px-5 py-3"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-500 uppercase shrink-0">' + initials + '</div><div class="font-semibold text-gray-900 text-sm">' + r.firstName + ' ' + r.lastName + '</div></div></td>' +
+                        ' class="px-5 py-3 text-center"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ' + typeCls + '"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="' + (isOt ? 'M12 4v16m8-8H4' : 'M20 12H4') + '"/></svg>' + typeLabel + '</span></td>' +
+                        ' class="px-5 py-3 text-sm text-gray-600">' + r.date + '</td>' +
+                        ' class="px-5 py-3 text-center font-mono text-sm font-semibold text-gray-700">' + r.hours.toFixed(1) + 'h</td>' +
+                        ' class="px-5 py-3 text-right font-mono text-sm font-bold text-emerald-600">₱' + r.amount.toFixed(2) + '</td>' +
+                        ' class="px-5 py-3 text-center"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ' + statusCls + '"><span class="w-1.5 h-1.5 rounded-full ' + statusDot + '"></span>' + statusLabel + '</span></td>' +
+                        ' class="px-5 py-3">' + actionsHtml + '</td>';
                     tbody.appendChild(row);
                 });
             }

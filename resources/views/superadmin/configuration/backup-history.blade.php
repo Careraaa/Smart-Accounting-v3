@@ -55,17 +55,17 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50/80 border-b border-gray-100">
-                        <th class="text-left px-5 py-3.5 text-[0.6rem] font-bold uppercase tracking-widest text-gray-400">File</th>
-                        <th class="text-left px-5 py-3.5 text-[0.6rem] font-bold uppercase tracking-widest text-gray-400">Size</th>
-                        <th class="text-left px-5 py-3.5 text-[0.6rem] font-bold uppercase tracking-widest text-gray-400">Created</th>
-                        <th class="text-right px-5 py-3.5 text-[0.6rem] font-bold uppercase tracking-widest text-gray-400">Actions</th>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                         class="text-left px-5 py-3 text-[0.6rem] font-bold uppercase tracking-widest text-gray-400">File</th>
+                         class="text-left px-5 py-3 text-[0.6rem] font-bold uppercase tracking-widest text-gray-400">Size</th>
+                         class="text-left px-5 py-3 text-[0.6rem] font-bold uppercase tracking-widest text-gray-400">Created</th>
+                         class="text-right px-5 py-3 text-[0.6rem] font-bold uppercase tracking-widest text-gray-400">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($backups as $i => $backup)
                         <tr class="row-in border-b border-gray-50 hover:bg-gray-50/60 transition-colors duration-150" style="--i: {{ $i }};">
-                            <td class="px-5 py-4">
+                             class="px-5 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-center text-gray-300 shrink-0">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
@@ -73,11 +73,11 @@
                                     <span class="font-mono text-sm font-semibold text-gray-900 truncate max-w-[280px]">{{ $backup['filename'] }}</span>
                                 </div>
                             </td>
-                            <td class="px-5 py-4 whitespace-nowrap">
+                             class="px-5 py-4 whitespace-nowrap">
                                 <span class="font-mono text-xs bg-gray-100/80 px-2.5 py-1.5 rounded-lg text-gray-600 font-medium">{{ number_format($backup['size'] / 1024 / 1024, 2) }} MB</span>
                             </td>
-                            <td class="px-5 py-4 font-mono text-sm text-gray-400 whitespace-nowrap">{{ date('M d, Y H:i:s', $backup['created_at']) }}</td>
-                            <td class="px-5 py-4">
+                             class="px-5 py-4 font-mono text-sm text-gray-400 whitespace-nowrap">{{ date('M d, Y H:i:s', $backup['created_at']) }}</td>
+                             class="px-5 py-4">
                                 <div class="flex items-center gap-2 justify-end">
                                     <a href="{{ route('configuration.backup-download', ['filename' => $backup['filename']]) }}" class="download-link inline-flex items-center gap-1.5 px-3 py-2 bg-white text-gray-600 border border-gray-200 rounded-lg text-xs font-semibold hover:border-gray-900 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200 no-underline active:scale-[0.95]">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>

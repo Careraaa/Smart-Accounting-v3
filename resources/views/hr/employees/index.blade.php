@@ -182,7 +182,7 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
                                 <a href="{{ route('employees.index', ['tab' => $tab, 'sort_by' => 'last_name', 'sort_order' => ($sortBy==='last_name'&&$sortOrder==='asc')?'desc':'asc']) }}"
                                    class="inline-flex items-center gap-1 hover:text-indigo-600 transition-colors">
                                     Employee
@@ -197,10 +197,10 @@
                                     @endif
                                 </a>
                             </th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
-                            <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
+                             class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
                         </tr>
                     </thead>
                     <tbody id="empTbody">
@@ -211,18 +211,18 @@
                                 data-dept="{{ strtolower($employee->department??'') }}"
                                 data-href="{{ route('employees.show', $employee) }}"
                                 onclick="if(!event.target.closest('a,button,form'))window.location=this.dataset.href">
-                                <td class="px-5 py-3.5">
+                                 class="px-5 py-3">
                                     <div>
                                         <div class="font-semibold text-gray-900">{{ $employee->last_name }}, {{ $employee->first_name }}</div>
                                         <div class="text-xs text-gray-400 mt-0.5">{{ $employee->position ?? 'none' }}</div>
                                     </div>
                                 </td>
-                                <td class="px-5 py-3.5 text-gray-500 text-sm hidden md:table-cell">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : 'none' }}</td>
-                                <td class="px-5 py-3.5">
+                                 class="px-5 py-3 text-gray-500 text-sm hidden md:table-cell">{{ $employee->gender ? ucwords(str_replace('_',' ',$employee->gender)) : 'none' }}</td>
+                                 class="px-5 py-3">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ $employee->department ?? 'none' }}</span>
                                 </td>
-                                <td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums hidden sm:table-cell">{{ $employee->phone ?? 'none' }}</td>
-                                <td class="px-5 py-3.5 text-center">
+                                 class="px-5 py-3 font-mono text-sm text-gray-600 tabular-nums hidden sm:table-cell">{{ $employee->phone ?? 'none' }}</td>
+                                 class="px-5 py-3 text-center">
                                     @if($employee->status === 'active')
                                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>Active
@@ -321,11 +321,11 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
-                            <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
+                             class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
                         </tr>
                     </thead>
                     <tbody id="empTbodyActive"></tbody>
@@ -401,11 +401,11 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
-                            <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
+                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
+                             class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
                         </tr>
                     </thead>
                     <tbody id="empTbodyInactive"></tbody>
@@ -571,11 +571,11 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                     tr.dataset.href = href;
                     tr.onclick = function(e) { if(!e.target.closest('a,button,form')) window.location = href; };
                     tr.innerHTML = [
-                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + r.lastName + ', ' + r.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (r.position||'none') + '</div></div></td>',
-                        '<td class="px-5 py-3.5 text-gray-500 text-sm">' + gender + '</td>',
-                        '<td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
-                        '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (r.phone||'none') + '</td>',
-                        '<td class="px-5 py-3.5 text-center">' + statusBadge + '</td>'
+                        ' class="px-5 py-3"><div><div class="font-semibold text-gray-900">' + r.lastName + ', ' + r.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (r.position||'none') + '</div></div></td>',
+                        ' class="px-5 py-3 text-gray-500 text-sm">' + gender + '</td>',
+                        ' class="px-5 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
+                        ' class="px-5 py-3 font-mono text-sm text-gray-600 tabular-nums">' + (r.phone||'none') + '</td>',
+                        ' class="px-5 py-3 text-center">' + statusBadge + '</td>'
                     ].join('');
                     tbody.appendChild(tr);
                 });
@@ -681,11 +681,11 @@ window.allEmployeesData = {!! json_encode($allEmployees->map(fn($e) => [
                     row.dataset.href   = href;
                     row.onclick = e => { if(!e.target.closest('a,button,form')) window.location = href; };
                     row.innerHTML = [
-                        '<td class="px-5 py-3.5"><div><div class="font-semibold text-gray-900">' + emp.lastName + ', ' + emp.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (emp.position||'none') + '</div></div></td>',
-                        '<td class="px-5 py-3.5 text-gray-500 text-sm">' + gender + '</td>',
-                        '<td class="px-5 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
-                        '<td class="px-5 py-3.5 font-mono text-sm text-gray-600 tabular-nums">' + (emp.phone||'none') + '</td>',
-                        '<td class="px-5 py-3.5 text-center">' + (STATUS_BADGE[emp.status]||STATUS_BADGE.inactive) + '</td>'
+                        ' class="px-5 py-3"><div><div class="font-semibold text-gray-900">' + emp.lastName + ', ' + emp.firstName + '</div><div class="text-xs text-gray-400 mt-0.5">' + (emp.position||'none') + '</div></div></td>',
+                        ' class="px-5 py-3 text-gray-500 text-sm">' + gender + '</td>',
+                        ' class="px-5 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">' + dept + '</span></td>',
+                        ' class="px-5 py-3 font-mono text-sm text-gray-600 tabular-nums">' + (emp.phone||'none') + '</td>',
+                        ' class="px-5 py-3 text-center">' + (STATUS_BADGE[emp.status]||STATUS_BADGE.inactive) + '</td>'
                     ].join('');
                     tbody.appendChild(row);
                 });

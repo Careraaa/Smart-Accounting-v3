@@ -31,13 +31,13 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50">
-                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Code</th>
-                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Account Name</th>
-                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Type</th>
-                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Total Debit</th>
-                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Total Credit</th>
-                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Balance</th>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Code</th>
+                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Account Name</th>
+                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Type</th>
+                         class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Total Debit</th>
+                         class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Total Credit</th>
+                         class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Balance</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -61,16 +61,16 @@
                             </tr>
                             @foreach($typeGroups[$type] as $account)
                                 <tr class="transition-colors hover:bg-gray-50/40">
-                                    <td class="px-4 py-3 text-xs font-bold font-mono text-gray-900">{{ $account->account_code }}</td>
-                                    <td class="px-4 py-3 text-xs font-semibold text-gray-900">{{ $account->account_name }}</td>
-                                    <td class="px-4 py-3 text-xs text-gray-500">{{ $account->account_type }}</td>
-                                    <td class="px-4 py-3 text-right text-xs font-semibold tabular-nums {{ $account->total_debit > 0 ? 'text-gray-900' : 'text-gray-300' }}">
+                                     class="px-5 py-3 text-xs font-bold font-mono text-gray-900">{{ $account->account_code }}</td>
+                                     class="px-5 py-3 text-xs font-semibold text-gray-900">{{ $account->account_name }}</td>
+                                     class="px-5 py-3 text-xs text-gray-500">{{ $account->account_type }}</td>
+                                     class="px-5 py-3 text-right text-xs font-semibold tabular-nums {{ $account->total_debit > 0 ? 'text-gray-900' : 'text-gray-300' }}">
                                         {{ $account->total_debit > 0 ? '₱' . number_format($account->total_debit, 2) : '—' }}
                                     </td>
-                                    <td class="px-4 py-3 text-right text-xs font-semibold tabular-nums {{ $account->total_credit > 0 ? 'text-gray-900' : 'text-gray-300' }}">
+                                     class="px-5 py-3 text-right text-xs font-semibold tabular-nums {{ $account->total_credit > 0 ? 'text-gray-900' : 'text-gray-300' }}">
                                         {{ $account->total_credit > 0 ? '₱' . number_format($account->total_credit, 2) : '—' }}
                                     </td>
-                                    <td class="px-4 py-3 text-right text-xs font-bold tabular-nums {{ $account->balance >= 0 ? 'text-gray-900' : 'text-red-600' }}">
+                                     class="px-5 py-3 text-right text-xs font-bold tabular-nums {{ $account->balance >= 0 ? 'text-gray-900' : 'text-red-600' }}">
                                         ₱{{ number_format($account->balance, 2) }}
                                     </td>
                                 </tr>
@@ -81,9 +81,9 @@
                 <tfoot>
                     <tr class="border-t-2 border-gray-200 bg-gray-50/80">
                         <td colspan="3" class="px-4 py-3 text-xs font-bold text-gray-900">TOTALS</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalDebit, 2) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalCredit, 2) }}</td>
-                        <td class="px-4 py-3 text-right">
+                         class="px-5 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalDebit, 2) }}</td>
+                         class="px-5 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalCredit, 2) }}</td>
+                         class="px-5 py-3 text-right">
                             @if(abs($totalDebit - $totalCredit) < 0.01)
                                 <span class="text-xs font-bold text-emerald-600 flex items-center justify-end gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>

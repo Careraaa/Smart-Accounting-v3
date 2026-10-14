@@ -280,11 +280,11 @@
                             <div class="border-t border-gray-50">
                                 <table class="w-full">
                                     <thead>
-                                        <tr class="border-b border-gray-50">
-                                            <th class="px-5 py-2.5 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-left">File</th>
-                                            <th class="px-5 py-2.5 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-left">Uploaded</th>
-                                            <th class="px-5 py-2.5 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-left">By</th>
-                                            <th class="px-5 py-2.5 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-left">Status</th>
+                                        <tr class="bg-gray-50 border-b border-gray-200">
+                                             class="px-5 py-3.5 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-left">File</th>
+                                             class="px-5 py-3.5 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-left">Uploaded</th>
+                                             class="px-5 py-3.5 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-left">By</th>
+                                             class="px-5 py-3.5 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-left">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -302,12 +302,12 @@
                                             };
                                             @endphp
                                             <tr class="hover:bg-gray-50/40 transition-colors">
-                                                <td class="px-5 py-2.5">
+                                                 class="px-5 py-3.5">
                                                     <a href="{{ $record->url }}" target="_blank" class="text-xs font-medium text-gray-700 hover:text-indigo-600 no-underline">{{ $record->original_name }}</a>
                                                 </td>
-                                                <td class="px-5 py-2.5 text-xs text-gray-400">{{ $record->created_at->format('M d, Y') }}</td>
-                                                <td class="px-5 py-2.5 text-xs text-gray-500">{{ ucfirst($record->uploaded_by_role) }}</td>
-                                                <td class="px-5 py-2.5">
+                                                 class="px-5 py-3.5 text-xs text-gray-400">{{ $record->created_at->format('M d, Y') }}</td>
+                                                 class="px-5 py-3.5 text-xs text-gray-500">{{ ucfirst($record->uploaded_by_role) }}</td>
+                                                 class="px-5 py-3.5">
                                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[0.55rem] font-semibold {{ $stBadge }}">{{ $stText }}</span>
                                                 </td>
                                             </tr>

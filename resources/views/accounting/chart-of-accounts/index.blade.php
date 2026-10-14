@@ -108,12 +108,12 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Code</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Name</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Type</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Description</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Actions</th>
+                         class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Code</th>
+                         class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Name</th>
+                         class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Type</th>
+                         class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Description</th>
+                         class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
+                         class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="coaGrid"></tbody>
@@ -197,12 +197,12 @@
             const tr = document.createElement('tr');
             tr.className = 'transition-colors hover:bg-gray-50/40';
             tr.innerHTML =
-                '<td class="px-4 py-3"><span class="text-xs font-bold text-gray-900 font-mono">'+a.account_code+'</span></td>' +
-                '<td class="px-4 py-3"><span class="text-xs font-semibold text-gray-900">'+a.account_name+'</span></td>' +
-                '<td class="px-4 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide border '+tc+'">'+a.account_type+'</span></td>' +
-                '<td class="px-4 py-3"><span class="text-xs text-gray-500 max-w-[200px] truncate block">'+(a.description||'—')+'</span></td>' +
-                '<td class="px-4 py-3">'+statusBadge+'</td>' +
-                '<td class="px-4 py-3 text-right"><div class="flex items-center justify-end gap-1">' +
+                ' class="px-5 py-3"><span class="text-xs font-bold text-gray-900 font-mono">'+a.account_code+'</span></td>' +
+                ' class="px-5 py-3"><span class="text-xs font-semibold text-gray-900">'+a.account_name+'</span></td>' +
+                ' class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide border '+tc+'">'+a.account_type+'</span></td>' +
+                ' class="px-5 py-3"><span class="text-xs text-gray-500 max-w-[200px] truncate block">'+(a.description||'—')+'</span></td>' +
+                ' class="px-5 py-3">'+statusBadge+'</td>' +
+                ' class="px-5 py-3 text-right"><div class="flex items-center justify-end gap-1">' +
                     '<a href="/accounting/chart-of-accounts/'+a.id+'" class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors no-underline" title="View"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>' +
                     '<a href="/accounting/chart-of-accounts/'+a.id+'/edit" class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors no-underline" title="Edit"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></a>' +
                     toggleBtn +

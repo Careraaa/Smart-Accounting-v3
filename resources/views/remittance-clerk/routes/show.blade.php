@@ -111,10 +111,10 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Plate Number</th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Operator</th>
-                        <th class="text-center px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                         class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Plate Number</th>
+                         class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Operator</th>
+                         class="text-center px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -125,9 +125,9 @@
                             $vvbadge = match($vvstatus) { 'active' => 'bg-emerald-50 text-emerald-600', 'under_maintenance' => 'bg-amber-50 text-amber-600', default => 'bg-gray-50 text-gray-500' };
                         @endphp
                         <tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location='{{ route('vehicles.show', $vehicle) }}'">
-                            <td class="px-5 py-3.5 text-xs font-semibold text-gray-700 tracking-wide">{{ $vehicle->plate_number }}</td>
-                            <td class="px-5 py-3.5 text-xs text-gray-600">{{ $vehicle->operator }}</td>
-                            <td class="px-5 py-3.5 text-center">
+                             class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wide">{{ $vehicle->plate_number }}</td>
+                             class="px-5 py-3 text-xs text-gray-600">{{ $vehicle->operator }}</td>
+                             class="px-5 py-3 text-center">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold {{ $vvbadge }}">{{ $vvlabel }}</span>
                             </td>
                         </tr>

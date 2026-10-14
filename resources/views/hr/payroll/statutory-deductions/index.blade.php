@@ -135,11 +135,11 @@
                 <div class="overflow-x-auto max-h-[560px] overflow-y-auto">
                     <table class="w-full text-sm">
                         <thead>
-                            <tr class="border-b border-gray-50 bg-gray-50/50">
-                                <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Type</th>
-                                <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Salary Range</th>
-                                <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee Share</th>
-                                <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employer Share</th>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                 class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Type</th>
+                                 class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Salary Range</th>
+                                 class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Employee Share</th>
+                                 class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Employer Share</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50" id="sdTbody">
@@ -168,13 +168,13 @@
                                 $isLastSss  = $gname === 'SSS' && $isMaxed;
                             @endphp
                             <tr data-type="{{ $gname }}" class="hover:bg-gray-50/40 transition-colors">
-                                <td class="px-4 py-3">
+                                 class="px-5 py-3">
                                     <div class="flex items-center gap-2.5">
                                         <span class="w-6 h-6 rounded-lg {{ $iconCls }} flex items-center justify-center text-[9px] font-extrabold shrink-0">{{ $abbr }}</span>
                                         <span class="text-xs font-semibold text-gray-900">{{ $gname }}</span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
+                                 class="px-5 py-3">
                                     <div class="flex items-center gap-1 font-mono tabular-nums text-xs text-gray-700">
                                         <span>₱{{ number_format($d->min_salary, 2) }}</span>
                                         <span class="text-gray-300">{{ $isMaxed ? '+' : '–' }}</span>
@@ -183,7 +183,7 @@
                                         @endunless
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
+                                 class="px-5 py-3">
                                     <div class="flex flex-col gap-1 items-start">
                                         @if($hasEeFixed)
                                             <span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱{{ number_format($d->employee_share, 2) }}</span>
@@ -202,7 +202,7 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
+                                 class="px-5 py-3">
                                     <div class="flex flex-col gap-1 items-start">
                                         @if($hasErFixed)
                                             <span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱{{ number_format($d->employer_share, 2) }}</span>
@@ -234,13 +234,13 @@
                             @foreach($wtRows as $wt)
                             @php $wtIsMaxed = $wt->max_salary >= 999999; @endphp
                             <tr data-type="Withholding Tax" class="hover:bg-gray-50/40 transition-colors">
-                                <td class="px-4 py-3">
+                                 class="px-5 py-3">
                                     <div class="flex items-center gap-2.5">
                                         <span class="w-6 h-6 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-[9px] font-extrabold shrink-0">WT</span>
                                         <span class="text-xs font-semibold text-gray-900">Withholding Tax</span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
+                                 class="px-5 py-3">
                                     <div class="flex items-center gap-1 font-mono tabular-nums text-xs text-gray-700">
                                         <span>₱{{ number_format($wt->min_salary, 2) }}</span>
                                         <span class="text-gray-300">{{ $wtIsMaxed ? '+' : '–' }}</span>
@@ -249,7 +249,7 @@
                                         @endunless
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
+                                 class="px-5 py-3">
                                     <div class="flex flex-col gap-1 items-start">
                                         @if($wt->employee_share)
                                             <span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱{{ number_format($wt->employee_share, 2) }}</span>
@@ -262,7 +262,7 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-4 py-3">
+                                 class="px-5 py-3">
                                     <span class="text-xs font-mono text-gray-300">—</span>
                                 </td>
                             </tr>

@@ -79,8 +79,8 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50">
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                         class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">
                             <a href="{{ route('vehicles.index', ['sort_by' => 'plate_number', 'sort_order' => ($sortBy === 'plate_number' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="text-inherit no-underline hover:text-gray-600 inline-flex items-center gap-1">
                                 Plate Number
                                 @if($sortBy === 'plate_number')
@@ -88,9 +88,9 @@
                                 @endif
                             </a>
                         </th>
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Route</th>
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Operator</th>
-                        <th class="text-center px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Status</th>
+                         class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Route</th>
+                         class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Operator</th>
+                         class="text-center px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="vehicleTbody">
@@ -104,10 +104,10 @@
                         data-name="{{ strtolower($vehicle->plate_number . ' ' . ($vehicle->route->route_name ?? '')) }}"
                         data-status="{{ $vstatus }}"
                         onclick="window.location='{{ route('vehicles.show', $vehicle) }}'">
-                        <td class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wide">{{ $vehicle->plate_number }}</td>
-                        <td class="px-4 py-3 text-xs text-gray-600">{{ $vehicle->route->route_name ?? '—' }}</td>
-                        <td class="px-4 py-3 text-xs text-gray-600">{{ $vehicle->operator }}</td>
-                        <td class="px-4 py-3 text-center">
+                         class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wide">{{ $vehicle->plate_number }}</td>
+                         class="px-5 py-3 text-xs text-gray-600">{{ $vehicle->route->route_name ?? '—' }}</td>
+                         class="px-5 py-3 text-xs text-gray-600">{{ $vehicle->operator }}</td>
+                         class="px-5 py-3 text-center">
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold {{ $badgeColor }}">{{ $vlabel }}</span>
                         </td>
                     </tr>

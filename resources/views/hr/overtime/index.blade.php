@@ -85,11 +85,11 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
-                        <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
-                        <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">OT This Month</th>
-                        <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">UT This Month</th>
-                        <th class="text-center px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Records</th>
+                         class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
+                         class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
+                         class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">OT This Month</th>
+                         class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">UT This Month</th>
+                         class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Records</th>
                     </tr>
                 </thead>
                 <tbody id="empTbody">
@@ -106,7 +106,7 @@
                             data-name="{{ strtolower($emp->first_name . ' ' . $emp->last_name) }}"
                             data-dept="{{ strtolower($emp->department ?? '') }}"
                             onclick="window.location='{{ route('overtime.employee.calendar', $emp->id) }}'">
-                            <td class="px-4 py-3.5">
+                             class="px-5 py-3">
                                 <div class="flex items-center gap-2.5">
                                     <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 uppercase shrink-0">{{ $initials }}</div>
                                     <div>
@@ -115,8 +115,8 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ $emp->department ?? '—' }}</span></td>
-                            <td class="text-center px-4 py-3.5">
+                             class="px-5 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ $emp->department ?? '—' }}</span></td>
+                             class="text-center px-5 py-3">
                                 @if($otHrs > 0)
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold font-mono tabular-nums bg-sky-50 text-sky-700 border border-sky-200">
                                         <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -126,7 +126,7 @@
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-400 border border-gray-200">—</span>
                                 @endif
                             </td>
-                            <td class="text-center px-4 py-3.5">
+                             class="text-center px-5 py-3">
                                 @if($utHrs > 0)
                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold font-mono tabular-nums bg-amber-50 text-amber-700 border border-amber-200">
                                         <svg class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
@@ -136,7 +136,7 @@
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-400 border border-gray-200">—</span>
                                 @endif
                             </td>
-                            <td class="text-center px-4 py-3.5 font-mono tabular-nums text-sm font-bold text-gray-700">
+                             class="text-center px-5 py-3 font-mono tabular-nums text-sm font-bold text-gray-700">
                                 {{ $recCount > 0 ? $recCount : '—' }}
                             </td>
                         </tr>
@@ -164,7 +164,7 @@
     </div>
 
     {{-- Pagination --}}
-    <div class="flex items-center justify-between px-5 py-3 mt-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl flex-wrap gap-3 table-wrap">
+    <div class="flex items-center justify-between px-5 py-3 mt-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl flex-wrap gap-3">
         <div class="text-xs text-gray-400" id="otPaginationInfo">
             Showing <strong class="text-gray-700">1</strong>–<strong class="text-gray-700">10</strong> of <strong class="text-gray-700">0</strong> employees
         </div>
@@ -246,7 +246,7 @@ window.monthlySummary = {!! json_encode($monthlySummary->map(fn($s) => [
                 }
 
                 row.innerHTML = `
-                    <td class="px-4 py-3.5">
+                     class="px-5 py-3">
                         <div class="flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-500 uppercase shrink-0">${initials}</div>
                             <div>
@@ -255,10 +255,10 @@ window.monthlySummary = {!! json_encode($monthlySummary->map(fn($s) => [
                             </div>
                         </div>
                     </td>
-                    <td class="px-4 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">${emp.department || '—'}</span></td>
-                    <td class="text-center px-4 py-3.5">${otPill}</td>
-                    <td class="text-center px-4 py-3.5">${utPill}</td>
-                    <td class="text-center px-4 py-3.5 font-mono tabular-nums text-sm font-bold text-gray-700">${recCount > 0 ? recCount : '—'}</td>
+                     class="px-5 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">${emp.department || '—'}</span></td>
+                     class="text-center px-5 py-3">${otPill}</td>
+                     class="text-center px-5 py-3">${utPill}</td>
+                     class="text-center px-5 py-3 font-mono tabular-nums text-sm font-bold text-gray-700">${recCount > 0 ? recCount : '—'}</td>
                 `;
                 tbody.appendChild(row);
             });

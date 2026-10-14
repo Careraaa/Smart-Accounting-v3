@@ -102,32 +102,32 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="border-b border-gray-100">
-                            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Leave Type</th>
-                            <th class="text-center px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total Days</th>
-                            <th class="text-center px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Used</th>
-                            <th class="text-center px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Remaining</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                             class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Leave Type</th>
+                             class="text-center px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total Days</th>
+                             class="text-center px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Used</th>
+                             class="text-center px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Remaining</th>
+                             class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($balances as $balance)
                             <tr class="border-b border-gray-50 hover:bg-gray-50/50">
-                                <td class="px-5 py-3">
+                                 class="px-5 py-3">
                                     <div class="font-bold text-gray-900 text-sm">{{ $balance->leaveType?->name ?? 'N/A' }}</div>
                                 </td>
-                                <td class="px-5 py-3 text-center">
+                                 class="px-5 py-3 text-center">
                                     <span class="font-bold text-gray-900 font-mono">{{ $balance->total_days }}</span>
                                 </td>
-                                <td class="px-5 py-3 text-center">
+                                 class="px-5 py-3 text-center">
                                     <span class="font-bold text-gray-600 font-mono">{{ $balance->used_days }}</span>
                                 </td>
-                                <td class="px-5 py-3 text-center">
+                                 class="px-5 py-3 text-center">
                                     <span class="ll-balance-pop inline-flex items-center justify-center font-bold font-mono text-sm {{ $balance->remaining_days > 0 ? 'text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg' : 'text-rose-700 bg-rose-50 px-2 py-0.5 rounded-lg' }}">
                                         {{ $balance->remaining_days }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-3">
+                                 class="px-5 py-3">
                                     @if($balance->remaining_days > 0)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">Available</span>
                                     @else
@@ -160,12 +160,12 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="border-b border-gray-100">
-                            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Leave Type</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Duration</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                             class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Leave Type</th>
+                             class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Duration</th>
+                             class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>
                             @if($leaves->where('status', 'pending')->count())
-                            <th class="text-right px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Actions</th>
+                             class="text-right px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Actions</th>
                             @endif
                         </tr>
                     </thead>
@@ -173,15 +173,15 @@
                         @forelse($leaves as $leave)
                             @php $pill = in_array($leave->status, ['pending','approved','rejected'], true) ? $leave->status : 'neutral'; @endphp
                             <tr class="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer" onclick="window.location='{{ route('employee.leaves.show', $leave) }}'">
-                                <td class="px-5 py-3">
+                                 class="px-5 py-3">
                                     <div class="font-bold text-gray-900 text-sm">{{ $leave->leaveType?->name ?? 'N/A' }}</div>
                                     <div class="text-xs text-gray-400">Submitted {{ $leave->created_at?->diffForHumans() ?? '—' }}</div>
                                 </td>
-                                <td class="px-5 py-3">
+                                 class="px-5 py-3">
                                     <div class="text-xs text-gray-500">{{ $leave->start_date->format('M d, Y') }} – {{ $leave->end_date->format('M d, Y') }}</div>
                                     <div class="font-bold text-gray-900 font-mono text-sm">{{ $leave->days }} day{{ $leave->days != 1 ? 's' : '' }}</div>
                                 </td>
-                                <td class="px-5 py-3">
+                                 class="px-5 py-3">
                                     @php
                                         $pillStyles = [
                                             'pending' => 'bg-amber-100 text-amber-700',
@@ -193,7 +193,7 @@
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $pillStyles[$pill] }}">{{ ucfirst($leave->status) }}</span>
                                 </td>
                                 @if($leaves->where('status', 'pending')->count())
-                                <td class="px-5 py-3 text-right" onclick="event.stopPropagation()">
+                                 class="px-5 py-3 text-right" onclick="event.stopPropagation()">
                                     @if($leave->status === 'pending')
                                         <div class="flex items-center justify-end gap-1.5">
                                             <a href="{{ route('employee.leaves.edit', $leave) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 bg-gray-50 hover:bg-gray-100 hover:text-gray-900 border border-gray-200 transition-all">

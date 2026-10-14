@@ -258,12 +258,12 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Type</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Hours</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Reason</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Amount</th>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                         class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>
+                         class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Type</th>
+                         class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Hours</th>
+                         class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Reason</th>
+                         class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Amount</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -273,16 +273,16 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
                         $amount = $record->amount !== null ? abs($record->amount) : round($payroll->hourly_rate * $record->hours, 2);
                     @endphp
                     <tr class="hover:bg-gray-50/40 transition-colors">
-                        <td class="px-5 py-3 font-mono text-xs text-gray-500">{{ $record->date->format('M d, Y') }}</td>
-                        <td class="px-5 py-3">
+                         class="px-5 py-3 font-mono text-xs text-gray-500">{{ $record->date->format('M d, Y') }}</td>
+                         class="px-5 py-3">
                             <span class="inline-flex items-center gap-1 text-[0.5rem] font-semibold uppercase tracking-wide px-2 py-1 rounded-full {{ $isOT ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500' }}">
                                 <span class="w-1.5 h-1.5 rounded-full {{ $isOT ? 'bg-emerald-400' : 'bg-red-400' }}"></span>
                                 {{ ucfirst($record->type) }}
                             </span>
                         </td>
-                        <td class="px-5 py-3 font-mono text-xs text-gray-700">{{ number_format($record->hours, 2) }} hrs</td>
-                        <td class="px-5 py-3 text-xs text-gray-400">{{ $record->reason ?? '—' }}</td>
-                        <td class="px-5 py-3 text-right font-mono text-xs font-semibold {{ $isOT ? 'text-emerald-600' : 'text-red-500' }}">
+                         class="px-5 py-3 font-mono text-xs text-gray-700">{{ number_format($record->hours, 2) }} hrs</td>
+                         class="px-5 py-3 text-xs text-gray-400">{{ $record->reason ?? '—' }}</td>
+                         class="px-5 py-3 text-right font-mono text-xs font-semibold {{ $isOT ? 'text-emerald-600' : 'text-red-500' }}">
                             {{ $isOT ? '+' : '−' }}₱{{ number_format($amount, 2) }}
                         </td>
                     </tr>
