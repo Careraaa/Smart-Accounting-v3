@@ -202,75 +202,56 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
             {{-- Attendance Trend (SVG line chart) --}}
             @php
-            $chartH = 160;
-            $chartW = 600;
-            $padL = 0; $padR = 0; $padT = 8; $padB = 24;
-            $plotW = $chartW - $padL - $padR;
-            $plotH = $chartH - $padT - $padB;
             $cnt = count($attendanceTrend);
-            $step = $cnt > 1 ? $plotW / ($cnt - 1) : 0;
-            $points = [];
+            $atH = 132;
+            $atPresentH = [];
+            $atLateH = [];
             foreach ($attendanceTrend as $i => $d) {
-                $x = $i * $step;
-                $y = $plotH - ($maxV > 0 ? ($d['present'] / $maxV) * $plotH : 0);
-                $points[] = round($x + $padL, 1) . ',' . round($y + $padT, 1);
+                $atPresentH[$i] = $maxV > 0 ? round(($d['present'] / $maxV) * $atH) : 0;
+                $atLateH[$i] = $maxV > 0 ? round(($d['late'] / $maxV) * $atH) : 0;
             }
             @endphp
             <div class="sad-fade-up kpi-card overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="text-[11px] font-semibold text-gray-900">Attendance Trend</span>
-                        <span class="text-[9px] text-gray-400 font-medium">7 days</span>
+                <div class="px-4 pt-4 pb-3 flex items-center justify-between">
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-[13px] font-semibold text-gray-900">Attendance Trend</span>
+                        <span class="text-[11px] text-gray-400">last 7 days</span>
                     </div>
-                    <div class="flex items-center gap-3 text-[10px]">
-                        <span class="flex items-center gap-1 text-gray-400"><span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> Present</span>
-                        <span class="flex items-center gap-1 text-gray-400"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> Late</span>
+                    <div class="flex items-center gap-3 text-[11px] text-gray-400">
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-indigo-500 inline-block"></span> Present</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-amber-400 inline-block"></span> Late</span>
                     </div>
                 </div>
-                <div class="p-4">
+                <div class="px-4 pb-4">
                     @if($cnt > 0)
-                    <svg viewBox="0 0 {{ $chartW }} {{ $chartH }}" class="w-full h-auto" style="max-height:180px">
-                        @for ($g = 0; $g <= 4; $g++)
-                        @php $gy = $padT + ($plotH / 4) * $g; @endphp
-                        <line x1="{{ $padL }}" y1="{{ $gy }}" x2="{{ $chartW - $padR }}" y2="{{ $gy }}" stroke="#f0f0f0" stroke-width="1"/>
-                        @endfor
-                        <path d="M{{ $points[0] }} L{{ implode(' L', $points) }} L{{ $padL + ($cnt - 1) * $step }},{{ $padT + $plotH }} L{{ $padL }},{{ $padT + $plotH }} Z"
-                              fill="url(#sadAtGrad)" opacity="0.15"/>
-                        @php
-                        $latePoints = [];
-                        foreach ($attendanceTrend as $i => $d) {
-                            $x = $i * $step;
-                            $y = $plotH - ($maxV > 0 ? ($d['late'] / $maxV) * $plotH : 0);
-                            $latePoints[] = round($x + $padL, 1) . ',' . round($y + $padT, 1);
-                        }
-                        @endphp
-                        <polyline points="{{ implode(' ', $latePoints) }}" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 3" class="sad-chart-line-delay"/>
-                        <polyline points="{{ implode(' ', $points) }}" fill="none" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sad-chart-line"/>
-                        @foreach ($attendanceTrend as $i => $d)
-                        @php $dx = $i * $step + $padL; $dy = $plotH - ($maxV > 0 ? ($d['present'] / $maxV) * $plotH : 0) + $padT; @endphp
-                        <circle cx="{{ $dx }}" cy="{{ $dy }}" r="3.5" fill="#4f46e5" stroke="white" stroke-width="2" class="sad-chart-dot"
-                                style="animation-delay:{{ 0.1 + $i * 0.05 }}s"/>
+                    <div class="at-plot">
+                        <div class="at-grid" style="bottom:0"></div>
+                        <div class="at-grid" style="bottom:50%"></div>
+                        <div class="at-grid at-grid-top" style="bottom:100%"></div>
+                        <span class="at-max">{{ $maxV }}</span>
+                        <div class="at-cols">
+                            @foreach ($attendanceTrend as $i => $d)
+                            <div class="at-col" title="{{ \Carbon\Carbon::parse($d['date_iso'])->format('D, M j') }} — {{ $d['present'] }} present, {{ $d['late'] }} late">
+                                <div class="at-bar" style="height:{{ $atPresentH[$i] + $atLateH[$i] }}px;animation-delay:{{ 0.05 + $i * 0.04 }}s">
+                                    <div class="at-seg at-late" style="height:{{ $atLateH[$i] }}px"></div>
+                                    <div class="at-seg at-present" style="height:{{ $atPresentH[$i] }}px"></div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="at-days">
+                        @foreach ($attendanceTrend as $d)
+                        <span>{{ \Carbon\Carbon::parse($d['date_iso'])->format('D') }}</span>
                         @endforeach
-                        @foreach ($attendanceTrend as $i => $d)
-                        @php $lx = $i * $step + $padL; @endphp
-                        <text x="{{ $lx }}" y="{{ $chartH - 4 }}" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="monospace">{{ \Carbon\Carbon::parse($d['date_iso'])->format('D') }}</text>
-                        @endforeach
-                        <defs>
-                            <linearGradient id="sadAtGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#4f46e5"/>
-                                <stop offset="100%" stop-color="#4f46e5" stop-opacity="0"/>
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    <div class="flex items-center justify-between mt-2 text-[10px] text-gray-400">
-                        <span class="flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>
-                            Present trend
-                        </span>
+                    </div>
+                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-[11px] text-gray-400">
+                        <span>Daily headcount, 7-day window</span>
                         <span>
-                            Today: <strong class="text-gray-700 font-mono">{{ $td['present'] }} present</strong>
-                            <span class="mx-1">·</span>
-                            <strong class="text-emerald-600 font-mono">{{ number_format($attendanceRate, 1) }}%</strong>
+                            Today:
+                            <strong class="text-gray-700 font-medium tabular-nums">{{ $td['present'] }}</strong> present
+                            <span class="mx-1 text-gray-300">·</span>
+                            <strong class="text-emerald-600 font-medium tabular-nums">{{ number_format($attendanceRate, 1) }}%</strong>
                         </span>
                     </div>
                     @else

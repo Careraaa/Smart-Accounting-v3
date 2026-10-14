@@ -54,3 +54,112 @@
     background-color: #1c1c1c !important;
   }
 }
+
+/* Attendance trend — stacked bar chart (HR + Super Admin dashboards) */
+.at-plot {
+  position: relative;
+  height: 132px;
+}
+
+.at-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #ececef;
+}
+
+.at-grid-top {
+  background-color: #e0e0e4;
+}
+
+.at-max {
+  position: absolute;
+  top: -6px;
+  right: 0;
+  font-size: 10px;
+  line-height: 1;
+  color: #a1a1aa;
+  font-variant-numeric: tabular-nums;
+}
+
+.at-cols {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.at-col {
+  flex: 1 1 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 0;
+}
+
+.at-bar {
+  width: 100%;
+  max-width: 30px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px 5px 3px 3px;
+  overflow: hidden;
+  transform-origin: bottom;
+  animation: atGrow 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.at-seg {
+  width: 100%;
+}
+
+.at-present {
+  background-color: #6366f1;
+}
+
+.at-late {
+  background-color: #fbbf24;
+}
+
+.at-days {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.at-days span {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #a1a1aa;
+}
+
+html.dark .at-grid {
+  background-color: #232327;
+}
+
+html.dark .at-grid-top {
+  background-color: #2e2e34;
+}
+
+html.dark .at-max,
+html.dark .at-days span {
+  color: #6b6b76;
+}
+
+html.dark .at-present {
+  background-color: #4f46e5;
+}
+
+html.dark .at-late {
+  background-color: #b45309;
+}
+
+@keyframes atGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
