@@ -337,4 +337,16 @@ html.dark .at-late {
    bg-gray-100 are left alone. */
 html:not(.dark) main.bg-gray-100 { background-color: #eaeaea; }
 html:not(.dark) .main-content { background-color: #eaeaea; }
-html:not(.dark) .table-wrap { background-color: #eaeaea; }
+
+/* Tables — light mode.
+   Tables live in a white `.table-wrap`, but the row shading shipped at
+   gray-50 (#f9fafb) on white and dividers at gray-100 (#f3f4f6) on white,
+   so the header band and every row line were effectively invisible.
+   Matched to the card palette: #d8d8d8 border, #f4f4f4 header, #e8e8e8 lines. */
+html:not(.dark) .table-wrap { border-color: #d8d8d8; }
+html:not(.dark) table thead > tr { background-color: #f4f4f4; }
+html:not(.dark) thead { background-color: #f4f4f4; }
+html:not(.dark) table tbody > tr > td,
+html:not(.dark) table tbody > tr > th,
+html:not(.dark) table tfoot > tr > td,
+html:not(.dark) table tfoot > tr > th { border-color: #e8e8e8; }
