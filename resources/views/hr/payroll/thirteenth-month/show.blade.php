@@ -106,25 +106,25 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
-                         class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Period</th>
-                         class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Basic Salary</th>
-                         class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Notes</th>
+                    <tr class="bg-gray-50/50">
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Period</th>
+                        <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Basic Salary</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Notes</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @foreach($breakdown['payroll_lines'] as $line)
                     <tr class="hover:bg-gray-50/40">
-                         class="px-5 py-3 text-sm text-gray-900">{{ $line['period_start'] }} &mdash; {{ $line['period_end'] }}</td>
-                         class="px-5 py-3 text-right text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($line['basic_salary'], 2) }}</td>
-                         class="px-5 py-3 text-xs text-gray-400">Basic salary only</td>
+                        <td class="px-5 py-3 text-sm text-gray-900">{{ $line['period_start'] }} &mdash; {{ $line['period_end'] }}</td>
+                        <td class="px-5 py-3 text-right text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($line['basic_salary'], 2) }}</td>
+                        <td class="px-5 py-3 text-xs text-gray-400">Basic salary only</td>
                     </tr>
                     @endforeach
                 </tbody>
                 <tfoot class="bg-gray-50/50">
                     <tr>
-                         class="px-5 py-3 text-sm font-bold text-gray-900">Total</td>
-                         class="px-5 py-3 text-right text-sm font-bold text-gray-900 tabular-nums">₱{{ number_format($breakdown['total_basic_salary'], 2) }}</td>
+                        <td class="px-5 py-3 text-sm font-bold text-gray-900">Total</td>
+                        <td class="px-5 py-3 text-right text-sm font-bold text-gray-900 tabular-nums">₱{{ number_format($breakdown['total_basic_salary'], 2) }}</td>
                         <td></td>
                     </tr>
                 </tfoot>

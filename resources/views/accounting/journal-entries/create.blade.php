@@ -87,11 +87,11 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm" id="linesTable">
                         <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200">
-                                 class="text-left text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3 w-[35%]">Account</th>
-                                 class="text-left text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3 w-[25%]">Description</th>
-                                 class="text-right text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3 w-[17%]">Debit (₱)</th>
-                                 class="text-right text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3 w-[17%]">Credit (₱)</th>
+                            <tr class="border-b border-gray-100">
+                                <th class="text-left text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-2 py-2 w-[35%]">Account</th>
+                                <th class="text-left text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-2 py-2 w-[25%]">Description</th>
+                                <th class="text-right text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-2 py-2 w-[17%]">Debit (₱)</th>
+                                <th class="text-right text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-2 py-2 w-[17%]">Credit (₱)</th>
                                 <th class="w-[6%]"></th>
                             </tr>
                         </thead>
@@ -152,28 +152,28 @@ function addLine() {
     const optionsHtml = accounts.map(a => `<option value="${a.id}">${a.code} – ${a.name}</option>`).join('');
 
     tr.innerHTML = `
-         class="px-5 py-1.5">
+        <td class="px-2 py-1.5">
             <select name="lines[${lineIndex}][account_id]" required
                     class="w-full text-xs border border-gray-200 rounded-lg px-2 py-2 outline-none transition-all focus:border-gray-400 bg-white">
                 <option value="">Select…</option>
                 ${optionsHtml}
             </select>
         </td>
-         class="px-5 py-1.5">
+        <td class="px-2 py-1.5">
             <input type="text" name="lines[${lineIndex}][description]" placeholder="Line description"
                    class="w-full text-xs border border-gray-200 rounded-lg px-2 py-2 outline-none transition-all focus:border-gray-400 bg-white placeholder:text-gray-300">
         </td>
-         class="px-5 py-1.5">
+        <td class="px-2 py-1.5">
             <input type="text" name="lines[${lineIndex}][debit]" value="0" data-type="debit"
                    class="line-amount w-full text-xs border border-gray-200 rounded-lg px-2 py-2 outline-none transition-all focus:border-gray-400 bg-white text-right tabular-nums"
                    onfocus="this.select()">
         </td>
-         class="px-5 py-1.5">
+        <td class="px-2 py-1.5">
             <input type="text" name="lines[${lineIndex}][credit]" value="0" data-type="credit"
                    class="line-amount w-full text-xs border border-gray-200 rounded-lg px-2 py-2 outline-none transition-all focus:border-gray-400 bg-white text-right tabular-nums"
                    onfocus="this.select()">
         </td>
-         class="px-5 py-1.5 text-center">
+        <td class="px-2 py-1.5 text-center">
             <button type="button" onclick="removeLine(this)"
                     class="inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer border-0 bg-transparent">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>

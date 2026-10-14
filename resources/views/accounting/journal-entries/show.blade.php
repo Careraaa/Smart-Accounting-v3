@@ -76,25 +76,25 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Account</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Description</th>
-                         class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Debit</th>
-                         class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Credit</th>
+                    <tr class="border-b border-gray-50">
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Account</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Description</th>
+                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Debit</th>
+                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Credit</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @foreach($journalEntry->lines as $line)
                         <tr class="transition-colors hover:bg-gray-50/40">
-                             class="px-5 py-3">
+                            <td class="px-4 py-3">
                                 <span class="text-xs font-bold text-gray-900 font-mono">{{ $line->account->account_code }}</span>
                                 <span class="text-xs text-gray-500 ml-1.5">{{ $line->account->account_name }}</span>
                             </td>
-                             class="px-5 py-3 text-xs text-gray-500">{{ $line->description ?? '—' }}</td>
-                             class="px-5 py-3 text-right text-xs font-semibold {{ $line->debit > 0 ? 'text-gray-900' : 'text-gray-300' }} tabular-nums">
+                            <td class="px-4 py-3 text-xs text-gray-500">{{ $line->description ?? '—' }}</td>
+                            <td class="px-4 py-3 text-right text-xs font-semibold {{ $line->debit > 0 ? 'text-gray-900' : 'text-gray-300' }} tabular-nums">
                                 {{ $line->debit > 0 ? '₱' . number_format($line->debit, 2) : '—' }}
                             </td>
-                             class="px-5 py-3 text-right text-xs font-semibold {{ $line->credit > 0 ? 'text-gray-900' : 'text-gray-300' }} tabular-nums">
+                            <td class="px-4 py-3 text-right text-xs font-semibold {{ $line->credit > 0 ? 'text-gray-900' : 'text-gray-300' }} tabular-nums">
                                 {{ $line->credit > 0 ? '₱' . number_format($line->credit, 2) : '—' }}
                             </td>
                         </tr>
@@ -103,8 +103,8 @@
                 <tfoot>
                     <tr class="border-t border-gray-100 bg-gray-50/50">
                         <td colspan="2" class="px-4 py-3 text-xs font-bold text-gray-900">Totals</td>
-                         class="px-5 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($journalEntry->total_debit, 2) }}</td>
-                         class="px-5 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($journalEntry->total_credit, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($journalEntry->total_debit, 2) }}</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($journalEntry->total_credit, 2) }}</td>
                     </tr>
                 </tfoot>
             </table>

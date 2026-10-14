@@ -50,13 +50,6 @@
 .att-table tbody tr:last-child { border-bottom:none; }
 .att-table tbody tr:hover { background:#fdf4f4; }
 .att-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
-/* Dark mode — these selectors outrank the global html.dark thead rule,
-   so the header band stayed light-on-dark. */
-html.dark .att-table thead tr { background:#171717;border-bottom-color:#2a2a2a; }
-html.dark .att-table thead th { color:#8a8a8a; }
-html.dark .att-table tbody tr { border-bottom-color:#2a2a2a; }
-html.dark .att-table tbody td { color:#d4d4d4; }
-html.dark .att-table tbody tr:hover { background:rgba(255,255,255,.04); }
 
 /* Employee cell */
 .att-emp-cell   { display:flex;align-items:center;gap:10px; }

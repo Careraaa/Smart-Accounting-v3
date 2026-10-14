@@ -110,12 +110,12 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
-                         class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee</th>
-                         class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Basic Salary</th>
-                         class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Months Worked</th>
-                         class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">13th Month Pay</th>
-                         class="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <tr class="bg-gray-50/50">
+                        <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee</th>
+                        <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Basic Salary</th>
+                        <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Months Worked</th>
+                        <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">13th Month Pay</th>
+                        <th class="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -128,7 +128,7 @@
                         };
                     @endphp
                     <tr class="clickable-row hover:bg-gray-50/40 transition-colors" onclick="window.location='{{ route('payroll.thirteenth-month-pay.show', $record) }}'">
-                         class="px-5 py-3">
+                        <td class="px-5 py-3">
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-[11px] font-bold text-gray-600 uppercase shrink-0">
                                     {{ substr($record->user?->first_name ?? '?', 0, 1) }}{{ substr($record->user?->last_name ?? '?', 0, 1) }}
@@ -139,10 +139,10 @@
                                 </div>
                             </div>
                         </td>
-                         class="px-5 py-3 text-right text-sm text-gray-900 tabular-nums">₱{{ number_format($record->total_basic_salary_earned, 2) }}</td>
-                         class="px-5 py-3 text-right text-sm text-gray-900 tabular-nums">{{ $record->months_worked }}</td>
-                         class="px-5 py-3 text-right text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($record->thirteenth_month_pay, 2) }}</td>
-                         class="px-5 py-3 text-center">
+                        <td class="px-5 py-3 text-right text-sm text-gray-900 tabular-nums">₱{{ number_format($record->total_basic_salary_earned, 2) }}</td>
+                        <td class="px-5 py-3 text-right text-sm text-gray-900 tabular-nums">{{ $record->months_worked }}</td>
+                        <td class="px-5 py-3 text-right text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($record->thirteenth_month_pay, 2) }}</td>
+                        <td class="px-5 py-3 text-center">
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide {{ $ps['text'] }} bg-opacity-10 {{ str_replace('text-', 'bg-', $ps['text']) }}/10">
                                 <span class="w-1.5 h-1.5 rounded-full {{ $ps['dot'] }}"></span>
                                 {{ $ps['label'] }}

@@ -105,14 +105,14 @@ $tab            = request()->query('tab', 'pending');
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
-                <tr class="bg-gray-50 border-b border-gray-200">
-                     class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>
-                     class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Route</th>
-                     class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Vehicle</th>
-                     class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Collection</th>
-                     class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Expenses</th>
-                     class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Net</th>
-                     class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
+                <tr class="border-b border-gray-50">
+                    <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>
+                    <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Route</th>
+                    <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Vehicle</th>
+                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-3 py-3">Collection</th>
+                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-3 py-3">Expenses</th>
+                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-3 py-3">Net</th>
+                    <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-3 py-3">Status</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50" id="remittanceGrid"></tbody>
@@ -193,18 +193,18 @@ window.remittanceData = {!! json_encode(
                           : 'bg-red-50 text-red-700 border-red-200';
                 const stDot = r.status === 'pending' ? 'bg-amber-500' : r.status === 'approved' ? 'bg-emerald-500' : 'bg-red-500';
                 tr.innerHTML = `
-                     class="px-5 py-3">
+                    <td class="px-5 py-3.5">
                         <p class="text-xs font-semibold text-gray-900">${r.date}</p>
                         ${r.driver ? '<p class="text-[0.55rem] text-gray-400 mt-0.5">'+r.driver+'</p>' : ''}
                     </td>
-                     class="px-5 py-3">
+                    <td class="px-4 py-3.5">
                         <p class="text-xs text-gray-600">${r.route}</p>
                     </td>
-                     class="px-5 py-3 text-xs text-gray-500">${r.vehicle}</td>
-                     class="px-5 py-3 text-right text-xs tabular-nums text-gray-600">₱${r.collection.toLocaleString('en-US')}</td>
-                     class="px-5 py-3 text-right text-xs tabular-nums text-amber-600">₱${r.expenses.toLocaleString('en-US')}</td>
-                     class="px-5 py-3 text-right text-xs font-bold tabular-nums text-gray-900">₱${r.net.toLocaleString('en-US')}</td>
-                     class="px-5 py-3 text-center">
+                    <td class="px-4 py-3.5 text-xs text-gray-500">${r.vehicle}</td>
+                    <td class="px-3 py-3.5 text-right text-xs tabular-nums text-gray-600">₱${r.collection.toLocaleString('en-US')}</td>
+                    <td class="px-3 py-3.5 text-right text-xs tabular-nums text-amber-600">₱${r.expenses.toLocaleString('en-US')}</td>
+                    <td class="px-3 py-3.5 text-right text-xs font-bold tabular-nums text-gray-900">₱${r.net.toLocaleString('en-US')}</td>
+                    <td class="px-3 py-3.5 text-center">
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.5rem] font-semibold border ${stCls}">
                             <span class="w-1.5 h-1.5 rounded-full ${stDot}"></span>
                             ${r.status.charAt(0).toUpperCase()+r.status.slice(1)}

@@ -140,13 +140,13 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200">
-                             class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Date</th>
-                             class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Type</th>
-                             class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Hours</th>
-                             class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Reason</th>
-                             class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
-                             class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Actions</th>
+                        <tr class="bg-gray-50 border-b border-gray-100">
+                            <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Date</th>
+                            <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Type</th>
+                            <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Hours</th>
+                            <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Reason</th>
+                            <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
+                            <th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
@@ -164,27 +164,27 @@
                                     : 'bg-yellow-50 text-yellow-700 border border-yellow-200';
                             @endphp
                             <tr class="hover:bg-gray-50/70 transition-colors">
-                                 class="px-5 py-3">
+                                <td class="px-5 py-3.5">
                                     <div class="font-semibold text-gray-900 text-sm">{{ $request->date->format('M d, Y') }}</div>
                                     <div class="text-xs text-gray-400 mt-0.5">{{ $request->date->format('l') }}</div>
                                 </td>
-                                 class="px-5 py-3">
+                                <td class="px-5 py-3.5">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $typeClasses }}">
                                         {{ ucfirst($request->type) }}
                                     </span>
                                 </td>
-                                 class="px-5 py-3">
+                                <td class="px-5 py-3.5">
                                     <span class="font-mono font-bold text-gray-900">{{ number_format($request->hours, 2) }}h</span>
                                 </td>
-                                 class="px-5 py-3">
+                                <td class="px-5 py-3.5">
                                     <span class="text-gray-500 text-sm">{{ Str::limit($request->reason, 60) }}</span>
                                 </td>
-                                 class="px-5 py-3">
+                                <td class="px-5 py-3.5">
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $pillClasses }}">
                                         {{ ucfirst($request->status) }}
                                     </span>
                                 </td>
-                                 class="px-5 py-3">
+                                <td class="px-5 py-3.5">
                                     <div class="flex items-center gap-1.5 justify-end">
                                         <a href="{{ route('employee.overtime-undertime.show', $request->id) }}"
                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all">

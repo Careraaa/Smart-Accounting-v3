@@ -77,13 +77,6 @@
 .otp-table tbody tr:last-child { border-bottom:none; }
 .otp-table tbody tr:hover { background:#fdf4f4; }
 .otp-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
-/* Dark mode — these selectors outrank the global html.dark thead rule,
-   so the header band stayed light-on-dark. */
-html.dark .otp-table thead tr { background:#171717;border-bottom-color:#2a2a2a; }
-html.dark .otp-table thead th { color:#8a8a8a; }
-html.dark .otp-table tbody tr { border-bottom-color:#2a2a2a; }
-html.dark .otp-table tbody td { color:#d4d4d4; }
-html.dark .otp-table tbody tr:hover { background:rgba(255,255,255,.04); }
 
 .otp-emp-cell   { display:flex;align-items:center;gap:10px; }
 .otp-emp-avatar { width:34px;height:34px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#6b7280;flex-shrink:0;border:1.5px solid #e5e7eb;text-transform:uppercase; }

@@ -130,13 +130,13 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
-                                <tr class="bg-gray-50 border-b border-gray-200">
-                                     class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Loan Amount</th>
-                                     class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Monthly</th>
-                                     class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Remaining</th>
-                                     class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Progress</th>
-                                     class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
-                                     class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Start Date</th>
+                                <tr class="bg-gray-50 border-b border-gray-100">
+                                    <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Loan Amount</th>
+                                    <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Monthly</th>
+                                    <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Remaining</th>
+                                    <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Progress</th>
+                                    <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
+                                    <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Start Date</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
@@ -153,16 +153,16 @@
                                         };
                                     @endphp
                                     <tr class="hover:bg-gray-50/70 transition-colors">
-                                         class="px-5 py-3">
+                                        <td class="px-5 py-3.5">
                                             <span class="font-mono font-bold text-gray-900">₱{{ number_format($loan->loan_amount, 2) }}</span>
                                         </td>
-                                         class="px-5 py-3">
+                                        <td class="px-5 py-3.5">
                                             <span class="font-mono text-sm text-gray-700">₱{{ number_format($loan->monthly_deduction, 2) }}</span>
                                         </td>
-                                         class="px-5 py-3">
+                                        <td class="px-5 py-3.5">
                                             <span class="font-mono text-sm text-gray-700">₱{{ number_format($loan->remaining_balance, 2) }}</span>
                                         </td>
-                                         class="px-5 py-3 min-w-[150px]">
+                                        <td class="px-5 py-3.5 min-w-[150px]">
                                             <div class="flex items-center gap-2.5">
                                                 <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                                                     <div class="h-full rounded-full {{ $progress >= 100 ? 'bg-emerald-500' : 'bg-blue-500' }}" style="width:{{ $progress }}%;"></div>
@@ -171,7 +171,7 @@
                                             </div>
                                             <div class="text-xs text-gray-400 mt-1 font-mono">{{ $loan->months_paid }}/{{ $totalMonths }} months paid</div>
                                         </td>
-                                         class="px-5 py-3">
+                                        <td class="px-5 py-3.5">
                                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $pillClasses }}">
                                                 {{ ucfirst($loan->status) }}
                                             </span>
@@ -182,7 +182,7 @@
                                                 </div>
                                             @endif
                                         </td>
-                                         class="px-5 py-3 text-sm text-gray-700">
+                                        <td class="px-5 py-3.5 text-sm text-gray-700">
                                             {{ $loan->start_date ? $loan->start_date->format('M d, Y') : '—' }}
                                         </td>
                                     </tr>

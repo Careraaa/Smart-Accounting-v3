@@ -49,10 +49,10 @@
             <table class="w-full text-[11px] border-collapse">
                 <thead>
                     <tr class="border-b border-gray-300" style="background:#f7f7f7;">
-                         class="text-left px-5.5 py-3.5 font-semibold text-gray-700">Plate Number</th>
-                         class="text-left px-5.5 py-3.5 font-semibold text-gray-700">Assigned Route</th>
-                         class="text-left px-5.5 py-3.5 font-semibold text-gray-700">Operator</th>
-                         class="text-left px-5.5 py-3.5 font-semibold text-gray-700">Boundary Rate</th>
+                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Plate Number</th>
+                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Assigned Route</th>
+                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Operator</th>
+                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Boundary Rate</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -61,10 +61,10 @@
                             $route = $routeStats[$index] ?? null;
                         @endphp
                         <tr class="border-b border-gray-200">
-                             class="px-5.5 py-3.5 font-mono">{{ $vehicle['plate_number'] }}</td>
-                             class="px-5.5 py-3.5">{{ $vehicle['route'] }}</td>
-                             class="px-5.5 py-3.5">{{ $vehicle['operator'] }}</td>
-                             class="px-5.5 py-3.5">₱{{ number_format($route['boundary'] ?? 0, 2) }}</td>
+                            <td class="px-2.5 py-2.5 font-mono">{{ $vehicle['plate_number'] }}</td>
+                            <td class="px-2.5 py-2.5">{{ $vehicle['route'] }}</td>
+                            <td class="px-2.5 py-2.5">{{ $vehicle['operator'] }}</td>
+                            <td class="px-2.5 py-2.5">₱{{ number_format($route['boundary'] ?? 0, 2) }}</td>
                         </tr>
                     @empty
                         <tr>

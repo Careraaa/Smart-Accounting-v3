@@ -154,38 +154,38 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
-                         class="w-10 px-5 py-3">
+                    <tr class="border-b border-gray-50">
+                        <th class="w-10 px-4 py-3">
 
                         </th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Employee</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Basic Pay</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Addl. Earnings</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Gross Pay</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Deductions</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Net Pay</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Addl. Earnings</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deductions</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($batch->payrolls as $detail)
                     @php $u = $detail->user; @endphp
                     <tr onclick="window.location='{{ route('payroll.batch.edit-employee', [$batch, $detail->id]) }}'" class="transition-colors hover:bg-gray-50/40 cursor-pointer">
-                         class="px-5 py-3" onclick="event.stopPropagation()">
+                        <td class="px-4 py-3" onclick="event.stopPropagation()">
                             <input type="checkbox" name="selected_ids[]" value="{{ $detail->id }}" onchange="updateSelectedCount()" class="w-3.5 h-3.5 rounded border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-300 cursor-pointer">
                         </td>
-                         class="px-5 py-3">
+                        <td class="px-4 py-3">
                             <div class="min-w-0">
                                 <p class="text-xs font-semibold text-gray-900 truncate">{{ $u->last_name }}, {{ $u->first_name }}</p>
                                 <p class="text-[0.55rem] text-gray-400 truncate font-mono">{{ $u->position ?? '—' }}</p>
                             </div>
                         </td>
-                         class="px-5 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($detail->basic_salary ?? 0,2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format(($detail->total_allowances ?? 0) + ($detail->total_bonuses ?? 0) + ($detail->holiday_pay ?? 0) + ($detail->holiday_ot_pay ?? 0),2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($detail->gross_pay ?? 0,2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($detail->total_deductions ?? 0,2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($detail->net_pay,2) }}</td>
-                         class="px-5 py-3" onclick="event.stopPropagation()">
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($detail->basic_salary ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format(($detail->total_allowances ?? 0) + ($detail->total_bonuses ?? 0) + ($detail->holiday_pay ?? 0) + ($detail->holiday_ot_pay ?? 0),2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($detail->gross_pay ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($detail->total_deductions ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($detail->net_pay,2) }}</td>
+                        <td class="px-4 py-3" onclick="event.stopPropagation()">
                             <div class="flex items-center justify-between gap-2">
                                 @php
                                     $ds = match($detail->status) {
@@ -214,26 +214,26 @@
                 </tbody>
                 <tfoot>
                     <tr class="border-t border-gray-50 bg-gray-50/50">
-                         class="w-10 px-5 py-3"></td>
-                         class="px-5 py-3">
+                        <td class="w-10 px-4 py-3"></td>
+                        <td class="px-4 py-3">
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Batch Totals</p>
                         </td>
-                         class="px-5 py-3 text-left">
+                        <td class="px-4 py-3 text-left">
                             <p class="text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($batch->payrolls->sum(fn($p) => $p->basic_salary ?? 0),2) }}</p>
                         </td>
-                         class="px-5 py-3 text-left">
+                        <td class="px-4 py-3 text-left">
                             <p class="text-sm font-semibold text-emerald-500 tabular-nums">₱{{ number_format($batch->payrolls->sum(fn($p) => ($p->total_allowances ?? 0) + ($p->total_bonuses ?? 0) + ($p->holiday_pay ?? 0) + ($p->holiday_ot_pay ?? 0)),2) }}</p>
                         </td>
-                         class="px-5 py-3 text-left">
+                        <td class="px-4 py-3 text-left">
                             <p class="text-sm font-semibold text-gray-900 tabular-nums">₱{{ number_format($batch->total_gross_pay ?? 0,2) }}</p>
                         </td>
-                         class="px-5 py-3 text-left">
+                        <td class="px-4 py-3 text-left">
                             <p class="text-sm font-semibold text-red-500 tabular-nums">₱{{ number_format($batch->total_deductions ?? 0,2) }}</p>
                         </td>
-                         class="px-5 py-3 text-left">
+                        <td class="px-4 py-3 text-left">
                             <p class="text-sm font-bold text-gray-900 tabular-nums">₱{{ number_format($batch->total_net_pay,2) }}</p>
                         </td>
-                         class="px-5 py-3"></td>
+                        <td class="px-4 py-3"></td>
                     </tr>
                 </tfoot>
             </table>

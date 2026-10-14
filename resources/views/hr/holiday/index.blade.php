@@ -133,22 +133,22 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Holiday Name</th>
-                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
-                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Holiday Name</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($allHolidays as $holiday)
                         <tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors duration-150 cursor-pointer"
                             onclick="window.location='{{ route('holiday.edit', $holiday) }}'">
-                             class="px-5 py-3">
+                            <td class="px-5 py-3.5">
                                 <div class="font-semibold text-gray-900">{{ $holiday->name }}</div>
                             </td>
-                             class="px-5 py-3">
+                            <td class="px-5 py-3.5">
                                 <span class="font-mono text-sm text-gray-500">{{ $holiday->date->format('l, M d, Y') }}</span>
                             </td>
-                             class="px-5 py-3">
+                            <td class="px-5 py-3.5">
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border
                                     {{ $holiday->type === 'regular' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200' }}">
                                     <span class="w-1.5 h-1.5 rounded-full {{ $holiday->type === 'regular' ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
@@ -219,30 +219,30 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Holiday Name</th>
-                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
-                             class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
-                             class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Holiday Name</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Type</th>
+                            <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($activeHolidays as $holiday)
                         <tr class="border-b border-gray-100 hover:bg-emerald-50/30 transition-colors duration-150 cursor-pointer"
                             onclick="window.location='{{ route('holiday.edit', $holiday) }}'">
-                             class="px-5 py-3">
+                            <td class="px-5 py-3.5">
                                 <div class="font-semibold text-gray-900">{{ $holiday->name }}</div>
                             </td>
-                             class="px-5 py-3">
+                            <td class="px-5 py-3.5">
                                 <span class="font-mono text-sm text-gray-500">{{ $holiday->date->format('l, M d, Y') }}</span>
                             </td>
-                             class="px-5 py-3">
+                            <td class="px-5 py-3.5">
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border
                                     {{ $holiday->type === 'regular' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200' }}">
                                     <span class="w-1.5 h-1.5 rounded-full {{ $holiday->type === 'regular' ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
                                     {{ ucfirst($holiday->type) }}
                                 </span>
                             </td>
-                             class="px-5 py-3 text-center">
+                            <td class="px-5 py-3.5 text-center">
                                 <div class="inline-flex items-center gap-1.5">
                                     <a href="{{ route('holiday.edit', $holiday) }}"
                                        class="w-7 h-7 rounded-lg bg-gray-100 text-gray-500 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center transition-all duration-200">

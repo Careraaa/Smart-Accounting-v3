@@ -96,11 +96,11 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
-                         class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Contribution type</th>
-                         class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employee</th>
-                         class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employer</th>
-                         class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Total</th>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Contribution type</th>
+                        <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employee</th>
+                        <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employer</th>
+                        <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Total</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -113,17 +113,17 @@
                     @endphp
                     @foreach($types as $t)
                     <tr class="transition-colors hover:bg-gray-50">
-                         class="px-5 py-3 text-sm font-semibold text-gray-900">{{ $t['name'] }}</td>
-                         class="px-5 py-3 text-right font-mono text-sm tabular-nums text-gray-700">₱{{ number_format($t['emp'], 2) }}</td>
-                         class="px-5 py-3 text-right font-mono text-sm tabular-nums text-gray-400">₱{{ number_format($t['er'], 2) }}</td>
-                         class="px-5 py-3 text-right font-mono text-sm tabular-nums text-green-700 font-semibold">₱{{ number_format($t['emp'] + $t['er'], 2) }}</td>
+                        <td class="px-5 py-3 text-sm font-semibold text-gray-900">{{ $t['name'] }}</td>
+                        <td class="px-5 py-3 text-right font-mono text-sm tabular-nums text-gray-700">₱{{ number_format($t['emp'], 2) }}</td>
+                        <td class="px-5 py-3 text-right font-mono text-sm tabular-nums text-gray-400">₱{{ number_format($t['er'], 2) }}</td>
+                        <td class="px-5 py-3 text-right font-mono text-sm tabular-nums text-green-700 font-semibold">₱{{ number_format($t['emp'] + $t['er'], 2) }}</td>
                     </tr>
                     @endforeach
                     <tr class="bg-gray-50 border-t-2 border-gray-100 font-bold">
-                         class="px-5 py-3 text-sm font-bold text-gray-900">Total</td>
-                         class="px-5 py-3 text-right font-mono text-sm tabular-nums font-bold text-gray-900">₱{{ number_format($empTotal, 2) }}</td>
-                         class="px-5 py-3 text-right font-mono text-sm tabular-nums font-bold text-gray-900">₱{{ number_format($erTotal, 2) }}</td>
-                         class="px-5 py-3 text-right font-mono text-sm tabular-nums font-bold text-green-700">₱{{ number_format($grandTotal, 2) }}</td>
+                        <td class="px-5 py-3 text-sm font-bold text-gray-900">Total</td>
+                        <td class="px-5 py-3 text-right font-mono text-sm tabular-nums font-bold text-gray-900">₱{{ number_format($empTotal, 2) }}</td>
+                        <td class="px-5 py-3 text-right font-mono text-sm tabular-nums font-bold text-gray-900">₱{{ number_format($erTotal, 2) }}</td>
+                        <td class="px-5 py-3 text-right font-mono text-sm tabular-nums font-bold text-green-700">₱{{ number_format($grandTotal, 2) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -139,15 +139,15 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
-                         class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employee</th>
-                         class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Period</th>
-                         class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Emp. SSS</th>
-                         class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Er. SSS</th>
-                         class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Emp. Pag-IBIG</th>
-                         class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Er. Pag-IBIG</th>
-                         class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Emp. PhilHealth</th>
-                         class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Er. PhilHealth</th>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employee</th>
+                        <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Period</th>
+                        <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Emp. SSS</th>
+                        <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Er. SSS</th>
+                        <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Emp. Pag-IBIG</th>
+                        <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Er. Pag-IBIG</th>
+                        <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Emp. PhilHealth</th>
+                        <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Er. PhilHealth</th>
                     </tr>
                 </thead>
                 <tbody id="gcBody" class="divide-y divide-gray-50"></tbody>
@@ -203,14 +203,14 @@ window.gcContributions = {!! json_encode(array_map(fn($c) => [
                 const tr = document.createElement('tr');
                 tr.className = 'transition-colors hover:bg-gray-50';
                 tr.innerHTML = `
-                     class="px-5 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">${c.employee_name}</td>
-                     class="px-5 py-3 text-xs text-gray-500 whitespace-nowrap">${c.period_start} – ${c.period_end}</td>
-                     class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-700">₱${c.employee_sss.toFixed(2)}</td>
-                     class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-400">₱${c.employer_sss.toFixed(2)}</td>
-                     class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-700">₱${c.employee_pagibig.toFixed(2)}</td>
-                     class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-400">₱${c.employer_pagibig.toFixed(2)}</td>
-                     class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-700">₱${c.employee_philhealth.toFixed(2)}</td>
-                     class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-400">₱${c.employer_philhealth.toFixed(2)}</td>
+                    <td class="px-5 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">${c.employee_name}</td>
+                    <td class="px-5 py-3 text-xs text-gray-500 whitespace-nowrap">${c.period_start} – ${c.period_end}</td>
+                    <td class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-700">₱${c.employee_sss.toFixed(2)}</td>
+                    <td class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-400">₱${c.employer_sss.toFixed(2)}</td>
+                    <td class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-700">₱${c.employee_pagibig.toFixed(2)}</td>
+                    <td class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-400">₱${c.employer_pagibig.toFixed(2)}</td>
+                    <td class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-700">₱${c.employee_philhealth.toFixed(2)}</td>
+                    <td class="px-5 py-3 text-right font-mono text-xs tabular-nums text-gray-400">₱${c.employer_philhealth.toFixed(2)}</td>
                 `;
                 body.appendChild(tr);
             });

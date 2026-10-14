@@ -119,30 +119,30 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Employee</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Basic Pay</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Addl. Earnings</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Gross Pay</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Deductions</th>
-                         class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Net Pay</th>
+                    <tr class="border-b border-gray-50">
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Addl. Earnings</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deductions</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net Pay</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($payrolls as $p)
                     @php $u = $p->user; @endphp
                     <tr onclick="window.location='{{ route('payroll.salary-computation.show', $p) }}'" class="transition-colors hover:bg-gray-50/40 cursor-pointer">
-                         class="px-5 py-3">
+                        <td class="px-4 py-3">
                             <div class="min-w-0">
                                 <p class="text-xs font-semibold text-gray-900 truncate">{{ $u->last_name }}, {{ $u->first_name }}</p>
                                 <p class="text-[0.55rem] text-gray-400 truncate font-mono">{{ $u->position ?? '—' }}</p>
                             </div>
                         </td>
-                         class="px-5 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($p->basic_salary ?? 0, 2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format(($p->total_allowances ?? 0) + ($p->total_bonuses ?? 0) + ($p->holiday_pay ?? 0) + ($p->holiday_ot_pay ?? 0),2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($p->gross_pay ?? 0,2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($p->total_deductions ?? 0,2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($p->net_pay,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($p->basic_salary ?? 0, 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format(($p->total_allowances ?? 0) + ($p->total_bonuses ?? 0) + ($p->holiday_pay ?? 0) + ($p->holiday_ot_pay ?? 0),2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($p->gross_pay ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($p->total_deductions ?? 0,2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($p->net_pay,2) }}</td>
                     </tr>
                     @empty
                     <tr>
@@ -153,12 +153,12 @@
                 @if($payrolls->isNotEmpty())
                 <tfoot>
                     <tr class="border-t border-gray-100 bg-gray-50/50">
-                         class="px-5 py-3 text-xs font-bold text-gray-900">Totals</td>
-                         class="px-5 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payrolls->sum('basic_salary'), 2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-bold text-emerald-500 tabular-nums">₱{{ number_format(($payrolls->sum('total_allowances') ?? 0) + ($payrolls->sum('total_bonuses') ?? 0) + ($payrolls->sum('holiday_pay') ?? 0) + ($payrolls->sum('holiday_ot_pay') ?? 0),2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalGross, 2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-bold text-red-500 tabular-nums">₱{{ number_format($totalDeductions, 2) }}</td>
-                         class="px-5 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalNet, 2) }}</td>
+                        <td class="px-4 py-3 text-xs font-bold text-gray-900">Totals</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payrolls->sum('basic_salary'), 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-emerald-500 tabular-nums">₱{{ number_format(($payrolls->sum('total_allowances') ?? 0) + ($payrolls->sum('total_bonuses') ?? 0) + ($payrolls->sum('holiday_pay') ?? 0) + ($payrolls->sum('holiday_ot_pay') ?? 0),2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalGross, 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-red-500 tabular-nums">₱{{ number_format($totalDeductions, 2) }}</td>
+                        <td class="px-4 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalNet, 2) }}</td>
                     </tr>
                 </tfoot>
                 @endif

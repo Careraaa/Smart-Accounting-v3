@@ -155,21 +155,21 @@ $remittancesJson = $remittances->groupBy(fn($r) => $r->remittance_date->format('
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-200">
-                         class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Date</th>
-                         class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Collection</th>
-                         class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Expenses</th>
-                         class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net Remittance</th>
+                    <tr class="border-b border-gray-50 bg-gray-50/50">
+                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Date</th>
+                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Collection</th>
+                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Expenses</th>
+                        <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net Remittance</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse($groupedRemittances as $remittance)
                         @php $dateKey = $remittance['remittance_date']->format('Y-m-d'); @endphp
                         <tr class="rm-row transition-colors" data-date="{{ $dateKey }}" onclick="openRemittanceModal('{{ $dateKey }}')">
-                             class="px-5 py-3 text-xs font-semibold text-gray-800">{{ $remittance['remittance_date']->format('M d, Y') }}</td>
-                             class="px-5 py-3 text-right text-xs tabular-nums font-bold text-emerald-600">₱{{ number_format($remittance['total_collection'], 2) }}</td>
-                             class="px-5 py-3 text-right text-xs tabular-nums text-gray-400">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
-                             class="px-5 py-3 text-right text-xs tabular-nums font-bold {{ $remittance['is_short_remittance'] ? 'text-red-600' : 'text-emerald-600' }}">
+                            <td class="px-5 py-3.5 text-xs font-semibold text-gray-800">{{ $remittance['remittance_date']->format('M d, Y') }}</td>
+                            <td class="px-4 py-3.5 text-right text-xs tabular-nums font-bold text-emerald-600">₱{{ number_format($remittance['total_collection'], 2) }}</td>
+                            <td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-400">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
+                            <td class="px-5 py-3.5 text-right text-xs tabular-nums font-bold {{ $remittance['is_short_remittance'] ? 'text-red-600' : 'text-emerald-600' }}">
                                 ₱{{ number_format($remittance['net_remittance'], 2) }}
                             </td>
                         </tr>
@@ -225,16 +225,16 @@ function openRemittanceModal(dateKey) {
     let rows = items.map(function(r, idx) {
         const netClass = r.short ? 'text-red-600' : 'text-emerald-600';
         return '<tr class="border-b border-gray-50">' +
-            ' class="px-5 py-3 text-xs text-gray-500 tabular-nums">' + (idx + 1) + '</td>' +
-            ' class="px-5 py-3 text-xs font-semibold text-gray-800">' + esc(r.driver) + '</td>' +
-            ' class="px-5 py-3 text-xs text-gray-500">' + esc(r.pao) + '</td>' +
-            ' class="px-5 py-3 text-xs text-gray-500">' + esc(r.route) + '</td>' +
-            ' class="px-5 py-3 text-xs text-gray-500 tabular-nums">' + esc(r.vehicle) + '</td>' +
-            ' class="px-5 py-3 text-xs text-right tabular-nums font-medium text-emerald-600">₱' + fmt(r.collection) + '</td>' +
-            ' class="px-5 py-3 text-xs text-right tabular-nums text-gray-400">₱' + fmt(r.expenses) + '</td>' +
-            ' class="px-5 py-3 text-xs text-right tabular-nums font-bold ' + netClass + '">₱' + fmt(r.net) + '</td>' +
-            ' class="px-5 py-3 text-xs text-center"><a href="' + r.show_url + '" class="text-blue-600 hover:text-blue-800 font-semibold no-underline">Details</a></td>' +
-            ' class="px-5 py-3 text-xs text-center">' + (r.short ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500" title="Short"></span>' : '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" title="OK"></span>') + '</td>' +
+            '<td class="px-3 py-2 text-xs text-gray-500 tabular-nums">' + (idx + 1) + '</td>' +
+            '<td class="px-3 py-2 text-xs font-semibold text-gray-800">' + esc(r.driver) + '</td>' +
+            '<td class="px-3 py-2 text-xs text-gray-500">' + esc(r.pao) + '</td>' +
+            '<td class="px-3 py-2 text-xs text-gray-500">' + esc(r.route) + '</td>' +
+            '<td class="px-3 py-2 text-xs text-gray-500 tabular-nums">' + esc(r.vehicle) + '</td>' +
+            '<td class="px-3 py-2 text-xs text-right tabular-nums font-medium text-emerald-600">₱' + fmt(r.collection) + '</td>' +
+            '<td class="px-3 py-2 text-xs text-right tabular-nums text-gray-400">₱' + fmt(r.expenses) + '</td>' +
+            '<td class="px-3 py-2 text-xs text-right tabular-nums font-bold ' + netClass + '">₱' + fmt(r.net) + '</td>' +
+            '<td class="px-3 py-2 text-xs text-center"><a href="' + r.show_url + '" class="text-blue-600 hover:text-blue-800 font-semibold no-underline">Details</a></td>' +
+            '<td class="px-3 py-2 text-xs text-center">' + (r.short ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500" title="Short"></span>' : '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" title="OK"></span>') + '</td>' +
         '</tr>';
     }).join('');
 
@@ -249,25 +249,25 @@ function openRemittanceModal(dateKey) {
         '<div class="overflow-x-auto overflow-y-auto flex-1">' +
             '<table class="w-full text-xs">' +
                 '<thead class="sticky top-0 z-10"><tr class="bg-gray-50/90 border-b border-gray-200">' +
-                    ' class="text-left px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">#</th>' +
-                    ' class="text-left px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Driver</th>' +
-                    ' class="text-left px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">PAO</th>' +
-                    ' class="text-left px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Route</th>' +
-                    ' class="text-left px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Vehicle</th>' +
-                    ' class="text-right px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Collection</th>' +
-                    ' class="text-right px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Expenses</th>' +
-                    ' class="text-right px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Net</th>' +
-                    ' class="text-center px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Details</th>' +
-                    ' class="text-center px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Sts</th>' +
+                    '<th class="text-left px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">#</th>' +
+                    '<th class="text-left px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Driver</th>' +
+                    '<th class="text-left px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">PAO</th>' +
+                    '<th class="text-left px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Route</th>' +
+                    '<th class="text-left px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Vehicle</th>' +
+                    '<th class="text-right px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Collection</th>' +
+                    '<th class="text-right px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Expenses</th>' +
+                    '<th class="text-right px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Net</th>' +
+                    '<th class="text-center px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Details</th>' +
+                    '<th class="text-center px-3 py-2 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Sts</th>' +
                 '</tr></thead>' +
                 '<tbody>' + rows +
                     '<tr class="bg-gray-50/50 border-t-2 border-gray-200">' +
                         '<td colspan="5" class="px-3 py-2.5 text-[0.6rem] font-bold uppercase tracking-wider text-gray-500 text-right">Daily total</td>' +
-                        ' class="px-5 py-3.5 text-xs text-right tabular-nums font-bold text-emerald-600">₱' + fmt(totalCol) + '</td>' +
-                        ' class="px-5 py-3.5 text-xs text-right tabular-nums text-gray-400">₱' + fmt(totalExp) + '</td>' +
-                        ' class="px-5 py-3.5 text-xs text-right tabular-nums font-bold ' + (hasShort ? 'text-red-600' : 'text-emerald-600') + '">₱' + fmt(totalNet) + '</td>' +
-                        ' class="px-5 py-3.5 text-xs text-center text-gray-300">—</td>' +
-                        ' class="px-5 py-3.5 text-xs text-center">' + (hasShort ? '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-red-500">Short</span>' : '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-emerald-500">Clear</span>') + '</td>' +
+                        '<td class="px-3 py-2.5 text-xs text-right tabular-nums font-bold text-emerald-600">₱' + fmt(totalCol) + '</td>' +
+                        '<td class="px-3 py-2.5 text-xs text-right tabular-nums text-gray-400">₱' + fmt(totalExp) + '</td>' +
+                        '<td class="px-3 py-2.5 text-xs text-right tabular-nums font-bold ' + (hasShort ? 'text-red-600' : 'text-emerald-600') + '">₱' + fmt(totalNet) + '</td>' +
+                        '<td class="px-3 py-2.5 text-xs text-center text-gray-300">—</td>' +
+                        '<td class="px-3 py-2.5 text-xs text-center">' + (hasShort ? '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-red-500">Short</span>' : '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-emerald-500">Clear</span>') + '</td>' +
                     '</tr>' +
                 '</tbody>' +
             '</table>' +
