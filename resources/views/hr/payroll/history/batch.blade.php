@@ -49,13 +49,13 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Department</th>
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Gross Pay</th>
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Deductions</th>
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Net Pay</th>
-                        <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Employee</th>
+                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Department</th>
+                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Gross Pay</th>
+                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Deductions</th>
+                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Net Pay</th>
+                        <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="batchTbody">
@@ -78,17 +78,17 @@
                         };
                     @endphp
                     <tr data-name="{{ strtolower(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? '')) }}" data-status="{{ $payroll->status }}" data-url="{{ route('payroll.salary-computation.show', $payroll) }}" class="hover:bg-gray-50/40 transition-colors cursor-pointer">
-                        <td class="px-4 py-3">
+                        <td class="px-5 py-3">
                             <div class="flex items-center gap-2.5">
                                 <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">{{ $initials }}</span>
                                 <div class="text-xs font-semibold text-gray-900">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</div>
                             </div>
                         </td>
-                        <td class="px-4 py-3"><span class="inline-block text-[0.55rem] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{{ $payroll->user->department ?? 'N/A' }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs text-gray-500 bat-count" style="animation-delay:0.05s">₱{{ number_format($payroll->gross_pay, 2) }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-red-400 bat-count" style="animation-delay:0.1s">₱{{ number_format($payroll->total_deductions, 2) }}</span></td>
-                        <td class="px-4 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900 bat-count" style="animation-delay:0.15s">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
-                        <td class="px-4 py-3 text-center">
+                        <td class="px-5 py-3"><span class="inline-block text-[0.55rem] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{{ $payroll->user->department ?? 'N/A' }}</span></td>
+                        <td class="px-5 py-3 text-end"><span class="font-mono tabular-nums text-xs text-gray-500 bat-count" style="animation-delay:0.05s">₱{{ number_format($payroll->gross_pay, 2) }}</span></td>
+                        <td class="px-5 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-red-400 bat-count" style="animation-delay:0.1s">₱{{ number_format($payroll->total_deductions, 2) }}</span></td>
+                        <td class="px-5 py-3 text-end"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900 bat-count" style="animation-delay:0.15s">₱{{ number_format($payroll->net_pay, 2) }}</span></td>
+                        <td class="px-5 py-3 text-center">
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-semibold border {{ $badgeCls }}">
                                 <span class="w-1 h-1 rounded-full {{ $dotCls }}"></span>
                                 {{ ucfirst($payroll->status) }}

@@ -175,25 +175,25 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Leave Type</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Days Allowed</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Carry Over</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Description</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Leave Type</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Days Allowed</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Carry Over</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Description</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($leaveTypes as $leaveType)
                         <tr class="border-b border-gray-100 hover:bg-violet-50/30 hover:cursor-pointer transition-colors duration-150" onclick="window.location='{{ route('leave-type.show', $leaveType) }}'">
-                            <td class="px-4 py-3.5">
+                            <td class="px-5 py-3">
                                 <div class="font-semibold text-gray-900">{{ $leaveType->name }}</div>
                                 @if($leaveType->abbreviation)
                                     <div class="text-xs text-gray-400 mt-0.5 font-mono">{{ $leaveType->abbreviation }}</div>
                                 @endif
                             </td>
-                            <td class="px-4 py-3.5">
+                            <td class="px-5 py-3">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">{{ $leaveType->days_allowed }} days</span>
                             </td>
-                            <td class="px-4 py-3.5">
+                            <td class="px-5 py-3">
                                 @if($leaveType->carry_over)
                                     <span class="inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -206,7 +206,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3.5">
+                            <td class="px-5 py-3">
                                 <span class="text-gray-500 text-xs">{{ Str::limit($leaveType->description, 60) }}</span>
                             </td>
                         </tr>
@@ -596,33 +596,33 @@
                     var html = '';
 
                     if (cols.indexOf('employee') !== -1) {
-                        html += '<td class="px-4 py-3.5"><div class="font-semibold text-gray-900 text-sm">' + r.name + '</div></td>';
+                        html += '<td class="px-5 py-3"><div class="font-semibold text-gray-900 text-sm">' + r.name + '</div></td>';
                     }
                     if (cols.indexOf('department') !== -1) {
-                        html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.department_display + '</span></td>';
+                        html += '<td class="px-5 py-3"><span class="text-xs text-gray-400 font-mono">' + r.department_display + '</span></td>';
                     }
                     if (cols.indexOf('leave_type') !== -1) {
                         var tCls = tab === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' : (tab === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200');
-                        html += '<td class="px-4 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ' + tCls + '">' + r.type_display + '</span></td>';
+                        html += '<td class="px-5 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ' + tCls + '">' + r.type_display + '</span></td>';
                     }
                     if (cols.indexOf('dates') !== -1) {
-                        html += '<td class="px-4 py-3.5"><span class="text-sm text-gray-700 font-mono">' + r.start_date + ' – ' + r.end_date + '</span></td>';
+                        html += '<td class="px-5 py-3"><span class="text-sm text-gray-700 font-mono">' + r.start_date + ' – ' + r.end_date + '</span></td>';
                     }
                     if (cols.indexOf('days') !== -1) {
-                        html += '<td class="px-4 py-3.5"><span class="font-bold text-gray-900">' + r.days + '<span class="text-gray-400 font-normal text-xs">d</span></span></td>';
+                        html += '<td class="px-5 py-3"><span class="font-bold text-gray-900">' + r.days + '<span class="text-gray-400 font-normal text-xs">d</span></span></td>';
                     }
                     if (cols.indexOf('pay_status') !== -1) {
                         var psCls = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                        html += '<td class="px-4 py-3.5"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ' + psCls + '">' + (r.status === 'paid' ? 'Paid' : 'Approved') + '</span></td>';
+                        html += '<td class="px-5 py-3"><span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ' + psCls + '">' + (r.status === 'paid' ? 'Paid' : 'Approved') + '</span></td>';
                     }
                     if (cols.indexOf('applied') !== -1) {
-                        html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.created_at + '</span></td>';
+                        html += '<td class="px-5 py-3"><span class="text-xs text-gray-400 font-mono">' + r.created_at + '</span></td>';
                     }
                     if (cols.indexOf('approved_date') !== -1) {
-                        html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.updated_at + '</span></td>';
+                        html += '<td class="px-5 py-3"><span class="text-xs text-gray-400 font-mono">' + r.updated_at + '</span></td>';
                     }
                     if (cols.indexOf('rejected_date') !== -1) {
-                        html += '<td class="px-4 py-3.5"><span class="text-xs text-gray-400 font-mono">' + r.updated_at + '</span></td>';
+                        html += '<td class="px-5 py-3"><span class="text-xs text-gray-400 font-mono">' + r.updated_at + '</span></td>';
                     }
 
                     tr.innerHTML = html;

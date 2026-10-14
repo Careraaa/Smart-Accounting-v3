@@ -154,28 +154,28 @@
                             data-name="{{ strtolower(($user->first_name ?? '') . ' ' . ($user->last_name ?? '') . ' ' . ($user->email ?? '')) }}"
                             data-role="{{ $user->role }}"
                             data-status="{{ $user->status === 'active' ? 'active' : 'inactive' }}">
-                            <td class="px-5 py-3.5">
+                            <td class="px-5 py-3">
                                 <div class="flex items-center gap-2.5">
                                     <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 border border-gray-200 flex-shrink-0 uppercase">{{ $initials }}</div>
                                     <div class="font-semibold text-gray-900">{{ $user->first_name ?? 'None' }} {{ $user->last_name ?? 'None' }}</div>
                                 </div>
                             </td>
-                            <td class="px-5 py-3.5">
+                            <td class="px-5 py-3">
                                 <span class="font-mono text-sm text-gray-600 tabular-nums">{{ $user->email ?? 'None' }}</span>
                             </td>
-                            <td class="px-5 py-3.5 text-center">
+                            <td class="px-5 py-3 text-center">
                                 <span class="inline-flex items-center justify-center px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full min-w-[120px] whitespace-nowrap {{ $roleBadge }}">
                                     {{ str_replace('_', ' ', $user->role) }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3.5 text-center">
+                            <td class="px-5 py-3 text-center">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full whitespace-nowrap {{ $statusBadge }}"
                                       data-status-badge>
                                     <span class="w-1.5 h-1.5 rounded-full {{ $user->status === 'active' ? 'bg-emerald-600' : 'bg-red-500' }}"></span>
                                     {{ $statusLabel }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3.5 text-center">
+                            <td class="px-5 py-3 text-center">
                                 <span class="font-mono text-sm text-gray-600 tabular-nums">
                                     @if(isset($user->last_login_at) && $user->last_login_at)
                                         {{ $user->last_login_at->format('M d, Y H:i') }}
@@ -184,7 +184,7 @@
                                     @endif
                                 </span>
                             </td>
-                            <td class="px-5 py-3.5 text-center">
+                            <td class="px-5 py-3 text-center">
                                 <div class="flex items-center gap-1.5 justify-center">
                                     <a href="{{ route('superadmin.accounts.edit', $user->id) }}" class="w-7 h-7 rounded-lg border border-gray-200 bg-white inline-flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-all duration-150 no-underline" title="Edit User">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -326,17 +326,17 @@ const ROLE_BADGE_MAP = {
                 const lastLoginHtml = u.lastLogin || '<span style="color:#9ca3af;">&mdash;</span>';
 
                 row.innerHTML = `
-                    <td class="px-5 py-3.5">
+                    <td class="px-5 py-3">
                         <div class="flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 border border-gray-200 flex-shrink-0 uppercase">${u.initials}</div>
                             <div class="font-semibold text-gray-900">${u.firstName} ${u.lastName}</div>
                         </div>
                     </td>
-                    <td class="px-5 py-3.5"><span class="font-mono text-sm text-gray-600 tabular-nums">${u.email}</span></td>
-                    <td class="px-5 py-3.5 text-center"><span class="inline-flex items-center justify-center px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full min-w-[120px] whitespace-nowrap ${roleBadge}">${roleLabel}</span></td>
-                    <td class="px-5 py-3.5 text-center"><span class="inline-flex items-center gap-1 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full whitespace-nowrap ${statusBadge}" data-status-badge><span class="w-1.5 h-1.5 rounded-full ${statusDot}"></span>${statusLabel}</span></td>
-                    <td class="px-5 py-3.5 text-center"><span class="font-mono text-sm text-gray-600 tabular-nums">${lastLoginHtml}</span></td>
-                    <td class="px-5 py-3.5 text-center">
+                    <td class="px-5 py-3"><span class="font-mono text-sm text-gray-600 tabular-nums">${u.email}</span></td>
+                    <td class="px-5 py-3 text-center"><span class="inline-flex items-center justify-center px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full min-w-[120px] whitespace-nowrap ${roleBadge}">${roleLabel}</span></td>
+                    <td class="px-5 py-3 text-center"><span class="inline-flex items-center gap-1 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full whitespace-nowrap ${statusBadge}" data-status-badge><span class="w-1.5 h-1.5 rounded-full ${statusDot}"></span>${statusLabel}</span></td>
+                    <td class="px-5 py-3 text-center"><span class="font-mono text-sm text-gray-600 tabular-nums">${lastLoginHtml}</span></td>
+                    <td class="px-5 py-3 text-center">
                         <div class="flex items-center gap-1.5 justify-center">
                             <a href="${editHref}" class="w-7 h-7 rounded-lg border border-gray-200 bg-white inline-flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300 transition-all duration-150 no-underline" title="Edit User">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>

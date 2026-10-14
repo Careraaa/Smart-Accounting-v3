@@ -96,7 +96,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-100">
+                    <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Contribution type</th>
                         <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employee</th>
                         <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employer</th>
@@ -139,7 +139,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50 border-b border-gray-100">
+                    <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employee</th>
                         <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Period</th>
                         <th class="px-5 py-3 text-right text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Emp. SSS</th>

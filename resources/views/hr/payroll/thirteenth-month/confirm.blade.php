@@ -110,7 +110,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="bg-gray-50/50">
+                    <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Employee</th>
                         <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Basic Salary</th>
                         <th class="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Months Worked</th>

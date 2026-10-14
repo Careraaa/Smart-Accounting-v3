@@ -29,12 +29,12 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50 bg-gray-50/50">
-                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Employee</th>
-                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Basic Salary</th>
-                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Months Worked</th>
-                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">13th Month Pay</th>
-                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Employee</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Basic Salary</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Months Worked</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">13th Month Pay</th>
+                        <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -49,16 +49,16 @@
                         $payslipUrl = route('payroll.thirteenth-month-pay.batch.payslip', [$batch, $record]);
                     @endphp
                     <tr onclick="window.open('{{ $payslipUrl }}', '_blank')" class="hover:bg-gray-50/40 transition-colors cursor-pointer">
-                        <td class="px-4 py-3">
+                        <td class="px-5 py-3">
                             <div class="min-w-0">
                                 <p class="text-xs font-semibold text-gray-900 truncate">{{ $record->user->last_name }}, {{ $record->user->first_name }}</p>
                                 <p class="text-[0.55rem] text-gray-400 truncate font-mono">{{ $record->user->position ?? '—' }}</p>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($record->total_basic_salary_earned ?? 0, 2) }}</td>
-                        <td class="px-4 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">{{ $record->months_worked }}</td>
-                        <td class="px-4 py-3 text-left text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($record->thirteenth_month_pay, 2) }}</td>
-                        <td class="px-4 py-3 text-left">
+                        <td class="px-5 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($record->total_basic_salary_earned ?? 0, 2) }}</td>
+                        <td class="px-5 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">{{ $record->months_worked }}</td>
+                        <td class="px-5 py-3 text-left text-xs font-bold text-amber-600 tabular-nums">₱{{ number_format($record->thirteenth_month_pay, 2) }}</td>
+                        <td class="px-5 py-3 text-left">
                             <span class="inline-flex items-center gap-1 text-[0.5rem] font-semibold uppercase tracking-wide text-gray-500">
                                 <span class="w-1.5 h-1.5 rounded-full {{ $ps['dot'] }}"></span>
                                 {{ $ps['label'] }}

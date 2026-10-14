@@ -46,24 +46,24 @@
         {{-- Table --}}
         <table class="w-full text-[11px] border-collapse">
             <thead>
-                <tr class="border-b border-gray-300" style="background:#f7f7f7;">
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Name</th>
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">License Number</th>
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Contact Number</th>
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Email</th>
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Gender</th>
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Address</th>
+                <tr class="bg-gray-50 border-b border-gray-200" style="background:#f7f7f7;">
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Name</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">License Number</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Contact Number</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Email</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Gender</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Address</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($drivers as $driver)
                     <tr class="border-b border-gray-200">
-                        <td class="px-2.5 py-2.5 font-semibold">{{ $driver->name }}</td>
-                        <td class="px-2.5 py-2.5">{{ $driver->license_number ?? 'N/A' }}</td>
-                        <td class="px-2.5 py-2.5">{{ $driver->contact_number ?? 'N/A' }}</td>
-                        <td class="px-2.5 py-2.5">{{ $driver->email ?? 'N/A' }}</td>
-                        <td class="px-2.5 py-2.5">{{ ucfirst($driver->gender ?? 'N/A') }}</td>
-                        <td class="px-2.5 py-2.5">{{ $driver->address ?? 'N/A' }}</td>
+                        <td class="px-5 py-3 font-semibold">{{ $driver->name }}</td>
+                        <td class="px-5 py-3">{{ $driver->license_number ?? 'N/A' }}</td>
+                        <td class="px-5 py-3">{{ $driver->contact_number ?? 'N/A' }}</td>
+                        <td class="px-5 py-3">{{ $driver->email ?? 'N/A' }}</td>
+                        <td class="px-5 py-3">{{ ucfirst($driver->gender ?? 'N/A') }}</td>
+                        <td class="px-5 py-3">{{ $driver->address ?? 'N/A' }}</td>
                     </tr>
                 @empty
                     <tr>

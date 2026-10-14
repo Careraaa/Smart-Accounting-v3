@@ -75,20 +75,20 @@
         <div>
             <table class="w-full text-[11px] border-collapse">
                 <thead>
-                    <tr class="border-b border-gray-300" style="background:#f7f7f7;">
-                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Date</th>
-                        <th class="text-right px-2.5 py-2.5 font-semibold text-gray-700">Collection</th>
-                        <th class="text-right px-2.5 py-2.5 font-semibold text-gray-700">Expenses</th>
-                        <th class="text-right px-2.5 py-2.5 font-semibold text-gray-700">Net Remittance</th>
+                    <tr class="bg-gray-50 border-b border-gray-200" style="background:#f7f7f7;">
+                        <th class="text-left px-5 py-3 font-semibold text-gray-700">Date</th>
+                        <th class="text-right px-5 py-3 font-semibold text-gray-700">Collection</th>
+                        <th class="text-right px-5 py-3 font-semibold text-gray-700">Expenses</th>
+                        <th class="text-right px-5 py-3 font-semibold text-gray-700">Net Remittance</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($groupedRemittances as $remittance)
                         <tr class="border-b border-gray-200">
-                            <td class="px-2.5 py-2.5">{{ $remittance['remittance_date']->format('M d, Y') }}</td>
-                            <td class="px-2.5 py-2.5 text-right text-emerald-700 font-semibold">₱{{ number_format($remittance['total_collection'], 2) }}</td>
-                            <td class="px-2.5 py-2.5 text-right text-gray-500">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
-                            <td class="px-2.5 py-2.5 text-right font-semibold {{ $remittance['is_short_remittance'] ? 'text-red-600' : 'text-emerald-600' }}">₱{{ number_format($remittance['net_remittance'], 2) }}</td>
+                            <td class="px-5 py-3">{{ $remittance['remittance_date']->format('M d, Y') }}</td>
+                            <td class="px-5 py-3 text-right text-emerald-700 font-semibold">₱{{ number_format($remittance['total_collection'], 2) }}</td>
+                            <td class="px-5 py-3 text-right text-gray-500">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
+                            <td class="px-5 py-3 text-right font-semibold {{ $remittance['is_short_remittance'] ? 'text-red-600' : 'text-emerald-600' }}">₱{{ number_format($remittance['net_remittance'], 2) }}</td>
                         </tr>
                     @empty
                         <tr>

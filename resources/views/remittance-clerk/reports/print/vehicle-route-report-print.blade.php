@@ -48,11 +48,11 @@
             <h2 class="text-sm font-bold text-gray-900 pb-2 mb-4" style="border-bottom:1.5px solid #e0e0e0;">Active Vehicles</h2>
             <table class="w-full text-[11px] border-collapse">
                 <thead>
-                    <tr class="border-b border-gray-300" style="background:#f7f7f7;">
-                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Plate Number</th>
-                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Assigned Route</th>
-                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Operator</th>
-                        <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Boundary Rate</th>
+                    <tr class="bg-gray-50 border-b border-gray-200" style="background:#f7f7f7;">
+                        <th class="text-left px-5 py-3 font-semibold text-gray-700">Plate Number</th>
+                        <th class="text-left px-5 py-3 font-semibold text-gray-700">Assigned Route</th>
+                        <th class="text-left px-5 py-3 font-semibold text-gray-700">Operator</th>
+                        <th class="text-left px-5 py-3 font-semibold text-gray-700">Boundary Rate</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -61,10 +61,10 @@
                             $route = $routeStats[$index] ?? null;
                         @endphp
                         <tr class="border-b border-gray-200">
-                            <td class="px-2.5 py-2.5 font-mono">{{ $vehicle['plate_number'] }}</td>
-                            <td class="px-2.5 py-2.5">{{ $vehicle['route'] }}</td>
-                            <td class="px-2.5 py-2.5">{{ $vehicle['operator'] }}</td>
-                            <td class="px-2.5 py-2.5">₱{{ number_format($route['boundary'] ?? 0, 2) }}</td>
+                            <td class="px-5 py-3 font-mono">{{ $vehicle['plate_number'] }}</td>
+                            <td class="px-5 py-3">{{ $vehicle['route'] }}</td>
+                            <td class="px-5 py-3">{{ $vehicle['operator'] }}</td>
+                            <td class="px-5 py-3">₱{{ number_format($route['boundary'] ?? 0, 2) }}</td>
                         </tr>
                     @empty
                         <tr>
