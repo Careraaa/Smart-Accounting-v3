@@ -1,4 +1,4 @@
-﻿@extends('layouts.layout')
+@extends('layouts.layout')
 
 @push('styles')
 <style>
@@ -76,24 +76,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
         </div>
 
-        {{-- STAT CARDS ROW 1: Workforce, Today, Leaves, Payroll --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Workforce</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.15s">{{ $activeEmployees }}<span class="text-xs text-gray-400 font-medium">/{{ $totalEmployees }}</span></p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center transition-all duration-300 group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    </div>
-                </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span>{{ $inactiveEmployees }} inactive</span>
-                    <span class="text-gray-300">·</span>
-                    <span>{{ $onLeaveEmployees }} on leave</span>
-                </div>
-            </div>
+        {{-- STAT CARDS ROW 1: Today, Leaves, Payroll --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-cyan-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
                 <div class="flex items-center justify-between">
                     <div>
@@ -142,24 +126,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
         </div>
 
-        {{-- STAT CARDS ROW 2: Pipeline, OT/UT, Advances --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pipeline</p>
-                        <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.35s">{{ $approvedPayroll }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center transition-all duration-300 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    </div>
-                </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>{{ $processingPayroll }} processing</span>
-                    <span class="text-gray-300">·</span>
-                    <span>{{ $approvedPayroll }} approved</span>
-                </div>
-            </div>
+        {{-- STAT CARDS ROW 2: OT/UT, Advances --}}
+        <div class="grid grid-cols-2 gap-3">
             <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-rose-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
                 <div class="flex items-center justify-between">
                     <div>
@@ -255,222 +223,125 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
             </div>
 
-            {{-- Leave Activity Graph --}}
-            @php
-            $lvCnt = count($leaveTrend);
-            $lvH = 104;
-            $lvMax = collect($leaveTrend)->map(fn($m) => $m['total'])->max() ?: 1;
-            $lvApprovedH = [];
-            $lvRestH = [];
-            foreach ($leaveTrend as $i => $m) {
-                $a = $lvMax > 0 ? round(($m['approved'] / $lvMax) * $lvH) : 0;
-                $lvApprovedH[$i] = $a;
-                $lvRestH[$i] = $lvMax > 0 ? round(($m['total'] / $lvMax) * $lvH) - $a : 0;
+        </div>
+
+
+
+        {{-- Charts row: Net Payroll Trend + Allowances vs Deductions --}}
+        @php
+            $trendPts = $monthlyPayrollTrend;
+            $trendCount = count($trendPts);
+            $chartMax = $trendCount > 0 ? max(array_column($trendPts, 'total')) : 1;
+            $chartH = 160;
+            $chartW = 600;
+            $padL = 0; $padR = 0; $padT = 8; $padB = 24;
+            $plotW = $chartW - $padL - $padR;
+            $plotH = $chartH - $padT - $padB;
+            $cnt = $trendCount;
+            $step = $cnt > 1 ? $plotW / ($cnt - 1) : 0;
+            $points = [];
+            foreach ($trendPts as $i => $pt) {
+                $x = $i * $step;
+                $y = $plotH - ($chartMax > 0 ? ($pt['total'] / $chartMax) * $plotH : 0);
+                $points[] = round($x + $padL, 1) . ',' . round($y + $padT, 1);
             }
-            $lvLast = $lvCnt - 1;
-            @endphp
-            <div class="sad-fade-up kpi-card overflow-hidden" style="animation-delay:0.1s">
-                <div class="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
-                    <div>
-                        <p class="kcard-label">Leave Activity</p>
-                        <p class="kcard-value mt-1">{{ collect($leaveTrend)->sum('total') }}</p>
-                    </div>
-                    <div class="flex items-center gap-3 lv-total text-[11px]">
-                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-emerald-500"></span> Approved</span>
-                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-gray-300"></span> Total</span>
-                    </div>
+            $ta = (float) ($totalAllowances ?? 0);
+            $td = (float) ($totalDeductions ?? 0);
+            $adTotal = $ta + $td;
+            $adAllowPct = $adTotal > 0 ? round(($ta / $adTotal) * 100) : 0;
+            $adDeducPct = $adTotal > 0 ? round(($td / $adTotal) * 100) : 0;
+            $circ = 2 * pi() * 36;
+            $allowOffset = $adAllowPct / 100 * $circ;
+        @endphp
+        <div class="grid grid-cols-1 gap-4">
+
+            {{-- Net Payroll Trend (SVG line chart) --}}
+            <div class="sad-fade-up kpi-card overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="text-[13px] font-semibold text-gray-900">Net Payroll Trend</h2>
+                    <span class="text-[11px] text-gray-400">Last 6 months</span>
                 </div>
-                <div class="px-4 pb-4">
-                    @if($lvCnt > 0)
-                    <div class="lv-plot">
-                        <div class="lv-grid" style="bottom:0"></div>
-                        <div class="lv-grid" style="bottom:50%"></div>
-                        <div class="lv-grid lv-grid-top" style="bottom:100%"></div>
-                        <span class="at-max">{{ $lvMax }}</span>
-                        <div class="lv-cols">
-                            @foreach ($leaveTrend as $i => $m)
-                            <div class="lv-col" title="{{ $m['label'] }} — {{ $m['approved'] }} approved of {{ $m['total'] }} total">
-                                <div class="lv-bar" style="height:{{ $lvApprovedH[$i] + $lvRestH[$i] }}px;animation-delay:{{ 0.05 + $i * 0.05 }}s">
-                                    <div class="lv-approved" style="height:{{ $lvApprovedH[$i] }}px"></div>
-                                    <div class="{{ $i === $lvLast ? 'lv-rest-last' : 'lv-rest' }}" style="height:{{ $lvRestH[$i] }}px"></div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div class="lv-days">
-                        @foreach ($leaveTrend as $m)
-                        <span>{{ $m['label'] }}</span>
+                <div class="p-4">
+                    @if($trendCount > 0)
+                    <svg viewBox="0 0 {{ $chartW }} {{ $chartH }}" class="w-full h-auto" style="max-height:180px">
+                        @for ($g = 0; $g <= 4; $g++)
+                        @php $gy = $padT + ($plotH / 4) * $g; @endphp
+                        <line x1="{{ $padL }}" y1="{{ $gy }}" x2="{{ $chartW - $padR }}" y2="{{ $gy }}" stroke="#f0f0f0" stroke-width="1"/>
+                        @endfor
+                        <path d="M{{ $points[0] }} L{{ implode(' L', $points) }} L{{ $padL + ($cnt - 1) * $step }},{{ $padT + $plotH }} L{{ $padL }},{{ $padT + $plotH }} Z"
+                              fill="url(#saChartGrad)" opacity="0.15"/>
+                        <polyline points="{{ implode(' ', $points) }}" fill="none" stroke="#c8292a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                  class="sad-chart-line"/>
+                        @foreach ($trendPts as $i => $pt)
+                        @php $dx = $i * $step + $padL; $dy = $plotH - ($chartMax > 0 ? ($pt['total'] / $chartMax) * $plotH : 0) + $padT; @endphp
+                        <circle cx="{{ $dx }}" cy="{{ $dy }}" r="3.5" fill="#c8292a" stroke="white" stroke-width="2" class="sad-chart-dot"
+                                style="animation-delay:{{ 0.1 + $i * 0.05 }}s"/>
                         @endforeach
+                        @foreach ($trendPts as $i => $pt)
+                        @php $lx = $i * $step + $padL; @endphp
+                        <text x="{{ $lx }}" y="{{ $chartH - 4 }}" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="monospace">{{ $pt['month'] ?? \Carbon\Carbon::parse($pt['label'])->format('M') }}</text>
+                        @endforeach
+                        <defs>
+                            <linearGradient id="saChartGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#c8292a"/>
+                                <stop offset="100%" stop-color="#c8292a" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="flex items-center justify-between mt-2 text-[10px] text-gray-400">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+                            Net pay trend
+                        </span>
+                        <span>
+                            Peak: <strong class="text-gray-700 font-mono">₱{{ number_format($chartMax, 2) }}</strong>
+                        </span>
                     </div>
                     @else
-                    <div class="flex items-center justify-center h-[104px] text-xs text-gray-400">No leave data yet.</div>
+                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No trend data yet.</div>
                     @endif
                 </div>
             </div>
-        </div>
 
-        {{-- REMITTANCE OVERVIEW --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Collections</p>
-                        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.15s">₱{{ number_format($totalCollections, 2) }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center transition-all duration-300 group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110">
-
-
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-                    </div>
+            {{-- Allowances vs Deductions (CSS donut) --}}
+            <div class="sad-fade-up kpi-card overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="text-[13px] font-semibold text-gray-900">Allowances vs Deductions</h2>
+                    <span class="text-[11px] text-gray-400">Aggregate amounts</span>
                 </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span>Finalized remittances</span>
+                <div class="px-4 py-4">
+                    @if($adTotal > 0)
+                    <div class="flex flex-col sm:flex-row items-center gap-5">
+                        <div class="relative w-[120px] h-[120px] shrink-0">
+                            <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="#22c55e" stroke-width="8" stroke-dasharray="{{ $allowOffset }} {{ $circ }}" stroke-dashoffset="0" stroke-linecap="round" class="sad-donut-seg" style="--pct:{{ $allowOffset }}"/>
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="#f43f5e" stroke-width="8" stroke-dasharray="{{ $circ - $allowOffset }} {{ $circ }}" stroke-dashoffset="{{ -$allowOffset }}" stroke-linecap="round" class="sad-donut-seg" style="--pct:{{ $circ - $allowOffset }};animation-delay:0.3s"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">₱{{ number_format($adTotal/1000,2) }}k</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 space-y-2 w-full">
+                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-emerald-50 transition-colors">
+                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-emerald-500"></span>
+                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Allowances</span>
+                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">₱{{ number_format($ta,2) }}</span>
+                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adAllowPct }}%</span>
+                            </div>
+                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-rose-50 transition-colors">
+                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-rose-500"></span>
+                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Deductions</span>
+                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">₱{{ number_format($td,2) }}</span>
+                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adDeducPct }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    @else
+                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No data yet.</div>
+                    @endif
                 </div>
             </div>
-            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-red-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Expenses</p>
-                        <p class="text-lg font-bold text-red-500 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.2s">₱{{ number_format($totalExpenses, 2) }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-red-50 text-red-500 flex items-center justify-center transition-all duration-300 group-hover:bg-red-500 group-hover:text-white group-hover:scale-110">
 
-
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
-                    </div>
-                </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span>{{ $totalExpenses > 0 ? round(($totalExpenses / max($totalCollections, 1)) * 100, 1) : 0 }}% of collections</span>
-                </div>
-            </div>
-            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-blue-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-                        <p class="text-lg font-bold text-blue-600 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.25s">₱{{ number_format($totalNetRemittance, 2) }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center transition-all duration-300 group-hover:bg-blue-500 group-hover:text-white group-hover:scale-110">
-
-
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span>{{ $totalCollections > 0 ? round(($totalNetRemittance / $totalCollections) * 100, 1) : 0 }}% margin</span>
-                </div>
-            </div>
-            <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-amber-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.2s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
-                        <p class="text-lg font-bold text-amber-600 tabular-nums mt-0.5 sad-count-num" style="animation-delay:0.3s">{{ $pendingRemittancesCount }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center transition-all duration-300 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span>{{ $completedRemittances }} finalized</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Payroll breakdown + Payroll status row --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="sad-fade-up kpi-card overflow-hidden" style="animation-delay:0.1s">
-                <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-900">Payroll breakdown</span>
-                    <span class="text-[9px] text-gray-400">Avg ₱{{ number_format($averageBasicSalary ?? 0, 2) }}</span>
-                </div>
-                <div class="px-5 py-4 space-y-4">
-                    <div>
-                        <div class="flex items-center justify-between text-[10px] mb-1.5">
-                            <span class="font-semibold text-gray-700">Allowances</span>
-                            <span class="font-mono tabular-nums text-gray-500">₱{{ number_format($totalAllowances, 2) }} · {{ number_format($allowancePercentage, 1) }}%</span>
-                        </div>
-                        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-emerald-500 transition-all duration-700" style="width: {{ $allowancePercentage }}%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex items-center justify-between text-[10px] mb-1.5">
-                            <span class="font-semibold text-gray-700">Deductions</span>
-                            <span class="font-mono tabular-nums text-gray-500">₱{{ number_format($totalDeductions, 2) }} · {{ number_format($deductionPercentage, 1) }}%</span>
-                        </div>
-                        <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-rose-500 transition-all duration-700" style="width: {{ $deductionPercentage }}%"></div>
-                        </div>
-                    </div>
-                    <div class="pt-2 border-t border-gray-100 grid grid-cols-2 gap-4 text-center">
-                        <div>
-                            <div class="text-base font-extrabold text-gray-900 tabular-nums">₱{{ number_format($totalPayroll, 2) }}</div>
-                            <div class="text-[0.55rem] font-semibold uppercase tracking-wider text-gray-400 mt-0.5">Total Net Pay</div>
-                        </div>
-                        <div>
-                            <div class="text-base font-extrabold text-gray-900 tabular-nums">{{ number_format($totalPayroll > 0 ? $totalDeductions / $totalPayroll * 100 : 0, 1) }}%</div>
-                            <div class="text-[0.55rem] font-semibold uppercase tracking-wider text-gray-400 mt-0.5">Deduction Rate</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="sad-fade-up kpi-card overflow-hidden" style="animation-delay:0.15s">
-                <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
-                    <span class="text-xs font-bold text-gray-900">Payroll status</span>
-                    <span class="text-[9px] text-gray-400">{{ $approvedPayroll + $approvedPayroll + $processingPayroll + $rejectedPayroll }} total</span>
-                </div>
-                <div class="px-5 py-4 space-y-3">
-                    @php $pipelineTotal = max(1, $approvedPayroll + $approvedPayroll + $processingPayroll + $rejectedPayroll); @endphp
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-900">Released</span>
-                                <span class="text-xs font-extrabold text-gray-900 tabular-nums">{{ $approvedPayroll }}</span>
-                            </div>
-                            <div class="w-full h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
-                                <div class="h-full rounded-full bg-emerald-500" style="width: {{ ($approvedPayroll / $pipelineTotal) * 100 }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 rounded-full bg-blue-500 shrink-0"></div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-900">Approved</span>
-                                <span class="text-xs font-extrabold text-gray-900 tabular-nums">{{ $approvedPayroll }}</span>
-                            </div>
-                            <div class="w-full h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
-                                <div class="h-full rounded-full bg-blue-500" style="width: {{ ($approvedPayroll / $pipelineTotal) * 100 }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-900">Processing</span>
-                                <span class="text-xs font-extrabold text-gray-900 tabular-nums">{{ $processingPayroll }}</span>
-                            </div>
-                            <div class="w-full h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
-                                <div class="h-full rounded-full bg-amber-500" style="width: {{ ($processingPayroll / $pipelineTotal) * 100 }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 rounded-full bg-rose-500 shrink-0"></div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-gray-900">Rejected</span>
-                                <span class="text-xs font-extrabold text-gray-900 tabular-nums">{{ $rejectedPayroll }}</span>
-                            </div>
-                            <div class="w-full h-1.5 bg-gray-100 rounded-full mt-1 overflow-hidden">
-                                <div class="h-full rounded-full bg-rose-500" style="width: {{ ($rejectedPayroll / $pipelineTotal) * 100 }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
     </div>
