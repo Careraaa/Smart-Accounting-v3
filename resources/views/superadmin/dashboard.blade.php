@@ -159,7 +159,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
         </div>
 
         {{-- CHART CARDS: Attendance, Net Payroll Trend, Allowances vs Deductions, Daily Remittance --}}
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
             {{-- Attendance Trend (SVG line chart) --}}
             @php
