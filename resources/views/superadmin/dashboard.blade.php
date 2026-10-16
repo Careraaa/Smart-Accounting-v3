@@ -77,7 +77,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
         </div>
 
         {{-- STAT CARDS ROW 1: Today, Leaves, Payroll --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-cyan-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.1s">
                 <div class="flex items-center justify-between">
                     <div>
@@ -123,11 +123,9 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
                             <span>₱{{ number_format($averageBasicSalary ?? 0, 2) }} avg basic</span>
                 </div>
-            </div>
         </div>
 
         {{-- STAT CARDS ROW 2: OT/UT, Advances --}}
-        <div class="grid grid-cols-2 gap-3">
             <div class="sad-bounce sad-stat-card kpi-card p-3.5 group hover:border-rose-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.3s">
                 <div class="flex items-center justify-between">
                     <div>
@@ -160,8 +158,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
         </div>
 
-        {{-- GRAPH CARDS ROW --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {{-- CHART CARDS: Attendance, Net Payroll Trend, Allowances vs Deductions, Daily Remittance --}}
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
 
             {{-- Attendance Trend (SVG line chart) --}}
             @php
@@ -253,7 +251,6 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             $circ = 2 * pi() * 36;
             $allowOffset = $adAllowPct / 100 * $circ;
         @endphp
-        <div class="grid grid-cols-1 gap-4">
 
             {{-- Net Payroll Trend (SVG line chart) --}}
             <div class="sad-fade-up kpi-card overflow-hidden">
@@ -423,7 +420,6 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 @endif
             </div>
 
-        </div>
 
     </div>
 
