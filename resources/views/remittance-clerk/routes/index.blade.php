@@ -91,8 +91,8 @@
                         <td class="px-5 py-3 text-xs font-semibold text-gray-700">{{ $route->origin ?? '—' }}</td>
                         <td class="px-5 py-3 text-xs font-semibold text-gray-700">{{ $route->destination ?? '—' }}</td>
                         <td class="px-5 py-3 text-xs text-gray-600">{{ $route->route_name ?? '—' }}</td>
-                        <td class="px-5 py-3 text-xs font-bold text-amber-600">₱{{ number_format($route->weekday_boundary, 2) }}</td>
-                        <td class="px-5 py-3 text-xs font-bold text-amber-600">₱{{ number_format($route->weekend_boundary, 2) }}</td>
+                        <td class="px-5 py-3 text-xs font-bold text-gray-900">₱{{ number_format($route->weekday_boundary, 2) }}</td>
+                        <td class="px-5 py-3 text-xs font-bold text-gray-900">₱{{ number_format($route->weekend_boundary, 2) }}</td>
                         <td class="px-5 py-3 text-xs text-center font-bold text-gray-700">{{ $route->vehicles->count() }}</td>
                         <td class="px-5 py-3 text-xs text-center font-bold text-emerald-600">{{ $route->vehicles->where('status', 'active')->count() }}</td>
                     </tr>
