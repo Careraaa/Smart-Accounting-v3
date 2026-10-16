@@ -197,6 +197,10 @@ class HrReportController extends Controller
                 }
             }
 
+            $empSssShare = $payroll->employer_sss ?? $empSssShare;
+            $empPagibigShare = $payroll->employer_pagibig ?? $empPagibigShare;
+            $empPhilhealthShare = $payroll->employer_philhealth ?? $empPhilhealthShare;
+
             $contributions[] = [
                 'employee_name' => $payroll->user->name ?? 'Unknown',
                 'period_start' => $payroll->payroll_period_start,
@@ -326,6 +330,10 @@ class HrReportController extends Controller
                     }
                 }
             }
+
+            $empSssShare = $payroll->employer_sss ?? $empSssShare;
+            $empPagibigShare = $payroll->employer_pagibig ?? $empPagibigShare;
+            $empPhilhealthShare = $payroll->employer_philhealth ?? $empPhilhealthShare;
 
             $contributions[] = [
                 'employee_name' => $payroll->user->name ?? 'Unknown',

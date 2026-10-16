@@ -41,7 +41,10 @@ class GeneralLedgerController extends Controller
 
                 $runningBalance = 0;
                 foreach ($transactions as &$t) {
-                    $runningBalance += (float) $t->debit - (float) $t->credit;
+                    $runningBalance += $selectedAccount->normalBalance(
+                        (float) $t->debit,
+                        (float) $t->credit
+                    );
                     $t->running_balance = $runningBalance;
                 }
                 unset($t);
@@ -66,13 +69,20 @@ class GeneralLedgerController extends Controller
         ], 'credit');
 
         $accounts = $query->orderBy('account_code')->get()->map(function ($account) {
-            $account->balance = (float) $account->total_debit - (float) $account->total_credit;
+            $account->total_debit = (float) $account->total_debit;
+            $account->total_credit = (float) $account->total_credit;
+            $account->balance = $account->normalBalance($account->total_debit, $account->total_credit);
             return $account;
         });
 
-        $totalDebit = $accounts->sum('total_debit');
-        $totalCredit = $accounts->sum('total_credit');
+        $totalDebit = (float) $accounts->sum('total_debit');
+        $totalCredit = (float) $accounts->sum('total_credit');
+        $netExpenses = (float) $accounts
+            ->where('account_type', 'Expense')
+            ->sum(fn ($account) => $account->normal_balance_side === 'debit'
+                ? $account->balance
+                : -$account->balance);
 
-        return view('accounting.general-ledger.summary', compact('accounts', 'totalDebit', 'totalCredit'));
+        return view('accounting.general-ledger.summary', compact('accounts', 'totalDebit', 'totalCredit', 'netExpenses'));
     }
 }

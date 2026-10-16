@@ -35,4 +35,25 @@ class PayrollJournalController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
+    public function refresh(PayrollBatch $batch)
+    {
+        if ($batch->status !== 'approved' || $batch->isThirteenthMonth()) {
+            return redirect()->back()->with('error', 'Only approved regular payroll batches can have their journal entries refreshed.');
+        }
+
+        $journalEntry = $this->journalService->getJournalEntryForBatch($batch);
+        if (!$journalEntry || $journalEntry->status !== 'Draft') {
+            return redirect()->back()->with('error', 'Only an existing draft journal entry can be refreshed.');
+        }
+
+        try {
+            $journalEntry = $this->journalService->generateJournalEntryForBatch($batch, $journalEntry);
+
+            return redirect()->route('accounting.journal-entries.show', $journalEntry)
+                ->with('success', "Draft journal entry {$journalEntry->journal_number} refreshed from the current payroll totals.");
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
 }

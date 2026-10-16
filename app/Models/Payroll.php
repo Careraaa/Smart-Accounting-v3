@@ -12,7 +12,7 @@ class Payroll extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'batch_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'payment_method', 'approved_by', 'total_allowances', 'total_bonuses', 'total_deductions', 'cash_advance_deduction', 'salary_loan_deduction', 'loan_deduction_data', 'days_worked', 'hours_worked', 'basic_salary', 'gross_pay', 'net_pay', 'holiday_pay', 'holiday_ot_pay', 'holiday_ot_hours', 'holiday_breakdown', 'sss', 'pagibig', 'philhealth', 'withholding_tax'];
+    protected $fillable = ['user_id', 'batch_id', 'payroll_period_start', 'payroll_period_end', 'status', 'payment_date', 'payment_method', 'approved_by', 'total_allowances', 'total_bonuses', 'total_deductions', 'cash_advance_deduction', 'salary_loan_deduction', 'loan_deduction_data', 'days_worked', 'hours_worked', 'basic_salary', 'gross_pay', 'net_pay', 'holiday_pay', 'holiday_ot_pay', 'holiday_ot_hours', 'holiday_breakdown', 'sss', 'pagibig', 'philhealth', 'withholding_tax', 'employer_sss', 'employer_pagibig', 'employer_philhealth'];
 
     protected $casts = [
         'payroll_period_start' => 'date',
@@ -20,6 +20,9 @@ class Payroll extends Model
         'payment_date' => 'date',
         'holiday_breakdown' => 'array',
         'loan_deduction_data' => 'array',
+        'employer_sss' => 'decimal:2',
+        'employer_pagibig' => 'decimal:2',
+        'employer_philhealth' => 'decimal:2',
     ];
 
     /* ======================

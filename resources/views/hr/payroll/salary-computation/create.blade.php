@@ -462,7 +462,7 @@
             </div>
             <div>
                 <p class="prl-card-head-title">Additional Deductions <span style="font-weight:400; color:#9ca3af; font-size:0.78rem; margin-left:6px;">optional</span></p>
-                <p class="prl-card-head-sub">Cash advances, loans, and other custom deductions</p>
+                <p class="prl-card-head-sub">Choose the accounting treatment for each deduction before saving</p>
             </div>
         </div>
         <div class="prl-card-body">

@@ -17,6 +17,8 @@ class PayrollDeduction extends Model
         'hours',
         'amount',
         'description',
+        'accounting_treatment',
+        'deduction_source',
     ];
 
     protected $casts = [
@@ -28,5 +30,3 @@ class PayrollDeduction extends Model
         return $this->belongsTo(Payroll::class);
     }
 }
-
-

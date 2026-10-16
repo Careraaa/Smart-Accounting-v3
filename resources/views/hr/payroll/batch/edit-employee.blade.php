@@ -259,7 +259,7 @@
                 && !str_starts_with($type, 'Undertime Deduction')
                 && !str_starts_with($type, 'Late Deduction');
         })
-        ->map(fn($d) => ['name' => $d->deduction_type ?? $d->name, 'amount' => $d->amount])
+        ->map(fn($d) => ['name' => $d->deduction_type ?? $d->name, 'amount' => $d->amount, 'accounting_treatment' => $d->accounting_treatment])
         ->values();
     $manualBonuses = $payroll->bonuses
         ->map(fn($b) => ['type' => $b->bonus_type, 'description' => $b->description ?? '', 'amount' => $b->amount])
@@ -464,6 +464,21 @@ window._ep = {
             pill.innerHTML = '<span class="max-w-[120px] truncate">' + labelFn(item) + '</span>'
                 + '<span class="tabular-nums font-mono opacity-85">&nbsp;' + fmt(item.amount) + '</span>'
                 + '<button type="button" class="w-3.5 h-3.5 rounded-full border-none flex items-center justify-center text-[10px] cursor-pointer p-0 shrink-0 opacity-55 hover:opacity-100 transition-opacity" data-idx="' + idx + '">\u2715</button>';
+            if (cid === 'ep_deduct_pills') {
+                const treatment = document.createElement('select');
+                treatment.className = 'border border-red-200 rounded px-1 py-0.5 text-[10px] bg-white';
+                treatment.setAttribute('aria-label', 'Accounting treatment for ' + item.name);
+                treatment.innerHTML = '<option value="">Classify</option>'
+                    + '<option value="contra_expense">Wage reduction (5060)</option>'
+                    + '<option value="payable">Withheld payable (2070)</option>'
+                    + '<option value="employee_receivable">Employee receivable (1030)</option>';
+                treatment.value = item.accounting_treatment || '';
+                treatment.addEventListener('change', function () {
+                    deductions[idx].accounting_treatment = treatment.value;
+                    render();
+                });
+                pill.insertBefore(treatment, pill.querySelector('button'));
+            }
             pill.querySelector('button').addEventListener('click', function(e) {
                 e.stopPropagation();
                 removeFn(parseInt(this.dataset.idx));
@@ -503,7 +518,7 @@ window._ep = {
         buildHidden('ep_allow_hidden',allowances,'allowances',['name','amount']);
         renderPills('ep_deduct_pills','ep_deduct_empty',deductions,d=>d.name,idx=>{deductions.splice(idx,1);render();});
         renderSubtotal('ep_deduct_subtotal','ep_deduct_total',deductions);
-        buildHidden('ep_deduct_hidden',deductions,'deductions',['name','amount']);
+        buildHidden('ep_deduct_hidden',deductions,'deductions',['name','amount','accounting_treatment']);
         renderPills('ep_bonus_pills','ep_bonus_empty',bonuses,b=>(BONUS_LABELS[b.type]||b.type)+(b.description?' \u2014 '+b.description:''),idx=>{bonuses.splice(idx,1);render();});
         renderSubtotal('ep_bonus_subtotal','ep_bonus_total',bonuses);
         buildHidden('ep_bonus_hidden',bonuses,'bonuses',['type','description','amount']);
@@ -522,7 +537,7 @@ window._ep = {
     $('ep_deduct_btn').addEventListener('click', function() {
         const name = $('ep_deduct_name').value.trim(), amount = parseFloat($('ep_deduct_amount').value);
         if (!name || isNaN(amount) || amount <= 0) return;
-        deductions.push({name, amount});
+        deductions.push({name, amount, accounting_treatment: ''});
         $('ep_deduct_name').value = ''; $('ep_deduct_amount').value = '';
         render(); fetchPreview();
     });
@@ -548,7 +563,11 @@ window._ep = {
         body.append('period_start', cfg.periodStart);
         body.append('period_end', cfg.periodEnd);
         allowances.forEach((a,i) => { body.append('allowances['+i+'][name]',a.name); body.append('allowances['+i+'][amount]',a.amount); });
-        deductions.forEach((d,i) => { body.append('deductions['+i+'][name]',d.name); body.append('deductions['+i+'][amount]',d.amount); });
+        deductions.forEach((d,i) => {
+            body.append('deductions['+i+'][name]',d.name);
+            body.append('deductions['+i+'][amount]',d.amount);
+            body.append('deductions['+i+'][accounting_treatment]',d.accounting_treatment || '');
+        });
         const token = document.querySelector('meta[name="csrf-token"]');
         fetch(cfg.previewUrl, {method:'POST',headers:{'X-CSRF-TOKEN':token?token.content:'','Accept':'application/json'},body})
         .then(r => r.ok ? r.json() : null)
@@ -577,7 +596,11 @@ window._ep = {
     }
 
     cfg.initAllowances.forEach(a => allowances.push({name:a.name, amount:parseFloat(a.amount)}));
-    cfg.initDeductions.forEach(d => deductions.push({name:d.name, amount:parseFloat(d.amount)}));
+    cfg.initDeductions.forEach(d => deductions.push({
+        name: d.name,
+        amount: parseFloat(d.amount),
+        accounting_treatment: d.accounting_treatment || '',
+    }));
     cfg.initBonuses.forEach(b => bonuses.push({type:b.type, description:b.description??'', amount:parseFloat(b.amount)}));
 
     render();
