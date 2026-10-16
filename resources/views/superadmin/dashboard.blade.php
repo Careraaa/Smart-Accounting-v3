@@ -366,7 +366,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             <p class="kcard-label">Daily Remittance Trend</p>
             <p class="text-xl font-semibold text-gray-900 tabular-nums mt-1">&#8369;{{ number_format($rcTotal, 0) }}</p>
         </div>
-        <a href="{{ route('remittances.index') }}" class="btn-uv-pill shrink-0 mt-0.5">View all &rarr;</a>
+        <a href="{{ route('remittances.index') }}" class="shrink-0 mt-1 text-[11px] font-medium text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">View all &rarr;</a>
     </div>
     <div class="px-4 pb-4 pt-2">
         @if($rcCount > 1)
