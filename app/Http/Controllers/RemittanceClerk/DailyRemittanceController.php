@@ -10,6 +10,7 @@ use App\Models\Route;
 use App\Models\Vehicle;
 use App\Notifications\RemittanceNotification;
 use App\Traits\LogsUserActivity;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DailyRemittanceController extends Controller
@@ -126,7 +127,9 @@ class DailyRemittanceController extends Controller
 
         // Disregard the boundary rate while the vehicle is under maintenance
         $isMaintenance = $vehicleStatus === 'under_maintenance';
-        $boundary = $isMaintenance ? 0 : ($vehicle->route->boundary ?? 0);
+        $boundary = $isMaintenance
+            ? 0
+            : ($vehicle->route?->boundaryForDate(Carbon::parse($validated['remittance_date'])) ?? 0);
         $validated['boundary'] = $boundary;
         $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
 
@@ -215,7 +218,9 @@ class DailyRemittanceController extends Controller
 
         // Disregard the boundary rate while the vehicle is under maintenance
         $isMaintenance = $vehicleStatus === 'under_maintenance';
-        $boundary = $isMaintenance ? 0 : ($vehicle->route->boundary ?? 0);
+        $boundary = $isMaintenance
+            ? 0
+            : ($vehicle->route?->boundaryForDate(Carbon::parse($validated['remittance_date'])) ?? 0);
         $validated['boundary'] = $boundary;
         $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
 

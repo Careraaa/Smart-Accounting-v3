@@ -7,7 +7,6 @@ use App\Models\DailyRemittance;
 use App\Models\Driver;
 use App\Models\PAO;
 use App\Models\Vehicle;
-use App\Models\Route;
 use Carbon\Carbon;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
@@ -171,7 +170,6 @@ class ReportController extends Controller
     public function printVehicleRouteReport()
     {
         $vehicles = Vehicle::with('route')->where('status', 'active')->get();
-        $routes = Route::where('status', 'active')->get();
 
         $vehicleStats = $vehicles->map(function ($vehicle) {
             return [
@@ -181,21 +179,11 @@ class ReportController extends Controller
                 'route' => $vehicle->route->route_name ?? 'N/A',
                 'operator' => $vehicle->operator,
                 'status' => $vehicle->status,
+                'weekday_boundary' => $vehicle->route->weekday_boundary ?? 0,
+                'weekend_boundary' => $vehicle->route->weekend_boundary ?? 0,
             ];
         });
 
-        $routeStats = $routes->map(function ($route) {
-            $vehicles = Vehicle::where('route_id', $route->id)->count();
-            $remittances = DailyRemittance::where('route_id', $route->id)->count();
-            return [
-                'id' => $route->id,
-                'route_name' => $route->route_name,
-                'vehicles' => $vehicles,
-                'total_remittances' => $remittances,
-                'boundary' => $route->boundary,
-            ];
-        });
-
-        return view('remittance-clerk.reports.print.vehicle-route-report-print', compact('vehicleStats', 'routeStats'));
+        return view('remittance-clerk.reports.print.vehicle-route-report-print', compact('vehicleStats'));
     }
 }
