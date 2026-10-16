@@ -148,6 +148,7 @@
                 'deductions' => 'array',
                 'deductions.*.name' => 'string',
                 'deductions.*.amount' => 'numeric',
+                'deductions.*.accounting_treatment' => 'required|in:contra_expense,payable,employee_receivable',
             ]);
 
             $employee = User::findOrFail($validated['user_id']);
@@ -180,6 +181,7 @@
                 'deductions' => 'array',
                 'deductions.*.name' => 'string',
                 'deductions.*.amount' => 'numeric',
+                'deductions.*.accounting_treatment' => 'nullable|in:contra_expense,payable,employee_receivable',
             ]);
 
             $employee = User::findOrFail($request->user_id);
@@ -413,7 +415,7 @@
                 $manualDeductions = $payroll->deductions
                     ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                         || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
-                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount, 'accounting_treatment' => $d->accounting_treatment])
                     ->values()
                     ->toArray();
 
@@ -609,45 +611,53 @@
                 'deductions' => 'array',
                 'deductions.*.name' => 'required|string',
                 'deductions.*.amount' => 'required|numeric|min:0',
+                'deductions.*.accounting_treatment' => 'required|in:contra_expense,payable,employee_receivable',
                 'bonuses' => 'array',
                 'bonuses.*.type' => 'required|in:performance,holiday,attendance,special',
                 'bonuses.*.description' => 'nullable|string|max:255',
                 'bonuses.*.amount' => 'required|numeric|min:0',
             ]);
 
-            $employee = $payroll->user;
-            $periodStart = Carbon::parse($batch->period_start);
-            $periodEnd = Carbon::parse($batch->period_end);
+            [$updatedPayroll, $employee] = DB::transaction(function () use ($batch, $payroll, $validated) {
+                $lockedBatch = PayrollBatch::whereKey($batch->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                abort_if(!$lockedBatch->isEditable(), 403, 'This batch is no longer editable.');
 
-            // After HR saves changes for an employee, mark it as prepared for batch submission.
-            $extraData = [
-                'status' => 'prepared',
-            ];
+                $lockedPayroll = Payroll::whereKey($payroll->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                abort_if((int) $lockedPayroll->batch_id !== (int) $lockedBatch->id, 403, 'Payroll does not belong to this batch.');
+                $lockedPayroll->load('user');
+                $employee = $lockedPayroll->user;
 
-            // Revert old loan deductions on source records first, so
-            // applyLoanDeductions below doesn't double-count them.
-            PayrollDeductionService::revertLoanDeductions($payroll);
+                $periodStart = Carbon::parse($lockedBatch->period_start);
+                $periodEnd = Carbon::parse($lockedBatch->period_end);
 
-            // Clear loan columns so updatePayroll doesn't preserve stale values.
-            $payroll->update([
-                'cash_advance_deduction' => 0,
-                'salary_loan_deduction' => 0,
-                'loan_deduction_data' => null,
-            ]);
-            $payroll->refresh();
+                PayrollDeductionService::revertLoanDeductions($lockedPayroll);
+                $lockedPayroll->update([
+                    'cash_advance_deduction' => 0,
+                    'salary_loan_deduction' => 0,
+                    'loan_deduction_data' => null,
+                ]);
+                $lockedPayroll->refresh();
 
-            $updatedPayroll = $this->payrollService->updatePayroll(
-                $payroll,
-                $employee,
-                $periodStart,
-                $periodEnd,
-                $validated['allowances'] ?? [],
-                $validated['deductions'] ?? [],
-                $extraData,
-                $validated['bonuses'] ?? [],
-            );
+                $updatedPayroll = $this->payrollService->updatePayroll(
+                    $lockedPayroll,
+                    $employee,
+                    $periodStart,
+                    $periodEnd,
+                    $validated['allowances'] ?? [],
+                    $validated['deductions'] ?? [],
+                    ['status' => 'prepared'],
+                    $validated['bonuses'] ?? [],
+                );
 
-            PayrollDeductionService::applyLoanDeductions($updatedPayroll);
+                PayrollDeductionService::applyLoanDeductions($updatedPayroll);
+
+                return [$updatedPayroll, $employee];
+            });
+
             return redirect()
                 ->route('payroll.batch.confirm', $batch)
                 ->with('success', "{$employee->first_name} {$employee->last_name}'s payroll saved and marked as prepared.")
@@ -674,7 +684,7 @@
             $manualDeductions = $payroll->deductions
                 ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                     || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
-                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount, 'accounting_treatment' => $d->accounting_treatment])
                 ->values()
                 ->toArray();
 
@@ -767,7 +777,7 @@
                 $manualDeductions = $payroll->deductions
                     ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                         || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
-                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                    ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount, 'accounting_treatment' => $d->accounting_treatment])
                     ->values()
                     ->toArray();
 
@@ -978,7 +988,7 @@
             $manualDeductions = $payroll->deductions
                 ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                     || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
-                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount, 'accounting_treatment' => $d->accounting_treatment])
                 ->values()
                 ->toArray();
 
@@ -1050,6 +1060,7 @@
                 'deductions' => 'array',
                 'deductions.*.name' => 'string',
                 'deductions.*.amount' => 'numeric',
+                'deductions.*.accounting_treatment' => 'required|in:contra_expense,payable,employee_receivable',
             ]);
 
             $employee = User::findOrFail($validated['user_id']);
@@ -1124,7 +1135,7 @@
             $manualDeductions = $payroll->deductions
                 ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                     || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
-                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount, 'accounting_treatment' => $d->accounting_treatment])
                 ->values()
                 ->toArray();
 

@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
         netPay: 0,
         // Line items (HR-entered; these ARE submitted to the server)
         allowances: [], // { name, amount }
-        deductions: [], // { name, amount }
+        deductions: [], // { name, amount, accounting_treatment }
     };
 
     let fetchId = 0;
@@ -324,6 +324,23 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             pill.append(textEl, dot, amtEl, rmBtn);
+
+            if (inputPrefix === "deductions") {
+                const treatment = document.createElement("select");
+                treatment.className = "border border-red-200 rounded px-1 py-0.5 text-[10px] bg-white";
+                treatment.setAttribute("aria-label", `Accounting treatment for ${item.name}`);
+                treatment.innerHTML = '<option value="">Classify</option>'
+                    + '<option value="contra_expense">Wage reduction (5060)</option>'
+                    + '<option value="payable">Withheld payable (2070)</option>'
+                    + '<option value="employee_receivable">Employee receivable (1030)</option>';
+                treatment.value = item.accounting_treatment || "";
+                treatment.addEventListener("change", () => {
+                    item.accounting_treatment = treatment.value;
+                    render();
+                });
+                pill.insertBefore(treatment, rmBtn);
+            }
+
             pillArea.appendChild(pill);
 
             // Hidden POST inputs — submitted to the server on form save
@@ -338,6 +355,13 @@ document.addEventListener("DOMContentLoaded", function () {
             ai.value = item.amount;
 
             hiddenWrap.append(ni, ai);
+            if (inputPrefix === "deductions") {
+                const ti = document.createElement("input");
+                ti.type = "hidden";
+                ti.name = `${inputPrefix}[${i}][accounting_treatment]`;
+                ti.value = item.accounting_treatment || "";
+                hiddenWrap.append(ti);
+            }
         });
     }
 
@@ -391,6 +415,7 @@ document.addEventListener("DOMContentLoaded", function () {
         S.deductions.forEach((d, i) => {
             body.append(`deductions[${i}][name]`, d.name);
             body.append(`deductions[${i}][amount]`, d.amount);
+            body.append(`deductions[${i}][accounting_treatment]`, d.accounting_treatment || "");
         });
 
         try {
@@ -477,7 +502,7 @@ document.addEventListener("DOMContentLoaded", function () {
             EL.deductAmount.focus();
             return;
         }
-        S.deductions.push({ name, amount });
+        S.deductions.push({ name, amount, accounting_treatment: "" });
         EL.deductName.value = EL.deductAmount.value = "";
         EL.deductName.focus();
         // Re-fetch so server recomputes net_pay with the new deduction included
@@ -529,6 +554,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .map((d) => ({
             name: String(d.name || ""),
             amount: parseFloat(d.amount) || 0,
+            accounting_treatment: String(d.accounting_treatment || ""),
         }))
         .filter((d) => d.name && d.amount > 0);
 

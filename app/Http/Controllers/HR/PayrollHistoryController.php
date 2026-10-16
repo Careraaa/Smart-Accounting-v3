@@ -109,7 +109,7 @@ class PayrollHistoryController extends Controller
             $manualDeductions = $payroll->deductions
                 ->reject(fn ($d) => in_array($d->deduction_type, ['SSS', 'Pag-IBIG', 'PhilHealth', 'Late Deduction', 'Withholding Tax'])
                     || str_starts_with((string) ($d->deduction_type ?? ''), 'Undertime Deduction'))
-                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount])
+                ->map(fn ($d) => ['name' => $d->deduction_type, 'amount' => $d->amount, 'accounting_treatment' => $d->accounting_treatment])
                 ->values()
                 ->toArray();
 

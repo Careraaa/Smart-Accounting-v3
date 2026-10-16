@@ -547,6 +547,7 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
 
         // Payroll Journal Generation
         Route::post('payroll-journal/{batch}/generate', [\App\Http\Controllers\Accounting\PayrollJournalController::class, 'generate'])->name('payroll-journal.generate');
+        Route::post('payroll-journal/{batch}/refresh', [\App\Http\Controllers\Accounting\PayrollJournalController::class, 'refresh'])->name('payroll-journal.refresh');
     });
 });
 

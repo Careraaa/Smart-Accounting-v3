@@ -80,6 +80,19 @@ class ChartOfAccountController extends Controller
             'description'  => 'nullable|string|max:1000',
         ]);
 
+        if ($chartOfAccount->is_contra && $validated['account_type'] !== 'Expense') {
+            return redirect()->back()->withInput()
+                ->with('error', 'A contra-expense account must retain the Expense account type.');
+        }
+
+        if (
+            $chartOfAccount->account_type !== $validated['account_type']
+            && $chartOfAccount->journalEntryLines()->exists()
+        ) {
+            return redirect()->back()->withInput()
+                ->with('error', 'An account type cannot be changed after journal entries have been recorded.');
+        }
+
         $oldValues = $chartOfAccount->toArray();
         $chartOfAccount->update($validated);
 

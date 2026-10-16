@@ -48,7 +48,8 @@ class PayrollBatch extends Model
 
     public function journalEntries()
     {
-        return $this->hasMany(JournalEntry::class, 'reference_id')->where('reference_type', 'Payroll');
+        return $this->hasMany(JournalEntry::class, 'reference_id')
+            ->where('reference_type', $this->isThirteenthMonth() ? '13th Month Pay' : 'Payroll');
     }
 
     public function generatedBy()
