@@ -91,6 +91,13 @@ class DashboardController extends Controller
         $pendingRemittancesCount = DailyRemittance::where('status', 'pending')->count();
         $completedRemittances = DailyRemittance::where('status', 'completed')->count();
 
+        // Recent remittances — feeds the Daily Remittance Trend card
+        $recentRemittances = DailyRemittance::with('driver', 'vehicle', 'route')
+            ->whereIn('status', ['approved', 'completed'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
         // ============ ATTENDANCE TREND (Last 7 days) ============
         $attendanceTrend = [];
         for ($i = 6; $i >= 0; $i--) {
@@ -241,6 +248,7 @@ class DashboardController extends Controller
             'totalNetRemittance',
             'pendingRemittancesCount',
             'completedRemittances',
+            'recentRemittances',
             'attendanceTrend',
             'monthlyPayrollTrend',
             'leaveTrend',

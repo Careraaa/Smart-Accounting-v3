@@ -342,6 +342,87 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
             </div>
 
+        {{-- Daily Remittance Trend (rc* prefixed vars so they don't clash with the payroll chart above) --}}
+            @php
+            $dailyData = collect();
+            if (isset($recentRemittances) && $recentRemittances->isNotEmpty()) {
+                $grouped = $recentRemittances->groupBy(fn($r) => $r->remittance_date?->format('Y-m-d'));
+                $dailyData = $grouped->map(fn($items, $rdate) => [
+                    'date'  => $rdate,
+                    'label' => \Carbon\Carbon::parse($rdate)->format('M d'),
+                    'net'   => $items->sum('net_remittance'),
+                    'count' => $items->count(),
+                ])->sortBy('date')->values();
+            }
+            $rcMax = $dailyData->max('net') ?: 1;
+            $rcH = 160;
+            $rcW = 600;
+            $rcPadL = 0; $rcPadR = 0; $rcPadT = 6; $rcPadB = 22;
+            $rcPlotW = $rcW - $rcPadL - $rcPadR;
+            $rcPlotH = $rcH - $rcPadT - $rcPadB;
+            $rcCnt = $dailyData->count();
+            @endphp
+            <div class="sad-fade-up kpi-card overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between shrink-0">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        </div>
+                        <h2 class="text-[13px] font-semibold text-gray-900">Daily Remittance Trend</h2>
+                    </div>
+                    <a href="{{ route('remittances.index') }}" class="btn-uv-pill">View all &rarr;</a>
+                </div>
+                @if($dailyData->isNotEmpty())
+                <div class="p-4">
+                    <svg viewBox="0 0 {{ $rcW }} {{ $rcH }}" class="w-full h-auto" style="max-height:180px">
+                        @php
+                        $rcStep = $rcCnt > 1 ? $rcPlotW / ($rcCnt - 1) : 0;
+                        $rcPoints = [];
+                        foreach ($dailyData as $i => $d) {
+                            $x = $i * $rcStep;
+                            $y = $rcPlotH - ($rcMax > 0 ? ($d['net'] / $rcMax) * $rcPlotH : 0);
+                            $rcPoints[] = round($x + $rcPadL, 1) . ',' . round($y + $rcPadT, 1);
+                        }
+                        @endphp
+                        @for ($g = 0; $g <= 4; $g++)
+                        @php $rgy = $rcPadT + ($rcPlotH / 4) * $g; @endphp
+                        <line x1="{{ $rcPadL }}" y1="{{ $rgy }}" x2="{{ $rcW - $rcPadR }}" y2="{{ $rgy }}" stroke="#f0f0f0" stroke-width="1"/>
+                        @endfor
+                        <path d="M{{ $rcPoints[0] }} L{{ implode(' L', $rcPoints) }} L{{ $rcPadL + ($rcCnt - 1) * $rcStep }},{{ $rcPadT + $rcPlotH }} L{{ $rcPadL }},{{ $rcPadT + $rcPlotH }} Z"
+                              fill="url(#saRcGrad)" opacity="0.15"/>
+                        <polyline points="{{ implode(' ', $rcPoints) }}" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                  class="sad-chart-line"/>
+                        @foreach ($dailyData as $i => $d)
+                        @php $rdx = $i * $rcStep + $rcPadL; $rdy = $rcPlotH - ($rcMax > 0 ? ($d['net'] / $rcMax) * $rcPlotH : 0) + $rcPadT; @endphp
+                        <circle cx="{{ $rdx }}" cy="{{ $rdy }}" r="3.5" fill="#059669" stroke="white" stroke-width="2" class="sad-chart-dot"
+                                style="animation-delay:{{ 0.1 + $i * 0.05 }}s"/>
+                        @endforeach
+                        @foreach ($dailyData as $i => $d)
+                        @php $rlx = $i * $rcStep + $rcPadL; @endphp
+                        <text x="{{ $rlx }}" y="{{ $rcH - 4 }}" text-anchor="middle" fill="#9ca3af" font-size="12" font-family="monospace">{{ $d['label'] }}</text>
+                        @endforeach
+                        <defs>
+                            <linearGradient id="saRcGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#059669"/>
+                                <stop offset="100%" stop-color="#059669" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="flex items-center justify-between mt-2 text-[10px] text-gray-400">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                            Net remittance
+                        </span>
+                        <span>
+                            Total: <strong class="text-gray-700 font-mono">₱{{ number_format($dailyData->sum('net'), 2) }}</strong>
+                        </span>
+                    </div>
+                </div>
+                @else
+                <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No remittance data yet.</div>
+                @endif
+            </div>
+
         </div>
 
     </div>
