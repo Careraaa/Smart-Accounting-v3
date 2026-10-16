@@ -221,7 +221,6 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                 </div>
             </div>
 
-        </div>
 
 
 
@@ -421,6 +420,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
 
 
+    </div>
     </div>
 
     {{-- RIGHT COLUMN: Calendar + To-Do --}}
