@@ -20,7 +20,7 @@
 @endpush
 
 @section('content')
-<div class="ll-page min-h-screen bg-gray-50/60">
+<div class="ll-page min-h-screen">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
 
         {{-- Header --}}
@@ -102,7 +102,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="border-b border-gray-100">
+                        <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Leave Type</th>
                             <th class="text-center px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Total Days</th>
                             <th class="text-center px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Used</th>
@@ -160,7 +160,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="border-b border-gray-100">
+                        <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Leave Type</th>
                             <th class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Duration</th>
                             <th class="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</th>

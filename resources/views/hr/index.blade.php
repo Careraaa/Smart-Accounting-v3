@@ -43,51 +43,46 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
     <div class="flex-1 min-w-0 w-full space-y-5">
 
         {{-- Quick Actions --}}
-        <div class="hrd-slide-bounce bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.2s">
-                <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-sm hrd-float">
-                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        </div>
-                        <span class="text-xs font-semibold text-gray-900">Quick Actions</span>
-                    </div>
-                    <span class="text-[0.55rem] font-mono text-gray-400">HR modules</span>
+        <div class="hrd-slide-bounce kpi-card overflow-hidden" style="animation-delay:0.2s">
+                <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+                    <span class="text-[13px] font-semibold text-gray-900">Quick Actions</span>
+                    <span class="text-[11px] text-gray-400">HR modules</span>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4">
-                    <a href="{{ route('payroll.salary-computation.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-indigo-50 hover:border-indigo-200 hover:shadow-sm no-underline">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center transition-all group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-indigo-200/50">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M8 21h8M12 17v4"/></svg>
+                    <a href="{{ route('payroll.salary-computation.index') }}" class="qa-tile group transition-all hover:bg-indigo-50 hover:border-indigo-200 no-underline">
+                        <div class="qa-icon bg-indigo-100 text-indigo-600 transition-colors group-hover:bg-indigo-500 group-hover:text-white">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M8 21h8M12 17v4"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-indigo-700 transition-colors text-center">Payroll</span>
+                        <span class="qa-label group-hover:text-indigo-700 transition-colors">Payroll</span>
                         @if($batchSubmitted > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-indigo-100 text-indigo-700 text-[0.45rem] font-bold">{{ $batchSubmitted }}</span>
+                            <span class="qa-badge bg-indigo-100 text-indigo-700 group-hover:bg-\2-500 group-hover:text-white transition-colors">{{ $batchSubmitted }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('leave.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-amber-50 hover:border-amber-200 hover:shadow-sm no-underline">
-                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center transition-all group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-amber-200/50">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <a href="{{ route('leave.index') }}" class="qa-tile group transition-all hover:bg-amber-50 hover:border-amber-200 no-underline">
+                        <div class="qa-icon bg-amber-100 text-amber-600 transition-colors group-hover:bg-amber-500 group-hover:text-white">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-amber-700 transition-colors text-center">Leave Mgmt</span>
+                        <span class="qa-label group-hover:text-amber-700 transition-colors">Leave Mgmt</span>
                         @if($pendingLeaves > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-amber-100 text-amber-700 text-[0.45rem] font-bold">{{ $pendingLeaves }}</span>
+                            <span class="qa-badge bg-amber-100 text-amber-700 group-hover:bg-\2-500 group-hover:text-white transition-colors">{{ $pendingLeaves }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('overtime.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-violet-50 hover:border-violet-200 hover:shadow-sm no-underline">
-                        <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-violet-200/50">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
+                    <a href="{{ route('overtime.index') }}" class="qa-tile group transition-all hover:bg-violet-50 hover:border-violet-200 no-underline">
+                        <div class="qa-icon bg-violet-100 text-violet-600 transition-colors group-hover:bg-violet-500 group-hover:text-white">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-violet-700 transition-colors text-center">OT / UT</span>
+                        <span class="qa-label group-hover:text-violet-700 transition-colors">OT / UT</span>
                         @if($pendingOT + $pendingUT > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-violet-100 text-violet-700 text-[0.45rem] font-bold">{{ $pendingOT + $pendingUT }}</span>
+                            <span class="qa-badge bg-violet-100 text-violet-700 group-hover:bg-\2-500 group-hover:text-white transition-colors">{{ $pendingOT + $pendingUT }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('payroll.receivables.index') }}" class="group flex flex-col items-center gap-2 px-3 py-4 rounded-xl bg-gray-50 border border-gray-100 transition-all hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-sm no-underline">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center transition-all group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-emerald-200/50">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                    <a href="{{ route('payroll.receivables.index') }}" class="qa-tile group transition-all hover:bg-emerald-50 hover:border-emerald-200 no-underline">
+                        <div class="qa-icon bg-emerald-100 text-emerald-600 transition-colors group-hover:bg-emerald-500 group-hover:text-white">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                         </div>
-                        <span class="text-[10px] font-semibold text-gray-700 group-hover:text-emerald-700 transition-colors text-center">Receivables</span>
+                        <span class="qa-label group-hover:text-emerald-700 transition-colors">Receivables</span>
                         @if($pendingCashAdvances > 0)
-                            <span class="inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full bg-emerald-100 text-emerald-700 text-[0.45rem] font-bold">{{ $pendingCashAdvances }}</span>
+                            <span class="qa-badge bg-emerald-100 text-emerald-700 group-hover:bg-\2-500 group-hover:text-white transition-colors">{{ $pendingCashAdvances }}</span>
                         @endif
                     </a>
                 </div>
@@ -96,75 +91,56 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             <div class="flex flex-col gap-4">
                 {{-- Attendance Trend --}}
                 @php
-                $atChartH = 100;
-                $atChartW = 600;
-                $atPadL = 0; $atPadR = 0; $atPadT = 8; $atPadB = 20;
-                $atPlotW = $atChartW - $atPadL - $atPadR;
-                $atPlotH = $atChartH - $atPadT - $atPadB;
                 $atCnt = count($attendanceTrend);
-                $atStep = $atCnt > 1 ? $atPlotW / ($atCnt - 1) : 0;
-                $atPoints = [];
+                $atH = 132;
+                $atPresentH = [];
+                $atLateH = [];
                 foreach ($attendanceTrend as $i => $d) {
-                    $x = $i * $atStep;
-                    $y = $atPlotH - ($maxV > 0 ? ($d['present'] / $maxV) * $atPlotH : 0);
-                    $atPoints[] = round($x + $atPadL, 1) . ',' . round($y + $atPadT, 1);
+                    $atPresentH[$i] = $maxV > 0 ? round(($d['present'] / $maxV) * $atH) : 0;
+                    $atLateH[$i] = $maxV > 0 ? round(($d['late'] / $maxV) * $atH) : 0;
                 }
                 @endphp
-                <div class="hrd-fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[11px] font-semibold text-gray-900">Attendance Trend</span>
-                            <span class="text-[9px] text-gray-400 font-medium">7 days</span>
+                <div class="hrd-fade-up kpi-card overflow-hidden">
+                    <div class="px-4 pt-4 pb-3 flex items-center justify-between">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-[13px] font-semibold text-gray-900">Attendance Trend</span>
+                            <span class="text-[11px] text-gray-400">last 7 days</span>
                         </div>
-                        <div class="flex items-center gap-3 text-[10px]">
-                            <span class="flex items-center gap-1 text-gray-400"><span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span> Present</span>
-                            <span class="flex items-center gap-1 text-gray-400"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> Late</span>
+                        <div class="flex items-center gap-3 text-[11px] text-gray-400">
+                            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-indigo-500 inline-block"></span> Present</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-amber-400 inline-block"></span> Late</span>
                         </div>
                     </div>
-                    <div class="p-4">
+                    <div class="px-4 pb-4">
                         @if($atCnt > 0)
-                        <svg viewBox="0 0 {{ $atChartW }} {{ $atChartH }}" class="w-full h-auto" style="max-height:180px">
-                            @for ($g = 0; $g <= 4; $g++)
-                            @php $gy = $atPadT + ($atPlotH / 4) * $g; @endphp
-                            <line x1="{{ $atPadL }}" y1="{{ $gy }}" x2="{{ $atChartW - $atPadR }}" y2="{{ $gy }}" stroke="#f0f0f0" stroke-width="1"/>
-                            @endfor
-                            <path d="M{{ $atPoints[0] }} L{{ implode(' L', $atPoints) }} L{{ $atPadL + ($atCnt - 1) * $atStep }},{{ $atPadT + $atPlotH }} L{{ $atPadL }},{{ $atPadT + $atPlotH }} Z"
-                                  fill="url(#hrAtGrad)" opacity="0.15"/>
-                            @php
-                            $atLate = [];
-                            foreach ($attendanceTrend as $i => $d) {
-                                $x = $i * $atStep;
-                                $y = $atPlotH - ($maxV > 0 ? ($d['late'] / $maxV) * $atPlotH : 0);
-                                $atLate[] = round($x + $atPadL, 1) . ',' . round($y + $atPadT, 1);
-                            }
-                            @endphp
-                            <polyline points="{{ implode(' ', $atLate) }}" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 3" class="hrd-chart-line-delay"/>
-                            <polyline points="{{ implode(' ', $atPoints) }}" fill="none" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hrd-chart-line"/>
-                            @foreach ($attendanceTrend as $i => $d)
-                            @php $dx = $i * $atStep + $atPadL; $dy = $atPlotH - ($maxV > 0 ? ($d['present'] / $maxV) * $atPlotH : 0) + $atPadT; @endphp
-                            <circle cx="{{ $dx }}" cy="{{ $dy }}" r="3.5" fill="#4f46e5" stroke="white" stroke-width="2" class="hrd-chart-dot"
-                                    style="animation-delay:{{ 0.1 + $i * 0.05 }}s"/>
+                        <div class="at-plot">
+                            <div class="at-grid" style="bottom:0"></div>
+                            <div class="at-grid" style="bottom:50%"></div>
+                            <div class="at-grid at-grid-top" style="bottom:100%"></div>
+                            <span class="at-max">{{ $maxV }}</span>
+                            <div class="at-cols">
+                                @foreach ($attendanceTrend as $i => $d)
+                                <div class="at-col" title="{{ \Carbon\Carbon::parse($d['date_iso'])->format('D, M j') }} — {{ $d['present'] }} present, {{ $d['late'] }} late">
+                                    <div class="at-bar" style="height:{{ $atPresentH[$i] + $atLateH[$i] }}px;animation-delay:{{ 0.05 + $i * 0.04 }}s">
+                                        <div class="at-seg at-late" style="height:{{ $atLateH[$i] }}px"></div>
+                                        <div class="at-seg at-present" style="height:{{ $atPresentH[$i] }}px"></div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="at-days">
+                            @foreach ($attendanceTrend as $d)
+                            <span>{{ \Carbon\Carbon::parse($d['date_iso'])->format('D') }}</span>
                             @endforeach
-                            @foreach ($attendanceTrend as $i => $d)
-                            @php $lx = $i * $atStep + $atPadL; @endphp
-                            <text x="{{ $lx }}" y="{{ $atChartH - 4 }}" text-anchor="middle" fill="#9ca3af" font-size="9" font-family="monospace">{{ \Carbon\Carbon::parse($d['date_iso'])->format('D') }}</text>
-                            @endforeach
-                            <defs>
-                                <linearGradient id="hrAtGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#4f46e5"/>
-                                    <stop offset="100%" stop-color="#4f46e5" stop-opacity="0"/>
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        <div class="flex items-center justify-between mt-2 text-[10px] text-gray-400">
-                            <span class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>
-                                Present trend
-                            </span>
+                        </div>
+                        <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-[11px] text-gray-400">
+                            <span>Daily headcount, 7-day window</span>
                             <span>
-                                Today: <strong class="text-gray-700 font-mono">{{ $td['present'] }} present</strong>
-                                <span class="mx-1">·</span>
-                                <strong class="text-emerald-600 font-mono">{{ number_format($tdRate, 1) }}%</strong>
+                                Today:
+                                <strong class="text-gray-700 font-medium tabular-nums">{{ $td['present'] }}</strong> present
+                                <span class="mx-1 text-gray-300">·</span>
+                                <strong class="text-emerald-600 font-medium tabular-nums">{{ number_format($tdRate, 1) }}%</strong>
                             </span>
                         </div>
                         @else
@@ -173,83 +149,48 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     </div>
                 </div>
 
-                {{-- Leave Activity --}}
-                <div class="hrd-fade-up bg-white rounded-xl shadow-sm border border-gray-100 p-4" style="animation-delay:0.1s">
-                    <div class="flex items-center justify-between mb-3">
-                        <div>
-                            <span class="text-[9px] font-semibold text-gray-600 uppercase tracking-widest">Leave Activity</span>
-                            <div class="flex items-baseline gap-1.5 mt-0.5">
-                                <span class="text-lg font-bold text-gray-900 tabular-nums">{{ collect($leaveTrend)->sum('total') }}</span>
-                                <span class="text-[10px] text-gray-400">last 6 months</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-2 text-[9px]">
-                            <span class="flex items-center gap-1 text-gray-400"><span class="w-1.5 h-1.5 rounded-full ring-1 ring-emerald-100 bg-emerald-500"></span> Approved</span>
-                            <span class="flex items-center gap-1 text-gray-400"><span class="w-1.5 h-1.5 rounded-full ring-1 ring-gray-200 bg-gray-300"></span> Total</span>
-                        </div>
-                    </div>
-                    @php $lvMax = collect($leaveTrend)->map(fn($m) => $m['total'])->max() ?: 1; @endphp
-                    <div class="flex items-end gap-2" style="height:50px">
-                        @foreach($leaveTrend as $i => $m)
-                        @php
-                        $th = max(4, round(($m['total'] / $lvMax) * 40));
-                        $ah = max(2, round(($m['approved'] / $lvMax) * 40));
-                        @endphp
-                        <div class="flex-1 flex flex-col items-center gap-0.5 h-full justify-end">
-                            <div class="w-full flex flex-col-reverse items-center" style="height:40px">
-                                <div class="w-4/5 bg-emerald-500 rounded-t hrd-bar" style="height:{{ $ah }}px;animation-delay:{{ $i * 0.1 + 0.2 }}s" title="Approved: {{ $m['approved'] }}"></div>
-                                <div class="w-4/5 bg-gray-200 rounded-t hrd-bar" style="height:{{ max(2, $th - $ah) }}px;animation-delay:{{ $i * 0.1 }}s" title="Total: {{ $m['total'] }}"></div>
-                            </div>
-                            <span class="text-[7px] text-gray-400 font-medium mt-0.5">{{ $m['label'] }}</span>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
             </div>
 
         {{-- STAT CARDS: Employees, Attendance, Holidays --}}
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            <a href="{{ route('employees.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-emerald-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.05s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Employees</p>
-                        <p class="text-xl font-bold text-gray-900 tabular-nums mt-0.5 hrd-count-num" style="animation-delay:0.15s">{{ $totalEmployees }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center transition-all duration-300 group-hover:bg-emerald-500 group-hover:text-white group-hover:scale-110">
+            <a href="{{ route('employees.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-4 no-underline group transition-all hover:border-emerald-300 hover:shadow-md" style="animation-delay:0.05s">
+                <div class="flex items-start justify-between gap-3">
+                    <p class="kcard-label">Employees</p>
+                    <div class="kcard-icon bg-emerald-50 text-emerald-600 transition-colors group-hover:bg-emerald-500 group-hover:text-white">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     </div>
                 </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                <p class="kcard-value mt-2 hrd-count-num" style="animation-delay:0.15s">{{ $totalEmployees }}</p>
+                <div class="kcard-foot mt-2.5 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
                     <span>{{ $newHiresThisMonth }} new this month</span>
                 </div>
             </a>
 
-            <a href="{{ route('attendance.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-cyan-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.15s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Attendance</p>
-                        <p class="text-xl font-bold text-gray-900 tabular-nums mt-0.5 hrd-count-num" style="animation-delay:0.25s">{{ $td['present'] }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-cyan-50 text-cyan-500 flex items-center justify-center transition-all duration-300 group-hover:bg-cyan-500 group-hover:text-white group-hover:scale-110">
+            <a href="{{ route('attendance.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-4 no-underline group transition-all hover:border-cyan-300 hover:shadow-md" style="animation-delay:0.15s">
+                <div class="flex items-start justify-between gap-3">
+                    <p class="kcard-label">Attendance</p>
+                    <div class="kcard-icon bg-cyan-50 text-cyan-600 transition-colors group-hover:bg-cyan-500 group-hover:text-white">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
                     </div>
                 </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
-                    <span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>{{ $tdRate }}% present today</span>
+                <p class="kcard-value mt-2 hrd-count-num" style="animation-delay:0.25s">{{ $td['present'] }}</p>
+                <div class="kcard-foot mt-2.5 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                    <span>{{ $tdRate }}% present today</span>
                 </div>
             </a>
 
-            <a href="{{ route('holiday.index') }}" class="hrd-bounce hrd-stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3.5 no-underline group hover:border-rose-200 hover:shadow-md transition-all duration-300" style="animation-delay:0.25s">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Holidays</p>
-                        <p class="text-xl font-bold text-gray-900 tabular-nums mt-0.5 hrd-count-num" style="animation-delay:0.35s">{{ $upcomingHolidays }}</p>
-                    </div>
-                    <div class="w-9 h-9 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center transition-all duration-300 group-hover:bg-rose-500 group-hover:text-white group-hover:scale-110">
+            <a href="{{ route('holiday.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-4 no-underline group transition-all hover:border-rose-300 hover:shadow-md" style="animation-delay:0.25s">
+                <div class="flex items-start justify-between gap-3">
+                    <p class="kcard-label">Holidays</p>
+                    <div class="kcard-icon bg-rose-50 text-rose-600 transition-colors group-hover:bg-rose-500 group-hover:text-white">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 11l7-7 7 7M5 19l7-7 7 7"/></svg>
                     </div>
                 </div>
-                <div class="mt-2 flex items-center gap-2 text-[9px] text-gray-400">
+                <p class="kcard-value mt-2 hrd-count-num" style="animation-delay:0.35s">{{ $upcomingHolidays }}</p>
+                <div class="kcard-foot mt-2.5 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
                     <span>Upcoming in 30 days</span>
                 </div>
             </a>
@@ -266,7 +207,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
         @include('partials.dashboard-calendar')
 
         {{-- To-Do Card --}}
-        <div class="hrd-slide-right bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style="animation-delay:0.1s">
+        <div class="hrd-slide-right kpi-card overflow-hidden" style="animation-delay:0.1s">
             <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>

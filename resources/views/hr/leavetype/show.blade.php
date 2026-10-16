@@ -19,7 +19,7 @@
 .stat-card:nth-child(2) { animation-delay: 0.1s; }
 .fade-up { animation: fadeSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
 .filter-bar { animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
-.table-wrap { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+.table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden { animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
 </style>
 @endpush
 
@@ -46,7 +46,7 @@
     <div class="grid grid-cols-1 gap-4">
 
         {{-- Details card --}}
-        <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden table-wrap">
+        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="px-6 py-5 border-b border-gray-50 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-gray-100 text-gray-400 flex items-center justify-center shrink-0">
                     <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

@@ -136,11 +136,11 @@ $periodLabel = $period === 'monthly' ? date('F', mktime(0,0,0,$month,1)) : "Year
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50 bg-gray-50/50">
+                    <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Period</th>
-                        <th class="text-center px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Employees</th>
-                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Gross Pay</th>
-                        <th class="text-right px-4 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Deductions</th>
+                        <th class="text-center px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Employees</th>
+                        <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Gross Pay</th>
+                        <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Deductions</th>
                         <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net Pay</th>
                     </tr>
                 </thead>
@@ -327,11 +327,11 @@ function showBatchModal(idx) {
                 tr.dataset.batchIdx = start + idx;
                 var fmt = function(n) { return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
                 tr.innerHTML =
-                    '<td class="px-5 py-3.5 text-xs font-semibold text-gray-900">' + b.period + '</td>' +
-                    '<td class="px-4 py-3.5 text-center text-xs font-semibold text-gray-700 tabular-nums">' + b.count + '</td>' +
-                    '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-gray-900">\u20b1' + fmt(b.gross) + '</td>' +
-                    '<td class="px-4 py-3.5 text-right text-xs tabular-nums text-red-600">\u20b1' + fmt(b.ded) + '</td>' +
-                    '<td class="px-5 py-3.5 text-right text-xs font-bold tabular-nums text-emerald-600">\u20b1' + fmt(b.net) + '</td>';
+                    '<td class="px-5 py-3 text-xs font-semibold text-gray-900">' + b.period + '</td>' +
+                    '<td class="px-5 py-3 text-center text-xs font-semibold text-gray-700 tabular-nums">' + b.count + '</td>' +
+                    '<td class="px-5 py-3 text-right text-xs tabular-nums text-gray-900">\u20b1' + fmt(b.gross) + '</td>' +
+                    '<td class="px-5 py-3 text-right text-xs tabular-nums text-red-600">\u20b1' + fmt(b.ded) + '</td>' +
+                    '<td class="px-5 py-3 text-right text-xs font-bold tabular-nums text-emerald-600">\u20b1' + fmt(b.net) + '</td>';
                 tr.addEventListener('click', function () {
                     showBatchModal(start + idx);
                 });
@@ -341,11 +341,11 @@ function showBatchModal(idx) {
             var tr = document.createElement('tr');
             tr.className = 'border-t border-gray-100 bg-gray-50/50';
             tr.innerHTML =
-                '<td class="px-5 py-3.5 text-xs font-bold text-gray-900">Totals</td>' +
-                '<td class="px-4 py-3.5 text-center text-xs font-bold text-gray-900 tabular-nums">' + total + '</td>' +
-                '<td class="px-4 py-3.5 text-right text-xs font-bold text-gray-900 tabular-nums">\u20b1' + fmt(window.payrollTotals.gross) + '</td>' +
-                '<td class="px-4 py-3.5 text-right text-xs font-bold text-amber-600 tabular-nums">\u20b1' + fmt(window.payrollTotals.ded) + '</td>' +
-                '<td class="px-5 py-3.5 text-right text-xs font-bold text-emerald-700 tabular-nums">\u20b1' + fmt(window.payrollTotals.net) + '</td>';
+                '<td class="px-5 py-3 text-xs font-bold text-gray-900">Totals</td>' +
+                '<td class="px-5 py-3 text-center text-xs font-bold text-gray-900 tabular-nums">' + total + '</td>' +
+                '<td class="px-5 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">\u20b1' + fmt(window.payrollTotals.gross) + '</td>' +
+                '<td class="px-5 py-3 text-right text-xs font-bold text-amber-600 tabular-nums">\u20b1' + fmt(window.payrollTotals.ded) + '</td>' +
+                '<td class="px-5 py-3 text-right text-xs font-bold text-emerald-700 tabular-nums">\u20b1' + fmt(window.payrollTotals.net) + '</td>';
             grid.appendChild(tr);
         }
 

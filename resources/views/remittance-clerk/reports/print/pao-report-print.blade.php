@@ -46,22 +46,22 @@
         {{-- Table --}}
         <table class="w-full text-[11px] border-collapse">
             <thead>
-                <tr class="border-b border-gray-300" style="background:#f7f7f7;">
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Name</th>
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Contact Number</th>
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Email</th>
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Gender</th>
-                    <th class="text-left px-2.5 py-2.5 font-semibold text-gray-700">Address</th>
+                <tr class="bg-gray-50 border-b border-gray-200" style="background:#f7f7f7;">
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Name</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Contact Number</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Email</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Gender</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Address</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($paos as $pao)
                     <tr class="border-b border-gray-200">
-                        <td class="px-2.5 py-2.5 font-semibold">{{ $pao->name }}</td>
-                        <td class="px-2.5 py-2.5">{{ $pao->contact_number ?? 'N/A' }}</td>
-                        <td class="px-2.5 py-2.5">{{ $pao->email ?? 'N/A' }}</td>
-                        <td class="px-2.5 py-2.5">{{ ucfirst($pao->gender ?? 'N/A') }}</td>
-                        <td class="px-2.5 py-2.5">{{ $pao->address ?? 'N/A' }}</td>
+                        <td class="px-5 py-3 font-semibold">{{ $pao->name }}</td>
+                        <td class="px-5 py-3">{{ $pao->contact_number ?? 'N/A' }}</td>
+                        <td class="px-5 py-3">{{ $pao->email ?? 'N/A' }}</td>
+                        <td class="px-5 py-3">{{ ucfirst($pao->gender ?? 'N/A') }}</td>
+                        <td class="px-5 py-3">{{ $pao->address ?? 'N/A' }}</td>
                     </tr>
                 @empty
                     <tr>

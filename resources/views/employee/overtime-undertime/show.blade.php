@@ -14,7 +14,7 @@
         : 'bg-yellow-50 text-yellow-700 border border-yellow-200';
 @endphp
 
-<div class="min-h-screen bg-gray-50/60">
+<div class="min-h-screen">
     <div class="max-w-screen-lg mx-auto px-4 sm:px-6 py-8">
 
         {{-- Flash --}}

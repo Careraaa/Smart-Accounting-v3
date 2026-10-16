@@ -72,7 +72,7 @@
                                     <td class="px-4 py-3 text-right text-xs font-semibold tabular-nums {{ $account->total_debit > 0 ? 'text-gray-900' : 'text-gray-300' }}">
                                         {{ $account->total_debit > 0 ? '₱' . number_format($account->total_debit, 2) : '—' }}
                                     </td>
-                                    <td class="px-4 py-3 text-right text-xs font-semibold tabular-nums {{ $account->total_credit > 0 ? 'text-gray-900' : 'text-gray-300' }}">
+                                    <td class="px-5 py-3 text-right text-xs font-semibold tabular-nums {{ $account->total_credit > 0 ? 'text-gray-900' : 'text-gray-300' }}">
                                         {{ $account->total_credit > 0 ? '₱' . number_format($account->total_credit, 2) : '—' }}
                                     </td>
                                     <td class="px-4 py-3 text-right text-xs font-bold tabular-nums {{ $account->balance >= 0 ? 'text-gray-900' : 'text-red-600' }}">
@@ -87,9 +87,9 @@
                 <tfoot>
                     <tr class="border-t-2 border-gray-200 bg-gray-50/80">
                         <td colspan="3" class="px-4 py-3 text-xs font-bold text-gray-900">TOTALS</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalDebit, 2) }}</td>
-                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalCredit, 2) }}</td>
-                        <td class="px-4 py-3 text-right">
+                        <td class="px-5 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalDebit, 2) }}</td>
+                        <td class="px-5 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalCredit, 2) }}</td>
+                        <td class="px-5 py-3 text-right">
                             @if(abs($totalDebit - $totalCredit) < 0.01)
                                 <span class="text-xs font-bold text-emerald-600 flex items-center justify-end gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>

@@ -89,20 +89,20 @@
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr class="border-b border-gray-50">
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">
                             <a href="{{ route('drivers.index', ['sort_by' => 'name', 'sort_order' => ($sortBy === 'name' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="text-gray-400 no-underline hover:text-gray-600 inline-flex items-center gap-1">
                                 Name
                                 @if($sortBy === 'name')<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>@endif
                             </a>
                         </th>
-                        <th class="text-left px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">
+                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">
                             <a href="{{ route('drivers.index', ['sort_by' => 'contact_number', 'sort_order' => ($sortBy === 'contact_number' && $sortOrder === 'asc') ? 'desc' : 'asc']) }}" class="text-gray-400 no-underline hover:text-gray-600 inline-flex items-center gap-1">
                                 Contact
                                 @if($sortBy === 'contact_number')<svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $sortOrder === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>@endif
                             </a>
                         </th>
-                        <th class="text-center px-4 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Status</th>
+                        <th class="text-center px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Status</th>
                     </tr>
                 </thead>
                 <tbody id="driverTbody" class="divide-y divide-gray-50">
@@ -112,11 +112,11 @@
                         data-name="{{ strtolower($driver->formatted_name) }}"
                         data-status="{{ $driver->status }}"
                         onclick="window.location='{{ route('drivers.show', $driver) }}'">
-                        <td class="px-4 py-3">
+                        <td class="px-5 py-3">
                             <span class="text-xs font-semibold text-gray-900">{{ $driver->formatted_name }}</span>
                         </td>
-                        <td class="px-4 py-3 text-xs text-gray-500 font-mono">{{ $driver->contact_number }}</td>
-                        <td class="px-4 py-3 text-center">
+                        <td class="px-5 py-3 text-xs text-gray-500 font-mono">{{ $driver->contact_number }}</td>
+                        <td class="px-5 py-3 text-center">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border {{ $sc }}">{{ ucfirst($driver->status) }}</span>
                         </td>
 
