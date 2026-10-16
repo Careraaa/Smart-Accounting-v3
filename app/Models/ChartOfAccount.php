@@ -15,11 +15,13 @@ class ChartOfAccount extends Model
         'account_type',
         'description',
         'is_active',
+        'is_contra',
         'created_by',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_contra' => 'boolean',
     ];
 
     public function createdBy()
@@ -50,5 +52,23 @@ class ChartOfAccount extends Model
     public function getDisplayNameAttribute(): string
     {
         return "{$this->account_code} – {$this->account_name}";
+    }
+
+    public function getNormalBalanceSideAttribute(): string
+    {
+        $debitNormal = in_array($this->account_type, ['Asset', 'Expense'], true);
+
+        if ($this->is_contra) {
+            $debitNormal = !$debitNormal;
+        }
+
+        return $debitNormal ? 'debit' : 'credit';
+    }
+
+    public function normalBalance(float $debit, float $credit): float
+    {
+        return $this->normal_balance_side === 'debit'
+            ? $debit - $credit
+            : $credit - $debit;
     }
 }

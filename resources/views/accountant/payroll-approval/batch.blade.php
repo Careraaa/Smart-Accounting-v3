@@ -84,7 +84,7 @@
         @endif
         @if($status === 'approved')
             @php
-                $hasJournalEntry = \App\Models\JournalEntry::where('reference_type', 'Payroll')
+                $hasJournalEntry = \App\Models\JournalEntry::where('reference_type', $batch->isThirteenthMonth() ? '13th Month Pay' : 'Payroll')
                     ->where('reference_id', $batch->id)
                     ->where('status', '!=', 'Void')
                     ->first();
@@ -95,6 +95,16 @@
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     View Journal Entry ({{ $hasJournalEntry->journal_number }})
                 </a>
+                @if($hasJournalEntry->status === 'Draft')
+                    <form method="POST" action="{{ route('accounting.payroll-journal.refresh', $batch) }}" class="inline"
+                          onsubmit="return confirm('Refresh this draft journal entry using the current payroll totals? Any manual changes to its draft lines will be replaced.')">
+                        @csrf
+                        <button type="submit"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-xs font-semibold text-amber-700 transition-all hover:bg-amber-100 active:scale-[0.97] cursor-pointer">
+                            Refresh Draft Entry
+                        </button>
+                    </form>
+                @endif
             @else
                 <form method="POST" action="{{ route('accounting.payroll-journal.generate', $batch) }}" class="inline"
                       onsubmit="return confirm('Generate a journal entry for this payroll batch? The entry will be created as a Draft for your review.')">

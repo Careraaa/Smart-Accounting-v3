@@ -37,7 +37,7 @@
                         <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Type</th>
                         <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Total Debit</th>
                         <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Total Credit</th>
-                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Balance</th>
+                        <th class="text-right text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Normal-Side Balance</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -62,7 +62,12 @@
                             @foreach($typeGroups[$type] as $account)
                                 <tr class="transition-colors hover:bg-gray-50/40">
                                     <td class="px-4 py-3 text-xs font-bold font-mono text-gray-900">{{ $account->account_code }}</td>
-                                    <td class="px-4 py-3 text-xs font-semibold text-gray-900">{{ $account->account_name }}</td>
+                                    <td class="px-4 py-3 text-xs font-semibold text-gray-900">
+                                        {{ $account->account_name }}
+                                        @if($account->is_contra)
+                                            <span class="ml-1 text-[10px] font-semibold text-amber-700">Contra-expense</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 text-xs text-gray-500">{{ $account->account_type }}</td>
                                     <td class="px-4 py-3 text-right text-xs font-semibold tabular-nums {{ $account->total_debit > 0 ? 'text-gray-900' : 'text-gray-300' }}">
                                         {{ $account->total_debit > 0 ? '₱' . number_format($account->total_debit, 2) : '—' }}
@@ -71,7 +76,8 @@
                                         {{ $account->total_credit > 0 ? '₱' . number_format($account->total_credit, 2) : '—' }}
                                     </td>
                                     <td class="px-4 py-3 text-right text-xs font-bold tabular-nums {{ $account->balance >= 0 ? 'text-gray-900' : 'text-red-600' }}">
-                                        ₱{{ number_format($account->balance, 2) }}
+                                        ₱{{ number_format(abs($account->balance), 2) }}
+                                        <span class="text-[10px] font-medium text-gray-400">{{ $account->balance < 0 ? 'abnormal' : $account->normal_balance_side }}</span>
                                     </td>
                                 </tr>
                             @endforeach
@@ -96,6 +102,10 @@
                                 </span>
                             @endif
                         </td>
+                    </tr>
+                    <tr class="border-t border-gray-100 bg-amber-50/50">
+                        <td colspan="5" class="px-4 py-3 text-xs font-semibold text-gray-700">NET EXPENSES AFTER CONTRA-EXPENSE BALANCES</td>
+                        <td class="px-4 py-3 text-right text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($netExpenses, 2) }}</td>
                     </tr>
                 </tfoot>
             </table>

@@ -23,6 +23,7 @@ class ChartOfAccountsSeeder extends Seeder
             ['account_code' => '2040', 'account_name' => 'Pag-IBIG Payable', 'account_type' => 'Liability', 'description' => 'Pag-IBIG contributions payable'],
             ['account_code' => '2050', 'account_name' => 'Withholding Tax Payable', 'account_type' => 'Liability', 'description' => 'Withholding tax deducted from employees'],
             ['account_code' => '2060', 'account_name' => '13th Month Payable', 'account_type' => 'Liability', 'description' => '13th month pay owed to employees'],
+            ['account_code' => '2070', 'account_name' => 'Other Payroll Deductions Payable', 'account_type' => 'Liability', 'description' => 'Employee payroll deductions withheld for remittance to third parties'],
 
             // Equity
             ['account_code' => '3010', 'account_name' => 'Owner\'s Equity', 'account_type' => 'Equity', 'description' => 'Owner\'s investment in the business'],
@@ -37,6 +38,7 @@ class ChartOfAccountsSeeder extends Seeder
             ['account_code' => '5030', 'account_name' => 'Employee Benefits Expense', 'account_type' => 'Expense', 'description' => 'Employee benefits expense'],
             ['account_code' => '5040', 'account_name' => '13th Month Pay Expense', 'account_type' => 'Expense', 'description' => '13th month pay expense'],
             ['account_code' => '5050', 'account_name' => 'Government Contributions Expense', 'account_type' => 'Expense', 'description' => 'Employer share of government contributions'],
+            ['account_code' => '5060', 'account_name' => 'Payroll Deductions', 'account_type' => 'Expense', 'description' => 'Contra-expense for valid employee wage reductions; not for statutory withholdings or employee receivable recoveries', 'is_contra' => true],
         ];
 
         foreach ($accounts as $account) {
@@ -53,6 +55,10 @@ class ChartOfAccountsSeeder extends Seeder
             'pagibig_payable'          => '2040',
             'withholding_tax_payable'  => '2050',
             'salaries_payable'         => '2010',
+            'payroll_deductions'       => '5060',
+            'other_payroll_deductions_payable' => '2070',
+            'employer_contributions_expense' => '5050',
+            'employee_receivable'      => '1030',
             'thirteenth_month_expense' => '5040',
             'thirteenth_month_payable' => '2060',
         ];

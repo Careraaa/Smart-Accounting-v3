@@ -7,6 +7,7 @@ use App\Models\JournalEntry;
 use App\Models\JournalEntryLine;
 use App\Models\ChartOfAccount;
 use App\Models\AccountingAuditLog;
+use App\Services\PayrollJournalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -124,6 +125,10 @@ class JournalEntryController extends Controller
             return redirect()->route('accounting.journal-entries.show', $journalEntry)
                 ->with('error', 'Only draft journal entries can be edited.');
         }
+        if (in_array($journalEntry->reference_type, ['Payroll', '13th Month Pay'], true)) {
+            return redirect()->route('accounting.journal-entries.show', $journalEntry)
+                ->with('error', 'Payroll journal entries must be refreshed from their payroll batch, not edited manually.');
+        }
 
         $journalEntry->load('lines.account');
         $accounts = ChartOfAccount::active()->orderBy('account_code')->get();
@@ -136,6 +141,10 @@ class JournalEntryController extends Controller
         if (!$journalEntry->isEditable()) {
             return redirect()->route('accounting.journal-entries.show', $journalEntry)
                 ->with('error', 'Only draft journal entries can be updated.');
+        }
+        if (in_array($journalEntry->reference_type, ['Payroll', '13th Month Pay'], true)) {
+            return redirect()->route('accounting.journal-entries.show', $journalEntry)
+                ->with('error', 'Payroll journal entries must be refreshed from their payroll batch, not edited manually.');
         }
 
         $validated = $request->validate([
@@ -173,6 +182,14 @@ class JournalEntryController extends Controller
 
         DB::beginTransaction();
         try {
+            $journalEntry = JournalEntry::whereKey($journalEntry->getKey())->lockForUpdate()->firstOrFail();
+            if ($journalEntry->status !== 'Draft') {
+                throw new \RuntimeException('Only draft journal entries can be updated.');
+            }
+            if (in_array($journalEntry->reference_type, ['Payroll', '13th Month Pay'], true)) {
+                throw new \RuntimeException('Payroll journal entries must be refreshed from their payroll batch, not edited manually.');
+            }
+
             $oldValues = $journalEntry->toArray();
 
             $journalEntry->update([
@@ -215,37 +232,52 @@ class JournalEntryController extends Controller
 
     public function post(JournalEntry $journalEntry)
     {
-        if ($journalEntry->status !== 'Draft') {
-            return redirect()->back()->with('error', 'Only draft journal entries can be posted.');
+        $journalEntryId = $journalEntry->getKey();
+
+        try {
+            DB::transaction(function () use ($journalEntryId, &$journalEntry) {
+                $journalEntry = JournalEntry::whereKey($journalEntryId)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                if ($journalEntry->status !== 'Draft') {
+                    throw new \RuntimeException('Only draft journal entries can be posted.');
+                }
+
+                $lines = $journalEntry->lines()->get();
+                if ($lines->count() < 2) {
+                    throw new \RuntimeException('A journal entry must have at least two lines.');
+                }
+
+                $totalDebit = (int) $lines->sum(fn ($line) => (int) round((float) $line->debit * 100));
+                $totalCredit = (int) $lines->sum(fn ($line) => (int) round((float) $line->credit * 100));
+                if ($totalDebit !== $totalCredit) {
+                    throw new \RuntimeException('Cannot post unbalanced entry. Debits and credits must be equal.');
+                }
+
+                if ($journalEntry->reference_type === 'Payroll') {
+                    app(PayrollJournalService::class)->assertJournalEntryMatchesPayroll($journalEntry);
+                }
+
+                $journalEntry->update([
+                    'status'    => 'Posted',
+                    'posted_by' => auth()->id(),
+                    'posted_at' => now(),
+                ]);
+
+                AccountingAuditLog::log(
+                    'posted',
+                    'Journal Entry',
+                    $journalEntry->id,
+                    "Posted journal entry {$journalEntry->journal_number}",
+                    ['status' => 'Draft'],
+                    ['status' => 'Posted']
+                );
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            throw $e;
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        $journalEntry->load('lines');
-
-        if ($journalEntry->lines->count() < 2) {
-            return redirect()->back()->with('error', 'A journal entry must have at least two lines.');
-        }
-
-        $totalDebit = $journalEntry->lines->sum('debit');
-        $totalCredit = $journalEntry->lines->sum('credit');
-
-        if (abs($totalDebit - $totalCredit) >= 0.01) {
-            return redirect()->back()->with('error', "Cannot post unbalanced entry. Debits (₱" . number_format($totalDebit, 2) . ") must equal Credits (₱" . number_format($totalCredit, 2) . ").");
-        }
-
-        $journalEntry->update([
-            'status'    => 'Posted',
-            'posted_by' => auth()->id(),
-            'posted_at' => now(),
-        ]);
-
-        AccountingAuditLog::log(
-            'posted',
-            'Journal Entry',
-            $journalEntry->id,
-            "Posted journal entry {$journalEntry->journal_number}",
-            ['status' => 'Draft'],
-            ['status' => 'Posted']
-        );
 
         return redirect()->route('accounting.journal-entries.show', $journalEntry)
             ->with('success', "Journal entry {$journalEntry->journal_number} posted successfully.");

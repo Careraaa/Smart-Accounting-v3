@@ -20,12 +20,19 @@ class PayrollService
     protected $attendanceService;
     protected $holidayWageService;
     protected $leaveService;
+    protected $statutoryContributionService;
 
-    public function __construct(AttendanceService $attendanceService, HolidayWageService $holidayWageService, LeaveService $leaveService = null)
+    public function __construct(
+        AttendanceService $attendanceService,
+        HolidayWageService $holidayWageService,
+        LeaveService $leaveService = null,
+        StatutoryContributionService $statutoryContributionService = null
+    )
     {
         $this->attendanceService = $attendanceService;
         $this->holidayWageService = $holidayWageService;
         $this->leaveService = $leaveService ?? app(LeaveService::class);
+        $this->statutoryContributionService = $statutoryContributionService ?? app(StatutoryContributionService::class);
     }
 
     /**
@@ -94,6 +101,9 @@ class PayrollService
             'sss'                  => round($values['sss'], 2),
             'pagibig'              => round($values['pagibig'], 2),
             'philhealth'           => round($values['philhealth'], 2),
+            'employer_sss'         => round($values['employerContributions']['sss'], 2),
+            'employer_pagibig'     => round($values['employerContributions']['pagibig'], 2),
+            'employer_philhealth'  => round($values['employerContributions']['philhealth'], 2),
             'withholding_tax'      => round($values['withholdingTax'], 2),
             'status'               => 'pending',
         ]);
@@ -279,6 +289,12 @@ class PayrollService
             ? $this->getStatutoryDeduction('PhilHealth', $monthlyEquivalent)
             : 0;
 
+        $employerContributions = $this->statutoryContributionService->employerShares(
+            $employee,
+            $monthlyEquivalent,
+            $hasIncome
+        );
+
         // ── Step 7: Withholding Tax (BIR) ─────────────────────────────────────
         // FIX: Previously computed as dailyBracketTax × daysWorked, which is wrong.
         // BIR withholding tax is computed on the TOTAL taxable income for the period,
@@ -313,6 +329,7 @@ class PayrollService
             'otHours', 'utHours', 'otPay',
             'holidayPay', 'holidayOTPay', 'holidayOTHours', 'holidayBreakdown',
             'lateDeductionData', 'utDeduction', 'sss', 'pagibig', 'philhealth', 'withholdingTax',
+            'employerContributions',
             'manualAllowTotal', 'manualDeductTotal',
             'grossPay', 'adjustedGross', 'totalDeductions', 'netPay'
         );
@@ -390,6 +407,9 @@ class PayrollService
             'sss'                  => round($values['sss'], 2),
             'pagibig'              => round($values['pagibig'], 2),
             'philhealth'           => round($values['philhealth'], 2),
+            'employer_sss'         => round($values['employerContributions']['sss'], 2),
+            'employer_pagibig'     => round($values['employerContributions']['pagibig'], 2),
+            'employer_philhealth'  => round($values['employerContributions']['philhealth'], 2),
             'withholding_tax'      => round($values['withholdingTax'], 2),
             'status'               => $extraData['status'] ?? ($payroll->status ?? 'prepared'),
         ]);
@@ -463,20 +483,22 @@ class PayrollService
                 'hours'          => round($values['lateDeductionData']['total_hours_late'], 4),
                 'amount'         => $values['lateDeductionData']['total_late_deduction'],
                 'description'    => $values['lateDeductionData']['total_minutes_late'] . ' minutes late',
+                'accounting_treatment' => 'contra_expense',
+                'deduction_source' => 'system',
             ]);
         }
 
         if ($values['sss'] > 0) {
-            $payroll->deductions()->create(['deduction_type' => 'SSS',        'amount' => round($values['sss'], 2)]);
+            $payroll->deductions()->create(['deduction_type' => 'SSS', 'amount' => round($values['sss'], 2), 'accounting_treatment' => 'payable', 'deduction_source' => 'system']);
         }
         if ($values['pagibig'] > 0) {
-            $payroll->deductions()->create(['deduction_type' => 'Pag-IBIG',   'amount' => round($values['pagibig'], 2)]);
+            $payroll->deductions()->create(['deduction_type' => 'Pag-IBIG', 'amount' => round($values['pagibig'], 2), 'accounting_treatment' => 'payable', 'deduction_source' => 'system']);
         }
         if ($values['philhealth'] > 0) {
-            $payroll->deductions()->create(['deduction_type' => 'PhilHealth', 'amount' => round($values['philhealth'], 2)]);
+            $payroll->deductions()->create(['deduction_type' => 'PhilHealth', 'amount' => round($values['philhealth'], 2), 'accounting_treatment' => 'payable', 'deduction_source' => 'system']);
         }
         if ($values['withholdingTax'] > 0) {
-            $payroll->deductions()->create(['deduction_type' => 'Withholding Tax', 'amount' => round($values['withholdingTax'], 2)]);
+            $payroll->deductions()->create(['deduction_type' => 'Withholding Tax', 'amount' => round($values['withholdingTax'], 2), 'accounting_treatment' => 'payable', 'deduction_source' => 'system']);
         }
 
         // Undertime deduction stored at full precision (not rounded) to avoid
@@ -486,6 +508,8 @@ class PayrollService
                 'deduction_type' => 'Undertime Deduction',
                 'hours'          => round($values['utHours'], 2),
                 'amount'         => $values['utDeduction'],
+                'accounting_treatment' => 'contra_expense',
+                'deduction_source' => 'system',
             ]);
         }
 
@@ -493,6 +517,8 @@ class PayrollService
             $payroll->deductions()->create([
                 'deduction_type' => $deduct['name'],
                 'amount'         => round((float) $deduct['amount'], 2),
+                'accounting_treatment' => $deduct['accounting_treatment'] ?? null,
+                'deduction_source' => 'manual',
             ]);
         }
     }

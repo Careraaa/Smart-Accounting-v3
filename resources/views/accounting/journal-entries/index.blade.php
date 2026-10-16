@@ -106,8 +106,6 @@
                         <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Debit</th>
                         <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Credit</th>
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Status</th>
-                        <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Created By</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="jeGrid"></tbody>
@@ -141,7 +139,6 @@
         'total_debit' => $e->total_debit,
         'total_credit' => $e->total_credit,
         'status' => $e->status,
-        'created_by_name' => $e->createdBy?->name ?? '—',
     ])) !!};
     const PER = 5;
     let page = 1, filtered = [], searchQ = '', statusF = '';
@@ -170,7 +167,7 @@
         filtered = raw.filter(e => {
             if(statusF && e.status !== statusF) return false;
             if(searchQ){
-                const hay = (e.journal_number + ' ' + (e.description||'') + ' ' + (e.created_by_name||'')).toLowerCase();
+                const hay = (e.journal_number + ' ' + (e.description||'')).toLowerCase();
                 if(!hay.includes(searchQ)) return false;
             }
             return true;
@@ -195,16 +192,19 @@
         slice.forEach(e => {
             const tc = statusColors[e.status] || '';
             const tr = document.createElement('tr');
-            tr.className = 'transition-colors hover:bg-gray-50/40';
+            tr.className = 'cursor-pointer transition-colors hover:bg-gray-50/60';
+            tr.dataset.href = '/accounting/journal-entries/' + e.id;
             tr.innerHTML =
                 '<td class="px-4 py-3"><a href="/accounting/journal-entries/'+e.id+'" class="text-xs font-bold text-gray-900 font-mono no-underline hover:underline">'+e.journal_number+'</a></td>' +
                 '<td class="px-4 py-3 text-xs text-gray-500">'+fmtDate(e.transaction_date)+'</td>' +
                 '<td class="px-4 py-3 text-xs text-gray-600 max-w-[200px] truncate">'+e.description+'</td>' +
                 '<td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">'+fmtMoney(e.total_debit)+'</td>' +
                 '<td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">'+fmtMoney(e.total_credit)+'</td>' +
-                '<td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide border '+tc+'">'+e.status+'</span></td>' +
-                '<td class="px-4 py-3 text-xs text-gray-500">'+e.created_by_name+'</td>' +
-                '<td class="px-4 py-3 text-right"><a href="/accounting/journal-entries/'+e.id+'" class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors no-underline" title="View"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a></td>';
+                '<td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide border '+tc+'">'+e.status+'</span></td>';
+            tr.addEventListener('click', event => {
+                if (event.target.closest('a, button, input, select, textarea')) return;
+                window.location.href = tr.dataset.href;
+            });
             tbody.appendChild(tr);
         });
         updatePagination();

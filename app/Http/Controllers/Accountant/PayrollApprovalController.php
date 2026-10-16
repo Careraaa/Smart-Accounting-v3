@@ -8,6 +8,7 @@ use App\Notifications\PayrollNotification;
 use App\Services\LeaveService;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PayrollApprovalController extends Controller
@@ -161,31 +162,45 @@ class PayrollApprovalController extends Controller
 
     public function approveBatch(Request $request)
     {
-        $batch = PayrollBatch::findOrFail($request->input('batch_id'));
-        $this->logActivity('approved', ( $batch->isThirteenthMonth() ? '13th Month ' : '' ) . "Batch #{$batch->id}", request()->url(), 'payroll_batch', $batch->id);
+        $batchId = $request->input('batch_id');
+        $approval = DB::transaction(function () use ($batchId) {
+            $batch = PayrollBatch::whereKey($batchId)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        if ($batch->status !== 'submitted') {
+            if ($batch->status !== 'submitted') {
+                return null;
+            }
+
+            if ($batch->isThirteenthMonth()) {
+                $updated = $batch->thirteenthMonthPays()->where('status', 'pending')->count();
+            } else {
+                $updated = $batch->payrolls()->where('status', 'submitted')->update(['status' => 'approved']);
+            }
+
+            $batch->update([
+                'status'       => 'approved',
+                'approved_by'  => auth()->id(),
+                'approved_at'  => now(),
+                'rejected_by'  => null,
+                'rejected_at'  => null,
+                'rejection_note' => null,
+            ]);
+
+            return [$batch, $updated];
+        });
+
+        if (!$approval) {
+            $batch = PayrollBatch::findOrFail($batchId);
             return redirect()->route('payroll-approval.batch', $batch)
                 ->with('error', 'This batch is no longer awaiting approval.');
         }
 
-        if ($batch->isThirteenthMonth()) {
-            $records = $batch->thirteenthMonthPays()->where('status', 'pending')->get();
-            $updated = $records->count();
-        } else {
-            $updated = $batch->payrolls()->where('status', 'submitted')->update(['status' => 'approved']);
-        }
-
-        $batch->update([
-            'status'       => 'approved',
-            'approved_by'  => auth()->id(),
-            'approved_at'  => now(),
-            'rejected_by'  => null,
-            'rejected_at'  => null,
-            'rejection_note' => null,
-        ]);
+        [$batch, $updated] = $approval;
+        $this->logActivity('approved', ($batch->isThirteenthMonth() ? '13th Month ' : '') . "Batch #{$batch->id}", request()->url(), 'payroll_batch', $batch->id);
 
         if (!$batch->isThirteenthMonth()) {
+            $batch->load('payrolls');
             $periodStart = Carbon::parse($batch->period_start);
             $periodEnd   = Carbon::parse($batch->period_end);
             foreach ($batch->payrolls as $payroll) {
