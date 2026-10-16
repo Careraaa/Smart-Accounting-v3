@@ -6,6 +6,7 @@ use App\Models\Driver;
 use App\Models\PAO;
 use App\Models\Route as TransportRoute;
 use App\Models\Vehicle;
+use Carbon\Carbon;
 use Database\Seeders\Support\SeedConfig;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -100,7 +101,8 @@ class RemittanceSeeder extends Seeder
             [
                 'origin' => 'Fortune',
                 'destination' => 'Cubao',
-                'boundary' => 3500,
+                'weekday_boundary' => 3500,
+                'weekend_boundary' => 3500,
                 'status' => 'active',
             ]
         );
@@ -110,7 +112,8 @@ class RemittanceSeeder extends Seeder
             [
                 'origin' => 'SSS Village',
                 'destination' => 'Cubao',
-                'boundary' => 3000,
+                'weekday_boundary' => 3000,
+                'weekend_boundary' => 3000,
                 'status' => 'active',
             ]
         );
@@ -120,7 +123,8 @@ class RemittanceSeeder extends Seeder
             [
                 'origin' => 'Montalban',
                 'destination' => 'Cubao',
-                'boundary' => 3500,
+                'weekday_boundary' => 3500,
+                'weekend_boundary' => 3500,
                 'status' => 'active',
             ]
         );
@@ -195,7 +199,7 @@ class RemittanceSeeder extends Seeder
 
             foreach ($assignments as $ai => [$driver, $pao, $route, $vehicle]) {
 
-                $boundary = (float) ($route->boundary ?? 1500);
+                $boundary = $route->boundaryForDate(Carbon::parse($date));
 
                 /*
                 |--------------------------------------------------------------------------

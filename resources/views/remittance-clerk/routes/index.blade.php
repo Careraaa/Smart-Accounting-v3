@@ -77,7 +77,8 @@
                         <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Origin</th>
                         <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Destination</th>
                         <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Route Name</th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Boundary</th>
+                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Weekday Boundary</th>
+                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Weekend Boundary</th>
                         <th class="text-center px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Vehicles</th>
                         <th class="text-center px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Active</th>
                     </tr>
@@ -90,18 +91,13 @@
                         <td class="px-5 py-3 text-xs font-semibold text-gray-700">{{ $route->origin ?? '—' }}</td>
                         <td class="px-5 py-3 text-xs font-semibold text-gray-700">{{ $route->destination ?? '—' }}</td>
                         <td class="px-5 py-3 text-xs text-gray-600">{{ $route->route_name ?? '—' }}</td>
-                        <td class="px-5 py-3 text-xs">
-                            @if($route->boundary)
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-600">₱{{ number_format($route->boundary, 2) }}</span>
-                            @else
-                                <span class="text-gray-300">—</span>
-                            @endif
-                        </td>
+                        <td class="px-5 py-3 text-xs font-bold text-gray-900">₱{{ number_format($route->weekday_boundary, 2) }}</td>
+                        <td class="px-5 py-3 text-xs font-bold text-gray-900">₱{{ number_format($route->weekend_boundary, 2) }}</td>
                         <td class="px-5 py-3 text-xs text-center font-bold text-gray-700">{{ $route->vehicles->count() }}</td>
                         <td class="px-5 py-3 text-xs text-center font-bold text-emerald-600">{{ $route->vehicles->where('status', 'active')->count() }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="6">
+                    <tr><td colspan="7">
                         <div class="text-center py-12">
                             <div class="w-12 h-12 rounded-full bg-gray-50 text-gray-300 flex items-center justify-center mx-auto mb-3">
                                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>

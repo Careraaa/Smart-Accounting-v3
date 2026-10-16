@@ -19,7 +19,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Remittance Date <span class="text-amber-600">*</span></label>
-                    <input type="date" name="remittance_date" value="{{ old('remittance_date') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('remittance_date') border-red-300 @enderror" required>
+                    <input type="date" id="remittance_date" name="remittance_date" value="{{ old('remittance_date') }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('remittance_date') border-red-300 @enderror" required>
                     @error('remittance_date') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
@@ -50,7 +50,7 @@
                     <select name="vehicle_id" id="vehicle_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('vehicle_id') border-red-300 @enderror" required>
                         <option value="">— Select Vehicle —</option>
                         @foreach ($vehicles as $vehicle)
-                            <option value="{{ $vehicle->id }}" data-boundary="{{ $vehicle->route->boundary ?? 0 }}" data-status="{{ $vehicle->status }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>{{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})</option>
+                            <option value="{{ $vehicle->id }}" data-weekday-boundary="{{ $vehicle->route->weekday_boundary ?? 0 }}" data-weekend-boundary="{{ $vehicle->route->weekend_boundary ?? 0 }}" data-status="{{ $vehicle->status }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>{{ $vehicle->plate_number }} ({{ $vehicle->route->origin ?? 'N/A' }} - {{ $vehicle->route->destination ?? 'N/A' }})</option>
                         @endforeach
                     </select>
                     @error('vehicle_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
@@ -82,6 +82,7 @@
                         <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
                         <input type="text" id="boundary_display" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" placeholder="0.00" readonly>
                     </div>
+                    <p class="text-[10px] text-gray-400 mt-1">Rate is selected based on the remittance date.</p>
                     <p id="boundary_note" class="text-[10px] text-amber-600 mt-1" style="display: none;">Boundary rate is disregarded while the vehicle is under maintenance.</p>
                 </div>
             </div>
@@ -153,6 +154,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const vehicleSelect = document.getElementById('vehicle_id');
             const vehicleStatusSelect = document.getElementById('vehicle_status');
+            const remittanceDateInput = document.getElementById('remittance_date');
             const boundaryDisplay = document.getElementById('boundary_display');
             const boundaryNote = document.getElementById('boundary_note');
             const netRemittanceInput = document.getElementById('net_remittance');
@@ -186,9 +188,20 @@
                 return vehicleStatusSelect.value === 'under_maintenance';
             }
 
-            function syncBoundaryDisplay() {
+            function selectedBoundary() {
                 const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
-                const boundary = parseFloat(selectedOption?.getAttribute('data-boundary')) || 0;
+                if (vehicleSelect.value === '' || remittanceDateInput.value === '') return 0;
+
+                const day = new Date(`${remittanceDateInput.value}T00:00:00`).getDay();
+                const rateAttribute = day === 0 || day === 6
+                    ? 'data-weekend-boundary'
+                    : 'data-weekday-boundary';
+
+                return parseFloat(selectedOption?.getAttribute(rateAttribute)) || 0;
+            }
+
+            function syncBoundaryDisplay() {
+                const boundary = selectedBoundary();
 
                 if (vehicleSelect.value === '') {
                     boundaryDisplay.value = '0.00';
@@ -204,10 +217,9 @@
 
             function updateShortRemittance() {
                 const netRemittance = parseMoney(netRemittanceInput.value);
-                const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
                 const boundary = isMaintenance()
                     ? 0
-                    : (parseFloat(selectedOption?.getAttribute('data-boundary')) || 0);
+                    : selectedBoundary();
 
                 if (boundary > 0 && netRemittance < boundary) {
                     shortRemittanceSection.style.display = 'grid';
@@ -285,6 +297,11 @@
             });
 
             vehicleStatusSelect.addEventListener('change', function() {
+                syncBoundaryDisplay();
+                updateShortRemittance();
+            });
+
+            remittanceDateInput.addEventListener('change', function() {
                 syncBoundaryDisplay();
                 updateShortRemittance();
             });
