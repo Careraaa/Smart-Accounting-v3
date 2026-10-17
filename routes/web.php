@@ -540,6 +540,12 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
         // General Ledger
         Route::get('general-ledger', [\App\Http\Controllers\Accounting\GeneralLedgerController::class, 'index'])->name('general-ledger.index');
         Route::get('general-ledger/summary', [\App\Http\Controllers\Accounting\GeneralLedgerController::class, 'summary'])->name('general-ledger.summary');
+        Route::get('general-ledger/csv', [\App\Http\Controllers\Accounting\GeneralLedgerController::class, 'exportCsv'])->name('general-ledger.csv');
+
+        // Financial reports
+        Route::get('trial-balance', [\App\Http\Controllers\Accounting\FinancialReportController::class, 'trialBalance'])->name('trial-balance.index');
+        Route::get('income-statement', [\App\Http\Controllers\Accounting\FinancialReportController::class, 'incomeStatement'])->name('income-statement.index');
+        Route::get('balance-sheet', [\App\Http\Controllers\Accounting\FinancialReportController::class, 'balanceSheet'])->name('balance-sheet.index');
 
         // Account Mappings
         Route::get('account-mappings', [\App\Http\Controllers\Accounting\AccountMappingController::class, 'index'])->name('account-mappings.index');

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Accounting;
 
 use App\Http\Controllers\Controller;
 use App\Models\JournalEntry;
-use App\Models\JournalEntryLine;
 use App\Models\ChartOfAccount;
 use App\Models\AccountingAuditLog;
 use App\Services\PayrollJournalService;
@@ -248,6 +247,14 @@ class JournalEntryController extends Controller
                     throw new \RuntimeException('A journal entry must have at least two lines.');
                 }
 
+                foreach ($lines as $line) {
+                    $debit = (int) round((float) $line->debit * 100);
+                    $credit = (int) round((float) $line->credit * 100);
+                    if ($debit < 0 || $credit < 0 || ($debit === 0 && $credit === 0) || ($debit > 0 && $credit > 0)) {
+                        throw new \RuntimeException('Cannot post journal entry: each line must contain a positive debit or credit, but not both.');
+                    }
+                }
+
                 $totalDebit = (int) $lines->sum(fn ($line) => (int) round((float) $line->debit * 100));
                 $totalCredit = (int) $lines->sum(fn ($line) => (int) round((float) $line->credit * 100));
                 if ($totalDebit !== $totalCredit) {
@@ -285,20 +292,31 @@ class JournalEntryController extends Controller
 
     public function void(JournalEntry $journalEntry)
     {
-        if ($journalEntry->status !== 'Posted') {
-            return redirect()->back()->with('error', 'Only posted journal entries can be voided.');
+        $journalEntryId = $journalEntry->getKey();
+
+        try {
+            DB::transaction(function () use ($journalEntryId, &$journalEntry) {
+                $journalEntry = JournalEntry::whereKey($journalEntryId)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                if ($journalEntry->status !== 'Posted') {
+                    throw new \RuntimeException('Only posted journal entries can be voided.');
+                }
+
+                $journalEntry->update(['status' => 'Void']);
+
+                AccountingAuditLog::log(
+                    'voided',
+                    'Journal Entry',
+                    $journalEntry->id,
+                    "Voided journal entry {$journalEntry->journal_number}",
+                    ['status' => 'Posted'],
+                    ['status' => 'Void']
+                );
+            });
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        $journalEntry->update(['status' => 'Void']);
-
-        AccountingAuditLog::log(
-            'voided',
-            'Journal Entry',
-            $journalEntry->id,
-            "Voided journal entry {$journalEntry->journal_number}",
-            ['status' => 'Posted'],
-            ['status' => 'Void']
-        );
 
         return redirect()->route('accounting.journal-entries.show', $journalEntry)
             ->with('success', "Journal entry {$journalEntry->journal_number} has been voided.");
