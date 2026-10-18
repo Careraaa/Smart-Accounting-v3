@@ -37,10 +37,13 @@ class ReportController extends Controller
         })->sortBy('remittance_date')->values();
         
         // Paginate the grouped results
-        $page = 1;
         $perPage = 10;
-        $groupedRemittances = new \Illuminate\Pagination\Paginator(
+        $groupedCount = $groupedRemittances->count();
+        $page = max(1, (int) request()->query('page', 1));
+        $page = min($page, max(1, (int) ceil($groupedCount / $perPage)));
+        $groupedRemittances = new \Illuminate\Pagination\LengthAwarePaginator(
             $groupedRemittances->forPage($page, $perPage),
+            $groupedCount,
             $perPage,
             $page,
             [
@@ -92,10 +95,13 @@ class ReportController extends Controller
         })->sortBy('remittance_date')->values();
         
         // Paginate the grouped results
-        $page = $request->get('page', 1);
         $perPage = 10;
-        $groupedRemittances = new \Illuminate\Pagination\Paginator(
+        $groupedCount = $groupedRemittances->count();
+        $page = max(1, (int) $request->get('page', 1));
+        $page = min($page, max(1, (int) ceil($groupedCount / $perPage)));
+        $groupedRemittances = new \Illuminate\Pagination\LengthAwarePaginator(
             $groupedRemittances->forPage($page, $perPage),
+            $groupedCount,
             $perPage,
             $page,
             [

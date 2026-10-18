@@ -122,7 +122,7 @@
                         <th class="text-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-50">
+                <tbody class="divide-y divide-gray-50" id="assignedVehicleTbody">
                     @foreach($route->vehicles as $vehicle)
                         @php
                             $vvstatus = strtolower($vehicle->status ?? 'active');
@@ -139,6 +139,10 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+            <p class="text-xs text-gray-400" id="assignedVehiclePaginationInfo">No vehicles to display</p>
+            <nav class="flex items-center gap-1" id="assignedVehiclePaginationNav"></nav>
         </div>
     </div>
     @endif
@@ -195,6 +199,55 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closeRouteDeleteModal();
     });
+
+    const vehicleTbody = document.getElementById('assignedVehicleTbody');
+    if (vehicleTbody) {
+        const vehicleRows = Array.from(vehicleTbody.querySelectorAll('tr'));
+        const vehicleInfo = document.getElementById('assignedVehiclePaginationInfo');
+        const vehicleNav = document.getElementById('assignedVehiclePaginationNav');
+        const perPage = 10;
+        let page = 1;
+
+        function renderAssignedVehicles() {
+            const total = vehicleRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / perPage));
+            page = Math.min(page, totalPages);
+            const start = (page - 1) * perPage;
+            const end = Math.min(start + perPage, total);
+
+            vehicleRows.forEach((row, index) => {
+                row.style.display = index >= start && index < end ? '' : 'none';
+            });
+            vehicleInfo.innerHTML = total
+                ? `Showing <strong class="text-gray-700">${start + 1}</strong>–<strong class="text-gray-700">${end}</strong> of <strong class="text-gray-700">${total}</strong>`
+                : 'No vehicles to display';
+
+            let html = '';
+            const buttonClass = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+            const activeClass = buttonClass + ' bg-gray-900 text-white border-gray-900';
+            const defaultClass = buttonClass + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+            const disabledClass = buttonClass + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+            if (totalPages > 1) {
+                html += `<button type="button" data-page="${page - 1}" aria-label="Previous page" class="${page === 1 ? disabledClass : defaultClass}">‹</button>`;
+                const windowStart = Math.max(1, page - 2);
+                const windowEnd = Math.min(totalPages, windowStart + 4);
+                const adjustedStart = Math.max(windowEnd - 4, 1);
+                for (let current = adjustedStart; current <= windowEnd; current++) {
+                    html += `<button type="button" data-page="${current}" aria-current="${current === page ? 'page' : 'false'}" class="${current === page ? activeClass : defaultClass}">${current}</button>`;
+                }
+                html += `<button type="button" data-page="${page + 1}" aria-label="Next page" class="${page === totalPages ? disabledClass : defaultClass}">›</button>`;
+            }
+            vehicleNav.innerHTML = html;
+        }
+
+        vehicleNav.addEventListener('click', event => {
+            const button = event.target.closest('button[data-page]');
+            if (!button) return;
+            page = Number(button.dataset.page);
+            renderAssignedVehicles();
+        });
+        renderAssignedVehicles();
+    }
 </script>
 @endpush
 @endsection

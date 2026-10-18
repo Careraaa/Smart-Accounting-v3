@@ -131,8 +131,8 @@
             </table>
         </div>
         <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50 bg-gray-50/30" id="paginationStrip">
-            <p class="text-[0.65rem] text-gray-400" id="paginationInfo">Showing 0–0 of 0</p>
-            <div class="flex items-center gap-1" id="paginationBtns"></div>
+            <p class="text-xs text-gray-400" id="paginationInfo">No remittances to display</p>
+            <nav class="flex items-center gap-1" id="paginationBtns"></nav>
         </div>
     </div>
 
@@ -198,20 +198,29 @@
             tbody.innerHTML = html;
         }
 
-        paginationInfo.textContent = total > 0
-            ? 'Showing ' + (start + 1) + '–' + end + ' of ' + total + ' ' + activeTab + ' remittances'
-            : 'Showing 0–0 of 0';
+        paginationInfo.innerHTML = total > 0
+            ? 'Showing <strong class="text-gray-700">' + (start + 1) + '</strong>–<strong class="text-gray-700">' + end + '</strong> of <strong class="text-gray-700">' + total + '</strong> ' + activeTab + ' remittances'
+            : 'No ' + activeTab + ' remittances to display';
 
         renderPagination(totalPages, currentPage);
     }
 
     function renderPagination(totalPages, cur) {
         var html = '';
-        var half = 2;
-        var winStart = Math.max(1, cur - half);
-        var winEnd = Math.min(totalPages, winStart + 4);
-        if (winEnd - winStart + 1 < 5) { winStart = Math.max(winEnd - 4, 1); }
-        for (var p = winStart; p <= winEnd; p++) { html += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold border cursor-pointer ' + (p === cur ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 hover:bg-gray-100 border-gray-200') + '" data-page="' + p + '">' + p + '</button>'; }
+        var buttonClass = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+        var activeClass = buttonClass + ' bg-gray-900 text-white border-gray-900';
+        var defaultClass = buttonClass + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+        var disabledClass = buttonClass + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+        if (totalPages > 1) {
+            html += '<button type="button" data-page="' + (cur - 1) + '" aria-label="Previous page" class="' + (cur === 1 ? disabledClass : defaultClass) + '">‹</button>';
+            var winStart = Math.max(1, cur - 2);
+            var winEnd = Math.min(totalPages, winStart + 4);
+            winStart = Math.max(winEnd - 4, 1);
+            for (var p = winStart; p <= winEnd; p++) {
+                html += '<button type="button" data-page="' + p + '" aria-current="' + (p === cur ? 'page' : 'false') + '" class="' + (p === cur ? activeClass : defaultClass) + '">' + p + '</button>';
+            }
+            html += '<button type="button" data-page="' + (cur + 1) + '" aria-label="Next page" class="' + (cur === totalPages ? disabledClass : defaultClass) + '">›</button>';
+        }
         paginationBtns.innerHTML = html;
 
         paginationBtns.querySelectorAll('button').forEach(function (btn) {

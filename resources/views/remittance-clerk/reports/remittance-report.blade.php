@@ -181,17 +181,31 @@
                 </tbody>
             </table>
         </div>
-        @if(method_exists($groupedRemittances, 'hasPages') && $groupedRemittances->hasPages())
-        <div class="flex justify-between items-center px-4 py-3 border-t border-gray-100 bg-gray-50/50">
-            <div class="text-[0.65rem] text-gray-400">
+        <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+            <div class="text-xs text-gray-400">
                 Showing
                 <strong class="text-gray-700">{{ $groupedRemittances->firstItem() }}</strong>–<strong class="text-gray-700">{{ $groupedRemittances->lastItem() }}</strong>
                 of
                 <strong class="text-gray-700">{{ $groupedRemittances->total() }}</strong> daily totals
             </div>
-            {{ $groupedRemittances->withQueryString()->links('pagination::tailwind') }}
+            @if($groupedRemittances->hasPages())
+                @php
+                    $currentPage = $groupedRemittances->currentPage();
+                    $lastPage = $groupedRemittances->lastPage();
+                    $windowStart = max(1, $currentPage - 2);
+                    $windowEnd = min($lastPage, $windowStart + 4);
+                    $windowStart = max(1, $windowEnd - 4);
+                    $pageButtonClass = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+                @endphp
+                <nav class="flex items-center gap-1" aria-label="Pagination">
+                    <a href="{{ $groupedRemittances->url(max(1, $currentPage - 1)) }}" aria-label="Previous page" class="{{ $pageButtonClass }} {{ $groupedRemittances->onFirstPage() ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300' }}">‹</a>
+                    @for($pageNumber = $windowStart; $pageNumber <= $windowEnd; $pageNumber++)
+                        <a href="{{ $groupedRemittances->url($pageNumber) }}" aria-current="{{ $pageNumber === $currentPage ? 'page' : 'false' }}" class="{{ $pageButtonClass }} {{ $pageNumber === $currentPage ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300' }}">{{ $pageNumber }}</a>
+                    @endfor
+                    <a href="{{ $groupedRemittances->url(min($lastPage, $currentPage + 1)) }}" aria-label="Next page" class="{{ $pageButtonClass }} {{ !$groupedRemittances->hasMorePages() ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300' }}">›</a>
+                </nav>
+            @endif
         </div>
-        @endif
     </div>
 @endsection
 
@@ -231,7 +245,7 @@ function openRemittanceModal(dateKey) {
             '<td class="px-5 py-3 text-sm text-center"><a href="' + r.show_url + '" class="text-blue-600 hover:text-blue-800 font-semibold no-underline">Details</a></td>' +
             '<td class="px-5 py-3 text-sm text-center">' + (r.short ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500" title="Short"></span>' : '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" title="OK"></span>') + '</td>' +
         '</tr>';
-    }).join('');
+    });
 
     overlay.innerHTML = '<div class="rm-modal bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 max-h-[85vh] flex flex-col overflow-hidden" onclick="event.stopPropagation()">' +
         '<div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">' +
@@ -255,21 +269,63 @@ function openRemittanceModal(dateKey) {
                     '<th class="text-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Details</th>' +
                     '<th class="text-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Sts</th>' +
                 '</tr></thead>' +
-                '<tbody>' + rows +
-                    '<tr class="bg-gray-50/50 border-t-2 border-gray-200">' +
+                '<tbody id="remittanceDetailBody">' + rows.slice(0, 10).join('') +
+                '</tbody><tfoot><tr class="bg-gray-50/50 border-t-2 border-gray-200">' +
                         '<td colspan="5" class="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-500 text-right">Daily total</td>' +
                         '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold text-emerald-600">₱' + fmt(totalCol) + '</td>' +
                         '<td class="px-5 py-3 text-sm text-right tabular-nums text-gray-400">₱' + fmt(totalExp) + '</td>' +
                         '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold ' + (hasShort ? 'text-red-600' : 'text-emerald-600') + '">₱' + fmt(totalNet) + '</td>' +
                         '<td class="px-5 py-3 text-sm text-center text-gray-300">—</td>' +
                         '<td class="px-5 py-3 text-sm text-center">' + (hasShort ? '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-red-500">Short</span>' : '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-emerald-500">Clear</span>') + '</td>' +
-                    '</tr>' +
-                '</tbody>' +
+                    '</tr></tfoot>' +
             '</table>' +
+        '</div>' +
+        '<div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/50">' +
+            '<p class="text-xs text-gray-400" id="remittanceDetailInfo"></p>' +
+            '<nav class="flex items-center gap-1" id="remittanceDetailNav" aria-label="Remittance detail pagination"></nav>' +
         '</div>' +
     '</div>';
 
     document.body.appendChild(overlay);
+
+    const detailBody = overlay.querySelector('#remittanceDetailBody');
+    const detailInfo = overlay.querySelector('#remittanceDetailInfo');
+    const detailNav = overlay.querySelector('#remittanceDetailNav');
+    const perPage = 10;
+    let page = 1;
+
+    function renderDetailPage() {
+        const totalPages = Math.max(1, Math.ceil(rows.length / perPage));
+        const start = (page - 1) * perPage;
+        const end = Math.min(start + perPage, rows.length);
+        detailBody.innerHTML = rows.slice(start, end).join('');
+        detailInfo.innerHTML = `Showing <strong class="text-gray-700">${start + 1}</strong>–<strong class="text-gray-700">${end}</strong> of <strong class="text-gray-700">${rows.length}</strong> remittance records`;
+
+        let html = '';
+        const buttonClass = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+        const activeClass = buttonClass + ' bg-gray-900 text-white border-gray-900';
+        const defaultClass = buttonClass + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+        const disabledClass = buttonClass + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+        if (totalPages > 1) {
+            html += `<button type="button" data-page="${page - 1}" aria-label="Previous page" class="${page === 1 ? disabledClass : defaultClass}">‹</button>`;
+            const windowStart = Math.max(1, page - 2);
+            const windowEnd = Math.min(totalPages, windowStart + 4);
+            const adjustedStart = Math.max(windowEnd - 4, 1);
+            for (let current = adjustedStart; current <= windowEnd; current++) {
+                html += `<button type="button" data-page="${current}" aria-current="${current === page ? 'page' : 'false'}" class="${current === page ? activeClass : defaultClass}">${current}</button>`;
+            }
+            html += `<button type="button" data-page="${page + 1}" aria-label="Next page" class="${page === totalPages ? disabledClass : defaultClass}">›</button>`;
+        }
+        detailNav.innerHTML = html;
+    }
+
+    detailNav.addEventListener('click', function(event) {
+        const button = event.target.closest('button[data-page]');
+        if (!button) return;
+        page = Number(button.dataset.page);
+        renderDetailPage();
+    });
+    renderDetailPage();
 }
 
 function closeRemittanceModal(el) {

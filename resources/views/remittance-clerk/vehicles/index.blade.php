@@ -128,6 +128,10 @@
         <div id="vehicleNoResults" style="display:none;">
             <div class="text-center py-8"><p class="text-xs font-semibold text-gray-400">No results</p><p class="text-[10px] text-gray-300 mt-0.5">Try adjusting your filters.</p></div>
         </div>
+        <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+            <p class="text-xs text-gray-400" id="vehiclePaginationInfo">No vehicles to display</p>
+            <nav class="flex items-center gap-1" id="vehiclePaginationNav"></nav>
+        </div>
     </div>
 
 @endsection
@@ -139,17 +143,54 @@
     const statusF = document.getElementById('statusFilter');
     const tbody = document.getElementById('vehicleTbody');
     const noRes = document.getElementById('vehicleNoResults');
+    const info = document.getElementById('vehiclePaginationInfo');
+    const nav = document.getElementById('vehiclePaginationNav');
+    const perPage = 10;
+    let page = 1;
+
     function run() {
         const q = search.value.toLowerCase().trim();
         const s = statusF.value;
         const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
-        const vis = rows.filter(r => (!q || r.dataset.name.includes(q)) && (!s || r.dataset.status === s));
+        const filtered = rows.filter(r => (!q || r.dataset.name.includes(q)) && (!s || r.dataset.status === s));
+        const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+        page = Math.min(page, totalPages);
+        const start = (page - 1) * perPage;
+        const end = Math.min(start + perPage, filtered.length);
+
         rows.forEach(r => r.style.display = 'none');
-        vis.forEach(r => r.style.display = '');
-        noRes.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
+        filtered.slice(start, end).forEach(r => r.style.display = '');
+        noRes.style.display = filtered.length === 0 && rows.length > 0 ? 'block' : 'none';
+        info.innerHTML = filtered.length
+            ? `Showing <strong class="text-gray-700">${start + 1}</strong>–<strong class="text-gray-700">${end}</strong> of <strong class="text-gray-700">${filtered.length}</strong>`
+            : 'No vehicles to display';
+
+        let html = '';
+        const buttonClass = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+        const activeClass = buttonClass + ' bg-gray-900 text-white border-gray-900';
+        const defaultClass = buttonClass + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+        const disabledClass = buttonClass + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+        if (totalPages > 1) {
+            html += `<button type="button" data-page="${page - 1}" aria-label="Previous page" class="${page === 1 ? disabledClass : defaultClass}">‹</button>`;
+            const windowStart = Math.max(1, page - 2);
+            const windowEnd = Math.min(totalPages, windowStart + 4);
+            const adjustedStart = Math.max(windowEnd - 4, 1);
+            for (let p = adjustedStart; p <= windowEnd; p++) {
+                html += `<button type="button" data-page="${p}" aria-current="${p === page ? 'page' : 'false'}" class="${p === page ? activeClass : defaultClass}">${p}</button>`;
+            }
+            html += `<button type="button" data-page="${page + 1}" aria-label="Next page" class="${page === totalPages ? disabledClass : defaultClass}">›</button>`;
+        }
+        nav.innerHTML = html;
     }
-    search.addEventListener('input', run);
-    statusF.addEventListener('change', run);
+    nav.addEventListener('click', event => {
+        const button = event.target.closest('button[data-page]');
+        if (!button) return;
+        page = Number(button.dataset.page);
+        run();
+    });
+    search.addEventListener('input', () => { page = 1; run(); });
+    statusF.addEventListener('change', () => { page = 1; run(); });
+    run();
 })();
 </script>
 @endpush

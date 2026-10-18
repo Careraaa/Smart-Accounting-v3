@@ -135,8 +135,8 @@
         </div>
     </div>
     <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50 bg-gray-50/30">
-        <p class="text-[0.65rem] text-gray-400" id="tableInfo">Showing 0–0 of 0</p>
-        <div class="flex items-center gap-1" id="tableBtns"></div>
+        <p class="text-xs text-gray-400" id="tableInfo">No remittances to display</p>
+        <nav class="flex items-center gap-1" id="tableBtns"></nav>
     </div>
 </div>
 @endsection
@@ -234,17 +234,24 @@
             tbody.innerHTML = html;
         }
 
-        info.textContent = total > 0 ? 'Showing ' + (start + 1) + '–' + end + ' of ' + total : 'Showing 0–0 of 0';
+        info.innerHTML = total > 0
+            ? 'Showing <strong class="text-gray-700">' + (start + 1) + '</strong>–<strong class="text-gray-700">' + end + '</strong> of <strong class="text-gray-700">' + total + '</strong>'
+            : 'No remittances to display';
 
         var bhtml = '';
         if (totalPages > 1) {
-            var half = 2, ws = Math.max(1, page - half), we = Math.min(totalPages, ws + 4);
-            if (we - ws + 1 < 5) ws = Math.max(we - 4, 1);
+            var btnClass = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+            var activeClass = btnClass + ' bg-gray-900 text-white border-gray-900';
+            var defaultClass = btnClass + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+            var disabledClass = btnClass + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+            var ws = Math.max(1, page - 2), we = Math.min(totalPages, ws + 4);
+            ws = Math.max(we - 4, 1);
+            bhtml += '<button type="button" data-page="' + (page - 1) + '" aria-label="Previous page" class="' + (page === 1 ? disabledClass : defaultClass) + '">‹</button>';
             for (var p = ws; p <= we; p++) {
-                bhtml += '<button class="px-2.5 py-1 rounded-lg text-[0.6rem] font-bold border cursor-pointer ' +
-                    (p === page ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 hover:bg-gray-100 border-gray-200') +
-                    '" data-page="' + p + '">' + p + '</button>';
+                bhtml += '<button type="button" data-page="' + p + '" aria-current="' + (p === page ? 'page' : 'false') + '" class="' +
+                    (p === page ? activeClass : defaultClass) + '">' + p + '</button>';
             }
+            bhtml += '<button type="button" data-page="' + (page + 1) + '" aria-label="Next page" class="' + (page === totalPages ? disabledClass : defaultClass) + '">›</button>';
         }
         btns.innerHTML = bhtml;
         btns.querySelectorAll('button').forEach(function (btn) {

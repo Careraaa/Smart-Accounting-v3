@@ -141,6 +141,10 @@
                 <p class="text-[10px] text-gray-300">Try adjusting your filters.</p>
             </div>
         </div>
+        <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50 bg-gray-50/30">
+            <p class="text-xs text-gray-400" id="driverPaginationInfo">No drivers to display</p>
+            <nav class="flex items-center gap-1" id="driverPaginationBtns"></nav>
+        </div>
     </div>
 
 @endsection
@@ -152,17 +156,59 @@
     const statusF = document.getElementById('statusFilter');
     const tbody   = document.getElementById('driverTbody');
     const noRes   = document.getElementById('driverNoResults');
+    const info    = document.getElementById('driverPaginationInfo');
+    const btns    = document.getElementById('driverPaginationBtns');
+    const perPage = 10;
+    let page = 1;
+
     function run() {
         const q = search.value.toLowerCase().trim();
         const s = statusF.value;
         const rows = Array.from(tbody.querySelectorAll('tr[data-name]'));
-        const vis = rows.filter(r => (!q || r.dataset.name.includes(q)) && (!s || r.dataset.status === s));
+        const filtered = rows.filter(r => (!q || r.dataset.name.includes(q)) && (!s || r.dataset.status === s));
+        const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+        page = Math.min(page, totalPages);
+        const start = (page - 1) * perPage;
+        const end = Math.min(start + perPage, filtered.length);
+
         rows.forEach(r => r.style.display = 'none');
-        vis.forEach(r => r.style.display = '');
-        noRes.style.display = vis.length === 0 && rows.length > 0 ? 'block' : 'none';
+        filtered.slice(start, end).forEach(r => r.style.display = '');
+        noRes.style.display = filtered.length === 0 && rows.length > 0 ? 'block' : 'none';
+        if (filtered.length === 0) {
+            info.textContent = 'No drivers to display';
+        } else {
+            info.innerHTML = `Showing <strong class="text-gray-700">${start + 1}</strong>–<strong class="text-gray-700">${end}</strong> of <strong class="text-gray-700">${filtered.length}</strong>`;
+        }
+
+        let pagination = '';
+        const buttonClass = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+        const activeClass = buttonClass + ' bg-gray-900 text-white border-gray-900';
+        const defaultClass = buttonClass + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+        const disabledClass = buttonClass + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+
+        if (totalPages > 1) {
+            pagination += `<button type="button" data-page="${page - 1}" aria-label="Previous page" class="${page === 1 ? disabledClass : defaultClass}">‹</button>`;
+            const windowStart = Math.max(1, page - 2);
+            const windowEnd = Math.min(totalPages, windowStart + 4);
+            const adjustedStart = Math.max(windowEnd - 4, 1);
+            for (let p = adjustedStart; p <= windowEnd; p++) {
+                pagination += `<button type="button" data-page="${p}" aria-current="${p === page ? 'page' : 'false'}" class="${p === page ? activeClass : defaultClass}">${p}</button>`;
+            }
+            pagination += `<button type="button" data-page="${page + 1}" aria-label="Next page" class="${page === totalPages ? disabledClass : defaultClass}">›</button>`;
+        }
+        btns.innerHTML = pagination;
     }
-    search.addEventListener('input', run);
-    statusF.addEventListener('change', run);
+
+    btns.addEventListener('click', event => {
+        const button = event.target.closest('button[data-page]');
+        if (!button) return;
+        page = Number(button.dataset.page);
+        run();
+    });
+
+    search.addEventListener('input', () => { page = 1; run(); });
+    statusF.addEventListener('change', () => { page = 1; run(); });
+    run();
 })();
 </script>
 @endpush
