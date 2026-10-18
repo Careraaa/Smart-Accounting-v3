@@ -69,7 +69,7 @@ $user = auth()->user();
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('employee.attendance.index') }}" class="btn-uv-pill">View all &rarr;</a>
+                <a href="{{ route('employee.attendance.index') }}" class="shrink-0 text-[11px] font-medium text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">View all &rarr;</a>
             </div>
 
             {{-- Quick Actions --}}

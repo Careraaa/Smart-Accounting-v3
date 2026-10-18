@@ -81,7 +81,7 @@ $mctActive = count($monthlyCollectionTrend) - 1;
                     </div>
                     <span class="text-xs font-semibold text-gray-900">Daily Remittance Trend</span>
                 </div>
-                <a href="{{ route('remittances.index') }}" class="btn-uv-pill">View all &rarr;</a>
+                <a href="{{ route('remittances.index') }}" class="shrink-0 text-[11px] font-medium text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">View all &rarr;</a>
             </div>
             @php
             $dailyData = collect();
