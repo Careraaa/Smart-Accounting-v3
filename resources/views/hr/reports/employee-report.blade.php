@@ -250,7 +250,7 @@
 
         @page {
             size: Letter landscape;
-            margin: 12mm;
+            margin: 0;
         }
     </style>
 </head>
