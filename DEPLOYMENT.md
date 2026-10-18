@@ -113,7 +113,29 @@ git push origin main
 Watch progress: repo → **Actions** tab.
 First deploy: **15–40 min** (~10k files over FTP). Later deploys only sync changed files.
 
-## 5. After each deploy — smoke tests
+## 5. After each deploy — database migrations
+
+The pipeline uploads **code only**. It never runs `php artisan migrate`, because the
+InfinityFree DB is not reachable from the GitHub runner and there is no SSH.
+
+**If a deploy adds or changes a migration, you must apply it by hand.**
+
+1. Open `database/migrations/` and find files added since the last deploy.
+2. Translate each one to plain SQL in phpMyAdmin.
+   - Keep the `Schema::hasColumn(...)` guards — they make the SQL safe to re-run.
+   - Reuse `database/manual/*.sql` where a manual script already exists.
+3. Run it against **both** the production and the sandbox database.
+4. Optionally record it so it is not forgotten:
+   ```sql
+   INSERT INTO migrations (migration, batch) VALUES ('2026_10_16_000002_add_payroll_accounting_classification', 1);
+   ```
+   Only do this after the SQL has actually been applied.
+
+> Symptom of a forgotten migration: a page that used to work starts returning
+> `500 ... Unknown column 'x' in 'INSERT INTO'`. The code deployed fine; only the
+> database is behind.
+
+## 6. After each deploy — smoke tests
 
 - [ ] Homepage + login works
 - [ ] CSS/JS loaded (not unstyled)
@@ -122,12 +144,13 @@ First deploy: **15–40 min** (~10k files over FTP). Later deploys only sync cha
 - [ ] Upload one attachment, download it back
 - [ ] Reports render
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
 | Blank page / "autoload.php" error | vendor not uploaded | Check Actions log — composer step failed? |
 | Site up but no styles | Vite build missing | Check `npm run build` step in Actions log |
+| `500 ... Unknown column 'x' in 'INSERT INTO'` | Migration not applied to that DB | See section 5 — run the SQL in phpMyAdmin |
 | Error 500 everywhere | `.htaccess` problem or bad `.env` | Set APP_DEBUG=true temporarily in the secret, redeploy, read error |
 | Login loops back | `sessions` table missing | Re-import DB dump |
 | 403 on some file | Root `.htaccess` guard — expected for `.env`, `.git`, etc. |
