@@ -34,8 +34,15 @@ class ChartOfAccountController extends Controller
             'account_code' => 'required|string|max:20|unique:chart_of_accounts,account_code',
             'account_name' => 'required|string|max:255',
             'account_type' => 'required|in:Asset,Liability,Equity,Revenue,Expense',
+            'is_contra' => 'sometimes|boolean',
             'description'  => 'nullable|string|max:1000',
         ]);
+
+        $validated['is_contra'] = $request->boolean('is_contra');
+        if ($validated['is_contra'] && !in_array($validated['account_type'], ['Revenue', 'Expense'], true)) {
+            return redirect()->back()->withInput()
+                ->with('error', 'Contra accounts must be classified as Revenue or Expense.');
+        }
 
         $validated['created_by'] = auth()->id();
 
@@ -77,20 +84,23 @@ class ChartOfAccountController extends Controller
             'account_code' => 'required|string|max:20|unique:chart_of_accounts,account_code,' . $chartOfAccount->id,
             'account_name' => 'required|string|max:255',
             'account_type' => 'required|in:Asset,Liability,Equity,Revenue,Expense',
+            'is_contra' => 'sometimes|boolean',
             'description'  => 'nullable|string|max:1000',
         ]);
 
-        if ($chartOfAccount->is_contra && $validated['account_type'] !== 'Expense') {
+        $validated['is_contra'] = $request->boolean('is_contra');
+        if ($validated['is_contra'] && !in_array($validated['account_type'], ['Revenue', 'Expense'], true)) {
             return redirect()->back()->withInput()
-                ->with('error', 'A contra-expense account must retain the Expense account type.');
+                ->with('error', 'Contra accounts must be classified as Revenue or Expense.');
         }
 
         if (
-            $chartOfAccount->account_type !== $validated['account_type']
+            ($chartOfAccount->account_type !== $validated['account_type']
+                || $chartOfAccount->is_contra !== $validated['is_contra'])
             && $chartOfAccount->journalEntryLines()->exists()
         ) {
             return redirect()->back()->withInput()
-                ->with('error', 'An account type cannot be changed after journal entries have been recorded.');
+                ->with('error', 'Account type and contra classification cannot be changed after journal entries have been recorded.');
         }
 
         $oldValues = $chartOfAccount->toArray();

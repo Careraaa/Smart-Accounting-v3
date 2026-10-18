@@ -297,7 +297,7 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-between px-4 py-3 bg-gray-50/80 border-t border-gray-100">
-                        <a class="btn-uv-pill text-sm" href="{{ route('notifications.index') }}">View all</a>
+                        <a class="text-sm font-medium text-gray-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors no-underline" href="{{ route('notifications.index') }}">View all</a>
                         <button class="text-sm font-bold text-red-500 no-underline hover:underline bg-transparent border-none cursor-pointer {{ $unread_count > 0 ? '' : 'hidden' }}" id="mark-all-read">Mark all as read</button>
                     </div>
                 </div>

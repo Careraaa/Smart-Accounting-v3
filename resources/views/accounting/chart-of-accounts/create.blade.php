@@ -78,6 +78,13 @@
                     @enderror
                 </div>
 
+                <div class="rounded-lg border border-gray-200 p-3">
+                    <label class="flex items-start gap-2 text-sm text-gray-700">
+                        <input type="checkbox" name="is_contra" value="1" {{ old('is_contra') ? 'checked' : '' }} class="mt-0.5 rounded border-gray-300">
+                        <span><span class="font-semibold">Contra account</span><span class="block text-xs text-gray-400">Use for contra-revenue or contra-expense accounts to reverse the normal balance.</span></span>
+                    </label>
+                </div>
+
                 {{-- Description --}}
                 <div>
                     <label for="description" class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">

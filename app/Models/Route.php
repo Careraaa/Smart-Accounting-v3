@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,9 +15,15 @@ class Route extends Model
         'route_code',
         'origin',
         'destination',
-        'boundary',
+        'weekday_boundary',
+        'weekend_boundary',
         'status',
     ];
+
+    public function boundaryForDate(CarbonInterface $date): float
+    {
+        return (float) ($date->isWeekend() ? $this->weekend_boundary : $this->weekday_boundary);
+    }
 
     public function vehicles()
     {

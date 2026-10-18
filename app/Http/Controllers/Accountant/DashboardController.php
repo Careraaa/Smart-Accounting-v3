@@ -122,13 +122,15 @@ class DashboardController extends Controller
             ];
         }
         
-        // Pending Cash Advances
-        $pendingCashAdvancesCount = CashAdvance::where('status', 'pending')->count();
+        // Cash advances awaiting the accountant's release.
+        // Status flow: pending -> approved (HR) -> released (accountant) -> deducted.
+        // The accountant's queue is 'approved'; 'pending' is still waiting on HR.
+        $pendingCashAdvancesCount = CashAdvance::where('status', 'approved')->count();
         if ($pendingCashAdvancesCount > 0) {
             $pendingItems[] = [
                 'text' => $pendingCashAdvancesCount === 1
-                    ? '1 Cash Advance Needs Approval'
-                    : "{$pendingCashAdvancesCount} Cash Advances Need Approval",
+                    ? '1 Cash Advance Needs Release'
+                    : "{$pendingCashAdvancesCount} Cash Advances Need Release",
                 'count' => $pendingCashAdvancesCount,
                 'url' => route('payroll.receivables.index', ['tab' => 'cash_advances']),
                 'icon' => 'feather-dollar-sign',

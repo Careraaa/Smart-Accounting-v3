@@ -749,6 +749,56 @@
                 });
             };
 
+            /**
+             * Scroll the sidebar so a freshly opened dropdown is fully visible.
+             *
+             * Two things this has to get right:
+             *  - Measure with getBoundingClientRect(). item.offsetTop is relative
+             *    to the nearest positioned ancestor, which here is the <nav>, not
+             *    the scrolling box — so the old numbers never lined up.
+             *  - Measure after the slide finishes. The submenu animates max-height
+             *    over .55s, so one frame after the click it is still closed and
+             *    its height is wrong.
+             */
+            const revealOpenedItem = (item) => {
+                const sub = item.querySelector('.sidebar-sub');
+                // Walk up from the menu item to its own scroll box. Do not use
+                // nav.querySelector('.overflow-y-auto') here — the search popup
+                // also has one and comes first in the DOM, so that grabs the
+                // wrong element and scrolls nothing visible.
+                const scrollEl = item.closest('.overflow-y-auto');
+                if (!sub || !scrollEl) return;
+
+                const scroll = () => {
+                    const itemRect = item.getBoundingClientRect();
+                    const viewRect = scrollEl.getBoundingClientRect();
+                    const hiddenBelow = (itemRect.bottom - viewRect.bottom) + 12;
+
+                    if (hiddenBelow > 0) {
+                        scrollEl.scrollTo({
+                            top: scrollEl.scrollTop + hiddenBelow,
+                            behavior: 'smooth'
+                        });
+                    }
+                };
+
+                // transitionend only fires when the height actually animates,
+                // so keep a timeout as a fallback for the no-op case.
+                let settled = false;
+                const finish = () => {
+                    if (settled) return;
+                    settled = true;
+                    sub.removeEventListener('transitionend', onEnd);
+                    scroll();
+                };
+                const onEnd = (e) => {
+                    if (e.propertyName === 'max-height') finish();
+                };
+
+                sub.addEventListener('transitionend', onEnd);
+                setTimeout(finish, 700);
+            };
+
             menuItems.forEach((item) => {
                 const trigger = getDirectTrigger(item);
                 if (!trigger) return;
@@ -773,17 +823,7 @@
 
                     // Scroll sidebar to keep the opened dropdown visible
                     if (next) {
-                        requestAnimationFrame(function() {
-                            var sub = item.querySelector('.sidebar-sub');
-                            var scrollEl = nav.querySelector('.overflow-y-auto');
-                            if (sub && scrollEl) {
-                                var itemBottom = item.offsetTop + item.offsetHeight;
-                                var scrollBottom = scrollEl.scrollTop + scrollEl.clientHeight;
-                                if (itemBottom > scrollBottom) {
-                                    scrollEl.scrollTop = itemBottom - scrollEl.clientHeight;
-                                }
-                            }
-                        });
+                        revealOpenedItem(item);
                     }
                 });
             });

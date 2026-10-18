@@ -52,23 +52,22 @@
                         <th class="text-left px-5 py-3 font-semibold text-gray-700">Plate Number</th>
                         <th class="text-left px-5 py-3 font-semibold text-gray-700">Assigned Route</th>
                         <th class="text-left px-5 py-3 font-semibold text-gray-700">Operator</th>
-                        <th class="text-left px-5 py-3 font-semibold text-gray-700">Boundary Rate</th>
+                        <th class="text-left px-5 py-3 font-semibold text-gray-700">Weekday Boundary</th>
+                        <th class="text-left px-5 py-3 font-semibold text-gray-700">Weekend Boundary</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($vehicleStats as $index => $vehicle)
-                        @php
-                            $route = $routeStats[$index] ?? null;
-                        @endphp
                         <tr class="border-b border-gray-200">
                             <td class="px-5 py-3 font-mono">{{ $vehicle['plate_number'] }}</td>
                             <td class="px-5 py-3">{{ $vehicle['route'] }}</td>
                             <td class="px-5 py-3">{{ $vehicle['operator'] }}</td>
-                            <td class="px-5 py-3">₱{{ number_format($route['boundary'] ?? 0, 2) }}</td>
+                            <td class="px-5 py-3">₱{{ number_format($vehicle['weekday_boundary'] ?? 0, 2) }}</td>
+                            <td class="px-5 py-3">₱{{ number_format($vehicle['weekend_boundary'] ?? 0, 2) }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center py-5 text-gray-400">No active vehicles found.</td>
+                            <td colspan="5" class="text-center py-5 text-gray-400">No active vehicles found.</td>
                         </tr>
                     @endforelse
                 </tbody>

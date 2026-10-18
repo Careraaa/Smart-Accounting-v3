@@ -37,8 +37,9 @@
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
             <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Boundary</p>
-                <p class="text-sm font-semibold text-gray-900">@if($route->boundary) ₱{{ number_format($route->boundary, 2) }} @else — @endif</p>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Boundary Rates</p>
+                <p class="text-xs font-semibold text-gray-900">Weekdays: ₱{{ number_format($route->weekday_boundary, 2) }}</p>
+                <p class="text-xs font-semibold text-gray-900">Weekends: ₱{{ number_format($route->weekend_boundary, 2) }}</p>
             </div>
         </div>
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3">
@@ -82,8 +83,12 @@
                 <span class="text-xs font-semibold text-gray-900">{{ $route->destination ?? '—' }}</span>
             </div>
             <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-medium text-gray-400">Boundary</span>
-                <span class="text-xs font-semibold text-gray-900">@if($route->boundary) ₱{{ number_format($route->boundary, 2) }} @else — @endif</span>
+                <span class="text-xs font-medium text-gray-400">Weekday Boundary</span>
+                <span class="text-xs font-semibold text-gray-900">₱{{ number_format($route->weekday_boundary, 2) }}</span>
+            </div>
+            <div class="flex items-center justify-between py-3 border-b border-gray-50">
+                <span class="text-xs font-medium text-gray-400">Weekend Boundary</span>
+                <span class="text-xs font-semibold text-gray-900">₱{{ number_format($route->weekend_boundary, 2) }}</span>
             </div>
             <div class="flex items-center gap-2 pt-4 pb-2 mt-2">
                 <a href="{{ route('routes.edit', $route) }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-gray-900 text-white hover:bg-gray-800 transition-all no-underline">

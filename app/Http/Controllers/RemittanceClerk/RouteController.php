@@ -50,7 +50,8 @@ class RouteController extends Controller
         $validated = $request->validate([
             'origin' => 'required|string',
             'destination' => 'required|string',
-            'boundary' => 'required|numeric|min:0',
+            'weekday_boundary' => 'required|numeric|min:0',
+            'weekend_boundary' => 'required|numeric|min:0',
         ]);
 
         // Auto-generate route name from origin and destination
@@ -81,7 +82,8 @@ class RouteController extends Controller
         $validated = $request->validate([
             'origin' => 'required|string',
             'destination' => 'required|string',
-            'boundary' => 'required|numeric|min:0',
+            'weekday_boundary' => 'required|numeric|min:0',
+            'weekend_boundary' => 'required|numeric|min:0',
         ]);
 
         // Auto-generate route name from origin and destination

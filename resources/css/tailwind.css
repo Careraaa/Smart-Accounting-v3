@@ -220,6 +220,56 @@
   html.dark .lv-total      { color: #8a8a8a; }
 }
 
+/* Line-chart primitives — Grok/GPT feel.
+   Grid is chrome, not content: kept below text contrast.
+   Only the final point gets a marker; the value is labelled directly at the
+   line end instead of in a legend. */
+.chart-grid {
+  stroke: #ededf0;
+  stroke-width: 1;
+}
+
+html.dark .chart-grid {
+  stroke: #26262a;
+}
+
+.chart-label {
+  fill: #a3a3a3;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+html.dark .chart-label {
+  fill: #6b6b6b;
+}
+
+.chart-endlabel {
+  fill: #3f3f46;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+html.dark .chart-endlabel {
+  fill: #d4d4d4;
+}
+
+.chart-ring {
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+html.dark .chart-ring {
+  stroke: #171717;
+}
+
+html:not(.dark) .chart-grid,
+html:not(.dark) .chart-label,
+html:not(.dark) .chart-endlabel,
+html:not(.dark) .chart-ring {
+  transition: none;
+}
+
 /* Attendance trend — stacked bar chart (HR + Super Admin dashboards) */
 .at-plot {
   position: relative;

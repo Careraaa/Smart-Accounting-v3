@@ -45,16 +45,28 @@
                     <select name="route_id" id="route_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('route_id') border-red-300 @enderror" required>
                         <option value="">-- Select Route --</option>
                         @foreach($routes as $route)
-                        <option value="{{ $route->id }}" data-boundary="{{ $route->boundary }}" {{ old('route_id', $vehicle->route_id) == $route->id ? 'selected' : '' }}>{{ $route->route_name }}</option>
+                        <option value="{{ $route->id }}" data-weekday-boundary="{{ $route->weekday_boundary }}" data-weekend-boundary="{{ $route->weekend_boundary }}" {{ old('route_id', $vehicle->route_id) == $route->id ? 'selected' : '' }}>{{ $route->route_name }}</option>
                         @endforeach
                     </select>
                     @error('route_id') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Boundary Rate</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">₱</span>
-                        <input type="text" id="boundary_display" class="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2.5 text-xs text-gray-700 bg-gray-50 focus:outline-none" placeholder="0.00" readonly>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Boundary Rates</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="block text-[10px] text-gray-400 mb-1">Weekdays</span>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">₱</span>
+                                <input type="text" id="weekday_boundary_display" class="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2.5 text-xs text-gray-700 bg-gray-50 focus:outline-none" placeholder="0.00" readonly>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-gray-400 mb-1">Weekends</span>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">₱</span>
+                                <input type="text" id="weekend_boundary_display" class="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-2.5 text-xs text-gray-700 bg-gray-50 focus:outline-none" placeholder="0.00" readonly>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -80,15 +92,12 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const routeSelect = document.getElementById('route_id');
-    const boundaryDisplay = document.getElementById('boundary_display');
+    const weekdayBoundaryDisplay = document.getElementById('weekday_boundary_display');
+    const weekendBoundaryDisplay = document.getElementById('weekend_boundary_display');
     routeSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
-        const boundary = selectedOption.getAttribute('data-boundary');
-        if (boundary && boundary !== '' && boundary !== 'null') {
-            boundaryDisplay.value = parseFloat(boundary).toFixed(2);
-        } else {
-            boundaryDisplay.value = '0.00';
-        }
+        weekdayBoundaryDisplay.value = (parseFloat(selectedOption.getAttribute('data-weekday-boundary')) || 0).toFixed(2);
+        weekendBoundaryDisplay.value = (parseFloat(selectedOption.getAttribute('data-weekend-boundary')) || 0).toFixed(2);
     });
     if (routeSelect.value) {
         routeSelect.dispatchEvent(new Event('change'));
