@@ -3,6 +3,8 @@
 -- migrations. This mirrors:
 --   database/migrations/2026_10_18_000001_create_boundary_payments_table.php
 --   database/migrations/2026_10_18_000002_backfill_boundary_account_mappings.php
+--   database/migrations/2026_10_18_000003_remove_paid_by_from_boundary_payments.php
+--   database/migrations/2026_10_18_000004_add_partner_allocation_to_boundary_payments.php
 --
 -- Safe to re-run when the boundary_payments table is absent or already
 -- complete. CREATE TABLE IF NOT EXISTS does not repair a partially-created
@@ -31,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `boundary_payments` (
     `initial_payment_remittance_id` BIGINT UNSIGNED NULL,
     `payment_date` DATE NOT NULL,
     `amount` DECIMAL(15, 2) NOT NULL,
-    `paid_by` VARCHAR(16) NOT NULL,
+    `paid_by` VARCHAR(16) NULL,
     `payment_kind` VARCHAR(16) NOT NULL,
     `status` VARCHAR(16) NOT NULL DEFAULT 'Posted',
     `recorded_by` BIGINT UNSIGNED NOT NULL,
@@ -55,6 +57,22 @@ CREATE TABLE IF NOT EXISTS `boundary_payments` (
     CONSTRAINT `boundary_payments_journal_entry_id_foreign`
         FOREIGN KEY (`journal_entry_id`) REFERENCES `journal_entries` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Boundary payments are joint and leave paid_by NULL. Shortage installments
+-- use this optional field to identify which partner's separate share is paid.
+SET @add_or_update_paid_by_sql = IF(
+    EXISTS (
+        SELECT 1 FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'boundary_payments'
+          AND COLUMN_NAME = 'paid_by'
+    ),
+    'ALTER TABLE `boundary_payments` MODIFY COLUMN `paid_by` VARCHAR(16) NULL',
+    'ALTER TABLE `boundary_payments` ADD COLUMN `paid_by` VARCHAR(16) NULL AFTER `amount`'
+);
+PREPARE paid_by_stmt FROM @add_or_update_paid_by_sql;
+EXECUTE paid_by_stmt;
+DEALLOCATE PREPARE paid_by_stmt;
 
 -- Match the Laravel mapping backfill: only insert defaults when the account
 -- exists with the expected active type. Existing mappings are not overwritten.

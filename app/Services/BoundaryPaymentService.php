@@ -16,19 +16,23 @@ class BoundaryPaymentService
     public function approveRemittance(
         int $remittanceId,
         ?string $paymentDate,
-        float $paymentAmount,
-        string $paidBy,
+        bool $confirmedReceived,
         int $userId
     ): array {
-        return DB::transaction(function () use ($remittanceId, $paymentDate, $paymentAmount, $paidBy, $userId) {
+        return DB::transaction(function () use ($remittanceId, $paymentDate, $confirmedReceived, $userId) {
             $remittance = DailyRemittance::whereKey($remittanceId)->lockForUpdate()->firstOrFail();
 
             if ($remittance->status !== 'pending') {
-                return [$remittance, false];
+                return [$remittance, false, 0.0];
             }
 
-            if ($paymentAmount > 0) {
-                $this->assertPaymentAmountDoesNotExceedBalance($paymentAmount, (float) $remittance->boundary);
+            $paymentAmount = min(
+                max(round((float) $remittance->net_remittance, 2), 0),
+                max(round((float) $remittance->boundary, 2), 0)
+            );
+
+            if ($paymentAmount > 0 && (! $confirmedReceived || ! $paymentDate)) {
+                throw new BoundaryPaymentException('Confirm that the boundary amount was received and provide its payment date before approval.');
             }
 
             $remittance->update(['status' => 'approved']);
@@ -38,7 +42,7 @@ class BoundaryPaymentService
                     $remittance,
                     $paymentDate,
                     $paymentAmount,
-                    $paidBy,
+                    null,
                     "daily-remittance-{$remittance->id}-initial",
                     $userId
                 );
@@ -58,7 +62,7 @@ class BoundaryPaymentService
                 ['status' => 'approved', 'boundary_payment_amount' => $paymentAmount]
             );
 
-            return [$remittance->fresh(), true];
+            return [$remittance->fresh(), true, $paymentAmount];
         });
     }
 
@@ -95,6 +99,7 @@ class BoundaryPaymentService
 
             $remaining = $this->remainingBoundaryBalance($remittance);
             $this->assertPaymentAmountDoesNotExceedBalance($paymentAmount, $remaining);
+            $this->assertPaymentAmountDoesNotExceedPartnerShare($remittance, $paidBy, $paymentAmount);
 
             $payment = $this->createPostedPayment(
                 $remittance,
@@ -105,7 +110,12 @@ class BoundaryPaymentService
                 $userId
             );
 
-            $this->updateShortageBalance($remittance, max(round($remaining - $paymentAmount, 2), 0));
+            $this->updateShortageBalance(
+                $remittance,
+                max(round($remaining - $paymentAmount, 2), 0),
+                $paidBy,
+                $paymentAmount
+            );
 
             return $payment;
         });
@@ -120,11 +130,31 @@ class BoundaryPaymentService
         }
     }
 
+    private function assertPaymentAmountDoesNotExceedPartnerShare(
+        DailyRemittance $remittance,
+        string $paidBy,
+        float $amount
+    ): void {
+        if (! in_array($paidBy, ['driver', 'pao'], true)) {
+            throw new BoundaryPaymentException('Shortage installments must be assigned to the driver or PAO share.');
+        }
+
+        $share = (float) ($paidBy === 'driver' ? $remittance->driver_share : $remittance->pao_share);
+        $paid = (float) ($paidBy === 'driver' ? $remittance->driver_amount_paid : $remittance->pao_amount_paid);
+        $remainingShare = max(round($share - $paid, 2), 0);
+
+        if (round($amount, 2) > $remainingShare) {
+            throw new BoundaryPaymentException(
+                ucfirst($paidBy).' payment cannot exceed their remaining shortage share of ₱'.number_format($remainingShare, 2).'.'
+            );
+        }
+    }
+
     private function createPostedPayment(
         DailyRemittance $remittance,
         string $paymentDate,
         float $amount,
-        string $paidBy,
+        ?string $paidBy,
         string $sourcePaymentKey,
         int $userId
     ): BoundaryPayment {
@@ -148,22 +178,20 @@ class BoundaryPaymentService
         ]);
 
         $remittance->loadMissing(['driver', 'pao', 'vehicle', 'route']);
-        $payer = match ($paidBy) {
-            'driver' => 'Driver '.($remittance->driver?->name ?? 'Unknown'),
-            'pao' => 'PAO '.($remittance->pao?->name ?? 'Unknown'),
-            default => 'Driver and PAO jointly',
-        };
         $remittanceDetails = collect([
             'Driver '.($remittance->driver?->name ?? 'Unknown'),
             'PAO '.($remittance->pao?->name ?? 'Unknown'),
             $remittance->vehicle?->plate_number,
             $remittance->route?->route_name,
         ])->filter()->implode(' / ');
+        $paymentOrigin = $paidBy
+            ? ucfirst($paidBy).' '.($paidBy === 'driver' ? ($remittance->driver?->name ?? 'Unknown') : ($remittance->pao?->name ?? 'Unknown'))
+            : 'driver and PAO partners';
         $description = sprintf(
-            'Boundary payment BP-%06d for remittance #%d paid by %s (%s)',
+            'Boundary payment BP-%06d for remittance #%d from %s (%s)',
             $payment->id,
             $remittance->id,
-            $payer,
+            $paymentOrigin,
             $remittanceDetails
         );
 
@@ -180,7 +208,7 @@ class BoundaryPaymentService
         $journalEntry->lines()->createMany([
             [
                 'account_id' => $cashAccountId,
-                'description' => "Boundary payment BP-{$payment->id} received from {$payer}",
+                'description' => "Boundary payment BP-{$payment->id} received from {$paymentOrigin}",
                 'debit' => $amount,
                 'credit' => 0,
             ],
@@ -225,7 +253,7 @@ class BoundaryPaymentService
                 'daily_remittance_id' => $remittance->id,
                 'amount' => number_format($amount, 2, '.', ''),
                 'payment_date' => $paymentDate,
-                'paid_by' => $paidBy,
+                'shortage_share' => $paidBy,
                 'journal_entry_id' => $journalEntry->id,
             ]
         );
@@ -271,13 +299,27 @@ class BoundaryPaymentService
         return max(round((float) $remittance->boundary - (float) $remittance->net_remittance, 2), 0);
     }
 
-    private function updateShortageBalance(DailyRemittance $remittance, float $remaining): void
-    {
+    private function updateShortageBalance(
+        DailyRemittance $remittance,
+        float $remaining,
+        ?string $paidBy = null,
+        float $paymentAmount = 0
+    ): void {
         $remaining = max(round($remaining, 2), 0);
         $updates = [
             'short_amount' => $remaining,
             'is_short_remittance' => (bool) $remittance->is_short_remittance || $remaining > 0,
         ];
+
+        if ($paidBy === 'driver') {
+            $driverPaid = round((float) $remittance->driver_amount_paid + $paymentAmount, 2);
+            $updates['driver_amount_paid'] = $driverPaid;
+            $updates['driver_status'] = $driverPaid >= (float) $remittance->driver_share ? 'paid' : 'partial';
+        } elseif ($paidBy === 'pao') {
+            $paoPaid = round((float) $remittance->pao_amount_paid + $paymentAmount, 2);
+            $updates['pao_amount_paid'] = $paoPaid;
+            $updates['pao_status'] = $paoPaid >= (float) $remittance->pao_share ? 'paid' : 'partial';
+        }
 
         if ($remaining === 0.0) {
             $updates['driver_status'] = 'paid';

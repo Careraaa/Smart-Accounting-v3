@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Accountant;
 
-use App\Http\Controllers\Controller;
 use App\Exceptions\BoundaryPaymentException;
+use App\Http\Controllers\Controller;
 use App\Models\DailyRemittance;
 use App\Notifications\RemittanceNotification;
 use App\Services\BoundaryPaymentService;
@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 class RemittanceApprovalController extends Controller
 {
     use LogsUserActivity;
+
     public function index()
     {
         $this->logActivity('viewed', 'Remittance Approval List', request()->url());
@@ -21,6 +22,7 @@ class RemittanceApprovalController extends Controller
         $remittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
             ->orderByDesc('remittance_date')
             ->get();
+
         return view('accountant.remittances-approval.index', compact('remittances'));
     }
 
@@ -30,40 +32,40 @@ class RemittanceApprovalController extends Controller
 
         $remittance->load('driver', 'pao', 'route', 'vehicle', 'boundaryPayments.journalEntry', 'boundaryPayments.recordedBy', 'boundaryPayments.approvedBy');
         $paymentSubmissionKey = (string) Str::uuid();
+
         return view('accountant.remittances-approval.show', compact('remittance', 'paymentSubmissionKey'));
     }
 
     public function approve(Request $request, DailyRemittance $remittance, BoundaryPaymentService $payments)
     {
         $validated = $request->validate([
-            'boundary_payment_amount' => 'nullable|numeric|min:0|decimal:0,2|max:99999999.99',
             'boundary_payment_date' => 'nullable|date|before_or_equal:today',
-            'boundary_paid_by' => 'nullable|in:driver,pao,joint',
             'confirm_boundary_received' => 'sometimes|accepted',
         ]);
-        $amount = (float) ($validated['boundary_payment_amount'] ?? 0);
+        $amountToPost = min(
+            max(round((float) $remittance->net_remittance, 2), 0),
+            max(round((float) $remittance->boundary, 2), 0)
+        );
 
-        if ($amount > 0) {
+        if ($amountToPost > 0) {
             $request->validate([
                 'boundary_payment_date' => 'required|date|before_or_equal:today',
-                'boundary_paid_by' => 'required|in:driver,pao,joint',
                 'confirm_boundary_received' => 'required|accepted',
             ]);
         }
 
         try {
-            [$remittance, $approvedNow] = $payments->approveRemittance(
+            [$remittance, $approvedNow, $amount] = $payments->approveRemittance(
                 $remittance->id,
-                $amount > 0 ? $validated['boundary_payment_date'] : null,
-                $amount,
-                $validated['boundary_paid_by'] ?? 'joint',
+                $validated['boundary_payment_date'] ?? null,
+                isset($validated['confirm_boundary_received']),
                 (int) auth()->id()
             );
         } catch (BoundaryPaymentException $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());
         }
 
-        if (!$approvedNow) {
+        if (! $approvedNow) {
             if ($remittance->status === 'approved') {
                 return redirect()->back()->with('success', 'Remittance was already approved; no duplicate payment was posted.');
             }
@@ -85,7 +87,7 @@ class RemittanceApprovalController extends Controller
         $validated = $request->validate([
             'payment_date' => 'required|date|before_or_equal:today',
             'amount' => 'required|numeric|min:0.01|decimal:0,2|max:9999999999999.99',
-            'paid_by' => 'required|in:driver,pao,joint',
+            'paid_by' => 'required|in:driver,pao',
             'source_payment_key' => 'required|uuid',
             'confirm_boundary_received' => 'required|accepted',
         ]);
@@ -126,7 +128,7 @@ class RemittanceApprovalController extends Controller
             return true;
         });
 
-        if (!$rejected) {
+        if (! $rejected) {
             return redirect()->back()->with('error', 'Only pending remittances can be rejected.');
         }
 

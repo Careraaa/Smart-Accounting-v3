@@ -22,6 +22,12 @@ $vehicle = $remittance->vehicle;
 $boundaryRemaining = $remittance->short_amount !== null
     ? max(round((float) $remittance->short_amount, 2), 0)
     : max(round((float) $remittance->boundary - (float) $remittance->net_remittance, 2), 0);
+$driverShareRemaining = max(round((float) $remittance->driver_share - (float) $remittance->driver_amount_paid, 2), 0);
+$paoShareRemaining = max(round((float) $remittance->pao_share - (float) $remittance->pao_amount_paid, 2), 0);
+$initialPaymentAmount = min(
+    max(round((float) $remittance->net_remittance, 2), 0),
+    max(round((float) $remittance->boundary, 2), 0)
+);
 $statusInfo = match($remittance->status) {
     'pending'  => ['label'=>'Pending',  'dot'=>'bg-amber-400', 'text'=>'text-amber-600', 'bg'=>'bg-amber-50'],
     'approved' => ['label'=>'Approved', 'dot'=>'bg-emerald-400','text'=>'text-emerald-600','bg'=>'bg-emerald-50'],
@@ -167,7 +173,7 @@ $statusInfo = match($remittance->status) {
                 <thead class="bg-gray-50 text-[10px] uppercase tracking-wider text-gray-400">
                     <tr>
                         <th class="px-5 py-3">Internal payment ID</th>
-                        <th class="px-5 py-3">Date / paid by</th>
+                        <th class="px-5 py-3">Payment date / shortage share</th>
                         <th class="px-5 py-3 text-right">Amount</th>
                         <th class="px-5 py-3">Journal entry</th>
                         <th class="px-5 py-3">Recorded / approved by</th>
@@ -177,7 +183,10 @@ $statusInfo = match($remittance->status) {
                     @foreach($remittance->boundaryPayments as $payment)
                         <tr>
                             <td class="px-5 py-3 font-mono font-semibold text-gray-700">BP-{{ str_pad($payment->id, 6, '0', STR_PAD_LEFT) }}</td>
-                            <td class="px-5 py-3 text-gray-600">{{ $payment->payment_date->format('M d, Y') }} / {{ strtoupper($payment->paid_by) }}</td>
+                            <td class="px-5 py-3 text-gray-600">
+                                {{ $payment->payment_date->format('M d, Y') }}
+                                <span class="block text-[10px] text-gray-400">{{ $payment->paid_by === 'pao' ? 'PAO share' : ($payment->paid_by === 'driver' ? 'Driver share' : 'Joint boundary') }}</span>
+                            </td>
                             <td class="px-5 py-3 text-right font-mono font-semibold text-gray-800">₱{{ number_format($payment->amount, 2) }}</td>
                             <td class="px-5 py-3">
                                 @if($payment->journalEntry)
@@ -198,16 +207,19 @@ $statusInfo = match($remittance->status) {
 
     <div class="px-5 py-4 border-t border-gray-100 flex items-center justify-between">
         <span class="text-xs font-semibold text-gray-600">Boundary remaining: <strong class="font-mono text-gray-900">₱{{ number_format($boundaryRemaining, 2) }}</strong></span>
-        @if($remittance->status === 'approved' && $boundaryRemaining > 0)
-            <form method="POST" action="{{ route('remittance-approval.boundary-payments.store', $remittance) }}" class="grid grid-cols-1 sm:grid-cols-5 gap-2 w-full sm:w-auto sm:ml-4">
+        @if($remittance->status === 'approved' && $boundaryRemaining > 0 && ($driverShareRemaining + $paoShareRemaining) > 0)
+            <form method="POST" action="{{ route('remittance-approval.boundary-payments.store', $remittance) }}" class="grid grid-cols-1 sm:grid-cols-4 gap-2 w-full sm:w-auto sm:ml-4">
                 @csrf
                 <input type="hidden" name="source_payment_key" value="{{ $paymentSubmissionKey }}">
                 <input type="date" name="payment_date" max="{{ now()->toDateString() }}" value="{{ old('payment_date', now()->toDateString()) }}" required class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs">
                 <input type="number" name="amount" min="0.01" max="{{ number_format($boundaryRemaining, 2, '.', '') }}" step="0.01" value="{{ old('amount') }}" required placeholder="Amount" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs">
                 <select name="paid_by" required class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs">
-                    <option value="joint">Driver / PAO jointly</option>
-                    <option value="driver">Driver</option>
-                    <option value="pao">PAO</option>
+                    @if($driverShareRemaining > 0)
+                        <option value="driver">{{ $driver?->name ?? 'Driver' }} share (₱{{ number_format($driverShareRemaining, 2) }} remaining)</option>
+                    @endif
+                    @if($paoShareRemaining > 0)
+                        <option value="pao">{{ $pao?->name ?? 'PAO' }} share (₱{{ number_format($paoShareRemaining, 2) }} remaining)</option>
+                    @endif
                 </select>
                 <label class="flex items-center gap-1.5 text-[10px] text-gray-600">
                     <input type="checkbox" name="confirm_boundary_received" value="1" required>
@@ -215,6 +227,8 @@ $statusInfo = match($remittance->status) {
                 </label>
                 <button type="submit" class="px-3 py-2 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 border-0">Record payment</button>
             </form>
+        @elseif($remittance->status === 'approved' && $boundaryRemaining > 0)
+            <span class="ml-4 text-xs text-amber-700">Separate Driver and PAO shortage shares must be set before recording a payment.</span>
         @endif
     </div>
 </div>
@@ -278,26 +292,19 @@ $statusInfo = match($remittance->status) {
         @endif
         <form method="POST" action="{{ route('remittance-approval.approve', $remittance) }}">
             @csrf
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                 <div>
-                    <label class="block text-[10px] font-semibold text-gray-500 mb-1">Actual boundary amount received</label>
-                    <input type="number" name="boundary_payment_amount" min="0" max="{{ number_format($remittance->boundary, 2, '.', '') }}" step="0.01" value="{{ old('boundary_payment_amount', min((float) $remittance->net_remittance, (float) $remittance->boundary)) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
+                    <label class="block text-[10px] font-semibold text-gray-500 mb-1">Boundary amount to confirm</label>
+                    <input type="number" value="{{ number_format($initialPaymentAmount, 2, '.', '') }}" readonly aria-readonly="true" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs bg-gray-50 text-gray-700 cursor-not-allowed">
+                    <p class="text-[10px] text-gray-400 mt-1">Calculated from the recorded net remittance, capped at the fixed boundary.</p>
                 </div>
                 <div>
                     <label class="block text-[10px] font-semibold text-gray-500 mb-1">Payment date</label>
                     <input type="date" name="boundary_payment_date" max="{{ now()->toDateString() }}" value="{{ old('boundary_payment_date', $remittance->remittance_date?->toDateString()) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
                 </div>
-                <div>
-                    <label class="block text-[10px] font-semibold text-gray-500 mb-1">Paid by</label>
-                    <select name="boundary_paid_by" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs">
-                        <option value="joint">Driver / PAO jointly</option>
-                        <option value="driver">Driver</option>
-                        <option value="pao">PAO</option>
-                    </select>
-                </div>
-                <label class="sm:col-span-3 flex items-start gap-2 text-xs text-gray-600">
+                <label class="sm:col-span-2 flex items-start gap-2 text-xs text-gray-600">
                     <input type="checkbox" name="confirm_boundary_received" value="1" class="mt-0.5">
-                    I confirm this boundary amount was actually received and verified. Only this amount, up to the remaining boundary, will be posted.
+                    I confirm this calculated boundary amount was actually received and verified. Only this amount will be posted.
                 </label>
             </div>
             <div class="flex gap-2">

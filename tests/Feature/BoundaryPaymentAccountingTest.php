@@ -11,6 +11,7 @@ use App\Models\Route as TransportRoute;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
@@ -110,7 +111,7 @@ function boundaryPaymentTestRemittance(float $boundary, float $netRemittance, st
     ]);
 }
 
-function boundaryPaymentPayload(string $token, string $date, string $amount, string $paidBy = 'joint'): array
+function boundaryPaymentPayload(string $token, string $date, string $amount, string $paidBy = 'driver'): array
 {
     return [
         'source_payment_key' => $token,
@@ -122,17 +123,22 @@ function boundaryPaymentPayload(string $token, string $date, string $amount, str
 }
 
 test('partial and later boundary payments post once and flow into accounting reports', function () {
+    expect(Schema::hasColumn('boundary_payments', 'paid_by'))->toBeTrue();
+
     $remittance = boundaryPaymentTestRemittance(3000, 2000);
     $today = now()->toDateString();
     $this->get(route('remittance-approval.show', $remittance))
         ->assertOk()
-        ->assertSee('Actual boundary amount received')
+        ->assertSee('Boundary amount to confirm')
+        ->assertSee('readonly', false)
+        ->assertSee('value="2000.00"', false)
+        ->assertDontSee('name="boundary_payment_amount"', false)
+        ->assertDontSee('Paid by')
         ->assertSee('No receipt is required.');
 
     $this->post(route('remittance-approval.approve', $remittance), [
-        'boundary_payment_amount' => '2000.00',
+        'boundary_payment_amount' => '9999.00',
         'boundary_payment_date' => $today,
-        'boundary_paid_by' => 'driver',
         'confirm_boundary_received' => '1',
     ])->assertRedirect();
 
@@ -142,7 +148,8 @@ test('partial and later boundary payments post once and flow into accounting rep
 
     $initialPayment = $remittance->boundaryPayments()->firstOrFail();
     expect($initialPayment->payment_kind)->toBe('initial')
-        ->and($initialPayment->paid_by)->toBe('driver')
+        ->and((float) $initialPayment->amount)->toBe(2000.0)
+        ->and($initialPayment->paid_by)->toBeNull()
         ->and($initialPayment->recorded_by)->toBe($this->accountant->id)
         ->and($initialPayment->approved_by)->toBe($this->accountant->id)
         ->and($initialPayment->journalEntry->status)->toBe('Posted')
@@ -153,9 +160,7 @@ test('partial and later boundary payments post once and flow into accounting rep
         ->and($initialPayment->journalEntry->description)->toContain('North Route');
 
     $this->post(route('remittance-approval.approve', $remittance), [
-        'boundary_payment_amount' => '2000.00',
         'boundary_payment_date' => $today,
-        'boundary_paid_by' => 'driver',
         'confirm_boundary_received' => '1',
     ])->assertRedirect();
     expect($remittance->boundaryPayments()->count())->toBe(1);
@@ -163,29 +168,38 @@ test('partial and later boundary payments post once and flow into accounting rep
     $firstInstallmentKey = (string) Str::uuid();
     $this->post(
         route('remittance-approval.boundary-payments.store', $remittance),
-        boundaryPaymentPayload($firstInstallmentKey, $today, '1001.00', 'pao')
+        boundaryPaymentPayload($firstInstallmentKey, $today, '501.00', 'driver')
     )->assertSessionHas('error');
-    expect($remittance->boundaryPayments()->count())->toBe(1);
+    expect($remittance->boundaryPayments()->count())->toBe(1)
+        ->and((float) $remittance->fresh()->driver_amount_paid)->toBe(0.0)
+        ->and((float) $remittance->fresh()->pao_amount_paid)->toBe(0.0);
 
     $this->post(
         route('remittance-approval.boundary-payments.store', $remittance),
-        boundaryPaymentPayload($firstInstallmentKey, $today, '500.00', 'pao')
+        boundaryPaymentPayload($firstInstallmentKey, $today, '500.00', 'driver')
     )->assertRedirect();
     $this->post(
         route('remittance-approval.boundary-payments.store', $remittance),
-        boundaryPaymentPayload($firstInstallmentKey, $today, '500.00', 'pao')
+        boundaryPaymentPayload($firstInstallmentKey, $today, '500.00', 'driver')
     )->assertRedirect();
     expect($remittance->boundaryPayments()->count())->toBe(2);
+    expect((float) $remittance->fresh()->short_amount)->toBe(500.0)
+        ->and((float) $remittance->fresh()->driver_amount_paid)->toBe(500.0)
+        ->and((float) $remittance->fresh()->pao_amount_paid)->toBe(0.0)
+        ->and($remittance->fresh()->driver_status)->toBe('paid')
+        ->and($remittance->fresh()->pao_status)->toBe('pending');
 
     $this->post(
         route('remittance-approval.boundary-payments.store', $remittance),
-        boundaryPaymentPayload((string) Str::uuid(), $today, '500.00', 'driver')
+        boundaryPaymentPayload((string) Str::uuid(), $today, '500.00', 'pao')
     )->assertRedirect();
 
     $remittance->refresh();
     expect($remittance->boundaryPayments()->count())->toBe(3)
         ->and((float) $remittance->boundaryPayments()->sum('amount'))->toBe(3000.0)
         ->and((float) $remittance->short_amount)->toBe(0.0)
+        ->and((float) $remittance->driver_amount_paid)->toBe(500.0)
+        ->and((float) $remittance->pao_amount_paid)->toBe(500.0)
         ->and($remittance->driver_status)->toBe('paid')
         ->and($remittance->pao_status)->toBe('paid')
         ->and(JournalEntry::where('reference_type', 'Boundary Payment')->where('status', 'Posted')->count())->toBe(3)
@@ -193,8 +207,17 @@ test('partial and later boundary payments post once and flow into accounting rep
     $this->get(route('remittance-approval.show', $remittance))
         ->assertOk()
         ->assertSee('Boundary Payments')
+        ->assertSee('Driver share')
+        ->assertSee('PAO share')
         ->assertSee('BP-000001');
+    $this->actingAs($this->clerk)
+        ->get(route('short-remittances.edit', $remittance))
+        ->assertOk()
+        ->assertSee('Driver shortage share')
+        ->assertSee('PAO shortage share')
+        ->assertSee('Share remaining');
 
+    $this->actingAs($this->accountant);
     $totals = app(\App\Services\AccountingReportService::class)->postedTotals();
     expect((float) $totals->get($this->cash->id)->debit_total)->toBe(3000.0)
         ->and((float) $totals->get($this->revenue->id)->credit_total)->toBe(3000.0);
@@ -236,28 +259,23 @@ test('full payment posts only the boundary and unpaid remittances create no entr
     $today = now()->toDateString();
 
     $this->post(route('remittance-approval.approve', $full), [
-        'boundary_payment_amount' => '3000.00',
         'boundary_payment_date' => $today,
-        'boundary_paid_by' => 'joint',
     ])->assertSessionHasErrors('confirm_boundary_received');
     expect($full->fresh()->status)->toBe('pending')
         ->and($full->boundaryPayments()->count())->toBe(0);
 
     $this->post(route('remittance-approval.approve', $full), [
-        'boundary_payment_amount' => '3000.00',
         'boundary_payment_date' => $today,
-        'boundary_paid_by' => 'joint',
         'confirm_boundary_received' => '1',
     ])->assertRedirect();
 
-    expect((float) $full->boundaryPayments()->sum('amount'))->toBe(3000.0)
+    expect($full->boundaryPayments()->firstOrFail()->paid_by)->toBeNull()
+        ->and((float) $full->boundaryPayments()->sum('amount'))->toBe(3000.0)
         ->and((float) $full->fresh()->short_amount)->toBe(0.0)
         ->and((float) $full->boundaryPayments()->first()->journalEntry->lines()->where('account_id', $this->revenue->id)->sum('credit'))->toBe(3000.0);
 
     $unpaid = boundaryPaymentTestRemittance(3000, 0);
-    $this->post(route('remittance-approval.approve', $unpaid), [
-        'boundary_payment_amount' => '0.00',
-    ])->assertRedirect();
+    $this->post(route('remittance-approval.approve', $unpaid), [])->assertRedirect();
 
     expect($unpaid->boundaryPayments()->count())->toBe(0)
         ->and((float) $unpaid->fresh()->short_amount)->toBe(3000.0)
@@ -267,7 +285,8 @@ test('full payment posts only the boundary and unpaid remittances create no entr
     $this->actingAs($this->clerk)
         ->get(route('short-remittances.edit', $legacyShortage))
         ->assertOk()
-        ->assertSee('read-only here')
+        ->assertSee('Driver shortage share')
+        ->assertSee('PAO shortage share')
         ->assertSee('No receipt is required.');
     $this->actingAs($this->clerk)
         ->put(route('short-remittances.update', $legacyShortage), [
@@ -285,9 +304,7 @@ test('missing boundary mappings roll back both approval and payment posting', fu
     AccountMapping::where('mapping_key', 'boundary_revenue')->delete();
 
     $this->post(route('remittance-approval.approve', $remittance), [
-        'boundary_payment_amount' => '2000.00',
         'boundary_payment_date' => now()->toDateString(),
-        'boundary_paid_by' => 'driver',
         'confirm_boundary_received' => '1',
     ])->assertSessionHas('error');
 
@@ -300,9 +317,7 @@ test('boundary journal entries keep their payment link when voided through the e
     $remittance = boundaryPaymentTestRemittance(3000, 3000);
 
     $this->post(route('remittance-approval.approve', $remittance), [
-        'boundary_payment_amount' => '3000.00',
         'boundary_payment_date' => now()->toDateString(),
-        'boundary_paid_by' => 'joint',
         'confirm_boundary_received' => '1',
     ])->assertRedirect();
 

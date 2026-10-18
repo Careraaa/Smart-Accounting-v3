@@ -34,7 +34,7 @@ npm run dev                 # separate terminal, for live CSS/JS
 
 ## Boundary payment accounting
 
-Accountants confirm the actual boundary amount received while approving a Daily Remittance. Later shortage installments are recorded against that same remittance in Remittance Approval. Each confirmed payment creates an internal payment-history row and one posted journal entry; no receipt number, upload, or receipt issuance is used. Payments are capped at the outstanding fixed boundary, and unapproved shortages do not affect accounting reports.
+Accountants confirm the calculated actual boundary amount received while approving a Daily Remittance; the boundary is a joint driver/PAO remittance and is not attributed to one partner. Later shortage installments are recorded against that same remittance in Remittance Approval and assigned to the driver's or PAO's existing separate shortage share. Each confirmed payment creates an internal payment-history row and one posted journal entry; no receipt number, upload, or receipt issuance is used. Payments are capped at the outstanding boundary and the selected partner's remaining share, and unapproved shortages do not affect accounting reports.
 
 Apply the new payment-history table and default mapping backfill with:
 

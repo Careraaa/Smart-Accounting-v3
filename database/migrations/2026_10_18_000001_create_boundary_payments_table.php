@@ -19,7 +19,7 @@ return new class extends Migration
                 ->restrictOnDelete();
             $table->date('payment_date');
             $table->decimal('amount', 15, 2);
-            $table->string('paid_by', 16);
+            $table->string('paid_by', 16)->nullable();
             $table->string('payment_kind', 16);
             $table->string('status', 16)->default('Posted');
             $table->foreignId('recorded_by')->constrained('users')->restrictOnDelete();
