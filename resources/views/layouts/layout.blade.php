@@ -762,7 +762,11 @@
              */
             const revealOpenedItem = (item) => {
                 const sub = item.querySelector('.sidebar-sub');
-                const scrollEl = nav.querySelector('.overflow-y-auto');
+                // Walk up from the menu item to its own scroll box. Do not use
+                // nav.querySelector('.overflow-y-auto') here — the search popup
+                // also has one and comes first in the DOM, so that grabs the
+                // wrong element and scrolls nothing visible.
+                const scrollEl = item.closest('.overflow-y-auto');
                 if (!sub || !scrollEl) return;
 
                 const scroll = () => {
