@@ -17,7 +17,7 @@
             .no-print { display: none !important; }
             .print-page { margin: 0; box-shadow: none; max-width: 100%; padding: 12mm; }
         }
-        @page { size: A4 landscape; margin: 12mm; }
+        @page { size: A4 landscape; margin: 0; }
     </style>
 </head>
 <body>
