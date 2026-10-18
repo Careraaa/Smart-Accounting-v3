@@ -32,6 +32,20 @@ php artisan serve           # http://127.0.0.1:8000
 npm run dev                 # separate terminal, for live CSS/JS
 ```
 
+## Boundary payment accounting
+
+Accountants confirm the actual boundary amount received while approving a Daily Remittance. Later shortage installments are recorded against that same remittance in Remittance Approval. Each confirmed payment creates an internal payment-history row and one posted journal entry; no receipt number, upload, or receipt issuance is used. Payments are capped at the outstanding fixed boundary, and unapproved shortages do not affect accounting reports.
+
+Apply the new payment-history table and default mapping backfill with:
+
+```bash
+php artisan migrate
+```
+
+Review **Accounting → Account Mappings** and configure active Asset and Revenue accounts for `boundary_cash` and `boundary_revenue`. All accounting reports use the resulting posted journal entries.
+
+Existing shortage amounts are retained; legacy resolution totals are not automatically converted into payment entries because they do not have a distinct confirmed-payment audit record. Accounting should review historical remittances before recording any outstanding settlements.
+
 ---
 
 ## 🔑 GitHub Secrets (repo owner sets these once)

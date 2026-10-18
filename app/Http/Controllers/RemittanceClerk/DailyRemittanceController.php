@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\RemittanceClerk;
 
+use App\Exceptions\BoundaryPaymentException;
 use App\Http\Controllers\Controller;
 use App\Models\DailyRemittance;
 use App\Models\Driver;
@@ -103,7 +104,7 @@ class DailyRemittanceController extends Controller
             'food_allowance' => 'nullable|numeric|min:0',
             'barker' => 'nullable|numeric|min:0',
             'others' => 'nullable|numeric|min:0',
-            'net_remittance' => 'required|numeric',
+            'net_remittance' => 'required|numeric|min:0|decimal:0,2|max:99999999.99',
             'vehicle_status' => 'required|in:active,under_maintenance',
             'is_short_remittance' => 'nullable|boolean',
             'short_amount' => 'nullable|numeric',
@@ -194,7 +195,7 @@ class DailyRemittanceController extends Controller
             'food_allowance' => 'nullable|numeric|min:0',
             'barker' => 'nullable|numeric|min:0',
             'others' => 'nullable|numeric|min:0',
-            'net_remittance' => 'required|numeric',
+            'net_remittance' => 'required|numeric|min:0|decimal:0,2|max:99999999.99',
             'vehicle_status' => 'required|in:active,under_maintenance',
             'is_short_remittance' => 'nullable|boolean',
             'short_amount' => 'nullable|numeric',
@@ -206,48 +207,57 @@ class DailyRemittanceController extends Controller
         $vehicleStatus = $validated['vehicle_status'];
         unset($validated['vehicle_status']);
 
-        // Get the vehicle and its associated route
-        $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+        try {
+            $remittance = \Illuminate\Support\Facades\DB::transaction(function () use ($remittance, $validated, $vehicleStatus) {
+                $lockedRemittance = DailyRemittance::whereKey($remittance->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-        // Keep the vehicle's status in sync with the clerk's selection
-        if ($vehicle->status !== $vehicleStatus) {
-            $vehicle->update(['status' => $vehicleStatus]);
+                if ($lockedRemittance->boundaryPayments()->exists()) {
+                    throw new BoundaryPaymentException('A remittance with recorded boundary payments cannot be edited. Contact accounting for a correction.');
+                }
+
+                $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+                if ($vehicle->status !== $vehicleStatus) {
+                    $vehicle->update(['status' => $vehicleStatus]);
+                }
+
+                $validated['route_id'] = $vehicle->route_id;
+                $isMaintenance = $vehicleStatus === 'under_maintenance';
+                $boundary = $isMaintenance
+                    ? 0
+                    : ($vehicle->route?->boundaryForDate(Carbon::parse($validated['remittance_date'])) ?? 0);
+                $validated['boundary'] = $boundary;
+                $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
+
+                $netRemittance = $validated['net_remittance'];
+                if (!$isMaintenance && $netRemittance < $boundary) {
+                    $validated['is_short_remittance'] = true;
+                    $validated['short_amount'] = round($boundary - $netRemittance, 2);
+                    $driverShareAmount = array_key_exists('driver_share_amount', $validated) && $validated['driver_share_amount'] !== null
+                        ? (float) $validated['driver_share_amount']
+                        : $validated['short_amount'] / 2;
+                    $validated['driver_share'] = round(min($validated['short_amount'], $driverShareAmount), 2);
+                    $validated['pao_share'] = round($validated['short_amount'] - $validated['driver_share'], 2);
+                } else {
+                    $validated['is_short_remittance'] = false;
+                    $validated['short_amount'] = null;
+                    $validated['driver_share'] = null;
+                    $validated['pao_share'] = null;
+                }
+
+                if (in_array($lockedRemittance->status, ['approved', 'rejected'], true)) {
+                    $validated['status'] = 'pending';
+                }
+
+                $lockedRemittance->update($validated);
+
+                return $lockedRemittance->fresh();
+            });
+        } catch (BoundaryPaymentException $e) {
+            return redirect()->route('remittances.show', $remittance)->with('error', $e->getMessage());
         }
 
-        $validated['route_id'] = $vehicle->route_id;
-
-        // Disregard the boundary rate while the vehicle is under maintenance
-        $isMaintenance = $vehicleStatus === 'under_maintenance';
-        $boundary = $isMaintenance
-            ? 0
-            : ($vehicle->route?->boundaryForDate(Carbon::parse($validated['remittance_date'])) ?? 0);
-        $validated['boundary'] = $boundary;
-        $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
-
-        // Check if net remittance is less than the boundary
-        $netRemittance = $validated['net_remittance'];
-
-        if (! $isMaintenance && $netRemittance < $boundary) {
-            $validated['is_short_remittance'] = true;
-            $validated['short_amount'] = round($boundary - $netRemittance, 2);
-            $driverShareAmount = array_key_exists('driver_share_amount', $validated) && $validated['driver_share_amount'] !== null
-                ? (float) $validated['driver_share_amount']
-                : $validated['short_amount'] / 2;
-            $validated['driver_share'] = round(min($validated['short_amount'], $driverShareAmount), 2);
-            $validated['pao_share'] = round($validated['short_amount'] - $validated['driver_share'], 2);
-        } else {
-            $validated['is_short_remittance'] = false;
-            $validated['short_amount'] = null;
-            $validated['driver_share'] = null;
-            $validated['pao_share'] = null;
-        }
-        
-        // If remittance is approved or rejected, reset status to pending when changes are made
-        if (in_array($remittance->status, ['approved', 'rejected'])) {
-            $validated['status'] = 'pending';
-        }
-        
-        $remittance->update($validated);
         $remittance->load('driver', 'pao', 'vehicle');
 
         RemittanceNotification::remittanceUpdated($remittance);
@@ -265,13 +275,28 @@ class DailyRemittanceController extends Controller
 
     public function destroy(DailyRemittance $remittance)
     {
-        $remittance->load('driver', 'pao', 'vehicle');
-        
+        try {
+            $remittance = \Illuminate\Support\Facades\DB::transaction(function () use ($remittance) {
+                $lockedRemittance = DailyRemittance::whereKey($remittance->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+                if ($lockedRemittance->boundaryPayments()->exists()) {
+                    throw new BoundaryPaymentException('A remittance with recorded boundary payments cannot be deleted. Contact accounting for a correction.');
+                }
+
+                $lockedRemittance->load('driver', 'pao', 'vehicle');
+                $lockedRemittance->delete();
+
+                return $lockedRemittance;
+            });
+        } catch (BoundaryPaymentException $e) {
+            return redirect()->route('remittances.show', $remittance)->with('error', $e->getMessage());
+        }
+
         RemittanceNotification::remittanceDeleted($remittance);
 
         $this->logActivity('deleted', "Daily Remittance #{$remittance->id}", request()->url(), 'daily_remittance', $remittance->id);
-        
-        $remittance->delete();
+
         return redirect()->route('remittances.index')->with('success', 'Daily Remittance deleted successfully.');
     }
 }

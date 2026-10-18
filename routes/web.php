@@ -513,6 +513,7 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::get('/remittance-approval', [RemittanceApprovalController::class, 'index'])->name('remittance-approval.index');
     Route::get('/remittance-approval/{remittance}', [RemittanceApprovalController::class, 'show'])->name('remittance-approval.show');
     Route::post('/remittance-approval/{remittance}/approve', [RemittanceApprovalController::class, 'approve'])->name('remittance-approval.approve');
+    Route::post('/remittance-approval/{remittance}/boundary-payments', [RemittanceApprovalController::class, 'recordPayment'])->name('remittance-approval.boundary-payments.store');
     Route::post('/remittance-approval/{remittance}/reject', [RemittanceApprovalController::class, 'reject'])->name('remittance-approval.reject');
 
     // Accountant release routes (for releasing approved requests)

@@ -30,6 +30,8 @@ class AccountMappingController extends Controller
             'employer_contributions_expense' => 'Employer Government Contributions Expense',
             'thirteenth_month_expense' => '13th Month Pay Expense',
             'thirteenth_month_payable' => '13th Month Payable',
+            'boundary_cash'            => 'Boundary Payment Cash / Bank',
+            'boundary_revenue'         => 'Boundary Revenue',
         ];
 
         $existingMappings = [];
@@ -61,6 +63,8 @@ class AccountMappingController extends Controller
             'employer_contributions_expense' => 'Expense',
             'thirteenth_month_expense' => 'Expense',
             'thirteenth_month_payable' => 'Liability',
+            'boundary_cash' => 'Asset',
+            'boundary_revenue' => 'Revenue',
         ];
 
         foreach ($validated['mappings'] as $index => $mapping) {

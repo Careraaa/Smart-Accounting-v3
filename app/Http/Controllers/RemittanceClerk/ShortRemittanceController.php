@@ -35,16 +35,11 @@ class ShortRemittanceController extends Controller
 
         // Separate into pending/partial and fully paid
         $pendingRemittances = $allShortRemittances->filter(function ($remittance) {
-            // If both are paid, it's fully paid
-            if ($remittance->driver_status === 'paid' && $remittance->pao_status === 'paid') {
-                return false;
-            }
-            return true;
+            return (float) $remittance->short_amount > 0;
         });
         
         $fullyPaidRemittances = $allShortRemittances->filter(function ($remittance) {
-            // Both must be paid to be fully paid
-            return $remittance->driver_status === 'paid' && $remittance->pao_status === 'paid';
+            return (float) $remittance->short_amount <= 0;
         });
 
         // Calculate statistics
@@ -74,7 +69,7 @@ class ShortRemittanceController extends Controller
             abort(404, 'This remittance is not a short remittance.');
         }
 
-        $shortRemittance->load('driver', 'pao', 'route', 'vehicle');
+        $shortRemittance->load('driver', 'pao', 'route', 'vehicle', 'boundaryPayments.recordedBy', 'boundaryPayments.approvedBy');
 
         $this->logActivity('viewed', "Short Remittance #{$shortRemittance->id}", request()->url(), 'short_remittance', $shortRemittance->id);
 
@@ -87,7 +82,7 @@ class ShortRemittanceController extends Controller
             abort(404, 'This remittance is not a short remittance.');
         }
 
-        $shortRemittance->load('driver', 'pao', 'route', 'vehicle');
+        $shortRemittance->load('driver', 'pao', 'route', 'vehicle', 'boundaryPayments.recordedBy', 'boundaryPayments.approvedBy');
         return view('remittance-clerk.short-remittances.edit', compact('shortRemittance'));
     }
 
@@ -97,27 +92,7 @@ class ShortRemittanceController extends Controller
             abort(404, 'This remittance is not a short remittance.');
         }
 
-        $validated = $request->validate([
-            'driver_amount_paid' => 'required|numeric|min:0|max:' . $shortRemittance->driver_share,
-            'driver_status' => 'required|in:pending,partial,paid',
-            'pao_amount_paid' => 'required|numeric|min:0|max:' . $shortRemittance->pao_share,
-            'pao_status' => 'required|in:pending,partial,paid',
-            'notes' => 'nullable|string|max:1000',
-        ]);
-
-        // Update short remittance with payment tracking information
-        $shortRemittance->update([
-            'driver_amount_paid' => $validated['driver_amount_paid'],
-            'driver_status' => $validated['driver_status'],
-            'pao_amount_paid' => $validated['pao_amount_paid'],
-            'pao_status' => $validated['pao_status'],
-            'resolution_notes' => $validated['notes'],
-            'resolved_at' => now(),
-        ]);
-
-        $this->logActivity('updated', "Short Remittance #{$shortRemittance->id}", request()->url(), 'short_remittance', $shortRemittance->id);
-
-        return redirect()->route('short-remittances.index')
-            ->with('success', 'Short remittance resolution updated successfully.');
+        return redirect()->route('short-remittances.show', $shortRemittance)
+            ->with('error', 'Shortage payments must be recorded and verified through Accountant Remittance Approval. This screen cannot mark payments as received.');
     }
 }

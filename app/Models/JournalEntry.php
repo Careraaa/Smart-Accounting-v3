@@ -41,6 +41,11 @@ class JournalEntry extends Model
         return $this->hasMany(JournalEntryLine::class, 'journal_entry_id');
     }
 
+    public function boundaryPayment()
+    {
+        return $this->hasOne(BoundaryPayment::class, 'journal_entry_id');
+    }
+
     public function getTotalDebitAttribute(): float
     {
         return (float) $this->lines->sum('debit');

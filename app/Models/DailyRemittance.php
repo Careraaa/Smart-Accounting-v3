@@ -69,4 +69,9 @@ class DailyRemittance extends Model
     {
         return $this->belongsTo(Vehicle::class);
     }
+
+    public function boundaryPayments()
+    {
+        return $this->hasMany(BoundaryPayment::class, 'daily_remittance_id')->orderBy('payment_date')->orderBy('id');
+    }
 }

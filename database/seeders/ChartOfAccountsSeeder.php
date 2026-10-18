@@ -61,6 +61,8 @@ class ChartOfAccountsSeeder extends Seeder
             'employee_receivable'      => '1030',
             'thirteenth_month_expense' => '5040',
             'thirteenth_month_payable' => '2060',
+            'boundary_cash'            => '1010',
+            'boundary_revenue'         => '4010',
         ];
 
         foreach ($mappings as $key => $code) {
