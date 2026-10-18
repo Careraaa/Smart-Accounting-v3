@@ -119,11 +119,11 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Date</th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Route</th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Vehicle</th>
-                        <th class="text-right px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Net Remittance</th>
-                        <th class="text-center px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Status</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Date</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Route</th>
+                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Vehicle</th>
+                        <th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Net Remittance</th>
+                        <th class="text-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="remittanceBody">
@@ -188,10 +188,10 @@
                     ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border bg-amber-50 text-amber-700 border-amber-200">Pending</span>'
                     : '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">Approved</span>';
                 html += '<tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location=\'' + r.show_url + '\'">' +
-                    '<td class="px-5 py-3"><p class="text-xs font-semibold text-gray-700 font-mono">' + r.date + '</p></td>' +
-                    '<td class="px-5 py-3"><p class="text-xs font-bold text-gray-900">' + r.route + '</p></td>' +
-                    '<td class="px-5 py-3"><p class="text-xs font-mono text-gray-700">' + r.vehicle + '</p></td>' +
-                    '<td class="px-5 py-3 text-right"><span class="text-xs font-mono font-bold ' + netClass + '">' + fmtPeso(r.net) + '</span></td>' +
+                    '<td class="px-5 py-3"><p class="text-sm font-semibold text-gray-700 font-mono">' + r.date + '</p></td>' +
+                    '<td class="px-5 py-3"><p class="text-sm font-bold text-gray-900">' + r.route + '</p></td>' +
+                    '<td class="px-5 py-3"><p class="text-sm font-mono text-gray-700">' + r.vehicle + '</p></td>' +
+                    '<td class="px-5 py-3 text-right"><span class="text-sm font-mono font-bold ' + netClass + '">' + fmtPeso(r.net) + '</span></td>' +
                     '<td class="px-5 py-3 text-center">' + badgeHtml + '</td>' +
                     '</tr>';
             });

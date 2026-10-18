@@ -74,13 +74,13 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Origin</th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Destination</th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Route Name</th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Weekday Boundary</th>
-                        <th class="text-left px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Weekend Boundary</th>
-                        <th class="text-center px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Vehicles</th>
-                        <th class="text-center px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Active</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Origin</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Destination</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Route Name</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Weekday Boundary</th>
+                        <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Weekend Boundary</th>
+                        <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Vehicles</th>
+                        <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Active</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="routeTbody">
@@ -88,13 +88,13 @@
                     <tr class="transition-colors hover:bg-gray-50/40 cursor-pointer"
                         data-name="{{ strtolower(($route->origin ?? '') . ' ' . ($route->destination ?? '') . ' ' . ($route->route_name ?? '')) }}"
                         onclick="window.location='{{ route('routes.show', $route) }}'">
-                        <td class="px-5 py-3 text-xs font-semibold text-gray-700">{{ $route->origin ?? '—' }}</td>
-                        <td class="px-5 py-3 text-xs font-semibold text-gray-700">{{ $route->destination ?? '—' }}</td>
-                        <td class="px-5 py-3 text-xs text-gray-600">{{ $route->route_name ?? '—' }}</td>
-                        <td class="px-5 py-3 text-xs font-bold text-gray-900">₱{{ number_format($route->weekday_boundary, 2) }}</td>
-                        <td class="px-5 py-3 text-xs font-bold text-gray-900">₱{{ number_format($route->weekend_boundary, 2) }}</td>
-                        <td class="px-5 py-3 text-xs text-center font-bold text-gray-700">{{ $route->vehicles->count() }}</td>
-                        <td class="px-5 py-3 text-xs text-center font-bold text-emerald-600">{{ $route->vehicles->where('status', 'active')->count() }}</td>
+                        <td class="px-5 py-3 text-sm font-semibold text-gray-700">{{ $route->origin ?? '—' }}</td>
+                        <td class="px-5 py-3 text-sm font-semibold text-gray-700">{{ $route->destination ?? '—' }}</td>
+                        <td class="px-5 py-3 text-sm text-gray-600">{{ $route->route_name ?? '—' }}</td>
+                        <td class="px-5 py-3 text-sm font-bold text-gray-900">₱{{ number_format($route->weekday_boundary, 2) }}</td>
+                        <td class="px-5 py-3 text-sm font-bold text-gray-900">₱{{ number_format($route->weekend_boundary, 2) }}</td>
+                        <td class="px-5 py-3 text-sm text-center font-bold text-gray-700">{{ $route->vehicles->count() }}</td>
+                        <td class="px-5 py-3 text-sm text-center font-bold text-emerald-600">{{ $route->vehicles->where('status', 'active')->count() }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="7">
