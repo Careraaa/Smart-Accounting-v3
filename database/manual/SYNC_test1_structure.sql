@@ -5,34 +5,34 @@
 --  Target:   the structure test2 has, which is what the code expects.
 --
 --  KEEPS EVERY ROW. It can create a missing table, add a missing column,
---  and add a missing primary key. It never drops anything.
+--  add a missing primary key, and add a missing foreign key.
+--  It never drops anything.
 --
 -- WARNING: BACK UP FIRST. Export test1 from phpMyAdmin and keep the file.
 --
--- NOTE: this does not remove columns test1 has that the target does not.
---      Keeping them is safer than dropping them and losing the data in them.
+-- NOTE: columns test1 has that the target does not are left in place.
+--      Keeping them is safer than dropping them and losing their data.
 -- ============================================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
 
--- 1. Create any table that is missing ------------------------------------
+-- 1. Create any table that is missing (foreign keys come later) ----------
 --
 SET @has_tbl_account_mappings = (SELECT COUNT(*) FROM information_schema.TABLES
   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'account_mappings');
 
 SET @sql = IF(@has_tbl_account_mappings = 0,
   'CREATE TABLE IF NOT EXISTS `account_mappings` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `mapping_key` varchar(50) NOT NULL,
-  `label` varchar(255) NOT NULL,
-  `account_id` bigint(20) unsigned NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `account_mappings_mapping_key_unique` (`mapping_key`),
-  KEY `account_mappings_account_id_foreign` (`account_id`),
-  CONSTRAINT `account_mappings_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `chart_of_accounts` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `mapping_key` varchar(50) NOT NULL,
+    `label` varchar(255) NOT NULL,
+    `account_id` bigint(20) unsigned NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `account_mappings_mapping_key_unique` (`mapping_key`),
+    KEY `account_mappings_account_id_foreign` (`account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
@@ -41,20 +41,19 @@ SET @has_tbl_accounting_audit_logs = (SELECT COUNT(*) FROM information_schema.TA
 
 SET @sql = IF(@has_tbl_accounting_audit_logs = 0,
   'CREATE TABLE IF NOT EXISTS `accounting_audit_logs` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `action` varchar(50) NOT NULL,
-  `module` varchar(50) NOT NULL,
-  `record_id` bigint(20) unsigned DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `old_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`old_values`)),
-  `new_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`new_values`)),
-  `ip_address` varchar(45) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `accounting_audit_logs_user_id_foreign` (`user_id`),
-  CONSTRAINT `accounting_audit_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `action` varchar(50) NOT NULL,
+    `module` varchar(50) NOT NULL,
+    `record_id` bigint(20) unsigned DEFAULT NULL,
+    `description` text DEFAULT NULL,
+    `old_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`old_values`)),
+    `new_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`new_values`)),
+    `ip_address` varchar(45) DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `accounting_audit_logs_user_id_foreign` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -64,20 +63,18 @@ SET @has_tbl_allowances = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_allowances = 0,
   'CREATE TABLE IF NOT EXISTS `allowances` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `payroll_id` bigint(20) unsigned DEFAULT NULL,
-  `allowance_type` varchar(255) NOT NULL,
-  `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `effective_date` date DEFAULT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'active\',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `allowances_user_id_foreign` (`user_id`),
-  KEY `allowances_payroll_id_foreign` (`payroll_id`),
-  CONSTRAINT `allowances_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `allowances_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `payroll_id` bigint(20) unsigned DEFAULT NULL,
+    `allowance_type` varchar(255) NOT NULL,
+    `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `effective_date` date DEFAULT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'active\',
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `allowances_user_id_foreign` (`user_id`),
+    KEY `allowances_payroll_id_foreign` (`payroll_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -87,18 +84,17 @@ SET @has_tbl_attendance = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_attendance = 0,
   'CREATE TABLE IF NOT EXISTS `attendance` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `date` date NOT NULL,
-  `time_in` time DEFAULT NULL,
-  `time_out` time DEFAULT NULL,
-  `status` enum(\'present\',\'late\',\'absent\',\'on leave\') DEFAULT NULL,
-  `is_manual` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `attendance_user_id_date_unique` (`user_id`,`date`),
-  CONSTRAINT `attendance_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `date` date NOT NULL,
+    `time_in` time DEFAULT NULL,
+    `time_out` time DEFAULT NULL,
+    `status` enum(\'present\',\'late\',\'absent\',\'on leave\') DEFAULT NULL,
+    `is_manual` tinyint(1) NOT NULL DEFAULT 0,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `attendance_user_id_date_unique` (`user_id`,`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -108,15 +104,14 @@ SET @has_tbl_attendance_logs = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_attendance_logs = 0,
   'CREATE TABLE IF NOT EXISTS `attendance_logs` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `type` enum(\'time_in\',\'time_out\') NOT NULL,
-  `logged_at` datetime NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `attendance_logs_user_id_foreign` (`user_id`),
-  CONSTRAINT `attendance_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `type` enum(\'time_in\',\'time_out\') NOT NULL,
+    `logged_at` datetime NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `attendance_logs_user_id_foreign` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -126,17 +121,16 @@ SET @has_tbl_attendance_tokens = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_attendance_tokens = 0,
   'CREATE TABLE IF NOT EXISTS `attendance_tokens` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `token` varchar(255) NOT NULL,
-  `used` tinyint(1) NOT NULL DEFAULT 0,
-  `user_id` bigint(20) unsigned DEFAULT NULL,
-  `expires_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `attendance_tokens_token_unique` (`token`),
-  KEY `attendance_tokens_user_id_foreign` (`user_id`),
-  CONSTRAINT `attendance_tokens_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `token` varchar(255) NOT NULL,
+    `used` tinyint(1) NOT NULL DEFAULT 0,
+    `user_id` bigint(20) unsigned DEFAULT NULL,
+    `expires_at` timestamp NULL DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `attendance_tokens_token_unique` (`token`),
+    KEY `attendance_tokens_user_id_foreign` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -146,14 +140,12 @@ SET @has_tbl_bonus_employee = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_bonus_employee = 0,
   'CREATE TABLE IF NOT EXISTS `bonus_employee` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `bonus_id` bigint(20) unsigned NOT NULL,
-  `user_id` bigint(20) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `bonus_employee_bonus_id_user_id_unique` (`bonus_id`,`user_id`),
-  KEY `bonus_employee_user_id_foreign` (`user_id`),
-  CONSTRAINT `bonus_employee_bonus_id_foreign` FOREIGN KEY (`bonus_id`) REFERENCES `bonuses` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `bonus_employee_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `bonus_id` bigint(20) unsigned NOT NULL,
+    `user_id` bigint(20) unsigned NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `bonus_employee_bonus_id_user_id_unique` (`bonus_id`,`user_id`),
+    KEY `bonus_employee_user_id_foreign` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -163,27 +155,26 @@ SET @has_tbl_bonuses = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_bonuses = 0,
   'CREATE TABLE IF NOT EXISTS `bonuses` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `type` varchar(255) NOT NULL,
-  `computation_method` varchar(255) NOT NULL,
-  `formula` text DEFAULT NULL,
-  `fixed_amount` decimal(12,2) DEFAULT NULL,
-  `percentage_value` decimal(8,4) DEFAULT NULL,
-  `is_mandatory` tinyint(1) NOT NULL DEFAULT 0,
-  `is_system_generated` tinyint(1) NOT NULL DEFAULT 0,
-  `status` varchar(255) NOT NULL DEFAULT \'active\',
-  `year` smallint(5) unsigned DEFAULT NULL,
-  `payroll_period` varchar(255) DEFAULT NULL,
-  `code` varchar(255) DEFAULT NULL,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `bonuses_code_unique` (`code`),
-  KEY `bonuses_created_by_foreign` (`created_by`),
-  CONSTRAINT `bonuses_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `description` text DEFAULT NULL,
+    `type` varchar(255) NOT NULL,
+    `computation_method` varchar(255) NOT NULL,
+    `formula` text DEFAULT NULL,
+    `fixed_amount` decimal(12,2) DEFAULT NULL,
+    `percentage_value` decimal(8,4) DEFAULT NULL,
+    `is_mandatory` tinyint(1) NOT NULL DEFAULT 0,
+    `is_system_generated` tinyint(1) NOT NULL DEFAULT 0,
+    `status` varchar(255) NOT NULL DEFAULT \'active\',
+    `year` smallint(5) unsigned DEFAULT NULL,
+    `payroll_period` varchar(255) DEFAULT NULL,
+    `code` varchar(255) DEFAULT NULL,
+    `created_by` bigint(20) unsigned DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `bonuses_code_unique` (`code`),
+    KEY `bonuses_created_by_foreign` (`created_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -193,32 +184,27 @@ SET @has_tbl_boundary_payments = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_boundary_payments = 0,
   'CREATE TABLE IF NOT EXISTS `boundary_payments` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `daily_remittance_id` bigint(20) unsigned NOT NULL,
-  `source_payment_key` varchar(64) NOT NULL,
-  `initial_payment_remittance_id` bigint(20) unsigned DEFAULT NULL,
-  `payment_date` date NOT NULL,
-  `amount` decimal(15,2) NOT NULL,
-  `paid_by` varchar(16) DEFAULT NULL,
-  `payment_kind` varchar(16) NOT NULL,
-  `status` varchar(16) NOT NULL DEFAULT \'Posted\',
-  `recorded_by` bigint(20) unsigned NOT NULL,
-  `approved_by` bigint(20) unsigned DEFAULT NULL,
-  `journal_entry_id` bigint(20) unsigned DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `boundary_payments_source_payment_key_unique` (`source_payment_key`),
-  UNIQUE KEY `boundary_payments_initial_payment_remittance_id_unique` (`initial_payment_remittance_id`),
-  UNIQUE KEY `boundary_payments_journal_entry_id_unique` (`journal_entry_id`),
-  KEY `boundary_payments_recorded_by_foreign` (`recorded_by`),
-  KEY `boundary_payments_approved_by_foreign` (`approved_by`),
-  KEY `boundary_payments_daily_remittance_id_payment_date_index` (`daily_remittance_id`,`payment_date`),
-  CONSTRAINT `boundary_payments_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`),
-  CONSTRAINT `boundary_payments_daily_remittance_id_foreign` FOREIGN KEY (`daily_remittance_id`) REFERENCES `daily_remittances` (`id`),
-  CONSTRAINT `boundary_payments_initial_payment_remittance_id_foreign` FOREIGN KEY (`initial_payment_remittance_id`) REFERENCES `daily_remittances` (`id`),
-  CONSTRAINT `boundary_payments_journal_entry_id_foreign` FOREIGN KEY (`journal_entry_id`) REFERENCES `journal_entries` (`id`),
-  CONSTRAINT `boundary_payments_recorded_by_foreign` FOREIGN KEY (`recorded_by`) REFERENCES `users` (`id`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `daily_remittance_id` bigint(20) unsigned NOT NULL,
+    `source_payment_key` varchar(64) NOT NULL,
+    `initial_payment_remittance_id` bigint(20) unsigned DEFAULT NULL,
+    `payment_date` date NOT NULL,
+    `amount` decimal(15,2) NOT NULL,
+    `paid_by` varchar(16) DEFAULT NULL,
+    `payment_kind` varchar(16) NOT NULL,
+    `status` varchar(16) NOT NULL DEFAULT \'Posted\',
+    `recorded_by` bigint(20) unsigned NOT NULL,
+    `approved_by` bigint(20) unsigned DEFAULT NULL,
+    `journal_entry_id` bigint(20) unsigned DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `boundary_payments_source_payment_key_unique` (`source_payment_key`),
+    UNIQUE KEY `boundary_payments_initial_payment_remittance_id_unique` (`initial_payment_remittance_id`),
+    UNIQUE KEY `boundary_payments_journal_entry_id_unique` (`journal_entry_id`),
+    KEY `boundary_payments_recorded_by_foreign` (`recorded_by`),
+    KEY `boundary_payments_approved_by_foreign` (`approved_by`),
+    KEY `boundary_payments_daily_remittance_id_payment_date_index` (`daily_remittance_id`,`payment_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -228,11 +214,11 @@ SET @has_tbl_cache = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_cache = 0,
   'CREATE TABLE IF NOT EXISTS `cache` (
-  `key` varchar(255) NOT NULL,
-  `value` mediumtext NOT NULL,
-  `expiration` int(11) NOT NULL,
-  PRIMARY KEY (`key`),
-  KEY `cache_expiration_index` (`expiration`)
+    `key` varchar(255) NOT NULL,
+    `value` mediumtext NOT NULL,
+    `expiration` int(11) NOT NULL,
+    PRIMARY KEY (`key`),
+    KEY `cache_expiration_index` (`expiration`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -242,11 +228,11 @@ SET @has_tbl_cache_locks = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_cache_locks = 0,
   'CREATE TABLE IF NOT EXISTS `cache_locks` (
-  `key` varchar(255) NOT NULL,
-  `owner` varchar(255) NOT NULL,
-  `expiration` int(11) NOT NULL,
-  PRIMARY KEY (`key`),
-  KEY `cache_locks_expiration_index` (`expiration`)
+    `key` varchar(255) NOT NULL,
+    `owner` varchar(255) NOT NULL,
+    `expiration` int(11) NOT NULL,
+    PRIMARY KEY (`key`),
+    KEY `cache_locks_expiration_index` (`expiration`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -256,29 +242,26 @@ SET @has_tbl_cash_advances = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_cash_advances = 0,
   'CREATE TABLE IF NOT EXISTS `cash_advances` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `repayment_months` int(11) NOT NULL DEFAULT 1,
-  `monthly_deduction` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `amount_deducted` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `request_date` date DEFAULT NULL,
-  `approval_date` date DEFAULT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'pending\',
-  `approved_by` bigint(20) unsigned DEFAULT NULL,
-  `approved_at` timestamp NULL DEFAULT NULL,
-  `rejection_reason` text DEFAULT NULL,
-  `deducted_payroll_id` bigint(20) unsigned DEFAULT NULL,
-  `notes` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `cash_advances_user_id_foreign` (`user_id`),
-  KEY `cash_advances_approved_by_foreign` (`approved_by`),
-  KEY `cash_advances_deducted_payroll_id_foreign` (`deducted_payroll_id`),
-  CONSTRAINT `cash_advances_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `cash_advances_deducted_payroll_id_foreign` FOREIGN KEY (`deducted_payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `cash_advances_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `repayment_months` int(11) NOT NULL DEFAULT 1,
+    `monthly_deduction` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `amount_deducted` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `request_date` date DEFAULT NULL,
+    `approval_date` date DEFAULT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'pending\',
+    `approved_by` bigint(20) unsigned DEFAULT NULL,
+    `approved_at` timestamp NULL DEFAULT NULL,
+    `rejection_reason` text DEFAULT NULL,
+    `deducted_payroll_id` bigint(20) unsigned DEFAULT NULL,
+    `notes` text DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `cash_advances_user_id_foreign` (`user_id`),
+    KEY `cash_advances_approved_by_foreign` (`approved_by`),
+    KEY `cash_advances_deducted_payroll_id_foreign` (`deducted_payroll_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -288,21 +271,20 @@ SET @has_tbl_chart_of_accounts = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_chart_of_accounts = 0,
   'CREATE TABLE IF NOT EXISTS `chart_of_accounts` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `account_code` varchar(20) NOT NULL,
-  `account_name` varchar(255) NOT NULL,
-  `account_type` enum(\'Asset\',\'Liability\',\'Equity\',\'Revenue\',\'Expense\') NOT NULL,
-  `description` text DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `is_contra` tinyint(1) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `chart_of_accounts_account_code_unique` (`account_code`),
-  KEY `chart_of_accounts_created_by_foreign` (`created_by`),
-  CONSTRAINT `chart_of_accounts_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `account_code` varchar(20) NOT NULL,
+    `account_name` varchar(255) NOT NULL,
+    `account_type` enum(\'Asset\',\'Liability\',\'Equity\',\'Revenue\',\'Expense\') NOT NULL,
+    `description` text DEFAULT NULL,
+    `is_active` tinyint(1) NOT NULL DEFAULT 1,
+    `created_by` bigint(20) unsigned DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    `is_contra` tinyint(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `chart_of_accounts_account_code_unique` (`account_code`),
+    KEY `chart_of_accounts_created_by_foreign` (`created_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
@@ -311,44 +293,40 @@ SET @has_tbl_daily_remittances = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_daily_remittances = 0,
   'CREATE TABLE IF NOT EXISTS `daily_remittances` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `driver_id` bigint(20) unsigned NOT NULL,
-  `pao_id` bigint(20) unsigned NOT NULL,
-  `route_id` bigint(20) unsigned NOT NULL,
-  `vehicle_id` bigint(20) unsigned NOT NULL,
-  `remittance_date` date NOT NULL,
-  `total_collection` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `diesel` decimal(10,2) DEFAULT NULL,
-  `parking` decimal(10,2) DEFAULT NULL,
-  `dispatcher` decimal(10,2) DEFAULT NULL,
-  `food_allowance` decimal(10,2) DEFAULT NULL,
-  `barker` decimal(10,2) DEFAULT NULL,
-  `others` decimal(10,2) DEFAULT NULL,
-  `total_expenses` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `boundary` decimal(10,2) DEFAULT NULL,
-  `net_remittance` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `is_short_remittance` tinyint(1) NOT NULL DEFAULT 0,
-  `short_amount` decimal(10,2) DEFAULT NULL,
-  `driver_share` decimal(10,2) DEFAULT NULL,
-  `driver_amount_paid` decimal(10,2) DEFAULT 0.00,
-  `driver_status` enum(\'pending\',\'partial\',\'paid\') DEFAULT \'pending\',
-  `pao_share` decimal(10,2) DEFAULT NULL,
-  `pao_amount_paid` decimal(10,2) DEFAULT 0.00,
-  `pao_status` enum(\'pending\',\'partial\',\'paid\') DEFAULT \'pending\',
-  `resolution_notes` text DEFAULT NULL,
-  `resolved_at` timestamp NULL DEFAULT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'pending\',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `daily_remittances_driver_id_foreign` (`driver_id`),
-  KEY `daily_remittances_pao_id_foreign` (`pao_id`),
-  KEY `daily_remittances_route_id_foreign` (`route_id`),
-  KEY `daily_remittances_vehicle_id_foreign` (`vehicle_id`),
-  CONSTRAINT `daily_remittances_driver_id_foreign` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `daily_remittances_pao_id_foreign` FOREIGN KEY (`pao_id`) REFERENCES `paos` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `daily_remittances_route_id_foreign` FOREIGN KEY (`route_id`) REFERENCES `routes` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `daily_remittances_vehicle_id_foreign` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `driver_id` bigint(20) unsigned NOT NULL,
+    `pao_id` bigint(20) unsigned NOT NULL,
+    `route_id` bigint(20) unsigned NOT NULL,
+    `vehicle_id` bigint(20) unsigned NOT NULL,
+    `remittance_date` date NOT NULL,
+    `total_collection` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `diesel` decimal(10,2) DEFAULT NULL,
+    `parking` decimal(10,2) DEFAULT NULL,
+    `dispatcher` decimal(10,2) DEFAULT NULL,
+    `food_allowance` decimal(10,2) DEFAULT NULL,
+    `barker` decimal(10,2) DEFAULT NULL,
+    `others` decimal(10,2) DEFAULT NULL,
+    `total_expenses` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `boundary` decimal(10,2) DEFAULT NULL,
+    `net_remittance` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `is_short_remittance` tinyint(1) NOT NULL DEFAULT 0,
+    `short_amount` decimal(10,2) DEFAULT NULL,
+    `driver_share` decimal(10,2) DEFAULT NULL,
+    `driver_amount_paid` decimal(10,2) DEFAULT 0.00,
+    `driver_status` enum(\'pending\',\'partial\',\'paid\') DEFAULT \'pending\',
+    `pao_share` decimal(10,2) DEFAULT NULL,
+    `pao_amount_paid` decimal(10,2) DEFAULT 0.00,
+    `pao_status` enum(\'pending\',\'partial\',\'paid\') DEFAULT \'pending\',
+    `resolution_notes` text DEFAULT NULL,
+    `resolved_at` timestamp NULL DEFAULT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'pending\',
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `daily_remittances_driver_id_foreign` (`driver_id`),
+    KEY `daily_remittances_pao_id_foreign` (`pao_id`),
+    KEY `daily_remittances_route_id_foreign` (`route_id`),
+    KEY `daily_remittances_vehicle_id_foreign` (`vehicle_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -358,20 +336,18 @@ SET @has_tbl_deductions = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_deductions = 0,
   'CREATE TABLE IF NOT EXISTS `deductions` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `payroll_id` bigint(20) unsigned DEFAULT NULL,
-  `deduction_type` varchar(255) NOT NULL,
-  `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `effective_date` date DEFAULT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'active\',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `deductions_user_id_foreign` (`user_id`),
-  KEY `deductions_payroll_id_foreign` (`payroll_id`),
-  CONSTRAINT `deductions_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `deductions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `payroll_id` bigint(20) unsigned DEFAULT NULL,
+    `deduction_type` varchar(255) NOT NULL,
+    `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `effective_date` date DEFAULT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'active\',
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `deductions_user_id_foreign` (`user_id`),
+    KEY `deductions_payroll_id_foreign` (`payroll_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -381,13 +357,13 @@ SET @has_tbl_departments = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_departments = 0,
   'CREATE TABLE IF NOT EXISTS `departments` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `departments_name_unique` (`name`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `is_active` tinyint(1) NOT NULL DEFAULT 1,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `departments_name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -397,20 +373,20 @@ SET @has_tbl_drivers = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_drivers = 0,
   'CREATE TABLE IF NOT EXISTS `drivers` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `license_number` varchar(255) NOT NULL,
-  `contact_number` varchar(255) NOT NULL,
-  `gender` enum(\'male\',\'female\',\'prefer_not_to_say\') DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `address` text DEFAULT NULL,
-  `date_of_hire` date DEFAULT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'active\',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `drivers_license_number_unique` (`license_number`),
-  UNIQUE KEY `drivers_email_unique` (`email`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `license_number` varchar(255) NOT NULL,
+    `contact_number` varchar(255) NOT NULL,
+    `gender` enum(\'male\',\'female\',\'prefer_not_to_say\') DEFAULT NULL,
+    `email` varchar(255) DEFAULT NULL,
+    `address` text DEFAULT NULL,
+    `date_of_hire` date DEFAULT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'active\',
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `drivers_license_number_unique` (`license_number`),
+    UNIQUE KEY `drivers_email_unique` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -420,26 +396,24 @@ SET @has_tbl_employee_attachments = (SELECT COUNT(*) FROM information_schema.TAB
 
 SET @sql = IF(@has_tbl_employee_attachments = 0,
   'CREATE TABLE IF NOT EXISTS `employee_attachments` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `attachment_key` varchar(255) NOT NULL,
-  `label` varchar(255) NOT NULL,
-  `file_path` varchar(255) NOT NULL,
-  `original_name` varchar(255) NOT NULL,
-  `mime_type` varchar(255) DEFAULT NULL,
-  `file_size` bigint(20) unsigned DEFAULT NULL,
-  `status` enum(\'pending\',\'approved\',\'rejected\') NOT NULL DEFAULT \'pending\',
-  `rejection_reason` text DEFAULT NULL,
-  `reviewed_by` bigint(20) unsigned DEFAULT NULL,
-  `reviewed_at` timestamp NULL DEFAULT NULL,
-  `uploaded_by_role` enum(\'hr\',\'employee\') NOT NULL DEFAULT \'hr\',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `employee_attachments_reviewed_by_foreign` (`reviewed_by`),
-  KEY `employee_attachments_user_id_attachment_key_index` (`user_id`,`attachment_key`),
-  CONSTRAINT `employee_attachments_reviewed_by_foreign` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `employee_attachments_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `attachment_key` varchar(255) NOT NULL,
+    `label` varchar(255) NOT NULL,
+    `file_path` varchar(255) NOT NULL,
+    `original_name` varchar(255) NOT NULL,
+    `mime_type` varchar(255) DEFAULT NULL,
+    `file_size` bigint(20) unsigned DEFAULT NULL,
+    `status` enum(\'pending\',\'approved\',\'rejected\') NOT NULL DEFAULT \'pending\',
+    `rejection_reason` text DEFAULT NULL,
+    `reviewed_by` bigint(20) unsigned DEFAULT NULL,
+    `reviewed_at` timestamp NULL DEFAULT NULL,
+    `uploaded_by_role` enum(\'hr\',\'employee\') NOT NULL DEFAULT \'hr\',
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `employee_attachments_reviewed_by_foreign` (`reviewed_by`),
+    KEY `employee_attachments_user_id_attachment_key_index` (`user_id`,`attachment_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -449,17 +423,16 @@ SET @has_tbl_employee_beneficiaries = (SELECT COUNT(*) FROM information_schema.T
 
 SET @sql = IF(@has_tbl_employee_beneficiaries = 0,
   'CREATE TABLE IF NOT EXISTS `employee_beneficiaries` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `date_of_birth` date DEFAULT NULL,
-  `relationship` varchar(255) DEFAULT NULL,
-  `sequence` int(11) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `employee_beneficiaries_user_id_foreign` (`user_id`),
-  CONSTRAINT `employee_beneficiaries_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `name` varchar(255) NOT NULL,
+    `date_of_birth` date DEFAULT NULL,
+    `relationship` varchar(255) DEFAULT NULL,
+    `sequence` int(11) NOT NULL DEFAULT 1,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `employee_beneficiaries_user_id_foreign` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -469,18 +442,17 @@ SET @has_tbl_employee_experiences = (SELECT COUNT(*) FROM information_schema.TAB
 
 SET @sql = IF(@has_tbl_employee_experiences = 0,
   'CREATE TABLE IF NOT EXISTS `employee_experiences` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `company_name` varchar(255) NOT NULL,
-  `position` varchar(255) DEFAULT NULL,
-  `duration` varchar(255) DEFAULT NULL,
-  `responsibilities` text DEFAULT NULL,
-  `sequence` int(11) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `employee_experiences_user_id_foreign` (`user_id`),
-  CONSTRAINT `employee_experiences_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `company_name` varchar(255) NOT NULL,
+    `position` varchar(255) DEFAULT NULL,
+    `duration` varchar(255) DEFAULT NULL,
+    `responsibilities` text DEFAULT NULL,
+    `sequence` int(11) NOT NULL DEFAULT 1,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `employee_experiences_user_id_foreign` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -490,20 +462,18 @@ SET @has_tbl_employee_leave_balances = (SELECT COUNT(*) FROM information_schema.
 
 SET @sql = IF(@has_tbl_employee_leave_balances = 0,
   'CREATE TABLE IF NOT EXISTS `employee_leave_balances` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `leave_type_id` bigint(20) unsigned NOT NULL,
-  `total_days` int(11) NOT NULL,
-  `used_days` int(11) NOT NULL DEFAULT 0,
-  `remaining_days` int(11) NOT NULL,
-  `year` year(4) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `employee_leave_balances_user_id_leave_type_id_year_unique` (`user_id`,`leave_type_id`,`year`),
-  KEY `employee_leave_balances_leave_type_id_foreign` (`leave_type_id`),
-  CONSTRAINT `employee_leave_balances_leave_type_id_foreign` FOREIGN KEY (`leave_type_id`) REFERENCES `leave_types` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `employee_leave_balances_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `leave_type_id` bigint(20) unsigned NOT NULL,
+    `total_days` int(11) NOT NULL,
+    `used_days` int(11) NOT NULL DEFAULT 0,
+    `remaining_days` int(11) NOT NULL,
+    `year` year(4) NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `employee_leave_balances_user_id_leave_type_id_year_unique` (`user_id`,`leave_type_id`,`year`),
+    KEY `employee_leave_balances_leave_type_id_foreign` (`leave_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -513,17 +483,16 @@ SET @has_tbl_employee_references = (SELECT COUNT(*) FROM information_schema.TABL
 
 SET @sql = IF(@has_tbl_employee_references = 0,
   'CREATE TABLE IF NOT EXISTS `employee_references` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `address` varchar(255) DEFAULT NULL,
-  `contact_number` varchar(255) DEFAULT NULL,
-  `sequence` int(11) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `employee_references_user_id_foreign` (`user_id`),
-  CONSTRAINT `employee_references_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `name` varchar(255) NOT NULL,
+    `address` varchar(255) DEFAULT NULL,
+    `contact_number` varchar(255) DEFAULT NULL,
+    `sequence` int(11) NOT NULL DEFAULT 1,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `employee_references_user_id_foreign` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -533,16 +502,15 @@ SET @has_tbl_employee_skills = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_employee_skills = 0,
   'CREATE TABLE IF NOT EXISTS `employee_skills` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `skill_name` varchar(255) NOT NULL,
-  `proficiency` varchar(255) DEFAULT NULL,
-  `sequence` int(11) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `employee_skills_user_id_foreign` (`user_id`),
-  CONSTRAINT `employee_skills_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `skill_name` varchar(255) NOT NULL,
+    `proficiency` varchar(255) DEFAULT NULL,
+    `sequence` int(11) NOT NULL DEFAULT 1,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `employee_skills_user_id_foreign` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -552,13 +520,13 @@ SET @has_tbl_holidays = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_holidays = 0,
   'CREATE TABLE IF NOT EXISTS `holidays` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `date` date NOT NULL,
-  `type` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `date` date NOT NULL,
+    `type` varchar(255) DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -568,25 +536,23 @@ SET @has_tbl_journal_entries = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_journal_entries = 0,
   'CREATE TABLE IF NOT EXISTS `journal_entries` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `journal_number` varchar(30) NOT NULL,
-  `transaction_date` date NOT NULL,
-  `description` varchar(255) NOT NULL,
-  `reference_type` varchar(50) DEFAULT NULL,
-  `reference_id` bigint(20) unsigned DEFAULT NULL,
-  `status` enum(\'Draft\',\'Posted\',\'Void\') NOT NULL DEFAULT \'Draft\',
-  `created_by` bigint(20) unsigned DEFAULT NULL,
-  `posted_by` bigint(20) unsigned DEFAULT NULL,
-  `posted_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `journal_entries_journal_number_unique` (`journal_number`),
-  KEY `journal_entries_created_by_foreign` (`created_by`),
-  KEY `journal_entries_posted_by_foreign` (`posted_by`),
-  KEY `journal_entries_reference_type_reference_id_index` (`reference_type`,`reference_id`),
-  CONSTRAINT `journal_entries_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `journal_entries_posted_by_foreign` FOREIGN KEY (`posted_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `journal_number` varchar(30) NOT NULL,
+    `transaction_date` date NOT NULL,
+    `description` varchar(255) NOT NULL,
+    `reference_type` varchar(50) DEFAULT NULL,
+    `reference_id` bigint(20) unsigned DEFAULT NULL,
+    `status` enum(\'Draft\',\'Posted\',\'Void\') NOT NULL DEFAULT \'Draft\',
+    `created_by` bigint(20) unsigned DEFAULT NULL,
+    `posted_by` bigint(20) unsigned DEFAULT NULL,
+    `posted_at` timestamp NULL DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `journal_entries_journal_number_unique` (`journal_number`),
+    KEY `journal_entries_created_by_foreign` (`created_by`),
+    KEY `journal_entries_posted_by_foreign` (`posted_by`),
+    KEY `journal_entries_reference_type_reference_id_index` (`reference_type`,`reference_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -596,19 +562,17 @@ SET @has_tbl_journal_entry_lines = (SELECT COUNT(*) FROM information_schema.TABL
 
 SET @sql = IF(@has_tbl_journal_entry_lines = 0,
   'CREATE TABLE IF NOT EXISTS `journal_entry_lines` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `journal_entry_id` bigint(20) unsigned NOT NULL,
-  `account_id` bigint(20) unsigned NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `debit` decimal(15,2) NOT NULL DEFAULT 0.00,
-  `credit` decimal(15,2) NOT NULL DEFAULT 0.00,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `journal_entry_lines_journal_entry_id_foreign` (`journal_entry_id`),
-  KEY `journal_entry_lines_account_id_foreign` (`account_id`),
-  CONSTRAINT `journal_entry_lines_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `chart_of_accounts` (`id`),
-  CONSTRAINT `journal_entry_lines_journal_entry_id_foreign` FOREIGN KEY (`journal_entry_id`) REFERENCES `journal_entries` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `journal_entry_id` bigint(20) unsigned NOT NULL,
+    `account_id` bigint(20) unsigned NOT NULL,
+    `description` varchar(255) DEFAULT NULL,
+    `debit` decimal(15,2) NOT NULL DEFAULT 0.00,
+    `credit` decimal(15,2) NOT NULL DEFAULT 0.00,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `journal_entry_lines_journal_entry_id_foreign` (`journal_entry_id`),
+    KEY `journal_entry_lines_account_id_foreign` (`account_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -618,16 +582,16 @@ SET @has_tbl_leave_types = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_leave_types = 0,
   'CREATE TABLE IF NOT EXISTS `leave_types` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `abbreviation` varchar(255) DEFAULT NULL,
-  `days_allowed` int(11) NOT NULL DEFAULT 0,
-  `carry_over` tinyint(1) NOT NULL DEFAULT 0,
-  `description` text DEFAULT NULL,
-  `status` enum(\'active\',\'inactive\') NOT NULL DEFAULT \'active\',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `abbreviation` varchar(255) DEFAULT NULL,
+    `days_allowed` int(11) NOT NULL DEFAULT 0,
+    `carry_over` tinyint(1) NOT NULL DEFAULT 0,
+    `description` text DEFAULT NULL,
+    `status` enum(\'active\',\'inactive\') NOT NULL DEFAULT \'active\',
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -637,27 +601,24 @@ SET @has_tbl_leaves = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_leaves = 0,
   'CREATE TABLE IF NOT EXISTS `leaves` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `leave_type_id` bigint(20) unsigned DEFAULT NULL,
-  `leave_type` varchar(255) NOT NULL,
-  `start_date` date NOT NULL,
-  `end_date` date NOT NULL,
-  `reason` text DEFAULT NULL,
-  `status` enum(\'pending\',\'approved\',\'rejected\',\'paid\') NOT NULL DEFAULT \'pending\',
-  `paid_days` int(11) NOT NULL DEFAULT 0,
-  `unpaid_days` int(11) NOT NULL DEFAULT 0,
-  `rejection_reason` text DEFAULT NULL,
-  `approved_by` bigint(20) unsigned DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `leaves_user_id_foreign` (`user_id`),
-  KEY `leaves_approved_by_foreign` (`approved_by`),
-  KEY `leaves_leave_type_id_foreign` (`leave_type_id`),
-  CONSTRAINT `leaves_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `leaves_leave_type_id_foreign` FOREIGN KEY (`leave_type_id`) REFERENCES `leave_types` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `leaves_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `leave_type_id` bigint(20) unsigned DEFAULT NULL,
+    `leave_type` varchar(255) NOT NULL,
+    `start_date` date NOT NULL,
+    `end_date` date NOT NULL,
+    `reason` text DEFAULT NULL,
+    `status` enum(\'pending\',\'approved\',\'rejected\',\'paid\') NOT NULL DEFAULT \'pending\',
+    `paid_days` int(11) NOT NULL DEFAULT 0,
+    `unpaid_days` int(11) NOT NULL DEFAULT 0,
+    `rejection_reason` text DEFAULT NULL,
+    `approved_by` bigint(20) unsigned DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `leaves_user_id_foreign` (`user_id`),
+    KEY `leaves_approved_by_foreign` (`approved_by`),
+    KEY `leaves_leave_type_id_foreign` (`leave_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -667,11 +628,11 @@ SET @has_tbl_migrations = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_migrations = 0,
   'CREATE TABLE IF NOT EXISTS `migrations` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `migration` varchar(255) NOT NULL,
-  `batch` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
+    `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `migration` varchar(255) NOT NULL,
+    `batch` int(11) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
@@ -680,21 +641,20 @@ SET @has_tbl_notifications = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_notifications = 0,
   'CREATE TABLE IF NOT EXISTS `notifications` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `type` varchar(255) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `message` text NOT NULL,
-  `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`data`)),
-  `read_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `notifications_user_id_created_at_index` (`user_id`,`created_at`),
-  KEY `notifications_user_id_read_at_index` (`user_id`,`read_at`),
-  KEY `notifications_deleted_at_index` (`deleted_at`),
-  CONSTRAINT `notifications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `type` varchar(255) NOT NULL,
+    `title` varchar(255) NOT NULL,
+    `message` text NOT NULL,
+    `data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`data`)),
+    `read_at` timestamp NULL DEFAULT NULL,
+    `deleted_at` timestamp NULL DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `notifications_user_id_created_at_index` (`user_id`,`created_at`),
+    KEY `notifications_user_id_read_at_index` (`user_id`,`read_at`),
+    KEY `notifications_deleted_at_index` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -704,24 +664,22 @@ SET @has_tbl_overtime_undertimes = (SELECT COUNT(*) FROM information_schema.TABL
 
 SET @sql = IF(@has_tbl_overtime_undertimes = 0,
   'CREATE TABLE IF NOT EXISTS `overtime_undertimes` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `date` date NOT NULL,
-  `type` varchar(255) NOT NULL,
-  `hours` decimal(5,2) NOT NULL,
-  `amount` decimal(15,2) DEFAULT NULL,
-  `hourly_rate_used` decimal(15,2) DEFAULT NULL,
-  `reason` text DEFAULT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'pending\',
-  `rejection_reason` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `approved_by` bigint(20) unsigned DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `overtime_undertimes_user_id_foreign` (`user_id`),
-  KEY `overtime_undertimes_approved_by_foreign` (`approved_by`),
-  CONSTRAINT `overtime_undertimes_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `overtime_undertimes_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `date` date NOT NULL,
+    `type` varchar(255) NOT NULL,
+    `hours` decimal(5,2) NOT NULL,
+    `amount` decimal(15,2) DEFAULT NULL,
+    `hourly_rate_used` decimal(15,2) DEFAULT NULL,
+    `reason` text DEFAULT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'pending\',
+    `rejection_reason` text DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    `approved_by` bigint(20) unsigned DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `overtime_undertimes_user_id_foreign` (`user_id`),
+    KEY `overtime_undertimes_approved_by_foreign` (`approved_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -731,18 +689,18 @@ SET @has_tbl_paos = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_paos = 0,
   'CREATE TABLE IF NOT EXISTS `paos` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `contact_number` varchar(255) NOT NULL,
-  `gender` enum(\'male\',\'female\',\'prefer_not_to_say\') DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `address` text DEFAULT NULL,
-  `date_of_hire` date DEFAULT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'active\',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `paos_email_unique` (`email`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `contact_number` varchar(255) NOT NULL,
+    `gender` enum(\'male\',\'female\',\'prefer_not_to_say\') DEFAULT NULL,
+    `email` varchar(255) DEFAULT NULL,
+    `address` text DEFAULT NULL,
+    `date_of_hire` date DEFAULT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'active\',
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `paos_email_unique` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -752,16 +710,15 @@ SET @has_tbl_payroll_allowances = (SELECT COUNT(*) FROM information_schema.TABLE
 
 SET @sql = IF(@has_tbl_payroll_allowances = 0,
   'CREATE TABLE IF NOT EXISTS `payroll_allowances` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `payroll_id` bigint(20) unsigned NOT NULL,
-  `allowance_type` varchar(255) NOT NULL,
-  `hours` decimal(8,2) DEFAULT NULL,
-  `amount` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `payroll_allowances_payroll_id_foreign` (`payroll_id`),
-  CONSTRAINT `payroll_allowances_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `payroll_id` bigint(20) unsigned NOT NULL,
+    `allowance_type` varchar(255) NOT NULL,
+    `hours` decimal(8,2) DEFAULT NULL,
+    `amount` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `payroll_allowances_payroll_id_foreign` (`payroll_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -771,31 +728,27 @@ SET @has_tbl_payroll_batches = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_payroll_batches = 0,
   'CREATE TABLE IF NOT EXISTS `payroll_batches` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(50) NOT NULL DEFAULT \'regular\',
-  `period_start` date NOT NULL,
-  `period_end` date NOT NULL,
-  `status` enum(\'draft\',\'submitted\',\'approved\',\'rejected\') NOT NULL DEFAULT \'draft\',
-  `generated_by` bigint(20) unsigned DEFAULT NULL,
-  `finalized_by` bigint(20) unsigned DEFAULT NULL,
-  `finalized_at` timestamp NULL DEFAULT NULL,
-  `approved_by` bigint(20) unsigned DEFAULT NULL,
-  `approved_at` timestamp NULL DEFAULT NULL,
-  `rejected_by` bigint(20) unsigned DEFAULT NULL,
-  `rejected_at` timestamp NULL DEFAULT NULL,
-  `rejection_note` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `payroll_batches_generated_by_foreign` (`generated_by`),
-  KEY `payroll_batches_finalized_by_foreign` (`finalized_by`),
-  KEY `payroll_batches_approved_by_foreign` (`approved_by`),
-  KEY `payroll_batches_rejected_by_foreign` (`rejected_by`),
-  KEY `payroll_batches_type_index` (`type`),
-  CONSTRAINT `payroll_batches_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `payroll_batches_finalized_by_foreign` FOREIGN KEY (`finalized_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `payroll_batches_generated_by_foreign` FOREIGN KEY (`generated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `payroll_batches_rejected_by_foreign` FOREIGN KEY (`rejected_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `type` varchar(50) NOT NULL DEFAULT \'regular\',
+    `period_start` date NOT NULL,
+    `period_end` date NOT NULL,
+    `status` enum(\'draft\',\'submitted\',\'approved\',\'rejected\') NOT NULL DEFAULT \'draft\',
+    `generated_by` bigint(20) unsigned DEFAULT NULL,
+    `finalized_by` bigint(20) unsigned DEFAULT NULL,
+    `finalized_at` timestamp NULL DEFAULT NULL,
+    `approved_by` bigint(20) unsigned DEFAULT NULL,
+    `approved_at` timestamp NULL DEFAULT NULL,
+    `rejected_by` bigint(20) unsigned DEFAULT NULL,
+    `rejected_at` timestamp NULL DEFAULT NULL,
+    `rejection_note` text DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `payroll_batches_generated_by_foreign` (`generated_by`),
+    KEY `payroll_batches_finalized_by_foreign` (`finalized_by`),
+    KEY `payroll_batches_approved_by_foreign` (`approved_by`),
+    KEY `payroll_batches_rejected_by_foreign` (`rejected_by`),
+    KEY `payroll_batches_type_index` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -805,16 +758,15 @@ SET @has_tbl_payroll_bonuses = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_payroll_bonuses = 0,
   'CREATE TABLE IF NOT EXISTS `payroll_bonuses` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `payroll_id` bigint(20) unsigned NOT NULL,
-  `bonus_type` enum(\'performance\',\'holiday\',\'attendance\',\'special\') NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `amount` decimal(12,2) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `payroll_bonuses_payroll_id_foreign` (`payroll_id`),
-  CONSTRAINT `payroll_bonuses_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `payroll_id` bigint(20) unsigned NOT NULL,
+    `bonus_type` enum(\'performance\',\'holiday\',\'attendance\',\'special\') NOT NULL,
+    `description` varchar(255) DEFAULT NULL,
+    `amount` decimal(12,2) NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `payroll_bonuses_payroll_id_foreign` (`payroll_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -824,16 +776,16 @@ SET @has_tbl_payroll_cutoff_schedules = (SELECT COUNT(*) FROM information_schema
 
 SET @sql = IF(@has_tbl_payroll_cutoff_schedules = 0,
   'CREATE TABLE IF NOT EXISTS `payroll_cutoff_schedules` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `cutoff_day` int(11) NOT NULL,
-  `label` varchar(255) NOT NULL,
-  `payroll_period_start` date DEFAULT NULL,
-  `payroll_period_end` date DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `payroll_cutoff_schedules_cutoff_day_unique` (`cutoff_day`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `cutoff_day` int(11) NOT NULL,
+    `label` varchar(255) NOT NULL,
+    `payroll_period_start` date DEFAULT NULL,
+    `payroll_period_end` date DEFAULT NULL,
+    `is_active` tinyint(1) NOT NULL DEFAULT 1,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `payroll_cutoff_schedules_cutoff_day_unique` (`cutoff_day`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -843,19 +795,18 @@ SET @has_tbl_payroll_deductions = (SELECT COUNT(*) FROM information_schema.TABLE
 
 SET @sql = IF(@has_tbl_payroll_deductions = 0,
   'CREATE TABLE IF NOT EXISTS `payroll_deductions` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `payroll_id` bigint(20) unsigned NOT NULL,
-  `deduction_type` varchar(255) NOT NULL,
-  `hours` decimal(8,2) DEFAULT NULL,
-  `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `description` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `accounting_treatment` varchar(30) DEFAULT NULL,
-  `deduction_source` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `payroll_deductions_payroll_id_foreign` (`payroll_id`),
-  CONSTRAINT `payroll_deductions_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `payroll_id` bigint(20) unsigned NOT NULL,
+    `deduction_type` varchar(255) NOT NULL,
+    `hours` decimal(8,2) DEFAULT NULL,
+    `amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `description` text DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    `accounting_treatment` varchar(30) DEFAULT NULL,
+    `deduction_source` varchar(20) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `payroll_deductions_payroll_id_foreign` (`payroll_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -865,49 +816,46 @@ SET @has_tbl_payrolls = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_payrolls = 0,
   'CREATE TABLE IF NOT EXISTS `payrolls` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `batch_id` bigint(20) unsigned DEFAULT NULL,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `payroll_period_start` date NOT NULL,
-  `payroll_period_end` date NOT NULL,
-  `total_allowances` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `total_bonuses` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `total_deductions` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `cash_advance_deduction` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `salary_loan_deduction` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `loan_deduction_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`loan_deduction_data`)),
-  `status` varchar(255) NOT NULL DEFAULT \'pending\',
-  `basic_salary` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `gross_pay` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `holiday_pay` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `holiday_ot_pay` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `holiday_ot_hours` decimal(8,2) NOT NULL DEFAULT 0.00,
-  `holiday_breakdown` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`holiday_breakdown`)),
-  `net_pay` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `days_worked` decimal(8,2) NOT NULL DEFAULT 0.00,
-  `hours_worked` decimal(8,2) NOT NULL DEFAULT 0.00,
-  `payment_date` date DEFAULT NULL,
-  `approved_by` bigint(20) unsigned DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `present_days` int(10) unsigned NOT NULL DEFAULT 0,
-  `late_days` int(10) unsigned NOT NULL DEFAULT 0,
-  `absent_days` int(10) unsigned NOT NULL DEFAULT 0,
-  `daily_rate_snapshot` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `sss` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `pagibig` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `philhealth` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `withholding_tax` decimal(12,2) NOT NULL DEFAULT 0.00,
-  `employer_sss` decimal(12,2) DEFAULT NULL,
-  `employer_pagibig` decimal(12,2) DEFAULT NULL,
-  `employer_philhealth` decimal(12,2) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `payrolls_user_id_foreign` (`user_id`),
-  KEY `payrolls_approved_by_foreign` (`approved_by`),
-  KEY `payrolls_batch_id_foreign` (`batch_id`),
-  CONSTRAINT `payrolls_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `payrolls_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `payroll_batches` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `payrolls_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `batch_id` bigint(20) unsigned DEFAULT NULL,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `payroll_period_start` date NOT NULL,
+    `payroll_period_end` date NOT NULL,
+    `total_allowances` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `total_bonuses` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `total_deductions` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `cash_advance_deduction` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `salary_loan_deduction` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `loan_deduction_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`loan_deduction_data`)),
+    `status` varchar(255) NOT NULL DEFAULT \'pending\',
+    `basic_salary` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `gross_pay` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `holiday_pay` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `holiday_ot_pay` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `holiday_ot_hours` decimal(8,2) NOT NULL DEFAULT 0.00,
+    `holiday_breakdown` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`holiday_breakdown`)),
+    `net_pay` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `days_worked` decimal(8,2) NOT NULL DEFAULT 0.00,
+    `hours_worked` decimal(8,2) NOT NULL DEFAULT 0.00,
+    `payment_date` date DEFAULT NULL,
+    `approved_by` bigint(20) unsigned DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    `present_days` int(10) unsigned NOT NULL DEFAULT 0,
+    `late_days` int(10) unsigned NOT NULL DEFAULT 0,
+    `absent_days` int(10) unsigned NOT NULL DEFAULT 0,
+    `daily_rate_snapshot` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `sss` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `pagibig` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `philhealth` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `withholding_tax` decimal(12,2) NOT NULL DEFAULT 0.00,
+    `employer_sss` decimal(12,2) DEFAULT NULL,
+    `employer_pagibig` decimal(12,2) DEFAULT NULL,
+    `employer_philhealth` decimal(12,2) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `payrolls_user_id_foreign` (`user_id`),
+    KEY `payrolls_approved_by_foreign` (`approved_by`),
+    KEY `payrolls_batch_id_foreign` (`batch_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -917,17 +865,16 @@ SET @has_tbl_pinned_items = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_pinned_items = 0,
   'CREATE TABLE IF NOT EXISTS `pinned_items` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `label` varchar(255) NOT NULL,
-  `url` varchar(500) NOT NULL,
-  `sort_order` smallint(5) unsigned NOT NULL DEFAULT 0,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `pinned_items_user_id_url_unique` (`user_id`,`url`),
-  KEY `pinned_items_user_id_sort_order_index` (`user_id`,`sort_order`),
-  CONSTRAINT `pinned_items_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `label` varchar(255) NOT NULL,
+    `url` varchar(500) NOT NULL,
+    `sort_order` smallint(5) unsigned NOT NULL DEFAULT 0,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `pinned_items_user_id_url_unique` (`user_id`,`url`),
+    KEY `pinned_items_user_id_sort_order_index` (`user_id`,`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -937,17 +884,16 @@ SET @has_tbl_position_rates = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_position_rates = 0,
   'CREATE TABLE IF NOT EXISTS `position_rates` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `department_id` bigint(20) unsigned DEFAULT NULL,
-  `name` varchar(255) NOT NULL,
-  `daily_rate` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `position_rates_name_unique` (`name`),
-  KEY `position_rates_department_id_foreign` (`department_id`),
-  CONSTRAINT `position_rates_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `department_id` bigint(20) unsigned DEFAULT NULL,
+    `name` varchar(255) NOT NULL,
+    `daily_rate` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `is_active` tinyint(1) NOT NULL DEFAULT 1,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `position_rates_name_unique` (`name`),
+    KEY `position_rates_department_id_foreign` (`department_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -957,16 +903,16 @@ SET @has_tbl_routes = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_routes = 0,
   'CREATE TABLE IF NOT EXISTS `routes` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `route_name` varchar(255) NOT NULL,
-  `weekday_boundary` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `weekend_boundary` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `origin` varchar(255) NOT NULL,
-  `destination` varchar(255) NOT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'active\',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `route_name` varchar(255) NOT NULL,
+    `weekday_boundary` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `weekend_boundary` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `origin` varchar(255) NOT NULL,
+    `destination` varchar(255) NOT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'active\',
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -976,15 +922,15 @@ SET @has_tbl_sessions = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_sessions = 0,
   'CREATE TABLE IF NOT EXISTS `sessions` (
-  `id` varchar(255) NOT NULL,
-  `user_id` bigint(20) unsigned DEFAULT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
-  `user_agent` text DEFAULT NULL,
-  `payload` longtext NOT NULL,
-  `last_activity` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `sessions_user_id_index` (`user_id`),
-  KEY `sessions_last_activity_index` (`last_activity`)
+    `id` varchar(255) NOT NULL,
+    `user_id` bigint(20) unsigned DEFAULT NULL,
+    `ip_address` varchar(45) DEFAULT NULL,
+    `user_agent` text DEFAULT NULL,
+    `payload` longtext NOT NULL,
+    `last_activity` int(11) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `sessions_user_id_index` (`user_id`),
+    KEY `sessions_last_activity_index` (`last_activity`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -994,13 +940,13 @@ SET @has_tbl_settings = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_settings = 0,
   'CREATE TABLE IF NOT EXISTS `settings` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `key` varchar(255) NOT NULL,
-  `value` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `settings_key_unique` (`key`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `key` varchar(255) NOT NULL,
+    `value` text DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `settings_key_unique` (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -1010,17 +956,17 @@ SET @has_tbl_shifts = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_shifts = 0,
   'CREATE TABLE IF NOT EXISTS `shifts` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `start_time` time NOT NULL,
-  `end_time` time NOT NULL,
-  `break_start` time DEFAULT NULL,
-  `break_end` time DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `shifts_name_unique` (`name`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `start_time` time NOT NULL,
+    `end_time` time NOT NULL,
+    `break_start` time DEFAULT NULL,
+    `break_end` time DEFAULT NULL,
+    `is_active` tinyint(1) NOT NULL DEFAULT 1,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `shifts_name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -1030,17 +976,17 @@ SET @has_tbl_statutory_deductions = (SELECT COUNT(*) FROM information_schema.TAB
 
 SET @sql = IF(@has_tbl_statutory_deductions = 0,
   'CREATE TABLE IF NOT EXISTS `statutory_deductions` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `min_salary` decimal(12,2) DEFAULT NULL,
-  `max_salary` decimal(12,2) DEFAULT NULL,
-  `employee_share` decimal(12,2) DEFAULT NULL,
-  `employer_share` decimal(12,2) DEFAULT NULL,
-  `percentage_employee` decimal(5,2) DEFAULT NULL,
-  `percentage_employer` decimal(5,2) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `min_salary` decimal(12,2) DEFAULT NULL,
+    `max_salary` decimal(12,2) DEFAULT NULL,
+    `employee_share` decimal(12,2) DEFAULT NULL,
+    `employer_share` decimal(12,2) DEFAULT NULL,
+    `percentage_employee` decimal(5,2) DEFAULT NULL,
+    `percentage_employer` decimal(5,2) DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -1050,36 +996,32 @@ SET @has_tbl_thirteenth_month_pays = (SELECT COUNT(*) FROM information_schema.TA
 
 SET @sql = IF(@has_tbl_thirteenth_month_pays = 0,
   'CREATE TABLE IF NOT EXISTS `thirteenth_month_pays` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `batch_id` bigint(20) unsigned DEFAULT NULL,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `calendar_year` smallint(5) unsigned NOT NULL,
-  `total_basic_salary_earned` decimal(14,2) NOT NULL DEFAULT 0.00,
-  `thirteenth_month_pay` decimal(14,2) NOT NULL DEFAULT 0.00,
-  `months_worked` decimal(5,2) NOT NULL DEFAULT 0.00,
-  `is_eligible` tinyint(1) NOT NULL DEFAULT 1,
-  `amount_paid` decimal(14,2) NOT NULL DEFAULT 0.00,
-  `amount_remaining` decimal(14,2) NOT NULL DEFAULT 0.00,
-  `status` varchar(255) NOT NULL DEFAULT \'pending\',
-  `payment_date` date DEFAULT NULL,
-  `paid_by` bigint(20) unsigned DEFAULT NULL,
-  `notes` text DEFAULT NULL,
-  `computed_by` bigint(20) unsigned DEFAULT NULL,
-  `computed_at` timestamp NULL DEFAULT NULL,
-  `computation_breakdown` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`computation_breakdown`)),
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `thirteenth_month_pays_user_id_calendar_year_unique` (`user_id`,`calendar_year`),
-  KEY `thirteenth_month_pays_paid_by_foreign` (`paid_by`),
-  KEY `thirteenth_month_pays_computed_by_foreign` (`computed_by`),
-  KEY `thirteenth_month_pays_calendar_year_status_index` (`calendar_year`,`status`),
-  KEY `thirteenth_month_pays_batch_id_foreign` (`batch_id`),
-  CONSTRAINT `thirteenth_month_pays_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `payroll_batches` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `thirteenth_month_pays_computed_by_foreign` FOREIGN KEY (`computed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `thirteenth_month_pays_paid_by_foreign` FOREIGN KEY (`paid_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `thirteenth_month_pays_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `batch_id` bigint(20) unsigned DEFAULT NULL,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `calendar_year` smallint(5) unsigned NOT NULL,
+    `total_basic_salary_earned` decimal(14,2) NOT NULL DEFAULT 0.00,
+    `thirteenth_month_pay` decimal(14,2) NOT NULL DEFAULT 0.00,
+    `months_worked` decimal(5,2) NOT NULL DEFAULT 0.00,
+    `is_eligible` tinyint(1) NOT NULL DEFAULT 1,
+    `amount_paid` decimal(14,2) NOT NULL DEFAULT 0.00,
+    `amount_remaining` decimal(14,2) NOT NULL DEFAULT 0.00,
+    `status` varchar(255) NOT NULL DEFAULT \'pending\',
+    `payment_date` date DEFAULT NULL,
+    `paid_by` bigint(20) unsigned DEFAULT NULL,
+    `notes` text DEFAULT NULL,
+    `computed_by` bigint(20) unsigned DEFAULT NULL,
+    `computed_at` timestamp NULL DEFAULT NULL,
+    `computation_breakdown` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`computation_breakdown`)),
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    `deleted_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `thirteenth_month_pays_user_id_calendar_year_unique` (`user_id`,`calendar_year`),
+    KEY `thirteenth_month_pays_paid_by_foreign` (`paid_by`),
+    KEY `thirteenth_month_pays_computed_by_foreign` (`computed_by`),
+    KEY `thirteenth_month_pays_calendar_year_status_index` (`calendar_year`,`status`),
+    KEY `thirteenth_month_pays_batch_id_foreign` (`batch_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -1089,18 +1031,17 @@ SET @has_tbl_user_activities = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_user_activities = 0,
   'CREATE TABLE IF NOT EXISTS `user_activities` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `action` varchar(255) NOT NULL,
-  `subject_type` varchar(255) DEFAULT NULL,
-  `subject_id` bigint(20) unsigned DEFAULT NULL,
-  `subject_label` varchar(255) NOT NULL,
-  `url` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `user_activities_user_id_created_at_index` (`user_id`,`created_at`),
-  CONSTRAINT `user_activities_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) unsigned NOT NULL,
+    `action` varchar(255) NOT NULL,
+    `subject_type` varchar(255) DEFAULT NULL,
+    `subject_id` bigint(20) unsigned DEFAULT NULL,
+    `subject_label` varchar(255) NOT NULL,
+    `url` varchar(255) DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `user_activities_user_id_created_at_index` (`user_id`,`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -1110,57 +1051,56 @@ SET @has_tbl_users = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_users = 0,
   'CREATE TABLE IF NOT EXISTS `users` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `username` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `password_changed` tinyint(1) NOT NULL DEFAULT 0,
-  `role` varchar(255) NOT NULL DEFAULT \'employee\',
-  `profile_picture` varchar(255) DEFAULT NULL,
-  `remember_token` varchar(100) DEFAULT NULL,
-  `is_logged_in` tinyint(1) NOT NULL DEFAULT 0,
-  `first_name` varchar(255) DEFAULT NULL,
-  `middle_name` varchar(255) DEFAULT NULL,
-  `last_name` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `phone` varchar(255) DEFAULT NULL,
-  `address` text DEFAULT NULL,
-  `civil_status` varchar(255) DEFAULT NULL,
-  `gender` enum(\'male\',\'female\',\'prefer_not_to_say\') DEFAULT NULL,
-  `spouse_name` varchar(255) DEFAULT NULL,
-  `date_of_birth` date DEFAULT NULL,
-  `place_of_birth` varchar(255) DEFAULT NULL,
-  `educational_attainment` varchar(255) DEFAULT NULL,
-  `driver_license_number` varchar(255) DEFAULT NULL,
-  `driver_license_validity` date DEFAULT NULL,
-  `date_of_hire` date DEFAULT NULL,
-  `position` varchar(255) DEFAULT NULL,
-  `shift_id` bigint(20) unsigned DEFAULT NULL,
-  `department` varchar(255) DEFAULT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'active\',
-  `salary_rate` decimal(10,2) NOT NULL DEFAULT 0.00,
-  `work_days_per_week` tinyint(4) NOT NULL DEFAULT 5,
-  `bank_name` varchar(255) DEFAULT NULL,
-  `bank_account_number` varchar(255) DEFAULT NULL,
-  `schedule_type` varchar(255) DEFAULT NULL,
-  `has_sss` tinyint(1) NOT NULL DEFAULT 0,
-  `sss_number` varchar(255) DEFAULT NULL,
-  `tin_number` varchar(255) DEFAULT NULL,
-  `has_tin` tinyint(1) NOT NULL DEFAULT 0,
-  `pagibig_number` varchar(255) DEFAULT NULL,
-  `philhealth_number` varchar(255) DEFAULT NULL,
-  `has_pagibig` tinyint(1) NOT NULL DEFAULT 0,
-  `has_philhealth` tinyint(1) NOT NULL DEFAULT 0,
-  `signature_path` varchar(255) DEFAULT NULL,
-  `attachments` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`attachments`)),
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `last_login_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `users_username_unique` (`username`),
-  UNIQUE KEY `users_email_unique` (`email`),
-  KEY `users_shift_id_foreign` (`shift_id`),
-  CONSTRAINT `users_shift_id_foreign` FOREIGN KEY (`shift_id`) REFERENCES `shifts` (`id`) ON DELETE SET NULL
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `username` varchar(255) NOT NULL,
+    `password` varchar(255) NOT NULL,
+    `password_changed` tinyint(1) NOT NULL DEFAULT 0,
+    `role` varchar(255) NOT NULL DEFAULT \'employee\',
+    `profile_picture` varchar(255) DEFAULT NULL,
+    `remember_token` varchar(100) DEFAULT NULL,
+    `is_logged_in` tinyint(1) NOT NULL DEFAULT 0,
+    `first_name` varchar(255) DEFAULT NULL,
+    `middle_name` varchar(255) DEFAULT NULL,
+    `last_name` varchar(255) DEFAULT NULL,
+    `email` varchar(255) DEFAULT NULL,
+    `phone` varchar(255) DEFAULT NULL,
+    `address` text DEFAULT NULL,
+    `civil_status` varchar(255) DEFAULT NULL,
+    `gender` enum(\'male\',\'female\',\'prefer_not_to_say\') DEFAULT NULL,
+    `spouse_name` varchar(255) DEFAULT NULL,
+    `date_of_birth` date DEFAULT NULL,
+    `place_of_birth` varchar(255) DEFAULT NULL,
+    `educational_attainment` varchar(255) DEFAULT NULL,
+    `driver_license_number` varchar(255) DEFAULT NULL,
+    `driver_license_validity` date DEFAULT NULL,
+    `date_of_hire` date DEFAULT NULL,
+    `position` varchar(255) DEFAULT NULL,
+    `shift_id` bigint(20) unsigned DEFAULT NULL,
+    `department` varchar(255) DEFAULT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'active\',
+    `salary_rate` decimal(10,2) NOT NULL DEFAULT 0.00,
+    `work_days_per_week` tinyint(4) NOT NULL DEFAULT 5,
+    `bank_name` varchar(255) DEFAULT NULL,
+    `bank_account_number` varchar(255) DEFAULT NULL,
+    `schedule_type` varchar(255) DEFAULT NULL,
+    `has_sss` tinyint(1) NOT NULL DEFAULT 0,
+    `sss_number` varchar(255) DEFAULT NULL,
+    `tin_number` varchar(255) DEFAULT NULL,
+    `has_tin` tinyint(1) NOT NULL DEFAULT 0,
+    `pagibig_number` varchar(255) DEFAULT NULL,
+    `philhealth_number` varchar(255) DEFAULT NULL,
+    `has_pagibig` tinyint(1) NOT NULL DEFAULT 0,
+    `has_philhealth` tinyint(1) NOT NULL DEFAULT 0,
+    `signature_path` varchar(255) DEFAULT NULL,
+    `attachments` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`attachments`)),
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    `last_login_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `users_username_unique` (`username`),
+    UNIQUE KEY `users_email_unique` (`email`),
+    KEY `users_shift_id_foreign` (`shift_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -1170,17 +1110,16 @@ SET @has_tbl_vehicles = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_vehicles = 0,
   'CREATE TABLE IF NOT EXISTS `vehicles` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `plate_number` varchar(255) NOT NULL,
-  `route_id` bigint(20) unsigned NOT NULL,
-  `operator` varchar(255) NOT NULL,
-  `status` varchar(255) NOT NULL DEFAULT \'active\',
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `vehicles_plate_number_unique` (`plate_number`),
-  KEY `vehicles_route_id_foreign` (`route_id`),
-  CONSTRAINT `vehicles_route_id_foreign` FOREIGN KEY (`route_id`) REFERENCES `routes` (`id`) ON DELETE CASCADE
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `plate_number` varchar(255) NOT NULL,
+    `route_id` bigint(20) unsigned NOT NULL,
+    `operator` varchar(255) NOT NULL,
+    `status` varchar(255) NOT NULL DEFAULT \'active\',
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `vehicles_plate_number_unique` (`plate_number`),
+    KEY `vehicles_route_id_foreign` (`route_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -1190,16 +1129,16 @@ SET @has_tbl_withholding_taxes = (SELECT COUNT(*) FROM information_schema.TABLES
 
 SET @sql = IF(@has_tbl_withholding_taxes = 0,
   'CREATE TABLE IF NOT EXISTS `withholding_taxes` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `min_salary` decimal(12,2) DEFAULT NULL,
-  `max_salary` decimal(12,2) DEFAULT NULL,
-  `employee_share` decimal(12,2) DEFAULT NULL,
-  `percentage_employee` decimal(5,2) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `min_salary` decimal(12,2) DEFAULT NULL,
+    `max_salary` decimal(12,2) DEFAULT NULL,
+    `employee_share` decimal(12,2) DEFAULT NULL,
+    `percentage_employee` decimal(5,2) DEFAULT NULL,
+    `description` text DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
@@ -5495,3 +5434,567 @@ SET @sql = IF(@has_withholding_taxes_updated_at = 0,
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- 536 columns checked.
+-- 3. Add any foreign key that is missing ---------------------------------
+-- Done last, because a foreign key needs both tables and the primary key
+-- on the table it points at to already exist.
+--
+SET @has_fk_account_mappings_account_mappings_account_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'account_mappings' AND CONSTRAINT_NAME = 'account_mappings_account_id_foreign');
+
+SET @sql = IF(@has_fk_account_mappings_account_mappings_account_id_foreign = 0,
+  'ALTER TABLE `account_mappings` ADD CONSTRAINT `account_mappings_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `chart_of_accounts` (`id`)',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_accounting_audit_logs_accounting_audit_logs_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'accounting_audit_logs' AND CONSTRAINT_NAME = 'accounting_audit_logs_user_id_foreign');
+
+SET @sql = IF(@has_fk_accounting_audit_logs_accounting_audit_logs_user_id_foreign = 0,
+  'ALTER TABLE `accounting_audit_logs` ADD CONSTRAINT `accounting_audit_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_allowances_allowances_payroll_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'allowances' AND CONSTRAINT_NAME = 'allowances_payroll_id_foreign');
+
+SET @sql = IF(@has_fk_allowances_allowances_payroll_id_foreign = 0,
+  'ALTER TABLE `allowances` ADD CONSTRAINT `allowances_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_allowances_allowances_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'allowances' AND CONSTRAINT_NAME = 'allowances_user_id_foreign');
+
+SET @sql = IF(@has_fk_allowances_allowances_user_id_foreign = 0,
+  'ALTER TABLE `allowances` ADD CONSTRAINT `allowances_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_attendance_attendance_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'attendance' AND CONSTRAINT_NAME = 'attendance_user_id_foreign');
+
+SET @sql = IF(@has_fk_attendance_attendance_user_id_foreign = 0,
+  'ALTER TABLE `attendance` ADD CONSTRAINT `attendance_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_attendance_logs_attendance_logs_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'attendance_logs' AND CONSTRAINT_NAME = 'attendance_logs_user_id_foreign');
+
+SET @sql = IF(@has_fk_attendance_logs_attendance_logs_user_id_foreign = 0,
+  'ALTER TABLE `attendance_logs` ADD CONSTRAINT `attendance_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_attendance_tokens_attendance_tokens_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'attendance_tokens' AND CONSTRAINT_NAME = 'attendance_tokens_user_id_foreign');
+
+SET @sql = IF(@has_fk_attendance_tokens_attendance_tokens_user_id_foreign = 0,
+  'ALTER TABLE `attendance_tokens` ADD CONSTRAINT `attendance_tokens_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_bonus_employee_bonus_employee_bonus_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'bonus_employee' AND CONSTRAINT_NAME = 'bonus_employee_bonus_id_foreign');
+
+SET @sql = IF(@has_fk_bonus_employee_bonus_employee_bonus_id_foreign = 0,
+  'ALTER TABLE `bonus_employee` ADD CONSTRAINT `bonus_employee_bonus_id_foreign` FOREIGN KEY (`bonus_id`) REFERENCES `bonuses` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_bonus_employee_bonus_employee_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'bonus_employee' AND CONSTRAINT_NAME = 'bonus_employee_user_id_foreign');
+
+SET @sql = IF(@has_fk_bonus_employee_bonus_employee_user_id_foreign = 0,
+  'ALTER TABLE `bonus_employee` ADD CONSTRAINT `bonus_employee_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_bonuses_bonuses_created_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'bonuses' AND CONSTRAINT_NAME = 'bonuses_created_by_foreign');
+
+SET @sql = IF(@has_fk_bonuses_bonuses_created_by_foreign = 0,
+  'ALTER TABLE `bonuses` ADD CONSTRAINT `bonuses_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_boundary_payments_boundary_payments_approved_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'boundary_payments' AND CONSTRAINT_NAME = 'boundary_payments_approved_by_foreign');
+
+SET @sql = IF(@has_fk_boundary_payments_boundary_payments_approved_by_foreign = 0,
+  'ALTER TABLE `boundary_payments` ADD CONSTRAINT `boundary_payments_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`)',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_boundary_payments_boundary_payments_daily_remittance_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'boundary_payments' AND CONSTRAINT_NAME = 'boundary_payments_daily_remittance_id_foreign');
+
+SET @sql = IF(@has_fk_boundary_payments_boundary_payments_daily_remittance_id_foreign = 0,
+  'ALTER TABLE `boundary_payments` ADD CONSTRAINT `boundary_payments_daily_remittance_id_foreign` FOREIGN KEY (`daily_remittance_id`) REFERENCES `daily_remittances` (`id`)',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_boundary_payments_boundary_payments_initial_payment_remittance_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'boundary_payments' AND CONSTRAINT_NAME = 'boundary_payments_initial_payment_remittance_id_foreign');
+
+SET @sql = IF(@has_fk_boundary_payments_boundary_payments_initial_payment_remittance_id_foreign = 0,
+  'ALTER TABLE `boundary_payments` ADD CONSTRAINT `boundary_payments_initial_payment_remittance_id_foreign` FOREIGN KEY (`initial_payment_remittance_id`) REFERENCES `daily_remittances` (`id`)',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_boundary_payments_boundary_payments_journal_entry_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'boundary_payments' AND CONSTRAINT_NAME = 'boundary_payments_journal_entry_id_foreign');
+
+SET @sql = IF(@has_fk_boundary_payments_boundary_payments_journal_entry_id_foreign = 0,
+  'ALTER TABLE `boundary_payments` ADD CONSTRAINT `boundary_payments_journal_entry_id_foreign` FOREIGN KEY (`journal_entry_id`) REFERENCES `journal_entries` (`id`)',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_boundary_payments_boundary_payments_recorded_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'boundary_payments' AND CONSTRAINT_NAME = 'boundary_payments_recorded_by_foreign');
+
+SET @sql = IF(@has_fk_boundary_payments_boundary_payments_recorded_by_foreign = 0,
+  'ALTER TABLE `boundary_payments` ADD CONSTRAINT `boundary_payments_recorded_by_foreign` FOREIGN KEY (`recorded_by`) REFERENCES `users` (`id`)',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_cash_advances_cash_advances_approved_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'cash_advances' AND CONSTRAINT_NAME = 'cash_advances_approved_by_foreign');
+
+SET @sql = IF(@has_fk_cash_advances_cash_advances_approved_by_foreign = 0,
+  'ALTER TABLE `cash_advances` ADD CONSTRAINT `cash_advances_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_cash_advances_cash_advances_deducted_payroll_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'cash_advances' AND CONSTRAINT_NAME = 'cash_advances_deducted_payroll_id_foreign');
+
+SET @sql = IF(@has_fk_cash_advances_cash_advances_deducted_payroll_id_foreign = 0,
+  'ALTER TABLE `cash_advances` ADD CONSTRAINT `cash_advances_deducted_payroll_id_foreign` FOREIGN KEY (`deducted_payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_cash_advances_cash_advances_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'cash_advances' AND CONSTRAINT_NAME = 'cash_advances_user_id_foreign');
+
+SET @sql = IF(@has_fk_cash_advances_cash_advances_user_id_foreign = 0,
+  'ALTER TABLE `cash_advances` ADD CONSTRAINT `cash_advances_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_chart_of_accounts_chart_of_accounts_created_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'chart_of_accounts' AND CONSTRAINT_NAME = 'chart_of_accounts_created_by_foreign');
+
+SET @sql = IF(@has_fk_chart_of_accounts_chart_of_accounts_created_by_foreign = 0,
+  'ALTER TABLE `chart_of_accounts` ADD CONSTRAINT `chart_of_accounts_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_daily_remittances_daily_remittances_driver_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'daily_remittances' AND CONSTRAINT_NAME = 'daily_remittances_driver_id_foreign');
+
+SET @sql = IF(@has_fk_daily_remittances_daily_remittances_driver_id_foreign = 0,
+  'ALTER TABLE `daily_remittances` ADD CONSTRAINT `daily_remittances_driver_id_foreign` FOREIGN KEY (`driver_id`) REFERENCES `drivers` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_daily_remittances_daily_remittances_pao_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'daily_remittances' AND CONSTRAINT_NAME = 'daily_remittances_pao_id_foreign');
+
+SET @sql = IF(@has_fk_daily_remittances_daily_remittances_pao_id_foreign = 0,
+  'ALTER TABLE `daily_remittances` ADD CONSTRAINT `daily_remittances_pao_id_foreign` FOREIGN KEY (`pao_id`) REFERENCES `paos` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_daily_remittances_daily_remittances_route_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'daily_remittances' AND CONSTRAINT_NAME = 'daily_remittances_route_id_foreign');
+
+SET @sql = IF(@has_fk_daily_remittances_daily_remittances_route_id_foreign = 0,
+  'ALTER TABLE `daily_remittances` ADD CONSTRAINT `daily_remittances_route_id_foreign` FOREIGN KEY (`route_id`) REFERENCES `routes` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_daily_remittances_daily_remittances_vehicle_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'daily_remittances' AND CONSTRAINT_NAME = 'daily_remittances_vehicle_id_foreign');
+
+SET @sql = IF(@has_fk_daily_remittances_daily_remittances_vehicle_id_foreign = 0,
+  'ALTER TABLE `daily_remittances` ADD CONSTRAINT `daily_remittances_vehicle_id_foreign` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_deductions_deductions_payroll_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'deductions' AND CONSTRAINT_NAME = 'deductions_payroll_id_foreign');
+
+SET @sql = IF(@has_fk_deductions_deductions_payroll_id_foreign = 0,
+  'ALTER TABLE `deductions` ADD CONSTRAINT `deductions_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_deductions_deductions_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'deductions' AND CONSTRAINT_NAME = 'deductions_user_id_foreign');
+
+SET @sql = IF(@has_fk_deductions_deductions_user_id_foreign = 0,
+  'ALTER TABLE `deductions` ADD CONSTRAINT `deductions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_employee_attachments_employee_attachments_reviewed_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_attachments' AND CONSTRAINT_NAME = 'employee_attachments_reviewed_by_foreign');
+
+SET @sql = IF(@has_fk_employee_attachments_employee_attachments_reviewed_by_foreign = 0,
+  'ALTER TABLE `employee_attachments` ADD CONSTRAINT `employee_attachments_reviewed_by_foreign` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_employee_attachments_employee_attachments_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_attachments' AND CONSTRAINT_NAME = 'employee_attachments_user_id_foreign');
+
+SET @sql = IF(@has_fk_employee_attachments_employee_attachments_user_id_foreign = 0,
+  'ALTER TABLE `employee_attachments` ADD CONSTRAINT `employee_attachments_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_employee_beneficiaries_employee_beneficiaries_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_beneficiaries' AND CONSTRAINT_NAME = 'employee_beneficiaries_user_id_foreign');
+
+SET @sql = IF(@has_fk_employee_beneficiaries_employee_beneficiaries_user_id_foreign = 0,
+  'ALTER TABLE `employee_beneficiaries` ADD CONSTRAINT `employee_beneficiaries_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_employee_experiences_employee_experiences_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_experiences' AND CONSTRAINT_NAME = 'employee_experiences_user_id_foreign');
+
+SET @sql = IF(@has_fk_employee_experiences_employee_experiences_user_id_foreign = 0,
+  'ALTER TABLE `employee_experiences` ADD CONSTRAINT `employee_experiences_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_employee_leave_balances_employee_leave_balances_leave_type_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_leave_balances' AND CONSTRAINT_NAME = 'employee_leave_balances_leave_type_id_foreign');
+
+SET @sql = IF(@has_fk_employee_leave_balances_employee_leave_balances_leave_type_id_foreign = 0,
+  'ALTER TABLE `employee_leave_balances` ADD CONSTRAINT `employee_leave_balances_leave_type_id_foreign` FOREIGN KEY (`leave_type_id`) REFERENCES `leave_types` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_employee_leave_balances_employee_leave_balances_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_leave_balances' AND CONSTRAINT_NAME = 'employee_leave_balances_user_id_foreign');
+
+SET @sql = IF(@has_fk_employee_leave_balances_employee_leave_balances_user_id_foreign = 0,
+  'ALTER TABLE `employee_leave_balances` ADD CONSTRAINT `employee_leave_balances_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_employee_references_employee_references_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_references' AND CONSTRAINT_NAME = 'employee_references_user_id_foreign');
+
+SET @sql = IF(@has_fk_employee_references_employee_references_user_id_foreign = 0,
+  'ALTER TABLE `employee_references` ADD CONSTRAINT `employee_references_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_employee_skills_employee_skills_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'employee_skills' AND CONSTRAINT_NAME = 'employee_skills_user_id_foreign');
+
+SET @sql = IF(@has_fk_employee_skills_employee_skills_user_id_foreign = 0,
+  'ALTER TABLE `employee_skills` ADD CONSTRAINT `employee_skills_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_journal_entries_journal_entries_created_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'journal_entries' AND CONSTRAINT_NAME = 'journal_entries_created_by_foreign');
+
+SET @sql = IF(@has_fk_journal_entries_journal_entries_created_by_foreign = 0,
+  'ALTER TABLE `journal_entries` ADD CONSTRAINT `journal_entries_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_journal_entries_journal_entries_posted_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'journal_entries' AND CONSTRAINT_NAME = 'journal_entries_posted_by_foreign');
+
+SET @sql = IF(@has_fk_journal_entries_journal_entries_posted_by_foreign = 0,
+  'ALTER TABLE `journal_entries` ADD CONSTRAINT `journal_entries_posted_by_foreign` FOREIGN KEY (`posted_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_journal_entry_lines_journal_entry_lines_account_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'journal_entry_lines' AND CONSTRAINT_NAME = 'journal_entry_lines_account_id_foreign');
+
+SET @sql = IF(@has_fk_journal_entry_lines_journal_entry_lines_account_id_foreign = 0,
+  'ALTER TABLE `journal_entry_lines` ADD CONSTRAINT `journal_entry_lines_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `chart_of_accounts` (`id`)',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_journal_entry_lines_journal_entry_lines_journal_entry_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'journal_entry_lines' AND CONSTRAINT_NAME = 'journal_entry_lines_journal_entry_id_foreign');
+
+SET @sql = IF(@has_fk_journal_entry_lines_journal_entry_lines_journal_entry_id_foreign = 0,
+  'ALTER TABLE `journal_entry_lines` ADD CONSTRAINT `journal_entry_lines_journal_entry_id_foreign` FOREIGN KEY (`journal_entry_id`) REFERENCES `journal_entries` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_leaves_leaves_approved_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'leaves' AND CONSTRAINT_NAME = 'leaves_approved_by_foreign');
+
+SET @sql = IF(@has_fk_leaves_leaves_approved_by_foreign = 0,
+  'ALTER TABLE `leaves` ADD CONSTRAINT `leaves_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_leaves_leaves_leave_type_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'leaves' AND CONSTRAINT_NAME = 'leaves_leave_type_id_foreign');
+
+SET @sql = IF(@has_fk_leaves_leaves_leave_type_id_foreign = 0,
+  'ALTER TABLE `leaves` ADD CONSTRAINT `leaves_leave_type_id_foreign` FOREIGN KEY (`leave_type_id`) REFERENCES `leave_types` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_leaves_leaves_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'leaves' AND CONSTRAINT_NAME = 'leaves_user_id_foreign');
+
+SET @sql = IF(@has_fk_leaves_leaves_user_id_foreign = 0,
+  'ALTER TABLE `leaves` ADD CONSTRAINT `leaves_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_notifications_notifications_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'notifications' AND CONSTRAINT_NAME = 'notifications_user_id_foreign');
+
+SET @sql = IF(@has_fk_notifications_notifications_user_id_foreign = 0,
+  'ALTER TABLE `notifications` ADD CONSTRAINT `notifications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_overtime_undertimes_overtime_undertimes_approved_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'overtime_undertimes' AND CONSTRAINT_NAME = 'overtime_undertimes_approved_by_foreign');
+
+SET @sql = IF(@has_fk_overtime_undertimes_overtime_undertimes_approved_by_foreign = 0,
+  'ALTER TABLE `overtime_undertimes` ADD CONSTRAINT `overtime_undertimes_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_overtime_undertimes_overtime_undertimes_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'overtime_undertimes' AND CONSTRAINT_NAME = 'overtime_undertimes_user_id_foreign');
+
+SET @sql = IF(@has_fk_overtime_undertimes_overtime_undertimes_user_id_foreign = 0,
+  'ALTER TABLE `overtime_undertimes` ADD CONSTRAINT `overtime_undertimes_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payroll_allowances_payroll_allowances_payroll_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payroll_allowances' AND CONSTRAINT_NAME = 'payroll_allowances_payroll_id_foreign');
+
+SET @sql = IF(@has_fk_payroll_allowances_payroll_allowances_payroll_id_foreign = 0,
+  'ALTER TABLE `payroll_allowances` ADD CONSTRAINT `payroll_allowances_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payroll_batches_payroll_batches_approved_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payroll_batches' AND CONSTRAINT_NAME = 'payroll_batches_approved_by_foreign');
+
+SET @sql = IF(@has_fk_payroll_batches_payroll_batches_approved_by_foreign = 0,
+  'ALTER TABLE `payroll_batches` ADD CONSTRAINT `payroll_batches_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payroll_batches_payroll_batches_finalized_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payroll_batches' AND CONSTRAINT_NAME = 'payroll_batches_finalized_by_foreign');
+
+SET @sql = IF(@has_fk_payroll_batches_payroll_batches_finalized_by_foreign = 0,
+  'ALTER TABLE `payroll_batches` ADD CONSTRAINT `payroll_batches_finalized_by_foreign` FOREIGN KEY (`finalized_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payroll_batches_payroll_batches_generated_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payroll_batches' AND CONSTRAINT_NAME = 'payroll_batches_generated_by_foreign');
+
+SET @sql = IF(@has_fk_payroll_batches_payroll_batches_generated_by_foreign = 0,
+  'ALTER TABLE `payroll_batches` ADD CONSTRAINT `payroll_batches_generated_by_foreign` FOREIGN KEY (`generated_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payroll_batches_payroll_batches_rejected_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payroll_batches' AND CONSTRAINT_NAME = 'payroll_batches_rejected_by_foreign');
+
+SET @sql = IF(@has_fk_payroll_batches_payroll_batches_rejected_by_foreign = 0,
+  'ALTER TABLE `payroll_batches` ADD CONSTRAINT `payroll_batches_rejected_by_foreign` FOREIGN KEY (`rejected_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payroll_bonuses_payroll_bonuses_payroll_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payroll_bonuses' AND CONSTRAINT_NAME = 'payroll_bonuses_payroll_id_foreign');
+
+SET @sql = IF(@has_fk_payroll_bonuses_payroll_bonuses_payroll_id_foreign = 0,
+  'ALTER TABLE `payroll_bonuses` ADD CONSTRAINT `payroll_bonuses_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payroll_deductions_payroll_deductions_payroll_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payroll_deductions' AND CONSTRAINT_NAME = 'payroll_deductions_payroll_id_foreign');
+
+SET @sql = IF(@has_fk_payroll_deductions_payroll_deductions_payroll_id_foreign = 0,
+  'ALTER TABLE `payroll_deductions` ADD CONSTRAINT `payroll_deductions_payroll_id_foreign` FOREIGN KEY (`payroll_id`) REFERENCES `payrolls` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payrolls_payrolls_approved_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payrolls' AND CONSTRAINT_NAME = 'payrolls_approved_by_foreign');
+
+SET @sql = IF(@has_fk_payrolls_payrolls_approved_by_foreign = 0,
+  'ALTER TABLE `payrolls` ADD CONSTRAINT `payrolls_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payrolls_payrolls_batch_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payrolls' AND CONSTRAINT_NAME = 'payrolls_batch_id_foreign');
+
+SET @sql = IF(@has_fk_payrolls_payrolls_batch_id_foreign = 0,
+  'ALTER TABLE `payrolls` ADD CONSTRAINT `payrolls_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `payroll_batches` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_payrolls_payrolls_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'payrolls' AND CONSTRAINT_NAME = 'payrolls_user_id_foreign');
+
+SET @sql = IF(@has_fk_payrolls_payrolls_user_id_foreign = 0,
+  'ALTER TABLE `payrolls` ADD CONSTRAINT `payrolls_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_pinned_items_pinned_items_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'pinned_items' AND CONSTRAINT_NAME = 'pinned_items_user_id_foreign');
+
+SET @sql = IF(@has_fk_pinned_items_pinned_items_user_id_foreign = 0,
+  'ALTER TABLE `pinned_items` ADD CONSTRAINT `pinned_items_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_position_rates_position_rates_department_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'position_rates' AND CONSTRAINT_NAME = 'position_rates_department_id_foreign');
+
+SET @sql = IF(@has_fk_position_rates_position_rates_department_id_foreign = 0,
+  'ALTER TABLE `position_rates` ADD CONSTRAINT `position_rates_department_id_foreign` FOREIGN KEY (`department_id`) REFERENCES `departments` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_thirteenth_month_pays_thirteenth_month_pays_batch_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'thirteenth_month_pays' AND CONSTRAINT_NAME = 'thirteenth_month_pays_batch_id_foreign');
+
+SET @sql = IF(@has_fk_thirteenth_month_pays_thirteenth_month_pays_batch_id_foreign = 0,
+  'ALTER TABLE `thirteenth_month_pays` ADD CONSTRAINT `thirteenth_month_pays_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `payroll_batches` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_thirteenth_month_pays_thirteenth_month_pays_computed_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'thirteenth_month_pays' AND CONSTRAINT_NAME = 'thirteenth_month_pays_computed_by_foreign');
+
+SET @sql = IF(@has_fk_thirteenth_month_pays_thirteenth_month_pays_computed_by_foreign = 0,
+  'ALTER TABLE `thirteenth_month_pays` ADD CONSTRAINT `thirteenth_month_pays_computed_by_foreign` FOREIGN KEY (`computed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_thirteenth_month_pays_thirteenth_month_pays_paid_by_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'thirteenth_month_pays' AND CONSTRAINT_NAME = 'thirteenth_month_pays_paid_by_foreign');
+
+SET @sql = IF(@has_fk_thirteenth_month_pays_thirteenth_month_pays_paid_by_foreign = 0,
+  'ALTER TABLE `thirteenth_month_pays` ADD CONSTRAINT `thirteenth_month_pays_paid_by_foreign` FOREIGN KEY (`paid_by`) REFERENCES `users` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_thirteenth_month_pays_thirteenth_month_pays_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'thirteenth_month_pays' AND CONSTRAINT_NAME = 'thirteenth_month_pays_user_id_foreign');
+
+SET @sql = IF(@has_fk_thirteenth_month_pays_thirteenth_month_pays_user_id_foreign = 0,
+  'ALTER TABLE `thirteenth_month_pays` ADD CONSTRAINT `thirteenth_month_pays_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_user_activities_user_activities_user_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'user_activities' AND CONSTRAINT_NAME = 'user_activities_user_id_foreign');
+
+SET @sql = IF(@has_fk_user_activities_user_activities_user_id_foreign = 0,
+  'ALTER TABLE `user_activities` ADD CONSTRAINT `user_activities_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_users_users_shift_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND CONSTRAINT_NAME = 'users_shift_id_foreign');
+
+SET @sql = IF(@has_fk_users_users_shift_id_foreign = 0,
+  'ALTER TABLE `users` ADD CONSTRAINT `users_shift_id_foreign` FOREIGN KEY (`shift_id`) REFERENCES `shifts` (`id`) ON DELETE SET NULL',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_fk_vehicles_vehicles_route_id_foreign = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
+  WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'vehicles' AND CONSTRAINT_NAME = 'vehicles_route_id_foreign');
+
+SET @sql = IF(@has_fk_vehicles_vehicles_route_id_foreign = 0,
+  'ALTER TABLE `vehicles` ADD CONSTRAINT `vehicles_route_id_foreign` FOREIGN KEY (`route_id`) REFERENCES `routes` (`id`) ON DELETE CASCADE',
+  'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- 62 foreign keys checked.
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- 4. Payroll accounting fix ----------------------------------------------
+UPDATE `chart_of_accounts`
+SET `is_contra` = 1,
+    `description` = 'Contra-expense for valid employee wage reductions; do not use for statutory withholdings or employee receivable recoveries.',
+    `updated_at` = NOW()
+WHERE `account_code` = '5060';
+
+INSERT INTO `chart_of_accounts`
+    (`account_code`, `account_name`, `account_type`, `description`, `is_active`, `created_at`, `updated_at`)
+SELECT '2070', 'Other Payroll Deductions Payable', 'Liability',
+       'Employee payroll deductions withheld for remittance to third parties',
+       1, NOW(), NOW()
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM `chart_of_accounts` WHERE `account_code` = '2070');
+
+INSERT IGNORE INTO `account_mappings` (`mapping_key`, `label`, `account_id`, `created_at`, `updated_at`)
+SELECT 'payroll_deductions', 'Payroll Deductions', `id`, NOW(), NOW()
+FROM `chart_of_accounts`
+WHERE `account_code` = '5060';
+
+INSERT IGNORE INTO `account_mappings` (`mapping_key`, `label`, `account_id`, `created_at`, `updated_at`)
+SELECT 'employee_receivable', 'Employee Receivable', `id`, NOW(), NOW()
+FROM `chart_of_accounts`
+WHERE `account_code` = '1030';
+
+INSERT IGNORE INTO `account_mappings` (`mapping_key`, `label`, `account_id`, `created_at`, `updated_at`)
+SELECT 'other_payroll_deductions_payable', 'Other Payroll Deductions Payable', `id`, NOW(), NOW()
+FROM `chart_of_accounts`
+WHERE `account_code` = '2070';
+
+INSERT IGNORE INTO `account_mappings` (`mapping_key`, `label`, `account_id`, `created_at`, `updated_at`)
+SELECT 'employer_contributions_expense', 'Employer Government Contributions Expense', `id`, NOW(), NOW()
+FROM `chart_of_accounts`
+WHERE `account_code` = '5050';
+
+-- 5. Verify --------------------------------------------------------------
+-- Every primary_key value here must say has PK.
+
+SELECT t.table_name,
+       IF(EXISTS (
+           SELECT 1 FROM information_schema.TABLE_CONSTRAINTS c
+           WHERE c.CONSTRAINT_SCHEMA = DATABASE()
+             AND c.TABLE_NAME = t.table_name
+             AND c.CONSTRAINT_TYPE = 'PRIMARY KEY'
+       ), 'has PK', 'STILL BROKEN') AS primary_key
+FROM information_schema.TABLES t
+WHERE t.TABLE_SCHEMA = DATABASE()
+  AND t.table_name IN ('users','payrolls','notifications','accounting_audit_logs','thirteenth_month_pays')
+ORDER BY t.table_name;
+
+-- Row counts. Everything must match what you had before.
+SELECT 'users' AS tbl, COUNT(*) AS rows_now FROM `users`
+UNION ALL SELECT 'drivers',           COUNT(*) FROM `drivers`
+UNION ALL SELECT 'paos',              COUNT(*) FROM `paos`
+UNION ALL SELECT 'routes',            COUNT(*) FROM `routes`
+UNION ALL SELECT 'vehicles',          COUNT(*) FROM `vehicles`
+UNION ALL SELECT 'payrolls',          COUNT(*) FROM `payrolls`
+UNION ALL SELECT 'attendance',        COUNT(*) FROM `attendance`
+UNION ALL SELECT 'daily_remittances', COUNT(*) FROM `daily_remittances`
+UNION ALL SELECT 'notifications',     COUNT(*) FROM `notifications`
+UNION ALL SELECT 'chart_of_accounts', COUNT(*) FROM `chart_of_accounts`;
