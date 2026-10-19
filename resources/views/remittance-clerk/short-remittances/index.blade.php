@@ -11,7 +11,7 @@
 <div class="flex items-start justify-between flex-wrap gap-4 mb-6 fade-up">
     <div>
         <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Short Remittances</h1>
-        <p class="text-sm text-gray-500 mt-0.5">Track remaining boundary shortages. Accountants record and verify actual payments.</p>
+        <p class="text-sm text-gray-500 mt-0.5">Track remaining boundary shortages. Remittance clerks record payments for accountant approval.</p>
     </div>
 </div>
 

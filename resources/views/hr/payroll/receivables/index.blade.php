@@ -22,8 +22,8 @@
     {{-- Header --}}
     <div class="fade-up flex items-start justify-between gap-4 flex-wrap">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Payroll Receivables</h1>
-            <p class="text-sm text-gray-400 mt-0.5">Manage cash advances</p>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Receivables</h1>
+            <p class="text-sm text-gray-400 mt-0.5">Manage cash advances and short-remittance balances</p>
         </div>
     </div>
 
@@ -51,10 +51,18 @@
     <div class="border-b border-gray-200" style="animation:fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) 0.05s both;">
         <nav class="flex gap-1 -mb-px" role="tablist">
             <button role="tab" data-tab="cash_advances"
-               class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group border-blue-500 text-blue-700 bg-blue-50/60">
+               class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group {{ $tab === 'short_remittances' ? 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' : 'border-blue-500 text-blue-700 bg-blue-50/60' }}">
                 <span class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg>
                     Cash Advances
+                </span>
+            </button>
+            <button role="tab" data-tab="short_remittances"
+               class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group {{ $tab === 'short_remittances' ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 {{ $tab === 'short_remittances' ? 'text-emerald-500' : 'text-gray-400' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Short Remittances
+                    <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'short_remittances' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600' }}">{{ $shortRemittances->count() }}</span>
                 </span>
             </button>
             {{--
@@ -127,7 +135,7 @@
     {{-- ══════════════════════════════════════════
          CASH ADVANCES TAB
     ══════════════════════════════════════════ --}}
-    <div id="tab-cash_advances" class="tab-panel {{ $tab === 'salary_loans' ? 'hidden' : '' }} active-panel">
+    <div id="tab-cash_advances" class="tab-panel {{ $tab === 'short_remittances' ? 'hidden' : '' }} {{ $tab === 'short_remittances' ? '' : 'active-panel' }}">
 
     {{-- Filter bar --}}
     <div class="filter-bar flex items-center gap-3 flex-wrap mb-3">
@@ -180,7 +188,36 @@
     </div>
     </div>
 
-    <!-- Salary loans are temporarily disabled in this view. -->
+    <div id="tab-short_remittances" class="tab-panel {{ $tab === 'short_remittances' ? 'active-panel' : 'hidden' }}">
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>
+                            <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Driver / PAO</th>
+                            <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Remittance status</th>
+                            <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Shortage balance</th>
+                            <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Awaiting approval</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @forelse($shortRemittances as $shortRemittance)
+                            <tr>
+                                <td class="px-5 py-3 text-xs text-gray-600">{{ $shortRemittance->remittance_date?->format('M d, Y') }}</td>
+                                <td class="px-5 py-3 text-xs font-semibold text-gray-800">{{ $shortRemittance->driver?->name ?? '—' }} / {{ $shortRemittance->pao?->name ?? '—' }}</td>
+                                <td class="px-5 py-3 text-xs capitalize text-gray-600">{{ $shortRemittance->status }}</td>
+                                <td class="px-5 py-3 text-right font-mono text-xs font-semibold text-red-600">₱{{ number_format($shortRemittance->short_amount ?? 0, 2) }}</td>
+                                <td class="px-5 py-3 text-right font-mono text-xs text-amber-700">₱{{ number_format($shortRemittance->boundaryPayments->where('status', 'Pending')->sum('amount'), 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="px-5 py-8 text-center text-sm text-gray-400">No short remittances to display.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -243,6 +280,7 @@ window.allSalaryLoans = [];
     var panels  = document.querySelectorAll('.tab-panel');
     var tabStyles = {
         cash_advances: { border: 'border-blue-500', text: 'text-blue-700', bg: 'bg-blue-50/60', icon: 'text-blue-500' },
+        short_remittances: { border: 'border-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50/60', icon: 'text-emerald-500' },
     };
     var inactiveBtn = ['border-transparent', 'text-gray-400', 'hover:text-gray-600', 'hover:border-gray-300', 'hover:bg-gray-50/50'];
     var inactiveSvg = ['text-gray-400', 'group-hover:text-gray-500'];

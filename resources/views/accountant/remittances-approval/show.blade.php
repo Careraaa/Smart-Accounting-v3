@@ -22,8 +22,6 @@ $vehicle = $remittance->vehicle;
 $boundaryRemaining = $remittance->short_amount !== null
     ? max(round((float) $remittance->short_amount, 2), 0)
     : max(round((float) $remittance->boundary - (float) $remittance->net_remittance, 2), 0);
-$driverShareRemaining = max(round((float) $remittance->driver_share - (float) $remittance->driver_amount_paid, 2), 0);
-$paoShareRemaining = max(round((float) $remittance->pao_share - (float) $remittance->pao_amount_paid, 2), 0);
 $initialPaymentAmount = min(
     max(round((float) $remittance->net_remittance, 2), 0),
     max(round((float) $remittance->boundary, 2), 0)
@@ -165,7 +163,7 @@ $statusInfo = match($remittance->status) {
 <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
     <div class="px-5 py-3.5 border-b border-gray-50">
         <span class="text-xs font-bold text-gray-700">Boundary Payments</span>
-        <p class="text-[10px] text-gray-400 mt-1">Only confirmed amounts received are posted. No receipt is required.</p>
+        <p class="text-[10px] text-gray-400 mt-1">Clerk-recorded payments stay pending until you approve them. Approval posts each payment once. No receipt is required.</p>
     </div>
     @if($remittance->boundaryPayments->isNotEmpty())
         <div class="overflow-x-auto">
@@ -176,7 +174,8 @@ $statusInfo = match($remittance->status) {
                         <th class="px-5 py-3">Payment date / shortage share</th>
                         <th class="px-5 py-3 text-right">Amount</th>
                         <th class="px-5 py-3">Journal entry</th>
-                        <th class="px-5 py-3">Recorded / approved by</th>
+                        <th class="px-5 py-3">Recorded / reviewed by</th>
+                        <th class="px-5 py-3">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -191,45 +190,43 @@ $statusInfo = match($remittance->status) {
                             <td class="px-5 py-3">
                                 @if($payment->journalEntry)
                                     <a class="text-blue-700 underline" href="{{ route('accounting.journal-entries.show', $payment->journalEntry) }}">{{ $payment->journalEntry->journal_number }} ({{ $payment->journalEntry->status }})</a>
+                                @elseif($payment->status === 'Pending')
+                                    <span class="text-amber-700">Created upon approval</span>
+                                @elseif($payment->status === 'Rejected')
+                                    <span class="text-gray-500">Not posted</span>
                                 @else
                                     <span class="text-red-600">Missing journal entry</span>
                                 @endif
                             </td>
                             <td class="px-5 py-3 text-gray-500">{{ $payment->recordedBy?->name ?? '—' }} / {{ $payment->approvedBy?->name ?? '—' }}</td>
+                            <td class="px-5 py-3">
+                                @if($payment->status === 'Pending')
+                                    <div class="flex items-center gap-2">
+                                        <form method="POST" action="{{ route('remittance-approval.boundary-payments.approve', $payment) }}">
+                                            @csrf
+                                            <button type="submit" class="rounded-md bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">Approve</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('remittance-approval.boundary-payments.reject', $payment) }}">
+                                            @csrf
+                                            <button type="submit" class="rounded-md border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50">Reject</button>
+                                        </form>
+                                    </div>
+                                @else
+                                    <span class="text-gray-400">—</span>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
     @else
-        <p class="px-5 py-4 text-xs text-gray-500">No boundary payments have been recorded.</p>
+        <p class="px-5 py-4 text-xs text-gray-500">No boundary payments have been submitted.</p>
     @endif
 
     <div class="px-5 py-4 border-t border-gray-100 flex items-center justify-between">
         <span class="text-xs font-semibold text-gray-600">Boundary remaining: <strong class="font-mono text-gray-900">₱{{ number_format($boundaryRemaining, 2) }}</strong></span>
-        @if($remittance->status === 'approved' && $boundaryRemaining > 0 && ($driverShareRemaining + $paoShareRemaining) > 0)
-            <form method="POST" action="{{ route('remittance-approval.boundary-payments.store', $remittance) }}" class="grid grid-cols-1 sm:grid-cols-4 gap-2 w-full sm:w-auto sm:ml-4">
-                @csrf
-                <input type="hidden" name="source_payment_key" value="{{ $paymentSubmissionKey }}">
-                <input type="date" name="payment_date" max="{{ now()->toDateString() }}" value="{{ old('payment_date', now()->toDateString()) }}" required class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs">
-                <input type="number" name="amount" min="0.01" max="{{ number_format($boundaryRemaining, 2, '.', '') }}" step="0.01" value="{{ old('amount') }}" required placeholder="Amount" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs">
-                <select name="paid_by" required class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs">
-                    @if($driverShareRemaining > 0)
-                        <option value="driver">{{ $driver?->name ?? 'Driver' }} share (₱{{ number_format($driverShareRemaining, 2) }} remaining)</option>
-                    @endif
-                    @if($paoShareRemaining > 0)
-                        <option value="pao">{{ $pao?->name ?? 'PAO' }} share (₱{{ number_format($paoShareRemaining, 2) }} remaining)</option>
-                    @endif
-                </select>
-                <label class="flex items-center gap-1.5 text-[10px] text-gray-600">
-                    <input type="checkbox" name="confirm_boundary_received" value="1" required>
-                    Received and verified
-                </label>
-                <button type="submit" class="px-3 py-2 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 border-0">Record payment</button>
-            </form>
-        @elseif($remittance->status === 'approved' && $boundaryRemaining > 0)
-            <span class="ml-4 text-xs text-amber-700">Separate Driver and PAO shortage shares must be set before recording a payment.</span>
-        @endif
+        <span class="text-xs text-gray-500">Clerks record payments from the Short Remittance page; approve or reject pending submissions above.</span>
     </div>
 </div>
 

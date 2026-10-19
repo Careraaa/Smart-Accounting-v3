@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Accountant;
 
 use App\Exceptions\BoundaryPaymentException;
 use App\Http\Controllers\Controller;
+use App\Models\BoundaryPayment;
 use App\Models\DailyRemittance;
 use App\Notifications\RemittanceNotification;
 use App\Services\BoundaryPaymentService;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class RemittanceApprovalController extends Controller
 {
@@ -31,9 +31,8 @@ class RemittanceApprovalController extends Controller
         $this->logActivity('viewed', "Remittance #{$remittance->id}", request()->url(), 'daily_remittance', $remittance->id);
 
         $remittance->load('driver', 'pao', 'route', 'vehicle', 'boundaryPayments.journalEntry', 'boundaryPayments.recordedBy', 'boundaryPayments.approvedBy');
-        $paymentSubmissionKey = (string) Str::uuid();
 
-        return view('accountant.remittances-approval.show', compact('remittance', 'paymentSubmissionKey'));
+        return view('accountant.remittances-approval.show', compact('remittance'));
     }
 
     public function approve(Request $request, DailyRemittance $remittance, BoundaryPaymentService $payments)
@@ -82,38 +81,44 @@ class RemittanceApprovalController extends Controller
             : 'Remittance approved. No boundary payment was recorded.');
     }
 
-    public function recordPayment(Request $request, DailyRemittance $remittance, BoundaryPaymentService $payments)
+    public function approvePayment(BoundaryPayment $payment, BoundaryPaymentService $payments)
     {
-        $validated = $request->validate([
-            'payment_date' => 'required|date|before_or_equal:today',
-            'amount' => 'required|numeric|min:0.01|decimal:0,2|max:9999999999999.99',
-            'paid_by' => 'required|in:driver,pao',
-            'source_payment_key' => 'required|uuid',
-            'confirm_boundary_received' => 'required|accepted',
-        ]);
-
         try {
-            $payment = $payments->recordPayment(
-                $remittance->id,
-                $validated['payment_date'],
-                (float) $validated['amount'],
-                $validated['paid_by'],
-                $validated['source_payment_key'],
-                (int) auth()->id()
-            );
+            $approvedPayment = $payments->approvePayment($payment->id, (int) auth()->id());
         } catch (BoundaryPaymentException $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());
         }
 
+        if (! $approvedPayment) {
+            return redirect()->back()->with('error', 'Only pending boundary payments for approved remittances can be approved.');
+        }
+
         $this->logActivity(
-            'posted',
-            "Boundary Payment #{$payment->id} for Remittance #{$remittance->id}",
+            'approved',
+            "Boundary Payment #{$approvedPayment->id} for Remittance #{$approvedPayment->daily_remittance_id}",
+            request()->url(),
+            'boundary_payment',
+            $approvedPayment->id
+        );
+
+        return redirect()->back()->with('success', "Boundary payment BP-{$approvedPayment->id} was approved and posted.");
+    }
+
+    public function rejectPayment(BoundaryPayment $payment, BoundaryPaymentService $payments)
+    {
+        if (! $payments->rejectPayment($payment->id, (int) auth()->id())) {
+            return redirect()->back()->with('error', 'Only pending boundary payments can be rejected.');
+        }
+
+        $this->logActivity(
+            'rejected',
+            "Boundary Payment #{$payment->id} for Remittance #{$payment->daily_remittance_id}",
             request()->url(),
             'boundary_payment',
             $payment->id
         );
 
-        return redirect()->back()->with('success', "Boundary payment BP-{$payment->id} was recorded and posted.");
+        return redirect()->back()->with('success', "Boundary payment BP-{$payment->id} was rejected.");
     }
 
     public function reject(Request $request, DailyRemittance $remittance)

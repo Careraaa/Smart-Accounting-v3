@@ -9,7 +9,7 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold text-gray-900 tracking-tight">Short Remittance Details</h1>
-                <p class="text-sm text-gray-500">Review the remaining boundary shortage and payment history.</p>
+                <p class="text-sm text-gray-500">Review the remaining boundary shortage and record received payments for accountant approval.</p>
             </div>
         </div>
         <a href="{{ route('short-remittances.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 transition-all no-underline">
@@ -123,7 +123,7 @@
             <div class="flex gap-2.5 justify-end pt-3 border-t border-gray-100">
                 <a href="{{ route('short-remittances.edit', $shortRemittance) }}" class="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gray-900 transition-all hover:bg-gray-800 active:scale-[0.97] cursor-pointer no-underline inline-flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    View Payment History
+                    Record / View Payments
                 </a>
             </div>
         </div>

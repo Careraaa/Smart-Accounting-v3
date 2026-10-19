@@ -97,27 +97,98 @@ class BoundaryPaymentService
                 throw new BoundaryPaymentException('Only approved remittances can record boundary payments.');
             }
 
-            $remaining = $this->remainingBoundaryBalance($remittance);
+            $remaining = $this->availableBoundaryBalance($remittance);
             $this->assertPaymentAmountDoesNotExceedBalance($paymentAmount, $remaining);
             $this->assertPaymentAmountDoesNotExceedPartnerShare($remittance, $paidBy, $paymentAmount);
 
-            $payment = $this->createPostedPayment(
-                $remittance,
-                $paymentDate,
-                $paymentAmount,
-                $paidBy,
-                $sourcePaymentKey,
-                $userId
-            );
+            $payment = BoundaryPayment::create([
+                'daily_remittance_id' => $remittance->id,
+                'source_payment_key' => $sourcePaymentKey,
+                'payment_date' => $paymentDate,
+                'amount' => $paymentAmount,
+                'paid_by' => $paidBy,
+                'payment_kind' => 'installment',
+                'status' => 'Pending',
+                'recorded_by' => $userId,
+            ]);
 
-            $this->updateShortageBalance(
-                $remittance,
-                max(round($remaining - $paymentAmount, 2), 0),
-                $paidBy,
-                $paymentAmount
+            AccountingAuditLog::log(
+                'submitted',
+                'Boundary Payment',
+                $payment->id,
+                "Submitted boundary payment BP-{$payment->id} for accountant approval",
+                null,
+                [
+                    'daily_remittance_id' => $remittance->id,
+                    'amount' => number_format($paymentAmount, 2, '.', ''),
+                    'payment_date' => $paymentDate,
+                    'shortage_share' => $paidBy,
+                ]
             );
 
             return $payment;
+        });
+    }
+
+    public function approvePayment(int $paymentId, int $userId): ?BoundaryPayment
+    {
+        return DB::transaction(function () use ($paymentId, $userId) {
+            $paymentRemittanceId = BoundaryPayment::whereKey($paymentId)->firstOrFail()->daily_remittance_id;
+
+            $remittance = DailyRemittance::whereKey($paymentRemittanceId)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $payment = BoundaryPayment::whereKey($paymentId)->lockForUpdate()->firstOrFail();
+
+            if ($payment->status !== 'Pending' || $remittance->status !== 'approved') {
+                return null;
+            }
+
+            $remaining = $this->remainingBoundaryBalance($remittance);
+            $this->assertPaymentAmountDoesNotExceedBalance((float) $payment->amount, $remaining);
+            $this->assertPaymentAmountDoesNotExceedPartnerShare($remittance, $payment->paid_by, (float) $payment->amount, false);
+
+            $payment->update([
+                'status' => 'Posted',
+                'approved_by' => $userId,
+            ]);
+            $payment = $payment->fresh();
+            $this->createPaymentJournalEntry($payment, $remittance, $userId);
+
+            $this->updateShortageBalance(
+                $remittance,
+                max(round($remaining - (float) $payment->amount, 2), 0),
+                $payment->paid_by,
+                (float) $payment->amount
+            );
+
+            return $payment->fresh();
+        });
+    }
+
+    public function rejectPayment(int $paymentId, int $userId): bool
+    {
+        return DB::transaction(function () use ($paymentId, $userId) {
+            $payment = BoundaryPayment::whereKey($paymentId)->lockForUpdate()->firstOrFail();
+            if ($payment->status !== 'Pending') {
+                return false;
+            }
+
+            $payment->update([
+                'status' => 'Rejected',
+                'approved_by' => $userId,
+            ]);
+
+            AccountingAuditLog::log(
+                'rejected',
+                'Boundary Payment',
+                $payment->id,
+                "Rejected boundary payment BP-{$payment->id}",
+                ['status' => 'Pending'],
+                ['status' => 'Rejected']
+            );
+
+            return true;
         });
     }
 
@@ -133,7 +204,8 @@ class BoundaryPaymentService
     private function assertPaymentAmountDoesNotExceedPartnerShare(
         DailyRemittance $remittance,
         string $paidBy,
-        float $amount
+        float $amount,
+        bool $includePending = true
     ): void {
         if (! in_array($paidBy, ['driver', 'pao'], true)) {
             throw new BoundaryPaymentException('Shortage installments must be assigned to the driver or PAO share.');
@@ -141,7 +213,13 @@ class BoundaryPaymentService
 
         $share = (float) ($paidBy === 'driver' ? $remittance->driver_share : $remittance->pao_share);
         $paid = (float) ($paidBy === 'driver' ? $remittance->driver_amount_paid : $remittance->pao_amount_paid);
-        $remainingShare = max(round($share - $paid, 2), 0);
+        $pending = $includePending
+            ? (float) $remittance->boundaryPayments()
+                ->where('status', 'Pending')
+                ->where('paid_by', $paidBy)
+                ->sum('amount')
+            : 0;
+        $remainingShare = max(round($share - $paid - $pending, 2), 0);
 
         if (round($amount, 2) > $remainingShare) {
             throw new BoundaryPaymentException(
@@ -158,8 +236,6 @@ class BoundaryPaymentService
         string $sourcePaymentKey,
         int $userId
     ): BoundaryPayment {
-        $cashAccountId = $this->mappedActiveAccountId('boundary_cash', 'Asset');
-        $revenueAccountId = $this->mappedActiveAccountId('boundary_revenue', 'Revenue');
         $initialPaymentRemittanceId = $remittance->boundaryPayments()->exists()
             ? null
             : $remittance->id;
@@ -176,6 +252,22 @@ class BoundaryPaymentService
             'recorded_by' => $userId,
             'approved_by' => $userId,
         ]);
+
+        $this->createPaymentJournalEntry($payment, $remittance, $userId);
+
+        return $payment;
+    }
+
+    private function createPaymentJournalEntry(
+        BoundaryPayment $payment,
+        DailyRemittance $remittance,
+        int $userId
+    ): void {
+        $cashAccountId = $this->mappedActiveAccountId('boundary_cash', 'Asset');
+        $revenueAccountId = $this->mappedActiveAccountId('boundary_revenue', 'Revenue');
+        $amount = (float) $payment->amount;
+        $paymentDate = $payment->payment_date->toDateString();
+        $paidBy = $payment->paid_by;
 
         $remittance->loadMissing(['driver', 'pao', 'vehicle', 'route']);
         $remittanceDetails = collect([
@@ -267,7 +359,6 @@ class BoundaryPaymentService
             ['status' => 'Posted', 'boundary_payment_id' => $payment->id]
         );
 
-        return $payment;
     }
 
     private function mappedActiveAccountId(string $mappingKey, string $expectedType): int
@@ -297,6 +388,15 @@ class BoundaryPaymentService
         }
 
         return max(round((float) $remittance->boundary - (float) $remittance->net_remittance, 2), 0);
+    }
+
+    private function availableBoundaryBalance(DailyRemittance $remittance): float
+    {
+        $pendingAmount = (float) $remittance->boundaryPayments()
+            ->where('status', 'Pending')
+            ->sum('amount');
+
+        return max(round($this->remainingBoundaryBalance($remittance) - $pendingAmount, 2), 0);
     }
 
     private function updateShortageBalance(

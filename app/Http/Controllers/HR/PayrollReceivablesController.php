@@ -5,6 +5,7 @@ namespace App\Http\Controllers\HR;
 use App\Http\Controllers\Controller;
 use App\Models\Payroll;
 use App\Models\CashAdvance;
+use App\Models\DailyRemittance;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 
@@ -14,10 +15,17 @@ class PayrollReceivablesController extends Controller
     public function index(Request $request)
     {
         $tab = $request->get('tab', 'cash_advances');
+        if (! in_array($tab, ['cash_advances', 'short_remittances'], true)) {
+            $tab = 'cash_advances';
+        }
 
         // Load ALL data upfront so tabs can switch client-side
         $allCashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
             ->orderBy('created_at', 'desc')
+            ->get();
+        $shortRemittances = DailyRemittance::with(['driver', 'pao', 'boundaryPayments'])
+            ->where('is_short_remittance', true)
+            ->orderByDesc('remittance_date')
             ->get();
 
         // Stats: count by status
@@ -34,7 +42,7 @@ class PayrollReceivablesController extends Controller
         $this->logActivity('viewed', 'Payroll receivables', request()->url(), 'payroll_receivable');
 
         return view('hr.payroll.receivables.index', compact(
-            'tab', 'allCashAdvances',
+            'tab', 'allCashAdvances', 'shortRemittances',
             'caPendingCount', 'caApprovedCount', 'caReleasedTotal',
             'totalCashAdvances', 'outstandingAmount'
         ));
