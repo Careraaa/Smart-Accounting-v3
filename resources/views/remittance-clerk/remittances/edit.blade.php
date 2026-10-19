@@ -94,7 +94,7 @@
                         <span class="px-3 py-2.5 text-xs text-gray-400 bg-gray-50 border-r border-gray-200">₱</span>
                         <input type="text" id="boundary_display" class="w-full px-3 py-2.5 text-xs text-gray-700 border-none outline-none bg-transparent" value="{{ number_format($remittance->boundary ?? 0, 2) }}" readonly>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-1">Rate is selected based on the remittance date.</p>
+                    <p class="text-[10px] text-gray-400 mt-1">Rate is selected based on the remittance date, less Food Allowance and Others.</p>
                     <p id="boundary_note" class="text-[10px] text-amber-600 mt-1" style="display: none;">Boundary rate is disregarded while the vehicle is under maintenance.</p>
                 </div>
             </div>
@@ -211,8 +211,13 @@
                 return parseFloat(selectedOption?.getAttribute(rateAttribute)) || 0;
             }
 
+            function boundaryDeductions() {
+                return ['food_allowance', 'others']
+                    .reduce((sum, field) => sum + parseMoney(document.querySelector(`[name="${field}"]`)?.value || 0), 0);
+            }
+
             function syncBoundaryDisplay() {
-                const boundary = selectedBoundary();
+                const boundary = Math.max(selectedBoundary() - boundaryDeductions(), 0);
 
                 if (vehicleSelect.value === '') {
                     boundaryDisplay.value = '0.00';
@@ -230,7 +235,7 @@
                 const netRemittance = parseMoney(netRemittanceInput.value);
                 const boundary = isMaintenance()
                     ? 0
-                    : selectedBoundary();
+                    : Math.max(selectedBoundary() - boundaryDeductions(), 0);
 
                 if (boundary > 0 && netRemittance < boundary) {
                     shortRemittanceSection.style.display = 'grid';
@@ -320,7 +325,11 @@
                 updateShortRemittance();
             });
 
-            document.querySelectorAll('.expense-input').forEach(input => input.addEventListener('input', updateTotalExpenses));
+            document.querySelectorAll('.expense-input').forEach(input => input.addEventListener('input', function() {
+                updateTotalExpenses();
+                syncBoundaryDisplay();
+                updateShortRemittance();
+            }));
             document.querySelectorAll('.money-input').forEach(input => {
                 input.addEventListener('focus', () => input.value = input.value.replace(/,/g, ''));
                 input.addEventListener('blur', () => {

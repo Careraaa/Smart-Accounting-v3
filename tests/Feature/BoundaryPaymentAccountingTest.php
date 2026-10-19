@@ -169,6 +169,29 @@ test('payroll receivables has a short remittances tab beside cash advances', fun
         ->assertSee(route('remittance-approval.boundary-payments.reject', $pendingPayment), false);
 });
 
+test('food allowance and other expenses reduce boundary when creating a remittance', function () {
+    $remittance = boundaryPaymentTestRemittance(3000, 2000);
+
+    $this->actingAs($this->clerk)->post(route('remittances.store'), [
+        'driver_id' => $remittance->driver_id,
+        'pao_id' => $remittance->pao_id,
+        'vehicle_id' => $remittance->vehicle_id,
+        'remittance_date' => now()->toDateString(),
+        'total_collection' => 5000,
+        'food_allowance' => 100,
+        'others' => 200,
+        'net_remittance' => 2600,
+        'vehicle_status' => 'active',
+    ])->assertRedirect(route('remittances.index'));
+
+    $createdRemittance = DailyRemittance::latest('id')->firstOrFail();
+    expect((float) $createdRemittance->boundary)->toBe(2700.0)
+        ->and((float) $createdRemittance->total_expenses)->toBe(300.0)
+        ->and((float) $createdRemittance->short_amount)->toBe(100.0)
+        ->and((float) $createdRemittance->driver_share)->toBe(50.0)
+        ->and((float) $createdRemittance->pao_share)->toBe(50.0);
+});
+
 test('partial and later boundary payments post once and flow into accounting reports', function () {
     expect(Schema::hasColumn('boundary_payments', 'paid_by'))->toBeTrue();
 

@@ -128,9 +128,7 @@ class DailyRemittanceController extends Controller
 
         // Disregard the boundary rate while the vehicle is under maintenance
         $isMaintenance = $vehicleStatus === 'under_maintenance';
-        $boundary = $isMaintenance
-            ? 0
-            : ($vehicle->route?->boundaryForDate(Carbon::parse($validated['remittance_date'])) ?? 0);
+        $boundary = $this->calculateBoundaryRate($vehicle, $validated, $isMaintenance);
         $validated['boundary'] = $boundary;
         $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
 
@@ -224,9 +222,7 @@ class DailyRemittanceController extends Controller
 
                 $validated['route_id'] = $vehicle->route_id;
                 $isMaintenance = $vehicleStatus === 'under_maintenance';
-                $boundary = $isMaintenance
-                    ? 0
-                    : ($vehicle->route?->boundaryForDate(Carbon::parse($validated['remittance_date'])) ?? 0);
+                $boundary = $this->calculateBoundaryRate($vehicle, $validated, $isMaintenance);
                 $validated['boundary'] = $boundary;
                 $validated['total_expenses'] = $this->calculateTotalExpenses($validated);
 
@@ -271,6 +267,18 @@ class DailyRemittanceController extends Controller
     {
         return round(collect(['diesel', 'parking', 'dispatcher', 'food_allowance', 'barker', 'others'])
             ->sum(fn ($field) => (float) ($values[$field] ?? 0)), 2);
+    }
+
+    private function calculateBoundaryRate(Vehicle $vehicle, array $values, bool $isMaintenance): float
+    {
+        if ($isMaintenance) {
+            return 0;
+        }
+
+        $baseBoundary = $vehicle->route?->boundaryForDate(Carbon::parse($values['remittance_date'])) ?? 0;
+        $boundaryDeductions = (float) ($values['food_allowance'] ?? 0) + (float) ($values['others'] ?? 0);
+
+        return round(max($baseBoundary - $boundaryDeductions, 0), 2);
     }
 
     public function destroy(DailyRemittance $remittance)
