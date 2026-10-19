@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\PositionRate;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -130,8 +132,14 @@ class SystemConfigurationController extends Controller
         ]);
 
         $validated['is_active'] = true;
+        $previousName = $position->name;
 
-        $position->update($validated);
+        DB::transaction(function () use ($position, $validated, $previousName) {
+            $position->update($validated);
+
+            User::where('position', $previousName)
+                ->update(['salary_rate' => $validated['daily_rate']]);
+        });
 
         $this->logActivity('updated', "Position: {$position->name}", request()->url(), 'configuration', $position->id);
 
