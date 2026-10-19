@@ -25,6 +25,12 @@
             <h1 class="text-xl font-bold text-gray-900 tracking-tight">{{ $batch->display_name }}</h1>
             <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $batch->period_start->format('M d, Y') }} – {{ $batch->period_end->format('M d, Y') }} · {{ $batch->payrolls->count() }} employees</p>
         </div>
+        @if ($batch->payrolls->isNotEmpty())
+            <a href="{{ route('payroll.batch.payslips.print', $batch) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-xs font-semibold no-underline hover:bg-gray-700 transition-colors whitespace-nowrap cursor-pointer">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+                Print All Payslips
+            </a>
+        @endif
     </div>
 
     {{-- Table --}}

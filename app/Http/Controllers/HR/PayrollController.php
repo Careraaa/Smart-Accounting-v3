@@ -397,6 +397,20 @@
 
         public function batchPayslips(PayrollBatch $batch)
         {
+            $this->prepareBatchPayslips($batch);
+
+            return view('hr.payroll.batch.payslips', compact('batch'));
+        }
+
+        public function batchPrintPayslips(PayrollBatch $batch)
+        {
+            $this->prepareBatchPayslips($batch);
+
+            return view('hr.payroll.batch.print-payslips', compact('batch'));
+        }
+
+        private function prepareBatchPayslips(PayrollBatch $batch): void
+        {
             $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
             $batch->setRelation('payrolls', $batch->payrolls->sortBy([
                 ['user.last_name', 'asc'],
@@ -442,16 +456,31 @@
 
                 $fullGrossPay = $computed['grossPay'] + $leavePay + $bonusTotal;
 
+                $periodStart = Carbon::parse($payroll->payroll_period_start);
+                $periodEnd = Carbon::parse($payroll->payroll_period_end);
+                $totalWeekdays = $periodStart->diffInDaysFiltered(fn (Carbon $day) => !$day->isWeekend(), $periodEnd);
+                if (!$periodStart->isWeekend()) {
+                    $totalWeekdays++;
+                }
+
                 $payroll->setAttribute('basic_salary', $computed['basicSalary']);
+                $payroll->setAttribute('days_worked', $computed['daysWorked']);
+                $payroll->setAttribute('total_weekdays', $totalWeekdays);
+                $payroll->setAttribute('hours_worked', $computed['hoursWorked']);
                 $payroll->setAttribute('gross_pay', $fullGrossPay);
-            // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
-            $loanTotal = (float)($payroll->cash_advance_deduction ?? 0);
+                $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay'] ?? 0);
+                $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours'] ?? 0);
+                $payroll->setAttribute('holiday_breakdown', array_map(fn ($holiday) => [
+                    'label' => $this->payrollService->buildHolidayLabel($holiday),
+                    'amount' => round($holiday['amount'], 2),
+                ], $computed['holidayBreakdown'] ?? []));
+
+                // Loan deductions are stored columns, not part of computePayroll(). Re-add them.
+                $loanTotal = (float) ($payroll->cash_advance_deduction ?? 0);
                 $totalDeductions = $computed['totalDeductions'] + $loanTotal;
                 $payroll->setAttribute('total_deductions', $totalDeductions);
                 $payroll->setAttribute('net_pay', $fullGrossPay - $totalDeductions);
             }
-
-            return view('hr.payroll.batch.payslips', compact('batch'));
         }
 
         public function generatePayslipIndex(Request $request)
