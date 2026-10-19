@@ -95,6 +95,10 @@
             flex-direction: row;
         }
 
+        .cut-guide {
+            display: none;
+        }
+
         .main-content {
             flex: 4;
             display: flex;
@@ -330,6 +334,13 @@
                 page-break-after: auto;
             }
 
+            .batch-print .cut-guide {
+                display: block;
+                width: 100%;
+                height: 0;
+                border-top: 1px dashed #777;
+            }
+
             .batch-print .page.page-break {
                 break-after: page;
                 page-break-after: always;
@@ -544,6 +555,9 @@
         </div> -->
 
         </div>
+        @if (!empty($batchPrint) && ($loop->iteration % 3 !== 0 || $loop->last))
+            <div class="cut-guide" aria-hidden="true"></div>
+        @endif
     @endforeach
 
     @if (!empty($batchPrint))
