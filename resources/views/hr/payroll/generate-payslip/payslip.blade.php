@@ -319,23 +319,45 @@
                 box-shadow: none;
                 width: 215.9mm;
                 height: 93.1mm;
+                break-after: page;
+                page-break-after: always;
+            }
+
+            .page:last-of-type { break-after: auto; page-break-after: auto; }
+
+            .batch-print .page {
+                break-after: auto;
+                page-break-after: auto;
+            }
+
+            .batch-print .page.page-break {
+                break-after: page;
+                page-break-after: always;
             }
         }
 
+        @if (!empty($batchPrint))
+        @page {
+            size: letter portrait;
+            margin: 0mm;
+        }
+        @else
         @page {
             size: A6 landscape;
             margin: 0mm;
         }
+        @endif
     </style>
 </head>
 
-<body>
+<body class="{{ !empty($batchPrint) ? 'batch-print' : '' }}">
 
     <div class="controls">
-        <button class="btn btn-primary" onclick="window.print()">Print Payslip</button>
+        <button class="btn btn-primary" onclick="window.print()">{{ !empty($batchPrint) ? 'Print All Payslips' : 'Print Payslip' }}</button>
     </div>
 
-    <div class="page">
+    @foreach (($payrolls ?? collect([$payroll])) as $payroll)
+        <div class="page{{ !empty($batchPrint) && $loop->iteration % 3 === 0 && !$loop->last ? ' page-break' : '' }}">
 
         <!-- LEFT COLUMN - Main Payslip -->
         <div class="main-content">
@@ -521,7 +543,14 @@
             </div>
         </div> -->
 
-    </div>
+        </div>
+    @endforeach
+
+    @if (!empty($batchPrint))
+        <script>
+            window.addEventListener('load', () => window.setTimeout(() => window.print(), 300));
+        </script>
+    @endif
 
 </body>
 </html>

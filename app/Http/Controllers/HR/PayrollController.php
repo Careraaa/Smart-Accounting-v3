@@ -406,7 +406,14 @@
         {
             $this->prepareBatchPayslips($batch);
 
-            return view('hr.payroll.batch.print-payslips', compact('batch'));
+            $payrolls = $batch->payrolls;
+            abort_if($payrolls->isEmpty(), 404);
+
+            return view('hr.payroll.generate-payslip.payslip', [
+                'payroll' => $payrolls->first(),
+                'payrolls' => $payrolls,
+                'batchPrint' => true,
+            ]);
         }
 
         private function prepareBatchPayslips(PayrollBatch $batch): void
