@@ -130,7 +130,16 @@ test('payroll receivables has a short remittances tab beside cash advances', fun
         'role' => 'hr',
         'status' => 'active',
     ]);
-    boundaryPaymentTestRemittance(3000, 2000);
+    $remittance = boundaryPaymentTestRemittance(3000, 2000, 'approved');
+    $paymentKey = (string) Str::uuid();
+    app(\App\Services\BoundaryPaymentService::class)->recordPayment(
+        $remittance->id,
+        now()->toDateString(),
+        100,
+        'driver',
+        $paymentKey,
+        $this->clerk->id
+    );
 
     $this->actingAs($hr)
         ->get(route('payroll.receivables.index', ['tab' => 'short_remittances']))
@@ -138,7 +147,26 @@ test('payroll receivables has a short remittances tab beside cash advances', fun
         ->assertSee('Cash Advances')
         ->assertSee('Short Remittances')
         ->assertSee('Dina Driver')
-        ->assertSee('₱1,000.00');
+        ->assertSee('₱1,000.00')
+        ->assertDontSee('Pending payment actions');
+
+    $pendingPayment = $remittance->boundaryPayments()->where('source_payment_key', $paymentKey)->firstOrFail();
+    $this->actingAs($hr)
+        ->get(route('payroll.receivables.index', ['tab' => 'short_remittances']))
+        ->assertDontSee(route('remittance-approval.boundary-payments.approve', $pendingPayment), false)
+        ->assertDontSee(route('remittance-approval.boundary-payments.reject', $pendingPayment), false);
+
+    $this->actingAs($this->accountant)
+        ->get(route('payroll.receivables.index', ['tab' => 'short_remittances']))
+        ->assertOk()
+        ->assertSee('Pending payment actions')
+        ->assertSee('BP-'.str_pad($pendingPayment->id, 6, '0', STR_PAD_LEFT))
+        ->assertSee('Approve')
+        ->assertSee('Reject')
+        ->assertSee('Recorded by Boundary Clerk')
+        ->assertSee('Reviewed by Pending')
+        ->assertSee(route('remittance-approval.boundary-payments.approve', $pendingPayment), false)
+        ->assertSee(route('remittance-approval.boundary-payments.reject', $pendingPayment), false);
 });
 
 test('partial and later boundary payments post once and flow into accounting reports', function () {
@@ -218,6 +246,12 @@ test('partial and later boundary payments post once and flow into accounting rep
         ->and($pendingPayment->journal_entry_id)->toBeNull()
         ->and((float) $remittance->fresh()->short_amount)->toBe(1000.0)
         ->and((float) $remittance->fresh()->driver_amount_paid)->toBe(0.0);
+    $this->actingAs($this->accountant)
+        ->get(route('remittance-approval.show', $remittance))
+        ->assertDontSee(route('remittance-approval.boundary-payments.approve', $pendingPayment), false)
+        ->assertDontSee(route('remittance-approval.boundary-payments.reject', $pendingPayment), false)
+        ->assertDontSee('>Action<', false);
+    $this->actingAs($this->clerk);
     $this->post(
         route('short-remittances.payments.store', $remittance),
         boundaryPaymentPayload($firstInstallmentKey, $today, '500.00', 'driver')

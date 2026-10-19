@@ -131,7 +131,7 @@
                             <th class="px-5 py-3">Date / shortage share</th>
                             <th class="px-5 py-3 text-right">Amount</th>
                             <th class="px-5 py-3">Status</th>
-                            <th class="px-5 py-3">Recorded by</th>
+                            <th class="px-5 py-3">Recorded / reviewed by</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -146,7 +146,10 @@
                                 <td class="px-5 py-3">
                                     <span class="rounded-full px-2 py-1 text-xs font-semibold {{ $payment->status === 'Posted' ? 'bg-emerald-50 text-emerald-700' : ($payment->status === 'Rejected' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700') }}">{{ $payment->status }}</span>
                                 </td>
-                                <td class="px-5 py-3">{{ $payment->recordedBy?->name ?? '—' }}</td>
+                                <td class="px-5 py-3 text-xs text-gray-600">
+                                    <span class="block">Recorded: {{ $payment->recordedBy?->name ?? '—' }}</span>
+                                    <span class="block text-gray-400">Reviewed: {{ $payment->approvedBy?->name ?? 'Pending' }}</span>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

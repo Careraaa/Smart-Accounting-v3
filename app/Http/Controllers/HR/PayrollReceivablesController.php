@@ -23,7 +23,12 @@ class PayrollReceivablesController extends Controller
         $allCashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
             ->orderBy('created_at', 'desc')
             ->get();
-        $shortRemittances = DailyRemittance::with(['driver', 'pao', 'boundaryPayments'])
+        $shortRemittances = DailyRemittance::with([
+            'driver',
+            'pao',
+            'boundaryPayments.recordedBy',
+            'boundaryPayments.approvedBy',
+        ])
             ->where('is_short_remittance', true)
             ->orderByDesc('remittance_date')
             ->get();

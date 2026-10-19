@@ -199,6 +199,9 @@
                             <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Remittance status</th>
                             <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Shortage balance</th>
                             <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Awaiting approval</th>
+                            @if(auth()->user()->role === 'accountant' || auth()->user()->role === 'superadmin')
+                                <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Pending payment actions</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
@@ -209,9 +212,39 @@
                                 <td class="px-5 py-3 text-xs capitalize text-gray-600">{{ $shortRemittance->status }}</td>
                                 <td class="px-5 py-3 text-right font-mono text-xs font-semibold text-red-600">₱{{ number_format($shortRemittance->short_amount ?? 0, 2) }}</td>
                                 <td class="px-5 py-3 text-right font-mono text-xs text-amber-700">₱{{ number_format($shortRemittance->boundaryPayments->where('status', 'Pending')->sum('amount'), 2) }}</td>
+                                @if(auth()->user()->role === 'accountant' || auth()->user()->role === 'superadmin')
+                                    <td class="px-5 py-3">
+                                        @forelse($shortRemittance->boundaryPayments->where('status', 'Pending') as $payment)
+                                            <div class="flex flex-wrap items-center gap-2 {{ $loop->first ? '' : 'mt-2 border-t border-gray-100 pt-2' }}">
+                                                <span class="text-xs text-gray-600">
+                                                    BP-{{ str_pad($payment->id, 6, '0', STR_PAD_LEFT) }} ·
+                                                    ₱{{ number_format($payment->amount, 2) }} ·
+                                                    {{ ucfirst($payment->paid_by) }} ·
+                                                    {{ $payment->payment_date?->format('M d, Y') }} ·
+                                                    Recorded by {{ $payment->recordedBy?->name ?? 'Unknown' }} ·
+                                                    Reviewed by {{ $payment->approvedBy?->name ?? 'Pending' }}
+                                                </span>
+                                                <form method="POST" action="{{ route('remittance-approval.boundary-payments.approve', $payment) }}">
+                                                    @csrf
+                                                    <button type="submit" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">
+                                                        Approve
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ route('remittance-approval.boundary-payments.reject', $payment) }}">
+                                                    @csrf
+                                                    <button type="submit" class="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50">
+                                                        Reject
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @empty
+                                            <span class="text-xs text-gray-400">No pending payments</span>
+                                        @endforelse
+                                    </td>
+                                @endif
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="px-5 py-8 text-center text-sm text-gray-400">No short remittances to display.</td></tr>
+                            <tr><td colspan="{{ in_array(auth()->user()->role, ['accountant', 'superadmin'], true) ? 6 : 5 }}" class="px-5 py-8 text-center text-sm text-gray-400">No short remittances to display.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

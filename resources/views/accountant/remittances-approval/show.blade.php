@@ -175,7 +175,6 @@ $statusInfo = match($remittance->status) {
                         <th class="px-5 py-3 text-right">Amount</th>
                         <th class="px-5 py-3">Journal entry</th>
                         <th class="px-5 py-3">Recorded / reviewed by</th>
-                        <th class="px-5 py-3">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -199,22 +198,6 @@ $statusInfo = match($remittance->status) {
                                 @endif
                             </td>
                             <td class="px-5 py-3 text-gray-500">{{ $payment->recordedBy?->name ?? '—' }} / {{ $payment->approvedBy?->name ?? '—' }}</td>
-                            <td class="px-5 py-3">
-                                @if($payment->status === 'Pending')
-                                    <div class="flex items-center gap-2">
-                                        <form method="POST" action="{{ route('remittance-approval.boundary-payments.approve', $payment) }}">
-                                            @csrf
-                                            <button type="submit" class="rounded-md bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700">Approve</button>
-                                        </form>
-                                        <form method="POST" action="{{ route('remittance-approval.boundary-payments.reject', $payment) }}">
-                                            @csrf
-                                            <button type="submit" class="rounded-md border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50">Reject</button>
-                                        </form>
-                                    </div>
-                                @else
-                                    <span class="text-gray-400">—</span>
-                                @endif
-                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -226,7 +209,7 @@ $statusInfo = match($remittance->status) {
 
     <div class="px-5 py-4 border-t border-gray-100 flex items-center justify-between">
         <span class="text-xs font-semibold text-gray-600">Boundary remaining: <strong class="font-mono text-gray-900">₱{{ number_format($boundaryRemaining, 2) }}</strong></span>
-        <span class="text-xs text-gray-500">Clerks record payments from the Short Remittance page; approve or reject pending submissions above.</span>
+        <span class="text-xs text-gray-500">Approve or reject pending payments from the Short Remittances tab in Receivables &amp; Loans.</span>
     </div>
 </div>
 
