@@ -332,16 +332,17 @@
             .batch-print .page {
                 break-after: auto;
                 page-break-after: auto;
+                height: 91mm;
             }
 
             .batch-print .cut-guide {
                 display: block;
                 width: 100%;
-                height: 0;
+                height: 1mm;
                 border-top: 1px dashed #777;
             }
 
-            .batch-print .page.page-break {
+            .batch-print .cut-guide.page-break {
                 break-after: page;
                 page-break-after: always;
             }
@@ -368,7 +369,7 @@
     </div>
 
     @foreach (($payrolls ?? collect([$payroll])) as $payroll)
-        <div class="page{{ !empty($batchPrint) && $loop->iteration % 3 === 0 && !$loop->last ? ' page-break' : '' }}">
+        <div class="page">
 
         <!-- LEFT COLUMN - Main Payslip -->
         <div class="main-content">
@@ -555,8 +556,8 @@
         </div> -->
 
         </div>
-        @if (!empty($batchPrint) && ($loop->iteration % 3 !== 0 || $loop->last))
-            <div class="cut-guide" aria-hidden="true"></div>
+        @if (!empty($batchPrint))
+            <div class="cut-guide{{ $loop->iteration % 3 === 0 && !$loop->last ? ' page-break' : '' }}" aria-hidden="true"></div>
         @endif
     @endforeach
 
