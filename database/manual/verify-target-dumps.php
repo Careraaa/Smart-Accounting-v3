@@ -19,12 +19,12 @@ function tables(string $path): array {
     foreach (explode("\n", $sql) as $l) {
         if ($cur === null && preg_match('/^CREATE TABLE `([^`]+)`/', $l, $m)) {
             $cur = $m[1]; $buf = $l;
-            if (preg_match('/\)\s*ENGINE=/', $l)) { $t[$cur] = cols($buf); $cur = null; }
+            if (preg_match('/^\s*\)\s*(ENGINE=[^;]*)?\s*;\s*$/', $l)) { $t[$cur] = cols($buf); $cur = null; }
             continue;
         }
         if ($cur !== null) {
             $buf .= "\n" . $l;
-            if (preg_match('/\)\s*ENGINE=/', $l)) { $t[$cur] = cols($buf); $cur = null; }
+            if (preg_match('/^\s*\)\s*(ENGINE=[^;]*)?\s*;\s*$/', $l)) { $t[$cur] = cols($buf); $cur = null; }
         }
     }
     return $t;
@@ -85,6 +85,28 @@ foreach ($files as $f) {
             'attendance_logs', 'overtime_undertimes', 'vehicles', 'routes',
         ]));
         if ($demoLeak) $problems[] = "demo data present: " . implode(', ', $demoLeak);
+    }
+
+    // Foreign keys: a parent table must be inserted before its child,
+    // otherwise the import fails with MySQL error #1452.
+    $fks = [];
+    if (preg_match_all('/CREATE TABLE `([^`]+)`\s*\([\s\S]*?\n\)\s*(ENGINE=[^;]*)?\s*;/', $sql, $tb, PREG_SET_ORDER)) {
+        foreach ($tb as $b) {
+            if (preg_match_all('/FOREIGN KEY \(`[^`]+`\) REFERENCES `([^`]+)`/', $b[0], $m)) {
+                foreach ($m[1] as $p) if ($p !== $b[1]) $fks[$b[1]][] = $p;
+            }
+        }
+    }
+    $pos = [];
+    foreach ($insTables as $i => $tblName) $pos[$tblName] = $i;
+    foreach ($fks as $child => $parents) {
+        if (!isset($pos[$child])) continue;                 // child has no data
+        foreach ($parents as $parent) {
+            if (!isset($pos[$parent])) continue;            // parent has no data
+            if ($pos[$parent] > $pos[$child]) {
+                $problems[] = "FK order: '$parent' must be inserted before '$child'";
+            }
+        }
     }
 
     if ($ref === null) { $ref = $t; $refName = $name; }
