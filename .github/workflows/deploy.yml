@@ -5,6 +5,10 @@
 #    push to main          -> PRODUCTION     (secrets: *_PROD)
 #    push to deploy-test   -> SANDBOX #1     (secrets: *_TEST)
 #    push to deploy-test-2 -> SANDBOX #2     (secrets: *_TEST2)
+#    push to deploy-sqa    -> SQA TESTER     (secrets: *_SQA)
+#
+#  All four branches MUST keep an identical copy of this workflow. If a branch
+#  is missing one, a push can land in the wrong folder on the server.
 #
 #  Required GitHub repo Secrets (Settings > Secrets and variables > Actions):
 #    FTP_USERNAME           - InfinityFree FTP user   (epiz_XXXX)
@@ -12,16 +16,18 @@
 #    FTP_SERVER_DIR_PROD    - e.g. /htdocs/
 #    FTP_SERVER_DIR_TEST    - e.g. /test-smartacc-v3.freedev.app/htdocs/
 #    FTP_SERVER_DIR_TEST2   - e.g. /test2-smartacc-v3.freedev.app/htdocs/
+#    FTP_SERVER_DIR_SQA    - e.g. /sqa-smartacc-v3.freedev.app/htdocs/
 #    PROD_ENV_FILE          - full production .env content
 #    TEST_ENV_FILE          - full test .env content
 #    TEST2_ENV_FILE         - full test2 .env content
+#    SQA_ENV_FILE           - full SQA .env content
 # =============================================================
 
 name: Deploy
 
 on:
   push:
-    branches: [main, deploy-test, deploy-test-2]
+    branches: [main, deploy-test, deploy-test-2, deploy-sqa]
   workflow_dispatch:
 
 jobs:
@@ -40,10 +46,15 @@ jobs:
             echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_PROD }}" >> "$GITHUB_ENV"
           elif [ "${{ github.ref_name }}" = "deploy-test" ]; then
             echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_TEST }}" >> "$GITHUB_ENV"
-          else
+          elif [ "${{ github.ref_name }}" = "deploy-test-2" ]; then
             echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_TEST2 }}" >> "$GITHUB_ENV"
+          elif [ "${{ github.ref_name }}" = "deploy-sqa" ]; then
+            echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_SQA }}" >> "$GITHUB_ENV"
+          else
+            echo "::error::Unknown branch '${{ github.ref_name }}'. Refusing to guess a folder."
+            echo "::error::This workflow only deploys: main, deploy-test, deploy-test-2, deploy-sqa"
+            exit 1
           fi
-
       # ---------- Create .env from secret (never committed!) ----------
       - name: Create .env (production)
         if: github.ref_name == 'main'
@@ -64,6 +75,13 @@ jobs:
         run: |
           cat > .env <<'ENVEOF'
           ${{ secrets.TEST2_ENV_FILE }}
+          ENVEOF
+
+      - name: Create .env (sqa)
+        if: github.ref_name == 'deploy-sqa'
+        run: |
+          cat > .env <<'ENVEOF'
+          ${{ secrets.SQA_ENV_FILE }}
           ENVEOF
 
       # ---------- PHP dependencies (vendor/ is NOT in git) ----------
