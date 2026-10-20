@@ -7,6 +7,9 @@
 #    push to deploy-test-2 -> SANDBOX #2     (secrets: *_TEST2)
 #    push to deploy-sqa    -> SQA TESTER     (secrets: *_SQA)
 #
+#  All four branches MUST keep an identical copy of this workflow. If a branch
+#  is missing one, a push can land in the wrong folder on the server.
+#
 #  Required GitHub repo Secrets (Settings > Secrets and variables > Actions):
 #    FTP_USERNAME           - InfinityFree FTP user   (epiz_XXXX)
 #    FTP_PASSWORD           - InfinityFree FTP password
@@ -43,12 +46,15 @@ jobs:
             echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_PROD }}" >> "$GITHUB_ENV"
           elif [ "${{ github.ref_name }}" = "deploy-test" ]; then
             echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_TEST }}" >> "$GITHUB_ENV"
+          elif [ "${{ github.ref_name }}" = "deploy-test-2" ]; then
+            echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_TEST2 }}" >> "$GITHUB_ENV"
           elif [ "${{ github.ref_name }}" = "deploy-sqa" ]; then
             echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_SQA }}" >> "$GITHUB_ENV"
           else
-            echo "SERVER_DIR=${{ secrets.FTP_SERVER_DIR_TEST2 }}" >> "$GITHUB_ENV"
+            echo "::error::Unknown branch '${{ github.ref_name }}'. Refusing to guess a folder."
+            echo "::error::This workflow only deploys: main, deploy-test, deploy-test-2, deploy-sqa"
+            exit 1
           fi
-
       # ---------- Create .env from secret (never committed!) ----------
       - name: Create .env (production)
         if: github.ref_name == 'main'
