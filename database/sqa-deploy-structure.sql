@@ -1,7 +1,8 @@
 -- ===========================================
 -- SQA Deploy Dump (sqa-smartacc-v3)
--- Generated: 2026-10-20 09:18:05
--- Structure + default staff accounts only
+-- Generated: 2026-10-20 14:30:11
+-- Source: manual/test1_READY.sql
+-- Structure + 5 staff accounts + reference data only
 -- ===========================================
 
 SET NAMES utf8mb4;
@@ -9,7 +10,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- MariaDB dump 10.19  Distrib 10.4.32-MariaDB, for Win64 (AMD64)
 --
--- Host: localhost    Database: bld
+-- Host: localhost    Database: rdy
 -- ------------------------------------------------------
 -- Server version	10.4.32-MariaDB
 
@@ -42,7 +43,7 @@ CREATE TABLE `account_mappings` (
   UNIQUE KEY `account_mappings_mapping_key_unique` (`mapping_key`),
   KEY `account_mappings_account_id_foreign` (`account_id`),
   CONSTRAINT `account_mappings_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `chart_of_accounts` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -51,6 +52,7 @@ CREATE TABLE `account_mappings` (
 
 LOCK TABLES `account_mappings` WRITE;
 /*!40000 ALTER TABLE `account_mappings` DISABLE KEYS */;
+INSERT INTO `account_mappings` VALUES (1,'other_payroll_deductions_payable','Other Payroll Deductions Payable',2,'2026-10-19 17:42:11','2026-10-19 17:42:11');
 /*!40000 ALTER TABLE `account_mappings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -73,7 +75,9 @@ CREATE TABLE `accounting_audit_logs` (
   `ip_address` varchar(45) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `accounting_audit_logs_user_id_foreign` (`user_id`),
+  CONSTRAINT `accounting_audit_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -437,11 +441,12 @@ CREATE TABLE `chart_of_accounts` (
   `created_by` bigint(20) unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `is_contra` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `chart_of_accounts_account_code_unique` (`account_code`),
   KEY `chart_of_accounts_created_by_foreign` (`created_by`),
   CONSTRAINT `chart_of_accounts_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -450,7 +455,7 @@ CREATE TABLE `chart_of_accounts` (
 
 LOCK TABLES `chart_of_accounts` WRITE;
 /*!40000 ALTER TABLE `chart_of_accounts` DISABLE KEYS */;
-INSERT INTO `chart_of_accounts` VALUES (1,'101','rent expense','Expense','rental for the month of july',1,NULL,'2026-09-03 23:19:22','2026-09-03 23:19:22');
+INSERT INTO `chart_of_accounts` VALUES (1,'101','rent expense','Expense','rental for the month of july',1,NULL,'2026-09-03 23:19:22','2026-09-03 23:19:22',0),(2,'2070','Other Payroll Deductions Payable','Liability','Employee payroll deductions withheld for remittance to third parties',1,NULL,'2026-10-19 17:42:11','2026-10-19 17:42:11',0);
 /*!40000 ALTER TABLE `chart_of_accounts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1020,7 +1025,9 @@ CREATE TABLE `notifications` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `notifications_user_id_foreign` (`user_id`),
+  CONSTRAINT `notifications_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=199 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1100,7 +1107,6 @@ CREATE TABLE `paos` (
 
 LOCK TABLES `paos` WRITE;
 /*!40000 ALTER TABLE `paos` DISABLE KEYS */;
-INSERT INTO `paos` VALUES (1,'Juan Bo','09318973202','male','juanbo@gmail.com','Concepcion Marikina City','2025-09-01','active','2026-09-17 01:13:08','2026-09-30 19:58:05'),(2,'Raymart Dizon','09182468761',NULL,NULL,NULL,NULL,'active','2026-09-30 19:56:19','2026-09-30 19:56:19'),(3,'Elco Monforte','09654813546',NULL,NULL,NULL,NULL,'active','2026-09-30 19:57:47','2026-09-30 19:57:47'),(4,'Bertmon Reyes','09256484354',NULL,NULL,NULL,NULL,'active','2026-09-30 19:58:39','2026-09-30 19:58:39'),(5,'Noel Ragua','09111111111',NULL,NULL,NULL,NULL,'active','2026-09-30 20:00:15','2026-09-30 20:00:15'),(6,'John Joseph Barcelon','09185623547',NULL,NULL,NULL,NULL,'active','2026-09-30 20:01:07','2026-09-30 20:01:07'),(7,'Samue Alcantara','09584321654',NULL,NULL,NULL,NULL,'active','2026-09-30 20:02:20','2026-09-30 20:02:20'),(8,'Kris Aldin Gayola','09845621564',NULL,NULL,NULL,NULL,'active','2026-09-30 20:02:37','2026-09-30 20:02:37'),(9,'Ediever Guilaran','09548976213',NULL,NULL,NULL,NULL,'active','2026-09-30 20:03:56','2026-09-30 20:03:56'),(10,'Kristian Bindoy','09256498731',NULL,NULL,NULL,NULL,'active','2026-09-30 20:04:33','2026-09-30 20:04:33'),(11,'Marina Sarno','09321654898',NULL,NULL,NULL,NULL,'active','2026-10-01 00:54:29','2026-10-01 00:54:29'),(12,'Myrna Mayuga','09321654789',NULL,NULL,NULL,NULL,'active','2026-10-01 18:15:09','2026-10-01 18:15:09'),(13,'Michael Tiamson','09366589757',NULL,NULL,NULL,NULL,'active','2026-10-01 18:29:41','2026-10-01 18:29:41'),(14,'Carl James Obeña','09513565749',NULL,NULL,NULL,NULL,'active','2026-10-01 18:33:48','2026-10-01 18:33:48'),(15,'Mary Grace Atoli','09456897651',NULL,NULL,NULL,NULL,'active','2026-10-01 18:42:49','2026-10-01 18:42:49'),(16,'Darren Lloyd Kho','09189876532',NULL,NULL,NULL,NULL,'active','2026-10-01 19:01:12','2026-10-01 19:01:12'),(17,'Lenie Nunez','09316879463',NULL,NULL,NULL,NULL,'active','2026-10-01 19:07:22','2026-10-01 19:07:22'),(18,'Jorick Batiancila','09598987416',NULL,NULL,NULL,NULL,'active','2026-10-01 19:08:55','2026-10-01 19:08:55'),(19,'Eloisa Meterio','09569879543',NULL,NULL,NULL,NULL,'active','2026-10-01 19:09:58','2026-10-01 19:09:58'),(20,'Joel Divina','09565468971',NULL,NULL,NULL,NULL,'active','2026-10-13 17:57:02','2026-10-13 17:57:02'),(21,'Ricky Carcueva','09088796531',NULL,NULL,NULL,NULL,'active','2026-10-13 18:00:21','2026-10-13 18:00:21'),(22,'Jhunelle Sarte','09564987651',NULL,NULL,NULL,NULL,'active','2026-10-13 18:43:13','2026-10-13 18:43:13');
 /*!40000 ALTER TABLE `paos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1317,7 +1323,13 @@ CREATE TABLE `payrolls` (
   `employer_sss` decimal(12,2) DEFAULT NULL,
   `employer_pagibig` decimal(12,2) DEFAULT NULL,
   `employer_philhealth` decimal(12,2) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `payrolls_approved_by_foreign` (`approved_by`),
+  KEY `payrolls_batch_id_foreign` (`batch_id`),
+  KEY `payrolls_user_id_foreign` (`user_id`),
+  CONSTRAINT `payrolls_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `payrolls_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `payroll_batches` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `payrolls_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1571,7 +1583,15 @@ CREATE TABLE `thirteenth_month_pays` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `thirteenth_month_pays_batch_id_foreign` (`batch_id`),
+  KEY `thirteenth_month_pays_computed_by_foreign` (`computed_by`),
+  KEY `thirteenth_month_pays_paid_by_foreign` (`paid_by`),
+  KEY `thirteenth_month_pays_user_id_foreign` (`user_id`),
+  CONSTRAINT `thirteenth_month_pays_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `payroll_batches` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `thirteenth_month_pays_computed_by_foreign` FOREIGN KEY (`computed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `thirteenth_month_pays_paid_by_foreign` FOREIGN KEY (`paid_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `thirteenth_month_pays_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1670,7 +1690,9 @@ CREATE TABLE `users` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `last_login_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `users_shift_id_foreign` (`shift_id`),
+  CONSTRAINT `users_shift_id_foreign` FOREIGN KEY (`shift_id`) REFERENCES `shifts` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1680,12 +1702,12 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Super Admin','super_admin','$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',0,'superadmin',NULL,'kGJJIedNYMXz7nGhWkPdQEOSuai3FNzSX01mr5WBaTNQh7mxQn0d8Ja7BSae',1,'Super',NULL,'Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'active',0.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-03 06:01:03','2026-10-20 06:39:14','2026-10-20 06:39:14'),(2,'QR Attendance Admin','qr_admin','$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',0,'qr_admin',NULL,'xaJY2iNiK6cNR2klK1Q3FZ60SnvLDu4BcS4L72hlxIDvb4sS7Mh6IJqt0Spy',1,'QR',NULL,'Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'active',0.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-03 06:01:03','2026-09-11 16:39:40','2026-09-11 16:39:40'),(3,'Maria Carmel Galino Wacay','melwacay','$2y$12$Hl/oT6oNl4sHMccJeHkOR.4cXfgXumCUOr15ecsjwgSHSWeAnEIgW',0,'hr',NULL,'PR0s7LPINDEXQiHJWJEym6NwKNvqLuYdGU0xXJkUbieZHfsS2tEqaVwFB5zq',1,'Maria Carmel','Galino','Wacay','maria.wacay@gmail.com','09959221488','{\"street\":\"549-C Dir A Bunye Street Lakeside III Purok 3\",\"barangay\":\"Sucat\",\"city\":\"Muntinlupa City\",\"province\":\"National Capital Region\"}','Single','female',NULL,'1970-11-10','Anini-y Antique','College (Bachelor\'s)',NULL,NULL,'2022-10-04','HR',1,'HR','active',5000.00,6,'BPI',NULL,NULL,1,'07-3105391-5','216-204-486',1,'1010-0108-2645',NULL,1,1,NULL,NULL,'2026-09-03 22:22:13','2026-09-18 20:52:22','2026-09-18 18:21:27'),(4,'beth boongaling','beth.boongaling','$2y$12$zTkN4TdQhMw5bR9y1sDhMeSNiUAtBSWNqvcTQcI9jKuThIxetS7K2',0,'accountant',NULL,NULL,1,'beth',NULL,'boongaling','elizabethboongaling04@gmail.com','09201213683','{\"street\":\"blk 6 lot 6 Millenium homes\",\"barangay\":\"burgos\",\"city\":\"rodriguez\",\"province\":\"rizal\"}','Married','female',NULL,'1986-04-04','San Mateo, Rizal','College (Bachelor\'s)',NULL,NULL,'2019-09-23','Accounting',1,'Accounting','active',1000.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-03 22:33:32','2026-10-01 18:23:23','2026-10-01 18:23:23'),(7,'Mary Grace Manduriao','marygrace.mandurioa','$2y$12$rGs5XGdVUa6CnOVSQnBaFuhTDcSSsvSqRQPAmQckKtbAd77P7HZ86',0,'employee',NULL,NULL,1,'Mary Grace',NULL,'Manduriao','marygracemanduriao@gmail.com','09368766406','{\"street\":\"Briget, Torres Comp\",\"barangay\":\"Ampid 1\",\"city\":\"San Mateo\",\"province\":\"Rizal\"}','Married','female',NULL,'1986-04-17','San Mateo, Rizal','College (Bachelor\'s)',NULL,NULL,'2023-09-01','Admin',NULL,'Admin','active',800.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-10 16:57:20','2026-09-10 17:07:54','2026-09-10 17:07:54'),(8,'Joshua  Boongaling','joshua.boongaling','$2y$12$.dYgOQmjLiistQRmB87ZburlUWXwD5sfYdo79deYCUDFO4P6T3nSC',0,'employee',NULL,NULL,1,'Joshua',NULL,'Boongaling',NULL,'09054857450','{\"street\":\"blk 6 lot 6 Millenium homes\",\"barangay\":\"burgos\",\"city\":\"rodriguez\",\"province\":\"Rizal\"}','Single','male',NULL,'1999-06-22','Quezon City','College (Bachelor\'s)',NULL,NULL,'2021-07-11','Admin',NULL,'Admin','active',800.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-10 17:20:22','2026-09-17 19:20:20','2026-09-17 19:20:20'),(9,'Manny  Dela Cruz','manny.delacruz','$2y$12$EphI47jSJ7wE7QcQ3yueYeiBKUuEouqy1Nz6k4cj3hrPoKv2SDr/a',0,'employee',NULL,NULL,1,'Manny',NULL,'Dela Cruz',NULL,'09617131703','{\"street\":\"blk 1 lot 16 Millenium homes\",\"barangay\":\"Burgos\",\"city\":\"Rodriguez\",\"province\":\"Rizal\"}','Married','male',NULL,'1978-06-12','Pangasinan','College (Bachelor\'s)',NULL,NULL,'2024-01-01','Admin',NULL,'Admin','active',800.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-10 17:42:18','2026-09-10 20:49:33','2026-09-10 20:49:33'),(10,'Ronolfo  Alcanse','ronolfo.alcanse','$2y$12$ZGHVYMJF2m.v7cA5eKVBjOXJiVbPb95TfwFXtXwiyOryIkMy4s2zy',0,'employee',NULL,NULL,1,'Ronolfo',NULL,'Alcanse','ronniealcanse1977@gmail.com','09958630020','{\"street\":\"Blk 2 Lot 1 Millenium Homes\",\"barangay\":\"Burgos\",\"city\":\"Rodriguez\",\"province\":\"Rizal\"}','Married','male',NULL,'1978-08-10','Cavite','College (Bachelor\'s)',NULL,NULL,'2024-01-01','Admin',3,'Admin','active',800.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-10 17:57:04','2026-09-18 18:52:24','2026-09-10 21:09:15'),(11,'Kimberly Magayones Ramos','kimberly.ramos','$2y$12$.oX9TY3OAVPPNDm4MmtSpueento.rir/CmaeznK2THZkRpDRuJgt2',0,'employee',NULL,NULL,0,'Kimberly','Magayones','Ramos','khimr@gmail.com','09668025877','{\"street\":\"0490 Area 6\",\"barangay\":\"Botocan\",\"city\":\"Quezon City\",\"province\":\"National Capital Region\"}','Single','female',NULL,'1996-04-30','Quezon City','Vocational / TESDA',NULL,NULL,'2026-09-15','Admin',4,'Admin','active',800.00,5,NULL,NULL,NULL,1,'35-1100417-8','611-600-080',1,'1212-8870-1922',NULL,1,0,NULL,NULL,'2026-09-18 19:22:51','2026-10-13 17:22:09',NULL);
+INSERT INTO `users` VALUES
 (1,'Super Admin','super_admin','$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',0,'superadmin',NULL,'kGJJIedNYMXz7nGhWkPdQEOSuai3FNzSX01mr5WBaTNQh7mxQn0d8Ja7BSae',1,'Super',NULL,'Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'active',0.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-03 06:01:03','2026-10-20 06:39:14','2026-10-20 06:39:14'),
 (2,'QR Attendance Admin','qr_admin','$2y$12$YhTTF5BRZfCgAA9.G1RFyObHHru/l1suzFQ2cXZvWvYYze66mQ/hS',0,'qr_admin',NULL,'xaJY2iNiK6cNR2klK1Q3FZ60SnvLDu4BcS4L72hlxIDvb4sS7Mh6IJqt0Spy',1,'QR',NULL,'Admin',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'active',0.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-03 06:01:03','2026-09-11 16:39:40','2026-09-11 16:39:40'),
-(3,'Maria Carmel Galino Wacay','melwacay','$2y$12$Hl/oT6oNl4sHMccJeHkOR.4cXfgXumCUOr15ecsjwgSHSWeAnEIgW',0,'hr',NULL,'PR0s7LPINDEXQiHJWJEym6NwKNvqLuYdGU0xXJkUbieZHfsS2tEqaVwFB5zq',1,'Maria Carmel','Galino','Wacay','maria.wacay@gmail.com','09959221488','{\"street\":\"549-C Dir A Bunye Street Lakeside III Purok 3\",\"barangay\":\"Sucat\",\"city\":\"Muntinlupa City\",\"province\":\"National Capital Region\"}','Single','female',NULL,'1970-11-10','Anini-y Antique','College (Bachelor\'s),
-(4,'beth boongaling','beth.boongaling','$2y$12$zTkN4TdQhMw5bR9y1sDhMeSNiUAtBSWNqvcTQcI9jKuThIxetS7K2',0,'accountant',NULL,NULL,1,'beth',NULL,'boongaling','elizabethboongaling04@gmail.com','09201213683','{\"street\":\"blk 6 lot 6 Millenium homes\",\"barangay\":\"burgos\",\"city\":\"rodriguez\",\"province\":\"rizal\"}','Married','female',NULL,'1986-04-04','San Mateo, Rizal','College (Bachelor\'s),
-(7,'Mary Grace Manduriao','marygrace.mandurioa','$2y$12$rGs5XGdVUa6CnOVSQnBaFuhTDcSSsvSqRQPAmQckKtbAd77P7HZ86',0,'employee',NULL,NULL,1,'Mary Grace',NULL,'Manduriao','marygracemanduriao@gmail.com','09368766406','{\"street\":\"Briget, Torres Comp\",\"barangay\":\"Ampid 1\",\"city\":\"San Mateo\",\"province\":\"Rizal\"}','Married','female',NULL,'1986-04-17','San Mateo, Rizal','College (Bachelor\'s);
+(3,'Maria Carmel Galino Wacay','melwacay','$2y$12$Hl/oT6oNl4sHMccJeHkOR.4cXfgXumCUOr15ecsjwgSHSWeAnEIgW',0,'hr',NULL,'PR0s7LPINDEXQiHJWJEym6NwKNvqLuYdGU0xXJkUbieZHfsS2tEqaVwFB5zq',1,'Maria Carmel','Galino','Wacay','maria.wacay@gmail.com','09959221488','{\"street\":\"549-C Dir A Bunye Street Lakeside III Purok 3\",\"barangay\":\"Sucat\",\"city\":\"Muntinlupa City\",\"province\":\"National Capital Region\"}','Single','female',NULL,'1970-11-10','Anini-y Antique','College (Bachelor\'s)',NULL,NULL,'2022-10-04','HR',1,'HR','active',5000.00,6,'BPI',NULL,NULL,1,'07-3105391-5','216-204-486',1,'1010-0108-2645',NULL,1,1,NULL,NULL,'2026-09-03 22:22:13','2026-09-18 20:52:22','2026-09-18 18:21:27'),
+(4,'beth boongaling','beth.boongaling','$2y$12$zTkN4TdQhMw5bR9y1sDhMeSNiUAtBSWNqvcTQcI9jKuThIxetS7K2',0,'accountant',NULL,NULL,1,'beth',NULL,'boongaling','elizabethboongaling04@gmail.com','09201213683','{\"street\":\"blk 6 lot 6 Millenium homes\",\"barangay\":\"burgos\",\"city\":\"rodriguez\",\"province\":\"rizal\"}','Married','female',NULL,'1986-04-04','San Mateo, Rizal','College (Bachelor\'s)',NULL,NULL,'2019-09-23','Accounting',1,'Accounting','active',1000.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-03 22:33:32','2026-10-01 18:23:23','2026-10-01 18:23:23'),
+(7,'Mary Grace Manduriao','marygrace.mandurioa','$2y$12$rGs5XGdVUa6CnOVSQnBaFuhTDcSSsvSqRQPAmQckKtbAd77P7HZ86',0,'employee',NULL,NULL,1,'Mary Grace',NULL,'Manduriao','marygracemanduriao@gmail.com','09368766406','{\"street\":\"Briget, Torres Comp\",\"barangay\":\"Ampid 1\",\"city\":\"San Mateo\",\"province\":\"Rizal\"}','Married','female',NULL,'1986-04-17','San Mateo, Rizal','College (Bachelor\'s)',NULL,NULL,'2023-09-01','Admin',NULL,'Admin','active',800.00,5,NULL,NULL,NULL,0,NULL,NULL,0,NULL,NULL,0,0,NULL,NULL,'2026-09-10 16:57:20','2026-09-10 17:07:54','2026-09-10 17:07:54');
 UNLOCK TABLES;
 
 --
@@ -1760,10 +1782,5 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed
-
--- ===========================================
--- Foreign key constraints
--- ===========================================
-
 
 SET FOREIGN_KEY_CHECKS = 1;
