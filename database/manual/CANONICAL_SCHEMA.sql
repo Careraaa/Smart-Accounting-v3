@@ -1,6 +1,6 @@
 -- ===========================================
 -- CANONICAL SCHEMA - single source of truth
--- Generated: 2026-10-20 17:34:01
+-- Generated: 2026-10-20 17:46:37
 --
 -- Every branch's database export must be built from this file so
 -- the structure always matches the code. Do not hand-edit.

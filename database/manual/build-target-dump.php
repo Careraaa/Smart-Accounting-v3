@@ -47,7 +47,7 @@
 $repo = dirname(__DIR__, 2);
 $schemaPath = $repo . '/database/manual/CANONICAL_SCHEMA.sql';
 
-$opts = getopt('', ['source:', 'profile:', 'out:', 'schema:', 'make-schema', 'list', 'help']);
+$opts = getopt('', ['source:', 'profile:', 'out:', 'schema:', 'reference-from:', 'make-schema', 'list', 'help']);
 if (isset($opts['help']) || (!$opts && !isset($opts['list']))) {
     echo file_get_contents(__FILE__, false, null, 0, 1800);
     exit;
@@ -106,14 +106,14 @@ function parseDump(string $sql): array {
         if (preg_match('/^CREATE TABLE `([^`]+)`/', $line, $m)) {
             $cur = $m[1];
             $buf = $line;
-            if (preg_match('/\)\s*ENGINE=[^;]*;\s*$/', $line)) {
+            if (preg_match('/^\s*\)\s*(ENGINE=[^;]*)?\s*;\s*$/', $line)) {
                 $ddl[$cur] = $buf; $order[] = $cur; $cur = null; $buf = null;
             }
             continue;
         }
         if ($cur !== null) {
             $buf .= "\n" . $line;
-            if (preg_match('/\)\s*ENGINE=[^;]*;\s*$/', $line)) {
+            if (preg_match('/^\s*\)\s*(ENGINE=[^;]*)?\s*;\s*$/', $line)) {
                 $ddl[$cur] = $buf; $order[] = $cur; $cur = null; $buf = null;
             }
             continue;
@@ -227,6 +227,48 @@ function migrationNames(string $repo): array {
     return $names;
 }
 
+// --- Foreign-key aware ordering ---------------------------------------------
+/** Parse "child table -> parent tables" from the canonical schema. */
+function parseForeignKeys(string $schema): array {
+    $fks = [];
+    if (preg_match_all('/CREATE TABLE `([^`]+)`\s*\([\s\S]*?\n\)\s*(ENGINE=[^;]*)?\s*;/', $schema, $tblBlk, PREG_SET_ORDER)) {
+        foreach ($tblBlk as $b) {
+            $child = $b[1];
+            if (preg_match_all('/FOREIGN KEY \(`[^`]+`\) REFERENCES `([^`]+)`/', $b[0], $m)) {
+                foreach ($m[1] as $parent) {
+                    if ($parent !== $child) $fks[$child][] = $parent;
+                }
+            }
+        }
+    }
+    return $fks;
+}
+
+/**
+ * Order tables so a parent is always inserted before its children.
+ * Without this the import fails with:
+ *   #1452 foreign key constraint fails (users.shift_id -> shifts.id)
+ */
+function topoSort(array $tables, array $fks): array {
+    $set = array_flip($tables);
+    $sorted = [];
+    $state = [];
+
+    $visit = function (string $t) use (&$visit, &$sorted, &$state, $fks, $set) {
+        if (($state[$t] ?? 0) === 2) return;
+        if (($state[$t] ?? 0) === 1) return;   // cycle - leave as is
+        $state[$t] = 1;
+        foreach ($fks[$t] ?? [] as $parent) {
+            if (isset($set[$parent])) $visit($parent);
+        }
+        $state[$t] = 2;
+        $sorted[] = $t;
+    };
+
+    foreach ($tables as $t) $visit($t);
+    return $sorted;
+}
+
 // â”€â”€ Build canonical schema â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function buildCanonical(array $parsed, array $migrations): string {
     $o = [];
@@ -267,7 +309,7 @@ function buildCanonical(array $parsed, array $migrations): string {
     return implode("\n", $o);
 }
 
-// â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// --- Main ---
 
 $source = $opts['source'] ?? null;
 if (!$source) {
@@ -315,8 +357,40 @@ if ($profile['data'] === 'all') {
 }
 // `users` is always emitted - the profile decides how many accounts.
 if (!in_array('users', $keepTables, true)) {
-    array_unshift($keepTables, 'users');
+    $keepTables[] = 'users';
 }
+
+// When a unified reference source is given, its reference tables are added
+// even if this environment's own dump has none (production had no
+// departments or position_rates at all).
+if (!empty($opts['reference-from'])) {
+    $refForTables = parseDump(file_get_contents($opts['reference-from']));
+    foreach (REFERENCE_TABLES as $t) {
+        if (isset($refForTables['data'][$t]) && !in_array($t, $keepTables, true)) {
+            $keepTables[] = $t;
+        }
+    }
+}
+
+// Optional: take the reference/seed rows from another dump so every
+// environment ends up with the same chart of accounts, shifts, departments,
+// position rates, etc. Useful when one environment is behind (production
+// had no departments or position_rates at all).
+$refParsed = null;
+if (!empty($opts['reference-from'])) {
+    $refPath = $opts['reference-from'];
+    if (!is_file($refPath)) {
+        fwrite(STDERR, "ERROR: --reference-from file not found: $refPath\n");
+        exit(1);
+    }
+    $refParsed = parseDump(file_get_contents($refPath));
+    echo "  reference data from: " . basename($refPath) . "\n";
+}
+
+// Insert parents before children, otherwise the import trips a foreign key
+// (users.shift_id -> shifts.id). Order comes from the canonical schema.
+$fkMap = parseForeignKeys($canon);
+$keepTables = topoSort($keepTables, $fkMap);
 
 $o = [];
 $o[] = "-- ===========================================";
@@ -326,6 +400,7 @@ $o[] = "-- Source: " . basename($source);
 $o[] = "-- Structure: database/manual/CANONICAL_SCHEMA.sql (identical for all branches)";
 $o[] = "-- Data rule : " . ($profile['data'] === 'all' ? 'full' : 'reference + staff only');
 $o[] = "-- Migrations: " . count($migrations) . " recorded";
+$o[] = "-- Insert order: " . implode(", ", $keepTables);
 $o[] = "-- ===========================================";
 $o[] = "";
 $o[] = "SET NAMES utf8mb4;";
@@ -347,15 +422,22 @@ $o[] = "";
 // 2. Data
 $keptTables = [];
 foreach ($keepTables as $t) {
-    if (!isset($parsed['data'][$t])) continue;
     if ($t === 'migrations') continue;         // already written from canonical
+
+    // Reference/seed rows may come from the unified reference source.
+    $src = $parsed;
+    if ($refParsed !== null && in_array($t, REFERENCE_TABLES, true) && isset($refParsed['data'][$t])) {
+        $src = $refParsed;
+    }
+    if (!isset($src['data'][$t])) continue;
+
     if ($t === 'users' && $profile['users'] !== 'all') {
-        $ins = $parsed['data'][$t][0];
+        $ins = $src['data'][$t][0];
         $limited = limitInsert($ins, $profile['users']);
         if ($limited !== '') { $o[] = $limited; $keptTables[] = "$t (" . countTuples($limited) . ")"; }
         continue;
     }
-    foreach ($parsed['data'][$t] as $ins) {
+    foreach ($src['data'][$t] as $ins) {
         $o[] = rtrim($ins, ';') . ';';
     }
     $keptTables[] = $t;
