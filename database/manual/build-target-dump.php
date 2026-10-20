@@ -47,7 +47,7 @@
 $repo = dirname(__DIR__, 2);
 $schemaPath = $repo . '/database/manual/CANONICAL_SCHEMA.sql';
 
-$opts = getopt('', ['source:', 'profile:', 'out:', 'schema:', 'reference-from:', 'make-schema', 'list', 'help']);
+$opts = getopt('', ['source:', 'profile:', 'out:', 'schema:', 'reference-from:', 'users:', 'data:', 'make-schema', 'list', 'help']);
 if (isset($opts['help']) || (!$opts && !isset($opts['list']))) {
     echo file_get_contents(__FILE__, false, null, 0, 1800);
     exit;
@@ -338,6 +338,32 @@ if (!$profileName || !isset($PROFILES[$profileName])) {
     exit(1);
 }
 $profile = $PROFILES[$profileName];
+
+// --users=all  -> keep every account in the source (useful when the client's
+//                 data lives in one environment and must reach all of them).
+if (isset($opts['users'])) {
+    $u = strtolower((string) $opts['users']);
+    if ($u === 'all') {
+        $profile['users'] = 'all';
+    } elseif (is_numeric($u)) {
+        $profile['users'] = (int) $u;
+    } else {
+        fwrite(STDERR, "ERROR: --users must be 'all' or a number\n");
+        exit(1);
+    }
+}
+
+// --data=all   -> keep every table's rows, not just the reference ones.
+//                 Use when an environment must receive the client's full data.
+if (isset($opts['data'])) {
+    $d = strtolower((string) $opts['data']);
+    if ($d === 'all' || $d === 'reference') {
+        $profile['data'] = $d;
+    } else {
+        fwrite(STDERR, "ERROR: --data must be 'all' or 'reference'\n");
+        exit(1);
+    }
+}
 
 
 if (!is_file($schemaFile)) {

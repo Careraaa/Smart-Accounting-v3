@@ -50,6 +50,10 @@ foreach ($files as $f) {
 
     $profile = 'unknown';
     if (preg_match('/-- TARGET DUMP: (\w+)/', $sql, $m)) $profile = $m[1];
+    // "Data rule : full" or "reference + staff only" - the staff-only rule
+    // only applies when the dump was built without the client's full data.
+    $dataRule = 'full';
+    if (preg_match('/-- Data rule : (.+)/', $sql, $m)) $dataRule = trim($m[1]);
 
     $ct = preg_match_all('/^CREATE TABLE/m', $sql);
     $dt = preg_match_all('/^DROP TABLE IF EXISTS/m', $sql);
@@ -72,12 +76,12 @@ foreach ($files as $f) {
     if ($dt !== 50)       $problems[] = "expected 50 DROP TABLE, got $dt";
     if ($migRows !== 26)  $problems[] = "expected 26 migration rows, got $migRows";
     if (!$users)          $problems[] = "no users INSERT";
-    if ($profile === 'sqa' && $userRows !== 5) $problems[] = "sqa must have exactly 5 staff accounts, got $userRows";
+    if ($profile === 'sqa' && $dataRule !== 'full' && $userRows !== 5) $problems[] = "sqa staff-only dump must have exactly 5 accounts, got $userRows";
     if (strpos($sql, 'SET FOREIGN_KEY_CHECKS = 0;') === false) $problems[] = "no FK-disable at start";
     if (strpos($sql, 'SET FOREIGN_KEY_CHECKS = 1;') === false) $problems[] = "no FK-enable at end";
 
-    // Demo data is only a problem for the clean (sqa) profile.
-    if ($profile === 'sqa') {
+    // Demo data is only a problem for a staff-only (clean) dump.
+    if ($profile === 'sqa' && $dataRule !== 'full') {
         $demoLeak = array_values(array_intersect($insTables, [
             'payrolls', 'attendance', 'daily_remittances', 'drivers', 'paos',
             'leave_requests', 'cash_advances', 'employees', 'notifications',
