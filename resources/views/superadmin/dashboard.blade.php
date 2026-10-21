@@ -182,7 +182,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                         <p class="kcard-label">Net Payroll Trend</p>
                         <p class="text-xl font-semibold text-gray-900 tabular-nums mt-1">₱{{ number_format($nMax, 0) }}</p>
                     </div>
-                    <span class="text-[11px] text-gray-400 mt-0.5">peak · last 6 months</span>
+                    <span class="text-[11px] text-gray-400 mt-0.5">approved payrolls · peak, last 6 months</span>
                 </div>
                 <div class="px-4 pb-4 pt-2">
                     @if($trendCount > 1)
@@ -212,7 +212,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             <div class="sad-fade-up kpi-card overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                     <h2 class="text-[13px] font-semibold text-gray-900">Allowances vs Deductions</h2>
-                    <span class="text-[11px] text-gray-400">Aggregate amounts</span>
+                    <span class="text-[11px] text-gray-400">Approved payrolls</span>
                 </div>
                 <div class="px-4 py-4">
                     @if($adTotal > 0)
@@ -249,17 +249,9 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
 {{-- Daily Remittance Trend --}}
 @php
-    $dailyData = collect();
-    if (isset($recentRemittances) && $recentRemittances->isNotEmpty()) {
-        $grouped = $recentRemittances->groupBy(fn($r) => $r->remittance_date?->format('Y-m-d'));
-        $dailyData = $grouped->map(fn($items, $rdate) => [
-            'date'  => $rdate,
-            'label' => \Carbon\Carbon::parse($rdate)->format('M d'),
-            'net'   => $items->sum('net_remittance'),
-            'count' => $items->count(),
-        ])->sortBy('date')->values();
-    }
-    $rcCount = $dailyData->count();
+    $dailyData = collect($dailyRemittanceTrend);
+    $rcHasData = $dailyData->sum('count') > 0;
+    $rcCount = $rcHasData ? $dailyData->count() : 0;
     $rcMax = $dailyData->max('net') ?: 1;
     $rcTotal = $dailyData->sum('net');
     $rcW = 600; $rcH = 180;
@@ -281,7 +273,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 <div class="sad-fade-up kpi-card overflow-hidden">
     <div class="px-4 pt-4 pb-1 flex items-start justify-between gap-3">
         <div>
-            <p class="kcard-label">Daily Remittance Trend</p>
+            <p class="kcard-label">Daily Remittance Trend <span class="font-normal text-gray-400">· last 7 days</span></p>
             <p class="text-xl font-semibold text-gray-900 tabular-nums mt-1">&#8369;{{ number_format($rcTotal, 0) }}</p>
         </div>
         <a href="{{ route('remittances.index') }}" class="shrink-0 mt-1 text-[11px] font-medium text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">View all &rarr;</a>
@@ -304,13 +296,8 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             <text class="chart-label" x="{{ $rcPadL }}" y="{{ $rcH - 6 }}" text-anchor="start">{{ $dailyData->first()['label'] }}</text>
             <text class="chart-label" x="{{ $rcPadL + $rcPlotW }}" y="{{ $rcH - 6 }}" text-anchor="end">{{ $dailyData->last()['label'] }}</text>
         </svg>
-        @elseif($rcCount === 1)
-        <div class="flex flex-col items-center justify-center h-[150px] gap-1">
-            <span class="text-lg font-semibold text-gray-900 tabular-nums">&#8369;{{ number_format($rcTotal, 0) }}</span>
-            <span class="text-[11px] text-gray-400">1 remittance day on record</span>
-        </div>
         @else
-        <div class="flex items-center justify-center h-[150px] text-xs text-gray-400">No remittance data yet.</div>
+        <div class="flex items-center justify-center h-[150px] text-xs text-gray-400">No finalized remittances in the last 7 days.</div>
         @endif
     </div>
 </div>
