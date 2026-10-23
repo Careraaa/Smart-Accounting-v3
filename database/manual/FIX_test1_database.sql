@@ -355,8 +355,6 @@ SET @sql = IF(@has_employer_philhealth = 0,
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- 2. Primary keys --------------------------------------------------------
--- Must run BEFORE the boundary_payments table below. That table has foreign
--- keys pointing at users, and a foreign key needs a primary key to point at.
 -- Without these the database cannot tell rows apart.
 
 SET @has_pk_users = (SELECT COUNT(*) FROM information_schema.TABLE_CONSTRAINTS
@@ -399,68 +397,7 @@ SET @sql = IF(@has_pk_thirteenth_month_pays = 0,
   'SELECT 1');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
--- 3. Routes: old column -> new columns ----------------------------------
--- test1 still has the old single boundary column. The code on test1 needs
--- weekday_boundary + weekend_boundary. This copies the value across, the same
--- way the migration does. Nothing is removed until the copy is done.
-
-SET @has_boundary = (SELECT COUNT(*) FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'routes' AND COLUMN_NAME = 'boundary');
-
-SET @sql = IF(@has_boundary > 0,
-  'ALTER TABLE `routes` ADD COLUMN `weekday_boundary` DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER `route_name`',
-  'SELECT 1');
-PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-
-SET @sql = IF(@has_boundary > 0,
-  'ALTER TABLE `routes` ADD COLUMN `weekend_boundary` DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER `weekday_boundary`',
-  'SELECT 1');
-PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-
-SET @sql = IF(@has_boundary > 0,
-  'UPDATE `routes` SET `weekday_boundary` = COALESCE(`boundary`, 0), `weekend_boundary` = COALESCE(`boundary`, 0)',
-  'SELECT 1');
-PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-
-SET @sql = IF(@has_boundary > 0,
-  'ALTER TABLE `routes` DROP COLUMN `boundary`',
-  'SELECT 1');
-PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
-
--- 4. boundary_payments table ---------------------------------------------
--- New in the October code. test1 has never had it, so the whole table is
--- missing. CREATE TABLE IF NOT EXISTS leaves it alone if it is ever added.
-
-CREATE TABLE IF NOT EXISTS `boundary_payments` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `daily_remittance_id` bigint(20) unsigned NOT NULL,
-  `source_payment_key` varchar(64) NOT NULL,
-  `initial_payment_remittance_id` bigint(20) unsigned DEFAULT NULL,
-  `payment_date` date NOT NULL,
-  `amount` decimal(15,2) NOT NULL,
-  `paid_by` varchar(16) DEFAULT NULL,
-  `payment_kind` varchar(16) NOT NULL,
-  `status` varchar(16) NOT NULL DEFAULT 'Posted',
-  `recorded_by` bigint(20) unsigned NOT NULL,
-  `approved_by` bigint(20) unsigned DEFAULT NULL,
-  `journal_entry_id` bigint(20) unsigned DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `boundary_payments_source_payment_key_unique` (`source_payment_key`),
-  UNIQUE KEY `boundary_payments_initial_payment_remittance_id_unique` (`initial_payment_remittance_id`),
-  UNIQUE KEY `boundary_payments_journal_entry_id_unique` (`journal_entry_id`),
-  KEY `boundary_payments_recorded_by_foreign` (`recorded_by`),
-  KEY `boundary_payments_approved_by_foreign` (`approved_by`),
-  KEY `boundary_payments_daily_remittance_id_payment_date_index` (`daily_remittance_id`,`payment_date`),
-  CONSTRAINT `boundary_payments_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`),
-  CONSTRAINT `boundary_payments_daily_remittance_id_foreign` FOREIGN KEY (`daily_remittance_id`) REFERENCES `daily_remittances` (`id`),
-  CONSTRAINT `boundary_payments_initial_payment_remittance_id_foreign` FOREIGN KEY (`initial_payment_remittance_id`) REFERENCES `daily_remittances` (`id`),
-  CONSTRAINT `boundary_payments_journal_entry_id_foreign` FOREIGN KEY (`journal_entry_id`) REFERENCES `journal_entries` (`id`),
-  CONSTRAINT `boundary_payments_recorded_by_foreign` FOREIGN KEY (`recorded_by`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 5. Payroll accounting fix ----------------------------------------------
+-- 3. Payroll accounting fix ----------------------------------------------
 
 UPDATE `chart_of_accounts`
 SET `is_contra` = 1,
@@ -503,20 +440,8 @@ WHERE `deduction_source` IS NULL
   AND (`deduction_type` IN ('SSS', 'Pag-IBIG', 'PhilHealth', 'Withholding Tax', 'Late Deduction')
        OR `deduction_type` LIKE 'Undertime Deduction%');
 
--- Boundary payments need these two accounts mapped. Skipped if the accounts do
--- not exist yet, which is fine, they can be set up later.
-INSERT IGNORE INTO `account_mappings` (`mapping_key`, `label`, `account_id`, `created_at`, `updated_at`)
-SELECT 'boundary_cash', 'Boundary Payment Cash / Bank', `id`, NOW(), NOW()
-FROM `chart_of_accounts`
-WHERE `account_code` = '1010' AND `account_type` = 'Asset' AND `is_active` = 1;
 
-INSERT IGNORE INTO `account_mappings` (`mapping_key`, `label`, `account_id`, `created_at`, `updated_at`)
-SELECT 'boundary_revenue', 'Boundary Revenue', `id`, NOW(), NOW()
-FROM `chart_of_accounts`
-WHERE `account_code` = '4010' AND `account_type` = 'Revenue' AND `is_active` = 1;
-
-
--- 6. Verify --------------------------------------------------------------
+-- 4. Verify --------------------------------------------------------------
 -- Every primary_key value here must say has PK.
 
 SELECT t.table_name,
