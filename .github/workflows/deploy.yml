@@ -85,10 +85,10 @@ jobs:
           ENVEOF
 
       # ---------- PHP dependencies (vendor/ is NOT in git) ----------
-      - name: Setup PHP 8.3
+      - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          php-version: "8.4"
           extensions: mbstring, pdo_mysql, openssl, tokenizer, xml, ctype, json, bcmath, gd, zip, fileinfo
           coverage: none
 
