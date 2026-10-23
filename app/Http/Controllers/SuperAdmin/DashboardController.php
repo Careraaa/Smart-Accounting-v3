@@ -41,10 +41,6 @@ class DashboardController extends Controller
             ->where('status', 'late')
             ->count();
         
-        $attendanceRate = $totalEmployees > 0 
-            ? (($presentToday + $lateToday) / $totalEmployees) * 100 
-            : 0;
-
         // ============ LEAVE STATISTICS ============
         $totalLeaves = Leave::count();
         $approvedLeaves = Leave::whereIn('status', ['approved', 'paid'])->count();
@@ -62,9 +58,10 @@ class DashboardController extends Controller
 
         // ============ PAYROLL STATISTICS ============
         $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])->get();
-        $totalPayroll = $payrolls->sum(fn($p) => $p->net_pay);
-        $totalAllowances = $payrolls->sum(fn($p) => $p->total_allowances);
-        $totalDeductions = $payrolls->sum(fn($p) => $p->total_deductions);
+        $approvedPayrolls = $payrolls->where('status', 'approved');
+        $totalPayroll = $approvedPayrolls->sum(fn($p) => $p->net_pay);
+        $totalAllowances = $approvedPayrolls->sum(fn($p) => $p->total_allowances);
+        $totalDeductions = $approvedPayrolls->sum(fn($p) => $p->total_deductions);
 
         // Payroll status breakdown
         $approvedPayroll = $payrolls->where('status', 'approved')->count();
@@ -72,7 +69,7 @@ class DashboardController extends Controller
         $processingPayroll = $payrolls->where('status', 'processing')->count();
 
         // Average basic salary
-        $averageBasicSalary = $payrolls->avg(fn($p) => $p->basic_salary);
+        $averageBasicSalary = $approvedPayrolls->avg(fn($p) => $p->basic_salary);
 
         // Deduction vs Allowance ratio
         $baseAmount = $totalAllowances + $totalDeductions;
@@ -91,17 +88,32 @@ class DashboardController extends Controller
         $pendingRemittancesCount = DailyRemittance::where('status', 'pending')->count();
         $completedRemittances = DailyRemittance::where('status', 'completed')->count();
 
-        // Recent remittances — feeds the Daily Remittance Trend card
-        $recentRemittances = DailyRemittance::with('driver', 'vehicle', 'route')
+        // Daily trend uses the same finalized remittance statuses as the clerk dashboard.
+        $remittanceTrendStart = $today->copy()->subDays(6);
+        $remittanceTotalsByDay = DailyRemittance::query()
+            ->selectRaw('DATE(remittance_date) as remittance_day, SUM(net_remittance) as net, COUNT(*) as count')
             ->whereIn('status', ['approved', 'completed'])
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
+            ->whereBetween('remittance_date', [$remittanceTrendStart->toDateString(), $today->toDateString()])
+            ->groupByRaw('DATE(remittance_date)')
+            ->get()
+            ->keyBy('remittance_day');
+        $dailyRemittanceTrend = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = $today->copy()->subDays($i);
+            $day = $date->toDateString();
+            $remittanceTotals = $remittanceTotalsByDay->get($day);
+            $dailyRemittanceTrend[] = [
+                'date' => $day,
+                'label' => $date->format('M d'),
+                'net' => (float) ($remittanceTotals->net ?? 0),
+                'count' => (int) ($remittanceTotals->count ?? 0),
+            ];
+        }
 
         // ============ ATTENDANCE TREND (Last 7 days) ============
         $attendanceTrend = [];
         for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i)->startOfDay();
+            $date = $today->copy()->subDays($i)->startOfDay();
             $present = Attendance::whereDate('date', $date)
                 ->where('status', 'present')
                 ->count();
@@ -120,12 +132,17 @@ class DashboardController extends Controller
                 'late' => $late
             ];
         }
+        $todayAttendance = $attendanceTrend[array_key_last($attendanceTrend)];
+        $todayAttendanceCount = $todayAttendance['present'] + $todayAttendance['late'] + $todayAttendance['absent'];
+        $attendanceRate = $todayAttendanceCount > 0
+            ? round(($todayAttendance['present'] / $todayAttendanceCount) * 100)
+            : 0;
 
         // ============ MONTHLY PAYROLL TREND (Last 6 months) ============
         $monthlyPayrollTrend = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $total = $payrolls
+            $total = $approvedPayrolls
                 ->where('created_at', '>=', $month->copy()->startOfMonth())
                 ->where('created_at', '<=', $month->copy()->endOfMonth())
                 ->sum(fn($p) => $p->net_pay);
@@ -248,7 +265,7 @@ class DashboardController extends Controller
             'totalNetRemittance',
             'pendingRemittancesCount',
             'completedRemittances',
-            'recentRemittances',
+            'dailyRemittanceTrend',
             'attendanceTrend',
             'monthlyPayrollTrend',
             'leaveTrend',

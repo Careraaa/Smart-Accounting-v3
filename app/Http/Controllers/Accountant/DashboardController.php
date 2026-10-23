@@ -23,13 +23,13 @@ class DashboardController extends Controller
         // Exclude superadmin and qr_admin from employee counts
         $totalEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])->count();
 
-        // Load only finalized payrolls (submitted → approved → released/paid).
-        // Draft / pending / rejected records are excluded from all stats.
+        // Include submitted and approved payrolls for the status pipeline.
+        // Only approved payrolls contribute to the monetary totals below.
         $payrolls = Payroll::with(['employee', 'allowances', 'deductions'])
             ->whereIn('status', self::ACTIVE_STATUSES)
             ->get();
 
-        // ── Monetary totals (approved + released only) ──────────────────────
+        // ── Monetary totals (approved payrolls only) ─────────────────────────
         $approvedPayrolls = $payrolls->whereIn('status', ['approved']);
 
         $totalPayroll       = $approvedPayrolls->sum(fn($p) => $p->net_pay);
@@ -49,10 +49,10 @@ class DashboardController extends Controller
         $deductionPercentage = $baseAmount > 0 ? ($totalDeductions / $baseAmount) * 100 : 0;
         $allowancePercentage = $baseAmount > 0 ? ($totalAllowances / $baseAmount) * 100 : 0;
 
-        // ── Recent payroll records (approved + released, newest first) ────────
+        // ── Recent payroll records (approved, newest first) ──────────────────
         $recentPayroll = $approvedPayrolls->sortByDesc('created_at')->take(10)->values();
 
-        // ── Monthly net-pay trend (last 6 months, approved + released only) ──
+        // ── Monthly net-pay trend (last 6 months, approved only) ─────────────
         $monthlyPayrollTrend = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
