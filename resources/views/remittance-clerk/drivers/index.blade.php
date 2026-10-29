@@ -117,7 +117,7 @@
                         </td>
                         <td class="px-5 py-3 text-sm text-gray-500 font-mono">{{ $driver->contact_number }}</td>
                         <td class="px-5 py-3 text-center">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border {{ $sc }}">{{ ucfirst($driver->status) }}</span>
+                            <span class="app-status-badge {{ $driver->status === 'active' ? 'active' : ($driver->status === 'pending' ? 'pending' : 'inactive') }}">{{ ucfirst($driver->status) }}</span>
                         </td>
 
                     </tr>

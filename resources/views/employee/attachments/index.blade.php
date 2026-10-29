@@ -147,8 +147,7 @@ document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){do
                                 </div>
                                 <span class="text-sm font-semibold text-gray-900">{{ $label }}</span>
                             </div>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold {{ $isApproved ? 'bg-emerald-50 text-emerald-600' : ($isPending ? 'bg-amber-50 text-amber-600' : ($isRejected ? 'bg-rose-50 text-rose-600' : 'bg-gray-100 text-gray-500')) }}">
-                                <span class="w-1.5 h-1.5 rounded-full {{ $isApproved ? 'bg-emerald-500' : ($isPending ? 'bg-amber-500 animate-pulse' : ($isRejected ? 'bg-rose-500' : 'bg-gray-300')) }}"></span>
+                            <span class="app-status-badge {{ $isApproved ? 'approved' : ($isPending ? 'pending' : ($isRejected ? 'rejected' : 'neutral')) }}">
                                 {{ $isApproved ? 'Approved' : ($isPending ? 'Pending' : ($isRejected ? 'Rejected' : 'Missing')) }}
                             </span>
                         </div>

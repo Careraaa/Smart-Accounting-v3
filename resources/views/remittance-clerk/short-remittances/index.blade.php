@@ -199,12 +199,12 @@
 
     function statusHtml(r) {
         if (r._type === 'resolved') {
-            return '<span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Fully Paid</span>';
+            return '<span class="app-status-badge approved">Fully Paid</span>';
         }
         var partial = r.driver_status === 'partial' || r.pao_status === 'partial';
-        var cls = partial ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200';
+        var statusClass = partial ? 'pending' : 'rejected';
         var lbl = partial ? 'Partial' : 'Pending';
-        return '<span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md ' + cls + '">' + lbl + '</span>';
+        return '<span class="app-status-badge ' + statusClass + '">' + lbl + '</span>';
     }
 
     function render() {

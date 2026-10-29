@@ -185,8 +185,8 @@
                 var isShort = r.is_short;
                 var netClass = isShort ? 'text-red-600' : 'text-emerald-600';
                 var badgeHtml = activeTab === 'pending'
-                    ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">Pending</span>'
-                    : '<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Approved</span>';
+                    ? '<span class="app-status-badge pending">Pending</span>'
+                    : '<span class="app-status-badge approved">Approved</span>';
                 html += '<tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location=\'' + r.show_url + '\'">' +
                     '<td class="px-5 py-3"><p class="text-sm font-semibold text-gray-700 font-mono">' + r.date + '</p></td>' +
                     '<td class="px-5 py-3"><p class="text-sm font-bold text-gray-900">' + r.route + '</p></td>' +

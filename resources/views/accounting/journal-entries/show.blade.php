@@ -37,7 +37,7 @@
             <p class="text-xs text-gray-400 mt-0.5">{{ $journalEntry->transaction_date->format('F d, Y') }} &middot; {{ $journalEntry->description }}</p>
         </div>
         <div class="flex items-center gap-2 shrink-0 flex-wrap">
-            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.65rem] font-semibold uppercase tracking-wide border {{ $statusColors[$journalEntry->status] ?? '' }}">
+            <span class="app-status-badge {{ $journalEntry->status === 'Posted' ? 'approved' : ($journalEntry->status === 'Void' ? 'rejected' : 'pending') }}">
                 {{ $journalEntry->status }}
             </span>
             @if($journalEntry->isEditable())

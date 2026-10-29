@@ -108,7 +108,7 @@
                         <td class="px-5 py-3 text-sm text-gray-600">{{ $vehicle->route->route_name ?? '—' }}</td>
                         <td class="px-5 py-3 text-sm text-gray-600">{{ $vehicle->operator }}</td>
                         <td class="px-5 py-3 text-center">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold {{ $badgeColor }}">{{ $vlabel }}</span>
+                            <span class="app-status-badge {{ $vstatus === 'active' ? 'active' : ($vstatus === 'under_maintenance' ? 'maintenance' : 'neutral') }}">{{ $vlabel }}</span>
                         </td>
                     </tr>
                 @empty

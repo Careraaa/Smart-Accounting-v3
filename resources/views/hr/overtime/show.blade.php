@@ -61,15 +61,7 @@
                     <p class="text-xs text-gray-400 m-0">Submitted {{ $overtime->created_at->format('M d, Y') }}</p>
                 </div>
                 <div class="ml-auto">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
-                        {{ $overtime->status === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : '' }}
-                        {{ $overtime->status === 'rejected' ? 'bg-red-50 text-red-700 border border-red-200' : '' }}
-                        {{ $overtime->status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' : '' }}">
-                        <span class="w-1.5 h-1.5 rounded-full
-                            {{ $overtime->status === 'approved' ? 'bg-emerald-600' : '' }}
-                            {{ $overtime->status === 'rejected' ? 'bg-red-600' : '' }}
-                            {{ $overtime->status === 'pending' ? 'bg-amber-500' : '' }}">
-                        </span>
+                    <span class="app-status-badge {{ in_array($overtime->status, ['pending', 'approved', 'rejected'], true) ? $overtime->status : 'neutral' }}">
                         {{ ucfirst($overtime->status) }}
                     </span>
                 </div>
