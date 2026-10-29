@@ -48,7 +48,7 @@
 @endpush
 
 @section('content')
-<div class="space-y-5 print-report-page">
+<div class="space-y-5 w-full max-w-7xl mx-auto print-report-page">
     <div class="flex items-start justify-between gap-4 flex-wrap">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">General Ledger</h1>

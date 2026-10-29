@@ -9,7 +9,7 @@
 @endpush
 
 @section('content')
-<div class="space-y-5 max-w-3xl mx-auto">
+<div class="space-y-5 w-full max-w-3xl mx-auto">
 
     @foreach(['success','error'] as $t)
         @if(session($t))
