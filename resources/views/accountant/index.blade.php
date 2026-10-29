@@ -96,11 +96,6 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
 
     </div>
 
-
-
-
-    </div>
-
     {{-- RIGHT COLUMN: Calendar + To-Do --}}
     <div class="w-full lg:w-[280px] lg:shrink-0 space-y-5">
         <div class="lg:sticky lg:top-24 space-y-5">
