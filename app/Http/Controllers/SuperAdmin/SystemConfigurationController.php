@@ -345,7 +345,12 @@ class SystemConfigurationController extends Controller
             }
 
             // Restore the database using the backup:restore command
-            Artisan::call('backup:restore', ['--source' => $dumpFile]);
+            $exitCode = Artisan::call('backup:restore', ['--source' => $dumpFile]);
+            if ($exitCode !== 0) {
+                $output = trim(Artisan::output());
+                return redirect()->route('configuration.restore-form')
+                    ->with('error', $output ?: 'Database restore failed. Check the application logs for details.');
+            }
             
             $this->logActivity('updated', 'configuration');
             return redirect()->route('configuration.index')->with('success', 'Database restored successfully!');
