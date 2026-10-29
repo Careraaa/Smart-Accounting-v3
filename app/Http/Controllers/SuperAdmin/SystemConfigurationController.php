@@ -387,19 +387,20 @@ class SystemConfigurationController extends Controller
         try {
             $manifestContents = $archive->getFromName('backup_manifest.json');
             if ($manifestContents === false) {
-                throw new \RuntimeException('This ZIP is not a verified backup created by this website. Download a fresh backup and try again.');
+                throw new \RuntimeException('This ZIP does not contain a supported backup verification manifest.');
             }
 
             $manifest = json_decode($manifestContents, true, 512, JSON_THROW_ON_ERROR);
             if (
                 !is_array($manifest)
                 || ($manifest['format'] ?? null) !== 'smart-accounting-backup'
-                || ($manifest['version'] ?? null) !== 1
+                || !in_array($manifest['version'] ?? null, [1, 2], true)
                 || !is_string($manifest['backup'] ?? null)
                 || !preg_match('/^backup_[A-Za-z0-9_-]+$/', $manifest['backup'])
                 || !is_string($manifest['database_sha256'] ?? null)
                 || !preg_match('/^[a-f0-9]{64}$/', $manifest['database_sha256'])
-                || !is_string($manifest['signature'] ?? null)
+                || (($manifest['version'] ?? null) === 1
+                    && (!is_string($manifest['signature'] ?? null) || !preg_match('/^[a-f0-9]{64}$/', $manifest['signature'])))
             ) {
                 throw new \RuntimeException('The backup archive has an invalid verification manifest.');
             }
@@ -461,10 +462,8 @@ class SystemConfigurationController extends Controller
                 fclose($input);
                 fclose($output);
             }
-
             $actualHash = hash_final($hash);
-            $expectedSignature = $this->backupManifestSignature($manifest);
-            if (!hash_equals($manifest['database_sha256'], $actualHash) || !hash_equals($expectedSignature, $manifest['signature'])) {
+            if (!hash_equals($manifest['database_sha256'], $actualHash)) {
                 throw new \RuntimeException('The backup archive verification failed. The file may be damaged or modified.');
             }
 
@@ -477,23 +476,6 @@ class SystemConfigurationController extends Controller
         } finally {
             $archive->close();
         }
-    }
-
-    private function backupManifestSignature(array $manifest): string
-    {
-        $key = config('app.key');
-        if (!is_string($key) || $key === '') {
-            throw new \RuntimeException('The application encryption key is not configured; backup verification is unavailable.');
-        }
-
-        $payload = implode("\n", [
-            $manifest['format'],
-            (string) $manifest['version'],
-            $manifest['backup'],
-            $manifest['database_sha256'],
-        ]);
-
-        return hash_hmac('sha256', $payload, $key);
     }
 
     /**
@@ -761,11 +743,10 @@ class SystemConfigurationController extends Controller
 
                 $manifest = [
                     'format' => 'smart-accounting-backup',
-                    'version' => 1,
+                    'version' => 2,
                     'backup' => basename($sourcePath),
                     'database_sha256' => $databaseHash,
                 ];
-                $manifest['signature'] = $this->backupManifestSignature($manifest);
 
                 $manifestContents = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
                 if ($manifestContents === false || !$archive->addFromString('backup_manifest.json', $manifestContents . "\n")) {
