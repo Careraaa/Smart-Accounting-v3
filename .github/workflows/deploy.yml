@@ -144,3 +144,45 @@ jobs:
             .env.example
             check-employees.php
             username_password.txt
+
+      # ---------- Also deploy deploy-test-2 to Byet.host ----------
+      - name: Create Byet.host Test 2 .env
+        if: github.ref_name == 'deploy-test-2'
+        shell: bash
+        run: |
+          cat > .env <<'ENVEOF'
+          ${{ secrets.BYET_TEST2_ENV_FILE }}
+          ENVEOF
+
+      - name: Upload deploy-test-2 to Byet.host
+        if: github.ref_name == 'deploy-test-2'
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.BYET_FTP_SERVER }}
+          port: 21
+          protocol: ftp
+          security: loose
+          username: ${{ secrets.BYET_FTP_USERNAME }}
+          password: ${{ secrets.BYET_FTP_PASSWORD }}
+          server-dir: ${{ secrets.BYET_FTP_SERVER_DIR_TEST2 }}
+          log-level: standard
+          exclude: |
+            **/.git/**
+            **/.git*
+            **/node_modules/**
+            **/.github/**
+            **/tests/**
+            **/storage/logs/*.log
+            **/storage/framework/cache/data/**
+            **/storage/framework/sessions/*
+            **/storage/framework/views/*
+            **/storage/framework/testing/**
+            **/database/database.sqlite
+            *.md
+            package.json
+            package-lock.json
+            vite.config.js
+            phpunit.xml
+            .env.example
+            check-employees.php
+            username_password.txt
