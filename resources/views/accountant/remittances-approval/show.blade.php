@@ -167,7 +167,7 @@ $statusInfo = match($remittance->status) {
     </div>
     @if($remittance->boundaryPayments->isNotEmpty())
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs app-standard-table">
                 <thead class="bg-gray-50 text-[10px] uppercase tracking-wider text-gray-400">
                     <tr>
                         <th class="px-5 py-3">Internal payment ID</th>

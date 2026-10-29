@@ -149,7 +149,7 @@ $descClass  = 'text-[0.6rem] text-gray-400 mt-1 leading-relaxed';
                         <div class="py-10 text-center text-sm text-gray-500">No departments configured yet.</div>
                     @else
                         <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
+                            <table class="w-full text-sm app-standard-table">
                                 <thead>
                                     <tr class="bg-gray-50 border-b border-gray-200">
                                         <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Department</th>
@@ -191,7 +191,7 @@ $descClass  = 'text-[0.6rem] text-gray-400 mt-1 leading-relaxed';
                         <div class="py-10 text-center text-sm text-gray-500">No positions configured yet.</div>
                     @else
                         <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
+                            <table class="w-full text-sm app-standard-table">
                                 <thead>
                                     <tr class="bg-gray-50 border-b border-gray-200">
                                         <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Position</th>

@@ -114,7 +114,7 @@
             <span class="text-[10px] font-semibold text-gray-400 ml-auto">{{ $route->vehicles->count() }} vehicle{{ $route->vehicles->count() !== 1 ? 's' : '' }}</span>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Plate Number</th>

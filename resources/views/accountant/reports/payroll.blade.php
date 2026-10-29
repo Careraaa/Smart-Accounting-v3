@@ -134,7 +134,7 @@ $periodLabel = $period === 'monthly' ? date('F', mktime(0,0,0,$month,1)) : "Year
             <span class="text-[0.55rem] text-gray-400">Payroll batches in range</span>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Period</th>

@@ -1,4 +1,4 @@
-﻿@extends('layouts.layout')
+@extends('layouts.layout')
 
 @push('styles')
 <style>
@@ -65,7 +65,7 @@ $tab            = request()->query('tab', 'pending');
         <div class="relative"><svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35"/></svg><input type="text" id="remittanceSearch" placeholder="Search driver, route, vehicle…" class="pl-8 pr-3 py-2 w-64 text-xs border border-gray-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/50"></div>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm app-standard-table">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
                     <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>

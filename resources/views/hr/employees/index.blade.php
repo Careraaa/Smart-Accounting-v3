@@ -177,12 +177,12 @@
         </div>
 
         {{-- Table --}}
-        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div class="table-wrap bg-white rounded-xl overflow-hidden">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
                 <span class="text-sm font-semibold text-gray-900">Employee records</span>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm app-standard-table">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -319,12 +319,12 @@
         </div>
 
         {{-- Table --}}
-        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div class="table-wrap bg-white rounded-xl overflow-hidden">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
                 <span class="text-sm font-semibold text-gray-900">Employee records</span>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm app-standard-table">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
@@ -402,12 +402,12 @@
         </div>
 
         {{-- Table --}}
-        <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div class="table-wrap bg-white rounded-xl overflow-hidden">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
                 <span class="text-sm font-semibold text-gray-900">Employee records</span>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm app-standard-table">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>

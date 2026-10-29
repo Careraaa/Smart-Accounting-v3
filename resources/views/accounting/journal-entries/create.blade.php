@@ -85,7 +85,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm" id="linesTable">
+                    <table class="w-full text-sm app-standard-table" id="linesTable">
                         <thead>
                             <tr class="bg-gray-50 border-b border-gray-200">
                                 <th class="text-left text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3 w-[35%]">Account</th>

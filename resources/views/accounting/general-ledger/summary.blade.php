@@ -29,7 +29,7 @@
 
     <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="border-b border-gray-50">
                         <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Code</th>

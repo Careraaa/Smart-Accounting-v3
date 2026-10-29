@@ -118,7 +118,7 @@
     {{-- Table --}}
     <div class="ac-table-in bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">User</th>
