@@ -32,6 +32,13 @@
 @php
 $maxV = collect($attendanceTrend)->map(fn($d) => $d['present'] + $d['late'] + $d['absent'])->max() ?: 1;
 $td = $attendanceTrend[array_key_last($attendanceTrend)];
+$financialRevenue = (float) ($financialOverview['netRevenue'] ?? 0);
+$financialNetIncome = (float) ($financialOverview['netIncome'] ?? 0);
+$financialExpense = (float) ($financialOverview['netExpenses'] ?? 0);
+$financialDateFrom = $financialOverview['dateFrom'] ?? now()->startOfMonth()->toDateString();
+$financialDateTo = $financialOverview['dateTo'] ?? now()->toDateString();
+$financialTrend = collect($financialTrend ?? []);
+$financialChartMax = max(1, (float) $financialTrend->max('revenue'), (float) $financialTrend->max(fn($point) => max($point['netIncome'], 0)));
 @endphp
 
 <div class="flex flex-col lg:flex-row gap-5 items-start">
@@ -76,7 +83,9 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
         </div>
 
-        {{-- CHART CARDS: Attendance, Net Payroll Trend, Allowances vs Deductions, Daily Remittance --}}
+        @include('partials.financial-overview-card')
+
+        {{-- CHART CARDS: Attendance, Net Payroll Trend, Daily Remittance --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
             {{-- Attendance Trend (SVG line chart) --}}
@@ -142,20 +151,10 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
 
 
-        {{-- Charts row: Net Payroll Trend + Allowances vs Deductions --}}
+        {{-- Net Payroll Trend --}}
         @php
             $trendPts = $monthlyPayrollTrend;
             $trendCount = count($trendPts);
-            $ta = (float) ($totalAllowances ?? 0);
-            $td = (float) ($totalDeductions ?? 0);
-            $adTotal = $ta + $td;
-            $adAllowPct = $adTotal > 0 ? round(($ta/$adTotal)*100) : 0;
-            $adDeducPct = $adTotal > 0 ? round(($td/$adTotal)*100) : 0;
-            $circ = 2 * pi() * 36;
-            $allowOffset = $adAllowPct / 100 * $circ;
-
-            // Net Payroll Trend geometry — 2px line, 3 recessive gridlines,
-            // room on the right for the direct end-label, no per-point dots.
             $nW = 600; $nH = 180;
             $nPadL = 4; $nPadR = 62; $nPadT = 16; $nPadB = 26;
             $nPlotW = $nW - $nPadL - $nPadR;
@@ -204,45 +203,6 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                     </svg>
                     @else
                     <div class="flex items-center justify-center h-[150px] text-xs text-gray-400">Not enough data for a trend.</div>
-                    @endif
-                </div>
-            </div>
-
-            {{-- Allowances vs Deductions (CSS donut) --}}
-            <div class="sad-fade-up kpi-card overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                    <h2 class="text-[13px] font-semibold text-gray-900">Allowances vs Deductions</h2>
-                    <span class="text-[11px] text-gray-400">Approved payrolls</span>
-                </div>
-                <div class="px-4 py-4">
-                    @if($adTotal > 0)
-                    <div class="flex flex-col sm:flex-row items-center gap-5">
-                        <div class="relative w-[120px] h-[120px] shrink-0">
-                            <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
-                                <circle cx="50" cy="50" r="36" fill="none" stroke="#22c55e" stroke-width="8" stroke-dasharray="{{ $allowOffset }} {{ $circ }}" stroke-dashoffset="0" stroke-linecap="round" class="sad-donut-seg" style="--pct:{{ $allowOffset }}"/>
-                                <circle cx="50" cy="50" r="36" fill="none" stroke="#f43f5e" stroke-width="8" stroke-dasharray="{{ $circ - $allowOffset }} {{ $circ }}" stroke-dashoffset="{{ -$allowOffset }}" stroke-linecap="round" class="sad-donut-seg" style="--pct:{{ $circ - $allowOffset }};animation-delay:0.3s"/>
-                            </svg>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">₱{{ number_format($adTotal/1000,2) }}k</span>
-                            </div>
-                        </div>
-                        <div class="flex-1 space-y-2 w-full">
-                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-emerald-50 transition-colors">
-                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-emerald-500"></span>
-                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Allowances</span>
-                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">₱{{ number_format($ta,2) }}</span>
-                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adAllowPct }}%</span>
-                            </div>
-                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-rose-50 transition-colors">
-                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-rose-500"></span>
-                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Deductions</span>
-                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">₱{{ number_format($td,2) }}</span>
-                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adDeducPct }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No data yet.</div>
                     @endif
                 </div>
             </div>

@@ -92,6 +92,8 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
 
 
 
+        @include('partials.financial-overview-card')
+
         {{-- Charts row 1 --}}
         @php
             $trendPts = $monthlyPayrollTrend;

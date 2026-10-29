@@ -11,11 +11,15 @@ use App\Models\OvertimeUndertime;
 use App\Models\Payroll;
 use App\Models\CashAdvance;
 use App\Models\DailyRemittance;
-use Illuminate\Http\Request;
+use App\Services\AccountingReportService;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     use LogsUserActivity;
+
+    public function __construct(private readonly AccountingReportService $accountingReports) {}
+
     public function index()
     {
         $this->logActivity('viewed', 'dashboard');
@@ -168,6 +172,27 @@ class DashboardController extends Controller
             ];
         }
 
+        // ============ FINANCIAL OVERVIEW ============
+        // Use the same posted journal-entry logic as the Income Statement page.
+        $financialDateTo = now()->toDateString();
+        $financialDateFrom = Carbon::parse($financialDateTo)->startOfMonth()->toDateString();
+        $financialOverview = $this->accountingReports->incomeStatement($financialDateFrom, $financialDateTo);
+        $financialOverview['dateFrom'] = $financialDateFrom;
+        $financialOverview['dateTo'] = $financialDateTo;
+
+        $financialTrend = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $monthFrom = $month->copy()->startOfMonth()->toDateString();
+            $monthTo = $month->copy()->endOfMonth()->toDateString();
+            $monthStatement = $this->accountingReports->incomeStatement($monthFrom, $monthTo);
+            $financialTrend[] = [
+                'month' => $month->format('M'),
+                'revenue' => (float) $monthStatement['netRevenue'],
+                'netIncome' => (float) $monthStatement['netIncome'],
+            ];
+        }
+
         // ============ CALENDAR DATA ============
         $calMonth = now()->month;
         $calYear = now()->year;
@@ -275,7 +300,9 @@ class DashboardController extends Controller
             'pendingItems',
             'recentLeaves',
             'recentAttendance',
-            'recentPayroll'
+            'recentPayroll',
+            'financialOverview',
+            'financialTrend'
         ));
     }
 }
