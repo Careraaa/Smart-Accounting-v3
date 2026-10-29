@@ -45,17 +45,31 @@
                     $financialPlotW = $financialChartW - ($financialChartPadX * 2);
                     $financialPlotH = $financialChartH - $financialChartPadTop - $financialChartPadBottom;
                     $financialStep = $financialPlotW / ($financialTrend->count() - 1);
-                    $revenuePoints = []; $incomePoints = [];
+                    $revenueCoords = []; $incomeCoords = [];
                     foreach ($financialTrend as $i => $point) {
                         $x = $financialChartPadX + ($i * $financialStep);
-                        $revenuePoints[] = round($x, 1) . ',' . round($financialChartPadTop + $financialPlotH - (($point['revenue'] / $financialChartMax) * $financialPlotH), 1);
-                        $incomePoints[] = round($x, 1) . ',' . round($financialChartPadTop + $financialPlotH - ((max($point['netIncome'], 0) / $financialChartMax) * $financialPlotH), 1);
+                        $revenueCoords[] = [$x, $financialChartPadTop + $financialPlotH - (($point['revenue'] / $financialChartMax) * $financialPlotH)];
+                        $incomeCoords[] = [$x, $financialChartPadTop + $financialPlotH - ((max($point['netIncome'], 0) / $financialChartMax) * $financialPlotH)];
                     }
+                    $smoothPath = function (array $coords): string {
+                        $path = 'M ' . round($coords[0][0], 1) . ' ' . round($coords[0][1], 1);
+                        for ($i = 1, $count = count($coords); $i < $count; $i++) {
+                            [$previousX, $previousY] = $coords[$i - 1];
+                            [$currentX, $currentY] = $coords[$i];
+                            $controlOffset = ($currentX - $previousX) / 3;
+                            $path .= ' C ' . round($previousX + $controlOffset, 1) . ' ' . round($previousY, 1)
+                                . ', ' . round($currentX - $controlOffset, 1) . ' ' . round($currentY, 1)
+                                . ', ' . round($currentX, 1) . ' ' . round($currentY, 1);
+                        }
+                        return $path;
+                    };
+                    $revenuePath = $smoothPath($revenueCoords);
+                    $incomePath = $smoothPath($incomeCoords);
                 @endphp
                 <svg viewBox="0 0 {{ $financialChartW }} {{ $financialChartH }}" class="mt-2 h-auto w-full" role="img" aria-label="Revenue and net income for the last six months">
                     <line x1="{{ $financialChartPadX }}" y1="{{ $financialChartPadTop + $financialPlotH }}" x2="{{ $financialChartW - $financialChartPadX }}" y2="{{ $financialChartPadTop + $financialPlotH }}" stroke="currentColor" class="text-gray-200 dark:text-neutral-700" />
-                    <polyline points="{{ implode(' ', $revenuePoints) }}" fill="none" stroke="#ee765f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-                    <polyline points="{{ implode(' ', $incomePoints) }}" fill="none" stroke="#55b995" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="{{ $revenuePath }}" fill="none" stroke="#ee765f" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="{{ $incomePath }}" fill="none" stroke="#55b995" stroke-width="2.5" stroke-linecap="round" />
                     @foreach($financialTrend as $i => $point)
                         <text x="{{ $financialChartPadX + ($i * $financialStep) }}" y="{{ $financialChartH - 6 }}" text-anchor="middle" fill="currentColor" class="text-gray-400 dark:text-neutral-500" font-size="10">{{ $point['month'] }}</text>
                     @endforeach
