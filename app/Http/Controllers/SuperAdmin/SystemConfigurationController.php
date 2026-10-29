@@ -425,6 +425,12 @@ class SystemConfigurationController extends Controller
                 throw new \RuntimeException('Unable to create temporary storage for the database dump.');
             }
 
+            $sqlDumpPath = $temporaryDump . '.sql';
+            if (!rename($temporaryDump, $sqlDumpPath)) {
+                throw new \RuntimeException('Unable to prepare the database dump for restoration.');
+            }
+            $temporaryDump = $sqlDumpPath;
+
             $input = $archive->getStream('database_dump.sql');
             $output = fopen($temporaryDump, 'wb');
             if ($input === false || $output === false) {
