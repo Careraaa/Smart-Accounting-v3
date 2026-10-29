@@ -177,16 +177,20 @@
                     @if ($cashAdvance->approved_at)
                     <div class="pt-3 border-t border-gray-50">
                         <div class="flex items-center gap-2.5 mb-3">
-                            <span class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            <span class="w-6 h-6 rounded-full {{ $cashAdvance->status === 'rejected' ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600' }} flex items-center justify-center shrink-0">
+                                @if ($cashAdvance->status === 'rejected')
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                @else
+                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                @endif
                             </span>
                             <div>
-                                <p class="text-xs font-semibold text-emerald-600">Approved</p>
+                                <p class="text-xs font-semibold {{ $cashAdvance->status === 'rejected' ? 'text-red-500' : 'text-emerald-600' }}">{{ $cashAdvance->status === 'rejected' ? 'Rejected' : 'Approved' }}</p>
                                 <p class="text-[0.55rem] text-gray-400 font-mono">{{ $cashAdvance->approved_at->format('M d, Y g:i A') }}</p>
                             </div>
                         </div>
                         <div class="ml-8">
-                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Approved By</p>
+                            <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">{{ $cashAdvance->status === 'rejected' ? 'Rejected By' : 'Approved By' }}</p>
                             <p class="text-xs text-gray-900">{{ optional($cashAdvance->approver)->name ?? '—' }}</p>
                         </div>
                     </div>
