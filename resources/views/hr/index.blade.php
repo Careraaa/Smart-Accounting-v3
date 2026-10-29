@@ -93,52 +93,6 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 
             </div>
 
-        {{-- STAT CARDS: Employees, Attendance, Holidays --}}
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            <a href="{{ route('employees.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-4 no-underline group transition-all hover:border-emerald-300 hover:shadow-md" style="animation-delay:0.05s">
-                <div class="flex items-start justify-between gap-3">
-                    <p class="kcard-label">Employees</p>
-                    <div class="kcard-icon bg-emerald-50 text-emerald-600 transition-colors group-hover:bg-emerald-500 group-hover:text-white">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    </div>
-                </div>
-                <p class="kcard-value mt-2 hrd-count-num" style="animation-delay:0.15s">{{ $totalEmployees }}</p>
-                <div class="kcard-foot mt-2.5 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-                    <span>{{ $newHiresThisMonth }} new this month</span>
-                </div>
-            </a>
-
-            <a href="{{ route('attendance.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-4 no-underline group transition-all hover:border-cyan-300 hover:shadow-md" style="animation-delay:0.15s">
-                <div class="flex items-start justify-between gap-3">
-                    <p class="kcard-label">Attendance</p>
-                    <div class="kcard-icon bg-cyan-50 text-cyan-600 transition-colors group-hover:bg-cyan-500 group-hover:text-white">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
-                    </div>
-                </div>
-                <p class="kcard-value mt-2 hrd-count-num" style="animation-delay:0.25s">{{ $td['present'] }}</p>
-                <div class="kcard-foot mt-2.5 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-                    <span>{{ $tdRate }}% present today</span>
-                </div>
-            </a>
-
-            <a href="{{ route('holiday.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-4 no-underline group transition-all hover:border-rose-300 hover:shadow-md" style="animation-delay:0.25s">
-                <div class="flex items-start justify-between gap-3">
-                    <p class="kcard-label">Holidays</p>
-                    <div class="kcard-icon bg-rose-50 text-rose-600 transition-colors group-hover:bg-rose-500 group-hover:text-white">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 11l7-7 7 7M5 19l7-7 7 7"/></svg>
-                    </div>
-                </div>
-                <p class="kcard-value mt-2 hrd-count-num" style="animation-delay:0.35s">{{ $upcomingHolidays }}</p>
-                <div class="kcard-foot mt-2.5 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
-                    <span>Upcoming in 30 days</span>
-                </div>
-            </a>
-
-        </div>
-
     </div>
 
     {{-- RIGHT COLUMN: Calendar + To-Do --}}

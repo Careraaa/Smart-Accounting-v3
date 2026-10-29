@@ -1,4 +1,4 @@
-@extends('layouts.layout')
+﻿@extends('layouts.layout')
 
 @push('styles')
 <style>
@@ -26,13 +26,7 @@ $tab            = request()->query('tab', 'pending');
 <div class="flex items-start justify-between mb-6 flex-wrap gap-4 fade-up">
     <div>
         <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Remittance Approval</h1>
-        <p class="text-sm text-gray-400 mt-0.5">Approve or reject remittances submitted by the remittance clerk</p>
-    </div>
-    <div class="flex items-center gap-2">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-50 text-violet-700 text-xs font-semibold border border-violet-200">
-            <span class="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse"></span>
-            {{ $totalPending }} pending
-        </span>
+        <p class="text-sm text-gray-500 mt-0.5">Approve or reject remittances submitted by the remittance clerk</p>
     </div>
 </div>
 
@@ -45,74 +39,42 @@ $tab            = request()->query('tab', 'pending');
     @endif
 @endforeach
 
-{{-- Stats --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <p class="text-xs text-gray-400 font-medium">Pending</p>
-        <p class="text-xl font-bold text-violet-600 tabular-nums mt-1">{{ $totalPending }}</p>
-    </div>
-    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <p class="text-xs text-gray-400 font-medium">Collection</p>
-        <p class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($pendingRemits->sum('total_collection'), 0) }}</p>
-    </div>
-    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <p class="text-xs text-gray-400 font-medium">Expenses</p>
-        <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">₱{{ number_format($pendingRemits->sum('total_expenses'), 0) }}</p>
-    </div>
-    <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <p class="text-xs text-gray-400 font-medium">Net Remittance</p>
-        <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($pendingRemits->sum('net_remittance'), 0) }}</p>
-    </div>
+{{-- Status tabs --}}
+<div class="border-b border-gray-200 mb-6 fade-up">
+    <nav class="flex gap-1 -mb-px overflow-x-auto" role="tablist">
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'pending']) }}" role="tab" class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 {{ $tab === 'pending' ? 'border-violet-500 text-violet-700 bg-violet-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">Pending @if($totalPending > 0)<span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'pending' ? 'bg-violet-100 text-violet-800' : 'bg-gray-200 text-gray-600' }}">{{ $totalPending }}</span>@endif</a>
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'approved']) }}" role="tab" class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 {{ $tab === 'approved' ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">Approved <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600' }}">{{ $approvedRemits->count() }}</span></a>
+        <a href="{{ request()->fullUrlWithQuery(['tab' => 'rejected']) }}" role="tab" class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 {{ $tab === 'rejected' ? 'border-red-500 text-red-700 bg-red-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">Rejected <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-600' }}">{{ $rejectedRemits->count() }}</span></a>
+    </nav>
 </div>
 
-{{-- Tabs + Filter --}}
-<div class="flex flex-wrap items-end justify-between gap-4 mb-5 fade-up">
-    <div class="border-b border-gray-200 flex-1">
-        <nav class="flex gap-1 -mb-px" role="tablist">
-            <a href="{{ request()->fullUrlWithQuery(['tab' => 'pending']) }}" role="tab"
-               class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2
-               {{ $tab === 'pending' ? 'border-violet-500 text-violet-700 bg-violet-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
-                <svg class="w-4 h-4 {{ $tab === 'pending' ? 'text-violet-500' : 'text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
-                Pending
-                @if($totalPending > 0)<span class="ml-0.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'pending' ? 'bg-violet-100 text-violet-800' : 'bg-gray-200 text-gray-600' }}">{{ $totalPending }}</span>@endif
-            </a>
-            <a href="{{ request()->fullUrlWithQuery(['tab' => 'approved']) }}" role="tab"
-               class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2
-               {{ $tab === 'approved' ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
-                <svg class="w-4 h-4 {{ $tab === 'approved' ? 'text-emerald-500' : 'text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Approved
-                @if($approvedRemits->count() > 0)<span class="ml-0.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600' }}">{{ $approvedRemits->count() }}</span>@endif
-            </a>
-            <a href="{{ request()->fullUrlWithQuery(['tab' => 'rejected']) }}" role="tab"
-               class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2
-               {{ $tab === 'rejected' ? 'border-red-500 text-red-700 bg-red-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
-                <svg class="w-4 h-4 {{ $tab === 'rejected' ? 'text-red-500' : 'text-gray-400' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
-                Rejected
-                @if($rejectedRemits->count() > 0)<span class="ml-0.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-600' }}">{{ $rejectedRemits->count() }}</span>@endif
-            </a>
-        </nav>
-    </div>
-    <div class="flex items-center gap-2 shrink-0">
-        <div class="relative">
-            <svg class="w-3.5 h-3.5 text-gray-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35"/></svg>
-            <input type="text" id="remittanceSearch" placeholder="Search driver or route..." class="pl-8 pr-3 py-2 w-56 text-xs border border-gray-300 rounded-lg outline-none transition-all focus:border-gray-900 focus:ring-1 focus:ring-gray-900/20 bg-white placeholder:text-gray-400">
-        </div>
-    </div>
+{{-- Summary cards --}}
+@php
+    $selectedRemits = $tab === 'approved' ? $approvedRemits : ($tab === 'rejected' ? $rejectedRemits : $pendingRemits);
+@endphp
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ ucfirst($tab) }} Remittances</div><div class="text-2xl font-bold text-gray-900 tabular-nums mt-1">{{ $selectedRemits->count() }}</div></div>
+    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Collection</div><div class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('total_collection'), 2) }}</div></div>
+    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Expenses</div><div class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('total_expenses'), 2) }}</div></div>
+    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Net Remittance</div><div class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('net_remittance'), 2) }}</div></div>
 </div>
-
 {{-- Table --}}
 <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+        <span class="text-sm font-semibold text-gray-900">Remittance records</span>
+        <div class="relative"><svg class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35"/></svg><input type="text" id="remittanceSearch" placeholder="Search driver, route, vehicle…" class="pl-8 pr-3 py-2 w-64 text-xs border border-gray-200 rounded-xl outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/50"></div>
+    </div>
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
-                    <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>
-                    <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Route</th>
-                    <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Vehicle</th>
-                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Collection</th>
-                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Expenses</th>
-                    <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Net</th>
-                    <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Route</th>
+                    <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Vehicle</th>
+                    <th class="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Collection</th>
+                    <th class="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Expenses</th>
+                    <th class="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Net</th>
+                    <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50" id="remittanceGrid"></tbody>
