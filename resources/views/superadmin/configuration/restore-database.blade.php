@@ -20,6 +20,31 @@ $descClass  = 'text-xs text-gray-400 mt-1 leading-relaxed';
         </a>
     </div>
 
+    @if (session('success'))
+    <div role="status" class="flex items-start gap-2.5 px-4 py-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm">
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        <span>{{ session('success') }}</span>
+    </div>
+    @endif
+
+    @if (session('error'))
+    <div role="alert" class="flex items-start gap-2.5 px-4 py-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm">
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
+        <span>{{ session('error') }}</span>
+    </div>
+    @endif
+
+    @if ($errors->any())
+    <div role="alert" class="px-4 py-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm">
+        <p class="font-semibold">The backup could not be processed:</p>
+        <ul class="list-disc list-inside mt-1 space-y-1">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
     <div class="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs leading-relaxed">
         <svg class="w-5 h-5 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05L13.71 3.86a2 2 0 0 0-3.42 0z"></path>

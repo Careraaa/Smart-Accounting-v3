@@ -362,7 +362,7 @@ class SystemConfigurationController extends Controller
             }
             
             $this->logActivity('updated', 'configuration');
-            return redirect()->route('configuration.index')->with('success', 'Database restored successfully!');
+            return redirect()->route('configuration.restore-form')->with('success', 'Database restored successfully.');
         } catch (\Throwable $e) {
             return redirect()->route('configuration.restore-form')->with('error', 'Restore failed: ' . $e->getMessage());
         } finally {
