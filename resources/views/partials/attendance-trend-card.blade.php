@@ -54,7 +54,7 @@
                             <div class="absolute inset-x-0 top-1/2 border-t border-dashed border-gray-200"></div>
                             <div class="absolute inset-x-0 bottom-0 border-t border-gray-200"></div>
                         </div>
-                        <div class="absolute inset-0 grid grid-cols-{{ min($attendanceDays->count(), 6) }} gap-1.5 sm:gap-3">
+                        <div class="absolute inset-0 grid gap-1.5 sm:gap-3" style="grid-template-columns:repeat({{ min($attendanceDays->count(), 6) }}, minmax(0, 1fr));">
                             @foreach($attendanceDays as $day)
                                 @php
                                     $present = (int) $day['present'];
@@ -70,7 +70,7 @@
                             @endforeach
                         </div>
                     </div>
-                    <div class="mt-[9px] grid grid-cols-{{ min($attendanceDays->count(), 6) }} gap-1.5 sm:gap-3">
+                    <div class="mt-[9px] grid gap-1.5 sm:gap-3" style="grid-template-columns:repeat({{ min($attendanceDays->count(), 6) }}, minmax(0, 1fr));">
                         @foreach($attendanceDays as $day)
                             @php $isToday = $day['date_iso'] === $attendanceToday['date_iso']; @endphp
                             <div class="flex items-center justify-center gap-1 text-[9px] leading-none {{ $isToday ? 'font-semibold text-gray-900' : 'font-medium text-gray-400' }}">
