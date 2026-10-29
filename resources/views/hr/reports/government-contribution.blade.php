@@ -67,26 +67,54 @@
     </form>
 
     {{-- Stat cards --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div class="stat-card bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden" style="--accent:#0284c7">
-            <div class="absolute bottom-0 left-0 right-0 h-[3px] rounded-b-xl" style="background:#0284c7"></div>
-            <p class="text-[0.55rem] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Employee Share</p>
-            <p class="font-mono text-lg font-extrabold text-gray-900 tabular-nums">₱{{ number_format($empTotal, 2) }}</p>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2m16 0v-2a4 4 0 00-3-3.87M14 3.13a4 4 0 010 7.75M14 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs text-gray-400 font-medium">Employee Share</p>
+                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($empTotal, 2) }}</p>
+                    <p class="text-[0.55rem] text-gray-400 font-mono mt-0.5">Employee contributions</p>
+                </div>
+            </div>
         </div>
-        <div class="stat-card bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden" style="animation-delay:0.05s;--accent:#16a34a">
-            <div class="absolute bottom-0 left-0 right-0 h-[3px] rounded-b-xl" style="background:#16a34a"></div>
-            <p class="text-[0.55rem] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Employer Share</p>
-            <p class="font-mono text-lg font-extrabold text-gray-900 tabular-nums">₱{{ number_format($erTotal, 2) }}</p>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4v18m6 0V11l-6-4M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs text-gray-400 font-medium">Employer Share</p>
+                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($erTotal, 2) }}</p>
+                    <p class="text-[0.55rem] text-gray-400 font-mono mt-0.5">Employer contributions</p>
+                </div>
+            </div>
         </div>
-        <div class="stat-card bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden" style="animation-delay:0.1s;--accent:#c8292a">
-            <div class="absolute bottom-0 left-0 right-0 h-[3px] rounded-b-xl" style="background:#c8292a"></div>
-            <p class="text-[0.55rem] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Grand Total</p>
-            <p class="font-mono text-lg font-extrabold text-gray-900 tabular-nums">₱{{ number_format($grandTotal, 2) }}</p>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M19 9l-5 5-4-4-5 5"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs text-gray-400 font-medium">Grand Total</p>
+                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5">₱{{ number_format($grandTotal, 2) }}</p>
+                    <p class="text-[0.55rem] text-gray-400 font-mono mt-0.5">Combined contributions</p>
+                </div>
+            </div>
         </div>
-        <div class="stat-card bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden" style="animation-delay:0.15s;--accent:#6b7280">
-            <div class="absolute bottom-0 left-0 right-0 h-[3px] rounded-b-xl" style="background:#6b7280"></div>
-            <p class="text-[0.55rem] font-bold uppercase tracking-widest text-gray-400 mb-1.5">Payroll Records</p>
-            <p class="font-mono text-lg font-extrabold text-gray-900 tabular-nums" id="gcTotalRecords">{{ count($contributions) }}</p>
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs text-gray-400 font-medium">Payroll Records</p>
+                    <p class="text-lg font-bold text-gray-900 tabular-nums mt-0.5" id="gcTotalRecords">{{ count($contributions) }}</p>
+                    <p class="text-[0.55rem] text-gray-400 font-mono mt-0.5">Records in selected period</p>
+                </div>
+            </div>
         </div>
     </div>
 
