@@ -310,38 +310,47 @@ class SystemConfigurationController extends Controller
     public function restoreDatabase(Request $request)
     {
         $validated = $request->validate([
-            'backup_file' => 'required|string',
+            'backup_file' => 'nullable|required_without:backup_upload|string',
+            'backup_upload' => 'nullable|required_without:backup_file|file|mimes:zip|extensions:zip|max:512000',
         ]);
 
+        if ($request->filled('backup_file') && $request->hasFile('backup_upload')) {
+            return redirect()->route('configuration.restore-form')
+                ->withErrors(['backup_upload' => 'Choose a saved backup or upload a backup ZIP, not both.'])
+                ->withInput();
+        }
+
+        $temporaryDump = null;
         try {
-            $backupPath = storage_path('backups');
-            $backup = basename($validated['backup_file']);
-            $backupFilePath = $backupPath . '/' . $backup;
+            if ($request->hasFile('backup_upload')) {
+                $temporaryDump = $this->extractUploadedBackupDump($request->file('backup_upload')->getRealPath());
+                $dumpFile = $temporaryDump;
+            } else {
+                $backupPath = storage_path('backups');
+                $backup = basename($validated['backup_file']);
+                $backupFilePath = $backupPath . '/' . $backup;
 
-            // Security check: ensure backup exists and is within backups directory
-            if (!file_exists($backupFilePath)) {
-                return redirect()->route('configuration.restore-form')->with('error', 'Backup not found.');
-            }
+                if (!file_exists($backupFilePath)) {
+                    return redirect()->route('configuration.restore-form')->with('error', 'Backup not found.');
+                }
 
-            $realPath = realpath($backupFilePath);
-            $realBackupPath = realpath($backupPath);
-            if ($realPath === false || strpos($realPath, $realBackupPath) !== 0) {
-                return redirect()->route('configuration.restore-form')->with('error', 'Invalid backup file.');
-            }
+                $realPath = realpath($backupFilePath);
+                $realBackupPath = realpath($backupPath);
+                if ($realPath === false || $realBackupPath === false || strpos($realPath, $realBackupPath . DIRECTORY_SEPARATOR) !== 0) {
+                    return redirect()->route('configuration.restore-form')->with('error', 'Invalid backup file.');
+                }
 
-            // Determine the database dump file location
-            $dumpFile = null;
-            
-            if (is_dir($backupFilePath)) {
-                // It's a directory backup, look for database_dump.sql inside
-                $dumpFile = $backupFilePath . '/database_dump.sql';
-            } elseif (is_file($backupFilePath) && strpos($backupFilePath, '.sql') !== false) {
-                // It's a SQL file directly
-                $dumpFile = $backupFilePath;
-            }
+                if (is_dir($backupFilePath)) {
+                    $dumpFile = $backupFilePath . DIRECTORY_SEPARATOR . 'database_dump.sql';
+                } elseif (is_file($backupFilePath) && str_ends_with(strtolower($backupFilePath), '.sql')) {
+                    $dumpFile = $backupFilePath;
+                } else {
+                    $dumpFile = null;
+                }
 
-            if (!$dumpFile || !file_exists($dumpFile)) {
-                return redirect()->route('configuration.restore-form')->with('error', 'No database dump found in backup.');
+                if (!$dumpFile || !is_file($dumpFile)) {
+                    return redirect()->route('configuration.restore-form')->with('error', 'No database dump found in backup.');
+                }
             }
 
             // Restore the database using the backup:restore command
@@ -353,10 +362,138 @@ class SystemConfigurationController extends Controller
             }
             
             $this->logActivity('updated', 'configuration');
-            return redirect()->route('configuration.index')->with('success', 'Database restored successfully!');
-        } catch (\Exception $e) {
+            return redirect()->route('configuration.restore-form')->with('success', 'Database restored successfully.');
+        } catch (\Throwable $e) {
             return redirect()->route('configuration.restore-form')->with('error', 'Restore failed: ' . $e->getMessage());
+        } finally {
+            if ($temporaryDump !== null && is_file($temporaryDump)) {
+                unlink($temporaryDump);
+            }
         }
+    }
+
+    private function extractUploadedBackupDump(string $uploadedArchive): string
+    {
+        if (!class_exists(\ZipArchive::class)) {
+            throw new \RuntimeException('The PHP ZIP extension is required to restore uploaded backups.');
+        }
+
+        $archive = new \ZipArchive();
+        if ($archive->open($uploadedArchive) !== true) {
+            throw new \RuntimeException('The uploaded file is not a valid backup archive.');
+        }
+
+        $temporaryDump = null;
+        try {
+            $manifestContents = $archive->getFromName('backup_manifest.json');
+            if ($manifestContents === false) {
+                throw new \RuntimeException('This ZIP is not a verified backup created by this website. Download a fresh backup and try again.');
+            }
+
+            $manifest = json_decode($manifestContents, true, 512, JSON_THROW_ON_ERROR);
+            if (
+                !is_array($manifest)
+                || ($manifest['format'] ?? null) !== 'smart-accounting-backup'
+                || ($manifest['version'] ?? null) !== 1
+                || !is_string($manifest['backup'] ?? null)
+                || !preg_match('/^backup_[A-Za-z0-9_-]+$/', $manifest['backup'])
+                || !is_string($manifest['database_sha256'] ?? null)
+                || !preg_match('/^[a-f0-9]{64}$/', $manifest['database_sha256'])
+                || !is_string($manifest['signature'] ?? null)
+            ) {
+                throw new \RuntimeException('The backup archive has an invalid verification manifest.');
+            }
+
+            $entryIndex = $archive->locateName('database_dump.sql', \ZipArchive::FL_NODIR);
+            if ($entryIndex === false) {
+                throw new \RuntimeException('The backup archive does not contain a database dump.');
+            }
+
+            $entry = $archive->statIndex($entryIndex);
+            if (!$entry || $entry['size'] < 1 || $entry['size'] > 536870912) {
+                throw new \RuntimeException('The database dump is empty or exceeds the 512 MB restore limit.');
+            }
+
+            $tempDirectory = storage_path('temp');
+            if (!is_dir($tempDirectory) && !mkdir($tempDirectory, 0755, true) && !is_dir($tempDirectory)) {
+                throw new \RuntimeException('Unable to prepare temporary storage for the uploaded backup.');
+            }
+
+            $temporaryDump = tempnam($tempDirectory, 'restore-');
+            if ($temporaryDump === false) {
+                throw new \RuntimeException('Unable to create temporary storage for the database dump.');
+            }
+
+            $input = $archive->getStream('database_dump.sql');
+            $output = fopen($temporaryDump, 'wb');
+            if ($input === false || $output === false) {
+                if (is_resource($input)) {
+                    fclose($input);
+                }
+                if (is_resource($output)) {
+                    fclose($output);
+                }
+                throw new \RuntimeException('Unable to read the database dump from the backup archive.');
+            }
+
+            $hash = hash_init('sha256');
+            try {
+                while (!feof($input)) {
+                    $chunk = fread($input, 8192);
+                    if ($chunk === false) {
+                        throw new \RuntimeException('Unable to read the database dump from the backup archive.');
+                    }
+                    if ($chunk === '') {
+                        continue;
+                    }
+
+                    hash_update($hash, $chunk);
+                    $offset = 0;
+                    while ($offset < strlen($chunk)) {
+                        $written = fwrite($output, substr($chunk, $offset));
+                        if ($written === false || $written === 0) {
+                            throw new \RuntimeException('Unable to extract the database dump from the backup archive.');
+                        }
+                        $offset += $written;
+                    }
+                }
+            } finally {
+                fclose($input);
+                fclose($output);
+            }
+
+            $actualHash = hash_final($hash);
+            $expectedSignature = $this->backupManifestSignature($manifest);
+            if (!hash_equals($manifest['database_sha256'], $actualHash) || !hash_equals($expectedSignature, $manifest['signature'])) {
+                throw new \RuntimeException('The backup archive verification failed. The file may be damaged or modified.');
+            }
+
+            return $temporaryDump;
+        } catch (\Throwable $e) {
+            if ($temporaryDump !== null && is_file($temporaryDump)) {
+                unlink($temporaryDump);
+            }
+            throw $e;
+        } finally {
+            $archive->close();
+        }
+    }
+
+    private function backupManifestSignature(array $manifest): string
+    {
+        $key = config('app.key');
+        if (!is_string($key) || $key === '') {
+            throw new \RuntimeException('The application encryption key is not configured; backup verification is unavailable.');
+        }
+
+        $payload = implode("\n", [
+            $manifest['format'],
+            (string) $manifest['version'],
+            $manifest['backup'],
+            $manifest['database_sha256'],
+        ]);
+
+        return hash_hmac('sha256', $payload, $key);
     }
 
     /**
@@ -612,6 +749,27 @@ class SystemConfigurationController extends Controller
                     }
                 } elseif (!$archive->addFile($item->getPathname(), $archivePath)) {
                     throw new \RuntimeException("Unable to add file [{$archivePath}] to the backup archive.");
+                }
+            }
+
+            $databaseDump = $sourcePath . DIRECTORY_SEPARATOR . 'database_dump.sql';
+            if (is_file($databaseDump)) {
+                $databaseHash = hash_file('sha256', $databaseDump);
+                if ($databaseHash === false) {
+                    throw new \RuntimeException('Unable to verify the database dump for this backup.');
+                }
+
+                $manifest = [
+                    'format' => 'smart-accounting-backup',
+                    'version' => 1,
+                    'backup' => basename($sourcePath),
+                    'database_sha256' => $databaseHash,
+                ];
+                $manifest['signature'] = $this->backupManifestSignature($manifest);
+
+                $manifestContents = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                if ($manifestContents === false || !$archive->addFromString('backup_manifest.json', $manifestContents . "\n")) {
+                    throw new \RuntimeException('Unable to add backup verification data to the archive.');
                 }
             }
 
