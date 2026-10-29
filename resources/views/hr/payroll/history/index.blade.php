@@ -163,6 +163,8 @@ window.allHistoryBatches = {!! json_encode($allBatches->map(fn($b) => [
     'is_first' => (int) $b->period_start->format('d') <= 15,
     'status' => $b->status ?? 'submitted',
     'employee_count' => $b->payrolls->count(),
+    'gross_pay' => (float) $b->payrolls->sum('gross_pay'),
+    'total_deductions' => (float) $b->payrolls->sum('total_deductions'),
     'net_pay' => (float) ($b->total_net_pay ?? $b->payrolls->sum('net_pay') ?? 0),
     'url' => route('payroll.history.batch', ['start' => $b->period_start->format('Y-m-d'), 'end' => $b->period_end->format('Y-m-d')]),
 ])) !!};
@@ -179,9 +181,10 @@ window.allHistoryBatches = {!! json_encode($allBatches->map(fn($b) => [
     let page = 1, filtered = [];
 
     const S_COLORS = {
-        draft:     { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500', label: 'Draft' },
-        submitted: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', dot: 'bg-violet-500', label: 'Submitted' },
-        approved:  { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Approved' },
+        draft:     { bg: 'bg-amber-50', text: 'text-amber-500', dot: 'bg-amber-300', label: 'Draft' },
+        submitted: { bg: 'bg-violet-50', text: 'text-violet-600', dot: 'bg-violet-400', label: 'Submitted' },
+        approved:  { bg: 'bg-emerald-50', text: 'text-emerald-600', dot: 'bg-emerald-400', label: 'Approved' },
+        rejected:  { bg: 'bg-red-50', text: 'text-red-600', dot: 'bg-red-400', label: 'Rejected' },
     };
 
     function applyFilters() {
@@ -212,34 +215,41 @@ window.allHistoryBatches = {!! json_encode($allBatches->map(fn($b) => [
         } else {
             noRes.classList.add('hidden');
             pageData.forEach(b => {
-                const si = S_COLORS[b.status] || S_COLORS.submitted;
+                const si = S_COLORS[b.status] || S_COLORS.draft;
                 const halfLabel = b.is_first ? '1st' : '2nd';
 
                 const card = document.createElement('div');
                 card.innerHTML = `
-                    <a href="${b.url}" class="block no-underline text-inherit">
-                        <div class="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50/60">
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-semibold text-gray-900">${b.month_year} — ${halfLabel} half</p>
-                                <p class="text-[0.55rem] font-mono text-gray-400 mt-0.5">${b.period_start_display} – ${b.period_end_display}</p>
-                            </div>
-                            <div class="flex items-center gap-5 shrink-0">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.55rem] font-semibold border ${si.bg} ${si.text} ${si.border}">
+                    <a href="${b.url}" class="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/60 group no-underline">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-semibold text-gray-900">${b.month_year} &mdash; ${halfLabel} half</span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide ${si.bg} ${si.text}">
                                     <span class="w-1.5 h-1.5 rounded-full ${si.dot}"></span>
                                     ${si.label}
                                 </span>
-                                <div class="text-center">
-                                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Employees</p>
-                                    <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">${b.employee_count}</p>
-                                </div>
-                                <div class="text-center">
-                                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Net Pay</p>
-                                    <p class="text-sm font-bold text-emerald-600 tabular-nums mt-0.5">₱${b.net_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
-                                </div>
-                                <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-0.5 font-mono">${b.period_start_display} &ndash; ${b.period_end_display}</p>
+                        </div>
+                        <div class="hidden sm:flex items-center gap-6 shrink-0">
+                            <div class="text-left min-w-[44px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Employees</p>
+                                <p class="text-sm font-semibold text-gray-900 tabular-nums">${b.employee_count}</p>
+                            </div>
+                            <div class="text-left min-w-[88px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Gross Pay</p>
+                                <p class="text-sm font-semibold text-gray-900 tabular-nums">₱${b.gross_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+                            </div>
+                            <div class="text-left min-w-[88px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
+                                <p class="text-sm font-semibold text-red-500 tabular-nums">₱${b.total_deductions.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+                            </div>
+                            <div class="text-left min-w-[88px]">
+                                <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net Pay</p>
+                                <p class="text-sm font-bold text-emerald-600 tabular-nums">₱${b.net_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
                             </div>
                         </div>
-                    </a>
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 `;
                 grid.appendChild(card);
             });

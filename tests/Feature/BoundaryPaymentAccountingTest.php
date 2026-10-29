@@ -122,7 +122,7 @@ function boundaryPaymentPayload(string $token, string $date, string $amount, str
     ];
 }
 
-test('payroll receivables has a short remittances tab beside cash advances', function () {
+test('payroll receivables shows the short remittances tab only to accountants', function () {
     $hr = User::create([
         'name' => 'Boundary HR',
         'username' => 'boundary-hr',
@@ -145,9 +145,8 @@ test('payroll receivables has a short remittances tab beside cash advances', fun
         ->get(route('payroll.receivables.index', ['tab' => 'short_remittances']))
         ->assertOk()
         ->assertSee('Cash Advances')
-        ->assertSee('Short Remittances')
-        ->assertSee('Dina Driver')
-        ->assertSee('₱1,000.00')
+        ->assertDontSee('Short Remittances')
+        ->assertDontSee('Dina Driver')
         ->assertDontSee('Pending payment actions');
 
     $pendingPayment = $remittance->boundaryPayments()->where('source_payment_key', $paymentKey)->firstOrFail();

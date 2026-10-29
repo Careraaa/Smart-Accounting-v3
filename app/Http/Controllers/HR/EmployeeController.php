@@ -185,7 +185,7 @@ class EmployeeController extends Controller
 
     public function show(User $employee)
     {
-        $employee->load(['workExperiences', 'specialSkills', 'beneficiaries', 'charRefs', 'employeeAttachments']);
+        $employee->load(['shift', 'workExperiences', 'specialSkills', 'beneficiaries', 'charRefs', 'employeeAttachments']);
         $this->logActivity('viewed', "Employee: {$employee->first_name} {$employee->last_name}", request()->url(), 'employee', $employee->id);
         return view('hr.employees.show', compact('employee'));
     }

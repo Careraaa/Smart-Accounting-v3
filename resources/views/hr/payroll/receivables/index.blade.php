@@ -23,7 +23,7 @@
     <div class="fade-up flex items-start justify-between gap-4 flex-wrap">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Receivables</h1>
-            <p class="text-sm text-gray-400 mt-0.5">Manage cash advances and short-remittance balances</p>
+            <p class="text-sm text-gray-400 mt-0.5">Manage cash advances{{ $canViewShortRemittances ? ' and short-remittance balances' : '' }}</p>
         </div>
     </div>
 
@@ -57,14 +57,16 @@
                     Cash Advances
                 </span>
             </button>
-            <button role="tab" data-tab="short_remittances"
-               class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group {{ $tab === 'short_remittances' ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
-                <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 {{ $tab === 'short_remittances' ? 'text-emerald-500' : 'text-gray-400' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Short Remittances
-                    <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'short_remittances' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600' }}">{{ $shortRemittances->count() }}</span>
-                </span>
-            </button>
+            @if($canViewShortRemittances)
+                <button role="tab" data-tab="short_remittances"
+                   class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group {{ $tab === 'short_remittances' ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 {{ $tab === 'short_remittances' ? 'text-emerald-500' : 'text-gray-400' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Short Remittances
+                        <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'short_remittances' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600' }}">{{ $shortRemittances->count() }}</span>
+                    </span>
+                </button>
+            @endif
             {{--
             <button role="tab" data-tab="salary_loans"
                class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group
@@ -188,6 +190,7 @@
     </div>
     </div>
 
+    @if(auth()->user()->role === 'accountant')
     <div id="tab-short_remittances" class="tab-panel {{ $tab === 'short_remittances' ? 'active-panel' : 'hidden' }}">
         <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
@@ -251,7 +254,7 @@
             </div>
         </div>
     </div>
-
+    @endif
 
 
 {{-- ── Mark as Paid Modal (Tailwind overlay) ── --}}
