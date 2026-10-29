@@ -159,7 +159,7 @@ InfinityFree DB is not reachable from the GitHub runner and there is no SSH.
 ## Known accepted losses on free hosting
 
 - Database backups and restores use the configured PHP database connection. Downloading folder backups requires PHP's ZIP extension.
-- To restore a downloaded backup, use **Configuration → Restore database → Backup ZIP from your device** and upload a ZIP downloaded from that same website. The archive is signed with that deployment's `APP_KEY`; download a fresh backup after deploying this upload/verification feature.
+- To restore a downloaded backup, use **Configuration → Restore database → Backup ZIP from your device**. Backup ZIPs can be transferred between websites; restore verifies the database dump against the SHA-256 checksum in the archive. This checksum detects damage but does not authenticate who created the archive, so only restore backups from trusted sources.
 - Laravel scheduled tasks do not run (no cron), including automatic absent marking and nightly cleanups
 - Emails can't send (SMTP ports blocked)
 - >50k visits/day = site sleeps until midnight
