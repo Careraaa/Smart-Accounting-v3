@@ -136,13 +136,7 @@
                                 @forelse($advances as $advance)
                                     @php
                                         $displayStatus = $advance->amount_deducted > 0 ? 'deducted' : $advance->status;
-                                        $pillClasses = match($displayStatus) {
-                                            'pending'  => 'bg-amber-50 text-amber-700 border border-amber-200',
-                                            'approved' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-                                            'rejected' => 'bg-rose-50 text-rose-700 border border-rose-200',
-                                            'deducted' => 'bg-violet-50 text-violet-700 border border-violet-200',
-                                            default    => 'bg-gray-100 text-gray-600 border border-gray-200',
-                                        };
+                                        $statusBadge = in_array($displayStatus, ['pending', 'approved', 'rejected', 'deducted'], true) ? $displayStatus : 'neutral';
                                     @endphp
                                     <tr class="hover:bg-gray-50/70 transition-colors">
                                         <td class="px-5 py-3 text-sm text-gray-700">
@@ -152,7 +146,7 @@
                                             <span class="font-mono font-bold text-gray-900">₱{{ number_format($advance->amount, 2) }}</span>
                                         </td>
                                         <td class="px-5 py-3">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $pillClasses }}">
+                                            <span class="app-status-badge {{ $statusBadge }}">
                                                 {{ ucfirst($displayStatus) }}
                                             </span>
                                         </td>

@@ -54,7 +54,7 @@
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 fade-up">
-    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4">
+    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 relative overflow-hidden">
         <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500 rounded-b-xl"></div>
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
@@ -67,7 +67,7 @@
             </div>
         </div>
     </div>
-    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4">
+    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 relative overflow-hidden">
         <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500 rounded-b-xl"></div>
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
@@ -80,7 +80,7 @@
             </div>
         </div>
     </div>
-    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4">
+    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 relative overflow-hidden">
         <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-b-xl"></div>
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
@@ -93,7 +93,7 @@
             </div>
         </div>
     </div>
-    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4">
+    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 relative overflow-hidden">
         <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 rounded-b-xl"></div>
         <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">

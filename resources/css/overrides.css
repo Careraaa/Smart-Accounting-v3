@@ -82,6 +82,84 @@ body {
     }
 }
 
+/* -- Shared Status Badges ------------------------------------- */
+/* Every status badge uses a pill shape. Colors stay owned by each status
+   family, so unique badges can keep their meaning. */
+.app-status-badge,
+.prl-status,
+.otp-status,
+.otp-type-badge,
+.emp-badge,
+.att-status,
+[data-status-badge],
+.hld-holiday-badge,
+.badge-active,
+.badge-inactive,
+.badge-leave,
+.badge-paid {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem !important;
+    border-radius: 9999px !important;
+    font-size: 0.75rem !important;
+    line-height: 1rem;
+    font-weight: 600 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    white-space: nowrap;
+}
+
+.prl-status::before,
+.otp-status::before,
+.att-status::before,
+.app-status-badge::before {
+    width: 0.375rem !important;
+    height: 0.375rem !important;
+    flex: 0 0 auto;
+}
+
+/* Common workflow and account states use one clean badge shape.
+   Special badges, such as attendance, vehicles, and accounting states,
+   keep their own colors and styles. */
+.app-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.app-status-badge::before {
+    content: '';
+    width: 0.375rem;
+    height: 0.375rem;
+    flex: 0 0 auto;
+    border-radius: 9999px;
+}
+
+.app-status-badge.pending { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.app-status-badge.pending::before { background: #d97706; }
+.app-status-badge.approved { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+.app-status-badge.approved::before { background: #16a34a; }
+.app-status-badge.rejected { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.app-status-badge.rejected::before { background: #dc2626; }
+.app-status-badge.active { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.app-status-badge.active::before { background: #3b82f6; }
+.app-status-badge.inactive,
+.app-status-badge.neutral { background: #f4f5f7; color: #6b7280; border-color: #e5e7eb; }
+.app-status-badge.inactive::before,
+.app-status-badge.neutral::before { background: #9ca3af; }
+.app-status-badge.settled { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+.app-status-badge.settled::before { background: #16a34a; }
+.app-status-badge.deducted { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+.app-status-badge.deducted::before { background: #8b5cf6; }
+
 /* -- Shared Table Components ----------------------------------- */
 
 /* Standard screen table based on Payroll Approval and Employee Management.

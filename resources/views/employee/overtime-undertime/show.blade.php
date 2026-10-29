@@ -3,12 +3,6 @@
 @section('content')
 @php
     $pill = in_array($overtimeUndertime->status, ['pending','approved','rejected'], true) ? $overtimeUndertime->status : 'neutral';
-    $pillClasses = match($pill) {
-        'pending'  => 'bg-amber-50 text-amber-700 border border-amber-200',
-        'approved' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-        'rejected' => 'bg-rose-50 text-rose-700 border border-rose-200',
-        default    => 'bg-gray-100 text-gray-600 border border-gray-200',
-    };
     $typeClasses = $overtimeUndertime->type === 'overtime'
         ? 'bg-blue-50 text-blue-700 border border-blue-200'
         : 'bg-yellow-50 text-yellow-700 border border-yellow-200';
@@ -67,7 +61,7 @@
                             <div class="w-2 h-2 rounded-full bg-gray-900"></div>
                             <span class="text-sm font-bold text-gray-900">Summary</span>
                         </div>
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $pillClasses }}">
+                        <span class="app-status-badge {{ $pill }}">
                             {{ ucfirst($overtimeUndertime->status) }}
                         </span>
                     </div>

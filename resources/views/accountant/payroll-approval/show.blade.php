@@ -71,7 +71,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $payroll->payroll_period_start->format('F d, Y') }} &mdash; {{ $payroll->payroll_period_end->format('F d, Y') }}</p>
         </div>
         <div class="flex flex-col items-end gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $sc['bg'] }} {{ $sc['text'] }}">
+            <span class="app-status-badge {{ $sc['bg'] }} {{ $sc['text'] }}">
                 <span class="w-2 h-2 rounded-full {{ $sc['dot'] }}"></span>
                 {{ $sc['label'] }}
             </span>

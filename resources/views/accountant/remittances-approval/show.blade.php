@@ -83,7 +83,7 @@ $statusInfo = match($remittance->status) {
         </div>
     </div>
     <div class="flex items-center gap-2">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
+        <span class="app-status-badge {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
             <span class="w-2 h-2 rounded-full {{ $statusInfo['dot'] }}"></span>
             {{ $statusInfo['label'] }}
         </span>

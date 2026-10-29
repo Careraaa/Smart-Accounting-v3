@@ -144,13 +144,7 @@
                                     @php
                                         $totalMonths = $loan->monthly_deduction > 0 ? ceil($loan->loan_amount / $loan->monthly_deduction) : 0;
                                         $progress    = $totalMonths > 0 ? min(100, round(($loan->months_paid / $totalMonths) * 100)) : 0;
-                                        $pillClasses = match($loan->status) {
-                                            'pending'  => 'bg-amber-50 text-amber-700 border border-amber-200',
-                                            'active'   => 'bg-blue-50 text-blue-700 border border-blue-200',
-                                            'settled'  => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-                                            'rejected' => 'bg-rose-50 text-rose-700 border border-rose-200',
-                                            default    => 'bg-gray-100 text-gray-600 border border-gray-200',
-                                        };
+                                        $loanStatus = in_array($loan->status, ['pending', 'active', 'settled', 'rejected'], true) ? $loan->status : 'neutral';
                                     @endphp
                                     <tr class="hover:bg-gray-50/70 transition-colors">
                                         <td class="px-5 py-3">
@@ -172,7 +166,7 @@
                                             <div class="text-xs text-gray-400 mt-1 font-mono">{{ $loan->months_paid }}/{{ $totalMonths }} months paid</div>
                                         </td>
                                         <td class="px-5 py-3">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $pillClasses }}">
+                                            <span class="app-status-badge {{ $loanStatus }}">
                                                 {{ ucfirst($loan->status) }}
                                             </span>
                                             @if($loan->rejection_reason)

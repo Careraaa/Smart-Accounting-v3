@@ -182,15 +182,7 @@
                                     <div class="font-bold text-gray-900 font-mono text-sm">{{ $leave->days }} day{{ $leave->days != 1 ? 's' : '' }}</div>
                                 </td>
                                 <td class="px-5 py-3">
-                                    @php
-                                        $pillStyles = [
-                                            'pending' => 'bg-amber-100 text-amber-700',
-                                            'approved' => 'bg-emerald-100 text-emerald-700',
-                                            'rejected' => 'bg-rose-100 text-rose-700',
-                                            'neutral' => 'bg-gray-100 text-gray-600',
-                                        ];
-                                    @endphp
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $pillStyles[$pill] }}">{{ ucfirst($leave->status) }}</span>
+                                    <span class="app-status-badge {{ $pill }}">{{ ucfirst($leave->status) }}</span>
                                 </td>
                                 @if($leaves->where('status', 'pending')->count())
                                 <td class="px-5 py-3 text-right" onclick="event.stopPropagation()">

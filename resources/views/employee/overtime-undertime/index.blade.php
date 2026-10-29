@@ -153,12 +153,6 @@
                         @forelse($requests as $request)
                             @php
                                 $pill = in_array($request->status, ['pending','approved','rejected'], true) ? $request->status : 'neutral';
-                                $pillClasses = match($pill) {
-                                    'pending'  => 'bg-amber-50 text-amber-700 border border-amber-200',
-                                    'approved' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-                                    'rejected' => 'bg-rose-50 text-rose-700 border border-rose-200',
-                                    default    => 'bg-gray-100 text-gray-600 border border-gray-200',
-                                };
                                 $typeClasses = $request->type === 'overtime'
                                     ? 'bg-blue-50 text-blue-700 border border-blue-200'
                                     : 'bg-yellow-50 text-yellow-700 border border-yellow-200';
@@ -180,7 +174,7 @@
                                     <span class="text-gray-500 text-sm">{{ Str::limit($request->reason, 60) }}</span>
                                 </td>
                                 <td class="px-5 py-3">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold {{ $pillClasses }}">
+                                    <span class="app-status-badge {{ $pill }}">
                                         {{ ucfirst($request->status) }}
                                     </span>
                                 </td>
