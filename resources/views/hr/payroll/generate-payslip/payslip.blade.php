@@ -332,60 +332,29 @@
             .batch-print .page {
                 break-after: auto;
                 page-break-after: auto;
-                height: 91mm;
             }
 
-            .batch-print-single .page {
-                height: 279.4mm;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .batch-print-single .main-content {
-                flex: none;
-                width: 100%;
-                height: 91mm;
-            }
-
-            .batch-print-single .cut-guide {
-                display: none;
-            }
-
-            .batch-print .cut-guide {
-                display: block;
-                width: 100%;
-                height: 1mm;
-                border-top: 1px dashed #777;
-            }
-
-            .batch-print .cut-guide.page-break {
+            .batch-print .page.batch-page-break {
                 break-after: page;
                 page-break-after: always;
             }
         }
 
-        @if (!empty($batchPrint))
-        @page {
-            size: letter portrait;
-            margin: 0mm;
-        }
-        @else
         @page {
             size: A6 landscape;
             margin: 0mm;
         }
-        @endif
     </style>
 </head>
 
-<body class="{{ !empty($batchPrint) ? 'batch-print'.($payrolls->count() === 1 ? ' batch-print-single' : '') : '' }}">
+<body class="{{ !empty($batchPrint) && $payrolls->count() > 1 ? 'batch-print' : '' }}">
 
     <div class="controls">
         <button class="btn btn-primary" onclick="window.print()">{{ !empty($batchPrint) ? 'Print All Payslips' : 'Print Payslip' }}</button>
     </div>
 
     @foreach (($payrolls ?? collect([$payroll])) as $payroll)
-        <div class="page">
+        <div class="page{{ !empty($batchPrint) && $payrolls->count() > 1 && !$loop->last ? ' batch-page-break' : '' }}">
 
         <!-- LEFT COLUMN - Main Payslip -->
         <div class="main-content">
@@ -572,9 +541,6 @@
         </div> -->
 
         </div>
-        @if (!empty($batchPrint))
-            <div class="cut-guide{{ $loop->iteration % 3 === 0 && !$loop->last ? ' page-break' : '' }}" aria-hidden="true"></div>
-        @endif
     @endforeach
 
     @if (!empty($batchPrint))
