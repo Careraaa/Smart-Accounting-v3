@@ -87,65 +87,7 @@ $financialChartMax = max(1, (float) $financialTrend->max('revenue'), (float) $fi
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 items-stretch">
             @include('partials.financial-overview-card')
 
-            {{-- Attendance Trend (SVG line chart) --}}
-            @php
-            $cnt = count($attendanceTrend);
-            $atH = 132;
-            $atPresentH = [];
-            $atLateH = [];
-            foreach ($attendanceTrend as $i => $d) {
-                $atPresentH[$i] = $maxV > 0 ? round(($d['present'] / $maxV) * $atH) : 0;
-                $atLateH[$i] = $maxV > 0 ? round(($d['late'] / $maxV) * $atH) : 0;
-            }
-            @endphp
-            <div class="sad-fade-up kpi-card overflow-hidden">
-                <div class="px-4 pt-4 pb-3 flex items-center justify-between">
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-[13px] font-semibold text-gray-900">Attendance Trend</span>
-                        <span class="text-[11px] text-gray-400">last 7 days</span>
-                    </div>
-                    <div class="flex items-center gap-3 text-[11px] text-gray-400">
-                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-indigo-500 inline-block"></span> Present</span>
-                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-amber-400 inline-block"></span> Late</span>
-                    </div>
-                </div>
-                <div class="px-4 pb-4">
-                    @if($cnt > 0)
-                    <div class="at-plot">
-                        <div class="at-grid" style="bottom:0"></div>
-                        <div class="at-grid" style="bottom:50%"></div>
-                        <div class="at-grid at-grid-top" style="bottom:100%"></div>
-                        <span class="at-max">{{ $maxV }}</span>
-                        <div class="at-cols">
-                            @foreach ($attendanceTrend as $i => $d)
-                            <div class="at-col" title="{{ \Carbon\Carbon::parse($d['date_iso'])->format('D, M j') }} — {{ $d['present'] }} present, {{ $d['late'] }} late">
-                                <div class="at-bar" style="height:{{ $atPresentH[$i] + $atLateH[$i] }}px;animation-delay:{{ 0.05 + $i * 0.04 }}s">
-                                    <div class="at-seg at-late" style="height:{{ $atLateH[$i] }}px"></div>
-                                    <div class="at-seg at-present" style="height:{{ $atPresentH[$i] }}px"></div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div class="at-days">
-                        @foreach ($attendanceTrend as $d)
-                        <span>{{ \Carbon\Carbon::parse($d['date_iso'])->format('D') }}</span>
-                        @endforeach
-                    </div>
-                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-[11px] text-gray-400">
-                        <span>Daily headcount, 7-day window</span>
-                        <span>
-                            Today:
-                            <strong class="text-gray-700 font-medium tabular-nums">{{ $td['present'] }}</strong> present
-                            <span class="mx-1 text-gray-300">·</span>
-                            <strong class="text-emerald-600 font-medium tabular-nums">{{ number_format($attendanceRate, 1) }}%</strong>
-                        </span>
-                    </div>
-                    @else
-                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No attendance data yet.</div>
-                    @endif
-                </div>
-            </div>
+            @include('partials.attendance-trend-card')
 
 
 
