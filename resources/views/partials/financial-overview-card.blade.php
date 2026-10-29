@@ -115,8 +115,12 @@
                         const revenueYs = @json(array_map(fn($point) => $financialChartPadTop + $financialPlotH - (($point['revenue'] / $financialChartMax) * $financialPlotH), $financialTrend->all()));
                         const incomeYs = @json(array_map(fn($point) => $financialChartPadTop + $financialPlotH - ((max($point['netIncome'], 0) / $financialChartMax) * $financialPlotH), $financialTrend->all()));
                         const resizeLabels = () => {
-                            const scale = {{ $financialChartW }} / chart.getBoundingClientRect().width;
-                            chart.querySelectorAll('.financial-chart-label').forEach((label) => label.setAttribute('font-size', Math.max(9, 9 * scale)));
+                            const scale = Math.max(1, {{ $financialChartW }} / chart.getBoundingClientRect().width);
+                            chart.querySelectorAll('.financial-chart-label').forEach((label) => {
+                                const x = Number(label.getAttribute('x'));
+                                const y = Number(label.getAttribute('y'));
+                                label.setAttribute('transform', `translate(${x * (1 - scale)}, ${y * (1 - scale)}) scale(${scale})`);
+                            });
                         };
                         resizeLabels();
                         window.addEventListener('resize', resizeLabels);

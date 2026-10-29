@@ -122,8 +122,12 @@
                     const xs = points.map((_, i) => {{ $rcPadL }} + (i * {{ $rcStep }}));
                     const ys = @json(array_map(fn($day) => $rcPadT + $rcPlotH - (((float) $day['net'] / $rcMax) * $rcPlotH), $dailyData->all()));
                     const resizeLabels = () => {
-                         const scale = {{ $rcW }} / chart.getBoundingClientRect().width;
-                         chart.querySelectorAll('.daily-remittance-chart-label').forEach((label) => label.setAttribute('font-size', Math.max(10, 10 * scale)));
+                         const scale = Math.max(1, {{ $rcW }} / chart.getBoundingClientRect().width);
+                         chart.querySelectorAll('.daily-remittance-chart-label').forEach((label) => {
+                             const x = Number(label.getAttribute('x'));
+                             const y = Number(label.getAttribute('y'));
+                             label.setAttribute('transform', `translate(${x * (1 - scale)}, ${y * (1 - scale)}) scale(${scale})`);
+                         });
                      };
                      resizeLabels();
                      window.addEventListener('resize', resizeLabels);
