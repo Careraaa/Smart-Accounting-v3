@@ -61,7 +61,7 @@ Details: [DEPLOYMENT.md §2–3](DEPLOYMENT.md)
 | Limit | Impact on us |
 |---|---|
 | **PHP scripts killed after 20 seconds** | Payroll on large batches dies mid-run → always test with SMALL employee sets |
-| **`exec()` disabled** | Backup/Restore buttons in Super Admin will error — known, accepted |
+| **No `exec()` / cron jobs** | Manual MySQL backup uses the app's database connection, but database restore needs a host with shell support; automatic backups cannot run without a scheduler |
 | **No cron jobs** | Laravel scheduled tasks do not run — automatic absent marking and nightly cleanup are disabled |
 | **SMTP ports blocked** | App cannot send real emails |
 | **~50k visits/day** | Exceeding = site sleeps until midnight |

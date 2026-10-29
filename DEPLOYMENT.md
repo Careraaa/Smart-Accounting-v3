@@ -158,14 +158,14 @@ InfinityFree DB is not reachable from the GitHub runner and there is no SSH.
 
 ## Known accepted losses on free hosting
 
-- Backup/Restore buttons error out (`exec()` banned)
+- Database backups can use the configured PHP database connection, but restoring a MySQL dump requires `exec()`/a MySQL client, which is disabled
 - Laravel scheduled tasks do not run (no cron), including automatic absent marking and nightly cleanups
 - Emails can't send (SMTP ports blocked)
 - >50k visits/day = site sleeps until midnight
 
 ## Laravel scheduler requirement
 
-The absent-marking command checks employee workdays and waits until each assigned shift ends. It is scheduled to run every 15 minutes, but Laravel's scheduler must itself be invoked every minute for scheduled commands to run.
+The absent-marking command checks employee workdays and waits until each assigned shift ends. It is scheduled to run every 15 minutes, but Laravel's scheduler must itself be invoked every minute for scheduled commands to run. The backup frequency setting currently does not schedule backups; automatic backups need a scheduler and a scheduled backup command.
 
 On a Windows/XAMPP machine, configure Windows Task Scheduler to run `C:\xampp\php\php.exe` with `artisan schedule:run` as the argument, set the working directory to the project root, and repeat the task every minute. InfinityFree does not provide cron jobs, so automatic absent marking will not run there unless the host offers a scheduler or an external scheduler is configured.
 

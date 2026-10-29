@@ -200,7 +200,13 @@ class SystemConfigurationController extends Controller
     public function backupNow()
     {
         try {
-            Artisan::call('backup:run');
+            $exitCode = Artisan::call('backup:run');
+            if ($exitCode !== 0) {
+                $output = trim(Artisan::output());
+                return redirect()->route('configuration.index')
+                    ->with('error', $output ?: 'Backup failed. Check the application logs for details.');
+            }
+
             $this->logActivity('updated', 'configuration');
             return redirect()->route('configuration.index')->with('success', 'Backup created successfully!')->with('_sound_backup', true);
         } catch (\Exception $e) {
