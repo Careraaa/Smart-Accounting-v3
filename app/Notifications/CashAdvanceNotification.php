@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class CashAdvanceNotification
 {
     /**
-     * Notify accountants of a new pending cash advance, and confirm to the employee.
+     * Notify HR and accountants of a new pending cash advance, and confirm to the employee.
      */
     public static function submitted(CashAdvance $cashAdvance): void
     {
@@ -27,8 +27,8 @@ class CashAdvanceNotification
             ['cash_advance_id' => $cashAdvance->id, 'amount' => $cashAdvance->amount]
         );
 
-        // Notify all accountants and superadmins
-        $approverIds = User::whereIn(DB::raw('LOWER(TRIM(role))'), ['accountant', 'superadmin'])
+        // Notify HR, accountants, and superadmins
+        $approverIds = User::whereIn(DB::raw('LOWER(TRIM(role))'), ['hr', 'accountant', 'superadmin'])
             ->pluck('id')
             ->toArray();
 
@@ -36,7 +36,7 @@ class CashAdvanceNotification
             $approverIds,
             'cash_advance_pending',
             'New Cash Advance Request',
-            "{$name} submitted a cash advance request of ₱{$amount} pending your approval.",
+            "{$name} submitted a cash advance request of ₱{$amount} pending review.",
             [
                 'cash_advance_id' => $cashAdvance->id,
                 'employee_id'     => $employee->id,

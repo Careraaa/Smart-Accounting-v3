@@ -62,7 +62,7 @@ Details: [DEPLOYMENT.md §2–3](DEPLOYMENT.md)
 |---|---|
 | **PHP scripts killed after 20 seconds** | Payroll on large batches dies mid-run → always test with SMALL employee sets |
 | **`exec()` disabled** | Backup/Restore buttons in Super Admin will error — known, accepted |
-| **No cron jobs** | Nightly cleanup tasks never run — old logs/notifications just accumulate |
+| **No cron jobs** | Laravel scheduled tasks do not run — automatic absent marking and nightly cleanup are disabled |
 | **SMTP ports blocked** | App cannot send real emails |
 | **~50k visits/day** | Exceeding = site sleeps until midnight |
 | **10 MB max per uploaded file** | Employee attachments above this fail |
