@@ -207,60 +207,7 @@ $financialChartMax = max(1, (float) $financialTrend->max('revenue'), (float) $fi
                 </div>
             </div>
 
-{{-- Daily Remittance Trend --}}
-@php
-    $dailyData = collect($dailyRemittanceTrend);
-    $rcHasData = $dailyData->sum('count') > 0;
-    $rcCount = $rcHasData ? $dailyData->count() : 0;
-    $rcMax = $dailyData->max('net') ?: 1;
-    $rcTotal = $dailyData->sum('net');
-    $rcW = 600; $rcH = 180;
-    $rcPadL = 4; $rcPadR = 62; $rcPadT = 16; $rcPadB = 26;
-    $rcPlotW = $rcW - $rcPadL - $rcPadR;
-    $rcPlotH = $rcH - $rcPadT - $rcPadB;
-    $rcStep = $rcCount > 1 ? $rcPlotW / ($rcCount - 1) : 0;
-    $rcPts = [];
-    foreach ($dailyData as $i => $d) {
-        $rcPts[] = round($rcPadL + $i * $rcStep, 1) . ',' . round($rcPadT + $rcPlotH - ($rcMax > 0 ? ($d['net'] / $rcMax) * $rcPlotH : 0), 1);
-    }
-    $rcLast = $rcCount - 1;
-    $rcEndX = $rcPadL + $rcLast * $rcStep;
-    $rcEndY = $rcPadT + $rcPlotH - ($rcCount > 0 ? ($dailyData[$rcLast]['net'] / max($rcMax, 1)) * $rcPlotH : 0);
-    $rcEndVal = $rcCount > 0 ? $dailyData[$rcLast]['net'] : 0;
-    $rcEndText = $rcEndVal >= 1000 ? "\u{20B1}" . number_format($rcEndVal / 1000, 1) . 'k' : "\u{20B1}" . number_format($rcEndVal);
-@endphp
-
-<div class="sad-fade-up kpi-card overflow-hidden">
-    <div class="px-4 pt-4 pb-1 flex items-start justify-between gap-3">
-        <div>
-            <p class="kcard-label">Daily Remittance Trend <span class="font-normal text-gray-400">· last 7 days</span></p>
-            <p class="text-xl font-semibold text-gray-900 tabular-nums mt-1">&#8369;{{ number_format($rcTotal, 0) }}</p>
-        </div>
-        <a href="{{ route('remittances.index') }}" class="shrink-0 mt-1 text-[11px] font-medium text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">View all &rarr;</a>
-    </div>
-    <div class="px-4 pb-4 pt-2">
-        @if($rcCount > 1)
-        <svg viewBox="0 0 {{ $rcW }} {{ $rcH }}" class="w-full h-auto" role="img"
-             aria-label="Net remittance across {{ $rcCount }} days, totalling {{ number_format($rcTotal, 0) }} pesos">
-            <line class="chart-grid" x1="{{ $rcPadL }}" y1="{{ $rcPadT + $rcPlotH }}" x2="{{ $rcPadL + $rcPlotW }}" y2="{{ $rcPadT + $rcPlotH }}"/>
-            <line class="chart-grid" x1="{{ $rcPadL }}" y1="{{ $rcPadT + $rcPlotH / 2 }}" x2="{{ $rcPadL + $rcPlotW }}" y2="{{ $rcPadT + $rcPlotH / 2 }}"/>
-            <line class="chart-grid" x1="{{ $rcPadL }}" y1="{{ $rcPadT }}" x2="{{ $rcPadL + $rcPlotW }}" y2="{{ $rcPadT }}"/>
-
-            <polyline points="{{ implode(' ', $rcPts) }}" fill="none" stroke="#059669"
-                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                      class="sad-chart-line"/>
-
-            <circle class="chart-ring" cx="{{ round($rcEndX, 1) }}" cy="{{ round($rcEndY, 1) }}" r="4" fill="#059669"/>
-            <text class="chart-endlabel" x="{{ round($rcEndX + 10, 1) }}" y="{{ round($rcEndY + 4, 1) }}">{{ $rcEndText }}</text>
-
-            <text class="chart-label" x="{{ $rcPadL }}" y="{{ $rcH - 6 }}" text-anchor="start">{{ $dailyData->first()['label'] }}</text>
-            <text class="chart-label" x="{{ $rcPadL + $rcPlotW }}" y="{{ $rcH - 6 }}" text-anchor="end">{{ $dailyData->last()['label'] }}</text>
-        </svg>
-        @else
-        <div class="flex items-center justify-center h-[150px] text-xs text-gray-400">No finalized remittances in the last 7 days.</div>
-        @endif
-    </div>
-</div>
+@include('partials.daily-remittance-card')
 
 
     </div>

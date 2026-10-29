@@ -67,13 +67,72 @@
                     $incomePath = $smoothPath($incomeCoords);
                 @endphp
                 <svg viewBox="0 0 {{ $financialChartW }} {{ $financialChartH }}" class="mt-2 h-auto w-full" role="img" aria-label="Revenue and net income for the last six months">
+                    <defs>
+                        <filter id="financialRevenueLineShadow" x="-20%" y="-30%" width="140%" height="170%" color-interpolation-filters="sRGB">
+                            <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#ee765f" flood-opacity="0.28" />
+                        </filter>
+                        <filter id="financialIncomeLineShadow" x="-20%" y="-30%" width="140%" height="170%" color-interpolation-filters="sRGB">
+                            <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#55b995" flood-opacity="0.24" />
+                        </filter>
+                    </defs>
                     <line x1="{{ $financialChartPadX }}" y1="{{ $financialChartPadTop + $financialPlotH }}" x2="{{ $financialChartW - $financialChartPadX }}" y2="{{ $financialChartPadTop + $financialPlotH }}" stroke="currentColor" class="text-gray-200 dark:text-neutral-700" />
-                    <path d="{{ $revenuePath }}" fill="none" stroke="#ee765f" stroke-width="2.5" stroke-linecap="round" />
-                    <path d="{{ $incomePath }}" fill="none" stroke="#55b995" stroke-width="2.5" stroke-linecap="round" />
+                    <path d="{{ $revenuePath }}" fill="none" stroke="#ee765f" stroke-width="2.5" stroke-linecap="round" filter="url(#financialRevenueLineShadow)" />
+                    <path d="{{ $incomePath }}" fill="none" stroke="#55b995" stroke-width="2.5" stroke-linecap="round" filter="url(#financialIncomeLineShadow)" />
                     @foreach($financialTrend as $i => $point)
-                        <text x="{{ $financialChartPadX + ($i * $financialStep) }}" y="{{ $financialChartH - 6 }}" text-anchor="middle" fill="currentColor" class="text-gray-400 dark:text-neutral-500" font-size="10">{{ $point['month'] }}</text>
+                        @php
+                            $financialX = $financialChartPadX + ($i * $financialStep);
+                            $financialRevenueY = $financialChartPadTop + $financialPlotH - (($point['revenue'] / $financialChartMax) * $financialPlotH);
+                            $financialIncomeY = $financialChartPadTop + $financialPlotH - ((max($point['netIncome'], 0) / $financialChartMax) * $financialPlotH);
+                        @endphp
+                        <text x="{{ $financialX }}" y="{{ $financialChartH - 6 }}" text-anchor="middle" fill="currentColor" class="text-gray-400 dark:text-neutral-500" font-size="6.5">{{ $point['month'] }}</text>
+                        <circle cx="{{ $financialX }}" cy="{{ $financialRevenueY }}" r="3.5" fill="#ee765f" stroke="white" stroke-width="2" class="financial-chart-point" data-index="{{ $i }}" />
+                        <circle cx="{{ $financialX }}" cy="{{ $financialIncomeY }}" r="3.5" fill="#55b995" stroke="white" stroke-width="2" class="financial-chart-point" data-index="{{ $i }}" />
                     @endforeach
+                    <g class="financial-chart-hover" aria-hidden="true" style="display:none">
+                        <line class="financial-hover-line" y1="{{ $financialChartPadTop }}" y2="{{ $financialChartPadTop + $financialPlotH }}" stroke="currentColor" stroke-dasharray="3 4" />
+                        <circle class="financial-hover-revenue" r="5" fill="#ee765f" stroke="white" stroke-width="2" />
+                        <circle class="financial-hover-income" r="5" fill="#55b995" stroke="white" stroke-width="2" />
+                        <rect class="financial-hover-box" width="142" height="54" rx="10" fill="white" stroke="#e4e3dc" />
+                        <text class="financial-hover-month" x="12" y="16" font-size="9" font-weight="700" letter-spacing="1.2" fill="#969791" />
+                        <text class="financial-hover-revenue-text" x="12" y="34" font-size="10" fill="#d96650" />
+                        <text class="financial-hover-income-text" x="12" y="47" font-size="10" fill="#3d9b78" />
+                    </g>
+                    <rect x="{{ $financialChartPadX }}" y="{{ $financialChartPadTop }}" width="{{ $financialPlotW }}" height="{{ $financialPlotH }}" fill="transparent" class="financial-chart-overlay" />
                 </svg>
+                <script>
+                    (() => {
+                        const chart = document.currentScript.previousElementSibling;
+                        const overlay = chart.querySelector('.financial-chart-overlay');
+                        const hover = chart.querySelector('.financial-chart-hover');
+                        const points = @json($financialTrend->values());
+                        const xs = points.map((_, i) => {{ $financialChartPadX }} + (i * {{ $financialStep }}));
+                        const revenueYs = @json(array_map(fn($point) => $financialChartPadTop + $financialPlotH - (($point['revenue'] / $financialChartMax) * $financialPlotH), $financialTrend->all()));
+                        const incomeYs = @json(array_map(fn($point) => $financialChartPadTop + $financialPlotH - ((max($point['netIncome'], 0) / $financialChartMax) * $financialPlotH), $financialTrend->all()));
+                        const show = (index) => {
+                            const x = xs[index];
+                            const boxX = Math.min(Math.max(x - 62, {{ $financialChartPadX }}), {{ $financialChartW }} - 152);
+                            hover.style.display = '';
+                            hover.querySelector('.financial-hover-line').setAttribute('x1', x);
+                            hover.querySelector('.financial-hover-line').setAttribute('x2', x);
+                            hover.querySelector('.financial-hover-revenue').setAttribute('cx', x);
+                            hover.querySelector('.financial-hover-revenue').setAttribute('cy', revenueYs[index]);
+                            hover.querySelector('.financial-hover-income').setAttribute('cx', x);
+                            hover.querySelector('.financial-hover-income').setAttribute('cy', incomeYs[index]);
+                            hover.querySelector('.financial-hover-box').setAttribute('x', boxX);
+                            hover.querySelector('.financial-hover-box').setAttribute('y', 18);
+                            hover.querySelector('.financial-hover-month').textContent = points[index].month.toUpperCase();
+                            hover.querySelector('.financial-hover-revenue-text').textContent = `Revenue  ₱${Number(points[index].revenue).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                            hover.querySelector('.financial-hover-income-text').textContent = `Net income  ₱${Number(points[index].netIncome).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                            hover.querySelectorAll('text').forEach((text) => text.setAttribute('transform', `translate(${boxX}, 0)`));
+                        };
+                        overlay.addEventListener('mousemove', (event) => {
+                            const box = overlay.getBoundingClientRect();
+                            const value = ((event.clientX - box.left) / box.width) * (xs[xs.length - 1] - xs[0]) + xs[0];
+                            show(Math.max(0, Math.min(xs.length - 1, Math.round((value - xs[0]) / {{ $financialStep }}))));
+                        });
+                        overlay.addEventListener('mouseleave', () => { hover.style.display = 'none'; });
+                    })();
+                </script>
             @else
                 <div class="flex h-24 items-center justify-center text-xs text-gray-400">No trend data yet.</div>
             @endif
