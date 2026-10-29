@@ -7,7 +7,10 @@
 .stat-card { animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 .fade-up { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .filter-bar { animation:fadeSlideUp 0.4s cubic-bezier(0.16,1,0.3,1) both; }
-.table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.table-wrap { animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+@media (prefers-reduced-motion: reduce) {
+    .stat-card, .fade-up, .filter-bar, .table-wrap { animation: none; }
+}
 </style>
 @endpush
 
@@ -30,29 +33,29 @@
     {{-- Topbar --}}
     <div class="fade-up flex items-start justify-between gap-4 flex-wrap">
         <div>
-            <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">Government Contribution Summary</h1>
+            <h1 class="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Government Contribution Summary</h1>
             <p class="text-xs text-gray-400 font-semibold mt-0.5 max-w-md">SSS, Pag-IBIG, and PhilHealth totals from payroll — employee and employer shares for the selected period.</p>
             <span class="inline-block mt-2 text-[0.6rem] font-semibold text-gray-500 bg-gray-100 rounded-md px-2 py-0.5">{{ \Carbon\Carbon::parse($dateFrom)->format('M j, Y') }} – {{ \Carbon\Carbon::parse($dateTo)->format('M j, Y') }}</span>
         </div>
-        <a href="{{ $printUrl }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold transition-all hover:bg-black active:scale-[0.97] no-underline">
+        <a href="{{ $printUrl }}" target="_blank" rel="noopener" class="inline-flex shrink-0 items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold transition-all hover:bg-black active:scale-[0.97] no-underline">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
             Print report
         </a>
     </div>
 
     {{-- Filter bar --}}
-    <form class="filter-bar flex items-center gap-3 flex-wrap bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3" method="get" action="{{ route('reports.government-contribution') }}" id="gc-report-filters">
-        <div class="flex flex-col gap-1 min-w-[140px] flex-1">
+    <form class="filter-bar grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3" method="get" action="{{ route('reports.government-contribution') }}" id="gc-report-filters">
+        <div class="flex min-w-0 flex-col gap-1">
             <label for="gc-date-from" class="text-[0.55rem] font-bold uppercase tracking-widest text-gray-400">Date from</label>
-            <input type="date" id="gc-date-from" name="date_from" value="{{ $dateFrom }}" onchange="this.form.submit()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100">
+            <input type="date" id="gc-date-from" name="date_from" value="{{ $dateFrom }}" onchange="this.form.submit()" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100">
         </div>
-        <div class="flex flex-col gap-1 min-w-[140px] flex-1">
+        <div class="flex min-w-0 flex-col gap-1">
             <label for="gc-date-to" class="text-[0.55rem] font-bold uppercase tracking-widest text-gray-400">Date to</label>
-            <input type="date" id="gc-date-to" name="date_to" value="{{ $dateTo }}" onchange="this.form.submit()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100">
+            <input type="date" id="gc-date-to" name="date_to" value="{{ $dateTo }}" onchange="this.form.submit()" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100">
         </div>
-        <div class="flex flex-col gap-1 min-w-[160px] flex-1">
+        <div class="flex min-w-0 flex-col gap-1 sm:col-span-2 lg:col-span-1">
             <label for="gc-employee" class="text-[0.55rem] font-bold uppercase tracking-widest text-gray-400">Employee</label>
-            <select id="gc-employee" name="employee_id" onchange="this.form.submit()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100">
+            <select id="gc-employee" name="employee_id" onchange="this.form.submit()" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 bg-gray-50 outline-none transition-all focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-100">
                 <option value="">All employees</option>
                 @foreach($employees as $employee)
                     <option value="{{ $employee->id }}" {{ request('employee_id') == $employee->id ? 'selected' : '' }}>
@@ -94,7 +97,7 @@
             <h2 class="text-xs font-bold text-gray-900">Summary by contribution type</h2>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full min-w-[520px] text-sm">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Contribution type</th>
@@ -137,7 +140,7 @@
             <h2 class="text-xs font-bold text-gray-900">Breakdown by employee</h2>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full min-w-[980px] text-sm">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employee</th>
@@ -161,7 +164,7 @@
         </div>
         <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex-wrap gap-3">
             <div class="text-xs text-gray-400" id="gcPaginationInfo">Showing <strong class="text-gray-700">0</strong> records</div>
-            <nav id="gcPaginationNav" class="flex items-center gap-1"></nav>
+            <nav id="gcPaginationNav" class="flex items-center gap-1" aria-label="Contribution records pagination"></nav>
         </div>
     </div>
 </div>
