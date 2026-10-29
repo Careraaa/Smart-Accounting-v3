@@ -240,7 +240,6 @@
                                                     </button>
                                                 </form>
                                             </div>
-                                            @endif
                                         @empty
                                             <span class="text-xs text-gray-400">No pending payments</span>
                                         @endforelse
@@ -255,7 +254,7 @@
             </div>
         </div>
     </div>
-
+    @endif
 
 
 {{-- ── Mark as Paid Modal (Tailwind overlay) ── --}}
