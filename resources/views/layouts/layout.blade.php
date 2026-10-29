@@ -720,6 +720,23 @@
 
             const menuItems = Array.from(nav.querySelectorAll('.sidebar-item.has-sub'));
             if (!menuItems.length) return;
+            const menuStateKey = 'sidebar-open-menus';
+
+            const readOpenMenus = () => {
+                try {
+                    const saved = JSON.parse(localStorage.getItem(menuStateKey) || '[]');
+                    return Array.isArray(saved) ? new Set(saved) : new Set();
+                } catch (e) {
+                    return new Set();
+                }
+            };
+
+            const saveOpenMenus = () => {
+                const openMenus = menuItems
+                    .map((item, index) => item.classList.contains('open') ? String(index) : null)
+                    .filter(Boolean);
+                localStorage.setItem(menuStateKey, JSON.stringify(openMenus));
+            };
 
             // Prevent visible flicker while the menu state is initialized.
             nav.classList.add('sidebar-initializing');
@@ -743,9 +760,11 @@
 
             const initializeMenus = () => {
                 const allowOpen = isExpandedDesktop();
-                menuItems.forEach((item) => {
+                const savedOpenMenus = readOpenMenus();
+                menuItems.forEach((item, index) => {
                     const hasActiveChild = !!item.querySelector('.sidebar-sub .sidebar-item.active');
-                    setOpen(item, allowOpen && (item.classList.contains('active') || hasActiveChild));
+                    const hasSavedState = savedOpenMenus.has(String(index));
+                    setOpen(item, allowOpen && (item.classList.contains('active') || hasActiveChild || hasSavedState));
                 });
             };
 
@@ -820,6 +839,7 @@
                     }
 
                     setOpen(item, next);
+                    saveOpenMenus();
 
                     // Scroll sidebar to keep the opened dropdown visible
                     if (next) {
