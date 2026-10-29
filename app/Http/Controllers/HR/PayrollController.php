@@ -496,6 +496,7 @@
         {
             $allBatches = PayrollBatch::withCount(['payrolls', 'thirteenthMonthPays'])
                 ->with(['payrolls', 'thirteenthMonthPays'])
+                ->where('status', 'approved')
                 ->where(function ($q) {
                     $q->whereHas('payrolls')
                       ->orWhere(function ($q) {

@@ -22,30 +22,26 @@
     </div>
 
     {{-- Filter bar --}}
-    <div class="filter-bar flex items-center gap-3 flex-wrap">
+    <div class="fade-up flex items-center gap-3 flex-wrap">
         <div class="flex-1 min-w-[200px]">
             <input type="text" id="psSearch" placeholder="Search batch…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
         </div>
-        <select id="psStatusFilter" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
-            <option value="">All Statuses</option>
-            <option value="draft">Draft</option>
-            <option value="submitted">Submitted</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-        </select>
-        <span class="text-xs text-gray-400 ml-auto" id="psCount">0 batches</span>
     </div>
 
     {{-- Batch cards --}}
-    <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+            <span class="text-sm font-semibold text-gray-900">Approved Batches</span>
+            <span class="text-xs text-gray-400 tabular-nums" id="psCount">0 total</span>
+        </div>
         <div class="divide-y divide-gray-50" id="psGrid"></div>
         <div id="psNoResults" class="hidden">
             <div class="flex flex-col items-center py-12 text-center">
                 <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-300 mb-3">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 </div>
-                <p class="text-sm font-semibold text-gray-500">No payroll batches yet</p>
-                <p class="text-xs text-gray-400 mt-0.5">Generate a payroll batch first to view payslips.</p>
+                <p class="text-sm font-semibold text-gray-500">No approved batches yet</p>
+                <p class="text-xs text-gray-400 mt-0.5">Approved payroll batches will appear here.</p>
             </div>
         </div>
         {{-- Pagination --}}
@@ -71,6 +67,8 @@ window.allBatches = {!! json_encode($allBatches->map(fn($b) => $b->type === 'thi
     'status' => $b->status,
     'payrolls_count' => (int) ($b->thirteenth_month_pays_count ?? $b->thirteenthMonthPays->count()),
     'total_net_pay' => (float) ($b->thirteenthMonthPays->sum('thirteenth_month_pay')),
+    'gross_pay' => (float) ($b->thirteenthMonthPays->sum('thirteenth_month_pay')),
+    'total_deductions' => 0,
     'url' => route('payroll.thirteenth-month-pay.batch.payslips', $b),
 ] : [
     'id' => $b->id,
@@ -83,12 +81,13 @@ window.allBatches = {!! json_encode($allBatches->map(fn($b) => $b->type === 'thi
     'status' => $b->status,
     'payrolls_count' => (int) ($b->payrolls_count ?? $b->payrolls->count()),
     'total_net_pay' => (float) ($b->total_net_pay ?? $b->payrolls->sum('net_pay')),
+    'gross_pay' => (float) $b->payrolls->sum('gross_pay'),
+    'total_deductions' => (float) $b->payrolls->sum('total_deductions'),
     'url' => route('payroll.batch.payslips', $b),
 ])) !!};
 
 (function () {
     const search  = document.getElementById('psSearch');
-    const statusF = document.getElementById('psStatusFilter');
     const grid    = document.getElementById('psGrid');
     const noRes   = document.getElementById('psNoResults');
     const count   = document.getElementById('psCount');
@@ -104,9 +103,7 @@ window.allBatches = {!! json_encode($allBatches->map(fn($b) => $b->type === 'thi
 
     function applyFilters() {
         const q = search.value.toLowerCase().trim();
-        const st = statusF.value;
         filtered = window.allBatches.filter(b => {
-            if (st && b.status !== st) return false;
             const haystack = (b.month_year + ' ' + b.status).toLowerCase();
             if (q && !haystack.includes(q)) return false;
             return true;
@@ -128,38 +125,44 @@ window.allBatches = {!! json_encode($allBatches->map(fn($b) => $b->type === 'thi
             pageData.forEach(b => {
                 const si = STATUS_MAP[b.status] || STATUS_MAP.submitted;
                 const halfLabel = b.half ?? (b.is_first ? '1st half' : '2nd half');
+                const periodLine = halfLabel === '13th Month'
+                    ? `Calendar Year ${b.period_start_display}`
+                    : `${b.period_start_display} – ${b.period_end_display}`;
 
                 const card = document.createElement('div');
-                const cardLink = document.createElement(b.status === 'approved' ? 'a' : 'div');
-                cardLink.className = 'block no-underline text-inherit';
-                if (b.status === 'approved') {
-                    cardLink.href = b.url;
-                } else {
-                    cardLink.setAttribute('aria-disabled', 'true');
-                    cardLink.title = 'Payslips are available after batch approval.';
-                    cardLink.classList.add('cursor-not-allowed', 'opacity-75');
-                }
+                const cardLink = document.createElement('a');
+                cardLink.href = b.url;
+                cardLink.className = 'flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-gray-50/60 group';
                 cardLink.innerHTML = `
-                        <div class="flex items-center gap-4 px-5 py-4 transition-colors ${b.status === 'approved' ? 'hover:bg-gray-50/60' : ''}">
                             <div class="min-w-0 flex-1">
-                                <p class="text-sm font-semibold text-gray-900">${b.month_year}${halfLabel === '13th Month' ? ' — 13th Month' : ` — ${halfLabel}`}</p>
-                                <p class="text-[0.55rem] font-mono text-gray-400 mt-0.5">${b.period_start_display}${b.period_end_display ? ' – ' + b.period_end_display : ''}</p>
-                            </div>
-                            <div class="flex items-center gap-5 shrink-0">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.55rem] font-semibold border ${si.bg} ${si.text} ${si.border}">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-semibold text-gray-900">${b.month_year} — ${halfLabel}</span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide ${si.bg} ${si.text}">
                                     <span class="w-1.5 h-1.5 rounded-full ${si.dot}"></span>
                                     ${si.label}
-                                </span>
-                                <div class="text-center">
-                                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Employees</p>
-                                    <p class="text-sm font-bold text-gray-900 tabular-nums mt-0.5">${b.payrolls_count}</p>
+                                    </span>
                                 </div>
-                                <div class="text-center">
-                                    <p class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400">Net Pay</p>
-                                    <p class="text-sm font-bold text-emerald-600 tabular-nums mt-0.5">₱${b.total_net_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
-                                </div>
-                                <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                <p class="text-xs text-gray-400 mt-0.5 font-mono">${periodLine}</p>
                             </div>
+                            <div class="hidden sm:flex items-center gap-6 shrink-0">
+                                <div class="text-left min-w-[44px]">
+                                    <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Employees</p>
+                                    <p class="text-sm font-semibold text-gray-900 tabular-nums">${b.payrolls_count}</p>
+                                </div>
+                                <div class="text-left min-w-[88px]">
+                                    <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Gross Pay</p>
+                                    <p class="text-sm font-semibold text-gray-900 tabular-nums">₱${b.gross_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+                                </div>
+                                <div class="text-left min-w-[88px]">
+                                    <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Deductions</p>
+                                    <p class="text-sm font-semibold text-red-500 tabular-nums">₱${b.total_deductions.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+                                </div>
+                                <div class="text-left min-w-[88px]">
+                                    <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Net Pay</p>
+                                    <p class="text-sm font-bold text-emerald-600 tabular-nums">₱${b.total_net_pay.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 `;
                 card.appendChild(cardLink);
                 grid.appendChild(card);
@@ -210,7 +213,6 @@ window.allBatches = {!! json_encode($allBatches->map(fn($b) => $b->type === 'thi
     }
 
     search.addEventListener('input', applyFilters);
-    statusF.addEventListener('change', applyFilters);
     applyFilters();
 })();
 </script>
