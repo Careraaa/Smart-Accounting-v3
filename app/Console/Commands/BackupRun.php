@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use PDO;
+use RuntimeException;
 
 class BackupRun extends Command
 {
@@ -127,57 +129,113 @@ class BackupRun extends Command
                 $this->info("SQLite database backed up.");
             }
         } elseif ($connection === 'mysql') {
-            // MySQL backup using mysqldump
-            $host = $config['host'] ?? 'localhost';
-            $database = $config['database'];
-            $user = $config['username'];
-            $password = $config['password'] ?? '';
-            $port = $config['port'] ?? 3306;
+            $this->backupMySqlDatabase($dumpFile);
+        } else {
+            throw new RuntimeException("Database backups are not supported for the [{$connection}] connection.");
+        }
+    }
 
-            // Try common mysqldump locations for XAMPP
-            $mysqldumpPaths = [
-                'C:\\xampp\\mysql\\bin\\mysqldump.exe',
-                'C:\\xampp\\MariaDB\\bin\\mysqldump.exe',
-                'mysqldump', // System PATH
-            ];
+    /**
+     * Export MySQL through the configured PDO connection, without requiring shell access.
+     */
+    private function backupMySqlDatabase(string $dumpFile): void
+    {
+        $pdo = DB::connection()->getPdo();
+        $temporaryFile = $dumpFile . '.tmp';
+        $handle = fopen($temporaryFile, 'wb');
 
-            $mysqldump = null;
-            foreach ($mysqldumpPaths as $path) {
-                if (file_exists($path) || $path === 'mysqldump') {
-                    $mysqldump = $path;
-                    break;
+        if ($handle === false) {
+            throw new RuntimeException("Unable to create database backup at {$temporaryFile}.");
+        }
+
+        try {
+            $this->writeDump($handle, "-- MySQL database backup\nSET FOREIGN_KEY_CHECKS=0;\n\n");
+            $tables = $pdo->query("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'")->fetchAll(PDO::FETCH_COLUMN);
+
+            foreach ($tables as $table) {
+                $quotedTable = $this->quoteIdentifier($table);
+                $createTable = $pdo->query("SHOW CREATE TABLE {$quotedTable}")->fetch(PDO::FETCH_NUM);
+
+                if (!$createTable || !isset($createTable[1])) {
+                    throw new RuntimeException("Unable to read the definition for table [{$table}].");
                 }
+
+                $this->writeDump($handle, "DROP TABLE IF EXISTS {$quotedTable};\n{$createTable[1]};\n\n");
+
+                $columnTypes = [];
+                $columns = $pdo->query("SHOW COLUMNS FROM {$quotedTable}")->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($columns as $column) {
+                    $columnTypes[$column['Field']] = $column['Type'];
+                }
+
+                $rows = $pdo->query("SELECT * FROM {$quotedTable}");
+                while ($row = $rows->fetch(PDO::FETCH_ASSOC)) {
+                    $columnNames = array_keys($row);
+                    $quotedColumns = implode(', ', array_map(
+                        fn (string $column): string => $this->quoteIdentifier($column),
+                        $columnNames
+                    ));
+                    $values = [];
+
+                    foreach ($row as $column => $value) {
+                        if ($value === null) {
+                            $values[] = 'NULL';
+                        } elseif (preg_match('/^(tinyblob|blob|mediumblob|longblob|binary|varbinary|bit)(\(|$)/i', $columnTypes[$column] ?? '')) {
+                            $values[] = '0x' . bin2hex((string) $value);
+                        } else {
+                            $quotedValue = $pdo->quote((string) $value);
+                            if ($quotedValue === false) {
+                                throw new RuntimeException("Unable to encode a value from table [{$table}].");
+                            }
+                            $values[] = $quotedValue;
+                        }
+                    }
+
+                    $this->writeDump(
+                        $handle,
+                        "INSERT INTO {$quotedTable} ({$quotedColumns}) VALUES (" . implode(', ', $values) . ");\n"
+                    );
+                }
+
+                $this->writeDump($handle, "\n");
             }
 
-            if ($mysqldump) {
-                // Build mysqldump command
-                $cmd = escapeshellarg($mysqldump);
-                $cmd .= ' --host=' . escapeshellarg($host);
-                $cmd .= ' --port=' . escapeshellarg((string)$port);
-                $cmd .= ' --user=' . escapeshellarg($user);
-                
-                // Only add password if it exists
-                if (!empty($password)) {
-                    $cmd .= ' --password=' . escapeshellarg($password);
-                }
-                
-                $cmd .= ' ' . escapeshellarg($database);
-                $cmd .= ' > ' . escapeshellarg($dumpFile);
-                
-                // Execute command
-                $output = [];
-                $returnVar = 0;
-                exec($cmd, $output, $returnVar);
-
-                if ($returnVar === 0 && file_exists($dumpFile) && filesize($dumpFile) > 0) {
-                    $size = filesize($dumpFile);
-                    $this->info("MySQL database backed up (" . $this->formatBytes($size) . ").");
-                } else {
-                    $this->warn("MySQL database backup encountered issues.");
-                }
-            } else {
-                $this->warn("mysqldump not found. Database not backed up.");
+            $this->writeDump($handle, "SET FOREIGN_KEY_CHECKS=1;\n");
+            if (!fflush($handle)) {
+                throw new RuntimeException('Unable to finish writing the MySQL database backup.');
             }
+        } catch (\Throwable $e) {
+            fclose($handle);
+            unlink($temporaryFile);
+            throw $e;
+        }
+
+        fclose($handle);
+
+        if (!rename($temporaryFile, $dumpFile)) {
+            unlink($temporaryFile);
+            throw new RuntimeException("Unable to finalize database backup at {$dumpFile}.");
+        }
+
+        $this->info('MySQL database backed up (' . $this->formatBytes(filesize($dumpFile)) . ').');
+    }
+
+    private function quoteIdentifier(string $identifier): string
+    {
+        return '`' . str_replace('`', '``', $identifier) . '`';
+    }
+
+    private function writeDump($handle, string $contents): void
+    {
+        $length = strlen($contents);
+        $written = 0;
+
+        while ($written < $length) {
+            $result = fwrite($handle, substr($contents, $written));
+            if ($result === false || $result === 0) {
+                throw new RuntimeException('Unable to write the MySQL database backup.');
+            }
+            $written += $result;
         }
     }
 

@@ -3,7 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class BackupRestore extends Command
 {
@@ -59,7 +60,7 @@ class BackupRestore extends Command
             $this->info("✓ Restore process completed!");
             return self::SUCCESS;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->error("Restore failed: " . $e->getMessage());
             return self::FAILURE;
         }
@@ -82,56 +83,117 @@ class BackupRestore extends Command
                 throw new \Exception('Failed to restore SQLite database');
             }
         } elseif ($connection === 'mysql') {
-            // MySQL restore using mysql CLI
-            $host = $config['host'] ?? 'localhost';
-            $database = $config['database'];
-            $user = $config['username'];
-            $password = $config['password'] ?? '';
-            $port = $config['port'] ?? 3306;
+            $handle = fopen($sqlFile, 'rb');
+            if ($handle === false) {
+                throw new RuntimeException("Unable to read database backup [{$sqlFile}].");
+            }
 
-            // Try common mysql locations for XAMPP
-            $mysqlPaths = [
-                'C:\\xampp\\mysql\\bin\\mysql.exe',
-                'C:\\xampp\\MariaDB\\bin\\mysql.exe',
-                'mysql', // System PATH
-            ];
+            $database = DB::connection();
+            $database->unprepared('SET FOREIGN_KEY_CHECKS=0');
 
-            $mysql = null;
-            foreach ($mysqlPaths as $path) {
-                if (file_exists($path) || $path === 'mysql') {
-                    $mysql = $path;
-                    break;
+            try {
+                foreach ($this->sqlStatements($handle) as $statement) {
+                    $database->unprepared($statement);
                 }
+            } finally {
+                fclose($handle);
+                $database->unprepared('SET FOREIGN_KEY_CHECKS=1');
             }
 
-            if (!$mysql) {
-                throw new \Exception('mysql client not found');
-            }
+            $this->info('MySQL database restored successfully.');
+        } else {
+            throw new RuntimeException("Database restore is not supported for the [{$connection}] connection.");
+        }
+    }
 
-            // Build mysql command
-            $cmd = escapeshellarg($mysql);
-            $cmd .= ' --host=' . escapeshellarg($host);
-            $cmd .= ' --port=' . escapeshellarg((string)$port);
-            $cmd .= ' --user=' . escapeshellarg($user);
-            
-            // Only add password if it exists
-            if (!empty($password)) {
-                $cmd .= ' --password=' . escapeshellarg($password);
-            }
-            
-            $cmd .= ' ' . escapeshellarg($database);
-            $cmd .= ' < ' . escapeshellarg($sqlFile);
-            
-            // Execute command
-            $output = [];
-            $returnVar = 0;
-            exec($cmd, $output, $returnVar);
+    /**
+     * Read SQL statements without loading a potentially large dump into memory.
+     */
+    private function sqlStatements($handle): \Generator
+    {
+        $statement = '';
+        $quote = null;
+        $lineComment = false;
+        $blockComment = false;
 
-            if ($returnVar === 0) {
-                $this->info("MySQL database restored successfully.");
-            } else {
-                throw new \Exception('MySQL restore failed: ' . implode("\n", $output));
+        while (($line = fgets($handle)) !== false) {
+            $length = strlen($line);
+
+            for ($i = 0; $i < $length; $i++) {
+                $character = $line[$i];
+                $next = $line[$i + 1] ?? '';
+
+                if ($lineComment) {
+                    if ($character === "\n") {
+                        $lineComment = false;
+                        $statement .= "\n";
+                    }
+                    continue;
+                }
+
+                if ($blockComment) {
+                    if ($character === '*' && $next === '/') {
+                        $blockComment = false;
+                        $statement .= ' ';
+                        $i++;
+                    }
+                    continue;
+                }
+
+                if ($quote !== null) {
+                    $statement .= $character;
+
+                    if ($character === '\\' && $quote !== '`' && $i + 1 < $length) {
+                        $statement .= $line[++$i];
+                    } elseif ($character === $quote) {
+                        if ($next === $quote) {
+                            $statement .= $line[++$i];
+                        } else {
+                            $quote = null;
+                        }
+                    }
+                    continue;
+                }
+
+                if (($character === '-' && $next === '-' && (($line[$i + 2] ?? '') === '' || ord($line[$i + 2]) <= 32))
+                    || $character === '#') {
+                    $lineComment = true;
+                    $i += $character === '-' ? 1 : 0;
+                    continue;
+                }
+
+                if ($character === '/' && $next === '*' && ($line[$i + 2] ?? '') !== '!') {
+                    $blockComment = true;
+                    $i++;
+                    continue;
+                }
+
+                if ($character === "'" || $character === '"' || $character === '`') {
+                    $quote = $character;
+                    $statement .= $character;
+                    continue;
+                }
+
+                if ($character === ';') {
+                    $statement = trim($statement);
+                    if ($statement !== '') {
+                        yield $statement;
+                    }
+                    $statement = '';
+                    continue;
+                }
+
+                $statement .= $character;
             }
+        }
+
+        if ($quote !== null || $blockComment) {
+            throw new RuntimeException('The SQL backup ended unexpectedly inside a quoted value or comment.');
+        }
+
+        $statement = trim($statement);
+        if ($statement !== '') {
+            yield $statement;
         }
     }
 }
