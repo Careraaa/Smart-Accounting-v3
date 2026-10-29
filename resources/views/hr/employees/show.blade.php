@@ -298,6 +298,17 @@
                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-0.5">{{ ($employee->work_days_per_week ?? 5) == 6 ? 'Mon - Sat' : 'Mon - Fri' }}</div>
                     </div>
                     <div>
+                        <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Shift</span>
+                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-0.5">
+                            @if($employee->shift)
+                                {{ $employee->shift->name }}
+                                <span class="text-gray-500 dark:text-gray-400">({{ \Carbon\Carbon::parse($employee->shift->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($employee->shift->end_time)->format('g:i A') }})</span>
+                            @else
+                                —
+                            @endif
+                        </div>
+                    </div>
+                    <div>
                         <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Driver's License</span>
                         <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-0.5 font-mono">{{ $employee->driver_license_number ?? '—' }}</div>
                     </div>

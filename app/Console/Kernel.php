@@ -12,9 +12,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Mark the previous completed workday after the day has ended.
+        // Check completed shifts regularly, including overnight shifts.
         $schedule->command('attendance:mark-absent')
-            ->dailyAt('00:05');
+            ->everyFifteenMinutes();
 
         // Delete attendance logs older than 2 days
         $schedule->command('attendance:delete-old-logs')
