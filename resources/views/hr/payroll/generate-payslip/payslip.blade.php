@@ -335,6 +335,22 @@
                 height: 91mm;
             }
 
+            .batch-print-single .page {
+                height: 279.4mm;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .batch-print-single .main-content {
+                flex: none;
+                width: 100%;
+                height: 91mm;
+            }
+
+            .batch-print-single .cut-guide {
+                display: none;
+            }
+
             .batch-print .cut-guide {
                 display: block;
                 width: 100%;
@@ -362,7 +378,7 @@
     </style>
 </head>
 
-<body class="{{ !empty($batchPrint) ? 'batch-print' : '' }}">
+<body class="{{ !empty($batchPrint) ? 'batch-print'.($payrolls->count() === 1 ? ' batch-print-single' : '') : '' }}">
 
     <div class="controls">
         <button class="btn btn-primary" onclick="window.print()">{{ !empty($batchPrint) ? 'Print All Payslips' : 'Print Payslip' }}</button>
