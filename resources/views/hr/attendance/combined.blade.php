@@ -136,7 +136,7 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
         {{-- Table --}}
         <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm app-standard-table">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
@@ -309,7 +309,7 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
         {{-- Table --}}
         <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm app-standard-table">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>

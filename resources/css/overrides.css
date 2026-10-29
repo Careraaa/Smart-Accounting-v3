@@ -149,6 +149,34 @@ html.dark .app-standard-table tbody tr:hover {
     background: rgba(255, 255, 255, 0.03);
 }
 
+/* Boundary payment history has long labels and must not squeeze columns
+   into unreadable widths on smaller screens. */
+.boundary-payments-table {
+    min-width: 860px;
+}
+
+.boundary-payments-table th,
+.boundary-payments-table td {
+    white-space: nowrap;
+}
+
+.boundary-payments-table th:nth-child(2),
+.boundary-payments-table td:nth-child(2) {
+    min-width: 190px;
+}
+
+.boundary-payments-table th:nth-child(4),
+.boundary-payments-table td:nth-child(4) {
+    min-width: 170px;
+    white-space: normal;
+}
+
+.boundary-payments-table th:nth-child(5),
+.boundary-payments-table td:nth-child(5) {
+    min-width: 190px;
+    white-space: normal;
+}
+
 .emp-badge {
     display: inline-block;
     font-size: 0.7rem;
