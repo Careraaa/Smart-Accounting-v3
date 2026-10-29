@@ -14,8 +14,10 @@ class PayrollReceivablesController extends Controller
     use LogsUserActivity;
     public function index(Request $request)
     {
+        $isAccountant = auth()->user()->role === 'accountant';
         $tab = $request->get('tab', 'cash_advances');
-        if (! in_array($tab, ['cash_advances', 'short_remittances'], true)) {
+        if (! in_array($tab, ['cash_advances', 'short_remittances'], true)
+            || ($tab === 'short_remittances' && ! $isAccountant)) {
             $tab = 'cash_advances';
         }
 
@@ -23,15 +25,17 @@ class PayrollReceivablesController extends Controller
         $allCashAdvances = CashAdvance::with(['user', 'approver', 'deductedPayroll'])
             ->orderBy('created_at', 'desc')
             ->get();
-        $shortRemittances = DailyRemittance::with([
-            'driver',
-            'pao',
-            'boundaryPayments.recordedBy',
-            'boundaryPayments.approvedBy',
-        ])
-            ->where('is_short_remittance', true)
-            ->orderByDesc('remittance_date')
-            ->get();
+        $shortRemittances = $isAccountant
+            ? DailyRemittance::with([
+                'driver',
+                'pao',
+                'boundaryPayments.recordedBy',
+                'boundaryPayments.approvedBy',
+            ])
+                ->where('is_short_remittance', true)
+                ->orderByDesc('remittance_date')
+                ->get()
+            : collect();
 
         // Stats: count by status
         $caPendingCount    = CashAdvance::where('status', 'pending')->count();
