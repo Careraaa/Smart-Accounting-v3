@@ -41,7 +41,8 @@
             </div>
             @if($financialTrend->count() > 1)
                 @php
-                    $financialChartW = 600; $financialChartH = 150; $financialChartPadX = 10; $financialChartPadTop = 10; $financialChartPadBottom = 24;
+                    // Use a wider viewBox so the chart does not look zoomed in on wide dashboards.
+                    $financialChartW = 1200; $financialChartH = 180; $financialChartPadX = 20; $financialChartPadTop = 10; $financialChartPadBottom = 26;
                     $financialPlotW = $financialChartW - ($financialChartPadX * 2);
                     $financialPlotH = $financialChartH - $financialChartPadTop - $financialChartPadBottom;
                     $financialStep = $financialPlotW / ($financialTrend->count() - 1);
@@ -76,26 +77,26 @@
                         </filter>
                     </defs>
                     <line x1="{{ $financialChartPadX }}" y1="{{ $financialChartPadTop + $financialPlotH }}" x2="{{ $financialChartW - $financialChartPadX }}" y2="{{ $financialChartPadTop + $financialPlotH }}" stroke="currentColor" class="text-gray-200 dark:text-neutral-700" />
-                    <path d="{{ $revenuePath }}" fill="none" stroke="#ee765f" stroke-width="2.5" stroke-linecap="round" filter="url(#financialRevenueLineShadow)" />
-                    <path d="{{ $incomePath }}" fill="none" stroke="#55b995" stroke-width="2.5" stroke-linecap="round" filter="url(#financialIncomeLineShadow)" />
+                    <path d="{{ $revenuePath }}" fill="none" stroke="#ee765f" stroke-width="2" stroke-linecap="round" filter="url(#financialRevenueLineShadow)" />
+                    <path d="{{ $incomePath }}" fill="none" stroke="#55b995" stroke-width="2" stroke-linecap="round" filter="url(#financialIncomeLineShadow)" />
                     @foreach($financialTrend as $i => $point)
                         @php
                             $financialX = $financialChartPadX + ($i * $financialStep);
                             $financialRevenueY = $financialChartPadTop + $financialPlotH - (($point['revenue'] / $financialChartMax) * $financialPlotH);
                             $financialIncomeY = $financialChartPadTop + $financialPlotH - ((max($point['netIncome'], 0) / $financialChartMax) * $financialPlotH);
                         @endphp
-                        <text x="{{ $financialX }}" y="{{ $financialChartH - 6 }}" text-anchor="middle" fill="currentColor" class="text-gray-400 dark:text-neutral-500" font-size="6.5">{{ $point['month'] }}</text>
-                        <circle cx="{{ $financialX }}" cy="{{ $financialRevenueY }}" r="3.5" fill="#ee765f" stroke="white" stroke-width="2" class="financial-chart-point" data-index="{{ $i }}" />
-                        <circle cx="{{ $financialX }}" cy="{{ $financialIncomeY }}" r="3.5" fill="#55b995" stroke="white" stroke-width="2" class="financial-chart-point" data-index="{{ $i }}" />
+                        <text x="{{ $financialX }}" y="{{ $financialChartH - 6 }}" text-anchor="middle" fill="currentColor" class="text-gray-400 dark:text-neutral-500" font-size="9">{{ $point['month'] }}</text>
+                        <circle cx="{{ $financialX }}" cy="{{ $financialRevenueY }}" r="3" fill="#ee765f" stroke="white" stroke-width="1.5" class="financial-chart-point" data-index="{{ $i }}" />
+                        <circle cx="{{ $financialX }}" cy="{{ $financialIncomeY }}" r="3" fill="#55b995" stroke="white" stroke-width="1.5" class="financial-chart-point" data-index="{{ $i }}" />
                     @endforeach
                     <g class="financial-chart-hover" aria-hidden="true" style="display:none">
                         <line class="financial-hover-line" y1="{{ $financialChartPadTop }}" y2="{{ $financialChartPadTop + $financialPlotH }}" stroke="currentColor" stroke-dasharray="3 4" />
-                        <circle class="financial-hover-revenue" r="5" fill="#ee765f" stroke="white" stroke-width="2" />
-                        <circle class="financial-hover-income" r="5" fill="#55b995" stroke="white" stroke-width="2" />
-                        <rect class="financial-hover-box" width="142" height="54" rx="10" fill="white" stroke="#e4e3dc" />
+                        <circle class="financial-hover-revenue" r="4" fill="#ee765f" stroke="white" stroke-width="1.5" />
+                        <circle class="financial-hover-income" r="4" fill="#55b995" stroke="white" stroke-width="1.5" />
+                        <rect class="financial-hover-box" width="150" height="54" rx="10" fill="white" stroke="#e4e3dc" />
                         <text class="financial-hover-month" x="12" y="16" font-size="9" font-weight="700" letter-spacing="1.2" fill="#969791" />
-                        <text class="financial-hover-revenue-text" x="12" y="34" font-size="10" fill="#d96650" />
-                        <text class="financial-hover-income-text" x="12" y="47" font-size="10" fill="#3d9b78" />
+                        <text class="financial-hover-revenue-text" x="12" y="35" font-size="10" fill="#d96650" />
+                        <text class="financial-hover-income-text" x="12" y="50" font-size="10" fill="#3d9b78" />
                     </g>
                     <rect x="{{ $financialChartPadX }}" y="{{ $financialChartPadTop }}" width="{{ $financialPlotW }}" height="{{ $financialPlotH }}" fill="transparent" class="financial-chart-overlay" />
                 </svg>
@@ -110,7 +111,7 @@
                         const incomeYs = @json(array_map(fn($point) => $financialChartPadTop + $financialPlotH - ((max($point['netIncome'], 0) / $financialChartMax) * $financialPlotH), $financialTrend->all()));
                         const show = (index) => {
                             const x = xs[index];
-                            const boxX = Math.min(Math.max(x - 62, {{ $financialChartPadX }}), {{ $financialChartW }} - 152);
+                            const boxX = Math.min(Math.max(x - 75, {{ $financialChartPadX }}), {{ $financialChartW }} - 160);
                             hover.style.display = '';
                             hover.querySelector('.financial-hover-line').setAttribute('x1', x);
                             hover.querySelector('.financial-hover-line').setAttribute('x2', x);

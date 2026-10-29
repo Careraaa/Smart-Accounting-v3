@@ -5,12 +5,13 @@
     $rcTotal = (float) $dailyData->sum('net');
     $rcAverage = $rcCount > 0 ? $rcTotal / $rcCount : 0;
     $rcMax = max(1, (float) $dailyData->max('net'));
-    $rcW = 720;
-    $rcH = 230;
-    $rcPadL = 52;
-    $rcPadR = 12;
-    $rcPadT = 14;
-    $rcPadB = 30;
+    // Keep the chart calm when the card stretches across a wide dashboard.
+    $rcW = 1200;
+    $rcH = 180;
+    $rcPadL = 58;
+    $rcPadR = 20;
+    $rcPadT = 10;
+    $rcPadB = 26;
     $rcPlotW = $rcW - $rcPadL - $rcPadR;
     $rcPlotH = $rcH - $rcPadT - $rcPadB;
     $rcStep = $rcCount > 1 ? $rcPlotW / ($rcCount - 1) : 0;
@@ -95,7 +96,7 @@
                     <text x="{{ $rcPadL - 8 }}" y="{{ $rcPadT + ($rcPlotH * $gridRatio) + 4 }}" text-anchor="end" class="fill-gray-400 dark:fill-neutral-500" font-size="10">₱{{ number_format($rcMax * (1 - $gridRatio) / 1000, 1) }}k</text>
                 @endforeach
                 <path d="{{ $rcAreaPath }}" fill="url(#dailyRemittanceFill)" />
-                <path d="{{ $rcLinePath }}" fill="none" stroke="#ee765f" stroke-width="2.5" stroke-linecap="round" filter="url(#dailyRemittanceLineShadow)" />
+                <path d="{{ $rcLinePath }}" fill="none" stroke="#ee765f" stroke-width="2" stroke-linecap="round" filter="url(#dailyRemittanceLineShadow)" />
                 @foreach($dailyData as $i => $day)
                     @if($i % 2 === 0 || $i === $rcCount - 1)
                         <text x="{{ $rcPadL + ($i * $rcStep) }}" y="{{ $rcH - 7 }}" text-anchor="middle" class="fill-gray-400 dark:fill-neutral-500" font-size="10">{{ \Carbon\Carbon::parse($day['date'])->format('M d') }}</text>
@@ -103,8 +104,8 @@
                 @endforeach
                 <g class="daily-remittance-hover" aria-hidden="true" style="display:none">
                     <line class="daily-remittance-hover-line" y1="{{ $rcPadT }}" y2="{{ $rcPadT + $rcPlotH }}" stroke="currentColor" stroke-dasharray="3 4" />
-                    <circle class="daily-remittance-hover-dot" r="5" fill="#ee765f" stroke="white" stroke-width="2" />
-                    <rect class="daily-remittance-hover-box" width="150" height="58" rx="10" fill="white" stroke="#e4e3dc" />
+                    <circle class="daily-remittance-hover-dot" r="4" fill="#ee765f" stroke="white" stroke-width="1.5" />
+                    <rect class="daily-remittance-hover-box" width="150" height="54" rx="10" fill="white" stroke="#e4e3dc" />
                     <text class="daily-remittance-hover-date" x="12" y="17" font-size="9" font-weight="700" letter-spacing="1.2" fill="#969791" />
                     <text class="daily-remittance-hover-value" x="12" y="39" font-size="11" fill="#d96650" />
                 </g>
@@ -121,7 +122,7 @@
                     const show = (index) => {
                         const x = xs[index];
                         const boxX = Math.min(Math.max(x - 75, {{ $rcPadL }}), {{ $rcW }} - 162);
-                        const boxY = Math.max(18, ys[index] - 74);
+                        const boxY = Math.max(14, ys[index] - 68);
                         hover.style.display = '';
                         hover.querySelector('.daily-remittance-hover-line').setAttribute('x1', x);
                         hover.querySelector('.daily-remittance-hover-line').setAttribute('x2', x);
