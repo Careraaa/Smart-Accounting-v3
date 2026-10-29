@@ -88,7 +88,7 @@
                             $financialRevenueY = $financialChartPadTop + $financialPlotH - (($point['revenue'] / $financialChartMax) * $financialPlotH);
                             $financialIncomeY = $financialChartPadTop + $financialPlotH - ((max($point['netIncome'], 0) / $financialChartMax) * $financialPlotH);
                         @endphp
-                        <text x="{{ $financialX }}" y="{{ $financialChartH - 6 }}" text-anchor="middle" fill="currentColor" class="text-gray-400 dark:text-neutral-500" font-size="9">{{ $point['month'] }}</text>
+                        <text x="{{ $financialX }}" y="{{ $financialChartH - 6 }}" text-anchor="middle" fill="currentColor" class="financial-chart-label text-gray-400 dark:text-neutral-500" font-size="9">{{ $point['month'] }}</text>
                         <circle cx="{{ $financialX }}" cy="{{ $financialRevenueY }}" r="3" fill="#ee765f" stroke="white" stroke-width="1.5" class="financial-chart-point" data-index="{{ $i }}" />
                         <circle cx="{{ $financialX }}" cy="{{ $financialIncomeY }}" r="3" fill="#55b995" stroke="white" stroke-width="1.5" class="financial-chart-point" data-index="{{ $i }}" />
                     @endforeach
@@ -114,6 +114,12 @@
                         const xs = points.map((_, i) => {{ $financialChartPadX }} + (i * {{ $financialStep }}));
                         const revenueYs = @json(array_map(fn($point) => $financialChartPadTop + $financialPlotH - (($point['revenue'] / $financialChartMax) * $financialPlotH), $financialTrend->all()));
                         const incomeYs = @json(array_map(fn($point) => $financialChartPadTop + $financialPlotH - ((max($point['netIncome'], 0) / $financialChartMax) * $financialPlotH), $financialTrend->all()));
+                        const resizeLabels = () => {
+                            const scale = {{ $financialChartW }} / chart.getBoundingClientRect().width;
+                            chart.querySelectorAll('.financial-chart-label').forEach((label) => label.setAttribute('font-size', Math.max(9, 9 * scale)));
+                        };
+                        resizeLabels();
+                        window.addEventListener('resize', resizeLabels);
                         const show = (index) => {
                             const x = xs[index];
                             const boxX = Math.min(Math.max(x - 75, {{ $financialChartPadX }}), {{ $financialChartW }} - 160);

@@ -99,7 +99,7 @@
                 <path d="{{ $rcLinePath }}" fill="none" stroke="#ee765f" stroke-width="2" stroke-linecap="round" filter="url(#dailyRemittanceLineShadow)" />
                 @foreach($dailyData as $i => $day)
                     @if($i % 2 === 0 || $i === $rcCount - 1)
-                        <text x="{{ $rcPadL + ($i * $rcStep) }}" y="{{ $rcH - 7 }}" text-anchor="middle" class="fill-gray-400 dark:fill-neutral-500" font-size="10">{{ \Carbon\Carbon::parse($day['date'])->format('M d') }}</text>
+                        <text x="{{ $rcPadL + ($i * $rcStep) }}" y="{{ $rcH - 7 }}" text-anchor="middle" class="daily-remittance-chart-label fill-gray-400 dark:fill-neutral-500" font-size="10">{{ \Carbon\Carbon::parse($day['date'])->format('M d') }}</text>
                     @endif
                 @endforeach
                 <g class="daily-remittance-hover" aria-hidden="true" style="display:none">
@@ -121,7 +121,13 @@
                     const points = @json($dailyData->values());
                     const xs = points.map((_, i) => {{ $rcPadL }} + (i * {{ $rcStep }}));
                     const ys = @json(array_map(fn($day) => $rcPadT + $rcPlotH - (((float) $day['net'] / $rcMax) * $rcPlotH), $dailyData->all()));
-                    const show = (index) => {
+                    const resizeLabels = () => {
+                         const scale = {{ $rcW }} / chart.getBoundingClientRect().width;
+                         chart.querySelectorAll('.daily-remittance-chart-label').forEach((label) => label.setAttribute('font-size', Math.max(10, 10 * scale)));
+                     };
+                     resizeLabels();
+                     window.addEventListener('resize', resizeLabels);
+                     const show = (index) => {
                         const x = xs[index];
                         const boxX = Math.min(Math.max(x - 75, {{ $rcPadL }}), {{ $rcW }} - 162);
                         const boxY = Math.max(14, ys[index] - 68);
