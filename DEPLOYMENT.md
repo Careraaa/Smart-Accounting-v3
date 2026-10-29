@@ -158,7 +158,7 @@ InfinityFree DB is not reachable from the GitHub runner and there is no SSH.
 
 ## Known accepted losses on free hosting
 
-- Database backups can use the configured PHP database connection, but restoring a MySQL dump requires `exec()`/a MySQL client, which is disabled
+- Database backups can use the configured PHP database connection. Downloading folder backups requires PHP's ZIP extension; restoring a MySQL dump still requires `exec()`/a MySQL client, which is disabled
 - Laravel scheduled tasks do not run (no cron), including automatic absent marking and nightly cleanups
 - Emails can't send (SMTP ports blocked)
 - >50k visits/day = site sleeps until midnight

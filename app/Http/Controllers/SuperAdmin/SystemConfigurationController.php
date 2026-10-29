@@ -556,20 +556,10 @@ class SystemConfigurationController extends Controller
                 mkdir($tempDir, 0755, true);
             }
 
-            $zipFilename = $dirName . '_' . now()->format('Y-m-d_H-i-s') . '.zip';
+            $zipFilename = $dirName . '_' . now()->format('Y-m-d_H-i-s') . '_' . bin2hex(random_bytes(4)) . '.zip';
             $zipPath = $tempDir . '/' . $zipFilename;
 
-            // Try using PowerShell Compress-Archive on Windows
-            if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
-                $this->createZipUsingPowerShell($dirPath, $zipPath);
-            } else {
-                // On Linux, try using system zip command
-                $this->createZipUsingSystemZip($dirPath, $zipPath);
-            }
-
-            if (!file_exists($zipPath)) {
-                throw new \Exception('Failed to create backup archive');
-            }
+            $this->createZipArchive($dirPath, $zipPath);
 
             // Download and delete after sending
             return response()->download($zipPath, $zipFilename)->deleteFileAfterSend(true);
@@ -580,39 +570,63 @@ class SystemConfigurationController extends Controller
         }
     }
 
-    /**
-     * Create ZIP using PowerShell (Windows)
-     */
-    private function createZipUsingPowerShell($source, $destination)
+    private function createZipArchive(string $source, string $destination): void
     {
-        $source = str_replace('/', '\\', realpath($source));
-        $destination = str_replace('/', '\\', $destination);
-        
-        $command = "powershell.exe -NoProfile -Command \"Add-Type -AssemblyName 'System.IO.Compression.FileSystem'; " .
-                   "[System.IO.Compression.ZipFile]::CreateFromDirectory('" . addslashes($source) . "', '" . addslashes($destination) . "')\"";
-        
-        exec($command, $output, $returnVar);
-        
-        if ($returnVar !== 0) {
-            throw new \Exception('PowerShell failed to create ZIP archive');
+        if (!class_exists(\ZipArchive::class)) {
+            throw new \RuntimeException('The PHP ZIP extension is required to download backup folders.');
         }
-    }
 
-    /**
-     * Create ZIP using system zip command (Linux/Mac)
-     */
-    private function createZipUsingSystemZip($source, $destination)
-    {
-        $parentDir = dirname($source);
-        $dirName = basename($source);
-        
-        $command = "cd " . escapeshellarg($parentDir) . " && zip -r " . 
-                   escapeshellarg($destination) . " " . escapeshellarg($dirName);
-        
-        exec($command, $output, $returnVar);
-        
-        if ($returnVar !== 0) {
-            throw new \Exception('System zip command failed');
+        $sourcePath = realpath($source);
+        if ($sourcePath === false || !is_dir($sourcePath)) {
+            throw new \RuntimeException('The backup folder could not be found.');
+        }
+
+        $archive = new \ZipArchive();
+        $result = $archive->open($destination, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        if ($result !== true) {
+            throw new \RuntimeException("Unable to create backup archive (ZIP error {$result}).");
+        }
+
+        try {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($sourcePath, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+
+            foreach ($iterator as $item) {
+                if ($item->isLink()) {
+                    continue;
+                }
+
+                $relativePath = substr($item->getPathname(), strlen($sourcePath) + 1);
+                $archivePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
+
+                if ($item->isDir()) {
+                    if (!$archive->addEmptyDir($archivePath)) {
+                        throw new \RuntimeException("Unable to add folder [{$archivePath}] to the backup archive.");
+                    }
+                } elseif (!$archive->addFile($item->getPathname(), $archivePath)) {
+                    throw new \RuntimeException("Unable to add file [{$archivePath}] to the backup archive.");
+                }
+            }
+
+        } catch (\Throwable $e) {
+            $archive->close();
+            if (file_exists($destination)) {
+                unlink($destination);
+            }
+            throw $e;
+        }
+
+        if (!$archive->close()) {
+            if (file_exists($destination)) {
+                unlink($destination);
+            }
+            throw new \RuntimeException('Unable to finish creating the backup archive.');
+        }
+
+        if (!is_file($destination) || filesize($destination) === 0) {
+            throw new \RuntimeException('The backup archive was created empty.');
         }
     }
 
