@@ -23,7 +23,7 @@
     <div class="fade-up flex items-start justify-between gap-4 flex-wrap">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Receivables</h1>
-            <p class="text-sm text-gray-400 mt-0.5">Manage cash advances{{ auth()->user()->role === 'accountant' ? ' and short-remittance balances' : '' }}</p>
+            <p class="text-sm text-gray-400 mt-0.5">Manage cash advances{{ $canViewShortRemittances ? ' and short-remittance balances' : '' }}</p>
         </div>
     </div>
 
@@ -57,7 +57,7 @@
                     Cash Advances
                 </span>
             </button>
-            @if(auth()->user()->role === 'accountant')
+            @if($canViewShortRemittances)
                 <button role="tab" data-tab="short_remittances"
                    class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 group {{ $tab === 'short_remittances' ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">
                     <span class="flex items-center gap-2">
