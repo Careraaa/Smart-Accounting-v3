@@ -170,59 +170,7 @@ $totalPendingTodo = $processingPayroll + $pendingRemittances + $pendingCashAdvan
     </div>
 
 
-        {{-- Charts row 2 --}}
-        @php
-            $ta = (float) ($totalAllowances ?? 0);
-            $td = (float) ($totalDeductions ?? 0);
-            $adTotal = $ta + $td;
-            $adAllowPct = $adTotal > 0 ? round(($ta/$adTotal)*100) : 0;
-            $adDeducPct = $adTotal > 0 ? round(($td/$adTotal)*100) : 0;
-        @endphp
-        <div class="grid grid-cols-1 gap-4">
-            {{-- Allowances vs Deductions (CSS donut) --}}
-            <div class="fade-up kpi-card overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
-                    <h2 class="text-[11px] font-semibold text-gray-900">Allowances vs Deductions</h2>
-                    <span class="text-[9px] text-gray-400 font-medium">Aggregate amounts</span>
-                </div>
-                <div class="px-4 py-4">
-                    @if($adTotal > 0)
-                    @php
-                        $circ = 2 * pi() * 36;
-                        $allowOffset = $adAllowPct / 100 * $circ;
-                    @endphp
-                    <div class="flex flex-col sm:flex-row items-center gap-5">
-                        <div class="relative w-[120px] h-[120px] shrink-0">
-                            <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
-                                <circle cx="50" cy="50" r="36" fill="none" stroke="#22c55e" stroke-width="8" stroke-dasharray="{{ $allowOffset }} {{ $circ }}" stroke-dashoffset="0" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ $allowOffset }}"/>
-                                <circle cx="50" cy="50" r="36" fill="none" stroke="#f43f5e" stroke-width="8" stroke-dasharray="{{ $circ - $allowOffset }} {{ $circ }}" stroke-dashoffset="{{ -$allowOffset }}" stroke-linecap="round" class="acd-donut-seg" style="--pct:{{ $circ - $allowOffset }};animation-delay:0.3s"/>
-                            </svg>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">₱{{ number_format($adTotal/1000,2) }}k</span>
-                            </div>
-                        </div>
-                        <div class="flex-1 space-y-2 w-full">
-                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-emerald-50 transition-colors">
-                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-emerald-500"></span>
-                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Allowances</span>
-                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">₱{{ number_format($ta,2) }}</span>
-                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adAllowPct }}%</span>
-                            </div>
-                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-rose-50 transition-colors">
-                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-rose-500"></span>
-                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Deductions</span>
-                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">₱{{ number_format($td,2) }}</span>
-                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adDeducPct }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No data yet.</div>
-                    @endif
-                </div>
-            </div>
 
-        </div>
 
     </div>
 
