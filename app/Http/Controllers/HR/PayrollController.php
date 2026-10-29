@@ -418,6 +418,8 @@
 
         private function prepareBatchPayslips(PayrollBatch $batch): void
         {
+            abort_unless($batch->status === 'approved', 403, 'Payslips are available only after the batch is approved.');
+
             $batch->load(['payrolls.user', 'payrolls.allowances', 'payrolls.deductions', 'payrolls.bonuses']);
             $batch->setRelation('payrolls', $batch->payrolls->sortBy([
                 ['user.last_name', 'asc'],
@@ -1159,6 +1161,14 @@
 
         public function generatePayslip(Payroll $payroll)
         {
+            if ($payroll->batch_id) {
+                abort_unless(
+                    $payroll->batch?->status === 'approved',
+                    403,
+                    'Payslips are available only after the batch is approved.'
+                );
+            }
+
             $payroll->load(['user', 'allowances', 'deductions', 'bonuses']);
 
             $manualAllowances = $payroll->allowances

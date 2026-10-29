@@ -28,6 +28,7 @@
         </div>
         <select id="psStatusFilter" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
             <option value="">All Statuses</option>
+            <option value="draft">Draft</option>
             <option value="submitted">Submitted</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
@@ -129,9 +130,17 @@ window.allBatches = {!! json_encode($allBatches->map(fn($b) => $b->type === 'thi
                 const halfLabel = b.half ?? (b.is_first ? '1st half' : '2nd half');
 
                 const card = document.createElement('div');
-                card.innerHTML = `
-                    <a href="${b.url}" class="block no-underline text-inherit">
-                        <div class="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50/60">
+                const cardLink = document.createElement(b.status === 'approved' ? 'a' : 'div');
+                cardLink.className = 'block no-underline text-inherit';
+                if (b.status === 'approved') {
+                    cardLink.href = b.url;
+                } else {
+                    cardLink.setAttribute('aria-disabled', 'true');
+                    cardLink.title = 'Payslips are available after batch approval.';
+                    cardLink.classList.add('cursor-not-allowed', 'opacity-75');
+                }
+                cardLink.innerHTML = `
+                        <div class="flex items-center gap-4 px-5 py-4 transition-colors ${b.status === 'approved' ? 'hover:bg-gray-50/60' : ''}">
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm font-semibold text-gray-900">${b.month_year}${halfLabel === '13th Month' ? ' — 13th Month' : ` — ${halfLabel}`}</p>
                                 <p class="text-[0.55rem] font-mono text-gray-400 mt-0.5">${b.period_start_display}${b.period_end_display ? ' – ' + b.period_end_display : ''}</p>
@@ -151,9 +160,8 @@ window.allBatches = {!! json_encode($allBatches->map(fn($b) => $b->type === 'thi
                                 </div>
                                 <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                             </div>
-                        </div>
-                    </a>
                 `;
+                card.appendChild(cardLink);
                 grid.appendChild(card);
             });
         }

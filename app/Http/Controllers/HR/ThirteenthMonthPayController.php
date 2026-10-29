@@ -103,6 +103,8 @@ class ThirteenthMonthPayController extends Controller
             abort(404);
         }
 
+        abort_unless($batch->status === 'approved', 403, 'Payslips are available only after the batch is approved.');
+
         $batch->load(['thirteenthMonthPays.user']);
 
         return view('hr.payroll.thirteenth-month.payslips', compact('batch'));
@@ -113,6 +115,12 @@ class ThirteenthMonthPayController extends Controller
         if ($batch->type !== 'thirteenth_month') {
             abort(404);
         }
+
+        abort_unless(
+            $batch->status === 'approved' && $record->batch_id === $batch->id,
+            403,
+            'Payslips are available only for records in an approved batch.'
+        );
 
         $record->load(['user', 'computedBy']);
 
