@@ -83,10 +83,9 @@ $financialChartMax = max(1, (float) $financialTrend->max('revenue'), (float) $fi
             </div>
         </div>
 
-        @include('partials.financial-overview-card')
-
-        {{-- CHART CARDS: Attendance, Net Payroll Trend, Daily Remittance --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {{-- Four dashboard cards in one balanced responsive grid. --}}
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 items-stretch">
+            @include('partials.financial-overview-card')
 
             {{-- Attendance Trend (SVG line chart) --}}
             @php
@@ -150,62 +149,6 @@ $financialChartMax = max(1, (float) $financialTrend->max('revenue'), (float) $fi
 
 
 
-
-        {{-- Net Payroll Trend --}}
-        @php
-            $trendPts = $monthlyPayrollTrend;
-            $trendCount = count($trendPts);
-            $nW = 600; $nH = 180;
-            $nPadL = 4; $nPadR = 62; $nPadT = 16; $nPadB = 26;
-            $nPlotW = $nW - $nPadL - $nPadR;
-            $nPlotH = $nH - $nPadT - $nPadB;
-            $nMax = $trendCount > 0 ? max(array_column($trendPts, 'total')) : 1;
-            $nLastIdx = $trendCount - 1;
-            $nStep = $trendCount > 1 ? $nPlotW / ($trendCount - 1) : 0;
-            $nPts = [];
-            foreach ($trendPts as $i => $pt) {
-                $nx = $nPadL + $i * $nStep;
-                $ny = $nPadT + $nPlotH - ($nMax > 0 ? ($pt['total'] / $nMax) * $nPlotH : 0);
-                $nPts[] = round($nx, 1) . ',' . round($ny, 1);
-            }
-            $nEndX = $nPadL + $nLastIdx * $nStep;
-            $nEndY = $trendCount > 0 ? $nPadT + $nPlotH - ($trendPts[$nLastIdx]['total'] / max($nMax, 1)) * $nPlotH : $nPadT + $nPlotH;
-            $nEndVal = $trendCount > 0 ? $trendPts[$nLastIdx]['total'] : 0;
-            $nEndText = $nEndVal >= 1000 ? '₱' . number_format($nEndVal / 1000, 1) . 'k' : '₱' . number_format($nEndVal);
-        @endphp
-
-            {{-- Net Payroll Trend --}}
-            <div class="sad-fade-up kpi-card overflow-hidden">
-                <div class="px-4 pt-4 pb-1 flex items-start justify-between gap-3">
-                    <div>
-                        <p class="kcard-label">Net Payroll Trend</p>
-                        <p class="text-xl font-semibold text-gray-900 tabular-nums mt-1">₱{{ number_format($nMax, 0) }}</p>
-                    </div>
-                    <span class="text-[11px] text-gray-400 mt-0.5">approved payrolls · peak, last 6 months</span>
-                </div>
-                <div class="px-4 pb-4 pt-2">
-                    @if($trendCount > 1)
-                    <svg viewBox="0 0 {{ $nW }} {{ $nH }}" class="w-full h-auto" role="img"
-                         aria-label="Net payroll over the last {{ $trendCount }} months, peaking at {{ number_format($nMax, 0) }} pesos">
-                        <line class="chart-grid" x1="{{ $nPadL }}" y1="{{ $nPadT + $nPlotH }}" x2="{{ $nPadL + $nPlotW }}" y2="{{ $nPadT + $nPlotH }}"/>
-                        <line class="chart-grid" x1="{{ $nPadL }}" y1="{{ $nPadT + $nPlotH / 2 }}" x2="{{ $nPadL + $nPlotW }}" y2="{{ $nPadT + $nPlotH / 2 }}"/>
-                        <line class="chart-grid" x1="{{ $nPadL }}" y1="{{ $nPadT }}" x2="{{ $nPadL + $nPlotW }}" y2="{{ $nPadT }}"/>
-
-                        <polyline points="{{ implode(' ', $nPts) }}" fill="none" stroke="#c8292a"
-                                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                  class="sad-chart-line"/>
-
-                        <circle class="chart-ring" cx="{{ round($nEndX, 1) }}" cy="{{ round($nEndY, 1) }}" r="4" fill="#c8292a"/>
-                        <text class="chart-endlabel" x="{{ round($nEndX + 10, 1) }}" y="{{ round($nEndY + 4, 1) }}">{{ $nEndText }}</text>
-
-                        <text class="chart-label" x="{{ $nPadL }}" y="{{ $nH - 6 }}" text-anchor="start">{{ $trendPts[0]['month'] ?? \Carbon\Carbon::parse($trendPts[0]['label'])->format('M') }}</text>
-                        <text class="chart-label" x="{{ $nPadL + $nPlotW }}" y="{{ $nH - 6 }}" text-anchor="end">{{ $trendPts[$nLastIdx]['month'] ?? \Carbon\Carbon::parse($trendPts[$nLastIdx]['label'])->format('M') }}</text>
-                    </svg>
-                    @else
-                    <div class="flex items-center justify-center h-[150px] text-xs text-gray-400">Not enough data for a trend.</div>
-                    @endif
-                </div>
-            </div>
 
 @include('partials.daily-remittance-card')
 

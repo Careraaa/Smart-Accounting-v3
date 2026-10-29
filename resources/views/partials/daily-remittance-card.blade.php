@@ -105,9 +105,11 @@
                 <g class="daily-remittance-hover" aria-hidden="true" style="display:none">
                     <line class="daily-remittance-hover-line" y1="{{ $rcPadT }}" y2="{{ $rcPadT + $rcPlotH }}" stroke="currentColor" stroke-dasharray="3 4" />
                     <circle class="daily-remittance-hover-dot" r="4" fill="#ee765f" stroke="white" stroke-width="1.5" />
-                    <rect class="daily-remittance-hover-box" width="150" height="54" rx="10" fill="white" stroke="#e4e3dc" />
-                    <text class="daily-remittance-hover-date" x="12" y="17" font-size="9" font-weight="700" letter-spacing="1.2" fill="#969791" />
-                    <text class="daily-remittance-hover-value" x="12" y="39" font-size="11" fill="#d96650" />
+                    <g class="daily-remittance-hover-popup">
+                        <rect class="daily-remittance-hover-box" width="150" height="54" rx="10" fill="white" stroke="#e4e3dc" />
+                        <text class="daily-remittance-hover-date" x="12" y="17" font-size="9" font-weight="700" letter-spacing="1.2" fill="#969791" />
+                        <text class="daily-remittance-hover-value" x="12" y="39" font-size="11" fill="#d96650" />
+                    </g>
                 </g>
                 <rect x="{{ $rcPadL }}" y="{{ $rcPadT }}" width="{{ $rcPlotW }}" height="{{ $rcPlotH }}" fill="transparent" class="daily-remittance-chart-overlay" />
             </svg>
@@ -123,15 +125,14 @@
                         const x = xs[index];
                         const boxX = Math.min(Math.max(x - 75, {{ $rcPadL }}), {{ $rcW }} - 162);
                         const boxY = Math.max(14, ys[index] - 68);
+                        const inverseScale = {{ $rcW }} / chart.getBoundingClientRect().width;
+                        const popupScale = Math.max(1, inverseScale);
                         hover.style.display = '';
                         hover.querySelector('.daily-remittance-hover-line').setAttribute('x1', x);
                         hover.querySelector('.daily-remittance-hover-line').setAttribute('x2', x);
                         hover.querySelector('.daily-remittance-hover-dot').setAttribute('cx', x);
                         hover.querySelector('.daily-remittance-hover-dot').setAttribute('cy', ys[index]);
-                        hover.querySelector('.daily-remittance-hover-box').setAttribute('x', boxX);
-                        hover.querySelector('.daily-remittance-hover-box').setAttribute('y', boxY);
-                        hover.querySelector('.daily-remittance-hover-date').setAttribute('transform', `translate(${boxX}, ${boxY})`);
-                        hover.querySelector('.daily-remittance-hover-value').setAttribute('transform', `translate(${boxX}, ${boxY})`);
+                        hover.querySelector('.daily-remittance-hover-popup').setAttribute('transform', `translate(${boxX / popupScale}, ${boxY / popupScale}) scale(${popupScale})`);
                         hover.querySelector('.daily-remittance-hover-date').textContent = points[index].date.replace(/^(\d{4})-/, '').toUpperCase();
                         hover.querySelector('.daily-remittance-hover-value').textContent = `Remitted  ₱${Number(points[index].net).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
                     };
