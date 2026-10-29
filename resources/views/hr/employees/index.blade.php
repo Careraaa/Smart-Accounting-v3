@@ -178,6 +178,9 @@
 
         {{-- Table --}}
         <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+                <span class="text-sm font-semibold text-gray-900">Employee records</span>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
@@ -317,6 +320,9 @@
 
         {{-- Table --}}
         <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+                <span class="text-sm font-semibold text-gray-900">Employee records</span>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
@@ -397,6 +403,9 @@
 
         {{-- Table --}}
         <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+                <span class="text-sm font-semibold text-gray-900">Employee records</span>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
