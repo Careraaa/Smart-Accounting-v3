@@ -616,7 +616,6 @@ class AttendanceController extends Controller
         } else {
             OvertimeUndertime::where('user_id', $userId)
                 ->where('date', $attendance->date->format('Y-m-d'))
-                ->where('status', 'pending')
                 ->delete();
         }
         // ─────────────────────────────────────────────────────────────────────
@@ -743,7 +742,6 @@ class AttendanceController extends Controller
         } else {
             OvertimeUndertime::where('user_id', $userId)
                 ->where('date', $attendance->date->format('Y-m-d'))
-                ->where('status', 'pending')
                 ->delete();
         }
 
