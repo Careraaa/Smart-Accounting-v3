@@ -1,4 +1,5 @@
 <?php
+// SQA deploy trigger
 
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
