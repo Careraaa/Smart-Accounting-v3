@@ -77,7 +77,7 @@
 
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
@@ -108,7 +108,7 @@
                         <td class="px-5 py-3 text-sm text-gray-600">{{ $vehicle->route->route_name ?? '—' }}</td>
                         <td class="px-5 py-3 text-sm text-gray-600">{{ $vehicle->operator }}</td>
                         <td class="px-5 py-3 text-center">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold {{ $badgeColor }}">{{ $vlabel }}</span>
+                            <span class="app-status-badge {{ $vstatus === 'active' ? 'active' : ($vstatus === 'under_maintenance' ? 'maintenance' : 'neutral') }}">{{ $vlabel }}</span>
                         </td>
                     </tr>
                 @empty

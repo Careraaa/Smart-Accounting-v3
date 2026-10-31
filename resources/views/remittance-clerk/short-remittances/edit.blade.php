@@ -124,7 +124,7 @@
             <p class="px-5 py-4 text-sm text-gray-500">No boundary payments have been submitted for this remittance.</p>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
+                <table class="w-full text-left text-sm app-standard-table">
                     <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
                         <tr>
                             <th class="px-5 py-3">Internal ID</th>

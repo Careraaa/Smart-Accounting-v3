@@ -124,6 +124,179 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ env.SERVER_DIR }}
           log-level: standard
+          timeout: 300000
+          exclude: |
+            **/.git/**
+            **/.git*
+            **/node_modules/**
+            **/.github/**
+            **/tests/**
+            **/storage/logs/*.log
+            **/storage/framework/cache/data/**
+            **/storage/framework/sessions/*
+            **/storage/framework/views/*
+            **/storage/framework/testing/**
+            **/database/database.sqlite
+            *.md
+            package.json
+            package-lock.json
+            vite.config.js
+            phpunit.xml
+            .env.example
+            check-employees.php
+            username_password.txt
+
+      # ---------- Also deploy deploy-test-2 to Byet.host ----------
+      - name: Create Byet.host Test 2 .env
+        if: github.ref_name == 'deploy-test-2'
+        shell: bash
+        run: |
+          cat > .env <<'ENVEOF'
+          ${{ secrets.BYET_TEST2_ENV_FILE }}
+          ENVEOF
+
+      - name: Upload deploy-test-2 to Byet.host
+        if: github.ref_name == 'deploy-test-2'
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.BYET_FTP_SERVER }}
+          port: 21
+          protocol: ftp
+          security: loose
+          username: ${{ secrets.BYET_FTP_USERNAME }}
+          password: ${{ secrets.BYET_FTP_PASSWORD }}
+          server-dir: ${{ secrets.BYET_FTP_SERVER_DIR_TEST2 }}
+          log-level: standard
+          timeout: 300000
+          exclude: |
+            **/.git/**
+            **/.git*
+            **/node_modules/**
+            **/.github/**
+            **/tests/**
+            **/storage/logs/*.log
+            **/storage/framework/cache/data/**
+            **/storage/framework/sessions/*
+            **/storage/framework/views/*
+            **/storage/framework/testing/**
+            **/database/database.sqlite
+            *.md
+            package.json
+            package-lock.json
+            vite.config.js
+            phpunit.xml
+            .env.example
+            check-employees.php
+            username_password.txt
+
+      # ---------- Also deploy main to Byet.host ----------
+      - name: Create Byet.host Main .env
+        if: github.ref_name == 'main'
+        shell: bash
+        run: |
+          cat > .env <<'ENVEOF'
+          ${{ secrets.BYET_ENV_MAIN }}
+          ENVEOF
+
+      - name: Upload main to Byet.host
+        if: github.ref_name == 'main'
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.BYET_FTP_SERVER }}
+          port: 21
+          protocol: ftp
+          security: loose
+          username: ${{ secrets.BYET_FTP_USERNAME }}
+          password: ${{ secrets.BYET_FTP_PASSWORD }}
+          server-dir: ${{ secrets.BYET_DIR_MAIN }}
+          log-level: standard
+          timeout: 300000
+          exclude: |
+            **/.git/**
+            **/.git*
+            **/node_modules/**
+            **/.github/**
+            **/tests/**
+            **/storage/logs/*.log
+            **/storage/framework/cache/data/**
+            **/storage/framework/sessions/*
+            **/storage/framework/views/*
+            **/storage/framework/testing/**
+            **/database/database.sqlite
+            *.md
+            package.json
+            package-lock.json
+            vite.config.js
+            phpunit.xml
+            .env.example
+            check-employees.php
+            username_password.txt
+
+      # ---------- Also deploy SQA to Byet.host ----------
+      - name: Create Byet.host SQA .env
+        if: github.ref_name == 'deploy-sqa'
+        shell: bash
+        run: |
+          cat > .env <<'ENVEOF'
+          ${{ secrets.BYET_ENV_SQA }}
+          ENVEOF
+
+      - name: Upload deploy-sqa to Byet.host
+        if: github.ref_name == 'deploy-sqa'
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.BYET_FTP_SERVER }}
+          port: 21
+          protocol: ftp
+          security: loose
+          username: ${{ secrets.BYET_FTP_USERNAME }}
+          password: ${{ secrets.BYET_FTP_PASSWORD }}
+          server-dir: ${{ secrets.BYET_DIR_SQA }}
+          log-level: standard
+          timeout: 300000
+          exclude: |
+            **/.git/**
+            **/.git*
+            **/node_modules/**
+            **/.github/**
+            **/tests/**
+            **/storage/logs/*.log
+            **/storage/framework/cache/data/**
+            **/storage/framework/sessions/*
+            **/storage/framework/views/*
+            **/storage/framework/testing/**
+            **/database/database.sqlite
+            *.md
+            package.json
+            package-lock.json
+            vite.config.js
+            phpunit.xml
+            .env.example
+            check-employees.php
+            username_password.txt
+
+      # ---------- Also deploy deploy-test to Byet.host ----------
+      - name: Create Byet.host Test .env
+        if: github.ref_name == 'deploy-test'
+        shell: bash
+        run: |
+          cat > .env <<'ENVEOF'
+          ${{ secrets.BYET_ENV_TEST }}
+          ENVEOF
+
+      - name: Upload deploy-test to Byet.host
+        if: github.ref_name == 'deploy-test'
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.BYET_FTP_SERVER }}
+          port: 21
+          protocol: ftp
+          security: loose
+          username: ${{ secrets.BYET_FTP_USERNAME }}
+          password: ${{ secrets.BYET_FTP_PASSWORD }}
+          server-dir: ${{ secrets.BYET_DIR_TEST }}
+          log-level: standard
+          timeout: 300000
           exclude: |
             **/.git/**
             **/.git*

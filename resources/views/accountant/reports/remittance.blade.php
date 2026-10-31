@@ -153,7 +153,7 @@ $remittancesJson = $remittances->groupBy(fn($r) => $r->remittance_date->format('
             <span class="text-[0.6rem] text-gray-400">Click a row to view breakdown</span>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-[0.55rem] font-bold uppercase tracking-wider text-gray-400">Date</th>
@@ -247,7 +247,7 @@ function openRemittanceModal(dateKey) {
             '<button onclick="closeRemittanceModal(this.closest(\'.fixed\'))" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-all border-0 cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>' +
         '</div>' +
         '<div class="overflow-x-auto overflow-y-auto flex-1">' +
-            '<table class="w-full text-xs">' +
+            '<table class="w-full text-xs app-standard-table">' +
                 '<thead class="sticky top-0 z-10"><tr class="bg-gray-50 border-b border-gray-200">' +
                     '<th class="text-left px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">#</th>' +
                     '<th class="text-left px-5 py-3 text-[0.5rem] font-bold uppercase tracking-wider text-gray-500">Driver</th>' +

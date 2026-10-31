@@ -278,7 +278,7 @@
                         </button>
                         <div class="ha-history-body overflow-hidden" style="max-height:0;transition:max-height 0.3s ease-out">
                             <div class="border-t border-gray-50">
-                                <table class="w-full">
+                                <table class="w-full app-standard-table">
                                     <thead>
                                         <tr class="bg-gray-50 border-b border-gray-200">
                                             <th class="px-5 py-3 text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 text-left">File</th>

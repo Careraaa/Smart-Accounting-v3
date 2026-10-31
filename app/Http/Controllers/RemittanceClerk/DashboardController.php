@@ -63,6 +63,29 @@ class DashboardController extends Controller
             ])
             ->toArray();
 
+        // Daily trend uses the same finalized statuses as the Super Admin dashboard.
+        $today = now()->startOfDay();
+        $trendStart = $today->copy()->subDays(6);
+        $totalsByDay = DailyRemittance::query()
+            ->selectRaw('DATE(remittance_date) as remittance_day, SUM(net_remittance) as net, COUNT(*) as count')
+            ->whereIn('status', $finalizedStatuses)
+            ->whereBetween('remittance_date', [$trendStart->toDateString(), $today->toDateString()])
+            ->groupByRaw('DATE(remittance_date)')
+            ->get()
+            ->keyBy('remittance_day');
+        $dailyRemittanceTrend = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = $today->copy()->subDays($i);
+            $day = $date->toDateString();
+            $totals = $totalsByDay->get($day);
+            $dailyRemittanceTrend[] = [
+                'date' => $day,
+                'label' => $date->format('M d'),
+                'net' => (float) ($totals->net ?? 0),
+                'count' => (int) ($totals->count ?? 0),
+            ];
+        }
+
         // Recent remittances
         $recentRemittances = DailyRemittance::with('driver', 'vehicle', 'route')
             ->whereIn('status', $finalizedStatuses)
@@ -97,6 +120,7 @@ class DashboardController extends Controller
             'averageExpenses',
             'collectionGrowth',
             'monthlyCollectionTrend',
+            'dailyRemittanceTrend',
             'recentRemittances',
             'pendingItems'
         ));

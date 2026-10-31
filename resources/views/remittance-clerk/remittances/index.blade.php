@@ -43,30 +43,6 @@
         </a>
     </div>
 
-    {{-- Stats --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm">
-            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total</p>
-            <p class="text-xl font-bold text-gray-900 tabular-nums mt-1">{{ $totalRemittances }}</p>
-            <p class="text-[10px] text-gray-400 mt-0.5">all remittances</p>
-        </div>
-        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm">
-            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Approved</p>
-            <p class="text-xl font-bold text-emerald-600 tabular-nums mt-1">{{ $approvedCount }}</p>
-            <p class="text-[10px] text-gray-400 mt-0.5">approved</p>
-        </div>
-        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm">
-            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
-            <p class="text-xl font-bold text-amber-600 tabular-nums mt-1">{{ $pendingCount }}</p>
-            <p class="text-[10px] text-gray-400 mt-0.5">awaiting review</p>
-        </div>
-        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm">
-            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Rejected</p>
-            <p class="text-xl font-bold text-red-600 tabular-nums mt-1">{{ $rejectedRemittances }}</p>
-            <p class="text-[10px] text-gray-400 mt-0.5">rejected</p>
-        </div>
-    </div>
-
     {{-- Tabs --}}
     <div class="border-b border-gray-200 mb-6 fade-up">
         <nav class="flex gap-1 -mb-px" role="tablist">
@@ -113,10 +89,34 @@
         </nav>
     </div>
 
+    {{-- Stats --}}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="scale-in stat-card bg-white border border-gray-200 rounded-xl px-5 py-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Total</p>
+            <p class="text-2xl font-bold text-gray-900 tabular-nums mt-1">{{ $totalRemittances }}</p>
+            <p class="text-xs text-gray-400 mt-1">all remittances</p>
+        </div>
+        <div class="scale-in stat-card bg-white border border-gray-200 rounded-xl px-5 py-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Approved</p>
+            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">{{ $approvedCount }}</p>
+            <p class="text-xs text-gray-400 mt-1">approved</p>
+        </div>
+        <div class="scale-in stat-card bg-white border border-gray-200 rounded-xl px-5 py-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Pending</p>
+            <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">{{ $pendingCount }}</p>
+            <p class="text-xs text-gray-400 mt-1">awaiting review</p>
+        </div>
+        <div class="scale-in stat-card bg-white border border-gray-200 rounded-xl px-5 py-4">
+            <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Rejected</p>
+            <p class="text-lg font-bold text-red-600 tabular-nums mt-1">{{ $rejectedRemittances }}</p>
+            <p class="text-xs text-gray-400 mt-1">rejected</p>
+        </div>
+    </div>
+
     {{-- Table --}}
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up" id="remittanceTable">
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden fade-up" id="remittanceTable">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Date</th>
@@ -185,8 +185,8 @@
                 var isShort = r.is_short;
                 var netClass = isShort ? 'text-red-600' : 'text-emerald-600';
                 var badgeHtml = activeTab === 'pending'
-                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border bg-amber-50 text-amber-700 border-amber-200">Pending</span>'
-                    : '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border bg-emerald-50 text-emerald-700 border-emerald-200">Approved</span>';
+                    ? '<span class="app-status-badge pending">Pending</span>'
+                    : '<span class="app-status-badge approved">Approved</span>';
                 html += '<tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location=\'' + r.show_url + '\'">' +
                     '<td class="px-5 py-3"><p class="text-sm font-semibold text-gray-700 font-mono">' + r.date + '</p></td>' +
                     '<td class="px-5 py-3"><p class="text-sm font-bold text-gray-900">' + r.route + '</p></td>' +

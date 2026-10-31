@@ -185,9 +185,9 @@ $user = auth()->user();
     if (!statusBadge) return;
 
     function makeBadge(type) {
-        if (type === 'time_in') return '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border border-emerald-200 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Timed In</span>';
-        if (type === 'time_out') return '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border border-amber-200 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Timed Out</span>';
-        return '<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-gray-50 to-slate-50 text-gray-500 border border-gray-200"><span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span> No Record</span>';
+        if (type === 'time_in') return '<span class="app-status-badge active">Timed In</span>';
+        if (type === 'time_out') return '<span class="app-status-badge pending">Timed Out</span>';
+        return '<span class="app-status-badge neutral">No Record</span>';
     }
 
     fetch("{{ route('attendance.lastlog') }}", { headers: { 'Accept': 'application/json' } })

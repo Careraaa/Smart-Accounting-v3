@@ -37,51 +37,6 @@ class OvertimeUndertimeController extends Controller
         ));
     }
 
-    public function index(Request $request)
-    {
-        // All employees (excluding system roles), ordered by department then name
-        $allEmployees = Employee::whereNotIn('role', ['superadmin', 'qr_admin'])
-            ->orderBy('department')
-            ->orderBy('last_name')
-            ->get();
-
-        // All unique departments
-        $departments = $allEmployees->pluck('department')->filter()->unique()->sort()->values();
-
-        // Per-employee OT/UT summary for the current month (for all employees)
-        $monthStart = now()->startOfMonth();
-        $monthEnd   = now()->endOfMonth();
-
-        $monthlySummary = OvertimeUndertime::whereBetween('date', [$monthStart, $monthEnd])
-            ->where('status', 'approved')
-            ->whereIn('user_id', $allEmployees->pluck('id'))
-            ->selectRaw('user_id,
-                SUM(CASE WHEN type = \'overtime\'  THEN hours ELSE 0 END) as ot_hours,
-                SUM(CASE WHEN type = \'undertime\' THEN hours ELSE 0 END) as ut_hours,
-                COUNT(*) as total_records')
-            ->groupBy('user_id')
-            ->get()
-            ->keyBy('user_id');
-
-        // Global stats (approved only)
-        $totalOvertimeHours  = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')->sum('hours');
-        $totalUndertimeHours = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')->sum('hours');
-        $overtimeCount       = OvertimeUndertime::where('status', 'approved')->where('type', 'overtime')->count();
-        $undertimeCount      = OvertimeUndertime::where('status', 'approved')->where('type', 'undertime')->count();
-
-        $this->logActivity('viewed', 'OT/UT records', request()->url(), 'overtime');
-
-        return view('hr.overtime.index', compact(
-            'allEmployees',
-            'departments',
-            'monthlySummary',
-            'totalOvertimeHours',
-            'totalUndertimeHours',
-            'overtimeCount',
-            'undertimeCount'
-        ));
-    }
-
     /**
      * Per-employee OT/UT calendar for a given month.
      */
@@ -164,7 +119,7 @@ class OvertimeUndertimeController extends Controller
         // Notify the employee their record was logged and approved
         OvertimeNotification::submitted($overtime);
 
-        return redirect()->route('overtime.index')
+        return redirect()->route('attendance.index', ['tab' => 'otut'])
             ->with('success', 'Overtime/Undertime record created and automatically approved.');
     }
 
@@ -266,6 +221,6 @@ class OvertimeUndertimeController extends Controller
         OvertimeNotification::deleted($overtime);
         $overtime->delete();
 
-        return redirect()->route('overtime.index')->with('success', 'Overtime/Undertime record deleted successfully.');
+        return redirect()->route('attendance.index', ['tab' => 'otut'])->with('success', 'Overtime/Undertime record deleted successfully.');
     }
 }

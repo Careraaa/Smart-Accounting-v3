@@ -32,6 +32,13 @@
 @php
 $maxV = collect($attendanceTrend)->map(fn($d) => $d['present'] + $d['late'] + $d['absent'])->max() ?: 1;
 $td = $attendanceTrend[array_key_last($attendanceTrend)];
+$financialRevenue = (float) ($financialOverview['netRevenue'] ?? 0);
+$financialNetIncome = (float) ($financialOverview['netIncome'] ?? 0);
+$financialExpense = (float) ($financialOverview['netExpenses'] ?? 0);
+$financialDateFrom = $financialOverview['dateFrom'] ?? now()->startOfMonth()->toDateString();
+$financialDateTo = $financialOverview['dateTo'] ?? now()->toDateString();
+$financialTrend = collect($financialTrend ?? []);
+$financialChartMax = max(1, (float) $financialTrend->max('revenue'), (float) $financialTrend->max(fn($point) => max($point['netIncome'], 0)));
 @endphp
 
 <div class="flex flex-col lg:flex-row gap-5 items-start">
@@ -76,231 +83,16 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
         </div>
 
-        {{-- CHART CARDS: Attendance, Net Payroll Trend, Allowances vs Deductions, Daily Remittance --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {{-- Four dashboard cards in one balanced responsive grid. --}}
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 items-stretch">
+            @include('partials.financial-overview-card')
 
-            {{-- Attendance Trend (SVG line chart) --}}
-            @php
-            $cnt = count($attendanceTrend);
-            $atH = 132;
-            $atPresentH = [];
-            $atLateH = [];
-            foreach ($attendanceTrend as $i => $d) {
-                $atPresentH[$i] = $maxV > 0 ? round(($d['present'] / $maxV) * $atH) : 0;
-                $atLateH[$i] = $maxV > 0 ? round(($d['late'] / $maxV) * $atH) : 0;
-            }
-            @endphp
-            <div class="sad-fade-up kpi-card overflow-hidden">
-                <div class="px-4 pt-4 pb-3 flex items-center justify-between">
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-[13px] font-semibold text-gray-900">Attendance Trend</span>
-                        <span class="text-[11px] text-gray-400">last 7 days</span>
-                    </div>
-                    <div class="flex items-center gap-3 text-[11px] text-gray-400">
-                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-indigo-500 inline-block"></span> Present</span>
-                        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-amber-400 inline-block"></span> Late</span>
-                    </div>
-                </div>
-                <div class="px-4 pb-4">
-                    @if($cnt > 0)
-                    <div class="at-plot">
-                        <div class="at-grid" style="bottom:0"></div>
-                        <div class="at-grid" style="bottom:50%"></div>
-                        <div class="at-grid at-grid-top" style="bottom:100%"></div>
-                        <span class="at-max">{{ $maxV }}</span>
-                        <div class="at-cols">
-                            @foreach ($attendanceTrend as $i => $d)
-                            <div class="at-col" title="{{ \Carbon\Carbon::parse($d['date_iso'])->format('D, M j') }} — {{ $d['present'] }} present, {{ $d['late'] }} late">
-                                <div class="at-bar" style="height:{{ $atPresentH[$i] + $atLateH[$i] }}px;animation-delay:{{ 0.05 + $i * 0.04 }}s">
-                                    <div class="at-seg at-late" style="height:{{ $atLateH[$i] }}px"></div>
-                                    <div class="at-seg at-present" style="height:{{ $atPresentH[$i] }}px"></div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    <div class="at-days">
-                        @foreach ($attendanceTrend as $d)
-                        <span>{{ \Carbon\Carbon::parse($d['date_iso'])->format('D') }}</span>
-                        @endforeach
-                    </div>
-                    <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-[11px] text-gray-400">
-                        <span>Daily headcount, 7-day window</span>
-                        <span>
-                            Today:
-                            <strong class="text-gray-700 font-medium tabular-nums">{{ $td['present'] }}</strong> present
-                            <span class="mx-1 text-gray-300">·</span>
-                            <strong class="text-emerald-600 font-medium tabular-nums">{{ number_format($attendanceRate, 1) }}%</strong>
-                        </span>
-                    </div>
-                    @else
-                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No attendance data yet.</div>
-                    @endif
-                </div>
-            </div>
+            @include('partials.attendance-trend-card')
 
 
 
 
-        {{-- Charts row: Net Payroll Trend + Allowances vs Deductions --}}
-        @php
-            $trendPts = $monthlyPayrollTrend;
-            $trendCount = count($trendPts);
-            $ta = (float) ($totalAllowances ?? 0);
-            $td = (float) ($totalDeductions ?? 0);
-            $adTotal = $ta + $td;
-            $adAllowPct = $adTotal > 0 ? round(($ta/$adTotal)*100) : 0;
-            $adDeducPct = $adTotal > 0 ? round(($td/$adTotal)*100) : 0;
-            $circ = 2 * pi() * 36;
-            $allowOffset = $adAllowPct / 100 * $circ;
-
-            // Net Payroll Trend geometry — 2px line, 3 recessive gridlines,
-            // room on the right for the direct end-label, no per-point dots.
-            $nW = 600; $nH = 180;
-            $nPadL = 4; $nPadR = 62; $nPadT = 16; $nPadB = 26;
-            $nPlotW = $nW - $nPadL - $nPadR;
-            $nPlotH = $nH - $nPadT - $nPadB;
-            $nMax = $trendCount > 0 ? max(array_column($trendPts, 'total')) : 1;
-            $nLastIdx = $trendCount - 1;
-            $nStep = $trendCount > 1 ? $nPlotW / ($trendCount - 1) : 0;
-            $nPts = [];
-            foreach ($trendPts as $i => $pt) {
-                $nx = $nPadL + $i * $nStep;
-                $ny = $nPadT + $nPlotH - ($nMax > 0 ? ($pt['total'] / $nMax) * $nPlotH : 0);
-                $nPts[] = round($nx, 1) . ',' . round($ny, 1);
-            }
-            $nEndX = $nPadL + $nLastIdx * $nStep;
-            $nEndY = $trendCount > 0 ? $nPadT + $nPlotH - ($trendPts[$nLastIdx]['total'] / max($nMax, 1)) * $nPlotH : $nPadT + $nPlotH;
-            $nEndVal = $trendCount > 0 ? $trendPts[$nLastIdx]['total'] : 0;
-            $nEndText = $nEndVal >= 1000 ? '₱' . number_format($nEndVal / 1000, 1) . 'k' : '₱' . number_format($nEndVal);
-        @endphp
-
-            {{-- Net Payroll Trend --}}
-            <div class="sad-fade-up kpi-card overflow-hidden">
-                <div class="px-4 pt-4 pb-1 flex items-start justify-between gap-3">
-                    <div>
-                        <p class="kcard-label">Net Payroll Trend</p>
-                        <p class="text-xl font-semibold text-gray-900 tabular-nums mt-1">₱{{ number_format($nMax, 0) }}</p>
-                    </div>
-                    <span class="text-[11px] text-gray-400 mt-0.5">approved payrolls · peak, last 6 months</span>
-                </div>
-                <div class="px-4 pb-4 pt-2">
-                    @if($trendCount > 1)
-                    <svg viewBox="0 0 {{ $nW }} {{ $nH }}" class="w-full h-auto" role="img"
-                         aria-label="Net payroll over the last {{ $trendCount }} months, peaking at {{ number_format($nMax, 0) }} pesos">
-                        <line class="chart-grid" x1="{{ $nPadL }}" y1="{{ $nPadT + $nPlotH }}" x2="{{ $nPadL + $nPlotW }}" y2="{{ $nPadT + $nPlotH }}"/>
-                        <line class="chart-grid" x1="{{ $nPadL }}" y1="{{ $nPadT + $nPlotH / 2 }}" x2="{{ $nPadL + $nPlotW }}" y2="{{ $nPadT + $nPlotH / 2 }}"/>
-                        <line class="chart-grid" x1="{{ $nPadL }}" y1="{{ $nPadT }}" x2="{{ $nPadL + $nPlotW }}" y2="{{ $nPadT }}"/>
-
-                        <polyline points="{{ implode(' ', $nPts) }}" fill="none" stroke="#c8292a"
-                                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                                  class="sad-chart-line"/>
-
-                        <circle class="chart-ring" cx="{{ round($nEndX, 1) }}" cy="{{ round($nEndY, 1) }}" r="4" fill="#c8292a"/>
-                        <text class="chart-endlabel" x="{{ round($nEndX + 10, 1) }}" y="{{ round($nEndY + 4, 1) }}">{{ $nEndText }}</text>
-
-                        <text class="chart-label" x="{{ $nPadL }}" y="{{ $nH - 6 }}" text-anchor="start">{{ $trendPts[0]['month'] ?? \Carbon\Carbon::parse($trendPts[0]['label'])->format('M') }}</text>
-                        <text class="chart-label" x="{{ $nPadL + $nPlotW }}" y="{{ $nH - 6 }}" text-anchor="end">{{ $trendPts[$nLastIdx]['month'] ?? \Carbon\Carbon::parse($trendPts[$nLastIdx]['label'])->format('M') }}</text>
-                    </svg>
-                    @else
-                    <div class="flex items-center justify-center h-[150px] text-xs text-gray-400">Not enough data for a trend.</div>
-                    @endif
-                </div>
-            </div>
-
-            {{-- Allowances vs Deductions (CSS donut) --}}
-            <div class="sad-fade-up kpi-card overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                    <h2 class="text-[13px] font-semibold text-gray-900">Allowances vs Deductions</h2>
-                    <span class="text-[11px] text-gray-400">Approved payrolls</span>
-                </div>
-                <div class="px-4 py-4">
-                    @if($adTotal > 0)
-                    <div class="flex flex-col sm:flex-row items-center gap-5">
-                        <div class="relative w-[120px] h-[120px] shrink-0">
-                            <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
-                                <circle cx="50" cy="50" r="36" fill="none" stroke="#22c55e" stroke-width="8" stroke-dasharray="{{ $allowOffset }} {{ $circ }}" stroke-dashoffset="0" stroke-linecap="round" class="sad-donut-seg" style="--pct:{{ $allowOffset }}"/>
-                                <circle cx="50" cy="50" r="36" fill="none" stroke="#f43f5e" stroke-width="8" stroke-dasharray="{{ $circ - $allowOffset }} {{ $circ }}" stroke-dashoffset="{{ -$allowOffset }}" stroke-linecap="round" class="sad-donut-seg" style="--pct:{{ $circ - $allowOffset }};animation-delay:0.3s"/>
-                            </svg>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <span class="text-[9px] font-bold text-gray-900 tabular-nums">₱{{ number_format($adTotal/1000,2) }}k</span>
-                            </div>
-                        </div>
-                        <div class="flex-1 space-y-2 w-full">
-                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-emerald-50 transition-colors">
-                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-emerald-500"></span>
-                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Allowances</span>
-                                <span class="text-[10px] font-bold text-emerald-600 tabular-nums">₱{{ number_format($ta,2) }}</span>
-                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adAllowPct }}%</span>
-                            </div>
-                            <div class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-rose-50 transition-colors">
-                                <span class="w-2.5 h-2.5 rounded-sm shrink-0 bg-rose-500"></span>
-                                <span class="text-[10px] font-semibold text-gray-700 flex-1">Deductions</span>
-                                <span class="text-[10px] font-bold text-rose-600 tabular-nums">₱{{ number_format($td,2) }}</span>
-                                <span class="text-[9px] text-gray-400 min-w-[28px] text-right">{{ $adDeducPct }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    @else
-                    <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No data yet.</div>
-                    @endif
-                </div>
-            </div>
-
-{{-- Daily Remittance Trend --}}
-@php
-    $dailyData = collect($dailyRemittanceTrend);
-    $rcHasData = $dailyData->sum('count') > 0;
-    $rcCount = $rcHasData ? $dailyData->count() : 0;
-    $rcMax = $dailyData->max('net') ?: 1;
-    $rcTotal = $dailyData->sum('net');
-    $rcW = 600; $rcH = 180;
-    $rcPadL = 4; $rcPadR = 62; $rcPadT = 16; $rcPadB = 26;
-    $rcPlotW = $rcW - $rcPadL - $rcPadR;
-    $rcPlotH = $rcH - $rcPadT - $rcPadB;
-    $rcStep = $rcCount > 1 ? $rcPlotW / ($rcCount - 1) : 0;
-    $rcPts = [];
-    foreach ($dailyData as $i => $d) {
-        $rcPts[] = round($rcPadL + $i * $rcStep, 1) . ',' . round($rcPadT + $rcPlotH - ($rcMax > 0 ? ($d['net'] / $rcMax) * $rcPlotH : 0), 1);
-    }
-    $rcLast = $rcCount - 1;
-    $rcEndX = $rcPadL + $rcLast * $rcStep;
-    $rcEndY = $rcPadT + $rcPlotH - ($rcCount > 0 ? ($dailyData[$rcLast]['net'] / max($rcMax, 1)) * $rcPlotH : 0);
-    $rcEndVal = $rcCount > 0 ? $dailyData[$rcLast]['net'] : 0;
-    $rcEndText = $rcEndVal >= 1000 ? "\u{20B1}" . number_format($rcEndVal / 1000, 1) . 'k' : "\u{20B1}" . number_format($rcEndVal);
-@endphp
-
-<div class="sad-fade-up kpi-card overflow-hidden">
-    <div class="px-4 pt-4 pb-1 flex items-start justify-between gap-3">
-        <div>
-            <p class="kcard-label">Daily Remittance Trend <span class="font-normal text-gray-400">· last 7 days</span></p>
-            <p class="text-xl font-semibold text-gray-900 tabular-nums mt-1">&#8369;{{ number_format($rcTotal, 0) }}</p>
-        </div>
-        <a href="{{ route('remittances.index') }}" class="shrink-0 mt-1 text-[11px] font-medium text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">View all &rarr;</a>
-    </div>
-    <div class="px-4 pb-4 pt-2">
-        @if($rcCount > 1)
-        <svg viewBox="0 0 {{ $rcW }} {{ $rcH }}" class="w-full h-auto" role="img"
-             aria-label="Net remittance across {{ $rcCount }} days, totalling {{ number_format($rcTotal, 0) }} pesos">
-            <line class="chart-grid" x1="{{ $rcPadL }}" y1="{{ $rcPadT + $rcPlotH }}" x2="{{ $rcPadL + $rcPlotW }}" y2="{{ $rcPadT + $rcPlotH }}"/>
-            <line class="chart-grid" x1="{{ $rcPadL }}" y1="{{ $rcPadT + $rcPlotH / 2 }}" x2="{{ $rcPadL + $rcPlotW }}" y2="{{ $rcPadT + $rcPlotH / 2 }}"/>
-            <line class="chart-grid" x1="{{ $rcPadL }}" y1="{{ $rcPadT }}" x2="{{ $rcPadL + $rcPlotW }}" y2="{{ $rcPadT }}"/>
-
-            <polyline points="{{ implode(' ', $rcPts) }}" fill="none" stroke="#059669"
-                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                      class="sad-chart-line"/>
-
-            <circle class="chart-ring" cx="{{ round($rcEndX, 1) }}" cy="{{ round($rcEndY, 1) }}" r="4" fill="#059669"/>
-            <text class="chart-endlabel" x="{{ round($rcEndX + 10, 1) }}" y="{{ round($rcEndY + 4, 1) }}">{{ $rcEndText }}</text>
-
-            <text class="chart-label" x="{{ $rcPadL }}" y="{{ $rcH - 6 }}" text-anchor="start">{{ $dailyData->first()['label'] }}</text>
-            <text class="chart-label" x="{{ $rcPadL + $rcPlotW }}" y="{{ $rcH - 6 }}" text-anchor="end">{{ $dailyData->last()['label'] }}</text>
-        </svg>
-        @else
-        <div class="flex items-center justify-center h-[150px] text-xs text-gray-400">No finalized remittances in the last 7 days.</div>
-        @endif
-    </div>
-</div>
+@include('partials.daily-remittance-card')
 
 
     </div>

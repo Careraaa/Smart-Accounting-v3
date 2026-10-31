@@ -14,7 +14,7 @@
 @endpush
 
 @section('content')
-<div class="space-y-5">
+<div class="space-y-5 w-full max-w-7xl mx-auto">
 
     {{-- Flash --}}
     @foreach(['success','error'] as $t)
@@ -97,7 +97,7 @@
     {{-- Table --}}
     <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Journal #</th>
@@ -190,7 +190,7 @@
         const slice = filtered.slice(start, start+PER);
         tbody.innerHTML = '';
         slice.forEach(e => {
-            const tc = statusColors[e.status] || '';
+            const badgeStatus = e.status === 'Posted' ? 'approved' : (e.status === 'Void' ? 'rejected' : 'pending');
             const tr = document.createElement('tr');
             tr.className = 'cursor-pointer transition-colors hover:bg-gray-50/60';
             tr.dataset.href = '/accounting/journal-entries/' + e.id;
@@ -200,7 +200,7 @@
                 '<td class="px-4 py-3 text-xs text-gray-600 max-w-[200px] truncate">'+e.description+'</td>' +
                 '<td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">'+fmtMoney(e.total_debit)+'</td>' +
                 '<td class="px-4 py-3 text-right text-xs font-semibold text-gray-900 tabular-nums">'+fmtMoney(e.total_credit)+'</td>' +
-                '<td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide border '+tc+'">'+e.status+'</span></td>';
+                '<td class="px-4 py-3"><span class="app-status-badge '+badgeStatus+'">'+e.status+'</span></td>';
             tr.addEventListener('click', event => {
                 if (event.target.closest('a, button, input, select, textarea')) return;
                 window.location.href = tr.dataset.href;

@@ -156,7 +156,7 @@
     {{-- Table --}}
     <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Employee</th>
@@ -194,7 +194,7 @@
     <div id="tab-short_remittances" class="tab-panel {{ $tab === 'short_remittances' ? 'active-panel' : 'hidden' }}">
         <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm app-standard-table">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>

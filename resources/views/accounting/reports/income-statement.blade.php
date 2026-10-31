@@ -44,7 +44,7 @@
 @endpush
 
 @section('content')
-<div class="space-y-5 max-w-5xl print-report-page">
+<div class="space-y-5 w-full max-w-5xl mx-auto print-report-page">
     <div class="flex items-start justify-between gap-4 flex-wrap">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Income Statement</h1>
@@ -78,7 +78,7 @@
         <div class="max-w-3xl mx-auto">
             <h2 class="text-center text-lg font-bold text-gray-900">Knights Transport Services Corporation</h2>
             <p class="text-center text-sm text-gray-500 mb-7">Income Statement</p>
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <tbody>
                     <tr class="border-b border-gray-100"><th colspan="2" class="py-3 text-left text-xs uppercase tracking-wide text-gray-500">Revenue</th></tr>
                     @forelse($revenues as $account)

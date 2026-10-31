@@ -48,7 +48,7 @@
 @endpush
 
 @section('content')
-<div class="space-y-5 print-report-page">
+<div class="space-y-5 w-full max-w-7xl mx-auto print-report-page">
     <div class="flex items-start justify-between gap-4 flex-wrap">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">General Ledger</h1>
@@ -138,7 +138,7 @@
         </div>
 
         <div class="bg-white border border-gray-200 rounded-xl overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left text-[0.6rem] font-semibold uppercase tracking-wide text-gray-400 px-4 py-3">Date</th>

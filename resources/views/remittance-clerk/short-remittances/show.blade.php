@@ -35,11 +35,11 @@
                         <span class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400 block mb-0.5">Status</span>
                         <p>
                             @if($shortRemittance->status === 'approved')
-                                <span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Approved</span>
+                                <span class="app-status-badge approved">Approved</span>
                             @elseif($shortRemittance->status === 'rejected')
-                                <span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md bg-red-50 text-red-700 border border-red-200">Rejected</span>
+                                <span class="app-status-badge rejected">Rejected</span>
                             @else
-                                <span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 border border-amber-200">Pending</span>
+                                <span class="app-status-badge pending">Pending</span>
                             @endif
                         </p>
                     </div>

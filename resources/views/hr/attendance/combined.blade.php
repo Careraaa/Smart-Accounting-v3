@@ -136,7 +136,7 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
         {{-- Table --}}
         <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm app-standard-table">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
@@ -309,7 +309,7 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
         {{-- Table --}}
         <div class="table-wrap bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm app-standard-table">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
@@ -318,7 +318,7 @@ html.dark .otut-action-reject:hover { background: rgba(69,10,10,0.8) !important;
                             <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Hours</th>
                             <th class="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Amount</th>
                             <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                            <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
+                            <th id="otutActionsHeader" class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="otutTbody"></tbody>
@@ -604,9 +604,11 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
         var countEl = document.getElementById('otutResultCount');
         var search = document.getElementById('otutSearch');
         var typeF  = document.getElementById('otutTypeFilter');
+        var actionsHeader = document.getElementById('otutActionsHeader');
 
         function switchTab(status) {
             curStatus = status;
+            actionsHeader.classList.toggle('hidden', status !== 'pending');
             document.querySelectorAll('.otut-tab').forEach(function (btn) {
                 btn.classList.toggle('active', btn.dataset.status === status);
             });
@@ -666,8 +668,6 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                                 '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
                             '</button>' +
                         '</div>';
-                    } else {
-                        actionsHtml = '<span class="text-xs text-gray-300 block text-center">—</span>';
                     }
 
                     row.innerHTML =
@@ -677,7 +677,7 @@ window.allOtRequests = {!! json_encode($allOtRequests->map(fn($r) => [
                         '<td class="px-5 py-3 text-center font-mono text-sm font-semibold text-gray-700">' + r.hours.toFixed(1) + 'h</td>' +
                         '<td class="px-5 py-3 text-right font-mono text-sm font-bold text-emerald-600">₱' + r.amount.toFixed(2) + '</td>' +
                         '<td class="px-5 py-3 text-center"><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ' + statusCls + '"><span class="w-1.5 h-1.5 rounded-full ' + statusDot + '"></span>' + statusLabel + '</span></td>' +
-                        '<td class="px-5 py-3">' + actionsHtml + '</td>';
+                        (r.status === 'pending' ? '<td class="px-5 py-3">' + actionsHtml + '</td>' : '');
                     tbody.appendChild(row);
                 });
             }
