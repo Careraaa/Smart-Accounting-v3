@@ -363,14 +363,14 @@ Route::middleware(['auth', 'check-status', 'role:hr,superadmin,accountant,qr_adm
         Route::post('/settings/attendance-settings', [\App\Http\Controllers\HR\ConfigurationController::class, 'updateAttendanceSettings'])->name('settings.attendance-settings.update');
     });
 
-    Route::get('/overtime/approved', [OvertimeUndertimeController::class, 'index'])
-        ->name('overtime.approved')
-        ->defaults('status', 'approved');
-    Route::get('/overtime/rejected', [OvertimeUndertimeController::class, 'index'])
-        ->name('overtime.rejected')
-        ->defaults('status', 'rejected');
+    Route::get('/overtime/approved', fn () => redirect()->route('attendance.index', ['tab' => 'otut']))
+        ->name('overtime.approved');
+    Route::get('/overtime/rejected', fn () => redirect()->route('attendance.index', ['tab' => 'otut']))
+        ->name('overtime.rejected');
 
-    Route::resource('overtime', OvertimeUndertimeController::class);
+    Route::get('/overtime', fn () => redirect()->route('attendance.index', ['tab' => 'otut']))
+        ->name('overtime.index');
+    Route::resource('overtime', OvertimeUndertimeController::class)->except(['index']);
     Route::get('/overtime/employee/{employee}/calendar', [OvertimeUndertimeController::class, 'employeeCalendar'])->name('overtime.employee.calendar');
     Route::post('/overtime/{overtime}/approve', [OvertimeUndertimeController::class, 'approve'])->name('overtime.approve');
     Route::post('/overtime/{overtime}/reject', [OvertimeUndertimeController::class, 'reject'])->name('overtime.reject');

@@ -67,7 +67,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                             <span class="qa-badge bg-amber-100 text-amber-700 group-hover:bg-\2-500 group-hover:text-white transition-colors">{{ $pendingLeaves }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('overtime.index') }}" class="qa-tile group transition-all hover:bg-violet-50 hover:border-violet-200 no-underline">
+                    <a href="{{ route('attendance.index', ['tab' => 'otut']) }}" class="qa-tile group transition-all hover:bg-violet-50 hover:border-violet-200 no-underline">
                         <div class="qa-icon bg-violet-100 text-violet-600 transition-colors group-hover:bg-violet-500 group-hover:text-white">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
                         </div>
