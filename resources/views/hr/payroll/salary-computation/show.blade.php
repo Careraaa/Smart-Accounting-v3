@@ -51,7 +51,7 @@
             default => ['label'=>'Pending','dot'=>'bg-amber-400','text'=>'text-amber-600','bg'=>'bg-amber-50'],
         };
         $overtimePay = (float)($payroll->overtime_pay ?? 0);
-        $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay'));
+        $leavePayAllowances = $payroll->allowances->filter(fn($a) => str_starts_with((string)($a->allowance_type ?? ''), 'Leave Pay') && (int)($a->hours ?? 0) > 0);
         $leavePayTotal = (float)($leavePayAllowances->sum('amount') ?? 0);
         $leavePayDays = (int) $leavePayAllowances->sum('hours');
         $holidayPay = (float)($payroll->holiday_pay ?? 0);

@@ -51,6 +51,8 @@ class PayrollService
         array $manualDeductions = [],
         array $manualBonuses = []
     ): Payroll {
+        $manualAllowances = $this->excludeGeneratedLeaveAllowances($manualAllowances);
+
         // ── Step 1: Calculate leave pay separately ──────────────────────────
         // Retrieve approved leaves for this payroll period
         $dailyRate = (float) ($employee->salary_rate ?? 0);
@@ -354,6 +356,8 @@ class PayrollService
         array $extraData = [],
         array $manualBonuses = [],
     ): Payroll {
+        $manualAllowances = $this->excludeGeneratedLeaveAllowances($manualAllowances);
+
         // ── Step 1: Calculate leave pay separately ──────────────────────────
         // Retrieve approved leaves for this payroll period
         $dailyRate = (float) ($employee->salary_rate ?? 0);
@@ -426,9 +430,32 @@ class PayrollService
         return $payroll->fresh();
     }
 
+    public function getStoredLeavePayBreakdown(Payroll $payroll): array
+    {
+        return $payroll->allowances
+            ->filter(fn ($allowance) => str_starts_with((string) ($allowance->allowance_type ?? ''), 'Leave Pay')
+                && (int) ($allowance->hours ?? 0) > 0
+                && (float) $allowance->amount > 0)
+            ->map(fn ($allowance) => [
+                'type_name' => str_replace(['Leave Pay (', ')'], '', $allowance->allowance_type),
+                'amount' => round((float) $allowance->amount, 2),
+                'paid_days' => (int) $allowance->hours,
+            ])
+            ->values()
+            ->all();
+    }
+
     // =========================================================================
     //  PRIVATE HELPERS — line-item persistence
     // =========================================================================
+
+    private function excludeGeneratedLeaveAllowances(array $manualAllowances): array
+    {
+        return array_values(array_filter(
+            $manualAllowances,
+            fn ($allowance) => !str_starts_with((string) ($allowance['name'] ?? ''), 'Leave Pay')
+        ));
+    }
 
     /**
      * Save all earning line items (OT, holiday breakdown, leave pay, manual allowances).
