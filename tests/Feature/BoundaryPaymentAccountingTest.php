@@ -130,6 +130,13 @@ test('payroll receivables shows the short remittances tab only to accountants', 
         'role' => 'hr',
         'status' => 'active',
     ]);
+    $superadmin = User::create([
+        'name' => 'Boundary Superadmin',
+        'username' => 'boundary-superadmin',
+        'password' => 'password',
+        'role' => 'superadmin',
+        'status' => 'active',
+    ]);
     $remittance = boundaryPaymentTestRemittance(3000, 2000, 'approved');
     $paymentKey = (string) Str::uuid();
     app(\App\Services\BoundaryPaymentService::class)->recordPayment(
@@ -154,6 +161,20 @@ test('payroll receivables shows the short remittances tab only to accountants', 
         ->get(route('payroll.receivables.index', ['tab' => 'short_remittances']))
         ->assertDontSee(route('remittance-approval.boundary-payments.approve', $pendingPayment), false)
         ->assertDontSee(route('remittance-approval.boundary-payments.reject', $pendingPayment), false);
+
+    $this->actingAs($superadmin)
+        ->withSession(['view_as_role' => 'hr'])
+        ->get(route('payroll.receivables.index', ['tab' => 'short_remittances']))
+        ->assertOk()
+        ->assertSee('Cash Advances')
+        ->assertDontSee('Short Remittances')
+        ->assertDontSee('Dina Driver');
+
+    $this->actingAs($superadmin)
+        ->withSession(['view_as_role' => 'accountant'])
+        ->get(route('payroll.receivables.index'))
+        ->assertOk()
+        ->assertSee('Short Remittances');
 
     $this->actingAs($this->accountant)
         ->get(route('payroll.receivables.index', ['tab' => 'short_remittances']))
