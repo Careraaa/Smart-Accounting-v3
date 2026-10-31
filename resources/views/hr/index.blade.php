@@ -67,7 +67,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
                             <span class="qa-badge bg-amber-100 text-amber-700 group-hover:bg-\2-500 group-hover:text-white transition-colors">{{ $pendingLeaves }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('overtime.index') }}" class="qa-tile group transition-all hover:bg-violet-50 hover:border-violet-200 no-underline">
+                    <a href="{{ route('attendance.index', ['tab' => 'otut']) }}" class="qa-tile group transition-all hover:bg-violet-50 hover:border-violet-200 no-underline">
                         <div class="qa-icon bg-violet-100 text-violet-600 transition-colors group-hover:bg-violet-500 group-hover:text-white">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
                         </div>
@@ -89,113 +89,9 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
             </div>
 
             <div class="flex flex-col gap-4">
-                {{-- Attendance Trend --}}
-                @php
-                $atCnt = count($attendanceTrend);
-                $atH = 132;
-                $atPresentH = [];
-                $atLateH = [];
-                foreach ($attendanceTrend as $i => $d) {
-                    $atPresentH[$i] = $maxV > 0 ? round(($d['present'] / $maxV) * $atH) : 0;
-                    $atLateH[$i] = $maxV > 0 ? round(($d['late'] / $maxV) * $atH) : 0;
-                }
-                @endphp
-                <div class="hrd-fade-up kpi-card overflow-hidden">
-                    <div class="px-4 pt-4 pb-3 flex items-center justify-between">
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-[13px] font-semibold text-gray-900">Attendance Trend</span>
-                            <span class="text-[11px] text-gray-400">last 7 days</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-[11px] text-gray-400">
-                            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-indigo-500 inline-block"></span> Present</span>
-                            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-[3px] bg-amber-400 inline-block"></span> Late</span>
-                        </div>
-                    </div>
-                    <div class="px-4 pb-4">
-                        @if($atCnt > 0)
-                        <div class="at-plot">
-                            <div class="at-grid" style="bottom:0"></div>
-                            <div class="at-grid" style="bottom:50%"></div>
-                            <div class="at-grid at-grid-top" style="bottom:100%"></div>
-                            <span class="at-max">{{ $maxV }}</span>
-                            <div class="at-cols">
-                                @foreach ($attendanceTrend as $i => $d)
-                                <div class="at-col" title="{{ \Carbon\Carbon::parse($d['date_iso'])->format('D, M j') }} — {{ $d['present'] }} present, {{ $d['late'] }} late">
-                                    <div class="at-bar" style="height:{{ $atPresentH[$i] + $atLateH[$i] }}px;animation-delay:{{ 0.05 + $i * 0.04 }}s">
-                                        <div class="at-seg at-late" style="height:{{ $atLateH[$i] }}px"></div>
-                                        <div class="at-seg at-present" style="height:{{ $atPresentH[$i] }}px"></div>
-                                    </div>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                        <div class="at-days">
-                            @foreach ($attendanceTrend as $d)
-                            <span>{{ \Carbon\Carbon::parse($d['date_iso'])->format('D') }}</span>
-                            @endforeach
-                        </div>
-                        <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-[11px] text-gray-400">
-                            <span>Daily headcount, 7-day window</span>
-                            <span>
-                                Today:
-                                <strong class="text-gray-700 font-medium tabular-nums">{{ $td['present'] }}</strong> present
-                                <span class="mx-1 text-gray-300">·</span>
-                                <strong class="text-emerald-600 font-medium tabular-nums">{{ number_format($tdRate, 1) }}%</strong>
-                            </span>
-                        </div>
-                        @else
-                        <div class="flex items-center justify-center h-[160px] text-xs text-gray-400">No attendance data yet.</div>
-                        @endif
-                    </div>
-                </div>
+                @include('partials.attendance-trend-card')
 
             </div>
-
-        {{-- STAT CARDS: Employees, Attendance, Holidays --}}
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3">
-            <a href="{{ route('employees.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-4 no-underline group transition-all hover:border-emerald-300 hover:shadow-md" style="animation-delay:0.05s">
-                <div class="flex items-start justify-between gap-3">
-                    <p class="kcard-label">Employees</p>
-                    <div class="kcard-icon bg-emerald-50 text-emerald-600 transition-colors group-hover:bg-emerald-500 group-hover:text-white">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    </div>
-                </div>
-                <p class="kcard-value mt-2 hrd-count-num" style="animation-delay:0.15s">{{ $totalEmployees }}</p>
-                <div class="kcard-foot mt-2.5 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-                    <span>{{ $newHiresThisMonth }} new this month</span>
-                </div>
-            </a>
-
-            <a href="{{ route('attendance.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-4 no-underline group transition-all hover:border-cyan-300 hover:shadow-md" style="animation-delay:0.15s">
-                <div class="flex items-start justify-between gap-3">
-                    <p class="kcard-label">Attendance</p>
-                    <div class="kcard-icon bg-cyan-50 text-cyan-600 transition-colors group-hover:bg-cyan-500 group-hover:text-white">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
-                    </div>
-                </div>
-                <p class="kcard-value mt-2 hrd-count-num" style="animation-delay:0.25s">{{ $td['present'] }}</p>
-                <div class="kcard-foot mt-2.5 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-                    <span>{{ $tdRate }}% present today</span>
-                </div>
-            </a>
-
-            <a href="{{ route('holiday.index') }}" class="hrd-bounce hrd-stat-card kpi-card p-4 no-underline group transition-all hover:border-rose-300 hover:shadow-md" style="animation-delay:0.25s">
-                <div class="flex items-start justify-between gap-3">
-                    <p class="kcard-label">Holidays</p>
-                    <div class="kcard-icon bg-rose-50 text-rose-600 transition-colors group-hover:bg-rose-500 group-hover:text-white">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 11l7-7 7 7M5 19l7-7 7 7"/></svg>
-                    </div>
-                </div>
-                <p class="kcard-value mt-2 hrd-count-num" style="animation-delay:0.35s">{{ $upcomingHolidays }}</p>
-                <div class="kcard-foot mt-2.5 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0"></span>
-                    <span>Upcoming in 30 days</span>
-                </div>
-            </a>
-
-        </div>
 
     </div>
 

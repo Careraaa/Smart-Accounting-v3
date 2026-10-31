@@ -31,61 +31,6 @@
     @endif
 @endforeach
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 fade-up">
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden">
-        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500 rounded-b-xl"></div>
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            </div>
-            <div>
-                <div class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">Pending</div>
-                <div class="text-lg font-extrabold text-gray-900 leading-tight">{{ $pendingRemittances->count() }}</div>
-                <div class="text-[0.65rem] text-gray-400">pending</div>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden">
-        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500 rounded-b-xl"></div>
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
-            </div>
-            <div>
-                <div class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">Total Short Amount</div>
-                <div class="text-lg font-extrabold text-gray-900 leading-tight">₱{{ number_format($pendingRemittances->sum('short_amount') + $fullyPaidRemittances->sum('short_amount'), 0) }}</div>
-                <div class="text-[0.65rem] text-gray-400">total shortage</div>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden">
-        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-b-xl"></div>
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            </div>
-            <div>
-                <div class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">Driver Shares</div>
-                <div class="text-lg font-extrabold text-gray-900 leading-tight">₱{{ number_format($pendingRemittances->sum('driver_share') + $fullyPaidRemittances->sum('driver_share'), 0) }}</div>
-                <div class="text-[0.65rem] text-gray-400">total driver liability</div>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden">
-        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 rounded-b-xl"></div>
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-            <div>
-                <div class="text-[0.65rem] font-bold uppercase tracking-wider text-gray-400">PAO Shares</div>
-                <div class="text-lg font-extrabold text-gray-900 leading-tight">₱{{ number_format($pendingRemittances->sum('pao_share') + $fullyPaidRemittances->sum('pao_share'), 0) }}</div>
-                <div class="text-[0.65rem] text-gray-400">total PAO liability</div>
-            </div>
-        </div>
-    </div>
-</div>
-
 {{-- Tab bar + search --}}
 <div class="flex flex-wrap items-end justify-between gap-4 mb-5 fade-up">
     <nav class="border-b border-gray-200 flex-1" role="tablist">
@@ -108,10 +53,65 @@
     </div>
 </div>
 
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 fade-up">
+    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 relative overflow-hidden">
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500 rounded-b-xl"></div>
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Pending</div>
+                <div class="text-lg font-bold text-gray-900 tabular-nums mt-1">{{ $pendingRemittances->count() }}</div>
+                <div class="text-xs text-gray-400 mt-1">pending</div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 relative overflow-hidden">
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500 rounded-b-xl"></div>
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>
+            </div>
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Total Short Amount</div>
+                <div class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($pendingRemittances->sum('short_amount') + $fullyPaidRemittances->sum('short_amount'), 0) }}</div>
+                <div class="text-xs text-gray-400 mt-1">total shortage</div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 relative overflow-hidden">
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-b-xl"></div>
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            </div>
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Driver Shares</div>
+                <div class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($pendingRemittances->sum('driver_share') + $fullyPaidRemittances->sum('driver_share'), 0) }}</div>
+                <div class="text-xs text-gray-400 mt-1">total driver liability</div>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 relative overflow-hidden">
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 rounded-b-xl"></div>
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-gray-400">PAO Shares</div>
+                <div class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($pendingRemittances->sum('pao_share') + $fullyPaidRemittances->sum('pao_share'), 0) }}</div>
+                <div class="text-xs text-gray-400 mt-1">total PAO liability</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- Table --}}
-<div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+<div class="fade-up bg-white border border-gray-200 rounded-xl overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm app-standard-table">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200">
                     <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Date</th>
@@ -134,7 +134,7 @@
             <p class="text-xs text-gray-400 mt-0.5">Try a different search or tab</p>
         </div>
     </div>
-    <div class="flex items-center justify-between px-5 py-3 border-t border-gray-50 bg-gray-50/30">
+    <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50">
         <p class="text-xs text-gray-400" id="tableInfo">No remittances to display</p>
         <nav class="flex items-center gap-1" id="tableBtns"></nav>
     </div>
@@ -199,12 +199,12 @@
 
     function statusHtml(r) {
         if (r._type === 'resolved') {
-            return '<span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Fully Paid</span>';
+            return '<span class="app-status-badge approved">Fully Paid</span>';
         }
         var partial = r.driver_status === 'partial' || r.pao_status === 'partial';
-        var cls = partial ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200';
+        var statusClass = partial ? 'pending' : 'rejected';
         var lbl = partial ? 'Partial' : 'Pending';
-        return '<span class="inline-block text-[0.6rem] font-bold px-2.5 py-1 rounded-md ' + cls + '">' + lbl + '</span>';
+        return '<span class="app-status-badge ' + statusClass + '">' + lbl + '</span>';
     }
 
     function render() {

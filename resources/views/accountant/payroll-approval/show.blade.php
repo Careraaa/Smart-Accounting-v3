@@ -71,7 +71,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $payroll->payroll_period_start->format('F d, Y') }} &mdash; {{ $payroll->payroll_period_end->format('F d, Y') }}</p>
         </div>
         <div class="flex flex-col items-end gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $sc['bg'] }} {{ $sc['text'] }}">
+            <span class="app-status-badge {{ $sc['bg'] }} {{ $sc['text'] }}">
                 <span class="w-2 h-2 rounded-full {{ $sc['dot'] }}"></span>
                 {{ $sc['label'] }}
             </span>
@@ -256,7 +256,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             <div><p class="text-sm font-bold text-gray-900">Overtime & Undertime Records</p><p class="text-xs text-gray-400">Approved records within this payroll period</p></div>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Date</th>

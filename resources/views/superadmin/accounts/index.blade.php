@@ -118,7 +118,7 @@
     {{-- Table --}}
     <div class="ac-table-in bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">User</th>
@@ -145,9 +145,7 @@
                                 'qr_admin'        => 'bg-indigo-100 text-indigo-800 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700',
                                 default           => 'bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600',
                             };
-                            $statusBadge = $user->status === 'active'
-                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                                : 'bg-red-100 text-red-800 border border-red-200';
+                            $statusBadge = $user->status === 'active' ? 'active' : 'inactive';
                             $statusLabel = ucfirst($user->status ?? 'inactive');
                         @endphp
                         <tr class="ac-row-hover border-b border-gray-100 transition-colors duration-150"
@@ -169,7 +167,7 @@
                                 </span>
                             </td>
                             <td class="px-5 py-3 text-center">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full whitespace-nowrap {{ $statusBadge }}"
+                                <span class="app-status-badge {{ $statusBadge }}"
                                       data-status-badge>
                                     <span class="w-1.5 h-1.5 rounded-full {{ $user->status === 'active' ? 'bg-emerald-600' : 'bg-red-500' }}"></span>
                                     {{ $statusLabel }}
@@ -320,8 +318,7 @@ const ROLE_BADGE_MAP = {
                 const roleLabel  = u.role.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                 const roleBadge  = ROLE_BADGE_MAP[u.role] || 'bg-gray-100 text-gray-700 border border-gray-200';
                 const isActive   = u.status === 'active';
-                const statusBadge= isActive ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-red-100 text-red-800 border border-red-200';
-                const statusDot  = isActive ? 'bg-emerald-600' : 'bg-red-500';
+                const statusBadge= isActive ? 'active' : 'inactive';
                 const statusLabel= u.status.charAt(0).toUpperCase() + u.status.slice(1);
                 const lastLoginHtml = u.lastLogin || '<span style="color:#9ca3af;">&mdash;</span>';
 
@@ -334,7 +331,7 @@ const ROLE_BADGE_MAP = {
                     </td>
                     <td class="px-5 py-3"><span class="font-mono text-sm text-gray-600 tabular-nums">${u.email}</span></td>
                     <td class="px-5 py-3 text-center"><span class="inline-flex items-center justify-center px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full min-w-[120px] whitespace-nowrap ${roleBadge}">${roleLabel}</span></td>
-                    <td class="px-5 py-3 text-center"><span class="inline-flex items-center gap-1 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full whitespace-nowrap ${statusBadge}" data-status-badge><span class="w-1.5 h-1.5 rounded-full ${statusDot}"></span>${statusLabel}</span></td>
+                    <td class="px-5 py-3 text-center"><span class="app-status-badge ${statusBadge}" data-status-badge>${statusLabel}</span></td>
                     <td class="px-5 py-3 text-center"><span class="font-mono text-sm text-gray-600 tabular-nums">${lastLoginHtml}</span></td>
                     <td class="px-5 py-3 text-center">
                         <div class="flex items-center gap-1.5 justify-center">
@@ -523,8 +520,8 @@ function toggleStatus(userId, checkbox) {
 
         if (badge) {
             const isActive = effectiveStatus === 'active';
-            badge.className = `inline-flex items-center gap-1 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wider rounded-full whitespace-nowrap ${isActive ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
-            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-600' : 'bg-red-500'}"></span>${effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1)}`;
+            badge.className = `app-status-badge ${isActive ? 'active' : 'inactive'}`;
+            badge.textContent = effectiveStatus.charAt(0).toUpperCase() + effectiveStatus.slice(1);
         }
 
         const userData = window.allAccountsData.find(u => u.id === userId);

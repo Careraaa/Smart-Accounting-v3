@@ -68,15 +68,15 @@
 .otp-filter-select:focus { border-color:#c8292a; }
 .otp-result-count { font-size:0.72rem;color:#9ca3af;font-family:'DM Mono',monospace;font-variant-numeric:tabular-nums;white-space:nowrap; }
 
-.otp-table-card { background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
+.otp-table-card { background:#fff;border:0;border-radius:0;overflow:hidden;animation:fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
 .otp-table-scroll { overflow-x:auto; }
-.otp-table { width:100%;border-collapse:collapse;font-size:0.835rem; }
-.otp-table thead tr { background:#f8f9fb;border-bottom:1px solid #e5e7eb; }
-.otp-table thead th { padding:11px 16px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:#6b7280;white-space:nowrap; }
+.otp-table { width:100%;border-collapse:collapse;font-size:0.875rem; }
+.otp-table thead tr { background:#f9fafb;border-bottom:1px solid #e5e7eb; }
+.otp-table thead th { padding:12px 20px;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#6b7280;white-space:nowrap; }
 .otp-table tbody tr { border-bottom:1px solid #f3f4f6;transition:background 0.12s;cursor:pointer; }
 .otp-table tbody tr:last-child { border-bottom:none; }
-.otp-table tbody tr:hover { background:#fdf4f4; }
-.otp-table tbody td { padding:12px 16px;color:#374151;vertical-align:middle; }
+.otp-table tbody tr:hover { background:rgba(249,250,251,.7); }
+.otp-table tbody td { padding:12px 20px;color:#374151;vertical-align:middle; }
 
 /* Dark mode - these selectors outrank the global html.dark thead rule,
    so the header band stayed light-on-dark. */
@@ -91,12 +91,12 @@ html.dark .otp-table tbody tr:hover { background:rgba(255,255,255,.04); }
 .otp-emp-name   { font-weight:600;color:#111827;font-size:0.845rem;line-height:1.2; }
 .otp-emp-pos    { font-size:0.72rem;color:#9ca3af;margin-top:1px; }
 
-.otp-type-badge { display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;border:1px solid; }
+.otp-type-badge { display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:0.75rem;line-height:1rem;font-weight:600;border:1px solid; }
 .otp-type-badge.ot { background:#f0f9ff;color:#0369a1;border-color:#bae6fd; }
 .otp-type-badge.ut { background:#fffbeb;color:#d97706;border-color:#fde68a; }
 
-.otp-status { display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap; }
-.otp-status::before { content:'';width:5px;height:5px;border-radius:50%; }
+.otp-status { display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:0.75rem;line-height:1rem;font-weight:600;text-transform:none;letter-spacing:normal;white-space:nowrap; }
+.otp-status::before { content:'';width:6px;height:6px;border-radius:50%;flex:0 0 auto; }
 .otp-status.s-approved { background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0; }
 .otp-status.s-approved::before { background:#16a34a; }
 .otp-status.s-rejected { background:#fff0f0;color:#c8292a;border:1px solid #fecaca; }

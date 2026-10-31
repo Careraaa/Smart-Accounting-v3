@@ -87,7 +87,7 @@
     {{-- Table --}}
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
@@ -117,7 +117,7 @@
                         </td>
                         <td class="px-5 py-3 text-sm text-gray-500 font-mono">{{ $driver->contact_number }}</td>
                         <td class="px-5 py-3 text-center">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border {{ $sc }}">{{ ucfirst($driver->status) }}</span>
+                            <span class="app-status-badge {{ $driver->status === 'active' ? 'active' : ($driver->status === 'pending' ? 'pending' : 'inactive') }}">{{ ucfirst($driver->status) }}</span>
                         </td>
 
                     </tr>

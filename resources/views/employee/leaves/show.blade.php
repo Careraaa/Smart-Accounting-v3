@@ -9,12 +9,6 @@
 
 @section('content')
 @php
-    $pillStyles = [
-        'pending' => 'bg-amber-100 text-amber-700',
-        'approved' => 'bg-emerald-100 text-emerald-700',
-        'rejected' => 'bg-rose-100 text-rose-700',
-        'neutral' => 'bg-gray-100 text-gray-600',
-    ];
     $pill = in_array($leave->status, ['pending','approved','rejected'], true) ? $leave->status : 'neutral';
 @endphp
 
@@ -77,7 +71,7 @@
                             <span class="w-2 h-2 rounded-full bg-gray-900"></span>
                             <span class="text-sm font-bold text-gray-800">Summary</span>
                         </div>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $pillStyles[$pill] }}">{{ ucfirst($leave->status) }}</span>
+                        <span class="app-status-badge {{ $pill }}">{{ ucfirst($leave->status) }}</span>
                     </div>
                     <div class="p-6">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">

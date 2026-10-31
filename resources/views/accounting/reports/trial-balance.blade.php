@@ -45,7 +45,7 @@
 @endpush
 
 @section('content')
-<div class="space-y-5 print-report-page">
+<div class="space-y-5 w-full max-w-7xl mx-auto print-report-page">
     <div class="flex items-start justify-between gap-4 flex-wrap">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Trial Balance</h1>
@@ -72,7 +72,7 @@
         <div class="text-right"><h1 class="text-xl font-bold text-gray-900">TRIAL BALANCE</h1><p class="text-xs text-gray-500">As of {{ \Carbon\Carbon::parse($asOf)->format('F d, Y') }}</p></div>
     </div>
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="w-full text-sm app-standard-table">
             <thead>
                 <tr class="border-b border-gray-100 bg-gray-50">
                     <th class="px-4 py-3 text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400">Code</th>

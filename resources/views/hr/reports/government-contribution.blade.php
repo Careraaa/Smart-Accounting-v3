@@ -125,7 +125,7 @@
             <h2 class="text-xs font-bold text-gray-900">Summary by contribution type</h2>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[520px] text-sm">
+            <table class="w-full min-w-[520px] text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Contribution type</th>
@@ -168,7 +168,7 @@
             <h2 class="text-xs font-bold text-gray-900">Breakdown by employee</h2>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[980px] text-sm">
+            <table class="w-full min-w-[980px] text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="px-5 py-3 text-left text-[0.6rem] font-bold uppercase tracking-widest text-gray-500">Employee</th>

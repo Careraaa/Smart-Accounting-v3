@@ -73,7 +73,7 @@
             </div>
             <div class="flex items-center justify-between py-3 border-b border-gray-50">
                 <span class="text-xs font-medium text-gray-400">Status</span>
-                <span class="text-xs font-semibold"><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold {{ $badgeColor }}">{{ $vlabel }}</span></span>
+                <span class="text-xs font-semibold"><span class="app-status-badge {{ $vstatus === 'active' ? 'active' : ($vstatus === 'under_maintenance' ? 'maintenance' : 'neutral') }}">{{ $vlabel }}</span></span>
             </div>
             <div class="flex items-center justify-between py-3 border-b border-gray-50">
                 <span class="text-xs font-medium text-gray-400">Origin</span>

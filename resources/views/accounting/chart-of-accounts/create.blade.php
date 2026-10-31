@@ -8,7 +8,7 @@
 @endpush
 
 @section('content')
-<div class="space-y-5 max-w-2xl">
+<div class="space-y-5 w-full max-w-2xl mx-auto">
 
     {{-- Flash --}}
     @foreach(['success','error'] as $t)

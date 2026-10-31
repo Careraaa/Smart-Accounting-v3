@@ -9,7 +9,7 @@
 @endpush
 
 @section('content')
-<div class="space-y-5 max-w-3xl mx-auto">
+<div class="space-y-5 w-full max-w-3xl mx-auto">
 
     @foreach(['success','error'] as $t)
         @if(session($t))
@@ -37,7 +37,7 @@
             <p class="text-xs text-gray-400 mt-0.5">{{ $journalEntry->transaction_date->format('F d, Y') }} &middot; {{ $journalEntry->description }}</p>
         </div>
         <div class="flex items-center gap-2 shrink-0 flex-wrap">
-            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.65rem] font-semibold uppercase tracking-wide border {{ $statusColors[$journalEntry->status] ?? '' }}">
+            <span class="app-status-badge {{ $journalEntry->status === 'Posted' ? 'approved' : ($journalEntry->status === 'Void' ? 'rejected' : 'pending') }}">
                 {{ $journalEntry->status }}
             </span>
             @if($journalEntry->isEditable())
@@ -74,7 +74,7 @@
     {{-- Lines Table --}}
     <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
                         <th class="text-left text-[0.65rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Account</th>

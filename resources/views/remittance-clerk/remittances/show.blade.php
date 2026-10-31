@@ -24,12 +24,7 @@
                 <div class="flex items-center gap-2.5 mb-0.5">
                     <h1 class="text-2xl font-bold text-gray-900 tracking-tight m-0">{{ $remittance->remittance_date?->format('F d, Y') ?? 'Remittance' }}</h1>
 
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border {{ $rsc }}">
-                        <span class="w-1.5 h-1.5 rounded-full
-                            {{ $remittance->status === 'approved' ? 'bg-emerald-600' : '' }}
-                            {{ $remittance->status === 'pending' ? 'bg-amber-500' : '' }}
-                            {{ $remittance->status === 'rejected' ? 'bg-red-600' : '' }}">
-                        </span>
+                    <span class="app-status-badge {{ in_array($remittance->status, ['pending', 'approved', 'rejected'], true) ? $remittance->status : 'neutral' }}">
                         {{ $rlabel }}
                     </span>
                 </div>
@@ -111,12 +106,7 @@
                 <div class="border-t border-gray-50"></div>
                 <div class="flex items-center justify-between">
                     <span class="text-[0.65rem] font-bold uppercase tracking-wide text-gray-400">Status</span>
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.55rem] font-bold border {{ $rsc }}">
-                        <span class="w-1.5 h-1.5 rounded-full
-                            {{ $remittance->status === 'approved' ? 'bg-emerald-600' : '' }}
-                            {{ $remittance->status === 'pending' ? 'bg-amber-500' : '' }}
-                            {{ $remittance->status === 'rejected' ? 'bg-red-600' : '' }}">
-                        </span>
+                    <span class="app-status-badge {{ in_array($remittance->status, ['pending', 'approved', 'rejected'], true) ? $remittance->status : 'neutral' }}">
                         {{ $rlabel }}
                     </span>
                 </div>

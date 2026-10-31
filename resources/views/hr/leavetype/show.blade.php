@@ -56,11 +56,7 @@
                     <p class="text-xs text-gray-400 m-0">Policy and configuration</p>
                 </div>
                 <div class="ml-auto">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
-                        {{ $leaveType->status === 'active' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-50 text-gray-500 border border-gray-200' }}">
-                        <span class="w-1.5 h-1.5 rounded-full
-                            {{ $leaveType->status === 'active' ? 'bg-emerald-600' : 'bg-gray-400' }}">
-                        </span>
+                    <span class="app-status-badge {{ $leaveType->status === 'active' ? 'active' : 'inactive' }}">
                         {{ ucfirst($leaveType->status) }}
                     </span>
                 </div>

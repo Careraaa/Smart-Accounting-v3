@@ -39,7 +39,7 @@
             <p class="prl-topbar-sub">Create an overtime or undertime entry</p>
         </div>
         <div class="prl-topbar-actions">
-            <a href="{{ route('overtime.index') }}" class="prl-btn-sec">
+            <a href="{{ route('attendance.index', ['tab' => 'otut']) }}" class="prl-btn-sec">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                 Back
             </a>
@@ -105,7 +105,7 @@
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     Create Record
                 </button>
-                <a href="{{ route('overtime.index') }}" class="prl-btn-sec">Cancel</a>
+                <a href="{{ route('attendance.index', ['tab' => 'otut']) }}" class="prl-btn-sec">Cancel</a>
             </div>
         </form>
     </div>

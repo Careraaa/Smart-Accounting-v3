@@ -83,7 +83,7 @@ $statusInfo = match($remittance->status) {
         </div>
     </div>
     <div class="flex items-center gap-2">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wide {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
+        <span class="app-status-badge {{ $statusInfo['bg'] }} {{ $statusInfo['text'] }}">
             <span class="w-2 h-2 rounded-full {{ $statusInfo['dot'] }}"></span>
             {{ $statusInfo['label'] }}
         </span>
@@ -167,7 +167,7 @@ $statusInfo = match($remittance->status) {
     </div>
     @if($remittance->boundaryPayments->isNotEmpty())
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs app-standard-table boundary-payments-table">
                 <thead class="bg-gray-50 text-[10px] uppercase tracking-wider text-gray-400">
                     <tr>
                         <th class="px-5 py-3">Internal payment ID</th>
@@ -182,8 +182,8 @@ $statusInfo = match($remittance->status) {
                         <tr>
                             <td class="px-5 py-3 font-mono font-semibold text-gray-700">BP-{{ str_pad($payment->id, 6, '0', STR_PAD_LEFT) }}</td>
                             <td class="px-5 py-3 text-gray-600">
-                                {{ $payment->payment_date->format('M d, Y') }}
-                                <span class="block text-[10px] text-gray-400">{{ $payment->paid_by === 'pao' ? 'PAO share' : ($payment->paid_by === 'driver' ? 'Driver share' : 'Joint boundary') }}</span>
+                                <span class="whitespace-nowrap">{{ $payment->payment_date->format('M d, Y') }}</span>
+                                <span class="block text-[10px] text-gray-400 whitespace-nowrap">{{ $payment->paid_by === 'pao' ? 'PAO share' : ($payment->paid_by === 'driver' ? 'Driver share' : 'Joint boundary') }}</span>
                             </td>
                             <td class="px-5 py-3 text-right font-mono font-semibold text-gray-800">₱{{ number_format($payment->amount, 2) }}</td>
                             <td class="px-5 py-3">

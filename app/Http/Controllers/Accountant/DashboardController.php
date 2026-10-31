@@ -8,11 +8,14 @@ use App\Models\Employee;
 use App\Models\DailyRemittance;
 use App\Models\CashAdvance;
 use App\Traits\LogsUserActivity;
-use Illuminate\Http\Request;
+use App\Services\AccountingReportService;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
     use LogsUserActivity;
+
+    public function __construct(private readonly AccountingReportService $accountingReports) {}
         // Statuses that represent finalized / actionable payrolls for the accountant view.
         private const ACTIVE_STATUSES = ['submitted', 'approved'];
 
@@ -139,6 +142,27 @@ class DashboardController extends Controller
             ];
         }
         
+        // Financial overview uses the same posted journal-entry logic as the Income Statement page.
+        $financialDateTo = now()->toDateString();
+        $financialDateFrom = Carbon::parse($financialDateTo)->startOfMonth()->toDateString();
+        $financialOverview = $this->accountingReports->incomeStatement($financialDateFrom, $financialDateTo);
+        $financialOverview['dateFrom'] = $financialDateFrom;
+        $financialOverview['dateTo'] = $financialDateTo;
+
+        $financialTrend = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $monthStatement = $this->accountingReports->incomeStatement(
+                $month->copy()->startOfMonth()->toDateString(),
+                $month->copy()->endOfMonth()->toDateString()
+            );
+            $financialTrend[] = [
+                'month' => $month->format('M'),
+                'revenue' => (float) $monthStatement['netRevenue'],
+                'netIncome' => (float) $monthStatement['netIncome'],
+            ];
+        }
+
         // Calendar data
         $calMonth = now()->month;
         $calYear  = now()->year;
@@ -166,7 +190,9 @@ class DashboardController extends Controller
             'pendingCashAdvancesCount',
             'calMonth',
             'calYear',
-            'totalPendingItems'
+            'totalPendingItems',
+            'financialOverview',
+            'financialTrend'
         ));
     }
 }
