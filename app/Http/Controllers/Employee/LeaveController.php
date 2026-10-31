@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Leave;
 use App\Models\LeaveType;
 use App\Models\EmployeeLeaveBalance;
+use App\Models\User;
 use App\Notifications\LeaveNotification;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LeaveController extends Controller
 {
@@ -108,9 +110,35 @@ class LeaveController extends Controller
         $endDate = \Carbon\Carbon::parse($validated['end_date']);
         $days = $endDate->diffInDays($startDate) + 1;
 
-        // Check if employee has sufficient balance
-        $balance = EmployeeLeaveBalance::getBalance($userId, $leaveTypeId);
-        if ($balance->remaining_days < $days) {
+        $leave = DB::transaction(function () use ($userId, $validated, $leaveTypeId, $days) {
+            User::whereKey($userId)->lockForUpdate()->firstOrFail();
+
+            if ($this->hasOverlappingLeave($userId, $validated['start_date'], $validated['end_date'])) {
+                return null;
+            }
+
+            $balance = EmployeeLeaveBalance::getBalance($userId, $leaveTypeId);
+            if ($balance->remaining_days < $days) {
+                return false;
+            }
+
+            $validated['user_id'] = $userId;
+            $validated['status'] = 'pending';
+
+            return Leave::create($validated);
+        });
+
+        if ($leave === null) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'start_date' => 'You already have a pending, approved, or paid leave request that overlaps these dates.',
+                ]);
+        }
+
+        if ($leave === false) {
+            $balance = EmployeeLeaveBalance::getBalance($userId, $leaveTypeId);
+
             return redirect()->back()
                 ->withInput()
                 ->withErrors([
@@ -118,10 +146,6 @@ class LeaveController extends Controller
                 ]);
         }
 
-        // Create the leave request
-        $validated['user_id'] = $userId;
-        $validated['status'] = 'pending';
-        $leave = Leave::create($validated);
         $leave->load('employee', 'leaveType');
 
         // Send notifications to managers/HR
@@ -212,7 +236,31 @@ class LeaveController extends Controller
             }
         }
 
-        $leave->update($validated);
+        $updated = DB::transaction(function () use ($leave, $validated) {
+            User::whereKey($leave->user_id)->lockForUpdate()->firstOrFail();
+
+            if ($this->hasOverlappingLeave(
+                $leave->user_id,
+                $validated['start_date'],
+                $validated['end_date'],
+                $leave->id
+            )) {
+                return false;
+            }
+
+            $leave->update($validated);
+
+            return true;
+        });
+
+        if (!$updated) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'start_date' => 'You already have a pending, approved, or paid leave request that overlaps these dates.',
+                ]);
+        }
+
         $leave->load('employee', 'leaveType');
 
         // Send notification about the update
@@ -247,5 +295,10 @@ class LeaveController extends Controller
         $leave->delete();
 
         return redirect()->route('employee.leaves.index')->with('success', 'Leave request cancelled successfully.');
+    }
+
+    private function hasOverlappingLeave(int $userId, string $startDate, string $endDate, ?int $exceptLeaveId = null): bool
+    {
+        return Leave::overlappingActiveDates($userId, $startDate, $endDate, $exceptLeaveId)->exists();
     }
 }

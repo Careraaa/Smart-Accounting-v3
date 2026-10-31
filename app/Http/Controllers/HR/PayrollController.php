@@ -459,6 +459,11 @@
                     $dailyRate
                 );
                 $leavePay = collect($leaveAllowances)->sum('amount');
+                $payroll->setAttribute('leave_breakdown', array_map(fn ($leave) => [
+                    'type_name' => $leave['type_name'] ?? $leave['name'] ?? 'Leave',
+                    'amount' => round($leave['amount'], 2),
+                    'paid_days' => $leave['paid_days'] ?? 0,
+                ], $leaveAllowances));
 
                 // Sum bonuses from stored records
                 $bonusTotal = (float) $payroll->bonuses->sum('amount');
@@ -1209,6 +1214,11 @@
                 $dailyRate
             );
             $leavePay = collect($leaveAllowances)->sum('amount');
+            $leaveBreakdown = array_map(fn ($leave) => [
+                'type_name' => $leave['type_name'] ?? $leave['name'] ?? 'Leave',
+                'amount' => round($leave['amount'], 2),
+                'paid_days' => $leave['paid_days'] ?? 0,
+            ], $leaveAllowances);
 
             // Sum bonuses from stored records
             $bonusTotal = (float) $payroll->bonuses->sum('amount');
@@ -1232,6 +1242,7 @@
                 'amount' => round($hb['amount'], 2),
             ], $computed['holidayBreakdown'] ?? []);
             $payroll->setAttribute('holiday_breakdown', $holidayBreakdown);
+            $payroll->setAttribute('leave_breakdown', $leaveBreakdown);
 
             return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
         }
