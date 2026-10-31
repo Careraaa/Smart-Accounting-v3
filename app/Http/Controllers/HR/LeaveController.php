@@ -221,7 +221,7 @@ class LeaveController extends Controller
         // Send notification
         LeaveNotification::leaveRejected($leave);
 
-        return redirect()->route('leave.pending')->with('success', $result['message']);
+        return redirect()->route('leave.rejected')->with('success', $result['message']);
     }
 
     public function getDetails(Leave $leave)
