@@ -311,7 +311,7 @@
             <tbody>
                 @forelse ($employees as $employee)
                     <tr>
-                        <td>{{ $employee->first_name }} {{ $employee->last_name }}</td>
+                        <td>{{ $employee->last_name }}, {{ $employee->first_name }}</td>
                         <td>{{ ucfirst($employee->gender ?? 'N/A') }}</td>
                         <td>{{ $employee->position ?? 'N/A' }}</td>
                         <td>{{ $employee->email ?? 'N/A' }}</td>
