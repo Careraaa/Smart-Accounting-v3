@@ -51,7 +51,7 @@
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">License Number</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Contact Number</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Email</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Gender</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Sex</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Address</th>
                 </tr>
             </thead>

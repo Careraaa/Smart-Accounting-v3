@@ -12,6 +12,7 @@ use App\Services\LeaveService;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class LeaveController extends Controller
 {
@@ -121,6 +122,8 @@ class LeaveController extends Controller
             'reason' => 'required|string',
         ]);
 
+        $this->ensureLeaveTypeAvailableForEmployee($validated['leave_type'], (int) $validated['user_id']);
+
         $leave = Leave::create($validated);
         $leave->load('employee');
 
@@ -143,7 +146,11 @@ class LeaveController extends Controller
     public function edit(Leave $leave)
     {
         $employees = Employee::where('status', 'active')->whereNotIn('role', ['superadmin', 'qr_admin'])->get();
-        $leaveTypes = ['Sick Leave', 'Vacation', 'Personal Leave', 'Maternity Leave', 'Paternity Leave', 'Other'];
+        $leaveTypes = LeaveType::where('status', 'active')->pluck('name')->all();
+
+        if ($leave->leave_type && !in_array($leave->leave_type, $leaveTypes, true)) {
+            $leaveTypes[] = $leave->leave_type;
+        }
 
         return view('hr.leave.edit', compact('leave', 'employees', 'leaveTypes'));
     }
@@ -157,6 +164,8 @@ class LeaveController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'required|string',
         ]);
+
+        $this->ensureLeaveTypeAvailableForEmployee($validated['leave_type'], (int) $validated['user_id']);
 
         $leave->update($validated);
         $leave->load('employee');
@@ -243,5 +252,18 @@ class LeaveController extends Controller
                 'approved_by' => $leave->approvedBy?->first_name . ' ' . $leave->approvedBy?->last_name,
             ]
         ]);
+    }
+
+    private function ensureLeaveTypeAvailableForEmployee(string $leaveType, int $userId): void
+    {
+        $employee = Employee::findOrFail($userId);
+
+        if (!LeaveType::isNameAvailableForGender($leaveType, $employee->gender)) {
+            $eligibleGender = LeaveType::genderRestrictionForName($leaveType);
+
+            throw ValidationException::withMessages([
+                'leave_type' => "This leave type is only available to {$eligibleGender} employees.",
+            ]);
+        }
     }
 }

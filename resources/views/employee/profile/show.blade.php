@@ -194,7 +194,7 @@
                             <div class="text-sm font-bold text-gray-900 font-mono">{{ $u->phone ?? '—' }}</div>
                         </div>
                         <div>
-                            <div class="text-[0.6rem] font-bold uppercase tracking-[0.08em] text-gray-400 mb-1">Gender</div>
+                            <div class="text-[0.6rem] font-bold uppercase tracking-[0.08em] text-gray-400 mb-1">Sex</div>
                             <div class="text-sm font-bold text-gray-900 capitalize">{{ $u->gender ?? '—' }}</div>
                         </div>
                     </div>
@@ -368,7 +368,7 @@
                 <div class="text-[0.6rem] font-bold uppercase tracking-[0.1em] text-gray-400 mb-3 pb-1 border-b border-gray-100">Personal Details</div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <div class="text-[0.65rem] text-gray-400 mb-1">Gender</div>
+                        <div class="text-[0.65rem] text-gray-400 mb-1">Sex</div>
                         <div class="text-sm font-bold text-gray-900 capitalize">{{ $u->gender ?? '—' }}</div>
                     </div>
                     <div>

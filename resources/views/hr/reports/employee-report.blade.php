@@ -301,7 +301,7 @@
             <thead>
                 <tr>
                     <th><strong>Name</strong></th>
-                    <th><strong>Gender</strong></th>
+                    <th><strong>Sex</strong></th>
                     <th><strong>Position</strong></th>
                     <th><strong>Email</strong></th>
                     <th><strong>Contact Number</strong></th>

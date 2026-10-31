@@ -46,7 +46,7 @@
                     @error('email') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Gender <span class="text-amber-600">*</span></label>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Sex <span class="text-amber-600">*</span></label>
                     <select name="gender" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" required>
                         <option value="">-- Select --</option>
                         <option value="male" {{ old('gender', $pao->gender) === 'male' ? 'selected' : '' }}>Male</option>

@@ -199,7 +199,7 @@
                                     @endif
                                 </a>
                             </th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Sex</th>
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
                             <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
@@ -327,7 +327,7 @@
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Sex</th>
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
                             <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
@@ -410,7 +410,7 @@
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Employee</th>
-                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Gender</th>
+                            <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden md:table-cell">Sex</th>
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Department</th>
                             <th class="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 hidden sm:table-cell">Contact</th>
                             <th class="text-center px-5 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
