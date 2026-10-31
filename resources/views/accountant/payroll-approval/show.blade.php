@@ -351,6 +351,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
         </div>
     </div>
 
+    @if($payroll->status === 'approved' && $payroll->batch?->status === 'approved')
     {{-- Actions --}}
     <div class="fade-up flex items-center gap-3 pt-2">
         <a href="{{ route('payroll.generatePayslip', $payroll) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-semibold transition-all hover:bg-gray-800 active:scale-[0.97]">
@@ -358,6 +359,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             Generate Payslip
         </a>
     </div>
+    @endif
 
 </div>
 @endsection
