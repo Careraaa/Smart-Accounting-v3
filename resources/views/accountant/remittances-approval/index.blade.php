@@ -20,6 +20,7 @@ $approvedRemits = $remittances->where('status', 'approved');
 $rejectedRemits = $remittances->where('status', 'rejected');
 $totalPending   = $pendingRemits->count();
 $tab            = request()->query('tab', 'pending');
+$tab            = in_array($tab, ['pending', 'approved', 'rejected'], true) ? $tab : 'pending';
 @endphp
 
 {{-- Header --}}
@@ -42,9 +43,9 @@ $tab            = request()->query('tab', 'pending');
 {{-- Status tabs --}}
 <div class="border-b border-gray-200 mb-6 fade-up">
     <nav class="flex gap-1 -mb-px overflow-x-auto" role="tablist">
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'pending']) }}" role="tab" class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 {{ $tab === 'pending' ? 'border-violet-500 text-violet-700 bg-violet-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">Pending @if($totalPending > 0)<span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'pending' ? 'bg-violet-100 text-violet-800' : 'bg-gray-200 text-gray-600' }}">{{ $totalPending }}</span>@endif</a>
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'approved']) }}" role="tab" class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 {{ $tab === 'approved' ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">Approved <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600' }}">{{ $approvedRemits->count() }}</span></a>
-        <a href="{{ request()->fullUrlWithQuery(['tab' => 'rejected']) }}" role="tab" class="relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 {{ $tab === 'rejected' ? 'border-red-500 text-red-700 bg-red-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">Rejected <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-600' }}">{{ $rejectedRemits->count() }}</span></a>
+        <button type="button" role="tab" aria-selected="{{ $tab === 'pending' ? 'true' : 'false' }}" data-tab="pending" class="remittance-tab relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 {{ $tab === 'pending' ? 'border-amber-500 text-amber-700 bg-amber-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">Pending @if($totalPending > 0)<span id="pendingCount" class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-gray-200 text-gray-600' }}">{{ $totalPending }}</span>@endif</button>
+        <button type="button" role="tab" aria-selected="{{ $tab === 'approved' ? 'true' : 'false' }}" data-tab="approved" class="remittance-tab relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 {{ $tab === 'approved' ? 'border-emerald-500 text-emerald-700 bg-emerald-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">Approved <span id="approvedCount" class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-600' }}">{{ $approvedRemits->count() }}</span></button>
+        <button type="button" role="tab" aria-selected="{{ $tab === 'rejected' ? 'true' : 'false' }}" data-tab="rejected" class="remittance-tab relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 {{ $tab === 'rejected' ? 'border-red-500 text-red-700 bg-red-50/60' : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50' }}">Rejected <span id="rejectedCount" class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold {{ $tab === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-600' }}">{{ $rejectedRemits->count() }}</span></button>
     </nav>
 </div>
 
@@ -53,10 +54,10 @@ $tab            = request()->query('tab', 'pending');
     $selectedRemits = $tab === 'approved' ? $approvedRemits : ($tab === 'rejected' ? $rejectedRemits : $pendingRemits);
 @endphp
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ ucfirst($tab) }} Remittances</div><div class="text-2xl font-bold text-gray-900 tabular-nums mt-1">{{ $selectedRemits->count() }}</div></div>
-    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Collection</div><div class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('total_collection'), 2) }}</div></div>
-    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Expenses</div><div class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('total_expenses'), 2) }}</div></div>
-    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Net Remittance</div><div class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('net_remittance'), 2) }}</div></div>
+    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div id="remittanceStatLabel" class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ ucfirst($tab) }} Remittances</div><div id="remittanceStatCount" class="text-2xl font-bold text-gray-900 tabular-nums mt-1">{{ $selectedRemits->count() }}</div></div>
+    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Collection</div><div id="remittanceStatCollection" class="text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('total_collection'), 2) }}</div></div>
+    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Expenses</div><div id="remittanceStatExpenses" class="text-lg font-bold text-red-600 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('total_expenses'), 2) }}</div></div>
+    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Net Remittance</div><div id="remittanceStatNet" class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('net_remittance'), 2) }}</div></div>
 </div>
 {{-- Table --}}
 <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -120,7 +121,61 @@ window.remittanceData = {!! json_encode(
     const search   = document.getElementById('remittanceSearch');
     const PER = 10;
     let page = 1;
-    let currentTab = '{{ $tab }}';
+    let currentTab = ['pending', 'approved', 'rejected'].includes('{{ $tab }}') ? '{{ $tab }}' : 'pending';
+
+    function updateStats(status) {
+        const filtered = window.remittanceData.filter(r => r.status === status);
+        const sum = key => filtered.reduce((total, remittance) => total + (remittance[key] || 0), 0);
+        const format = amount => '₱' + amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        document.getElementById('remittanceStatLabel').textContent = status.charAt(0).toUpperCase() + status.slice(1) + ' Remittances';
+        document.getElementById('remittanceStatCount').textContent = filtered.length;
+        document.getElementById('remittanceStatCollection').textContent = format(sum('collection'));
+        document.getElementById('remittanceStatExpenses').textContent = format(sum('expenses'));
+        document.getElementById('remittanceStatNet').textContent = format(sum('net'));
+    }
+
+    function updateTabs(status) {
+        document.querySelectorAll('.remittance-tab').forEach(button => {
+            const tab = button.dataset.tab;
+            const active = tab === status;
+            const activeClasses = {
+                pending: 'border-amber-500 text-amber-700 bg-amber-50/60',
+                approved: 'border-emerald-500 text-emerald-700 bg-emerald-50/60',
+                rejected: 'border-red-500 text-red-700 bg-red-50/60',
+            };
+            const badgeActiveClasses = {
+                pending: 'bg-amber-100 text-amber-800',
+                approved: 'bg-emerald-100 text-emerald-800',
+                rejected: 'bg-red-100 text-red-800',
+            };
+
+            button.setAttribute('aria-selected', active ? 'true' : 'false');
+            button.className = `remittance-tab relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 ${
+                active ? activeClasses[tab] : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50'
+            }`;
+            const badge = button.querySelector('span');
+            if (badge) {
+                badge.className = `inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold ${
+                    active ? badgeActiveClasses[tab] : 'bg-gray-200 text-gray-600'
+                }`;
+            }
+        });
+    }
+
+    function switchTab(status, updateHistory = true) {
+        if (!['pending', 'approved', 'rejected'].includes(status)) status = 'pending';
+        currentTab = status;
+        page = 1;
+        updateTabs(status);
+        updateStats(status);
+        if (updateHistory) {
+            const url = new URL(window.location);
+            url.searchParams.set('tab', status);
+            history.pushState({ tab: status }, '', url);
+        }
+        render();
+    }
 
     function getFiltered() {
         const q = (search?.value || '').toLowerCase();
@@ -164,7 +219,7 @@ window.remittanceData = {!! json_encode(
                     </td>
                     <td class="px-5 py-3 text-xs text-gray-500">${r.vehicle}</td>
                     <td class="px-5 py-3 text-right text-xs tabular-nums text-gray-600">₱${r.collection.toLocaleString('en-US')}</td>
-                    <td class="px-5 py-3 text-right text-xs tabular-nums text-amber-600">₱${r.expenses.toLocaleString('en-US')}</td>
+                    <td class="px-5 py-3 text-right text-xs tabular-nums text-red-600">₱${r.expenses.toLocaleString('en-US')}</td>
                     <td class="px-5 py-3 text-right text-xs font-bold tabular-nums text-gray-900">₱${r.net.toLocaleString('en-US')}</td>
                     <td class="px-5 py-3 text-center">
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.5rem] font-semibold border ${stCls}">
@@ -221,6 +276,15 @@ window.remittanceData = {!! json_encode(
         search.addEventListener('input', function () { page = 1; render(); });
     }
 
+    document.querySelectorAll('.remittance-tab').forEach(button => {
+        button.addEventListener('click', () => switchTab(button.dataset.tab));
+    });
+
+    window.addEventListener('popstate', () => {
+        switchTab(new URL(window.location).searchParams.get('tab'), false);
+    });
+
+    updateTabs(currentTab);
     render();
 })();
 </script>
