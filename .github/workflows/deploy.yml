@@ -124,6 +124,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ env.SERVER_DIR }}
           log-level: standard
+          timeout: 300000
           exclude: |
             **/.git/**
             **/.git*
@@ -166,6 +167,7 @@ jobs:
           password: ${{ secrets.BYET_FTP_PASSWORD }}
           server-dir: ${{ secrets.BYET_FTP_SERVER_DIR_TEST2 }}
           log-level: standard
+          timeout: 300000
           exclude: |
             **/.git/**
             **/.git*
@@ -208,6 +210,7 @@ jobs:
           password: ${{ secrets.BYET_FTP_PASSWORD }}
           server-dir: ${{ secrets.BYET_DIR_MAIN }}
           log-level: standard
+          timeout: 300000
           exclude: |
             **/.git/**
             **/.git*
@@ -250,6 +253,7 @@ jobs:
           password: ${{ secrets.BYET_FTP_PASSWORD }}
           server-dir: ${{ secrets.BYET_DIR_SQA }}
           log-level: standard
+          timeout: 300000
           exclude: |
             **/.git/**
             **/.git*
