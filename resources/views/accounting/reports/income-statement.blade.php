@@ -50,7 +50,7 @@
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Income Statement</h1>
             <p class="text-sm text-gray-400 mt-0.5">{{ \Carbon\Carbon::parse($dateFrom)->format('F d, Y') }} – {{ \Carbon\Carbon::parse($dateTo)->format('F d, Y') }} · Posted entries only</p>
         </div>
-        <button type="button" onclick="window.print()" class="no-print px-4 py-2 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-600">Print</button>
+        <button type="button" onclick="window.print()" class="no-print inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200">Print</button>
     </div>
     @if($errors->any())
         <div class="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{{ $errors->first() }}</div>

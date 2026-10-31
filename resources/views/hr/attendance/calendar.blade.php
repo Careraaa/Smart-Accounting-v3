@@ -101,8 +101,7 @@
                 <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Back to Employees
             </a>
-            <a href="{{ route('attendance.employee.dtr', [$employee->id, 'month' => $month->format('Y-m')]) }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gray-900 text-white border border-gray-900 rounded-xl text-xs font-semibold no-underline hover:bg-gray-700 transition-colors whitespace-nowrap cursor-pointer">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>
+            <a href="{{ route('attendance.employee.dtr', [$employee->id, 'month' => $month->format('Y-m')]) }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 no-underline whitespace-nowrap cursor-pointer">
                 Print DTR
             </a>
         </div>
