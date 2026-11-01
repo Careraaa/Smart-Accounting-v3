@@ -14,7 +14,10 @@ class PayrollReceivablesController extends Controller
     use LogsUserActivity;
     public function index(Request $request)
     {
-        $canViewShortRemittances = in_array(auth()->user()->role, ['accountant', 'superadmin'], true);
+        $user = auth()->user();
+        $activeRole = session('view_as_role') ?? $user->role;
+        $canViewShortRemittances = $user->role === 'accountant'
+            || ($user->role === 'superadmin' && $activeRole === 'accountant');
         $tab = $request->get('tab', 'cash_advances');
         if (! in_array($tab, ['cash_advances', 'short_remittances'], true)
             || ($tab === 'short_remittances' && ! $canViewShortRemittances)) {

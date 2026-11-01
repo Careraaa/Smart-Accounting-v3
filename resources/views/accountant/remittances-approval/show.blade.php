@@ -44,12 +44,26 @@ $statusInfo = match($remittance->status) {
     </div>
 </div>
 
-{{-- Back --}}
-<div>
+{{-- Back and decisions --}}
+<div class="flex items-center justify-between gap-3 flex-wrap">
         <a href="{{ route('remittance-approval.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back to remittances
         </a>
+        @if($remittance->status === 'pending')
+            <div class="flex items-center gap-2 ml-auto">
+                <button type="button" onclick="openRejectModal()"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-red-200 rounded-lg text-xs font-semibold text-red-600 transition-all hover:bg-red-50 active:scale-[0.97] cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
+                    Reject
+                </button>
+                <button type="button" onclick="openApproveModal()"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold transition-all hover:bg-emerald-700 active:scale-[0.97] cursor-pointer border-0">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Approve
+                </button>
+            </div>
+        @endif
 </div>
 
 {{-- Flash --}}
@@ -87,18 +101,6 @@ $statusInfo = match($remittance->status) {
             <span class="w-2 h-2 rounded-full {{ $statusInfo['dot'] }}"></span>
             {{ $statusInfo['label'] }}
         </span>
-        @if($remittance->status === 'pending')
-            <button type="button" onclick="openRejectModal()"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition-all border-0 cursor-pointer">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
-                Reject
-            </button>
-            <button type="button" onclick="openApproveModal()"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all border-0 cursor-pointer">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                Approve
-            </button>
-        @endif
     </div>
 </div>
 
@@ -141,7 +143,7 @@ $statusInfo = match($remittance->status) {
         </div>
         <div class="flex items-center justify-between py-3 border-b border-gray-50">
             <span class="text-xs font-semibold text-gray-500">Total Expenses</span>
-            <span class="text-xs font-bold text-amber-600 font-mono">₱{{ number_format($remittance->total_expenses, 2) }}</span>
+            <span class="text-xs font-bold text-red-600 font-mono">₱{{ number_format($remittance->total_expenses, 2) }}</span>
         </div>
         <div class="flex items-center justify-between py-3 border-b border-gray-50">
             <span class="text-xs font-semibold text-gray-500">Net Remittance</span>

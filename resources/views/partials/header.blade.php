@@ -697,8 +697,10 @@
         // Global polling interval ID
         let notificationPollingInterval = null;
 
-        // Track unread count for notification sound
-        let previousUnreadCount = 0;
+        // Track unread count for notification sound.
+        // The first count check must not treat old notifications as new.
+        let previousUnreadCount = null;
+        const notificationSessionKey = 'notification-sound-login-{{ auth()->id() }}';
 
         // Preload notification sound
         const notifSound = new Audio(@json(asset('sounds/notif.mp3')));
@@ -871,8 +873,16 @@
                 const count = data.unread_count || 0;
                 let   blip  = document.querySelector('#notification-btn .notif-blip');
 
-                // Play notification sound if unread count increased
-                if (count > previousUnreadCount) {
+                // On the first check, play once for existing unread notices only.
+                // Later checks play only when the unread count increases.
+                if (previousUnreadCount === null) {
+                    const playedForLogin = sessionStorage.getItem(notificationSessionKey);
+                    if (count > 0 && !playedForLogin) {
+                        notifSound.currentTime = 0;
+                        notifSound.play().catch(function(){});
+                        sessionStorage.setItem(notificationSessionKey, '1');
+                    }
+                } else if (count > previousUnreadCount) {
                     notifSound.currentTime = 0;
                     notifSound.play().catch(function(){});
                 }

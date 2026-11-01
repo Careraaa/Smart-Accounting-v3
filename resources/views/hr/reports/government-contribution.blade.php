@@ -37,8 +37,7 @@
             <p class="text-xs text-gray-400 font-semibold mt-0.5 max-w-md">SSS, Pag-IBIG, and PhilHealth totals from payroll — employee and employer shares for the selected period.</p>
             <span class="inline-block mt-2 text-[0.6rem] font-semibold text-gray-500 bg-gray-100 rounded-md px-2 py-0.5">{{ \Carbon\Carbon::parse($dateFrom)->format('M j, Y') }} – {{ \Carbon\Carbon::parse($dateTo)->format('M j, Y') }}</span>
         </div>
-        <a href="{{ $printUrl }}" target="_blank" rel="noopener" class="inline-flex shrink-0 items-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold transition-all hover:bg-black active:scale-[0.97] no-underline">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        <a href="{{ $printUrl }}" target="_blank" rel="noopener" class="inline-flex shrink-0 items-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 no-underline">
             Print report
         </a>
     </div>

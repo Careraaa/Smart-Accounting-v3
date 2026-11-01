@@ -35,10 +35,10 @@
 <div class="flex flex-wrap items-end justify-between gap-4 mb-5 fade-up">
     <nav class="border-b border-gray-200 flex-1" role="tablist">
         <button type="button" role="tab" data-tab="pending"
-            class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 border-red-500 text-red-700 bg-red-50/60">
-            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 border-amber-500 text-amber-700 bg-amber-50/60">
+            <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             Pending
-            <span class="tab-badge ml-0.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold bg-red-100 text-red-800">{{ $pendingRemittances->count() }}</span>
+            <span class="tab-badge ml-0.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">{{ $pendingRemittances->count() }}</span>
         </button>
         <button type="button" role="tab" data-tab="resolved"
             class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300 hover:bg-gray-50/50">
@@ -55,9 +55,9 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 fade-up">
     <div class="bg-white border border-gray-200 rounded-xl px-5 py-4 relative overflow-hidden">
-        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500 rounded-b-xl"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500 rounded-b-xl"></div>
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+            <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
             <div>
@@ -202,7 +202,7 @@
             return '<span class="app-status-badge approved">Fully Paid</span>';
         }
         var partial = r.driver_status === 'partial' || r.pao_status === 'partial';
-        var statusClass = partial ? 'pending' : 'rejected';
+        var statusClass = 'pending';
         var lbl = partial ? 'Partial' : 'Pending';
         return '<span class="app-status-badge ' + statusClass + '">' + lbl + '</span>';
     }
@@ -260,7 +260,7 @@
     }
 
     var tabStyles = {
-        pending:  { border: 'border-red-500', text: 'text-red-700', bg: 'bg-red-50/60', badge: { bg: 'bg-red-100', text: 'text-red-800' } },
+        pending:  { border: 'border-amber-500', text: 'text-amber-700', bg: 'bg-amber-50/60', badge: { bg: 'bg-amber-100', text: 'text-amber-800' } },
         resolved: { border: 'border-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50/60', badge: { bg: 'bg-emerald-100', text: 'text-emerald-800' } },
     };
     var inactBtn = ['border-transparent', 'text-gray-400', 'hover:text-gray-600', 'hover:border-gray-300', 'hover:bg-gray-50/50'];
@@ -272,11 +272,11 @@
             if (tab === activeTab) return;
 
             document.querySelectorAll('.tab-btn').forEach(function (b) {
-                b.classList.remove('border-red-500', 'text-red-700', 'bg-red-50/60', 'border-emerald-500', 'text-emerald-700', 'bg-emerald-50/60');
+                b.classList.remove('border-amber-500', 'text-amber-700', 'bg-amber-50/60', 'border-emerald-500', 'text-emerald-700', 'bg-emerald-50/60');
                 b.classList.add.apply(b.classList, inactBtn);
                 var badge = b.querySelector('.tab-badge');
                 if (badge) {
-                    badge.classList.remove('bg-red-100', 'text-red-800', 'bg-emerald-100', 'text-emerald-800');
+                    badge.classList.remove('bg-amber-100', 'text-amber-800', 'bg-emerald-100', 'text-emerald-800');
                     badge.classList.add.apply(badge.classList, inactBadge);
                 }
             });

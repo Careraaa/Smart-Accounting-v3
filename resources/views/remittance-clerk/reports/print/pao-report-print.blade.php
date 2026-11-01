@@ -24,7 +24,7 @@
     {{-- Controls --}}
     <div class="no-print max-w-[900px] mx-auto mt-7 mb-3 flex justify-end gap-2">
         <a href="{{ route('paos.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-semibold bg-white text-gray-700 border border-gray-200 no-underline cursor-pointer hover:opacity-80 transition-opacity">← Back</a>
-        <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-semibold text-white cursor-pointer border-none hover:opacity-80 transition-opacity" style="background:#0a0a0a;">Print Report</button>
+        <button onclick="window.print()" class="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 cursor-pointer">Print Report</button>
     </div>
 
     <div class="print-page bg-white max-w-[900px] mx-auto mb-10 shadow-sm p-10" style="box-shadow:0 2px 24px rgba(0,0,0,.08);">
@@ -50,7 +50,7 @@
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Name</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Contact Number</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Email</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Gender</th>
+                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Sex</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Address</th>
                 </tr>
             </thead>

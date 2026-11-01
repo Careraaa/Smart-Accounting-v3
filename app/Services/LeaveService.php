@@ -232,30 +232,45 @@ class LeaveService
         $approvedLeaves = Leave::where('user_id', $userId)
             ->where('status', 'approved')
             ->where(function ($query) use ($start, $end) {
-                // Leave overlaps with the period if:
-                // - start_date <= period_end AND end_date >= period_start
                 $query->whereDate('start_date', '<=', $end->toDateString())
                       ->whereDate('end_date', '>=', $start->toDateString());
             })
+            ->with('leaveType')
+            ->orderBy('start_date')
+            ->orderBy('id')
             ->get();
 
         $allowances = [];
+        $paidDates = [];
+        $periodStart = $start->copy()->startOfDay();
+        $periodEnd = $end->copy()->startOfDay();
 
         foreach ($approvedLeaves as $leave) {
-            $paidDays = $leave->paid_days ?? $leave->days;
-            if ($paidDays > 0) {
-                $leavePayAmount = $dailyRate * $paidDays;
-                $typeName = $leave->leaveType?->name ?? $leave->leave_type ?? 'Leave';
-                $allowances[] = [
-                    'name' => $typeName,
-                    'type_name' => $typeName,
-                    'amount' => $leavePayAmount,
-                    'paid_days' => $paidDays,
-                ];
+            $remainingPaidDays = max(0, (int) ($leave->paid_days ?? $leave->days));
+            $leaveDate = $leave->start_date->copy()->startOfDay();
+            $leaveEnd = $leave->end_date->copy()->startOfDay();
+            $typeName = $leave->leaveType?->name ?? $leave->leave_type ?? 'Leave';
+
+            while ($remainingPaidDays > 0 && $leaveDate->lte($leaveEnd)) {
+                $dateKey = $leaveDate->toDateString();
+                if ($leaveDate->betweenIncluded($periodStart, $periodEnd) && !isset($paidDates[$dateKey])) {
+                    $paidDates[$dateKey] = true;
+                    $allowances[$typeName] ??= [
+                        'name' => $typeName,
+                        'type_name' => $typeName,
+                        'amount' => 0,
+                        'paid_days' => 0,
+                    ];
+                    $allowances[$typeName]['amount'] += $dailyRate;
+                    $allowances[$typeName]['paid_days']++;
+                }
+
+                $remainingPaidDays--;
+                $leaveDate->addDay();
             }
         }
 
-        return $allowances;
+        return array_values($allowances);
     }
 
 

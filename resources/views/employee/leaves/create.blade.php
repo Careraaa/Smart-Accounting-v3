@@ -53,7 +53,7 @@
                                 <select name="leave_type_id" id="leave_type_id" class="block w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all @error('leave_type_id') border-rose-300 ring-1 ring-rose-300 @enderror" required>
                                     <option value="">Select Leave Type</option>
                                     @foreach($leaveTypes as $type)
-                                        <option value="{{ $type->id }}" {{ old('leave_type_id') == $type->id ? 'selected' : '' }}" data-available="{{ $type->balance->remaining_days }}">
+                                        <option value="{{ $type->id }}" {{ old('leave_type_id') == $type->id ? 'selected' : '' }} data-available="{{ $type->balance->remaining_days }}">
                                             {{ $type->name }} ({{ $type->balance->remaining_days }}/{{ $type->balance->total_days }} days available)
                                         </option>
                                     @endforeach

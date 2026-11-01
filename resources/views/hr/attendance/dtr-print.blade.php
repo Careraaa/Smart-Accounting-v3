@@ -15,6 +15,8 @@
         .controls { max-width: var(--page-w); margin: 28px auto 12px; display: flex; justify-content: flex-end; gap: 8px; }
         .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 4px; font: 600 12px var(--font-body); cursor: pointer; text-decoration: none; border: 1.5px solid transparent; }
         .btn-primary { background: var(--black); color: white; }
+        .controls .btn.btn-primary { gap: 0; padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; color: #4b5563; font: 600 14px var(--font-body); transition: all .2s; }
+        .controls .btn.btn-primary:hover { opacity: 1; border-color: #d1d5db; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
         .btn-ghost { background: white; color: var(--gray-dark); border-color: #e0e0e0; }
         .page { width: var(--page-w); min-height: var(--page-h); margin: 0 auto 40px; padding: .22in .2in; background: white; box-shadow: 0 2px 24px rgba(0,0,0,.08); }
         .form-heading { position: relative; text-align: center; margin-bottom: 9px; }

@@ -64,9 +64,13 @@ $reqClass   = 'text-red-500 ml-0.5';
                         @error('email')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                     <div>
-                        <label class="{{ $labelClass }}">Phone</label>
-                        <input type="tel" name="phone" class="{{ $inputClass }} @error('phone') border-red-400 bg-red-50 @enderror" value="{{ old('phone') }}" placeholder="09173458216" inputmode="numeric" autocomplete="tel" maxlength="11" pattern="09\d{9}" data-digits-only>
-                        @error('phone')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
+                        <label class="{{ $labelClass }}">Sex <span class="{{ $reqClass }}">*</span></label>
+                        <select name="gender" class="{{ $inputClass }} @error('gender') border-red-400 bg-red-50 @enderror" required>
+                            <option value="">— Select sex —</option>
+                            <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Male</option>
+                        </select>
+                        @error('gender')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                 </div>
             </div>

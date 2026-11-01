@@ -132,7 +132,7 @@
     </div>
     <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <p class="text-xs text-gray-400 font-medium">Deductions</p>
-        <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">₱{{ number_format($totalDeductions, 2) }}</p>
+        <p class="text-lg font-bold text-red-600 tabular-nums mt-1">₱{{ number_format($totalDeductions, 2) }}</p>
     </div>
     <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <p class="text-xs text-gray-400 font-medium">Net Pay</p>
@@ -169,7 +169,7 @@
                         <td class="px-5 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($payroll->basic_salary ?? 0, 2) }}</td>
                         <td class="px-5 py-3 text-left text-xs font-semibold text-emerald-500 tabular-nums">₱{{ number_format(($payroll->total_allowances ?? 0) + ($payroll->total_bonuses ?? 0) + ($payroll->holiday_pay ?? 0) + ($payroll->holiday_ot_pay ?? 0),2) }}</td>
                         <td class="px-5 py-3 text-left text-xs font-semibold text-gray-900 tabular-nums">₱{{ number_format($payroll->gross_pay ?? 0,2) }}</td>
-                        <td class="px-5 py-3 text-left text-xs font-semibold text-red-500 tabular-nums">₱{{ number_format($payroll->total_deductions ?? 0,2) }}</td>
+                        <td class="px-5 py-3 text-left text-xs font-semibold text-red-600 tabular-nums">₱{{ number_format($payroll->total_deductions ?? 0,2) }}</td>
                         <td class="px-5 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payroll->net_pay,2) }}</td>
                     </tr>
                 @empty
@@ -185,7 +185,7 @@
                         <td class="px-5 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($payrolls->sum('basic_salary'), 2) }}</td>
                         <td class="px-5 py-3 text-left text-xs font-bold text-emerald-500 tabular-nums">₱{{ number_format(($payrolls->sum('total_allowances') ?? 0) + ($payrolls->sum('total_bonuses') ?? 0) + ($payrolls->sum('holiday_pay') ?? 0) + ($payrolls->sum('holiday_ot_pay') ?? 0),2) }}</td>
                         <td class="px-5 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalGross, 2) }}</td>
-                        <td class="px-5 py-3 text-left text-xs font-bold text-red-500 tabular-nums">₱{{ number_format($totalDeductions, 2) }}</td>
+                        <td class="px-5 py-3 text-left text-xs font-bold text-red-600 tabular-nums">₱{{ number_format($totalDeductions, 2) }}</td>
                         <td class="px-5 py-3 text-left text-xs font-bold text-gray-900 tabular-nums">₱{{ number_format($totalNet, 2) }}</td>
                     </tr>
                 </tfoot>
