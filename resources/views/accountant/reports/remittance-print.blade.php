@@ -109,8 +109,7 @@
         th.text-right, td.text-right { text-align: right; }
         td { padding: 10px; border-bottom: 1px solid var(--gray-rule); vertical-align: middle; }
         tbody tr:hover { background: var(--gray-bg); }
-
-        .mono { font-family: var(--font-mono); }
+        .mono { font-family: var(--font-body); }
 
         /* Signatures */
         .signatures {
