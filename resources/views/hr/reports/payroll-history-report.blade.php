@@ -260,6 +260,11 @@
                 background: #fff;
             }
 
+            body, body * {
+                color: #000 !important;
+                font-family: 'Sora', sans-serif !important;
+            }
+
             .controls {
                 display: none !important;
             }
@@ -301,29 +306,6 @@
             <div class="report-title">
                 <h1>PAYSLIPS ISSUED</h1>
                 <div class="report-period">{{ date('M d, Y') }}</div>
-            </div>
-        </div>
-
-        {{-- Summary Strip --}}
-        <div class="summary-strip">
-            <div class="summary-item">
-                <span class="summary-label">Total Employees</span>
-                <span class="summary-value">{{ $totalEmployees }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Gross Pay</span>
-                <span class="summary-value">₱{{ number_format($totalGrossPay, 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Deductions</span>
-                <span class="summary-value" style="color: #dc2626;">₱{{ number_format($totalDeductions, 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Net Pay</span>
-                <span class="summary-value" style="color: #16a34a;">₱{{ number_format($totalNetPay, 2) }}</span>
             </div>
         </div>
 
