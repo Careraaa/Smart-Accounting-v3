@@ -251,7 +251,7 @@
         }
 
         .mono {
-            font-family: var(--font-mono);
+            font-family: var(--font-body);
         }
 
         /* Print */
@@ -260,8 +260,14 @@
                 background: #fff;
             }
 
-            body, body * {
+            html, body, body * {
                 color: #000 !important;
+                font-family: 'Sora', sans-serif !important;
+            }
+
+            .mono,
+            .summary-value,
+            .summary-label {
                 font-family: 'Sora', sans-serif !important;
             }
 
