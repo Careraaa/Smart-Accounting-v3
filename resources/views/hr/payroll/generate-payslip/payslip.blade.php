@@ -78,6 +78,24 @@
             color: #fff;
         }
 
+        .controls .btn.btn-primary {
+            gap: 0;
+            padding: 10px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fff;
+            color: #4b5563;
+            font: 600 14px var(--font-body);
+            transition: all .2s;
+        }
+
+        .controls .btn.btn-primary:hover {
+            opacity: 1;
+            border-color: #d1d5db;
+            color: #111827;
+            box-shadow: 0 1px 2px rgba(0,0,0,.05);
+        }
+
         .btn-ghost {
             background: #fff;
             color: var(--gray-dark);
@@ -418,14 +436,21 @@
                                     </tr>
                                 @endif
 
-                                @forelse ($payroll->allowances as $allow)
-                                    @php $isLeavePay = str_starts_with((string)($allow->allowance_type ?? ''), 'Leave Pay'); @endphp
+                                @foreach ($payroll->allowances->reject(fn ($allow) => str_starts_with((string) ($allow->allowance_type ?? ''), 'Leave Pay')) as $allow)
                                     <tr>
                                         <td>{{ $allow->allowance_type }}</td>
-                                        <td class="mono right">{{ $isLeavePay ? ((int)($allow->hours ?? 0)) . ' day' . ((int)($allow->hours ?? 0) !== 1 ? 's' : '') : ($allow->hours ?? '—') }}</td>
+                                        <td class="mono right">{{ $allow->hours ?? '—' }}</td>
                                         <td class="mono">₱{{ number_format($allow->amount, 2) }}</td>
                                     </tr>
-                                @empty @endforelse
+                                @endforeach
+
+                                @foreach (($payroll->leave_breakdown ?? []) as $leave)
+                                    <tr>
+                                        <td>Leave Pay ({{ $leave['type_name'] }})</td>
+                                        <td class="mono right">{{ (int) $leave['paid_days'] }} day{{ (int) $leave['paid_days'] !== 1 ? 's' : '' }}</td>
+                                        <td class="mono">₱{{ number_format($leave['amount'], 2) }}</td>
+                                    </tr>
+                                @endforeach
 
                                 @foreach ($payroll->bonuses as $bonus)
                                     <tr>

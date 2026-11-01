@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Leave;
 use App\Models\LeaveType;
 use App\Models\EmployeeLeaveBalance;
+use App\Models\User;
 use App\Notifications\LeaveNotification;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class LeaveController extends Controller
 {
@@ -18,7 +21,8 @@ class LeaveController extends Controller
      */
     public function index(Request $request)
     {
-        $userId = auth()->id();
+        $user = auth()->user();
+        $userId = $user->id;
         $query = Leave::where('user_id', $userId)->with('employee', 'approvedBy', 'leaveType');
 
         // Filter by status
@@ -38,8 +42,9 @@ class LeaveController extends Controller
         $approvedLeaves = Leave::where('user_id', $userId)->where('status', 'approved')->count();
         $rejectedLeaves = Leave::where('user_id', $userId)->where('status', 'rejected')->count();
 
-        // Ensure current-year leave balances exist for all active leave types
-        $activeLeaveTypes = LeaveType::where('status', 'active')->get();
+        // Ensure balances exist for active leave types available to this employee.
+        $activeLeaveTypes = LeaveType::where('status', 'active')->get()
+            ->filter(fn (LeaveType $type) => $type->isAvailableForGender($user->gender));
         $balances = $activeLeaveTypes->map(function ($leaveType) use ($userId) {
             return EmployeeLeaveBalance::getBalance($userId, $leaveType->id);
         })->load('leaveType');
@@ -62,28 +67,31 @@ class LeaveController extends Controller
      */
     public function create()
     {
-        $userId = auth()->id();
+        $user = auth()->user();
+        $userId = $user->id;
         $currentYear = now()->year;
 
         // Get active leave types with their current balances
-        $leaveTypes = LeaveType::where('status', 'active')->get()->map(function ($type) use ($userId, $currentYear) {
-            $balance = EmployeeLeaveBalance::where('user_id', $userId)
-                ->where('leave_type_id', $type->id)
-                ->where('year', $currentYear)
-                ->first();
+        $leaveTypes = LeaveType::where('status', 'active')->get()
+            ->filter(fn (LeaveType $type) => $type->isAvailableForGender($user->gender))
+            ->map(function ($type) use ($userId, $currentYear) {
+                $balance = EmployeeLeaveBalance::where('user_id', $userId)
+                    ->where('leave_type_id', $type->id)
+                    ->where('year', $currentYear)
+                    ->first();
 
-            if (!$balance) {
-                $balance = new EmployeeLeaveBalance([
-                    'total_days' => $type->days_allowed,
-                    'used_days' => 0,
-                    'remaining_days' => $type->days_allowed,
-                    'year' => $currentYear,
-                ]);
-            }
+                if (!$balance) {
+                    $balance = new EmployeeLeaveBalance([
+                        'total_days' => $type->days_allowed,
+                        'used_days' => 0,
+                        'remaining_days' => $type->days_allowed,
+                        'year' => $currentYear,
+                    ]);
+                }
 
-            $type->balance = $balance;
-            return $type;
-        });
+                $type->balance = $balance;
+                return $type;
+            });
 
         return view('employee.leaves.create', compact('leaveTypes'));
     }
@@ -101,6 +109,7 @@ class LeaveController extends Controller
         ]);
 
         $userId = auth()->id();
+        $this->ensureLeaveTypeAvailableForGender((int) $validated['leave_type_id'], auth()->user()->gender);
         $leaveTypeId = $validated['leave_type_id'];
 
         // Calculate the number of days
@@ -108,9 +117,35 @@ class LeaveController extends Controller
         $endDate = \Carbon\Carbon::parse($validated['end_date']);
         $days = $endDate->diffInDays($startDate) + 1;
 
-        // Check if employee has sufficient balance
-        $balance = EmployeeLeaveBalance::getBalance($userId, $leaveTypeId);
-        if ($balance->remaining_days < $days) {
+        $leave = DB::transaction(function () use ($userId, $validated, $leaveTypeId, $days) {
+            User::whereKey($userId)->lockForUpdate()->firstOrFail();
+
+            if ($this->hasOverlappingLeave($userId, $validated['start_date'], $validated['end_date'])) {
+                return null;
+            }
+
+            $balance = EmployeeLeaveBalance::getBalance($userId, $leaveTypeId);
+            if ($balance->remaining_days < $days) {
+                return false;
+            }
+
+            $validated['user_id'] = $userId;
+            $validated['status'] = 'pending';
+
+            return Leave::create($validated);
+        });
+
+        if ($leave === null) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'start_date' => 'You already have a pending, approved, or paid leave request that overlaps these dates.',
+                ]);
+        }
+
+        if ($leave === false) {
+            $balance = EmployeeLeaveBalance::getBalance($userId, $leaveTypeId);
+
             return redirect()->back()
                 ->withInput()
                 ->withErrors([
@@ -118,10 +153,6 @@ class LeaveController extends Controller
                 ]);
         }
 
-        // Create the leave request
-        $validated['user_id'] = $userId;
-        $validated['status'] = 'pending';
-        $leave = Leave::create($validated);
         $leave->load('employee', 'leaveType');
 
         // Send notifications to managers/HR
@@ -164,7 +195,9 @@ class LeaveController extends Controller
             abort(403, 'Only pending leave requests can be edited.');
         }
 
-        $leaveTypes = LeaveType::where('status', 'active')->pluck('name', 'id');
+        $leaveTypes = LeaveType::where('status', 'active')->get()
+            ->filter(fn (LeaveType $type) => $type->isAvailableForGender(auth()->user()->gender))
+            ->pluck('name', 'id');
 
         return view('employee.leaves.edit', compact('leave', 'leaveTypes'));
     }
@@ -190,6 +223,8 @@ class LeaveController extends Controller
             'reason' => 'required|string|max:1000',
         ]);
 
+        $this->ensureLeaveTypeAvailableForGender((int) $validated['leave_type_id'], auth()->user()->gender);
+
         // Calculate the new number of days
         $startDate = \Carbon\Carbon::parse($validated['start_date']);
         $endDate = \Carbon\Carbon::parse($validated['end_date']);
@@ -212,7 +247,31 @@ class LeaveController extends Controller
             }
         }
 
-        $leave->update($validated);
+        $updated = DB::transaction(function () use ($leave, $validated) {
+            User::whereKey($leave->user_id)->lockForUpdate()->firstOrFail();
+
+            if ($this->hasOverlappingLeave(
+                $leave->user_id,
+                $validated['start_date'],
+                $validated['end_date'],
+                $leave->id
+            )) {
+                return false;
+            }
+
+            $leave->update($validated);
+
+            return true;
+        });
+
+        if (!$updated) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'start_date' => 'You already have a pending, approved, or paid leave request that overlaps these dates.',
+                ]);
+        }
+
         $leave->load('employee', 'leaveType');
 
         // Send notification about the update
@@ -247,5 +306,23 @@ class LeaveController extends Controller
         $leave->delete();
 
         return redirect()->route('employee.leaves.index')->with('success', 'Leave request cancelled successfully.');
+    }
+
+    private function hasOverlappingLeave(int $userId, string $startDate, string $endDate, ?int $exceptLeaveId = null): bool
+    {
+        return Leave::overlappingActiveDates($userId, $startDate, $endDate, $exceptLeaveId)->exists();
+    }
+
+    private function ensureLeaveTypeAvailableForGender(int $leaveTypeId, ?string $gender): void
+    {
+        $leaveType = LeaveType::findOrFail($leaveTypeId);
+
+        if (!$leaveType->isAvailableForGender($gender)) {
+            $eligibleGender = LeaveType::genderRestrictionForName($leaveType->name);
+
+            throw ValidationException::withMessages([
+                'leave_type_id' => "This leave type is only available to {$eligibleGender} employees.",
+            ]);
+        }
     }
 }

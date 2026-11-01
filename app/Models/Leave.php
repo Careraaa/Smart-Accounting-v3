@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
@@ -64,6 +65,20 @@ class Leave extends Model
     public function approvedBy()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function scopeOverlappingActiveDates(
+        Builder $query,
+        int $userId,
+        string $startDate,
+        string $endDate,
+        ?int $exceptLeaveId = null
+    ): Builder {
+        return $query->where('user_id', $userId)
+            ->whereIn('status', ['pending', 'approved', 'paid'])
+            ->whereDate('start_date', '<=', $endDate)
+            ->whereDate('end_date', '>=', $startDate)
+            ->when($exceptLeaveId, fn ($query) => $query->where('id', '!=', $exceptLeaveId));
     }
 
     /**

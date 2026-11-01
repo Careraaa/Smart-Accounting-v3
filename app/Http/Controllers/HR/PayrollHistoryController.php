@@ -7,7 +7,6 @@ use App\Models\Payroll;
 use App\Models\PayrollBatch;
 use App\Models\User;
 use App\Models\PayrollCutoffSchedule;
-use App\Services\LeaveService;
 use App\Services\PayrollService;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
@@ -17,12 +16,10 @@ class PayrollHistoryController extends Controller
 {
     use LogsUserActivity;
     protected $payrollService;
-    protected $leaveService;
 
-    public function __construct(PayrollService $payrollService, LeaveService $leaveService)
+    public function __construct(PayrollService $payrollService)
     {
         $this->payrollService = $payrollService;
-        $this->leaveService = $leaveService;
     }
     // ====================== INDEX ======================
     public function index(Request $request)
@@ -121,15 +118,7 @@ class PayrollHistoryController extends Controller
                 $manualDeductions,
             );
 
-            // Recompute leave pay (same as generatePayrollForEmployee does)
-            $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
-            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
-                $payroll->user_id,
-                $payroll->payroll_period_start,
-                $payroll->payroll_period_end,
-                $dailyRate
-            );
-            $leavePay = collect($leaveAllowances)->sum('amount');
+            $leavePay = collect($this->payrollService->getStoredLeavePayBreakdown($payroll))->sum('amount');
 
             // Sum bonuses from stored records
             $bonusTotal = (float) $payroll->bonuses->sum('amount');

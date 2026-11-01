@@ -51,7 +51,7 @@ form a:focus-visible {
                                 <select name="user_id" id="user_id" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-9 text-sm text-gray-900 bg-white outline-none transition-colors focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 appearance-none @error('user_id') border-amber-500 @enderror" required>
                                     <option value="">— Select Employee —</option>
                                     @foreach($employees as $employee)
-                                        <option value="{{ $employee->id }}" @selected($leave->user_id == $employee->id)>
+                                        <option value="{{ $employee->id }}" data-gender="{{ strtolower((string) $employee->gender) }}" @selected(old('user_id', $leave->user_id) == $employee->id)>
                                             {{ $employee->first_name }} {{ $employee->last_name }}
                                         </option>
                                     @endforeach
@@ -66,7 +66,7 @@ form a:focus-visible {
                                 <select name="leave_type" id="leave_type" class="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-9 text-sm text-gray-900 bg-white outline-none transition-colors focus:border-gray-400 focus:ring-2 focus:ring-gray-200/50 appearance-none @error('leave_type') border-amber-500 @enderror" required>
                                     <option value="">— Select Leave Type —</option>
                                     @foreach($leaveTypes as $type)
-                                        <option value="{{ $type }}" @selected($leave->leave_type == $type)>{{ $type }}</option>
+                                        <option value="{{ $type }}" data-gender-restriction="{{ \App\Models\LeaveType::genderRestrictionForName($type) ?? '' }}" @selected(old('leave_type', $leave->leave_type) == $type)>{{ $type }}</option>
                                     @endforeach
                                 </select>
                                 <svg class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -135,6 +135,32 @@ form a:focus-visible {
     s.addEventListener('change', calc);
     e.addEventListener('change', calc);
     calc();
+})();
+</script>
+<script>
+(function(){
+    const employeeSelect = document.getElementById('user_id');
+    const leaveTypeSelect = document.getElementById('leave_type');
+
+    function filterLeaveTypes(){
+        const gender = employeeSelect.options[employeeSelect.selectedIndex].dataset.gender || '';
+
+        Array.from(leaveTypeSelect.options).forEach(function(option){
+            if (!option.value) return;
+
+            const restriction = option.dataset.genderRestriction;
+            const unavailable = restriction && restriction !== gender;
+            option.hidden = Boolean(unavailable);
+            option.disabled = Boolean(unavailable);
+
+            if (unavailable && option.selected) {
+                leaveTypeSelect.value = '';
+            }
+        });
+    }
+
+    employeeSelect.addEventListener('change', filterLeaveTypes);
+    filterLeaveTypes();
 })();
 </script>
 @endpush

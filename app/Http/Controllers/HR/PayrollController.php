@@ -450,15 +450,9 @@
                     $manualDeductions,
                 );
 
-                // Recompute leave pay (same as generatePayrollForEmployee does)
-                $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
-                $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
-                    $payroll->user_id,
-                    $payroll->payroll_period_start,
-                    $payroll->payroll_period_end,
-                    $dailyRate
-                );
-                $leavePay = collect($leaveAllowances)->sum('amount');
+                $leaveBreakdown = $this->payrollService->getStoredLeavePayBreakdown($payroll);
+                $leavePay = collect($leaveBreakdown)->sum('amount');
+                $payroll->setAttribute('leave_breakdown', $leaveBreakdown);
 
                 // Sum bonuses from stored records
                 $bonusTotal = (float) $payroll->bonuses->sum('amount');
@@ -1039,15 +1033,8 @@
                 $manualDeductions,
             );
 
-            // Recompute leave pay (same as generatePayrollForEmployee does)
-            $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
-            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
-                $payroll->user_id,
-                $payroll->payroll_period_start,
-                $payroll->payroll_period_end,
-                $dailyRate
-            );
-            $leavePay = collect($leaveAllowances)->sum('amount');
+            $leaveBreakdown = $this->payrollService->getStoredLeavePayBreakdown($payroll);
+            $leavePay = collect($leaveBreakdown)->sum('amount');
 
             // Sum bonuses from stored records
             $bonusTotal = (float) $payroll->bonuses->sum('amount');
@@ -1070,6 +1057,7 @@
             $payroll->setAttribute('holiday_ot_pay', $computed['holidayOTPay']);
             $payroll->setAttribute('holiday_ot_hours', $computed['holidayOTHours']);
             $payroll->setAttribute('holiday_breakdown', $computed['holidayBreakdown']);
+            $payroll->setAttribute('leave_breakdown', $leaveBreakdown);
 
             $overtimeHours = $computed['otHours'];
 
@@ -1200,15 +1188,8 @@
             $totalWeekdays = $ps->diffInDaysFiltered(fn (Carbon $d) => !$d->isWeekend(), $pe);
             if (!$ps->isWeekend()) $totalWeekdays++;
 
-            // Recompute leave pay (same as generatePayrollForEmployee does)
-            $dailyRate = (float) ($payroll->user->salary_rate ?? 0);
-            $leaveAllowances = $this->leaveService->getApprovedLeavesAllowances(
-                $payroll->user_id,
-                $payroll->payroll_period_start,
-                $payroll->payroll_period_end,
-                $dailyRate
-            );
-            $leavePay = collect($leaveAllowances)->sum('amount');
+            $leaveBreakdown = $this->payrollService->getStoredLeavePayBreakdown($payroll);
+            $leavePay = collect($leaveBreakdown)->sum('amount');
 
             // Sum bonuses from stored records
             $bonusTotal = (float) $payroll->bonuses->sum('amount');
@@ -1232,6 +1213,7 @@
                 'amount' => round($hb['amount'], 2),
             ], $computed['holidayBreakdown'] ?? []);
             $payroll->setAttribute('holiday_breakdown', $holidayBreakdown);
+            $payroll->setAttribute('leave_breakdown', $leaveBreakdown);
 
             return view('hr.payroll.generate-payslip.payslip', compact('payroll'));
         }

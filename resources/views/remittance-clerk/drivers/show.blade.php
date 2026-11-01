@@ -82,7 +82,7 @@
                 <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $driver->email ?? '—' }}</span>
             </div>
             <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Gender</span>
+                <span class="text-xs font-semibold text-gray-500">Sex</span>
                 <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ ucfirst(str_replace('_', ' ', $driver->gender ?? '—')) }}</span>
             </div>
             <div class="flex items-center justify-between py-3 border-b border-gray-50">

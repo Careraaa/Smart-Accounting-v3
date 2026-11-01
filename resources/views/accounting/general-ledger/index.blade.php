@@ -96,7 +96,7 @@
         @endphp
         <div class="flex justify-end gap-2 no-print">
             <a href="{{ route('accounting.general-ledger.csv', request()->query()) }}" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 no-underline hover:bg-gray-50">Export CSV</a>
-            <button type="button" onclick="window.print()" class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600">Print</button>
+            <button type="button" onclick="window.print()" class="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200">Print</button>
         </div>
 
         <div class="print-report">

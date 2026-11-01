@@ -43,7 +43,7 @@ class AccountController extends Controller
             'username' => 'required|string|unique:users,username|max:255',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string|in:hr,accountant,remittance_clerk,employee,qr_admin',
-            'phone' => ['nullable', 'regex:/^09\d{9}$/'],
+            'gender' => 'required|string|in:male,female',
             'position' => 'required|string|max:255',
             'shift_id' => 'required|exists:shifts,id',
             'department' => 'nullable|string|max:255',

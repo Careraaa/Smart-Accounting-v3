@@ -76,6 +76,24 @@
             color: #fff;
         }
 
+        .controls .btn.btn-primary {
+            gap: 0;
+            padding: 10px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fff;
+            color: #4b5563;
+            font: 600 14px var(--font-body);
+            transition: all .2s;
+        }
+
+        .controls .btn.btn-primary:hover {
+            opacity: 1;
+            border-color: #d1d5db;
+            color: #111827;
+            box-shadow: 0 1px 2px rgba(0,0,0,.05);
+        }
+
         .btn-ghost {
             background: #fff;
             color: var(--gray-dark);
