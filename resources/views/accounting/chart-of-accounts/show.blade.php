@@ -53,7 +53,7 @@
                 @csrf
                 @method('PATCH')
                 <button type="submit"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 {{ $chartOfAccount->is_active ? 'bg-white border border-amber-200 text-amber-700 hover:bg-amber-50' : 'bg-emerald-600 text-white hover:bg-emerald-700' }} rounded-lg text-xs font-semibold transition-all active:scale-[0.97] cursor-pointer">
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 {{ $chartOfAccount->is_active ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-emerald-600 text-white hover:bg-emerald-700' }} rounded-lg text-xs font-semibold transition-all active:scale-[0.97] cursor-pointer">
                     {{ $chartOfAccount->is_active ? 'Deactivate' : 'Activate' }}
                 </button>
             </form>
