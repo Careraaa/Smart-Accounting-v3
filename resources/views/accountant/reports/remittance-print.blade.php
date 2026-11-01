@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <style>
@@ -31,7 +31,7 @@
             --white: #ffffff;
             --page-w: 900px;
             --font-body: 'Sora', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-mono: var(--font-body);
         }
 
         body {
@@ -189,9 +189,9 @@
                 @forelse ($groupedRemittances as $remittance)
                     <tr>
                         <td>{{ $remittance['remittance_date']->format('M d, Y') }}</td>
-                        <td class="text-right mono" style="color: #16a34a;">₱{{ number_format($remittance['total_collection'], 2) }}</td>
+                        <td class="text-right mono" style="color: #000000;">₱{{ number_format($remittance['total_collection'], 2) }}</td>
                         <td class="text-right mono">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
-                        <td class="text-right mono" style="font-weight: 700; color: {{ $remittance['is_short_remittance'] ? '#dc2626' : '#16a34a' }};">₱{{ number_format($remittance['net_remittance'], 2) }}</td>
+                        <td class="text-right mono" style="font-weight: 700; color: #000000;">₱{{ number_format($remittance['net_remittance'], 2) }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -203,7 +203,7 @@
             <tfoot>
                 <tr style="border-top: 2px solid var(--gray-rule); background: var(--gray-bg); font-weight: 700;">
                     <td style="padding: 10px;">TOTAL</td>
-                    <td class="text-right mono" style="padding: 10px; color: #16a34a;">₱{{ number_format($totalCollection, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; color: #000000;">₱{{ number_format($totalCollection, 2) }}</td>
                     <td class="text-right mono" style="padding: 10px;">₱{{ number_format($totalExpenses, 2) }}</td>
                     <td class="text-right mono" style="padding: 10px;">₱{{ number_format($totalNetRemittance, 2) }}</td>
                 </tr>

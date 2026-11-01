@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <style>
@@ -32,7 +32,7 @@
             --accent: #1a1a1a;
             --page-w: 900px;
             --font-body: 'Sora', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-mono: var(--font-body);
         }
 
         body {
@@ -234,7 +234,7 @@
             font-size: 10px;
             font-weight: 600;
             background: #f0fdf4;
-            color: #16a34a;
+            color: #000000;
         }
 
         .badge-paid {
@@ -244,7 +244,7 @@
             font-size: 10px;
             font-weight: 600;
             background: #eff6ff;
-            color: #2563eb;
+            color: #000000;
         }
 
         /* Print */
@@ -301,7 +301,7 @@
         <div class="summary-strip">
             <div class="summary-item">
                 <span class="summary-label">Total Approved</span>
-                <span class="summary-value" style="color: #16a34a;">{{ $approvedLeaves }}</span>
+                <span class="summary-value" style="color: #000000;">{{ $approvedLeaves }}</span>
             </div>
             <div class="summary-divider"></div>
             <div class="summary-item">

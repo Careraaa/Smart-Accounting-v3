@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <style>
@@ -31,7 +31,7 @@
             --white: #ffffff;
             --page-w: 900px;
             --font-body: 'Sora', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-mono: var(--font-body);
         }
 
         body {
@@ -202,8 +202,8 @@
                         </td>
                         <td class="text-right"><strong>{{ $batch['count'] }}</strong></td>
                         <td class="text-right mono">₱{{ number_format($batch['total_gross'], 2) }}</td>
-                        <td class="text-right mono" style="color: #dc2626;">₱{{ number_format($batch['total_deductions'], 2) }}</td>
-                        <td class="text-right mono"><strong style="color: #16a34a;">₱{{ number_format($batch['total_net'], 2) }}</strong></td>
+                        <td class="text-right mono" style="color: #000000;">₱{{ number_format($batch['total_deductions'], 2) }}</td>
+                        <td class="text-right mono"><strong style="color: #000000;">₱{{ number_format($batch['total_net'], 2) }}</strong></td>
                     </tr>
                 @empty
                     <tr>
@@ -217,8 +217,8 @@
                     <td style="padding: 10px;">TOTAL</td>
                     <td class="text-right" style="padding: 10px;"></td>
                     <td class="text-right mono" style="padding: 10px;">₱{{ number_format($totalGross, 2) }}</td>
-                    <td class="text-right mono" style="padding: 10px; color: #dc2626;">₱{{ number_format($totalDeductions, 2) }}</td>
-                    <td class="text-right mono" style="padding: 10px; color: #16a34a;">₱{{ number_format($totalNet, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; color: #000000;">₱{{ number_format($totalDeductions, 2) }}</td>
+                    <td class="text-right mono" style="padding: 10px; color: #000000;">₱{{ number_format($totalNet, 2) }}</td>
                 </tr>
             </tfoot>
             @endif
