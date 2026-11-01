@@ -1,0 +1,29 @@
+/* Shared print rules. Employee report is the base format for every printable page. */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+@media print {
+    html,
+    body,
+    body * {
+        font-family: 'Sora', sans-serif !important;
+        color: #000 !important;
+    }
+
+    body {
+        background: #fff !important;
+    }
+
+    /* Keep every number and status label black when printed. */
+    .text-red-500, .text-red-600, .text-red-700,
+    .text-green-500, .text-green-600, .text-green-700,
+    .text-blue-500, .text-blue-600, .text-blue-700,
+    .text-yellow-500, .text-yellow-600, .text-yellow-700,
+    [class*="text-"] {
+        color: #000 !important;
+    }
+
+    .no-print,
+    .controls {
+        display: none !important;
+    }
+}

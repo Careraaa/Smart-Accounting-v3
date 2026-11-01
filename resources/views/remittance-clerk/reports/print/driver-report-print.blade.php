@@ -19,6 +19,7 @@
         }
         @page { size: A4 landscape; margin: 0; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
 </head>
 <body>
     {{-- Controls --}}

@@ -45,6 +45,7 @@
         @media print { body { background: white; } .controls { display: none !important; } .page { width: var(--page-w); min-height: var(--page-h); margin: 0; box-shadow: none; padding: .22in .2in; } }
         @page { size: 3.2in 8.5in; margin: 0; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
 </head>
 <body>
     <div class="controls">

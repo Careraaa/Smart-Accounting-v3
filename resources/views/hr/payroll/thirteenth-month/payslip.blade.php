@@ -336,6 +336,7 @@
             margin: 0mm;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
 </head>
 
 <body>
