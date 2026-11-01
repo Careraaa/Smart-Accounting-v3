@@ -121,11 +121,6 @@ class ChartOfAccountController extends Controller
 
     public function toggleStatus(ChartOfAccount $chartOfAccount)
     {
-        if ($chartOfAccount->journalEntryLines()->exists()) {
-            return redirect()->back()
-                ->with('error', "Cannot deactivate account {$chartOfAccount->account_code} — it has existing journal entries. Mark it inactive instead.");
-        }
-
         $oldStatus = $chartOfAccount->is_active;
         $chartOfAccount->update(['is_active' => !$chartOfAccount->is_active]);
 

@@ -186,6 +186,25 @@ test('financial reports share posted-date balances and account normal sides', fu
         ->assertSee('100.00');
 });
 
+test('accounts with journal entries can be deactivated', function () {
+    $account = accountingTestAccount('1010', 'Cash', 'Asset');
+    accountingTestEntry([
+        'journal_number' => 'JE-2026-00020',
+        'transaction_date' => '2026-02-01',
+        'description' => 'Existing journal history',
+        'status' => 'Posted',
+    ], [
+        ['account_id' => $account->id, 'debit' => 100, 'credit' => 0],
+        ['account_id' => accountingTestAccount('3010', 'Owner Equity', 'Equity')->id, 'debit' => 0, 'credit' => 100],
+    ]);
+
+    $this->patch(route('accounting.chart-of-accounts.toggle-status', $account))
+        ->assertRedirect(route('accounting.chart-of-accounts.index'))
+        ->assertSessionHas('success', 'Account 1010 deactivated successfully.');
+
+    expect($account->fresh()->is_active)->toBeFalse();
+});
+
 test('posting requires a balanced entry and duplicate post or void does not duplicate accounting history', function () {
     $cash = accountingTestAccount('1010', 'Cash', 'Asset');
     $equity = accountingTestAccount('3010', 'Owner Equity', 'Equity');
