@@ -27,9 +27,10 @@ class AppServiceProvider extends ServiceProvider
             Request::HEADER_X_FORWARDED_PREFIX
         );
 
-        // Also force https so asset URLs are always generated with https
-        // (required for Cloudflare tunnel which only exposes HTTPS externally)
-        URL::forceScheme('https');
+        // Cloudflare uses HTTPS, but local XAMPP uses plain HTTP.
+        if (app()->environment('production') || request()->isSecure()) {
+            URL::forceScheme('https');
+        }
 
         // Register observer for automatic leave balance management when new employees are created
         User::observe(UserObserver::class);
