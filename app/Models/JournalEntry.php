@@ -66,6 +66,11 @@ class JournalEntry extends Model
         return $this->status === 'Draft';
     }
 
+    public function isPayrollGenerated(): bool
+    {
+        return in_array($this->reference_type, ['Payroll', '13th Month Pay'], true);
+    }
+
     public function scopeDraft($query)
     {
         return $query->where('status', 'Draft');

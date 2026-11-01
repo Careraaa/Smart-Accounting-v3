@@ -124,7 +124,7 @@ class JournalEntryController extends Controller
             return redirect()->route('accounting.journal-entries.show', $journalEntry)
                 ->with('error', 'Only draft journal entries can be edited.');
         }
-        if (in_array($journalEntry->reference_type, ['Payroll', '13th Month Pay'], true)) {
+        if ($journalEntry->isPayrollGenerated()) {
             return redirect()->route('accounting.journal-entries.show', $journalEntry)
                 ->with('error', 'Payroll journal entries must be refreshed from their payroll batch, not edited manually.');
         }
@@ -141,7 +141,7 @@ class JournalEntryController extends Controller
             return redirect()->route('accounting.journal-entries.show', $journalEntry)
                 ->with('error', 'Only draft journal entries can be updated.');
         }
-        if (in_array($journalEntry->reference_type, ['Payroll', '13th Month Pay'], true)) {
+        if ($journalEntry->isPayrollGenerated()) {
             return redirect()->route('accounting.journal-entries.show', $journalEntry)
                 ->with('error', 'Payroll journal entries must be refreshed from their payroll batch, not edited manually.');
         }
@@ -185,7 +185,7 @@ class JournalEntryController extends Controller
             if ($journalEntry->status !== 'Draft') {
                 throw new \RuntimeException('Only draft journal entries can be updated.');
             }
-            if (in_array($journalEntry->reference_type, ['Payroll', '13th Month Pay'], true)) {
+            if ($journalEntry->isPayrollGenerated()) {
                 throw new \RuntimeException('Payroll journal entries must be refreshed from their payroll batch, not edited manually.');
             }
 
