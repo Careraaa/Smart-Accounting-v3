@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+@media print {
+    html, body, body * {
+        font-family: 'Sora', sans-serif !important;
+        color: #000 !important;
+    }
+
+    body { background: #fff !important; }
+
+    .mono,
+    [class*="font-mono"] {
+        font-family: 'Sora', sans-serif !important;
+    }
+
+    [class*="text-red-"], [class*="text-green-"],
+    [class*="text-emerald-"], [class*="text-blue-"],
+    [class*="text-yellow-"], [class*="text-orange-"],
+    [class*="text-rose-"], [class*="text-violet-"],
+    [style*="color"] {
+        color: #000 !important;
+    }
+
+    .no-print, .controls { display: none !important; }
+}
