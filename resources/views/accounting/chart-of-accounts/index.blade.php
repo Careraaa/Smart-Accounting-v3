@@ -113,7 +113,6 @@
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Type</th>
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Description</th>
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
-                        <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="coaGrid"></tbody>
@@ -139,8 +138,16 @@
 @push('scripts')
 <script>
 (function(){
-    const raw = {!! json_encode($accounts) !!};
-    const PER = 5;
+    const raw = {!! json_encode($accounts->map(fn ($account) => [
+        'id' => $account->id,
+        'account_code' => $account->account_code,
+        'account_name' => $account->account_name,
+        'account_type' => $account->account_type,
+        'description' => $account->description,
+        'is_active' => $account->is_active,
+        'show_url' => route('accounting.chart-of-accounts.show', $account),
+    ])) !!};
+    const PER = 10;
     let page = 1, filtered = [], searchQ = '', typeF = '', statusF = '';
 
     const typeColors = {
@@ -191,22 +198,17 @@
             const statusBadge = a.is_active
                 ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Active</span>'
                 : '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-semibold bg-gray-50 text-gray-500 border border-gray-200"><span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>Inactive</span>';
-            const toggleBtn = a.is_active
-                ? '<form method="POST" action="/accounting/chart-of-accounts/'+a.id+'/toggle-status" class="inline" onsubmit="return confirm(\'Are you sure you want to deactivate this account?\')"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="_method" value="PATCH"><button type="submit" class="inline-flex items-center justify-center w-7 h-7 rounded-lg transition-colors border-0 cursor-pointer text-amber-500 hover:text-amber-600 hover:bg-amber-50" title="Deactivate"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg></button></form>'
-                : '<form method="POST" action="/accounting/chart-of-accounts/'+a.id+'/toggle-status" class="inline" onsubmit="return confirm(\'Are you sure you want to activate this account?\')"><input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="_method" value="PATCH"><button type="submit" class="inline-flex items-center justify-center w-7 h-7 rounded-lg transition-colors border-0 cursor-pointer text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50" title="Activate"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button></form>';
             const tr = document.createElement('tr');
-            tr.className = 'transition-colors hover:bg-gray-50/40';
+            tr.className = 'transition-colors hover:bg-gray-50/60 cursor-pointer';
+            tr.addEventListener('click', () => {
+                window.location.href = a.show_url;
+            });
             tr.innerHTML =
-                '<td class="px-5 py-3"><span class="text-xs font-bold text-gray-900 font-mono">'+a.account_code+'</span></td>' +
+                '<td class="px-5 py-3"><a href="'+a.show_url+'" class="text-xs font-bold text-gray-900 font-mono no-underline">'+a.account_code+'</a></td>' +
                 '<td class="px-5 py-3"><span class="text-xs font-semibold text-gray-900">'+a.account_name+'</span></td>' +
                 '<td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.6rem] font-semibold uppercase tracking-wide border '+tc+'">'+a.account_type+'</span></td>' +
                 '<td class="px-5 py-3"><span class="text-xs text-gray-500 max-w-[200px] truncate block">'+(a.description||'—')+'</span></td>' +
-                '<td class="px-5 py-3">'+statusBadge+'</td>' +
-                '<td class="px-5 py-3 text-right"><div class="flex items-center justify-end gap-1">' +
-                    '<a href="/accounting/chart-of-accounts/'+a.id+'" class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors no-underline" title="View"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>' +
-                    '<a href="/accounting/chart-of-accounts/'+a.id+'/edit" class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors no-underline" title="Edit"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></a>' +
-                    toggleBtn +
-                '</div></td>';
+                '<td class="px-5 py-3">'+statusBadge+'</td>';
             tbody.appendChild(tr);
         });
         updatePagination();
