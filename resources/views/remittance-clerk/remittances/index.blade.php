@@ -84,6 +84,11 @@
                 <span class="flex items-center gap-2">
                     <svg class="w-4 h-4 {{ ($tab ?? 'pending') === 'rejected' ? 'text-red-500' : 'text-gray-400 group-hover:text-gray-500' }} transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/></svg>
                     Rejected
+                    @if($rejectedRemittances > 0)
+                    <span class="ml-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold
+                        {{ ($tab ?? 'pending') === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-600' }}
+                        transition-colors duration-200">{{ $rejectedRemittances }}</span>
+                    @endif
                 </span>
             </button>
         </nav>
@@ -143,8 +148,9 @@
 (function () {
     var pendingData = @json($pendingData);
     var approvedData = @json($approvedData);
+    var rejectedData = @json($rejectedData);
 
-    var allData = { pending: pendingData, approved: approvedData, rejected: [] };
+    var allData = { pending: pendingData, approved: approvedData, rejected: rejectedData };
     var PER_PAGE = 10;
     var activeTab = '{{ $tab ?? 'pending' }}';
     var currentPage = 1;
@@ -157,7 +163,7 @@
     var tabStyles = {
         pending:  { border: 'border-amber-500',  text: 'text-amber-700',  bg: 'bg-amber-50/60', icon: 'text-amber-500',  badge: { bg: 'bg-amber-100',   text: 'text-amber-800' } },
         approved: { border: 'border-emerald-500',text: 'text-emerald-700',bg: 'bg-emerald-50/60',icon: 'text-emerald-500',badge: { bg: 'bg-emerald-100', text: 'text-emerald-800' } },
-        rejected: { border: 'border-red-500',    text: 'text-red-700',   bg: 'bg-red-50/60',   icon: 'text-red-500',   badge: { bg: '',               text: '' } }
+        rejected: { border: 'border-red-500',    text: 'text-red-700',   bg: 'bg-red-50/60',   icon: 'text-red-500',   badge: { bg: 'bg-red-100',      text: 'text-red-800' } }
     };
     var inactiveBtn = ['border-transparent', 'text-gray-400', 'hover:text-gray-600', 'hover:border-gray-300', 'hover:bg-gray-50/50'];
     var inactiveSvg = ['text-gray-400', 'group-hover:text-gray-500'];
@@ -186,7 +192,9 @@
                 var netClass = isShort ? 'text-red-600' : 'text-emerald-600';
                 var badgeHtml = activeTab === 'pending'
                     ? '<span class="app-status-badge pending">Pending</span>'
-                    : '<span class="app-status-badge approved">Approved</span>';
+                    : activeTab === 'rejected'
+                        ? '<span class="app-status-badge rejected">Rejected</span>'
+                        : '<span class="app-status-badge approved">Approved</span>';
                 html += '<tr class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location=\'' + r.show_url + '\'">' +
                     '<td class="px-5 py-3"><p class="text-sm font-semibold text-gray-700 font-mono">' + r.date + '</p></td>' +
                     '<td class="px-5 py-3"><p class="text-sm font-bold text-gray-900">' + r.route + '</p></td>' +
@@ -241,7 +249,7 @@
             var svg = b.querySelector('svg');
             if (svg) { svg.classList.remove('text-amber-500','text-emerald-500','text-red-500'); svg.classList.add.apply(svg.classList, inactiveSvg); }
             var badge = b.querySelector('[class*="ml-1"]');
-            if (badge) { badge.classList.remove('bg-amber-100','text-amber-800','bg-emerald-100','text-emerald-800'); badge.classList.add.apply(badge.classList, inactiveBadge); }
+            if (badge) { badge.classList.remove('bg-amber-100','text-amber-800','bg-emerald-100','text-emerald-800','bg-red-100','text-red-800'); badge.classList.add.apply(badge.classList, inactiveBadge); }
         });
         var s = tabStyles[tab];
         var btn = document.querySelector('.tab-btn[data-tab="' + tab + '"]');
@@ -251,7 +259,7 @@
             var svg = btn.querySelector('svg');
             if (svg) { svg.classList.remove.apply(svg.classList, inactiveSvg); svg.classList.add(s.icon); }
             var badge = btn.querySelector('[class*="ml-1"]');
-            if (badge && s.badge.bg) { badge.classList.remove.apply(badge.classList, inactiveBadge); badge.classList.add(s.badge.bg, s.badge.text); }
+            if (badge) { badge.classList.remove.apply(badge.classList, inactiveBadge); badge.classList.add(s.badge.bg, s.badge.text); }
         }
         var url = new URL(window.location);
         url.searchParams.set('tab', tab);

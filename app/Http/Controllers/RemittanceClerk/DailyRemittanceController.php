@@ -44,6 +44,11 @@ class DailyRemittanceController extends Controller
             ->where('status', 'approved')
             ->orderBy($sortBy, $sortOrder)
             ->get();
+
+        $rejectedRecords = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
+            ->where('status', 'rejected')
+            ->orderBy($sortBy, $sortOrder)
+            ->get();
         
         // Tab parameter
         $tab = $request->get('tab', 'pending');
@@ -70,16 +75,27 @@ class DailyRemittanceController extends Controller
             'status' => 'approved',
             'show_url' => route('remittances.show', $r),
         ])->values();
+
+        $rejectedData = $rejectedRecords->map(fn($r) => [
+            'id' => $r->id,
+            'date' => $r->remittance_date?->format('M d, Y'),
+            'route' => $r->route->route_name ?? '—',
+            'vehicle' => $r->vehicle->plate_number ?? '—',
+            'net' => (float) $r->net_remittance,
+            'is_short' => (bool) $r->is_short_remittance,
+            'status' => 'rejected',
+            'show_url' => route('remittances.show', $r),
+        ])->values();
         
         // Calculate statistics
         $totalRemittances = DailyRemittance::count();
         $approvedCount = DailyRemittance::where('status', 'approved')->count();
         $pendingCount = DailyRemittance::where('status', 'pending')->count();
-        $rejectedRemittances = DailyRemittance::where('status', 'rejected')->count();
+        $rejectedRemittances = $rejectedRecords->count();
         
         $this->logActivity('viewed', 'Daily Remittances list', request()->url(), 'daily_remittance');
 
-        return view('remittance-clerk.remittances.index', compact('pendingRemittances', 'approvedRemittances', 'pendingData', 'approvedData', 'sortBy', 'sortOrder', 'totalRemittances', 'approvedCount', 'pendingCount', 'rejectedRemittances', 'tab'));
+        return view('remittance-clerk.remittances.index', compact('pendingRemittances', 'approvedRemittances', 'pendingData', 'approvedData', 'rejectedData', 'sortBy', 'sortOrder', 'totalRemittances', 'approvedCount', 'pendingCount', 'rejectedRemittances', 'tab'));
     }
 
     public function create()

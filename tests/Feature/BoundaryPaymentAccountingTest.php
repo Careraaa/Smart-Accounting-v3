@@ -122,6 +122,26 @@ function boundaryPaymentPayload(string $token, string $date, string $amount, str
     ];
 }
 
+test('remittance clerk can see rejected remittances in the rejected tab', function () {
+    $firstRejected = boundaryPaymentTestRemittance(3000, 2000, 'rejected');
+    $secondRejected = boundaryPaymentTestRemittance(3000, 2500, 'rejected');
+
+    $response = $this->actingAs($this->clerk)
+        ->get(route('remittances.index', ['tab' => 'rejected']))
+        ->assertOk()
+        ->assertViewHas('rejectedRemittances', 2)
+        ->assertViewHas('rejectedData', function ($rejectedData) use ($firstRejected, $secondRejected) {
+            $actualIds = $rejectedData->pluck('id')->all();
+            $expectedIds = [$firstRejected->id, $secondRejected->id];
+            sort($actualIds);
+            sort($expectedIds);
+
+            return $actualIds === $expectedIds;
+        })
+        ->assertSee('rejected: rejectedData', false)
+        ->assertSee('app-status-badge rejected', false);
+});
+
 test('payroll receivables shows the short remittances tab only to accountants', function () {
     $hr = User::create([
         'name' => 'Boundary HR',
