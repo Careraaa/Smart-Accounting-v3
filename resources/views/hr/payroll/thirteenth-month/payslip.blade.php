@@ -10,7 +10,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         *,
@@ -34,7 +34,7 @@
             --page-width: 215.9mm;
             --page-height: 139.7mm;
             --font-body: 'Sora', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-mono: var(--font-body);
         }
 
         body {
@@ -336,6 +336,7 @@
             margin: 0mm;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
 </head>
 
 <body>

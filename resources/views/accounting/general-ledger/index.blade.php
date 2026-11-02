@@ -2,6 +2,7 @@
 
 @push('styles')
 <style>
+@import url('{{ asset('css/print-standard.css') }}');
 .print-only { display: none; }
 @media print {
     @page { size: A4 landscape; margin: 12mm; }
