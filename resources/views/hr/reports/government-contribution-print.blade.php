@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <style>
@@ -32,7 +32,7 @@
             --accent: #1a1a1a;
             --page-w: 900px;
             --font-body: 'Sora', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-mono: var(--font-body);
         }
 
         body {
@@ -233,7 +233,7 @@
             font-size: 10px;
             font-weight: 600;
             background: #dcfce7;
-            color: #16a34a;
+            color: #000000;
         }
 
         .badge-inactive {
@@ -243,7 +243,7 @@
             font-size: 10px;
             font-weight: 600;
             background: #fee2e2;
-            color: #dc2626;
+            color: #000000;
         }
 
         /* Print */
@@ -269,6 +269,7 @@
             margin: 0;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
 </head>
 
 <body>

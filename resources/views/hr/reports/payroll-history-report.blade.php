@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
     <style>
@@ -32,7 +32,7 @@
             --accent: #1a1a1a;
             --page-w: 900px;
             --font-body: 'Sora', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-mono: var(--font-body);
         }
 
         body {
@@ -251,13 +251,31 @@
         }
 
         .mono {
-            font-family: var(--font-mono);
+            font-family: var(--font-body);
         }
 
         /* Print */
         @media print {
             body {
                 background: #fff;
+            }
+
+            html, body, body * {
+                color: #000 !important;
+                -webkit-text-fill-color: #000 !important;
+                font-family: 'Sora', sans-serif !important;
+            }
+
+            [style*="color"],
+            [class*="text-"] {
+                color: #000 !important;
+                -webkit-text-fill-color: #000 !important;
+            }
+
+            .mono,
+            .summary-value,
+            .summary-label {
+                font-family: 'Sora', sans-serif !important;
             }
 
             .controls {
@@ -277,6 +295,7 @@
             margin: 0;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
 </head>
 
 <body>
@@ -303,29 +322,6 @@
             </div>
         </div>
 
-        {{-- Summary Strip --}}
-        <div class="summary-strip">
-            <div class="summary-item">
-                <span class="summary-label">Total Employees</span>
-                <span class="summary-value">{{ $totalEmployees }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Gross Pay</span>
-                <span class="summary-value">₱{{ number_format($totalGrossPay, 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Deductions</span>
-                <span class="summary-value" style="color: #dc2626;">₱{{ number_format($totalDeductions, 2) }}</span>
-            </div>
-            <div class="summary-divider"></div>
-            <div class="summary-item">
-                <span class="summary-label">Total Net Pay</span>
-                <span class="summary-value" style="color: #16a34a;">₱{{ number_format($totalNetPay, 2) }}</span>
-            </div>
-        </div>
-
         {{-- Table --}}
         <table>
             <thead>
@@ -347,8 +343,8 @@
                         <td class="text-right mono">₱{{ number_format($payroll->basic_salary, 2) }}</td>
                         <td class="text-right mono">₱{{ number_format($payroll->total_allowances, 2) }}</td>
                         <td class="text-right mono"><strong>₱{{ number_format($payroll->gross_pay, 2) }}</strong></td>
-                        <td class="text-right mono" style="color: #dc2626;">₱{{ number_format($payroll->total_deductions, 2) }}</td>
-                        <td class="text-right mono"><strong style="color: #16a34a;">₱{{ number_format($payroll->net_pay, 2) }}</strong></td>
+                        <td class="text-right mono" style="color: #000000;">₱{{ number_format($payroll->total_deductions, 2) }}</td>
+                        <td class="text-right mono"><strong style="color: #000000;">₱{{ number_format($payroll->net_pay, 2) }}</strong></td>
                     </tr>
                 @empty
                     <tr>

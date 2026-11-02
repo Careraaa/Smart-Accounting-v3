@@ -52,6 +52,14 @@
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         Edit Request
                     </a>
+                    <form action="{{ route('employee.leaves.destroy', $leave) }}" method="POST" data-sa-confirm="Cancel this leave request?">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-sm font-bold rounded-xl transition-all">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
+                            Cancel Request
+                        </button>
+                    </form>
                 @endif
                 <a href="{{ route('employee.leaves.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-xl transition-all shadow-sm">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7-7-7 7 7 7"/></svg>
@@ -61,10 +69,10 @@
         </div>
 
         {{-- Content grid --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div>
 
             {{-- Main: Summary --}}
-            <div class="lg:col-span-2">
+            <div>
                 <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
                     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                         <div class="flex items-center gap-3">
@@ -130,36 +138,6 @@
                                 </div>
                             </div>
                         @endif
-                    </div>
-                </div>
-            </div>
-
-            {{-- Sidebar: Actions --}}
-            <div>
-                <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-                    <div class="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
-                        <span class="w-2 h-2 rounded-full bg-gray-900"></span>
-                        <span class="text-sm font-bold text-gray-800">Actions</span>
-                    </div>
-                    <div class="p-5 flex flex-col gap-2.5">
-                        @if($leave->status === 'pending')
-                            <a href="{{ route('employee.leaves.edit', $leave) }}" class="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-xl transition-all">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                Edit Request
-                            </a>
-                            <form action="{{ route('employee.leaves.destroy', $leave) }}" method="POST" data-sa-confirm="Cancel this leave request?">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-sm font-bold rounded-xl transition-all">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
-                                    Cancel Request
-                                </button>
-                            </form>
-                        @endif
-                        <a href="{{ route('employee.leaves.index') }}" class="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-bold rounded-xl transition-all shadow-sm">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                            View All Requests
-                        </a>
                     </div>
                 </div>
             </div>
