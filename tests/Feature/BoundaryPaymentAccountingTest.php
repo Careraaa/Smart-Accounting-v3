@@ -142,6 +142,30 @@ test('remittance clerk can see rejected remittances in the rejected tab', functi
         ->assertSee('app-status-badge rejected', false);
 });
 
+test('remittance create and update reject letters in monetary fields', function () {
+    $remittance = boundaryPaymentTestRemittance(3000, 2000);
+    $payload = [
+        'driver_id' => $remittance->driver_id,
+        'pao_id' => $remittance->pao_id,
+        'vehicle_id' => $remittance->vehicle_id,
+        'remittance_date' => now()->toDateString(),
+        'total_collection' => 'letters',
+        'net_remittance' => '2000.00',
+        'vehicle_status' => 'active',
+    ];
+
+    $this->actingAs($this->clerk)
+        ->post(route('remittances.store'), $payload)
+        ->assertSessionHasErrors('total_collection');
+
+    $payload['total_collection'] = '5000.00';
+    $payload['diesel'] = 'letters';
+    $this->put(route('remittances.update', $remittance), $payload)
+        ->assertSessionHasErrors('diesel');
+
+    expect((float) $remittance->fresh()->total_collection)->toBe(5000.0);
+});
+
 test('payroll receivables shows the short remittances tab only to accountants', function () {
     $hr = User::create([
         'name' => 'Boundary HR',

@@ -333,6 +333,15 @@
                     if (input.classList.contains('expense-input')) updateTotalExpenses();
                 });
             });
+            document.querySelectorAll('.money-input:not([readonly]), input[name="driver_share_amount"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const value = this.value.replace(/[^\d.]/g, '');
+                    const decimalIndex = value.indexOf('.');
+                    this.value = decimalIndex === -1
+                        ? value
+                        : value.slice(0, decimalIndex + 1) + value.slice(decimalIndex + 1).replace(/\./g, '').slice(0, 2);
+                });
+            });
             netRemittanceInput.closest('form').addEventListener('submit', function() {
                 this.querySelectorAll('.money-input').forEach(input => input.value = input.value.replace(/,/g, ''));
             });
