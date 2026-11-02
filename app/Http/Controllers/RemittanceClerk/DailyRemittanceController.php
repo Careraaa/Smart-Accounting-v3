@@ -44,6 +44,11 @@ class DailyRemittanceController extends Controller
             ->where('status', 'approved')
             ->orderBy($sortBy, $sortOrder)
             ->get();
+
+        $rejectedRecords = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
+            ->where('status', 'rejected')
+            ->orderBy($sortBy, $sortOrder)
+            ->get();
         
         // Tab parameter
         $tab = $request->get('tab', 'pending');
@@ -70,16 +75,27 @@ class DailyRemittanceController extends Controller
             'status' => 'approved',
             'show_url' => route('remittances.show', $r),
         ])->values();
+
+        $rejectedData = $rejectedRecords->map(fn($r) => [
+            'id' => $r->id,
+            'date' => $r->remittance_date?->format('M d, Y'),
+            'route' => $r->route->route_name ?? '—',
+            'vehicle' => $r->vehicle->plate_number ?? '—',
+            'net' => (float) $r->net_remittance,
+            'is_short' => (bool) $r->is_short_remittance,
+            'status' => 'rejected',
+            'show_url' => route('remittances.show', $r),
+        ])->values();
         
         // Calculate statistics
         $totalRemittances = DailyRemittance::count();
         $approvedCount = DailyRemittance::where('status', 'approved')->count();
         $pendingCount = DailyRemittance::where('status', 'pending')->count();
-        $rejectedRemittances = DailyRemittance::where('status', 'rejected')->count();
+        $rejectedRemittances = $rejectedRecords->count();
         
         $this->logActivity('viewed', 'Daily Remittances list', request()->url(), 'daily_remittance');
 
-        return view('remittance-clerk.remittances.index', compact('pendingRemittances', 'approvedRemittances', 'pendingData', 'approvedData', 'sortBy', 'sortOrder', 'totalRemittances', 'approvedCount', 'pendingCount', 'rejectedRemittances', 'tab'));
+        return view('remittance-clerk.remittances.index', compact('pendingRemittances', 'approvedRemittances', 'pendingData', 'approvedData', 'rejectedData', 'sortBy', 'sortOrder', 'totalRemittances', 'approvedCount', 'pendingCount', 'rejectedRemittances', 'tab'));
     }
 
     public function create()
@@ -97,20 +113,20 @@ class DailyRemittanceController extends Controller
             'pao_id' => 'required|exists:paos,id',
             'vehicle_id' => 'required|exists:vehicles,id',
             'remittance_date' => 'required|date',
-            'total_collection' => 'required|numeric',
-            'diesel' => 'nullable|numeric|min:0',
-            'parking' => 'nullable|numeric|min:0',
-            'dispatcher' => 'nullable|numeric|min:0',
-            'food_allowance' => 'nullable|numeric|min:0',
-            'barker' => 'nullable|numeric|min:0',
-            'others' => 'nullable|numeric|min:0',
-            'net_remittance' => 'required|numeric|min:0|decimal:0,2|max:99999999.99',
+            'total_collection' => ['required', 'numeric', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'diesel' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'parking' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'dispatcher' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'food_allowance' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'barker' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'others' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'net_remittance' => ['required', 'numeric', 'min:0', 'decimal:0,2', 'max:99999999.99', 'regex:/^\d+(?:\.\d{1,2})?$/'],
             'vehicle_status' => 'required|in:active,under_maintenance',
             'is_short_remittance' => 'nullable|boolean',
-            'short_amount' => 'nullable|numeric',
-            'driver_share' => 'nullable|numeric',
-            'pao_share' => 'nullable|numeric',
-            'driver_share_amount' => 'nullable|numeric|min:0',
+            'short_amount' => ['nullable', 'numeric', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'driver_share' => ['nullable', 'numeric', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'pao_share' => ['nullable', 'numeric', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'driver_share_amount' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
         ]);
 
         $vehicleStatus = $validated['vehicle_status'];
@@ -186,20 +202,20 @@ class DailyRemittanceController extends Controller
             'pao_id' => 'required|exists:paos,id',
             'vehicle_id' => 'required|exists:vehicles,id',
             'remittance_date' => 'required|date',
-            'total_collection' => 'required|numeric',
-            'diesel' => 'nullable|numeric|min:0',
-            'parking' => 'nullable|numeric|min:0',
-            'dispatcher' => 'nullable|numeric|min:0',
-            'food_allowance' => 'nullable|numeric|min:0',
-            'barker' => 'nullable|numeric|min:0',
-            'others' => 'nullable|numeric|min:0',
-            'net_remittance' => 'required|numeric|min:0|decimal:0,2|max:99999999.99',
+            'total_collection' => ['required', 'numeric', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'diesel' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'parking' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'dispatcher' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'food_allowance' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'barker' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'others' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'net_remittance' => ['required', 'numeric', 'min:0', 'decimal:0,2', 'max:99999999.99', 'regex:/^\d+(?:\.\d{1,2})?$/'],
             'vehicle_status' => 'required|in:active,under_maintenance',
             'is_short_remittance' => 'nullable|boolean',
-            'short_amount' => 'nullable|numeric',
-            'driver_share' => 'nullable|numeric',
-            'pao_share' => 'nullable|numeric',
-            'driver_share_amount' => 'nullable|numeric|min:0',
+            'short_amount' => ['nullable', 'numeric', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'driver_share' => ['nullable', 'numeric', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'pao_share' => ['nullable', 'numeric', 'regex:/^\d+(?:\.\d{1,2})?$/'],
+            'driver_share_amount' => ['nullable', 'numeric', 'min:0', 'regex:/^\d+(?:\.\d{1,2})?$/'],
         ]);
 
         $vehicleStatus = $validated['vehicle_status'];

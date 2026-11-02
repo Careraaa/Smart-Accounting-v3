@@ -7,10 +7,6 @@
             <p class="text-sm text-gray-500 mt-0.5">Update remittance details. Edited approved/rejected entries will return to pending for re-approval.</p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('remittances.show', $remittance) }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 transition-all no-underline">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                View
-            </a>
             <a href="{{ route('remittances.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 transition-all no-underline">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Back
@@ -335,6 +331,15 @@
                 input.addEventListener('blur', () => {
                     formatMoney(input);
                     if (input.classList.contains('expense-input')) updateTotalExpenses();
+                });
+            });
+            document.querySelectorAll('.money-input:not([readonly]), input[name="driver_share_amount"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const value = this.value.replace(/[^\d.]/g, '');
+                    const decimalIndex = value.indexOf('.');
+                    this.value = decimalIndex === -1
+                        ? value
+                        : value.slice(0, decimalIndex + 1) + value.slice(decimalIndex + 1).replace(/\./g, '').slice(0, 2);
                 });
             });
             netRemittanceInput.closest('form').addEventListener('submit', function() {

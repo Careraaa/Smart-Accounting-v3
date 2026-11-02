@@ -7,7 +7,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('images/knights-icon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
         :root { --black: #0a0a0a; --gray-dark: #3a3a3a; --gray-mid: #707070; --gray-rule: #b8b8b8; --gray-bg: #f7f7f7; --page-w: 3.2in; --page-h: 8.5in; --font-body: 'Sora', sans-serif; }
@@ -45,6 +45,7 @@
         @media print { body { background: white; } .controls { display: none !important; } .page { width: var(--page-w); min-height: var(--page-h); margin: 0; box-shadow: none; padding: .22in .2in; } }
         @page { size: 3.2in 8.5in; margin: 0; }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
 </head>
 <body>
     <div class="controls">
