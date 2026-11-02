@@ -44,17 +44,34 @@
                     </span>
                 </div>
             </div>
-            <a href="{{ route('employee.overtime-undertime.index') }}"
-               class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                Back
-            </a>
+            <div class="flex items-center gap-2">
+                @if($overtimeUndertime->status === 'pending')
+                    <a href="{{ route('employee.overtime-undertime.edit', $overtimeUndertime->id) }}"
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-bold rounded-xl transition-all shadow-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        Edit Request
+                    </a>
+                    <form action="{{ route('employee.overtime-undertime.destroy', $overtimeUndertime->id) }}" method="POST" data-sa-confirm="Are you sure you want to delete this request? This action cannot be undone.">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-sm font-bold rounded-xl transition-all">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
+                            Delete Request
+                        </button>
+                    </form>
+                @endif
+                <a href="{{ route('employee.overtime-undertime.index') }}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+                    <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    Back
+                </a>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div>
 
             {{-- Main summary card --}}
-            <div class="lg:col-span-2">
+            <div>
                 <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
                     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                         <div class="flex items-center gap-2">
@@ -122,39 +139,6 @@
                                 {{ $overtimeUndertime->employee->first_name }} {{ $overtimeUndertime->employee->last_name }}
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Actions sidebar --}}
-            <div class="lg:col-span-1">
-                <div class="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                    <div class="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
-                        <div class="w-2 h-2 rounded-full bg-gray-900"></div>
-                        <span class="text-sm font-bold text-gray-900">Actions</span>
-                    </div>
-                    <div class="p-5 flex flex-col gap-2.5">
-                        @if($overtimeUndertime->status === 'pending')
-                            <a href="{{ route('employee.overtime-undertime.edit', $overtimeUndertime->id) }}"
-                               class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white text-sm font-semibold rounded-xl transition-all shadow-sm">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                Edit Request
-                            </a>
-                            <form action="{{ route('employee.overtime-undertime.destroy', $overtimeUndertime->id) }}" method="POST" data-sa-confirm="Are you sure you want to delete this request? This action cannot be undone.">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-sm font-semibold rounded-xl transition-all">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a1 1 0 011-1h2a1 1 0 011 1v2"/></svg>
-                                    Delete Request
-                                </button>
-                            </form>
-                        @endif
-                        <a href="{{ route('employee.overtime-undertime.index') }}"
-                           class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
-                            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            Back to List
-                        </a>
                     </div>
                 </div>
             </div>
