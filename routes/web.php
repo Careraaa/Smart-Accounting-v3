@@ -209,11 +209,6 @@ Route::middleware(['auth', 'check-status'])->group(function () {
     Route::post('/my/attachments', [EmployeeSelfAttachmentController::class, 'store'])->name('employee.attachments.store');
 });
 
-// Read-only remittance details are linked from reports for both clerks and accountants.
-Route::middleware(['auth', 'check-status', 'role:remittance_clerk,accountant,superadmin'])
-    ->get('/remittances/{remittance}', [DailyRemittanceController::class, 'show'])
-    ->name('remittances.show');
-
 // ===== REMITTANCE CLERK ROUTES =====
 Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])->group(function () {
     Route::get('/remittance-clerk', [RemittanceClerkDashboardController::class, 'index'])->name('remittance-clerk.index');
@@ -222,8 +217,7 @@ Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])-
     Route::resource('paos', PAOController::class);
     Route::resource('routes', RouteController::class);
     Route::resource('vehicles', VehicleController::class);
-    // Keep remittance details available to accountants through the report link.
-    Route::resource('remittances', DailyRemittanceController::class)->except(['show']);
+    Route::resource('remittances', DailyRemittanceController::class);
     Route::resource('short-remittances', ShortRemittanceController::class)->only(['index', 'show', 'edit', 'update']);
     Route::post('/short-remittances/{shortRemittance}/payments', [ShortRemittanceController::class, 'recordPayment'])->name('short-remittances.payments.store');
     Route::get('/remittance/assigned-driver', fn() => view('remittance-clerk.remittances.assigned-driver'))->name('remittance.assigned-driver');
