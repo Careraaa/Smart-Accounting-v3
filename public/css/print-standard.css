@@ -107,8 +107,14 @@
 
 @media screen and (max-width: 640px) {
     .page.payslip-page .slip-header {
-        align-items: center;
-        flex-wrap: wrap;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        padding: 14px 12px;
+    }
+
+    .page.payslip-page .slip-title {
+        align-self: flex-end;
     }
 
     .page.payslip-page .company-name {
@@ -116,26 +122,76 @@
     }
 
     .page.payslip-page .emp-strip {
-        gap: 8px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        padding: 12px;
         font-size: 12px;
     }
 
     .page.payslip-page .slip-body {
         overflow: visible;
+        gap: 12px;
+        padding: 12px 8px;
     }
 
     .page.payslip-page .two-col {
         grid-template-columns: minmax(0, 1fr);
         flex: none;
+        gap: 0;
     }
 
     .page.payslip-page .two-col > div {
+        min-width: 0;
         border-right: 0;
         border-bottom: 1px solid var(--black);
+        padding: 12px 10px;
     }
 
     .page.payslip-page .two-col > div:last-child {
         border-bottom: 0;
+    }
+
+    .page.payslip-page .section-label {
+        margin-bottom: 6px;
+        font-size: 15px;
+    }
+
+    .page.payslip-page .pay-table {
+        display: table;
+        table-layout: fixed;
+        overflow: visible;
+        font-size: 13px;
+    }
+
+    .page.payslip-page .pay-table th,
+    .page.payslip-page .pay-table td {
+        padding: 7px 4px;
+        font-size: 13px;
+    }
+
+    .page.payslip-page .pay-table th:first-child,
+    .page.payslip-page .pay-table td:first-child:not([colspan]) {
+        width: 52%;
+        overflow-wrap: break-word;
+    }
+
+    .page.payslip-page .pay-table th:nth-child(2),
+    .page.payslip-page .pay-table td:nth-child(2) {
+        width: 20%;
+    }
+
+    .page.payslip-page .pay-table th:last-child,
+    .page.payslip-page .pay-table td:last-child {
+        width: 28%;
+    }
+
+    .page.payslip-page .subtotal-row {
+        padding: 10px 4px 2px;
+        font-size: 13px;
+    }
+
+    .page.payslip-page .net-pay-block {
+        padding: 12px 10px;
     }
 }
 
@@ -146,6 +202,6 @@
     }
 
     body > .page.payslip-page {
-        padding: 8px !important;
+        padding: 12px !important;
     }
 }
