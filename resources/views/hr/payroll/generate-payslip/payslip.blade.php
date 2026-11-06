@@ -363,7 +363,7 @@
             margin: 0mm;
         }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}?v={{ filemtime(public_path('css/print-standard.css')) }}">
 </head>
 
 <body class="{{ !empty($batchPrint) && $payrolls->count() > 1 ? 'batch-print' : '' }}">
