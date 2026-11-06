@@ -341,7 +341,7 @@
 
 <body>
 
-    <div class="controls">
+    <div class="controls payslip-controls">
         <button class="btn btn-primary" onclick="window.print()">Print</button>
     </div>
 

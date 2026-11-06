@@ -33,6 +33,14 @@
         flex-wrap: wrap;
     }
 
+    body > .payslip-controls {
+        justify-content: flex-end;
+    }
+
+    body > .payslip-controls > .btn {
+        margin-left: auto;
+    }
+
     body > .page,
     body > .print-page {
         width: calc(100% - 24px) !important;
@@ -97,9 +105,47 @@
     }
 }
 
+@media screen and (max-width: 640px) {
+    .page.payslip-page .slip-header {
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .page.payslip-page .company-name {
+        font-size: clamp(12px, 4vw, 15px);
+    }
+
+    .page.payslip-page .emp-strip {
+        gap: 8px;
+        font-size: 12px;
+    }
+
+    .page.payslip-page .slip-body {
+        overflow: visible;
+    }
+
+    .page.payslip-page .two-col {
+        grid-template-columns: minmax(0, 1fr);
+        flex: none;
+    }
+
+    .page.payslip-page .two-col > div {
+        border-right: 0;
+        border-bottom: 1px solid var(--black);
+    }
+
+    .page.payslip-page .two-col > div:last-child {
+        border-bottom: 0;
+    }
+}
+
 @media screen and (max-width: 480px) {
     body > .page,
     body > .print-page {
         padding: 16px !important;
+    }
+
+    body > .page.payslip-page {
+        padding: 8px !important;
     }
 }

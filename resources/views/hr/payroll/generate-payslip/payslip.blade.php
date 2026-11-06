@@ -368,7 +368,7 @@
 
 <body class="{{ !empty($batchPrint) && $payrolls->count() > 1 ? 'batch-print' : '' }}">
 
-    <div class="controls">
+    <div class="controls payslip-controls">
         <button class="btn btn-primary" onclick="window.print()">{{ !empty($batchPrint) ? 'Print All Payslips' : 'Print Payslip' }}</button>
     </div>
 
