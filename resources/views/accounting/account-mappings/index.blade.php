@@ -29,12 +29,12 @@
 
             <div class="space-y-4">
                 @foreach($mappingDefinitions as $key => $label)
-                    <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div class="flex flex-col gap-3 p-4 bg-gray-50 rounded-xl sm:flex-row sm:items-center sm:gap-4">
                         <div class="flex-1 min-w-0">
                             <p class="text-xs font-bold text-gray-900">{{ $label }}</p>
                             <p class="text-[0.6rem] text-gray-400 font-mono mt-0.5">{{ $key }}</p>
                         </div>
-                        <div class="min-w-[280px]">
+                        <div class="w-full min-w-0 sm:w-1/2 sm:min-w-[280px] sm:flex-1">
                             <select name="mappings[{{ $loop->index }}][account_id]" required
                                     class="w-full text-xs border border-gray-200 rounded-lg px-3 py-2.5 outline-none transition-all focus:border-gray-400 bg-white">
                                 <option value="">Select account…</option>

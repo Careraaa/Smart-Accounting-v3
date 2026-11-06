@@ -345,7 +345,7 @@
         <button class="btn btn-primary" onclick="window.print()">Print</button>
     </div>
 
-    <div class="page">
+    <div class="page payslip-page">
 
         <div class="main-content">
 

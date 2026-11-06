@@ -373,7 +373,7 @@
     </div>
 
     @foreach (($payrolls ?? collect([$payroll])) as $payroll)
-        <div class="page{{ !empty($batchPrint) && $payrolls->count() > 1 && !$loop->last ? ' batch-page-break' : '' }}">
+        <div class="page payslip-page{{ !empty($batchPrint) && $payrolls->count() > 1 && !$loop->last ? ' batch-page-break' : '' }}">
 
         <!-- LEFT COLUMN - Main Payslip -->
         <div class="main-content">
