@@ -6,6 +6,7 @@
     use App\Models\Payroll;
     use App\Models\PayrollBatch;
     use App\Models\PayrollCutoffSchedule;
+    use App\Models\ThirteenthMonthPay;
     use App\Models\User;
     use App\Models\Attendance;
     use App\Models\Leave;
@@ -501,6 +502,53 @@
                 ->get();
 
             return view('hr.payroll.generate-payslip.index', compact('allBatches'));
+        }
+
+        public function myPayslips()
+        {
+            $this->authorizeMyPayslipAccess();
+
+            $payrolls = Payroll::with('batch')
+                ->where('user_id', auth()->id())
+                ->where(function ($query) {
+                    $query->whereHas('batch', fn ($batch) => $batch->where('status', 'approved'))
+                        ->orWhere(fn ($query) => $query->whereNull('batch_id')->where('status', 'approved'));
+                })
+                ->orderByDesc('payroll_period_start')
+                ->get();
+
+            $thirteenthMonthPays = ThirteenthMonthPay::with('batch')
+                ->where('user_id', auth()->id())
+                ->whereHas('batch', fn ($batch) => $batch->where('status', 'approved'))
+                ->orderByDesc('calendar_year')
+                ->get();
+
+            return view('employee.payslips.index', compact('payrolls', 'thirteenthMonthPays'));
+        }
+
+        public function myPayslip(Payroll $payroll)
+        {
+            $this->authorizeMyPayslipAccess();
+
+            abort_unless((int) $payroll->user_id === (int) auth()->id(), 403);
+            abort_unless(
+                $payroll->batch_id
+                    ? $payroll->batch?->status === 'approved'
+                    : $payroll->status === 'approved',
+                403,
+                'Payslips are available only after approval.'
+            );
+
+            return $this->generatePayslip($payroll);
+        }
+
+        private function authorizeMyPayslipAccess(): void
+        {
+            abort_unless(
+                in_array(auth()->user()->role, ['employee', 'hr', 'accountant', 'remittance_clerk'], true),
+                403,
+                'You are not authorized to view self-service payslips.'
+            );
         }
 
         public function batchAddDepartment(Request $request, PayrollBatch $batch)

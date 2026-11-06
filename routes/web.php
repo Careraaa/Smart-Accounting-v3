@@ -237,6 +237,10 @@ Route::middleware(['auth', 'check-status', 'role:remittance_clerk,superadmin'])-
 
 // ===== EMPLOYEE ROUTES =====
 Route::middleware(['auth', 'check-status', 'role:employee,superadmin,remittance_clerk,hr,accountant'])->group(function () {
+    Route::get('/my/payslips', [PayrollController::class, 'myPayslips'])->name('employee.payslips.index');
+    Route::get('/my/payslips/{payroll}', [PayrollController::class, 'myPayslip'])->name('employee.payslips.show');
+    Route::get('/my/payslips/thirteenth-month/{batch}/{record}', [ThirteenthMonthPayController::class, 'myPayslip'])->name('employee.payslips.thirteenth-month');
+
     Route::get('/employee', function () {
         $user = auth()->user();
         return view('employee.dashboard', [
