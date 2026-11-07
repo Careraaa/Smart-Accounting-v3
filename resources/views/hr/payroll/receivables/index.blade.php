@@ -292,8 +292,6 @@ window.allCashAdvances = {!! json_encode($allCashAdvances->sortBy(fn($a) => strt
     'name' => trim(($a->user->last_name ?? '') . ', ' . ($a->user->first_name ?? '')) ?: '—',
     'name_lower' => strtolower(trim(($a->user->last_name ?? '') . ' ' . ($a->user->first_name ?? ''))),
     'position' => $a->user->position ?? '',
-    'initial_1' => strtoupper(substr($a->user->first_name ?? ($a->user->name ?? 'U'), 0, 1)),
-    'initial_2' => strtoupper(substr($a->user->last_name ?? '', 0, 1)),
     'amount' => (float) $a->amount,
     'repayment_months' => $a->repayment_months ?? 1,
     'monthly_deduction' => (float) ($a->monthly_deduction ?? $a->amount),
@@ -418,7 +416,6 @@ window.allSalaryLoans = [];
         } else {
             caNR.classList.add('hidden');
             pageData.forEach(r => {
-                const initials = (r.initial_1 || 'U') + (r.initial_2 || '');
                 const badgeCls = { pending: 'bg-amber-50 text-amber-700 border-amber-200', approved: 'bg-emerald-50 text-emerald-700 border-emerald-200', released: 'bg-emerald-50 text-emerald-700 border-emerald-200', deducted: 'bg-violet-50 text-violet-700 border-violet-200', rejected: 'bg-red-50 text-red-700 border-red-200' }[r.status] || 'bg-gray-50 text-gray-600 border-gray-200';
                 const dotCls = { pending: 'bg-amber-500', approved: 'bg-emerald-500', released: 'bg-emerald-500', deducted: 'bg-violet-500', rejected: 'bg-red-500' }[r.status] || 'bg-gray-400';
                 const tr = document.createElement('tr');
@@ -426,12 +423,9 @@ window.allSalaryLoans = [];
                 tr.dataset.url = r.url;
                 tr.innerHTML = `
                     <td class="px-5 py-3">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">${initials}</span>
-                            <div>
-                                <div class="text-xs font-semibold text-gray-900">${r.name}</div>
-                                <div class="text-[0.55rem] text-gray-400">${r.position}</div>
-                            </div>
+                        <div>
+                            <div class="text-xs font-semibold text-gray-900">${r.name}</div>
+                            <div class="text-[0.55rem] text-gray-400">${r.position}</div>
                         </div>
                     </td>
                     <td class="px-5 py-3"><span class="font-mono tabular-nums text-xs font-semibold text-gray-900">₱${r.amount.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
