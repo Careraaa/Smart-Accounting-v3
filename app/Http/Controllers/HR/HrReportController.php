@@ -92,15 +92,15 @@ class HrReportController extends Controller
             ->orderByDesc('period_start')
             ->get();
 
-        $totalBatches = $batches->count();
-        $totalEmployees = $batches->sum(fn ($batch) => $batch->payrolls->count());
-        $totalGrossPay = $batches->sum(fn ($batch) => $batch->payrolls->sum('gross_pay'));
-        $totalDeductions = $batches->sum(fn ($batch) => $batch->payrolls->sum('total_deductions'));
-        $totalNetPay = $batches->sum(fn ($batch) => $batch->payrolls->sum('net_pay'));
+        $payrolls = $batches->flatMap(fn ($batch) => $batch->payrolls);
+        $totalEmployees = $payrolls->count();
+        $totalGrossPay = $payrolls->sum('gross_pay');
+        $totalDeductions = $payrolls->sum('total_deductions');
+        $totalNetPay = $payrolls->sum('net_pay');
         $filters = array_filter([
             'Search' => $validated['search'] ?? null,
             'Month' => isset($validated['month'])
-                ? Carbon::create()->month($validated['month'])->format('F')
+                ? Carbon::create()->month((int) $validated['month'])->format('F')
                 : null,
             'Year' => $validated['year'] ?? null,
         ]);
@@ -109,8 +109,8 @@ class HrReportController extends Controller
 
         return view('hr.reports.payroll-history-report', compact(
             'batches',
+            'payrolls',
             'filters',
-            'totalBatches',
             'totalEmployees',
             'totalGrossPay',
             'totalDeductions',

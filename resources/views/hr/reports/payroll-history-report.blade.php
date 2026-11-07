@@ -335,33 +335,24 @@
                 <tr>
                     <th>Employee Name</th>
                     <th>Payroll Period</th>
-                    <th class="text-right">Basic Salary</th>
-                    <th class="text-right">Allowances</th>
-                    <th class="text-right">Gross Pay</th>
-                    <th class="text-right">Deductions</th>
-                    <th class="text-right">Net Pay</th>
+                    <th>Basic Salary</th>
+                    <th>Allowances</th>
+                    <th>Gross Pay</th>
+                    <th>Deductions</th>
+                    <th>Net Pay</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse ($batches as $batch)
-                    <tr class="batch-row">
-                        <td colspan="7">
-                            <strong>{{ $batch->display_name }}</strong>
-                            <span class="batch-pill">{{ ucfirst($batch->status ?? 'submitted') }}</span>
-                            <span class="mono">{{ $batch->period_start->format('M d') }} – {{ $batch->period_end->format('M d, Y') }}</span>
-                        </td>
+                @forelse ($payrolls as $payroll)
+                    <tr>
+                        <td>{{ $payroll->user->first_name ?? '' }} {{ $payroll->user->last_name ?? '' }}</td>
+                        <td>{{ $payroll->payroll_period_start->format('M d') }} – {{ $payroll->payroll_period_end->format('M d, Y') }}</td>
+                        <td class="mono">₱{{ number_format($payroll->basic_salary, 2) }}</td>
+                        <td class="mono">₱{{ number_format($payroll->total_allowances, 2) }}</td>
+                        <td class="mono"><strong>₱{{ number_format($payroll->gross_pay, 2) }}</strong></td>
+                        <td class="mono" style="color: #000000;">₱{{ number_format($payroll->total_deductions, 2) }}</td>
+                        <td class="mono"><strong style="color: #000000;">₱{{ number_format($payroll->net_pay, 2) }}</strong></td>
                     </tr>
-                    @foreach($batch->payrolls as $payroll)
-                        <tr>
-                            <td>{{ $payroll->user->first_name ?? '' }} {{ $payroll->user->last_name ?? '' }}</td>
-                            <td>{{ $payroll->payroll_period_start->format('M d') }} – {{ $payroll->payroll_period_end->format('M d, Y') }}</td>
-                            <td class="text-right mono">₱{{ number_format($payroll->basic_salary, 2) }}</td>
-                            <td class="text-right mono">₱{{ number_format($payroll->total_allowances, 2) }}</td>
-                            <td class="text-right mono"><strong>₱{{ number_format($payroll->gross_pay, 2) }}</strong></td>
-                            <td class="text-right mono" style="color: #000000;">₱{{ number_format($payroll->total_deductions, 2) }}</td>
-                            <td class="text-right mono"><strong style="color: #000000;">₱{{ number_format($payroll->net_pay, 2) }}</strong></td>
-                        </tr>
-                    @endforeach
                 @empty
                     <tr>
                         <td colspan="7" style="padding: 20px; text-align: center;">No payslips found.</td>
@@ -371,11 +362,11 @@
             <tfoot>
                 <tr>
                     <td colspan="2"><strong>Totals</strong></td>
-                    <td class="text-right mono"><strong>₱{{ number_format($batches->sum(fn ($batch) => $batch->payrolls->sum('basic_salary')), 2) }}</strong></td>
-                    <td class="text-right mono"><strong>₱{{ number_format($batches->sum(fn ($batch) => $batch->payrolls->sum('total_allowances')), 2) }}</strong></td>
-                    <td class="text-right mono"><strong>₱{{ number_format($totalGrossPay, 2) }}</strong></td>
-                    <td class="text-right mono"><strong>₱{{ number_format($totalDeductions, 2) }}</strong></td>
-                    <td class="text-right mono"><strong>₱{{ number_format($totalNetPay, 2) }}</strong></td>
+                    <td class="mono"><strong>₱{{ number_format($payrolls->sum('basic_salary'), 2) }}</strong></td>
+                    <td class="mono"><strong>₱{{ number_format($payrolls->sum('total_allowances'), 2) }}</strong></td>
+                    <td class="mono"><strong>₱{{ number_format($totalGrossPay, 2) }}</strong></td>
+                    <td class="mono"><strong>₱{{ number_format($totalDeductions, 2) }}</strong></td>
+                    <td class="mono"><strong>₱{{ number_format($totalNetPay, 2) }}</strong></td>
                 </tr>
             </tfoot>
         </table>
