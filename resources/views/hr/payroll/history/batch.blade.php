@@ -19,7 +19,7 @@
 <div class="space-y-5">
 
     {{-- Header --}}
-    <div class="fade-up flex items-start gap-3">
+    <div class="fade-up flex flex-col items-start gap-2">
         <a href="{{ route('payroll.history.index') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 transition-all hover:border-gray-400 hover:text-gray-900 active:scale-[0.97] no-underline shrink-0">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
             Back
@@ -55,16 +55,8 @@
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="batchTbody">
                 @forelse($payrolls as $payroll)
-                    @php
-                        $initials = strtoupper(substr($payroll->user->first_name ?? 'U', 0, 1) . substr($payroll->user->last_name ?? '', 0, 1));
-                    @endphp
                     <tr data-name="{{ strtolower(($payroll->user->first_name ?? '') . ' ' . ($payroll->user->last_name ?? '')) }}" data-url="{{ route('payroll.salary-computation.show', $payroll) }}" class="hover:bg-gray-50/40 transition-colors cursor-pointer">
-                        <td class="px-5 py-3">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-7 h-7 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-[9px] font-bold shrink-0 border border-gray-200">{{ $initials }}</span>
-                                <div class="text-xs font-semibold text-gray-900">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</div>
-                            </div>
-                        </td>
+                        <td class="px-5 py-3 text-xs font-semibold text-gray-900">{{ $payroll->user->first_name }} {{ $payroll->user->last_name }}</td>
                         <td class="px-5 py-3 text-left text-xs text-gray-500">{{ $payroll->payroll_period_start->format('M d') }} – {{ $payroll->payroll_period_end->format('M d, Y') }}</td>
                         <td class="px-5 py-3 text-left"><span class="font-mono tabular-nums text-xs text-gray-500 bat-count">₱{{ number_format($payroll->basic_salary, 2) }}</span></td>
                         <td class="px-5 py-3 text-left"><span class="font-mono tabular-nums text-xs text-gray-500 bat-count">₱{{ number_format($payroll->total_allowances, 2) }}</span></td>
