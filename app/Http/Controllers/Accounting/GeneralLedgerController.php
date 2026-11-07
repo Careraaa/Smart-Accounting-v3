@@ -13,9 +13,9 @@ class GeneralLedgerController extends Controller
     public function index(Request $request)
     {
         $filters = $this->validatedFilters($request);
-        $accounts = ChartOfAccount::active()->orderBy('account_code')->get();
+        $accounts = ChartOfAccount::orderBy('account_code')->get();
         $selectedAccount = isset($filters['account_id'])
-            ? ChartOfAccount::active()->findOrFail($filters['account_id'])
+            ? ChartOfAccount::findOrFail($filters['account_id'])
             : null;
         $ledger = $selectedAccount ? $this->ledger($selectedAccount, $filters) : null;
 
@@ -32,7 +32,7 @@ class GeneralLedgerController extends Controller
         $filters = $this->validatedFilters($request);
         abort_unless(isset($filters['account_id']), 422, 'Select an account before exporting the ledger.');
 
-        $account = ChartOfAccount::active()->findOrFail($filters['account_id']);
+        $account = ChartOfAccount::findOrFail($filters['account_id']);
         $ledger = $this->ledger($account, $filters);
         $filename = 'general-ledger-'.preg_replace('/[^A-Za-z0-9._-]/', '_', $account->account_code).'.csv';
 

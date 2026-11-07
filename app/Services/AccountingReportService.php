@@ -36,7 +36,7 @@ class AccountingReportService
     {
         $totals = $this->postedTotals(dateTo: $dateTo);
 
-        return ChartOfAccount::active()
+        return ChartOfAccount::query()
             ->orderBy('account_code')
             ->get()
             ->map(function (ChartOfAccount $account) use ($totals) {
@@ -51,7 +51,7 @@ class AccountingReportService
 
     public function incomeStatement(string $dateFrom, string $dateTo): array
     {
-        $accounts = ChartOfAccount::active()->orderBy('account_code')->get();
+        $accounts = ChartOfAccount::orderBy('account_code')->get();
         $periodTotals = $this->postedTotals($dateFrom, $dateTo);
 
         $accounts->each(function (ChartOfAccount $account) use ($periodTotals) {

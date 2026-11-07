@@ -74,7 +74,7 @@
                 <select id="account_id" name="account_id" required class="w-full text-xs border border-gray-300 rounded-lg px-3 py-2.5 bg-white">
                     <option value="">Select account…</option>
                     @foreach($accounts as $account)
-                        <option value="{{ $account->id }}" @selected(($filters['account_id'] ?? '') == $account->id)>{{ $account->account_code }} – {{ $account->account_name }}</option>
+                        <option value="{{ $account->id }}" @selected(($filters['account_id'] ?? '') == $account->id)>{{ $account->account_code }} – {{ $account->account_name }}{{ $account->is_active ? '' : ' (Inactive)' }}</option>
                     @endforeach
                 </select>
             </div>

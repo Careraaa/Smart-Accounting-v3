@@ -166,7 +166,7 @@
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Requested</th>
                         <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Deducted On</th>
-                        @if(auth()->user()->role === 'accountant')
+                        @if($canViewShortRemittances)
                         <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Actions</th>
                         @endif
                     </tr>
@@ -202,7 +202,7 @@
                             <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Remittance status</th>
                             <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Shortage balance</th>
                             <th class="text-right text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Awaiting approval</th>
-                            @if(auth()->user()->role === 'accountant' || auth()->user()->role === 'superadmin')
+                            @if($canViewShortRemittances)
                                 <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Pending payment actions</th>
                             @endif
                         </tr>
@@ -215,7 +215,7 @@
                                 <td class="px-5 py-3 text-xs capitalize text-gray-600">{{ $shortRemittance->status }}</td>
                                 <td class="px-5 py-3 text-right font-mono text-xs font-semibold text-red-600">₱{{ number_format($shortRemittance->short_amount ?? 0, 2) }}</td>
                                 <td class="px-5 py-3 text-right font-mono text-xs text-amber-700">₱{{ number_format($shortRemittance->boundaryPayments->where('status', 'Pending')->sum('amount'), 2) }}</td>
-                                @if(auth()->user()->role === 'accountant' || auth()->user()->role === 'superadmin')
+                                @if($canViewShortRemittances)
                                     <td class="px-5 py-3">
                                         @forelse($shortRemittance->boundaryPayments->where('status', 'Pending') as $payment)
                                             <div class="flex flex-wrap items-center gap-2 {{ $loop->first ? '' : 'mt-2 border-t border-gray-100 pt-2' }}">
@@ -247,7 +247,7 @@
                                 @endif
                             </tr>
                         @empty
-                            <tr><td colspan="{{ in_array(auth()->user()->role, ['accountant', 'superadmin'], true) ? 6 : 5 }}" class="px-5 py-8 text-center text-sm text-gray-400">No short remittances to display.</td></tr>
+                            <tr><td colspan="{{ $canViewShortRemittances ? 6 : 5 }}" class="px-5 py-8 text-center text-sm text-gray-400">No short remittances to display.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

@@ -289,6 +289,7 @@ $statusInfo = match($remittance->status) {
                     <input type="checkbox" name="confirm_boundary_received" value="1" class="mt-0.5">
                     I confirm this calculated boundary amount was actually received and verified. Only this amount will be posted.
                 </label>
+                <p class="sm:col-span-2 text-[10px] text-gray-400">No receipt is required.</p>
             </div>
             <div class="flex gap-2">
                 <button type="button" onclick="closeApproveModal()"

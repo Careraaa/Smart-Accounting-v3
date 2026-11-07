@@ -81,7 +81,7 @@
                     @forelse($assets as $account)
                         <tr><td class="py-2 text-gray-700">{{ $account->account_code }} · {{ $account->account_name }}</td><td class="py-2 text-right tabular-nums">{{ number_format($account->balance, 2) }}</td></tr>
                     @empty
-                        <tr><td colspan="2" class="py-2 text-sm text-gray-400">No active asset accounts.</td></tr>
+                        <tr><td colspan="2" class="py-2 text-sm text-gray-400">No asset accounts.</td></tr>
                     @endforelse
                     <tr class="border-t border-gray-200"><td class="py-3 font-bold text-gray-900">Total assets</td><td class="py-3 text-right font-bold tabular-nums">{{ number_format($totalAssets, 2) }}</td></tr>
 
@@ -89,7 +89,7 @@
                     @forelse($liabilities as $account)
                         <tr><td class="py-2 text-gray-700">{{ $account->account_code }} · {{ $account->account_name }}</td><td class="py-2 text-right tabular-nums">{{ number_format($account->balance, 2) }}</td></tr>
                     @empty
-                        <tr><td colspan="2" class="py-2 text-sm text-gray-400">No active liability accounts.</td></tr>
+                        <tr><td colspan="2" class="py-2 text-sm text-gray-400">No liability accounts.</td></tr>
                     @endforelse
                     <tr class="border-t border-gray-200"><td class="py-3 font-bold text-gray-900">Total liabilities</td><td class="py-3 text-right font-bold tabular-nums">{{ number_format($totalLiabilities, 2) }}</td></tr>
 
@@ -97,7 +97,7 @@
                     @forelse($equityAccounts as $account)
                         <tr><td class="py-2 text-gray-700">{{ $account->account_code }} · {{ $account->account_name }}</td><td class="py-2 text-right tabular-nums">{{ number_format($account->balance, 2) }}</td></tr>
                     @empty
-                        <tr><td colspan="2" class="py-2 text-sm text-gray-400">No active equity accounts.</td></tr>
+                        <tr><td colspan="2" class="py-2 text-sm text-gray-400">No equity accounts.</td></tr>
                     @endforelse
                     <tr><td class="py-2 text-gray-700">Current-period {{ $currentEarnings >= 0 ? 'earnings' : 'loss' }} ({{ \Carbon\Carbon::parse($currentPeriodStart)->format('M d, Y') }} – {{ \Carbon\Carbon::parse($asOf)->format('M d, Y') }})</td><td class="py-2 text-right tabular-nums">{{ number_format($currentEarnings, 2) }}</td></tr>
                     <tr class="border-t border-gray-200"><td class="py-3 font-bold text-gray-900">Total equity</td><td class="py-3 text-right font-bold tabular-nums">{{ number_format($totalEquity, 2) }}</td></tr>

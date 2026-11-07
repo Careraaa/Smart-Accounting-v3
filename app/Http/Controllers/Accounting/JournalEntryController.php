@@ -9,6 +9,7 @@ use App\Models\AccountingAuditLog;
 use App\Services\PayrollJournalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class JournalEntryController extends Controller
 {
@@ -43,10 +44,10 @@ class JournalEntryController extends Controller
             'reference_type'   => 'nullable|string|max:50',
             'reference_id'     => 'nullable|integer',
             'lines'            => 'required|array|min:2',
-            'lines.*.account_id' => 'required|exists:chart_of_accounts,id',
+            'lines.*.account_id' => ['required', 'integer', Rule::exists('chart_of_accounts', 'id')->where('is_active', true)],
             'lines.*.description' => 'nullable|string|max:255',
-            'lines.*.debit'    => 'required|numeric|min:0',
-            'lines.*.credit'   => 'required|numeric|min:0',
+            'lines.*.debit'    => 'required|numeric|decimal:0,2|min:0',
+            'lines.*.credit'   => 'required|numeric|decimal:0,2|min:0',
         ]);
 
         $lines = $validated['lines'];
@@ -152,10 +153,10 @@ class JournalEntryController extends Controller
             'reference_type'   => 'nullable|string|max:50',
             'reference_id'     => 'nullable|integer',
             'lines'            => 'required|array|min:2',
-            'lines.*.account_id' => 'required|exists:chart_of_accounts,id',
+            'lines.*.account_id' => ['required', 'integer', Rule::exists('chart_of_accounts', 'id')->where('is_active', true)],
             'lines.*.description' => 'nullable|string|max:255',
-            'lines.*.debit'    => 'required|numeric|min:0',
-            'lines.*.credit'   => 'required|numeric|min:0',
+            'lines.*.debit'    => 'required|numeric|decimal:0,2|min:0',
+            'lines.*.credit'   => 'required|numeric|decimal:0,2|min:0',
         ]);
 
         $lines = $validated['lines'];
@@ -245,6 +246,11 @@ class JournalEntryController extends Controller
                 $lines = $journalEntry->lines()->get();
                 if ($lines->count() < 2) {
                     throw new \RuntimeException('A journal entry must have at least two lines.');
+                }
+                if (ChartOfAccount::whereIn('id', $lines->pluck('account_id')->unique())
+                    ->where('is_active', false)
+                    ->exists()) {
+                    throw new \RuntimeException('Cannot post a journal entry that uses an inactive account.');
                 }
 
                 foreach ($lines as $line) {

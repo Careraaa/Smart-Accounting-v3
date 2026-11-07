@@ -201,6 +201,7 @@ test('payroll receivables shows the short remittances tab only to accountants', 
         ->assertDontSee('Pending payment actions');
 
     $pendingPayment = $remittance->boundaryPayments()->where('source_payment_key', $paymentKey)->firstOrFail();
+    expect($pendingPayment->recordedBy?->name)->toBe('Boundary Clerk');
     $this->actingAs($hr)
         ->get(route('payroll.receivables.index', ['tab' => 'short_remittances']))
         ->assertDontSee(route('remittance-approval.boundary-payments.approve', $pendingPayment), false)

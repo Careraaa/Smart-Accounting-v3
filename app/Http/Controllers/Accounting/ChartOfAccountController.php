@@ -97,10 +97,11 @@ class ChartOfAccountController extends Controller
         if (
             ($chartOfAccount->account_type !== $validated['account_type']
                 || $chartOfAccount->is_contra !== $validated['is_contra'])
-            && $chartOfAccount->journalEntryLines()->exists()
+            && ($chartOfAccount->journalEntryLines()->exists()
+                || $chartOfAccount->accountMappings()->exists())
         ) {
             return redirect()->back()->withInput()
-                ->with('error', 'Account type and contra classification cannot be changed after journal entries have been recorded.');
+                ->with('error', 'Account type and contra classification cannot be changed while the account has journal entries or account mappings.');
         }
 
         $oldValues = $chartOfAccount->toArray();

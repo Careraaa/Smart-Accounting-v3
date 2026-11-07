@@ -97,7 +97,7 @@
                         <td class="px-4 py-3 text-right text-xs tabular-nums">{{ $account->ending_credit > 0 ? number_format($account->ending_credit, 2) : '—' }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="px-4 py-12 text-center text-sm text-gray-400">No active accounts are available.</td></tr>
+                    <tr><td colspan="7" class="px-4 py-12 text-center text-sm text-gray-400">No accounts are available.</td></tr>
                 @endforelse
             </tbody>
             <tfoot>

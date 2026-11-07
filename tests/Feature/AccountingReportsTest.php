@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\AccountingAuditLog;
+use App\Models\AccountMapping;
 use App\Models\ChartOfAccount;
 use App\Models\JournalEntry;
 use App\Models\User;
@@ -203,6 +204,180 @@ test('accounts with journal entries can be deactivated', function () {
         ->assertSessionHas('success', 'Account 1010 deactivated successfully.');
 
     expect($account->fresh()->is_active)->toBeFalse();
+});
+
+test('inactive account history remains reportable and inactive accounts cannot be reused', function () {
+    $cash = accountingTestAccount('1010', 'Inactive Cash', 'Asset');
+    $expense = accountingTestAccount('5010', 'Inactive Wages', 'Expense');
+    $revenue = accountingTestAccount('4010', 'Inactive Service Revenue', 'Revenue');
+    $equity = accountingTestAccount('3010', 'Owner Equity', 'Equity');
+    $cash->update(['is_active' => false]);
+    $expense->update(['is_active' => false]);
+    $revenue->update(['is_active' => false]);
+
+    accountingTestEntry([
+        'journal_number' => 'JE-2026-00030',
+        'transaction_date' => '2026-03-01',
+        'description' => 'Activity in inactive accounts',
+        'status' => 'Posted',
+    ], [
+        ['account_id' => $cash->id, 'debit' => 100, 'credit' => 0],
+        ['account_id' => $expense->id, 'debit' => 30, 'credit' => 0],
+        ['account_id' => $revenue->id, 'debit' => 0, 'credit' => 100],
+        ['account_id' => $equity->id, 'debit' => 0, 'credit' => 30],
+    ]);
+
+    $this->get(route('accounting.trial-balance.index', ['as_of' => '2026-03-01']))
+        ->assertOk()
+        ->assertSee('Inactive Cash')
+        ->assertSee('Inactive Wages')
+        ->assertSee('Inactive Service Revenue')
+        ->assertSee('BALANCED');
+    $this->get(route('accounting.income-statement.index', [
+        'date_from' => '2026-03-01',
+        'date_to' => '2026-03-01',
+    ]))
+        ->assertOk()
+        ->assertSee('Inactive Wages')
+        ->assertSee('Inactive Service Revenue')
+        ->assertSee('70.00');
+    $this->get(route('accounting.balance-sheet.index', ['as_of' => '2026-03-01']))
+        ->assertOk()
+        ->assertSee('Inactive Cash')
+        ->assertSee('BALANCED');
+    $this->get(route('accounting.general-ledger.index', ['account_id' => $cash->id]))
+        ->assertOk()
+        ->assertSee('Inactive Cash')
+        ->assertSee('100.00');
+
+    $this->post(route('accounting.journal-entries.store'), [
+        'transaction_date' => '2026-03-02',
+        'description' => 'Attempt to reuse inactive account',
+        'lines' => [
+            ['account_id' => $cash->id, 'debit' => 10, 'credit' => 0],
+            ['account_id' => $equity->id, 'debit' => 0, 'credit' => 10],
+        ],
+    ])->assertSessionHasErrors('lines.0.account_id');
+
+    $draft = accountingTestEntry([
+        'journal_number' => 'JE-2026-00031',
+        'transaction_date' => '2026-03-02',
+        'description' => 'Draft with newly inactive account',
+        'status' => 'Draft',
+    ], [
+        ['account_id' => $cash->id, 'debit' => 10, 'credit' => 0],
+        ['account_id' => $equity->id, 'debit' => 0, 'credit' => 10],
+    ]);
+    $this->from(route('accounting.journal-entries.show', $draft))
+        ->post(route('accounting.journal-entries.post', $draft))
+        ->assertRedirect(route('accounting.journal-entries.show', $draft))
+        ->assertSessionHas('error', 'Cannot post a journal entry that uses an inactive account.');
+    expect($draft->fresh()->status)->toBe('Draft');
+});
+
+test('account mappings require active accounts of the correct type and preserve mapped account classification', function () {
+    $expense = accountingTestAccount('5010', 'Payroll Expense', 'Expense');
+    $asset = accountingTestAccount('1010', 'Cash', 'Asset');
+    $contraExpense = accountingTestAccount('5061', 'Payroll Deductions', 'Expense', true);
+
+    $this->post(route('accounting.account-mappings.store'), [
+        'mappings' => [
+            ['key' => 'payroll_expense', 'account_id' => $expense->id],
+        ],
+    ])->assertRedirect(route('accounting.account-mappings.index'));
+    expect(AccountMapping::getAccountIdForKey('payroll_expense'))->toBe($expense->id);
+
+    $this->from(route('accounting.account-mappings.index'))
+        ->post(route('accounting.account-mappings.store'), [
+            'mappings' => [
+                ['key' => 'payroll_expense', 'account_id' => $asset->id],
+            ],
+        ])
+        ->assertRedirect(route('accounting.account-mappings.index'))
+        ->assertSessionHasErrors('mappings.0.account_id');
+    expect(AccountMapping::getAccountIdForKey('payroll_expense'))->toBe($expense->id);
+
+    $this->from(route('accounting.account-mappings.index'))
+        ->post(route('accounting.account-mappings.store'), [
+            'mappings' => [
+                ['key' => 'payroll_deductions', 'account_id' => $expense->id],
+            ],
+        ])
+        ->assertRedirect(route('accounting.account-mappings.index'))
+        ->assertSessionHasErrors('mappings.0.account_id');
+
+    $this->post(route('accounting.account-mappings.store'), [
+        'mappings' => [
+            ['key' => 'payroll_deductions', 'account_id' => $contraExpense->id],
+        ],
+    ])->assertRedirect(route('accounting.account-mappings.index'));
+    expect(AccountMapping::getAccountIdForKey('payroll_deductions'))->toBe($contraExpense->id);
+
+    $this->from(route('accounting.chart-of-accounts.edit', $expense))
+        ->put(route('accounting.chart-of-accounts.update', $expense), [
+            'account_code' => $expense->account_code,
+            'account_name' => $expense->account_name,
+            'account_type' => 'Revenue',
+            'description' => $expense->description,
+        ])
+        ->assertRedirect(route('accounting.chart-of-accounts.edit', $expense))
+        ->assertSessionHas('error');
+    expect($expense->fresh()->account_type)->toBe('Expense');
+
+    $expense->update(['is_active' => false]);
+    $this->from(route('accounting.account-mappings.index'))
+        ->post(route('accounting.account-mappings.store'), [
+            'mappings' => [
+                ['key' => 'payroll_expense', 'account_id' => $expense->id],
+            ],
+        ])
+        ->assertRedirect(route('accounting.account-mappings.index'))
+        ->assertSessionHasErrors('mappings.0.account_id');
+});
+
+test('journal drafts enforce currency precision and can be edited before posting', function () {
+    $cash = accountingTestAccount('1010', 'Cash', 'Asset');
+    $equity = accountingTestAccount('3010', 'Owner Equity', 'Equity');
+
+    $this->from(route('accounting.journal-entries.create'))
+        ->post(route('accounting.journal-entries.store'), [
+            'transaction_date' => '2026-03-03',
+            'description' => 'Invalid precision',
+            'lines' => [
+                ['account_id' => $cash->id, 'debit' => '10.005', 'credit' => '0'],
+                ['account_id' => $equity->id, 'debit' => '0', 'credit' => '10.005'],
+            ],
+        ])
+        ->assertRedirect(route('accounting.journal-entries.create'))
+        ->assertSessionHasErrors('lines.0.debit');
+    expect(JournalEntry::count())->toBe(0);
+
+    $this->post(route('accounting.journal-entries.store'), [
+        'transaction_date' => '2026-03-03',
+        'description' => 'Initial draft',
+        'lines' => [
+            ['account_id' => $cash->id, 'debit' => '10.00', 'credit' => '0'],
+            ['account_id' => $equity->id, 'debit' => '0', 'credit' => '10.00'],
+        ],
+    ])->assertRedirect();
+    $entry = JournalEntry::latest('id')->firstOrFail();
+    expect($entry->status)->toBe('Draft');
+
+    $this->get(route('accounting.journal-entries.edit', $entry))->assertOk();
+    $this->put(route('accounting.journal-entries.update', $entry), [
+        'transaction_date' => '2026-03-04',
+        'description' => 'Updated draft',
+        'lines' => [
+            ['account_id' => $cash->id, 'debit' => '15.00', 'credit' => '0'],
+            ['account_id' => $equity->id, 'debit' => '0', 'credit' => '15.00'],
+        ],
+    ])->assertRedirect(route('accounting.journal-entries.show', $entry));
+
+    expect($entry->fresh()->description)->toBe('Updated draft')
+        ->and((float) $entry->fresh()->lines()->sum('debit'))->toBe(15.0);
+
+    $this->post(route('accounting.journal-entries.post', $entry))->assertRedirect();
+    expect($entry->fresh()->status)->toBe('Posted');
 });
 
 test('posting requires a balanced entry and duplicate post or void does not duplicate accounting history', function () {

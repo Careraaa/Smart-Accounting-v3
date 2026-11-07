@@ -189,6 +189,11 @@ class DailyRemittanceController extends Controller
 
     public function edit(DailyRemittance $remittance)
     {
+        if ($remittance->boundaryPayments()->exists()) {
+            return redirect()->route('remittances.show', $remittance)
+                ->with('error', 'A remittance with recorded boundary payments cannot be edited. Contact accounting for a correction.');
+        }
+
         abort_unless($remittance->status !== 'approved', 403, 'Approved remittances cannot be edited.');
 
         $drivers = Driver::where('status', 'active')->get()->sortBy(fn (Driver $driver) => $driver->formatted_name, SORT_NATURAL | SORT_FLAG_CASE)->values();
@@ -199,6 +204,11 @@ class DailyRemittanceController extends Controller
 
     public function update(Request $request, DailyRemittance $remittance)
     {
+        if ($remittance->boundaryPayments()->exists()) {
+            return redirect()->route('remittances.show', $remittance)
+                ->with('error', 'A remittance with recorded boundary payments cannot be edited. Contact accounting for a correction.');
+        }
+
         abort_unless($remittance->status !== 'approved', 403, 'Approved remittances cannot be edited.');
 
         $validated = $request->validate([
@@ -231,11 +241,11 @@ class DailyRemittanceController extends Controller
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                abort_unless($lockedRemittance->status !== 'approved', 403, 'Approved remittances cannot be edited.');
-
                 if ($lockedRemittance->boundaryPayments()->exists()) {
                     throw new BoundaryPaymentException('A remittance with recorded boundary payments cannot be edited. Contact accounting for a correction.');
                 }
+
+                abort_unless($lockedRemittance->status !== 'approved', 403, 'Approved remittances cannot be edited.');
 
                 $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
                 if ($vehicle->status !== $vehicleStatus) {
@@ -305,6 +315,11 @@ class DailyRemittanceController extends Controller
 
     public function destroy(DailyRemittance $remittance)
     {
+        if ($remittance->boundaryPayments()->exists()) {
+            return redirect()->route('remittances.show', $remittance)
+                ->with('error', 'A remittance with recorded boundary payments cannot be deleted. Contact accounting for a correction.');
+        }
+
         abort_unless(! in_array($remittance->status, ['approved', 'rejected'], true), 403, 'Approved or rejected remittances cannot be deleted.');
 
         try {
@@ -313,11 +328,11 @@ class DailyRemittanceController extends Controller
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                abort_unless(! in_array($lockedRemittance->status, ['approved', 'rejected'], true), 403, 'Approved or rejected remittances cannot be deleted.');
-
                 if ($lockedRemittance->boundaryPayments()->exists()) {
                     throw new BoundaryPaymentException('A remittance with recorded boundary payments cannot be deleted. Contact accounting for a correction.');
                 }
+
+                abort_unless(! in_array($lockedRemittance->status, ['approved', 'rejected'], true), 403, 'Approved or rejected remittances cannot be deleted.');
 
                 $lockedRemittance->load('driver', 'pao', 'vehicle');
                 $lockedRemittance->delete();
