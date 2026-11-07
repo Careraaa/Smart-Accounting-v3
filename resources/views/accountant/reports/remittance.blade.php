@@ -157,7 +157,7 @@
                 </div>
                 <div class="min-w-0">
                     <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 m-0">Net Remittance</p>
-                    <p class="text-xl font-bold {{ $shortRemittances > 0 ? 'text-red-600' : 'text-emerald-600' }} tabular-nums mt-1 mb-0">₱{{ number_format($totalNetRemittance, 2) }}</p>
+                    <p class="text-xl font-bold text-gray-900 tabular-nums mt-1 mb-0">₱{{ number_format($totalNetRemittance, 2) }}</p>
                 </div>
             </div>
             <p class="text-xs text-gray-500 mt-3 mb-0">{{ $shortRemittances > 0 ? 'Short remittance recorded in this period' : 'No short remittances in this period' }}</p>
