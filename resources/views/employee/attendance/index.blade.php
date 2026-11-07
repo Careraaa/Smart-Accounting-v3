@@ -413,7 +413,10 @@
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <div class="flex items-center gap-2">
                 <svg class="w-4 h-4 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                <span class="text-sm font-bold text-gray-900">Quick Attendance</span>
+                <div>
+                    <span class="text-sm font-bold text-gray-900">Quick Attendance</span>
+                    <div id="att-q-date-label" class="text-[11px] text-gray-400 mt-0.5"></div>
+                </div>
             </div>
             <button type="button" class="att-quick-close w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -436,6 +439,7 @@
                 </div>
 
                 <div class="flex gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" class="att-mark-absent flex-1 px-4 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-sm font-semibold hover:bg-rose-100 transition-all duration-200 active:scale-[0.97]">Absent</button>
                     <button type="button" class="att-quick-close flex-1 px-4 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all duration-200 active:scale-[0.97]">Cancel</button>
                     <button type="submit" class="flex-1 px-4 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-semibold hover:bg-gray-800 transition-all duration-200 active:scale-[0.97]">Save</button>
                 </div>
@@ -494,6 +498,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var qForm = document.getElementById('att-quick-form');
     var qUserId = document.getElementById('att-q-user-id');
     var qDate = document.getElementById('att-q-date');
+    var qDateLabel = document.getElementById('att-q-date-label');
     var qTimeIn = document.getElementById('att-q-time-in');
     var qTimeOut = document.getElementById('att-q-time-out');
     var qStatus = document.getElementById('att-q-status');
@@ -507,8 +512,9 @@ document.addEventListener('DOMContentLoaded', function() {
         function qOpen(uid, date) {
             qUserId.value = uid;
             qDate.value = date;
-            qTimeIn.value = '';
-            qTimeOut.value = '';
+            qDateLabel.textContent = new Date(date + 'T00:00:00').toLocaleDateString(undefined, {weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'});
+            qTimeIn.value = '08:00';
+            qTimeOut.value = '17:00';
             qStatus.style.display = 'none';
             if (qStatus) { qStatus.style.display = 'none'; qStatus.className = 'mt-3 text-xs text-center font-medium'; }
             qModal.style.display = 'flex';
@@ -526,6 +532,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.stopPropagation();
                 qOpen(this.getAttribute('data-user-id'), this.getAttribute('data-date'));
             });
+        });
+
+        qModal.querySelector('.att-mark-absent').addEventListener('click', function() {
+            qTimeIn.value = '';
+            qTimeOut.value = '';
+            qForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
         });
 
         qForm.addEventListener('submit', function(e) {

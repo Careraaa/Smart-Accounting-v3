@@ -684,6 +684,11 @@ class AttendanceController extends Controller
         $attendance->save();
 
         // ── Auto OT/UT detection (same logic as store()) ──
+        if (!$attendance->time_in && !$attendance->time_out) {
+            $attendance->status = 'absent';
+            $attendance->save();
+        }
+
         if ($attendance->time_in && $attendance->time_out) {
             $dateStr = $attendance->date->format('Y-m-d');
             $employee = Employee::find($userId);
