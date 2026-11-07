@@ -169,7 +169,7 @@
                     </div>
                     <div>
                         <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Phone</span>
-                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-0.5 font-mono">+63{{ $employee->phone ?? '—' }}</div>
+                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-0.5 font-mono">{{ $employee->phone ?? '—' }}</div>
                     </div>
                     <div>
                         <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Sex</span>
