@@ -49,8 +49,6 @@
                 <tr class="bg-gray-50 border-b border-gray-200" style="background:#f7f7f7;">
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Name</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Contact Number</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Email</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Sex</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Address</th>
                 </tr>
             </thead>
@@ -59,13 +57,11 @@
                     <tr class="border-b border-gray-200">
                         <td class="px-5 py-3 font-semibold">{{ $pao->name }}</td>
                         <td class="px-5 py-3">{{ $pao->contact_number ?? 'N/A' }}</td>
-                        <td class="px-5 py-3">{{ $pao->email ?? 'N/A' }}</td>
-                        <td class="px-5 py-3">{{ ucfirst($pao->gender ?? 'N/A') }}</td>
                         <td class="px-5 py-3">{{ $pao->address ?? 'N/A' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-gray-400">No active PAOs found.</td>
+                        <td colspan="3" class="text-center py-5 text-gray-400">No active PAOs found.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -61,10 +61,7 @@
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200" style="background:#f7f7f7;">
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Name</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">License Number</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Contact Number</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Email</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Sex</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Address</th>
                 </tr>
             </thead>
@@ -72,15 +69,12 @@
                 @forelse ($drivers as $driver)
                     <tr class="border-b border-gray-200">
                         <td data-label="Name" class="px-5 py-3 font-semibold">{{ $driver->name }}</td>
-                        <td data-label="License Number" class="px-5 py-3">{{ $driver->license_number ?? 'N/A' }}</td>
                         <td data-label="Contact Number" class="px-5 py-3">{{ $driver->contact_number ?? 'N/A' }}</td>
-                        <td data-label="Email" class="px-5 py-3">{{ $driver->email ?? 'N/A' }}</td>
-                        <td data-label="Sex" class="px-5 py-3">{{ ucfirst($driver->gender ?? 'N/A') }}</td>
                         <td data-label="Address" class="px-5 py-3">{{ $driver->address ?? 'N/A' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-gray-400">No active drivers found.</td>
+                        <td colspan="3" class="text-center py-5 text-gray-400">No active drivers found.</td>
                     </tr>
                 @endforelse
             </tbody>
