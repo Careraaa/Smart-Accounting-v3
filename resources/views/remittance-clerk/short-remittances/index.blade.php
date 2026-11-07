@@ -110,7 +110,7 @@
                     <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Driver</th>
                     <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">PAO</th>
                     <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Vehicle</th>
-                    <th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Short Amount</th>
+                    <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Short Amount</th>
                     <th class="text-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-400">Status</th>
                 </tr>
             </thead>
@@ -220,7 +220,7 @@
                     '<td class="px-5 py-3 text-sm text-gray-700 font-semibold">' + r.driver + '</td>' +
                     '<td class="px-5 py-3 text-sm text-gray-700 font-semibold">' + r.pao + '</td>' +
                     '<td class="px-5 py-3 text-sm text-gray-500 font-mono">' + r.vehicle + '</td>' +
-                    '<td class="px-5 py-3 text-sm text-right font-mono font-bold text-red-600">₱' + Number(r.short_amount).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+                    '<td class="px-5 py-3 text-sm text-left font-mono font-bold text-red-600">₱' + Number(r.short_amount).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
                     '<td class="px-5 py-3 text-center">' + statusHtml(r) + '</td></tr>';
             });
             tbody.innerHTML = html;
