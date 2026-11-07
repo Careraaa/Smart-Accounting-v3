@@ -143,16 +143,17 @@ $statusInfo = match($remittance->status) {
         </div>
         <div class="flex items-center justify-between py-3 border-b border-gray-50">
             <span class="text-xs font-semibold text-gray-500">Total Expenses</span>
-            <span class="text-xs font-bold text-red-600 font-mono">₱{{ number_format($remittance->total_expenses, 2) }}</span>
-        </div>
-        <div class="flex items-center justify-between py-3 border-b border-gray-50">
-            <span class="text-xs font-semibold text-gray-500">Net Remittance</span>
-            <span class="text-xs font-bold text-emerald-600 font-mono">₱{{ number_format($remittance->net_remittance, 2) }}</span>
+            <span class="text-xs font-bold text-gray-900 font-mono">₱{{ number_format($remittance->total_expenses, 2) }}</span>
         </div>
         <div class="flex items-center justify-between py-3">
             <span class="text-xs font-semibold text-gray-500">Boundary</span>
             <span class="text-xs font-bold text-gray-900 font-mono">₱{{ number_format($remittance->boundary ?? 0, 2) }}</span>
         </div>
+        <div class="flex items-center justify-between py-3 border-b border-gray-50">
+            <span class="text-xs font-semibold text-gray-500">Net Remittance</span>
+            <span class="text-xs font-bold {{ $remittance->is_short_remittance ? 'text-red-600' : 'text-emerald-600' }} font-mono">₱{{ number_format($remittance->net_remittance, 2) }}</span>
+        </div>
+        
         @if($remittance->is_short_remittance)
         <div class="flex items-center gap-2 pt-3 mt-2 border-t border-gray-50">
             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-red-50 text-red-600 border border-red-200">Remaining boundary: ₱{{ number_format($boundaryRemaining, 2) }}</span>
