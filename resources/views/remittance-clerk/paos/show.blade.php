@@ -1,6 +1,6 @@
 @extends('layouts.layout')
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-5">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
     {{-- Back --}}
     <div class="flex items-center justify-between gap-3">
         <a href="{{ route('paos.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
@@ -15,7 +15,7 @@
     </div>
 
     {{-- Header Card --}}
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start gap-4">
+    <div class="hidden">
         <div class="flex items-center gap-4">
             <div class="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                 <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -39,7 +39,7 @@
     </div>
 
     {{-- Stat chips --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div class="hidden">
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -52,49 +52,49 @@
     </div>
 
     {{-- PAO Information Card --}}
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="px-5 py-3.5 border-b border-gray-50 flex items-center gap-2.5">
-            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+    <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             </div>
-            <span class="text-xs font-bold text-gray-700">PAO Information</span>
+            <h2 class="text-xs font-bold text-gray-900">PAO Information</h2>
         </div>
-        <div class="p-5">
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Full Name</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->name ?? '—' }}</span>
+        <div class="px-5 divide-y divide-gray-100">
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Full Name</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $pao->name ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Contact Number</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->contact_number ?? '—' }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Contact Number</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $pao->contact_number ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Email</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->email ?? '—' }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Email</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $pao->email ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Sex</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ ucfirst(str_replace('_', ' ', $pao->gender ?? '—')) }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Sex</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ ucfirst(str_replace('_', ' ', $pao->gender ?? '—')) }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Date of Hire</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->date_of_hire?->format('F d, Y') ?? '—' }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Date of Hire</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $pao->date_of_hire?->format('F d, Y') ?? '—' }}</span>
             </div>
             @if($pao->address)
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Address</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $pao->address }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Address</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $pao->address }}</span>
             </div>
             @endif
             <div class="flex items-center justify-between py-3">
-                <span class="text-xs font-semibold text-gray-500">Status</span>
-                <span class="text-xs text-gray-700 text-right">
+                <span class="text-xs font-medium text-gray-600">Status</span>
+                <span class="text-xs text-gray-900 text-right">
                     @php $sc = match($pao->status) { 'active' => 'bg-emerald-500/10 text-emerald-600 border-emerald-200/30', 'pending' => 'bg-amber-500/10 text-amber-600 border-amber-200/30', default => 'bg-red-500/10 text-red-600 border-red-200/30' }; @endphp
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border {{ $sc }}">{{ ucfirst($pao->status) }}</span>
                 </span>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 {{-- Delete Confirmation Modal --}}
 <div id="paoDeleteModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">

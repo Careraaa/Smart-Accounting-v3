@@ -108,7 +108,7 @@
                         <td class="px-5 py-3 text-sm text-gray-600">{{ $vehicle->route->route_name ?? '—' }}</td>
                         <td class="px-5 py-3 text-sm text-gray-600">{{ $vehicle->operator }}</td>
                         <td class="px-5 py-3 text-center">
-                            <span class="app-status-badge {{ $vstatus === 'active' ? 'active' : ($vstatus === 'under_maintenance' ? 'maintenance' : 'neutral') }}">{{ $vlabel }}</span>
+                            <span class="app-status-badge {{ $vstatus === 'active' ? 'active' : (in_array($vstatus, ['inactive', 'under_maintenance'], true) ? 'inactive' : 'neutral') }}">{{ $vlabel }}</span>
                         </td>
                     </tr>
                 @empty

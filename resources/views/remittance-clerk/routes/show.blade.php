@@ -81,7 +81,7 @@
                         @php
                             $vvstatus = strtolower($vehicle->status ?? 'active');
                             $vvlabel = match($vvstatus) { 'under_maintenance' => 'Under Maintenance', default => ucfirst($vvstatus) };
-                            $vvbadge = match($vvstatus) { 'active' => 'bg-emerald-50 text-emerald-600', 'under_maintenance' => 'bg-amber-50 text-amber-600', default => 'bg-gray-50 text-gray-500' };
+                            $vvbadge = $vvstatus === 'active' ? 'bg-emerald-50 text-emerald-600' : (in_array($vvstatus, ['inactive', 'under_maintenance'], true) ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-500');
                         @endphp
                         <tr data-vehicle-row class="transition-colors hover:bg-gray-50/50 cursor-pointer" onclick="window.location='{{ route('vehicles.show', $vehicle) }}'">
                             <td class="px-5 py-3 text-sm font-semibold text-gray-700 tracking-wide">{{ $vehicle->plate_number }}</td>

@@ -73,7 +73,7 @@
             </div>
             <div class="flex items-center justify-between py-3">
                 <span class="text-xs font-medium text-gray-600">Status</span>
-                <span class="text-xs font-semibold"><span class="app-status-badge {{ $vstatus === 'active' ? 'active' : ($vstatus === 'under_maintenance' ? 'maintenance' : 'neutral') }}">{{ $vlabel }}</span></span>
+                <span class="text-xs font-semibold"><span class="app-status-badge {{ $vstatus === 'active' ? 'active' : (in_array($vstatus, ['inactive', 'under_maintenance'], true) ? 'inactive' : 'neutral') }}">{{ $vlabel }}</span></span>
             </div>
             <div class="flex items-center justify-between py-3">
                 <span class="text-xs font-medium text-gray-600">Origin</span>
