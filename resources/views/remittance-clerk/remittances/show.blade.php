@@ -32,21 +32,21 @@
         </div>
     </div>
 
-    <header class="flex items-start gap-3 fade-up">
-        <div class="w-11 h-11 rounded-xl bg-gray-900 text-white flex items-center justify-center text-base font-bold shrink-0">
-            {{ strtoupper(substr($remittance->route->route_name ?? 'R', 0, 1)) }}
-        </div>
-        <div class="min-w-0">
-            <div class="flex items-center gap-2.5 flex-wrap">
-                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight m-0">{{ $remittance->remittance_date?->format('F d, Y') ?? 'Remittance' }}</h1>
-                <span class="app-status-badge {{ in_array($remittance->status, ['pending', 'approved', 'rejected'], true) ? $remittance->status : 'neutral' }}">{{ $rlabel }}</span>
+    <header class="flex items-center justify-between gap-4 fade-up">
+        <div class="flex items-start gap-3 min-w-0">
+            <div class="w-11 h-11 rounded-xl bg-gray-900 text-white flex items-center justify-center text-base font-bold shrink-0">
+                {{ strtoupper(substr($remittance->route->route_name ?? 'R', 0, 1)) }}
             </div>
-            <p class="text-sm text-gray-500 mt-1 mb-0">{{ $remittance->route->route_name ?? '—' }}</p>
+            <div class="min-w-0">
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight m-0">{{ $remittance->remittance_date?->format('F d, Y') ?? 'Remittance' }}</h1>
+                <p class="text-sm text-gray-500 mt-1 mb-0">{{ $remittance->route->route_name ?? '—' }}</p>
+            </div>
         </div>
+        <span class="app-status-badge shrink-0 {{ in_array($remittance->status, ['pending', 'approved', 'rejected'], true) ? $remittance->status : 'neutral' }}">{{ $rlabel }}</span>
     </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <section class="h-full bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -69,7 +69,7 @@
             </dl>
         </section>
 
-        <section class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up">
+        <section class="h-full bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden fade-up">
             <div class="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
