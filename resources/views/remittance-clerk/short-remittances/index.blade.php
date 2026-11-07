@@ -31,8 +31,8 @@
     @endif
 @endforeach
 
-{{-- Tab bar + search --}}
-<div class="flex flex-wrap items-end justify-between gap-4 mb-5 fade-up">
+{{-- Tabs --}}
+<div class="mb-5 fade-up">
     <nav class="border-b border-gray-200 flex-1" role="tablist">
         <button type="button" role="tab" data-tab="pending"
             class="tab-btn relative px-5 py-3 text-sm font-medium border-b-2 transition-all duration-200 inline-flex items-center gap-2 border-amber-500 text-amber-700 bg-amber-50/60">
@@ -47,10 +47,6 @@
             <span class="tab-badge ml-0.5 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold bg-gray-200 text-gray-600">{{ $fullyPaidRemittances->count() }}</span>
         </button>
     </nav>
-    <div class="relative flex-1 min-w-[180px] sm:flex-none sm:w-56">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-        <input type="text" id="searchInput" placeholder="Search driver, PAO, vehicle..." class="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all">
-    </div>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 fade-up">
@@ -93,6 +89,14 @@
                 <p class="text-lg font-bold text-gray-900 tabular-nums">₱{{ number_format($pendingRemittances->sum('pao_share') + $fullyPaidRemittances->sum('pao_share'), 0) }}</p>
                 <p class="text-[10px] text-gray-400">total PAO liability</p>
             </div>
+    </div>
+</div>
+
+{{-- Search --}}
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm p-3 mb-4 flex items-center gap-3 flex-wrap fade-up">
+    <div class="relative flex-1 min-w-[180px]">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search driver, PAO, vehicle..." class="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all">
     </div>
 </div>
 
