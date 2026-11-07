@@ -23,7 +23,9 @@
             Back
         </a>
         <div class="flex items-center gap-2">
+            @if($remittance->status !== 'approved')
             <a href="{{ route('remittances.edit', $remittance) }}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white bg-gray-900 transition-all hover:bg-gray-800 active:scale-[0.97] no-underline whitespace-nowrap">Edit Remittance</a>
+            @endif
             <form action="{{ route('remittances.destroy', $remittance) }}" method="POST" class="inline" data-sa-confirm="Delete this remittance?">
                 @csrf @method('DELETE')
                 <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-red-600 bg-white border border-red-200 transition-all hover:bg-red-50 hover:border-red-300 active:scale-[0.97] cursor-pointer whitespace-nowrap">Delete</button>
@@ -172,10 +174,12 @@
 
     {{-- Footer Actions --}}
     <div class="hidden">
+        @if($remittance->status !== 'approved')
         <a href="{{ route('remittances.edit', $remittance) }}" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-gray-900 transition-all hover:bg-gray-800 active:scale-[0.97] no-underline">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
             Edit Remittance
         </a>
+        @endif
         <form action="{{ route('remittances.destroy', $remittance) }}" method="POST" class="inline"
             data-sa-confirm="Delete this remittance?">
             @csrf @method('DELETE')
