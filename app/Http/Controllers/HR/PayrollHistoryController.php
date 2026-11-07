@@ -89,6 +89,7 @@ class PayrollHistoryController extends Controller
 
         // Get payrolls for this batch period
         $payrolls = Payroll::with(['user', 'allowances', 'deductions', 'bonuses'])
+            ->where('status', 'approved')
             ->where(function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('payroll_period_start', [$startDate, $endDate])
                   ->orWhereBetween('payroll_period_end', [$startDate, $endDate]);
@@ -141,11 +142,9 @@ class PayrollHistoryController extends Controller
         $totalDeductions = $payrolls->sum('total_deductions');
         $totalNetPay     = $payrolls->sum('net_pay');
 
-        $approvedCount = $payrolls->where('status', 'approved')->count();
-        $pendingCount = $payrolls->where('status', '!=', 'approved')->count();
-
         $batch = PayrollBatch::whereDate('period_start', $startDate->toDateString())
             ->whereDate('period_end', $endDate->toDateString())
+            ->where('status', 'approved')
             ->latest('id')
             ->first();
 
@@ -158,9 +157,7 @@ class PayrollHistoryController extends Controller
             'payrolls', 
             'totalGross', 
             'totalDeductions', 
-            'totalNetPay', 
-            'approvedCount', 
-            'pendingCount'
+            'totalNetPay'
         ));
     }
 }
