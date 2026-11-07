@@ -28,10 +28,12 @@ class PayrollHistoryController extends Controller
             'payrolls.user', 
             'payrolls.allowances', 
             'payrolls.deductions'
-        ])->orderBy('period_start', 'desc')->get();
+        ])->where('status', 'approved')
+            ->orderBy('period_start', 'desc')
+            ->get();
 
         // Statistics
-        $totalBatches = PayrollBatch::count();
+        $totalBatches = $allBatches->count();
 
         // Safe total payroll calculation (net_pay is an accessor)
         $totalPayroll = Payroll::with(['allowances', 'deductions'])
@@ -39,7 +41,7 @@ class PayrollHistoryController extends Controller
                                ->get()
                                ->sum('net_pay') ?? 0;
 
-        $totalReleased = PayrollBatch::where('status', 'approved')->count();
+        $totalReleased = $totalBatches;
 
         $activeEmployees = User::whereIn('role', ['employee', 'hr', 'remittance_clerk', 'accountant'])
             ->where('status', 'active')

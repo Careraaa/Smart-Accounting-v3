@@ -40,7 +40,7 @@
     <div class="fade-up flex items-start justify-between gap-4 flex-wrap">
         <div class="flex items-center gap-2">
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Payroll History</h1>
-            <p class="text-sm text-gray-400 mt-0.5">View all submitted and paid payroll batches</p>
+            <p class="text-sm text-gray-400 mt-0.5">View all approved payroll batches</p>
         </div>
         <div class="flex items-center gap-2">
             <button type="button" id="printHistoryReport" class="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">

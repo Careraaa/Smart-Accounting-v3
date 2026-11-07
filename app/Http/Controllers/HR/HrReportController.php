@@ -89,6 +89,7 @@ class HrReportController extends Controller
 
         $batches = PayrollBatch::with('payrolls.user')
             ->whereIn('id', $validated['batch_ids'])
+            ->where('status', 'approved')
             ->orderByDesc('period_start')
             ->get();
 
