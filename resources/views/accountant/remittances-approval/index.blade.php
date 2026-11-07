@@ -57,7 +57,7 @@ $tab            = in_array($tab, ['pending', 'approved', 'rejected'], true) ? $t
     <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div id="remittanceStatLabel" class="text-xs font-semibold uppercase tracking-wider text-gray-400">{{ ucfirst($tab) }} Remittances</div><div id="remittanceStatCount" class="text-2xl font-bold text-gray-900 tabular-nums mt-1">{{ $selectedRemits->count() }}</div></div>
     <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Collection</div><div id="remittanceStatCollection" class="text-left text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('total_collection'), 2) }}</div></div>
     <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Expenses</div><div id="remittanceStatExpenses" class="text-left text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('total_expenses'), 2) }}</div></div>
-    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Net Remittance</div><div id="remittanceStatNet" class="text-left text-lg font-bold {{ $selectedRemits->contains(fn ($remittance) => (bool) $remittance->is_short_remittance) ? 'text-red-600' : 'text-emerald-600' }} tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('net_remittance'), 2) }}</div></div>
+    <div class="stat-card bg-white border border-gray-200 rounded-xl px-5 py-4"><div class="text-xs font-semibold uppercase tracking-wider text-gray-400">Net Remittance</div><div id="remittanceStatNet" class="text-left text-lg font-bold text-gray-900 tabular-nums mt-1">₱{{ number_format($selectedRemits->sum('net_remittance'), 2) }}</div></div>
 </div>
 {{-- Table --}}
 <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -134,10 +134,6 @@ window.remittanceData = {!! json_encode(
         document.getElementById('remittanceStatCollection').textContent = format(sum('collection'));
         document.getElementById('remittanceStatExpenses').textContent = format(sum('expenses'));
         document.getElementById('remittanceStatNet').textContent = format(sum('net'));
-        const netStat = document.getElementById('remittanceStatNet');
-        const hasShortRemittance = filtered.some(remittance => remittance.isShort);
-        netStat.classList.toggle('text-red-600', hasShortRemittance);
-        netStat.classList.toggle('text-emerald-600', !hasShortRemittance);
     }
 
     function updateTabs(status) {
@@ -223,9 +219,9 @@ window.remittanceData = {!! json_encode(
                         <p class="text-xs text-gray-600">${r.route}</p>
                     </td>
                     <td class="px-5 py-3 text-xs text-gray-500">${r.vehicle}</td>
-                    <td class="px-5 py-3 text-left text-xs tabular-nums text-gray-600">₱${r.collection.toLocaleString('en-US')}</td>
-                    <td class="px-5 py-3 text-left text-xs tabular-nums text-gray-600">₱${r.expenses.toLocaleString('en-US')}</td>
-                    <td class="px-5 py-3 text-left text-xs font-bold tabular-nums ${r.isShort ? 'text-red-600' : 'text-emerald-600'}">₱${r.net.toLocaleString('en-US')}</td>
+                    <td class="px-5 py-3 text-left text-xs tabular-nums text-gray-600">₱${r.collection.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="px-5 py-3 text-left text-xs tabular-nums text-gray-600">₱${r.expenses.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="px-5 py-3 text-left text-xs font-bold tabular-nums ${r.isShort ? 'text-red-600' : 'text-emerald-600'}">₱${r.net.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td class="px-5 py-3 text-center">
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.5rem] font-semibold border ${stCls}">
                             <span class="w-1.5 h-1.5 rounded-full ${stDot}"></span>
