@@ -47,8 +47,6 @@
     $remittancesJson = $remittances->groupBy(fn($r) => $r->remittance_date->format('Y-m-d'))->map(function ($group) {
         return $group->map(fn($r) => [
             'show_url' => route('remittances.show', $r),
-            'driver' => $r->driver?->name ?? ($r->driver?->first_name.' '.$r->driver?->last_name ?? 'N/A'),
-            'pao' => $r->pao?->name ?? ($r->pao?->first_name.' '.$r->pao?->last_name ?? 'N/A'),
             'route' => $r->route?->route_name ?? 'N/A',
             'vehicle' => $r->vehicle?->plate_number ?? 'N/A',
             'collection' => (float) $r->total_collection,
@@ -270,23 +268,18 @@ function openRemittanceModal(dateKey) {
     const totalNet = items.reduce((s, i) => s + i.net, 0);
     const hasShort = items.some(i => i.short);
 
-    let rows = items.map(function(r, idx) {
+    let rows = items.map(function(r) {
         const netClass = r.short ? 'text-red-600' : 'text-emerald-600';
-        return '<tr class="border-b border-gray-50">' +
-            '<td class="px-5 py-3 text-sm text-gray-500 tabular-nums">' + (idx + 1) + '</td>' +
-            '<td class="px-5 py-3 text-sm font-semibold text-gray-800">' + esc(r.driver) + '</td>' +
-            '<td class="px-5 py-3 text-sm text-gray-500">' + esc(r.pao) + '</td>' +
+        return '<tr class="border-b border-gray-50 cursor-pointer hover:bg-gray-50" data-show-url="' + esc(r.show_url) + '" role="link" tabindex="0">' +
             '<td class="px-5 py-3 text-sm text-gray-500">' + esc(r.route) + '</td>' +
             '<td class="px-5 py-3 text-sm text-gray-500 tabular-nums">' + esc(r.vehicle) + '</td>' +
             '<td class="px-5 py-3 text-sm text-right tabular-nums font-medium text-emerald-600">₱' + fmt(r.collection) + '</td>' +
             '<td class="px-5 py-3 text-sm text-right tabular-nums text-gray-400">₱' + fmt(r.expenses) + '</td>' +
             '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold ' + netClass + '">₱' + fmt(r.net) + '</td>' +
-            '<td class="px-5 py-3 text-sm text-center"><a href="' + r.show_url + '" class="text-blue-600 hover:text-blue-800 font-semibold no-underline">Details</a></td>' +
-            '<td class="px-5 py-3 text-sm text-center">' + (r.short ? '<span class="inline-block w-1.5 h-1.5 rounded-full bg-red-500" title="Short"></span>' : '<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" title="OK"></span>') + '</td>' +
         '</tr>';
     });
 
-    overlay.innerHTML = '<div class="rm-modal bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 max-h-[85vh] flex flex-col overflow-hidden" onclick="event.stopPropagation()">' +
+    overlay.innerHTML = '<div class="rm-modal bg-white rounded-2xl shadow-2xl w-full max-w-5xl mx-4 max-h-[85vh] flex flex-col overflow-hidden" onclick="event.stopPropagation()">' +
         '<div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">' +
             '<div>' +
                 '<h3 class="text-sm font-bold text-gray-900 m-0">' + formatted + '</h3>' +
@@ -297,25 +290,18 @@ function openRemittanceModal(dateKey) {
         '<div class="overflow-x-auto overflow-y-auto flex-1">' +
             '<table class="w-full text-sm app-standard-table">' +
                 '<thead class="sticky top-0 z-10"><tr class="bg-gray-50 border-b border-gray-200">' +
-                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">#</th>' +
-                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Driver</th>' +
-                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">PAO</th>' +
                     '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Route</th>' +
                     '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Vehicle</th>' +
                     '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Collection</th>' +
                     '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Expenses</th>' +
-                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Net</th>' +
-                    '<th class="text-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Details</th>' +
-                    '<th class="text-center px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Sts</th>' +
+                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Net Remittance</th>' +
                 '</tr></thead>' +
                 '<tbody id="remittanceDetailBody">' + rows.slice(0, 10).join('') +
                 '</tbody><tfoot><tr class="bg-gray-50/50 border-t-2 border-gray-200">' +
-                        '<td colspan="5" class="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-500 text-right">Daily total</td>' +
+                        '<td colspan="2" class="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-500 text-right">Daily total</td>' +
                         '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold text-emerald-600">₱' + fmt(totalCol) + '</td>' +
                         '<td class="px-5 py-3 text-sm text-right tabular-nums text-gray-400">₱' + fmt(totalExp) + '</td>' +
                         '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold ' + (hasShort ? 'text-red-600' : 'text-emerald-600') + '">₱' + fmt(totalNet) + '</td>' +
-                        '<td class="px-5 py-3 text-sm text-center text-gray-300">—</td>' +
-                        '<td class="px-5 py-3 text-sm text-center">' + (hasShort ? '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-red-500">Short</span>' : '<span class="inline-flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-wider text-emerald-500">Clear</span>') + '</td>' +
                     '</tr></tfoot>' +
             '</table>' +
         '</div>' +
@@ -330,6 +316,17 @@ function openRemittanceModal(dateKey) {
     const detailBody = overlay.querySelector('#remittanceDetailBody');
     const detailInfo = overlay.querySelector('#remittanceDetailInfo');
     const detailNav = overlay.querySelector('#remittanceDetailNav');
+    detailBody.addEventListener('click', function(event) {
+        const row = event.target.closest('tr[data-show-url]');
+        if (row) window.location.href = row.dataset.showUrl;
+    });
+    detailBody.addEventListener('keydown', function(event) {
+        const row = event.target.closest('tr[data-show-url]');
+        if (row && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault();
+            window.location.href = row.dataset.showUrl;
+        }
+    });
     const perPage = 10;
     let page = 1;
 
