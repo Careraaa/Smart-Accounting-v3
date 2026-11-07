@@ -133,6 +133,7 @@ class HolidayWageService
         $totalHolidayPay           = 0.0;
         $totalHolidayOvertimePay   = 0.0;
         $totalHolidayOvertimeHours = 0.0;
+        $holidayOvertimeMultipliers = [];
         $breakdown                 = [];
 
         foreach ($byDate as $dateStr => $dayHolidays) {
@@ -177,6 +178,7 @@ class HolidayWageService
                 continue; // Unknown holiday type — skip safely
             }
 
+            $holidayOvertimeMultipliers[$dateStr] = $this->holidayOvertimeMultiplier($type, $isRestDay);
             $basePay           = $result['base_pay'];
             $otHours           = $result['ot_hours'] ?? 0.0;
             $otPay             = $result['ot_pay'] ?? 0.0;
@@ -224,8 +226,19 @@ class HolidayWageService
             'holiday_pay'              => round($totalHolidayPay, 2),
             'holiday_overtime_pay'     => round($totalHolidayOvertimePay, 2),
             'holiday_overtime_hours'   => round($totalHolidayOvertimeHours, 2),
+            'holiday_overtime_multipliers' => $holidayOvertimeMultipliers,
             'breakdown'                => $breakdown,
         ];
+    }
+
+    private function holidayOvertimeMultiplier(string $type, bool $isRestDay): float
+    {
+        return match ($type) {
+            'regular' => 2.0 * 1.30 * ($isRestDay ? 1.30 : 1.0),
+            'special' => $isRestDay ? 1.50 * 1.30 : 1.30 * 1.30,
+            'double' => ($isRestDay ? 3.90 : 3.0) * 1.30,
+            default => throw new \InvalidArgumentException("Unsupported holiday type: {$type}"),
+        };
     }
 
     // ================================================================
@@ -363,8 +376,7 @@ class HolidayWageService
      *    150% of daily rate. Formula: daily_rate × 1.50
      *
      *  Worked > 8h (rest day + overtime):
-     *    150% base + OT. OT formula: hourly_rate × 1.30 × 1.30 × OT_hours
-     *    (OT multiplier stays at 1.69 — rest-day premium only affects the base)
+     *    150% base + OT. OT formula: hourly_rate × 1.50 × 1.30 × OT_hours
      */
     private function computeSpecialHoliday(
         float $dailyRate,
@@ -403,7 +415,7 @@ class HolidayWageService
 
             if ($overtimeHours > 0) {
 
-                $otPay = $hourlyRate * 1.30 * 1.30 * $overtimeHours;
+                $otPay = $hourlyRate * 1.50 * 1.30 * $overtimeHours;
 
                 return [
                     'base_pay'           => $premiumPay + $cola,
