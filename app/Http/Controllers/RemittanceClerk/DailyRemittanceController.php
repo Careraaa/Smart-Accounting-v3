@@ -305,11 +305,16 @@ class DailyRemittanceController extends Controller
 
     public function destroy(DailyRemittance $remittance)
     {
+        abort_unless(! in_array($remittance->status, ['approved', 'rejected'], true), 403, 'Approved or rejected remittances cannot be deleted.');
+
         try {
             $remittance = \Illuminate\Support\Facades\DB::transaction(function () use ($remittance) {
                 $lockedRemittance = DailyRemittance::whereKey($remittance->getKey())
                     ->lockForUpdate()
                     ->firstOrFail();
+
+                abort_unless(! in_array($lockedRemittance->status, ['approved', 'rejected'], true), 403, 'Approved or rejected remittances cannot be deleted.');
+
                 if ($lockedRemittance->boundaryPayments()->exists()) {
                     throw new BoundaryPaymentException('A remittance with recorded boundary payments cannot be deleted. Contact accounting for a correction.');
                 }

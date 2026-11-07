@@ -22,11 +22,13 @@
             @if($remittance->status !== 'approved')
                 <a href="{{ route('remittances.edit', $remittance) }}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white bg-gray-900 hover:bg-gray-800 transition-all no-underline whitespace-nowrap">Edit Remittance</a>
             @endif
-            <form action="{{ route('remittances.destroy', $remittance) }}" method="POST" class="inline" data-sa-confirm="Delete this remittance?">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-red-600 bg-white border border-red-200 hover:bg-red-50 transition-all cursor-pointer whitespace-nowrap">Delete</button>
-            </form>
+            @if(!in_array($remittance->status, ['approved', 'rejected'], true))
+                <form action="{{ route('remittances.destroy', $remittance) }}" method="POST" class="inline" data-sa-confirm="Delete this remittance?">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-red-600 bg-white border border-red-200 hover:bg-red-50 transition-all cursor-pointer whitespace-nowrap">Delete</button>
+                </form>
+            @endif
         </div>
     </div>
 
