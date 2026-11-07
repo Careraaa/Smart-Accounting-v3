@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\Leave;
 use App\Models\Payroll;
+use App\Models\PayrollBatch;
 use App\Models\StatutoryDeduction;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
@@ -76,21 +77,40 @@ class HrReportController extends Controller
         ));
     }
 
-    public function printPayrollHistoryReport()
+    public function printPayrollHistoryReport(Request $request)
     {
-        $payrolls = Payroll::with('user')
-            ->orderByDesc('payroll_period_start')
+        $validated = $request->validate([
+            'batch_ids' => ['required', 'array', 'min:1'],
+            'batch_ids.*' => ['required', 'integer', 'distinct', 'exists:payroll_batches,id'],
+            'search' => ['nullable', 'string', 'max:100'],
+            'month' => ['nullable', 'integer', 'between:1,12'],
+            'year' => ['nullable', 'integer', 'between:2000,2100'],
+        ]);
+
+        $batches = PayrollBatch::with('payrolls.user')
+            ->whereIn('id', $validated['batch_ids'])
+            ->orderByDesc('period_start')
             ->get();
 
-        $totalEmployees = $payrolls->count();
-        $totalGrossPay  = $payrolls->sum('gross_pay');
-        $totalDeductions = $payrolls->sum('total_deductions');
-        $totalNetPay    = $payrolls->sum('net_pay');
+        $totalBatches = $batches->count();
+        $totalEmployees = $batches->sum(fn ($batch) => $batch->payrolls->count());
+        $totalGrossPay = $batches->sum(fn ($batch) => $batch->payrolls->sum('gross_pay'));
+        $totalDeductions = $batches->sum(fn ($batch) => $batch->payrolls->sum('total_deductions'));
+        $totalNetPay = $batches->sum(fn ($batch) => $batch->payrolls->sum('net_pay'));
+        $filters = array_filter([
+            'Search' => $validated['search'] ?? null,
+            'Month' => isset($validated['month'])
+                ? Carbon::create()->month($validated['month'])->format('F')
+                : null,
+            'Year' => $validated['year'] ?? null,
+        ]);
 
         $this->logActivity('viewed', 'Payroll history report', request()->url(), 'report');
 
         return view('hr.reports.payroll-history-report', compact(
-            'payrolls',
+            'batches',
+            'filters',
+            'totalBatches',
             'totalEmployees',
             'totalGrossPay',
             'totalDeductions',
