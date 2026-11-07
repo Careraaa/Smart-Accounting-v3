@@ -59,121 +59,159 @@
     });
 @endphp
 
-{{-- Top bar --}}
-    <div class="rc-fade-up flex items-start justify-between gap-4 mb-5 flex-wrap">
+<div class="max-w-7xl mx-auto space-y-5">
+    <header class="rc-fade-up flex items-start justify-between gap-4 flex-wrap">
         <div>
-            <h1 class="text-xl font-extrabold text-gray-900 tracking-tight m-0">Remittance Report</h1>
-            <p class="text-xs text-gray-400 max-w-[520px] leading-relaxed m-0 mt-0.5">Filter weekly, monthly, or yearly totals and print a summary for the selected period.</p>
-            <span class="inline-block text-[0.65rem] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md mt-2">{{ $periodLabel }}</span>
+            <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-400 m-0 mb-1">Remittance Clerk</p>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight m-0">Remittance Report</h1>
+            <p class="text-sm text-gray-500 mt-1 mb-0">Review approved collections, expenses, and daily net remittances.</p>
         </div>
+        <div class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-gray-200 text-xs font-semibold text-gray-700 shadow-sm">
+            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            {{ $periodLabel }}
+        </div>
+    </header>
 
-    </div>
+    <section class="rc-scale-in bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" aria-label="Report filters">
+        <div class="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 9h12m-9 5h6m-3 0v6"/></svg>
+            <h2 class="text-sm font-bold text-gray-900 m-0">Report period</h2>
+        </div>
+        <div class="p-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="flex flex-col gap-1.5">
+                <label for="period" class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Period</label>
+                <select id="period" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                    <option value="daily" {{ $period === 'daily' ? 'selected' : '' }}>Daily</option>
+                    <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
+                    <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
+                    <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1.5" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }};">
+                <label for="week" class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Week</label>
+                <select id="week" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                    @foreach ($weekOptions as $weekOption)
+                        <option value="{{ $weekOption['number'] }}" {{ (int) $week === $weekOption['number'] ? 'selected' : '' }}>{{ $weekOption['label'] }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="flex flex-col gap-1.5" id="daySelect" style="display:{{ $period === 'daily' ? 'flex' : 'none' }};">
+                <label for="day" class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Day</label>
+                <select id="day" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                    @for ($i = 1; $i <= 31; $i++)
+                        <option value="{{ $i }}" {{ (int) ($day ?? now()->day) === $i ? 'selected' : '' }}>{{ $i }}</option>
+                    @endfor
+                </select>
+            </div>
+            <div class="flex flex-col gap-1.5" id="monthSelect" style="display:{{ in_array($period, ['daily', 'monthly']) ? 'flex' : 'none' }};">
+                <label for="month" class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Month</label>
+                <select id="month" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                    @for ($i = 1; $i <= 12; $i++)
+                        <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
+                    @endfor
+                </select>
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <label for="year" class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Year</label>
+                <select id="year" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 bg-gray-50 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all cursor-pointer">
+                    @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
+                        <option value="{{ $i }}" {{ (int) $year === $i ? 'selected' : '' }}>{{ $i }}</option>
+                    @endfor
+                </select>
+            </div>
+        </div>
+    </section>
 
-    {{-- Filter bar --}}
-    <div class="rc-scale-in bg-white border border-gray-200 rounded-xl p-4 flex items-end gap-3 mb-5 flex-wrap" style="animation-delay:0.05s">
-        <div class="flex flex-col gap-1 min-w-[130px] flex-1">
-            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Period</label>
-            <select id="period" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
-                <option value="daily" {{ $period === 'daily' ? 'selected' : '' }}>Daily</option>
-                <option value="weekly" {{ $period === 'weekly' ? 'selected' : '' }}>Weekly</option>
-                <option value="monthly" {{ $period === 'monthly' ? 'selected' : '' }}>Monthly</option>
-                <option value="yearly" {{ $period === 'yearly' ? 'selected' : '' }}>Yearly</option>
-            </select>
-        </div>
-        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="weekSelect" style="display:{{ $period === 'weekly' ? 'flex' : 'none' }};">
-            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Week</label>
-            <select id="week" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
-                @foreach ($weekOptions as $weekOption)
-                    <option value="{{ $weekOption['number'] }}" {{ (int) $week === $weekOption['number'] ? 'selected' : '' }}>{{ $weekOption['label'] }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="daySelect" style="display:{{ $period === 'daily' ? 'flex' : 'none' }};">
-            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Day</label>
-            <select id="day" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
-                @for ($i = 1; $i <= 31; $i++)
-                    <option value="{{ $i }}" {{ (int) ($day ?? now()->day) === $i ? 'selected' : '' }}>{{ $i }}</option>
-                @endfor
-            </select>
-        </div>
-        <div class="flex flex-col gap-1 min-w-[130px] flex-1" id="monthSelect" style="display:{{ in_array($period, ['daily', 'monthly']) ? 'flex' : 'none' }};">
-            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Month</label>
-            <select id="month" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
-                @for ($i = 1; $i <= 12; $i++)
-                    <option value="{{ $i }}" {{ (int) $month === $i ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
-                @endfor
-            </select>
-        </div>
-        <div class="flex flex-col gap-1 min-w-[130px] flex-1">
-            <label class="text-[0.6rem] font-bold uppercase tracking-wider text-gray-400">Year</label>
-            <select id="year" class="border border-gray-200 rounded-lg px-2.5 py-2 text-xs text-gray-800 bg-gray-50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all cursor-pointer">
-                @for ($i = date('Y'); $i >= date('Y') - 5; $i--)
-                    <option value="{{ $i }}" {{ (int) $year === $i ? 'selected' : '' }}>{{ $i }}</option>
-                @endfor
-            </select>
-        </div>
-    </div>
+    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4" aria-label="Remittance totals">
+        <article class="scale-in stat-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 m-0">Total Collection</p>
+                    <p class="text-xl font-bold text-gray-900 tabular-nums mt-1 mb-0">₱{{ number_format($totalCollection, 2) }}</p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-3 mb-0">Gross collections for this period</p>
+        </article>
+        <article class="scale-in stat-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 14l2-2 2 2 4-4m-9 8h10M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 m-0">Total Expenses</p>
+                    <p class="text-xl font-bold text-gray-900 tabular-nums mt-1 mb-0">₱{{ number_format($totalExpenses, 2) }}</p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-3 mb-0">Trip and operating costs</p>
+        </article>
+        <article class="scale-in stat-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 15l3-3 3 2 5-6"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 m-0">Net Remittance</p>
+                    <p class="text-xl font-bold {{ $shortRemittances > 0 ? 'text-red-600' : 'text-emerald-600' }} tabular-nums mt-1 mb-0">₱{{ number_format($totalNetRemittance, 2) }}</p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-3 mb-0">{{ $shortRemittances > 0 ? 'Short remittance recorded in this period' : 'No short remittances in this period' }}</p>
+        </article>
+        <article class="scale-in stat-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.7 3.86a2 2 0 00-3.4 0z"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500 m-0">Short Remittances</p>
+                    <p class="text-xl font-bold text-gray-900 tabular-nums mt-1 mb-0">{{ $shortRemittances }}</p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 mt-3 mb-0">Shortages recorded in this period</p>
+        </article>
+    </section>
 
-    {{-- Stats grid --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
-            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Collection</p>
-            <p class="text-lg font-bold text-emerald-600 tabular-nums mt-1">₱{{ number_format($totalCollection, 2) }}</p>
-            <p class="text-[10px] text-gray-400 mt-0.5">Gross collections</p>
-        </div>
-        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-red-200 transition-all duration-300">
-            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Total Expenses</p>
-            <p class="text-lg font-bold text-red-600 tabular-nums mt-1">₱{{ number_format($totalExpenses, 2) }}</p>
-            <p class="text-[10px] text-gray-400 mt-0.5">Trip and operating costs</p>
-        </div>
-        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300">
-            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Net Remittance</p>
-            <p class="text-lg font-bold text-blue-600 tabular-nums mt-1">₱{{ number_format($totalNetRemittance, 2) }}</p>
-            <p class="text-[10px] text-gray-400 mt-0.5">Collection minus expenses</p>
-        </div>
-        <div class="scale-in stat-card bg-white rounded-xl border border-gray-100 p-3.5 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300">
-            <p class="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Short Remittances</p>
-            <p class="text-lg font-bold text-amber-600 tabular-nums mt-1">{{ $shortRemittances }}</p>
-            <p class="text-[10px] text-gray-400 mt-0.5">Shortages in period</p>
-        </div>
-    </div>
-
-    {{-- Table card --}}
-    <div class="rc-fade-up bg-white border border-gray-200 rounded-xl overflow-hidden" style="animation-delay:0.3s">
-        <div class="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between">
-            <h2 class="flex items-center gap-2 text-sm font-bold text-gray-900 m-0">
-                <span class="w-2 h-2 rounded-full bg-red-600 inline-block"></span>
-                Daily totals
-            </h2>
-            <span class="text-[0.6rem] text-gray-400">Click a row to view breakdown</span>
+    <section class="rc-fade-up bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" style="animation-delay:0.2s">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                </div>
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900 m-0">Daily Totals</h2>
+                    <p class="text-xs text-gray-500 mt-0.5 mb-0">{{ $periodLabel }} · {{ $groupedRemittances->total() }} {{ \Illuminate\Support\Str::plural('day', $groupedRemittances->total()) }}</p>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500 m-0">Select a row to view its remittance breakdown</p>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm app-standard-table">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
-                        <th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Date</th>
-                        <th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Collection</th>
-                        <th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Expenses</th>
-                        <th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Net remittance</th>
+                        <th class="text-left px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">Date</th>
+                        <th class="text-right px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">Collection</th>
+                        <th class="text-right px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">Expenses</th>
+                        <th class="text-right px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-gray-500">Net Remittance</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100">
                     @forelse($groupedRemittances as $remittance)
                         @php $dateKey = $remittance['remittance_date']->format('Y-m-d'); @endphp
-                        <tr class="rm-row border-b border-gray-100 transition-colors" data-date="{{ $dateKey }}" onclick="openRemittanceModal('{{ $dateKey }}')">
-                            <td class="px-5 py-3 text-sm font-semibold text-gray-800">{{ $remittance['remittance_date']->format('M d, Y') }}</td>
-                            <td class="px-5 py-3 text-right text-sm tabular-nums font-bold text-emerald-600">₱{{ number_format($remittance['total_collection'], 2) }}</td>
-                            <td class="px-5 py-3 text-right text-sm tabular-nums text-gray-400">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
-                            <td class="px-5 py-3 text-right text-sm tabular-nums font-bold {{ $remittance['is_short_remittance'] ? 'text-red-600' : 'text-emerald-600' }}">
-                                ₱{{ number_format($remittance['net_remittance'], 2) }}
-                            </td>
+                        <tr class="rm-row transition-colors" data-date="{{ $dateKey }}" onclick="openRemittanceModal('{{ $dateKey }}')">
+                            <td class="px-5 py-4 text-sm font-semibold text-gray-900">{{ $remittance['remittance_date']->format('M d, Y') }}</td>
+                            <td class="px-5 py-4 text-right text-sm tabular-nums font-semibold text-gray-900">₱{{ number_format($remittance['total_collection'], 2) }}</td>
+                            <td class="px-5 py-4 text-right text-sm tabular-nums font-semibold text-gray-900">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
+                            <td class="px-5 py-4 text-right text-sm tabular-nums font-bold {{ $remittance['is_short_remittance'] ? 'text-red-600' : 'text-emerald-600' }}">₱{{ number_format($remittance['net_remittance'], 2) }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="text-center py-12">
-                                <div class="flex flex-col items-center gap-2">
+                            <td colspan="4" class="text-center py-14">
+                                <div class="flex flex-col items-center gap-3">
                                     <svg class="w-6 h-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                                    <p class="text-xs text-gray-400">No remittances found for this period. Try adjusting the filters.</p>
+                                    <p class="text-sm font-semibold text-gray-800">No remittances for this period</p>
+                                    <p class="text-xs text-gray-500">Try choosing a different date range.</p>
                                 </div>
                             </td>
                         </tr>
@@ -181,12 +219,12 @@
                 </tbody>
             </table>
         </div>
-        <div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/50">
-            <div class="text-xs text-gray-400">
+        <div class="flex items-center justify-between gap-3 flex-wrap px-5 py-3 border-t border-gray-100 bg-gray-50/50">
+            <div class="text-xs text-gray-500">
                 Showing
-                <strong class="text-gray-700">{{ $groupedRemittances->firstItem() }}</strong>–<strong class="text-gray-700">{{ $groupedRemittances->lastItem() }}</strong>
+                <strong class="text-gray-900">{{ $groupedRemittances->firstItem() ?? 0 }}</strong>–<strong class="text-gray-900">{{ $groupedRemittances->lastItem() ?? 0 }}</strong>
                 of
-                <strong class="text-gray-700">{{ $groupedRemittances->total() }}</strong> daily totals
+                <strong class="text-gray-900">{{ $groupedRemittances->total() }}</strong> daily totals
             </div>
             @if($groupedRemittances->hasPages())
                 @php
@@ -195,7 +233,7 @@
                     $windowStart = max(1, $currentPage - 2);
                     $windowEnd = min($lastPage, $windowStart + 4);
                     $windowStart = max(1, $windowEnd - 4);
-                    $pageButtonClass = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
+                    $pageButtonClass = 'flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold border transition-all duration-150';
                 @endphp
                 <nav class="flex items-center gap-1" aria-label="Pagination">
                     <a href="{{ $groupedRemittances->url(max(1, $currentPage - 1)) }}" aria-label="Previous page" class="{{ $pageButtonClass }} {{ $groupedRemittances->onFirstPage() ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300' }}">‹</a>
@@ -206,7 +244,8 @@
                 </nav>
             @endif
         </div>
-    </div>
+    </section>
+</div>
 @endsection
 
 @push('scripts')
