@@ -176,7 +176,8 @@
         </article>
     </section>
 
-    <section class="rc-fade-up bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" style="animation-delay:0.2s">
+    <section id="daily-totals" class="rc-fade-up bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" style="animation-delay:0.2s">
+        <script type="application/json" id="rm-data">{!! json_encode($remittancesJson, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
@@ -206,7 +207,7 @@
                             <td class="px-5 py-4 text-sm font-semibold text-gray-900">{{ $remittance['remittance_date']->format('M d, Y') }}</td>
                             <td class="px-5 py-4 text-left text-sm tabular-nums font-semibold text-gray-900">₱{{ number_format($remittance['total_collection'], 2) }}</td>
                             <td class="px-5 py-4 text-left text-sm tabular-nums font-semibold text-gray-900">₱{{ number_format($remittance['total_expenses'], 2) }}</td>
-                            <td class="px-5 py-4 text-left text-sm tabular-nums font-bold {{ $remittance['is_short_remittance'] ? 'text-red-600' : 'text-emerald-600' }}">₱{{ number_format($remittance['net_remittance'], 2) }}</td>
+                            <td class="px-5 py-4 text-left text-sm tabular-nums font-bold text-gray-900">₱{{ number_format($remittance['net_remittance'], 2) }}</td>
                         </tr>
                     @empty
                         <tr>
@@ -253,7 +254,7 @@
 
 @push('scripts')
 <script>
-const __rmData = {!! $remittancesJson !!};
+let __rmData = JSON.parse(document.getElementById('rm-data').textContent);
 
 function openRemittanceModal(dateKey) {
     const items = __rmData[dateKey];
@@ -383,6 +384,59 @@ function esc(str) {
 function fmt(n) {
     return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+(function () {
+    let activeRequest;
+
+    async function loadReportPage(url, addHistoryEntry) {
+        if (activeRequest) activeRequest.abort();
+        activeRequest = new AbortController();
+        const request = activeRequest;
+
+        try {
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal: request.signal
+            });
+            if (!response.ok) throw new Error('Unable to load remittance report page: ' + response.status);
+
+            const html = await response.text();
+            const nextDocument = new DOMParser().parseFromString(html, 'text/html');
+            const nextSection = nextDocument.getElementById('daily-totals');
+            const nextData = nextDocument.getElementById('rm-data');
+            const currentSection = document.getElementById('daily-totals');
+            if (!nextSection || !nextData || !currentSection) {
+                throw new Error('Remittance report pagination response did not contain the expected report section.');
+            }
+
+            const nextRemittanceData = JSON.parse(nextData.textContent);
+            currentSection.replaceWith(nextSection);
+            __rmData = nextRemittanceData;
+            if (addHistoryEntry) history.pushState({ remittanceReportPage: true }, '', url);
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error(error);
+            window.location.assign(url);
+        }
+    }
+
+    document.addEventListener('click', function (event) {
+        const link = event.target.closest('#daily-totals nav[aria-label="Pagination"] a[href]');
+        if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target) return;
+
+        const url = new URL(link.href, window.location.href);
+        if (url.origin !== window.location.origin) return;
+
+        event.preventDefault();
+        loadReportPage(url.href, true);
+    });
+
+    window.addEventListener('popstate', function () {
+        if (window.location.pathname === new URL('{{ route('reports.remittance') }}', window.location.href).pathname) {
+            loadReportPage(window.location.href, false);
+        }
+    });
+})();
 
 (function () {
     const periodSelect = document.getElementById('period');
