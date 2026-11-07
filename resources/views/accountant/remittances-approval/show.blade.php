@@ -166,7 +166,7 @@ $statusInfo = match($remittance->status) {
 <div class="fade-up bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
     <div class="px-5 py-3.5 border-b border-gray-50">
         <span class="text-xs font-bold text-gray-700">Boundary Payments</span>
-        <p class="text-[10px] text-gray-400 mt-1">Clerk-recorded payments stay pending until you approve them. Approval posts each payment once. No receipt is required.</p>
+        <p class="text-[10px] text-gray-400 mt-1">Clerk-recorded payments stay pending until you approve them. Approval posts each payment once. </p>
     </div>
     @if($remittance->boundaryPayments->isNotEmpty())
         <div class="overflow-x-auto">
