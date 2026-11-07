@@ -79,7 +79,7 @@
             <dl class="px-5 divide-y divide-gray-100">
                 <div class="flex items-center justify-between gap-4 py-3">
                     <dt class="text-xs font-medium text-gray-500">Total Collection</dt>
-                    <dd class="text-xs font-bold text-emerald-600 tabular-nums m-0">₱{{ number_format($remittance->total_collection, 2) }}</dd>
+                    <dd class="text-xs font-bold text-gray-900 tabular-nums m-0">₱{{ number_format($remittance->total_collection, 2) }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-4 py-3">
                     <dt class="text-xs font-medium text-gray-500">Boundary Rate</dt>
@@ -87,11 +87,11 @@
                 </div>
                 <div class="flex items-center justify-between gap-4 py-3">
                     <dt class="text-xs font-medium text-gray-500">Total Expenses</dt>
-                    <dd class="text-xs font-semibold text-red-600 tabular-nums m-0">₱{{ number_format($remittance->total_expenses, 2) }}</dd>
+                    <dd class="text-xs font-semibold text-gray-900 tabular-nums m-0">₱{{ number_format($remittance->total_expenses, 2) }}</dd>
                 </div>
                 <div class="flex items-center justify-between gap-4 py-3">
                     <dt class="text-xs font-bold text-gray-900">Net Remittance</dt>
-                    <dd class="text-sm font-bold text-gray-900 tabular-nums m-0">₱{{ number_format($remittance->net_remittance, 2) }}</dd>
+                    <dd class="text-sm font-bold {{ $remittance->is_short_remittance ? 'text-red-600' : 'text-emerald-600' }} tabular-nums m-0">₱{{ number_format($remittance->net_remittance, 2) }}</dd>
                 </div>
             </dl>
         </section>

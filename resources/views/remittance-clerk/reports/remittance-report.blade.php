@@ -273,9 +273,9 @@ function openRemittanceModal(dateKey) {
         return '<tr class="border-b border-gray-50 cursor-pointer hover:bg-gray-50" data-show-url="' + esc(r.show_url) + '" role="link" tabindex="0">' +
             '<td class="px-5 py-3 text-sm text-gray-900">' + esc(r.route) + '</td>' +
             '<td class="px-5 py-3 text-sm text-gray-900 tabular-nums">' + esc(r.vehicle) + '</td>' +
-            '<td class="px-5 py-3 text-sm text-right tabular-nums font-medium text-gray-900">₱' + fmt(r.collection) + '</td>' +
-            '<td class="px-5 py-3 text-sm text-right tabular-nums text-gray-900">₱' + fmt(r.expenses) + '</td>' +
-            '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold ' + netClass + '">₱' + fmt(r.net) + '</td>' +
+            '<td class="px-5 py-3 text-sm text-left tabular-nums font-medium text-gray-900">₱' + fmt(r.collection) + '</td>' +
+            '<td class="px-5 py-3 text-sm text-left tabular-nums text-gray-900">₱' + fmt(r.expenses) + '</td>' +
+            '<td class="px-5 py-3 text-sm text-left tabular-nums font-bold ' + netClass + '">₱' + fmt(r.net) + '</td>' +
         '</tr>';
     });
 
@@ -292,16 +292,16 @@ function openRemittanceModal(dateKey) {
                 '<thead class="sticky top-0 z-10"><tr class="bg-gray-50 border-b border-gray-200">' +
                     '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Route</th>' +
                     '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Vehicle</th>' +
-                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Collection</th>' +
-                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Expenses</th>' +
-                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Net Remittance</th>' +
+                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Collection</th>' +
+                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Expenses</th>' +
+                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Net Remittance</th>' +
                 '</tr></thead>' +
                 '<tbody id="remittanceDetailBody">' + rows.slice(0, 10).join('') +
                 '</tbody><tfoot><tr class="bg-gray-50/50 border-t-2 border-gray-200">' +
                         '<td colspan="2" class="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-900 text-right">Daily total</td>' +
-                        '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold text-gray-900">₱' + fmt(totalCol) + '</td>' +
-                        '<td class="px-5 py-3 text-sm text-right tabular-nums text-gray-900">₱' + fmt(totalExp) + '</td>' +
-                        '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold text-gray-900">₱' + fmt(totalNet) + '</td>' +
+                        '<td class="px-5 py-3 text-sm text-left tabular-nums font-bold text-gray-900">₱' + fmt(totalCol) + '</td>' +
+                        '<td class="px-5 py-3 text-sm text-left tabular-nums text-gray-900">₱' + fmt(totalExp) + '</td>' +
+                        '<td class="px-5 py-3 text-sm text-left tabular-nums font-bold text-gray-900">₱' + fmt(totalNet) + '</td>' +
                     '</tr></tfoot>' +
             '</table>' +
         '</div>' +
