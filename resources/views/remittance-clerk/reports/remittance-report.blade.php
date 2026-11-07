@@ -271,10 +271,10 @@ function openRemittanceModal(dateKey) {
     let rows = items.map(function(r) {
         const netClass = r.short ? 'text-red-600' : 'text-emerald-600';
         return '<tr class="border-b border-gray-50 cursor-pointer hover:bg-gray-50" data-show-url="' + esc(r.show_url) + '" role="link" tabindex="0">' +
-            '<td class="px-5 py-3 text-sm text-gray-500">' + esc(r.route) + '</td>' +
-            '<td class="px-5 py-3 text-sm text-gray-500 tabular-nums">' + esc(r.vehicle) + '</td>' +
-            '<td class="px-5 py-3 text-sm text-right tabular-nums font-medium text-emerald-600">₱' + fmt(r.collection) + '</td>' +
-            '<td class="px-5 py-3 text-sm text-right tabular-nums text-gray-400">₱' + fmt(r.expenses) + '</td>' +
+            '<td class="px-5 py-3 text-sm text-gray-900">' + esc(r.route) + '</td>' +
+            '<td class="px-5 py-3 text-sm text-gray-900 tabular-nums">' + esc(r.vehicle) + '</td>' +
+            '<td class="px-5 py-3 text-sm text-right tabular-nums font-medium text-gray-900">₱' + fmt(r.collection) + '</td>' +
+            '<td class="px-5 py-3 text-sm text-right tabular-nums text-gray-900">₱' + fmt(r.expenses) + '</td>' +
             '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold ' + netClass + '">₱' + fmt(r.net) + '</td>' +
         '</tr>';
     });
@@ -283,30 +283,30 @@ function openRemittanceModal(dateKey) {
         '<div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">' +
             '<div>' +
                 '<h3 class="text-sm font-bold text-gray-900 m-0">' + formatted + '</h3>' +
-                '<p class="text-[0.65rem] text-gray-400 m-0 mt-0.5">' + items.length + ' remittance record' + (items.length > 1 ? 's' : '') + '</p>' +
+                '<p class="text-[0.65rem] text-gray-900 m-0 mt-0.5">' + items.length + ' remittance record' + (items.length > 1 ? 's' : '') + '</p>' +
             '</div>' +
-            '<button onclick="closeRemittanceModal(this.closest(\'.fixed\'))" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-all border-0 cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>' +
+            '<button onclick="closeRemittanceModal(this.closest(\'.fixed\'))" class="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-900 transition-all border-0 cursor-pointer"><svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>' +
         '</div>' +
         '<div class="overflow-x-auto overflow-y-auto flex-1">' +
             '<table class="w-full text-sm app-standard-table">' +
                 '<thead class="sticky top-0 z-10"><tr class="bg-gray-50 border-b border-gray-200">' +
-                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Route</th>' +
-                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Vehicle</th>' +
-                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Collection</th>' +
-                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Expenses</th>' +
-                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-500">Net Remittance</th>' +
+                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Route</th>' +
+                    '<th class="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Vehicle</th>' +
+                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Collection</th>' +
+                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Expenses</th>' +
+                    '<th class="text-right px-5 py-3 text-xs font-bold uppercase tracking-wider text-gray-900">Net Remittance</th>' +
                 '</tr></thead>' +
                 '<tbody id="remittanceDetailBody">' + rows.slice(0, 10).join('') +
                 '</tbody><tfoot><tr class="bg-gray-50/50 border-t-2 border-gray-200">' +
-                        '<td colspan="2" class="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-500 text-right">Daily total</td>' +
-                        '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold text-emerald-600">₱' + fmt(totalCol) + '</td>' +
-                        '<td class="px-5 py-3 text-sm text-right tabular-nums text-gray-400">₱' + fmt(totalExp) + '</td>' +
-                        '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold ' + (hasShort ? 'text-red-600' : 'text-emerald-600') + '">₱' + fmt(totalNet) + '</td>' +
+                        '<td colspan="2" class="px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-900 text-right">Daily total</td>' +
+                        '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold text-gray-900">₱' + fmt(totalCol) + '</td>' +
+                        '<td class="px-5 py-3 text-sm text-right tabular-nums text-gray-900">₱' + fmt(totalExp) + '</td>' +
+                        '<td class="px-5 py-3 text-sm text-right tabular-nums font-bold text-gray-900">₱' + fmt(totalNet) + '</td>' +
                     '</tr></tfoot>' +
             '</table>' +
         '</div>' +
         '<div class="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-gray-50/50">' +
-            '<p class="text-xs text-gray-400" id="remittanceDetailInfo"></p>' +
+            '<p class="text-xs text-gray-900" id="remittanceDetailInfo"></p>' +
             '<nav class="flex items-center gap-1" id="remittanceDetailNav" aria-label="Remittance detail pagination"></nav>' +
         '</div>' +
     '</div>';
@@ -335,13 +335,13 @@ function openRemittanceModal(dateKey) {
         const start = (page - 1) * perPage;
         const end = Math.min(start + perPage, rows.length);
         detailBody.innerHTML = rows.slice(start, end).join('');
-        detailInfo.innerHTML = `Showing <strong class="text-gray-700">${start + 1}</strong>–<strong class="text-gray-700">${end}</strong> of <strong class="text-gray-700">${rows.length}</strong> remittance records`;
+        detailInfo.innerHTML = `Showing <strong class="text-gray-900">${start + 1}</strong>–<strong class="text-gray-900">${end}</strong> of <strong class="text-gray-900">${rows.length}</strong> remittance records`;
 
         let html = '';
         const buttonClass = 'flex items-center justify-center w-7 h-7 rounded-lg text-xs font-semibold border transition-all duration-150';
         const activeClass = buttonClass + ' bg-gray-900 text-white border-gray-900';
-        const defaultClass = buttonClass + ' bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
-        const disabledClass = buttonClass + ' bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed pointer-events-none';
+        const defaultClass = buttonClass + ' bg-white text-gray-900 border-gray-200 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300';
+        const disabledClass = buttonClass + ' bg-gray-50 text-gray-900 border-gray-100 cursor-not-allowed pointer-events-none';
         if (totalPages > 1) {
             html += `<button type="button" data-page="${page - 1}" aria-label="Previous page" class="${page === 1 ? disabledClass : defaultClass}">‹</button>`;
             const windowStart = Math.max(1, page - 2);
