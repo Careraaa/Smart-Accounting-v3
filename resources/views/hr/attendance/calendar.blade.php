@@ -504,8 +504,8 @@ document.addEventListener('DOMContentLoaded', function() {
             qUserId.value = uid;
             qDate.value = date;
             qDateLabel.textContent = new Date(date + 'T00:00:00').toLocaleDateString(undefined, {weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'});
-            qTimeIn.value = '';
-            qTimeOut.value = '';
+            qTimeIn.value = '08:00';
+            qTimeOut.value = '17:00';
             qStatus.style.display = 'none';
             if (qStatus) { qStatus.style.display = 'none'; qStatus.className = 'mt-3 text-xs text-center font-medium'; }
             qModal.style.display = 'flex';
