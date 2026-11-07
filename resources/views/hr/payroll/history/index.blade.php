@@ -43,9 +43,9 @@
             <p class="text-sm text-gray-400 mt-0.5">View all submitted and paid payroll batches</p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('hr.reports.print.payroll-history-report') }}" target="_blank" class="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 no-underline">
+            <button type="button" id="printHistoryReport" class="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                 Print Report
-            </a>
+            </button>
         </div>
     </div>
 
@@ -112,13 +112,13 @@
         <div class="flex-1 min-w-[200px]">
             <input type="text" id="prlSearch" placeholder="Search by period…" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100">
         </div>
-        <select id="filterMonth" onchange="applyFilter()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
+        <select id="filterMonth" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
             <option value="">All Months</option>
             @for($i = 1; $i <= 12; $i++)
                 <option value="{{ $i }}" {{ $filterMonth == $i ? 'selected' : '' }}>{{ \Carbon\Carbon::createFromDate(null, $i)->format('F') }}</option>
             @endfor
         </select>
-        <select id="filterYear" onchange="applyFilter()" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
+        <select id="filterYear" class="border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 bg-white outline-none transition-all focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer">
             <option value="">All Years</option>
             @for($i = now()->year - 5; $i <= now()->year; $i++)
                 <option value="{{ $i }}" {{ $filterYear == $i ? 'selected' : '' }}>{{ $i }}</option>
@@ -172,6 +172,7 @@ window.allHistoryBatches = {!! json_encode($allBatches->map(fn($b) => [
     const search  = document.getElementById('prlSearch');
     const monthF  = document.getElementById('filterMonth');
     const yearF   = document.getElementById('filterYear');
+    const printButton = document.getElementById('printHistoryReport');
     const grid    = document.getElementById('prlGrid');
     const noRes   = document.getElementById('prlNoResults');
     const emptyTitle = document.getElementById('prlEmptyTitle');
@@ -201,11 +202,108 @@ window.allHistoryBatches = {!! json_encode($allBatches->map(fn($b) => [
         render();
     }
 
+    function printFilteredBatches() {
+        if (filtered.length === 0) return;
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            window.alert('Please allow pop-ups to print the payroll history report.');
+            return;
+        }
+
+        const escapeHtml = value => String(value).replace(/[&<>"']/g, character => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        })[character]);
+        const formatMoney = value => Number(value).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+        const monthLabel = monthF.selectedOptions[0]?.textContent.trim();
+        const filters = [
+            search.value.trim() ? `Search: ${search.value.trim()}` : null,
+            monthF.value ? `Month: ${monthLabel}` : null,
+            yearF.value ? `Year: ${yearF.value}` : null,
+        ].filter(Boolean);
+        const rows = filtered.map(batch => `
+            <tr>
+                <td>${escapeHtml(`${batch.month_year} — ${batch.is_first ? '1st' : '2nd'} half`)}</td>
+                <td>${escapeHtml(`${batch.period_start_display} – ${batch.period_end_display}`)}</td>
+                <td>${escapeHtml(batch.status)}</td>
+                <td class="number">${escapeHtml(batch.employee_count)}</td>
+                <td class="number">₱${escapeHtml(formatMoney(batch.gross_pay))}</td>
+                <td class="number">₱${escapeHtml(formatMoney(batch.total_deductions))}</td>
+                <td class="number">₱${escapeHtml(formatMoney(batch.net_pay))}</td>
+            </tr>`).join('');
+        const totals = filtered.reduce((sum, batch) => ({
+            gross: sum.gross + Number(batch.gross_pay),
+            deductions: sum.deductions + Number(batch.total_deductions),
+            net: sum.net + Number(batch.net_pay),
+        }), { gross: 0, deductions: 0, net: 0 });
+
+        printWindow.document.open();
+        printWindow.document.write(`<!doctype html>
+            <html lang="en">
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Payroll History Report</title>
+                <style>
+                    * { box-sizing: border-box; }
+                    body { color: #111827; font: 12px Arial, sans-serif; margin: 28px; }
+                    h1 { font-size: 22px; margin: 0 0 6px; }
+                    .meta { color: #4b5563; margin-bottom: 18px; }
+                    table { border-collapse: collapse; width: 100%; }
+                    th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+                    th { background: #f3f4f6; font-size: 10px; text-transform: uppercase; }
+                    .number { text-align: right; white-space: nowrap; }
+                    tfoot { font-weight: bold; }
+                    @page { size: landscape; margin: 12mm; }
+                    @media print { body { margin: 0; } }
+                </style>
+            </head>
+            <body>
+                <h1>Payroll History Report</h1>
+                <div class="meta">
+                    ${escapeHtml(filters.length ? filters.join(' · ') : 'All payroll batches')}
+                    · ${filtered.length} ${filtered.length === 1 ? 'batch' : 'batches'}
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Payroll period</th><th>Date range</th><th>Status</th>
+                            <th class="number">Employees</th><th class="number">Gross pay</th>
+                            <th class="number">Deductions</th><th class="number">Net pay</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4">Total for shown batches</td>
+                            <td class="number">₱${escapeHtml(formatMoney(totals.gross))}</td>
+                            <td class="number">₱${escapeHtml(formatMoney(totals.deductions))}</td>
+                            <td class="number">₱${escapeHtml(formatMoney(totals.net))}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </body>
+            </html>`);
+        printWindow.document.close();
+        window.setTimeout(() => {
+            printWindow.focus();
+            printWindow.print();
+        }, 250);
+    }
+
     function render() {
         const start = (page - 1) * PER;
         const end = Math.min(start + PER, filtered.length);
         const pageData = filtered.slice(start, end);
         grid.innerHTML = '';
+        printButton.disabled = filtered.length === 0;
 
         if (pageData.length === 0) {
             noRes.classList.remove('hidden');
@@ -299,6 +397,7 @@ window.allHistoryBatches = {!! json_encode($allBatches->map(fn($b) => [
     search.addEventListener('input', applyFilters);
     monthF.addEventListener('change', applyFilters);
     yearF.addEventListener('change', applyFilters);
+    printButton.addEventListener('click', printFilteredBatches);
     applyFilters();
 })();
 </script>
