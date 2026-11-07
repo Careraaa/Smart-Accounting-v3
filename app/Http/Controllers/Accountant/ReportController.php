@@ -199,7 +199,7 @@ class ReportController extends Controller
             ->values()
             ->toArray();
   
-        $preparedBy = User::where('role', 'remittance_clerk')->first();
+        $preparedBy = User::where('role', 'hr')->first();
         $checkedBy = auth()->user();
 
         return view('accountant.reports.payroll-print', compact(
