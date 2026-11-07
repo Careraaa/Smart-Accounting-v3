@@ -6,10 +6,12 @@ use App\Exceptions\BoundaryPaymentException;
 use App\Http\Controllers\Controller;
 use App\Models\BoundaryPayment;
 use App\Models\DailyRemittance;
+use App\Models\Setting;
 use App\Notifications\RemittanceNotification;
 use App\Services\BoundaryPaymentService;
 use App\Traits\LogsUserActivity;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RemittanceApprovalController extends Controller
 {
@@ -22,8 +24,76 @@ class RemittanceApprovalController extends Controller
         $remittances = DailyRemittance::with('driver', 'pao', 'route', 'vehicle')
             ->orderByDesc('remittance_date')
             ->get();
+        $testingMode = Setting::get('testing_mode', 'disabled') === 'enabled';
 
-        return view('accountant.remittances-approval.index', compact('remittances'));
+        return view('accountant.remittances-approval.index', compact('remittances', 'testingMode'));
+    }
+
+    public function approveAllPending(BoundaryPaymentService $payments)
+    {
+        abort_unless(
+            Setting::get('testing_mode', 'disabled') === 'enabled',
+            403,
+            'Bulk remittance approval is only available while testing mode is enabled.'
+        );
+
+        try {
+            $approvedRemittances = DB::transaction(function () use ($payments) {
+                $pendingRemittances = DailyRemittance::where('status', 'pending')
+                    ->lockForUpdate()
+                    ->get();
+                $approved = collect();
+
+                foreach ($pendingRemittances as $remittance) {
+                    $paymentDate = $remittance->remittance_date->isFuture()
+                        ? today()->toDateString()
+                        : $remittance->remittance_date->toDateString();
+
+                    [$approvedRemittance, $approvedNow] = $payments->approveRemittance(
+                        $remittance->id,
+                        $paymentDate,
+                        true,
+                        (int) auth()->id()
+                    );
+
+                    if ($approvedNow) {
+                        $approved->push($approvedRemittance);
+                    }
+                }
+
+                return $approved;
+            });
+        } catch (BoundaryPaymentException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        if ($approvedRemittances->isEmpty()) {
+            return redirect()->back()->with('error', 'There are no pending remittances to approve.');
+        }
+
+        $journalEntriesGenerated = 0;
+        foreach ($approvedRemittances as $remittance) {
+            $amountToPost = min(
+                max(round((float) $remittance->net_remittance, 2), 0),
+                max(round((float) $remittance->boundary, 2), 0)
+            );
+            $journalEntriesGenerated += $amountToPost > 0 ? 1 : 0;
+
+            $this->logActivity(
+                'approved',
+                "Remittance #{$remittance->id}",
+                request()->url(),
+                'daily_remittance',
+                $remittance->id
+            );
+            $remittance->load('driver', 'pao', 'vehicle');
+            RemittanceNotification::remittanceApproved($remittance);
+        }
+
+        return redirect()->back()->with(
+            'success',
+            "Approved {$approvedRemittances->count()} pending remittances and generated {$journalEntriesGenerated} boundary-payment journal entries."
+        );
     }
 
     public function show(DailyRemittance $remittance)

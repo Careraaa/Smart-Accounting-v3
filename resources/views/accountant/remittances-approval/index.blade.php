@@ -29,6 +29,16 @@ $tab            = in_array($tab, ['pending', 'approved', 'rejected'], true) ? $t
         <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Remittance Approval</h1>
         <p class="text-sm text-gray-500 mt-0.5">Approve or reject remittances submitted by the remittance clerk</p>
     </div>
+    @if($testingMode && $totalPending > 0)
+        <form action="{{ route('remittance-approval.approve-all') }}" method="POST"
+              onsubmit="return confirm('Approve all {{ $totalPending }} pending remittances? Boundary payments and their journal entries will also be posted where due.');">
+            @csrf
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700">
+                Approve All Pending (Testing)
+            </button>
+            <p class="mt-1 text-right text-xs text-amber-700">Boundary-payment journal entries will be generated where due.</p>
+        </form>
+    @endif
 </div>
 
 {{-- Flash --}}

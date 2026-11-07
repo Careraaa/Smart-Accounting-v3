@@ -8,6 +8,7 @@ use App\Models\Driver;
 use App\Models\JournalEntry;
 use App\Models\PAO;
 use App\Models\Route as TransportRoute;
+use App\Models\Setting;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -140,6 +141,45 @@ test('remittance clerk can see rejected remittances in the rejected tab', functi
         })
         ->assertSee('rejected: rejectedData', false)
         ->assertSee('app-status-badge rejected', false);
+});
+
+test('testing mode bulk approval approves pending remittances and posts boundary journal entries', function () {
+    Setting::set('testing_mode', 'enabled');
+    $withBoundaryPayment = boundaryPaymentTestRemittance(3000, 2000);
+    $withoutBoundaryPayment = boundaryPaymentTestRemittance(0, 0);
+    $rejected = boundaryPaymentTestRemittance(3000, 2000, 'rejected');
+
+    $this->get(route('remittance-approval.index'))
+        ->assertOk()
+        ->assertSee(route('remittance-approval.approve-all'), false)
+        ->assertSee('Approve All Pending (Testing)');
+
+    $this->post(route('remittance-approval.approve-all'))
+        ->assertRedirect()
+        ->assertSessionHas('success', 'Approved 2 pending remittances and generated 1 boundary-payment journal entries.');
+
+    $this->assertDatabaseHas('daily_remittances', ['id' => $withBoundaryPayment->id, 'status' => 'approved']);
+    $this->assertDatabaseHas('daily_remittances', ['id' => $withoutBoundaryPayment->id, 'status' => 'approved']);
+    $this->assertDatabaseHas('daily_remittances', ['id' => $rejected->id, 'status' => 'rejected']);
+
+    $payment = $withBoundaryPayment->boundaryPayments()->firstOrFail();
+    $this->assertDatabaseHas('journal_entries', [
+        'reference_type' => 'Boundary Payment',
+        'reference_id' => $payment->id,
+        'status' => 'Posted',
+    ]);
+});
+
+test('testing mode bulk approval is unavailable when testing mode is disabled', function () {
+    $remittance = boundaryPaymentTestRemittance(3000, 2000);
+
+    $this->get(route('remittance-approval.index'))
+        ->assertOk()
+        ->assertDontSee(route('remittance-approval.approve-all'), false);
+
+    $this->post(route('remittance-approval.approve-all'))->assertForbidden();
+
+    $this->assertDatabaseHas('daily_remittances', ['id' => $remittance->id, 'status' => 'pending']);
 });
 
 test('remittance create and update reject letters in monetary fields', function () {
