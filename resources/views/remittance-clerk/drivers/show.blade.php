@@ -1,6 +1,6 @@
 @extends('layouts.layout')
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6 bg-[#eaeaea] dark:bg-[#0a0a0a]">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
     <div class="flex items-center justify-between gap-3">
         <a href="{{ route('drivers.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -17,10 +17,6 @@
             </button>
             <form id="deleteDriverForm" action="{{ route('drivers.destroy', $driver) }}" method="POST" class="hidden">@csrf @method('DELETE')</form>
         </div>
-    </div>
-
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $driver->name }}</h1>
     </div>
 
     <div class="hidden">
@@ -69,48 +65,53 @@
     </div>
 
     {{-- Driver Information Card --}}
-    <section>
-        <h2 class="text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Driver Information</h2>
-        <div class="divide-y divide-gray-200">
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Full Name</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $driver->name ?? '—' }}</span>
+    <section class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">License Number</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $driver->license_number ?? '—' }}</span>
+            <h2 class="text-xs font-bold text-gray-900">Driver Information</h2>
+        </div>
+        <div class="px-5 divide-y divide-gray-100">
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Full Name</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $driver->name ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Contact Number</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $driver->contact_number ?? '—' }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">License Number</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $driver->license_number ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Email</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $driver->email ?? '—' }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Contact Number</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $driver->contact_number ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Sex</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ ucfirst(str_replace('_', ' ', $driver->gender ?? '—')) }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Email</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $driver->email ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Date of Hire</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $driver->date_of_hire?->format('F d, Y') ?? '—' }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Sex</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ ucfirst(str_replace('_', ' ', $driver->gender ?? '—')) }}</span>
+            </div>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Date of Hire</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $driver->date_of_hire?->format('F d, Y') ?? '—' }}</span>
             </div>
             @if($driver->address)
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-semibold text-gray-500">Address</span>
-                <span class="text-xs text-gray-700 text-right max-w-[60%]">{{ $driver->address }}</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Address</span>
+                <span class="text-xs text-gray-900 text-right max-w-[60%]">{{ $driver->address }}</span>
             </div>
             @endif
             <div class="flex items-center justify-between py-3">
-                <span class="text-xs font-semibold text-gray-500">Status</span>
-                <span class="text-xs text-gray-700 text-right">
+                <span class="text-xs font-medium text-gray-600">Status</span>
+                <span class="text-xs text-gray-900 text-right">
                     @php $sc = match($driver->status) { 'active' => 'bg-emerald-500/10 text-emerald-600 border-emerald-200/30', 'pending' => 'bg-amber-500/10 text-amber-600 border-amber-200/30', default => 'bg-red-500/10 text-red-600 border-red-200/30' }; @endphp
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border {{ $sc }}">{{ ucfirst($driver->status) }}</span>
                 </span>
             </div>
         </div>
-        </section>
+    </section>
 </div>
 {{-- Delete Confirmation Modal --}}
 <div id="driverDeleteModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">

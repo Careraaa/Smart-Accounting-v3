@@ -8,7 +8,7 @@
 </style>
 @endpush
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6 bg-[#eaeaea] dark:bg-[#0a0a0a]">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
 
     @php
         $vstatus = strtolower($vehicle->status ?? 'active');
@@ -33,11 +33,6 @@
         </div>
     </div>
 
-    <div class="fade-up">
-        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $vehicle->plate_number }}</h1>
-        <p class="text-sm text-gray-500 mt-0.5">{{ $vehicle->route ? ($vehicle->route->origin . ' → ' . $vehicle->route->destination) : 'No route assigned' }}</p>
-    </div>
-
     <div class="hidden">
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center shrink-0">
@@ -60,35 +55,40 @@
         </div>
     </div>
 
-    <section class="fade-up">
-        <h2 class="text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Vehicle Information</h2>
-        <div class="divide-y divide-gray-200">
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-medium text-gray-400">Plate Number</span>
+    <section class="fade-up bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 17h14l1-5-2-5H6l-2 5 1 5zm0 0v2m14-2v2M7 12h.01M17 12h.01"/></svg>
+            </div>
+            <h2 class="text-xs font-bold text-gray-900">Vehicle Information</h2>
+        </div>
+        <div class="px-5 divide-y divide-gray-100">
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Plate Number</span>
                 <span class="text-xs font-semibold text-gray-900">{{ $vehicle->plate_number ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-medium text-gray-400">Operator</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Operator</span>
                 <span class="text-xs font-semibold text-gray-900">{{ $vehicle->operator ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-medium text-gray-400">Status</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Status</span>
                 <span class="text-xs font-semibold"><span class="app-status-badge {{ $vstatus === 'active' ? 'active' : ($vstatus === 'under_maintenance' ? 'maintenance' : 'neutral') }}">{{ $vlabel }}</span></span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-medium text-gray-400">Origin</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Origin</span>
                 <span class="text-xs font-semibold text-gray-900">{{ $vehicle->route->origin ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-medium text-gray-400">Destination</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Destination</span>
                 <span class="text-xs font-semibold text-gray-900">{{ $vehicle->route->destination ?? '—' }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-medium text-gray-400">Weekday Boundary</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Weekday Boundary</span>
                 <span class="text-xs font-semibold text-gray-900">₱{{ number_format($vehicle->route->weekday_boundary ?? 0, 2) }}</span>
             </div>
-            <div class="flex items-center justify-between py-3 border-b border-gray-50">
-                <span class="text-xs font-medium text-gray-400">Weekend Boundary</span>
+            <div class="flex items-center justify-between py-3">
+                <span class="text-xs font-medium text-gray-600">Weekend Boundary</span>
                 <span class="text-xs font-semibold text-gray-900">₱{{ number_format($vehicle->route->weekend_boundary ?? 0, 2) }}</span>
             </div>
         </div>
