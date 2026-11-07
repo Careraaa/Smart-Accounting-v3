@@ -61,8 +61,6 @@
             <div class="meta-row"><span class="meta-label">Name</span><span class="meta-value">{{ $employee->last_name }}, {{ $employee->first_name }}</span></div>
             <div class="meta-row"><span class="meta-label">For the month of</span><span class="meta-value">{{ $month->format('F Y') }}</span></div>
             <div class="meta-row"><span class="meta-label">Office Hours (regular days)</span><span class="meta-value">{{ $officeHours }}</span></div>
-            <div class="meta-row"><span class="meta-label">Arrival &amp; Departure</span><span class="meta-line"></span></div>
-            <div class="meta-row"><span class="meta-label">Saturdays</span><span class="meta-line"></span></div>
         </div>
 
         @php $totalHours = 0; $totalMinutes = 0; @endphp
