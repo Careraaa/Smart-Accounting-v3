@@ -367,6 +367,15 @@
                         </a>
                     </li>
 
+                    @if (in_array($activeRole, ['employee', 'hr', 'accountant', 'remittance_clerk'], true) && auth()->user()->role !== 'superadmin')
+                        <li class="sidebar-item">
+                            <a href="{{ route('employee.payslips.index') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('employee.payslips.*') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
+                                <span class="sidebar-icon flex items-center justify-center text-green-600"><i class="feather-file" style="font-size:18px"></i></span>
+                                <span class="sidebar-text truncate min-w-0">My Payslips</span>
+                            </a>
+                        </li>
+                    @endif
+
                     <li class="sidebar-item">
                         <a href="{{ route('attendance.scan') }}" class="sidebar-link flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm no-underline {{ request()->routeIs('attendance.scan') ? 'active text-gray-900 font-semibold' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-50' }}">
                             <span class="sidebar-icon flex items-center justify-center {{ request()->routeIs('attendance.scan') ? 'text-cyan-500' : 'text-cyan-500' }}"><i class="feather-camera" style="font-size:18px"></i></span>

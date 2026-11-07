@@ -17,20 +17,32 @@
             .no-print { display: none !important; }
             .print-page { margin: 0; box-shadow: none; max-width: 100%; padding: 12mm; }
         }
+        @media screen and (max-width: 900px) {
+            .no-print { margin: 12px 12px 8px; }
+            .print-page { margin: 0 12px 16px; padding: 20px; }
+            .report-header { align-items: flex-start; gap: 16px; }
+            .report-table,
+            .report-table tbody,
+            .report-table tr { display: block; width: 100%; }
+            .report-table thead { display: none; }
+            .report-table tbody tr { padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+            .report-table td { display: grid; grid-template-columns: minmax(7rem, 38%) minmax(0, 1fr); gap: 10px; padding: 5px 0; overflow-wrap: anywhere; }
+            .report-table td::before { content: attr(data-label); font-weight: 600; color: #4b5563; }
+            .report-table td[colspan] { display: block; text-align: center; }
+        }
         @page { size: A4 landscape; margin: 0; }
     </style>
     <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
 </head>
 <body>
     {{-- Controls --}}
-    <div class="no-print max-w-[900px] mx-auto mt-7 mb-3 flex justify-end gap-2">
-        <a href="{{ route('drivers.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded text-xs font-semibold bg-white text-gray-700 border border-gray-200 no-underline cursor-pointer hover:opacity-80 transition-opacity">← Back</a>
+    <div class="no-print print-controls max-w-[900px] mx-auto mt-7 mb-3 flex justify-end gap-2">
         <button onclick="window.print()" class="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:text-gray-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 cursor-pointer">Print Report</button>
     </div>
 
     <div class="print-page bg-white max-w-[900px] mx-auto mb-10 shadow-sm p-10" style="box-shadow:0 2px 24px rgba(0,0,0,.08);">
         {{-- Header --}}
-        <div class="flex items-end justify-between pb-6 mb-7" style="border-bottom:2px solid #0a0a0a;">
+        <div class="report-header flex items-end justify-between pb-6 mb-7" style="border-bottom:2px solid #0a0a0a;">
             <div class="flex items-center gap-3">
                 <img src="{{ asset('images/knights-icon.png') }}" alt="Logo" class="w-10 h-10 object-contain rounded-lg">
                 <div>
@@ -45,30 +57,24 @@
         </div>
 
         {{-- Table --}}
-        <table class="w-full text-[11px] border-collapse">
+        <table class="report-table w-full text-[11px] border-collapse">
             <thead>
                 <tr class="bg-gray-50 border-b border-gray-200" style="background:#f7f7f7;">
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Name</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">License Number</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Contact Number</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Email</th>
-                    <th class="text-left px-5 py-3 font-semibold text-gray-700">Sex</th>
                     <th class="text-left px-5 py-3 font-semibold text-gray-700">Address</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($drivers as $driver)
                     <tr class="border-b border-gray-200">
-                        <td class="px-5 py-3 font-semibold">{{ $driver->name }}</td>
-                        <td class="px-5 py-3">{{ $driver->license_number ?? 'N/A' }}</td>
-                        <td class="px-5 py-3">{{ $driver->contact_number ?? 'N/A' }}</td>
-                        <td class="px-5 py-3">{{ $driver->email ?? 'N/A' }}</td>
-                        <td class="px-5 py-3">{{ ucfirst($driver->gender ?? 'N/A') }}</td>
-                        <td class="px-5 py-3">{{ $driver->address ?? 'N/A' }}</td>
+                        <td data-label="Name" class="px-5 py-3 font-semibold">{{ $driver->name }}</td>
+                        <td data-label="Contact Number" class="px-5 py-3">{{ $driver->contact_number ?? 'N/A' }}</td>
+                        <td data-label="Address" class="px-5 py-3">{{ $driver->address ?? 'N/A' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-gray-400">No active drivers found.</td>
+                        <td colspan="3" class="text-center py-5 text-gray-400">No active drivers found.</td>
                     </tr>
                 @endforelse
             </tbody>

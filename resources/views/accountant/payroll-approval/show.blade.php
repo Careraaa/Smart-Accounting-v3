@@ -16,6 +16,12 @@
 .text-gray-500 { color: #4b5563 !important; }
 .stat-card p:first-child { font-size: 0.625rem !important; }
 th { font-size: 0.625rem !important; }
+.payroll-line-item > span:first-child { min-width: 0; }
+@media (max-width: 639px) {
+    .payroll-line-item { flex-wrap: wrap; gap: 0.35rem; }
+    .payroll-line-item > span:first-child { flex: 1 1 60%; }
+    .payroll-line-item > span + span { margin-left: auto; }
+}
 </style>
 @endpush
 
@@ -46,7 +52,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
     ->where('status', 'absent')->count();
 @endphp
 
-<div class="max-w-4xl mx-auto space-y-5">
+<div class="w-full min-w-0 max-w-4xl mx-auto space-y-5">
 
     {{-- Page title --}}
     <div class="flex items-center justify-between">
@@ -63,14 +69,14 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
     </button>
 
     {{-- Employee header --}}
-    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-5 flex items-center gap-4">
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 px-4 sm:px-6 py-5 flex flex-wrap items-center gap-3 sm:flex-nowrap sm:gap-4">
         <span class="w-12 h-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center text-base font-extrabold text-gray-600 shrink-0 uppercase">{{ strtoupper(substr($user->first_name??'U',0,1).substr($user->last_name??'',0,1)) }}</span>
-        <div class="flex-1">
+        <div class="min-w-0 flex-1">
             <h1 class="text-lg font-extrabold text-gray-900 tracking-tight">{{ $user->first_name }} {{ $user->last_name }}</h1>
             <p class="text-xs text-gray-400">{{ $user->position ?? ($user->department ?? 'Employee') }}</p>
-            <p class="text-xs text-gray-400 mt-0.5 font-mono">{{ $payroll->payroll_period_start->format('F d, Y') }} &mdash; {{ $payroll->payroll_period_end->format('F d, Y') }}</p>
+            <p class="text-xs text-gray-400 mt-0.5 font-mono break-words">{{ $payroll->payroll_period_start->format('F d, Y') }} &mdash; {{ $payroll->payroll_period_end->format('F d, Y') }}</p>
         </div>
-        <div class="flex flex-col items-end gap-2">
+        <div class="w-full sm:w-auto flex flex-col items-start sm:items-end gap-2">
             <span class="app-status-badge {{ $sc['bg'] }} {{ $sc['text'] }}">
                 <span class="w-2 h-2 rounded-full {{ $sc['dot'] }}"></span>
                 {{ $sc['label'] }}
@@ -82,20 +88,20 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
     </div>
 
     {{-- Stat chips --}}
-    <div class="grid grid-cols-4 gap-3">
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
             <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Days Worked</p>
             <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">{{ $payroll->days_worked }}</p>
         </div>
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
             <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Absent</p>
             <p class="text-lg font-extrabold {{ $daysAbsent > 0 ? 'text-red-500' : 'text-gray-900' }} tabular-nums mt-1">{{ $daysAbsent }}</p>
         </div>
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
             <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Daily Rate</p>
             <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($payroll->per_day_rate, 2) }}</p>
         </div>
-        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 text-center">
+        <div class="stat-card bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-4 text-center">
             <p class="text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400">Hourly Rate</p>
             <p class="text-lg font-extrabold text-gray-900 tabular-nums mt-1">₱{{ number_format($payroll->hourly_rate, 2) }}</p>
         </div>
@@ -110,13 +116,13 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             <div><p class="text-sm font-bold text-gray-900">Earnings</p><p class="text-xs text-gray-400">Basic pay, overtime, and allowances</p></div>
         </div>
         <div class="px-5 py-4 divide-y divide-gray-50">
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-gray-600">Basic Pay <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1.5">daily rate &times; {{ $payroll->days_worked }} days</span></span>
                 <span class="text-sm font-semibold text-gray-900 tabular-nums font-mono">₱{{ number_format($payroll->basic_salary, 2) }}</span>
             </div>
 
             @foreach($holidayBreakdown as $hb)
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-emerald-600 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                     {{ $hb['label'] ?? 'Holiday Pay' }}
@@ -127,7 +133,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
 
             @php $holidayOTPay = (float)($payroll->holiday_ot_pay ?? 0); $holidayOTHours = (float)($payroll->holiday_ot_hours ?? 0); @endphp
             @if($holidayOTPay > 0)
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-emerald-600 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                     Holiday Overtime Pay
@@ -138,7 +144,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             @endif
 
             @foreach($overtimeAllowances as $ot)
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-emerald-600 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                     {{ $ot->allowance_type }}
@@ -153,7 +159,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
                 $_laName = str_replace(['Leave Pay (', ')'], '', $la->allowance_type);
                 $_laDays = (int)($la->hours ?? 0);
             @endphp
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-emerald-600 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                     {{ $_laName }}
@@ -164,7 +170,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             @endforeach
 
             @foreach($regularAllowances as $allow)
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-emerald-600 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                     {{ $allow->allowance_type }}
@@ -174,7 +180,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             @endforeach
 
             @foreach($payroll->bonuses as $bonus)
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-purple-600 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                     {{ $bonus->bonus_type }}
@@ -201,7 +207,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
         </div>
         <div class="px-5 py-4 divide-y divide-gray-50">
             @forelse($regularDeductions as $d)
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-red-500 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
                     {{ $d->deduction_type === 'Late Deduction' ? 'Tardiness' : $d->deduction_type }}
@@ -213,7 +219,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             @endforelse
 
             @foreach($undertimeDeductions as $ut)
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-red-500 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
                     Undertime <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">attendance-based</span>
@@ -223,7 +229,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             @endforeach
 
             @if($caDeduction > 0)
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-red-500 flex items-center gap-1.5">
                     <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4"/></svg>
                     Cash Advance <span class="text-[0.5rem] font-semibold uppercase tracking-wide text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded ml-1">loan</span>
@@ -233,7 +239,7 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
             @endif
 
             @if($regularDeductions->isEmpty() && $undertimeDeductions->isEmpty() && $caDeduction <= 0)
-            <div class="flex items-center justify-between py-2.5">
+            <div class="payroll-line-item flex items-center justify-between py-2.5">
                 <span class="text-sm text-gray-300 italic">No deductions</span>
                 <span></span>
             </div>
@@ -294,9 +300,9 @@ $daysAbsent = \App\Models\Attendance::where('user_id', $payroll->user_id)
     @endif
 
     {{-- Net Pay --}}
-    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 px-6 py-5 flex items-center justify-between">
+    <div class="fade-up bg-white rounded-xl shadow-sm border border-gray-100 px-4 sm:px-6 py-5 flex flex-wrap items-center justify-between gap-2">
         <span class="text-xs font-semibold uppercase tracking-widest text-gray-400">Net Pay</span>
-        <span class="text-2xl font-extrabold text-gray-900 tabular-nums font-mono">₱{{ number_format($payroll->net_pay, 2) }}</span>
+        <span class="ml-auto text-xl sm:text-2xl font-extrabold text-gray-900 tabular-nums font-mono">₱{{ number_format($payroll->net_pay, 2) }}</span>
     </div>
 
     {{-- Employee info --}}

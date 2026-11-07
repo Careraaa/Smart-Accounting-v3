@@ -189,6 +189,8 @@ class DailyRemittanceController extends Controller
 
     public function edit(DailyRemittance $remittance)
     {
+        abort_unless($remittance->status !== 'approved', 403, 'Approved remittances cannot be edited.');
+
         $drivers = Driver::where('status', 'active')->get()->sortBy(fn (Driver $driver) => $driver->formatted_name, SORT_NATURAL | SORT_FLAG_CASE)->values();
         $paos = PAO::where('status', 'active')->get()->sortBy(fn (PAO $pao) => $pao->formatted_name, SORT_NATURAL | SORT_FLAG_CASE)->values();
         $vehicles = Vehicle::where('status', 'active')->orWhere('id', $remittance->vehicle_id)->get();
@@ -197,6 +199,8 @@ class DailyRemittanceController extends Controller
 
     public function update(Request $request, DailyRemittance $remittance)
     {
+        abort_unless($remittance->status !== 'approved', 403, 'Approved remittances cannot be edited.');
+
         $validated = $request->validate([
             'driver_id' => 'required|exists:drivers,id',
             'pao_id' => 'required|exists:paos,id',
@@ -226,6 +230,8 @@ class DailyRemittanceController extends Controller
                 $lockedRemittance = DailyRemittance::whereKey($remittance->getKey())
                     ->lockForUpdate()
                     ->firstOrFail();
+
+                abort_unless($lockedRemittance->status !== 'approved', 403, 'Approved remittances cannot be edited.');
 
                 if ($lockedRemittance->boundaryPayments()->exists()) {
                     throw new BoundaryPaymentException('A remittance with recorded boundary payments cannot be edited. Contact accounting for a correction.');
@@ -299,11 +305,16 @@ class DailyRemittanceController extends Controller
 
     public function destroy(DailyRemittance $remittance)
     {
+        abort_unless(! in_array($remittance->status, ['approved', 'rejected'], true), 403, 'Approved or rejected remittances cannot be deleted.');
+
         try {
             $remittance = \Illuminate\Support\Facades\DB::transaction(function () use ($remittance) {
                 $lockedRemittance = DailyRemittance::whereKey($remittance->getKey())
                     ->lockForUpdate()
                     ->firstOrFail();
+
+                abort_unless(! in_array($lockedRemittance->status, ['approved', 'rejected'], true), 403, 'Approved or rejected remittances cannot be deleted.');
+
                 if ($lockedRemittance->boundaryPayments()->exists()) {
                     throw new BoundaryPaymentException('A remittance with recorded boundary payments cannot be deleted. Contact accounting for a correction.');
                 }

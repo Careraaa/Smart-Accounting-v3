@@ -130,6 +130,18 @@ class ThirteenthMonthPayController extends Controller
         return view('hr.payroll.thirteenth-month.payslip', compact('batch', 'record', 'breakdown'));
     }
 
+    public function myPayslip(PayrollBatch $batch, ThirteenthMonthPay $record)
+    {
+        abort_unless(
+            in_array(auth()->user()->role, ['employee', 'hr', 'accountant', 'remittance_clerk'], true),
+            403,
+            'You are not authorized to view self-service payslips.'
+        );
+        abort_unless((int) $record->user_id === (int) auth()->id(), 403);
+
+        return $this->payslip($batch, $record);
+    }
+
     public function reopen(PayrollBatch $batch)
     {
         if ($batch->type !== 'thirteenth_month') {

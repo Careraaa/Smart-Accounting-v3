@@ -10,7 +10,7 @@
     $boundaryAvailable = max(round((float) $shortRemittance->short_amount - (float) $pendingPayments->sum('amount'), 2), 0);
 @endphp
 <div class="max-w-4xl mx-auto space-y-5">
-    <div class="flex items-start justify-between gap-4">
+    <div class="flex flex-col-reverse items-start gap-3">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Boundary Shortage</h1>
             <p class="mt-1 text-sm text-gray-500">Daily remittance #{{ $shortRemittance->id }} · {{ $shortRemittance->remittance_date?->format('F d, Y') }}</p>

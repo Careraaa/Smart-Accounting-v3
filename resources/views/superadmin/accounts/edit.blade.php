@@ -8,7 +8,7 @@ $reqClass   = 'text-red-500 ml-0.5';
 @endphp
 
 @section('content')
-<div class="max-w-3xl">
+<div class="max-w-6xl mx-auto">
         <a href="{{ route('superadmin.accounts.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer mb-4">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back to accounts
@@ -65,9 +65,13 @@ $reqClass   = 'text-red-500 ml-0.5';
                         @error('email')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                     <div>
-                        <label class="{{ $labelClass }}">Phone</label>
-                        <input type="tel" name="phone" class="{{ $inputClass }} @error('phone') border-red-400 bg-red-50 @enderror" value="{{ old('phone', $user->phone) }}" placeholder="09173458216" inputmode="numeric" autocomplete="tel" maxlength="11" pattern="09\d{9}" data-digits-only>
-                        @error('phone')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
+                        <label class="{{ $labelClass }}">Sex <span class="{{ $reqClass }}">*</span></label>
+                        <select name="gender" class="{{ $inputClass }} @error('gender') border-red-400 bg-red-50 @enderror" required>
+                            <option value="">— Select sex —</option>
+                            <option value="female" {{ old('gender', $user->gender) === 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="male" {{ old('gender', $user->gender) === 'male' ? 'selected' : '' }}>Male</option>
+                        </select>
+                        @error('gender')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                 </div>
             </div>
@@ -114,20 +118,25 @@ $reqClass   = 'text-red-500 ml-0.5';
                 </div>
                 <div>
                     <p class="text-sm font-bold text-gray-900">Employment</p>
-                    <p class="text-xs text-gray-400">HR fields</p>
+                    <p class="text-xs text-gray-400">Position, daily rate, and shift</p>
                 </div>
             </div>
             <div class="px-5 py-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="{{ $labelClass }}">Position</label>
-                        <input type="text" name="position" class="{{ $inputClass }} @error('position') border-red-400 bg-red-50 @enderror" value="{{ old('position', $user->position) }}" placeholder="Accounting Clerk">
+                        <label class="{{ $labelClass }}">Position <span class="{{ $reqClass }}">*</span></label>
+                        <select name="position" id="position" class="{{ $inputClass }} @error('position') border-red-400 bg-red-50 @enderror" required>
+                            <option value="">&mdash; Select position &mdash;</option>
+                            @foreach ($positions as $position)
+                                <option value="{{ $position->name }}" data-daily-rate="{{ $position->daily_rate }}" {{ old('position', $user->position) === $position->name ? 'selected' : '' }}>{{ $position->name }}</option>
+                            @endforeach
+                        </select>
                         @error('position')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                     <div>
-                        <label class="{{ $labelClass }}">Department</label>
-                        <input type="text" name="department" class="{{ $inputClass }} @error('department') border-red-400 bg-red-50 @enderror" value="{{ old('department', $user->department) }}" placeholder="Finance">
-                        @error('department')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
+                        <label class="{{ $labelClass }}">Daily rate <span class="{{ $reqClass }}">*</span></label>
+                        <input type="number" name="salary_rate" id="salary_rate" class="{{ $inputClass }} @error('salary_rate') border-red-400 bg-red-50 @enderror" value="{{ old('salary_rate', $user->salary_rate) }}" placeholder="Auto-filled from position" inputmode="decimal" step="0.01" min="0" readonly required>
+                        @error('salary_rate')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -135,11 +144,6 @@ $reqClass   = 'text-red-500 ml-0.5';
                         <label class="{{ $labelClass }}">Date of hire</label>
                         <input type="date" name="date_of_hire" class="{{ $inputClass }} @error('date_of_hire') border-red-400 bg-red-50 @enderror" value="{{ old('date_of_hire', $user->date_of_hire?->format('Y-m-d')) }}">
                         @error('date_of_hire')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
-                    </div>
-                    <div>
-                        <label class="{{ $labelClass }}">Salary rate</label>
-                        <input type="number" name="salary_rate" class="{{ $inputClass }} @error('salary_rate') border-red-400 bg-red-50 @enderror" value="{{ old('salary_rate', $user->salary_rate) }}" placeholder="25000.00" inputmode="decimal" step="0.01" min="0" data-decimal-only>
-                        @error('salary_rate')<span class="{{ $errClass }}">{{ $message }}</span>@enderror
                     </div>
                     <div>
                         <label class="{{ $labelClass }}">Shift <span class="{{ $reqClass }}">*</span></label>
@@ -173,32 +177,25 @@ $reqClass   = 'text-red-500 ml-0.5';
         if (el.value !== digits) el.value = digits;
     };
 
-    const normalizeDecimalOnly = (el) => {
-        const raw = (el.value || '');
-        let cleaned = raw.replace(/[^\d.]/g, '');
-        const firstDot = cleaned.indexOf('.');
-        if (firstDot !== -1) {
-            cleaned = cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '');
-        }
-        if (el.value !== cleaned) el.value = cleaned;
-    };
+    const positionSelect = document.getElementById('position');
+    const salaryInput = document.getElementById('salary_rate');
+    if (positionSelect && salaryInput) {
+        const syncSalary = () => {
+            const selectedOption = positionSelect.options[positionSelect.selectedIndex];
+            const dailyRate = selectedOption?.dataset.dailyRate;
+            salaryInput.value = (dailyRate !== undefined && dailyRate !== '') ? dailyRate : '';
+        };
+        positionSelect.addEventListener('change', syncSalary);
+        syncSalary();
+    }
 
     document.addEventListener('input', (e) => {
         const el = e.target;
         if (!(el instanceof HTMLInputElement)) return;
         if (el.hasAttribute('data-digits-only')) normalizeDigitsOnly(el);
-        if (el.hasAttribute('data-decimal-only')) normalizeDecimalOnly(el);
-    });
-
-    document.addEventListener('keydown', (e) => {
-        const el = e.target;
-        if (!(el instanceof HTMLInputElement)) return;
-        if (!el.hasAttribute('data-decimal-only')) return;
-        if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') e.preventDefault();
     });
 
     document.querySelectorAll('input[data-digits-only]').forEach(normalizeDigitsOnly);
-    document.querySelectorAll('input[data-decimal-only]').forEach(normalizeDecimalOnly);
 })();
 </script>
 @endpush

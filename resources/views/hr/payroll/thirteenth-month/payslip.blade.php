@@ -336,16 +336,16 @@
             margin: 0mm;
         }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}?v={{ filemtime(public_path('css/print-standard.css')) }}">
 </head>
 
 <body>
 
-    <div class="controls">
+    <div class="controls payslip-controls">
         <button class="btn btn-primary" onclick="window.print()">Print</button>
     </div>
 
-    <div class="page">
+    <div class="page payslip-page">
 
         <div class="main-content">
 

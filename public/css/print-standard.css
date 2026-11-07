@@ -23,3 +23,185 @@
 
     .no-print, .controls { display: none !important; }
 }
+
+@media screen and (max-width: 1100px) {
+    body > .controls,
+    body > .print-controls {
+        width: calc(100% - 24px);
+        max-width: 900px;
+        margin: 12px auto 8px !important;
+        flex-wrap: wrap;
+    }
+
+    body > .payslip-controls {
+        justify-content: flex-end;
+    }
+
+    body > .payslip-controls > .btn {
+        margin-left: auto;
+    }
+
+    body > .page,
+    body > .print-page {
+        width: calc(100% - 24px) !important;
+        max-width: 900px !important;
+        min-height: 0 !important;
+        margin: 0 auto 16px !important;
+        padding: 20px !important;
+    }
+
+    body > .page table:not(.report-table),
+    body > .print-page table:not(.report-table) {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .page .report-header,
+    .print-page .report-header,
+    .print-page > div:first-child {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .page .report-title,
+    .print-page .report-title,
+    .print-page > div:first-child > :last-child {
+        text-align: left;
+    }
+
+    .page .signatures {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .page .signature-block {
+        min-width: min(100%, 200px);
+    }
+
+    body > .page.payslip-page {
+        height: auto !important;
+        overflow: visible;
+        flex-direction: column;
+    }
+
+    .page.payslip-page .main-content {
+        width: 100%;
+        height: auto;
+        flex: none;
+    }
+
+    .page.payslip-page .acknowledgement {
+        height: auto;
+        flex: none;
+        border-top: 1px solid var(--black);
+        border-left: 0;
+        margin-top: 12px;
+    }
+
+    .print-page .grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .page.payslip-page .slip-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        padding: 14px 12px;
+    }
+
+    .page.payslip-page .slip-title {
+        align-self: flex-end;
+    }
+
+    .page.payslip-page .company-name {
+        font-size: clamp(12px, 4vw, 15px);
+    }
+
+    .page.payslip-page .emp-strip {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        padding: 12px;
+        font-size: 12px;
+    }
+
+    .page.payslip-page .slip-body {
+        overflow: visible;
+        gap: 12px;
+        padding: 12px 8px;
+    }
+
+    .page.payslip-page .two-col {
+        grid-template-columns: minmax(0, 1fr);
+        flex: none;
+        gap: 0;
+    }
+
+    .page.payslip-page .two-col > div {
+        min-width: 0;
+        border-right: 0;
+        border-bottom: 1px solid var(--black);
+        padding: 12px 10px;
+    }
+
+    .page.payslip-page .two-col > div:last-child {
+        border-bottom: 0;
+    }
+
+    .page.payslip-page .section-label {
+        margin-bottom: 6px;
+        font-size: 15px;
+    }
+
+    .page.payslip-page .pay-table {
+        display: table;
+        table-layout: fixed;
+        overflow: visible;
+        font-size: 13px;
+    }
+
+    .page.payslip-page .pay-table th,
+    .page.payslip-page .pay-table td {
+        padding: 7px 4px;
+        font-size: 13px;
+    }
+
+    .page.payslip-page .pay-table th:first-child,
+    .page.payslip-page .pay-table td:first-child:not([colspan]) {
+        width: 52%;
+        overflow-wrap: break-word;
+    }
+
+    .page.payslip-page .pay-table th:nth-child(2),
+    .page.payslip-page .pay-table td:nth-child(2) {
+        width: 20%;
+    }
+
+    .page.payslip-page .pay-table th:last-child,
+    .page.payslip-page .pay-table td:last-child {
+        width: 28%;
+    }
+
+    .page.payslip-page .subtotal-row {
+        padding: 10px 4px 2px;
+        font-size: 13px;
+    }
+
+    .page.payslip-page .net-pay-block {
+        padding: 12px 10px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    body > .page,
+    body > .print-page {
+        padding: 16px !important;
+    }
+
+    body > .page.payslip-page {
+        padding: 12px !important;
+    }
+}

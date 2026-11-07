@@ -8,7 +8,7 @@ $descClass  = 'text-[0.6rem] text-gray-400 mt-1 leading-relaxed';
 @endphp
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-8">
+<div class="w-full min-w-0 max-w-4xl mx-auto space-y-8">
 
     <div class="fade-in">
         <h1 class="text-2xl font-bold text-gray-900 tracking-tight">System configuration</h1>
@@ -36,12 +36,12 @@ $descClass  = 'text-[0.6rem] text-gray-400 mt-1 leading-relaxed';
     </div>
     @endif
 
-    <div class="flex gap-1 p-1 bg-gray-100/80 border border-gray-200 rounded-xl fade-in tab-bar">
-        <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-gray-900 shadow-sm" data-tab="general">General</button>
-        <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="positions">Positions</button>
-        <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="backup">Backup</button>
-        <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="maintenance">Maintenance</button>
-        <button type="button" class="tab-btn px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="testing">Testing</button>
+    <div class="flex gap-1 p-1 bg-gray-100/80 border border-gray-200 rounded-xl fade-in tab-bar overflow-x-auto">
+        <button type="button" class="tab-btn shrink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-gray-900 shadow-sm" data-tab="general">General</button>
+        <button type="button" class="tab-btn shrink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="positions">Positions</button>
+        <button type="button" class="tab-btn shrink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="backup">Backup</button>
+        <button type="button" class="tab-btn shrink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="maintenance">Maintenance</button>
+        <button type="button" class="tab-btn shrink-0 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-transparent text-gray-500 hover:text-gray-900" data-tab="testing">Testing</button>
     </div>
 
     {{-- GENERAL TAB --}}
@@ -548,6 +548,7 @@ $descClass  = 'text-[0.6rem] text-gray-400 mt-1 leading-relaxed';
 .scale-in { animation:scaleIn 0.35s cubic-bezier(0.16,1,0.3,1) both; }
 .tab-panel.active { animation:tabFade 0.3s cubic-bezier(0.16,1,0.3,1) both; }
 .tab-bar > .tab-btn { transition: all 0.2s ease; }
+.tab-bar { scrollbar-width: thin; }
 </style>
 
 <script>

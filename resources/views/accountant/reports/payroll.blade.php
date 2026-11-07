@@ -63,7 +63,7 @@ $periodLabel = $period === 'monthly' ? date('F', mktime(0,0,0,$month,1)) : "Year
 
 {{-- Header --}}
     <div class="flex items-start justify-between mb-6 flex-wrap gap-4 fade-up">
-        <div class="flex items-center gap-2">
+        <div class="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Payroll Reports</h1>
             <p class="text-sm text-gray-500 mt-0.5">Approved payroll batches — gross, deductions, and net pay across periods.</p>
             <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-500 text-[0.55rem] font-semibold mt-2">{{ count($batchData) }} {{ Str::plural('batch', count($batchData)) }} · {{ $periodLabel }}</span>

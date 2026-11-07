@@ -363,17 +363,17 @@
             margin: 0mm;
         }
     </style>
-    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}?v={{ filemtime(public_path('css/print-standard.css')) }}">
 </head>
 
 <body class="{{ !empty($batchPrint) && $payrolls->count() > 1 ? 'batch-print' : '' }}">
 
-    <div class="controls">
+    <div class="controls payslip-controls">
         <button class="btn btn-primary" onclick="window.print()">{{ !empty($batchPrint) ? 'Print All Payslips' : 'Print Payslip' }}</button>
     </div>
 
     @foreach (($payrolls ?? collect([$payroll])) as $payroll)
-        <div class="page{{ !empty($batchPrint) && $payrolls->count() > 1 && !$loop->last ? ' batch-page-break' : '' }}">
+        <div class="page payslip-page{{ !empty($batchPrint) && $payrolls->count() > 1 && !$loop->last ? ' batch-page-break' : '' }}">
 
         <!-- LEFT COLUMN - Main Payslip -->
         <div class="main-content">
