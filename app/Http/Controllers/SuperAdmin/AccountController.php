@@ -94,7 +94,7 @@ class AccountController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $account->id,
             'role' => 'required|string|in:superadmin,hr,accountant,remittance_clerk,employee,qr_admin',
-            'phone' => ['nullable', 'regex:/^09\d{9}$/'],
+            'gender' => 'required|string|in:male,female',
             'position' => [
                 'required',
                 'string',
