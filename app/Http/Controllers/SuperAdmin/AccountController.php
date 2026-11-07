@@ -9,6 +9,7 @@ use App\Models\PositionRate;
 use App\Models\Shift;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class AccountController extends Controller
 {
@@ -44,22 +45,29 @@ class AccountController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string|in:hr,accountant,remittance_clerk,employee,qr_admin',
             'gender' => 'required|string|in:male,female',
-            'position' => 'required|string|max:255',
+            'position' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::exists('position_rates', 'name')->where('is_active', true),
+            ],
             'shift_id' => 'required|exists:shifts,id',
-            'department' => 'nullable|string|max:255',
             'date_of_hire' => 'required|date',
-            'salary_rate' => 'required|numeric|min:0',
         ], [
             'position.required' => 'Position is required.',
             'date_of_hire.required' => 'Date of hire is required.',
-            'salary_rate.required' => 'Daily rate is required.',
         ]);
 
         $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
         $validated['password'] = Hash::make($validated['password']);
         $validated['status'] = 'active';
 
-        $validated['department'] = $this->resolveDepartmentFromPosition($validated['position'] ?? '');
+        $positionRate = PositionRate::with('department')
+            ->where('is_active', true)
+            ->where('name', $validated['position'])
+            ->firstOrFail();
+        $validated['salary_rate'] = $positionRate->daily_rate;
+        $validated['department'] = $positionRate->department?->name;
 
         $user = User::create($validated);
 
@@ -70,9 +78,13 @@ class AccountController extends Controller
 
     public function edit(User $account)
     {
+        $positions = PositionRate::where('is_active', true)
+            ->with('department')
+            ->orderBy('name')
+            ->get();
         $shifts = Shift::where('is_active', true)->orderBy('name')->get();
 
-        return view('superadmin.accounts.edit', ['user' => $account, 'shifts' => $shifts]);
+        return view('superadmin.accounts.edit', ['user' => $account, 'positions' => $positions, 'shifts' => $shifts]);
     }
 
     public function update(Request $request, User $account)
@@ -83,16 +95,24 @@ class AccountController extends Controller
             'email' => 'required|email|unique:users,email,' . $account->id,
             'role' => 'required|string|in:superadmin,hr,accountant,remittance_clerk,employee,qr_admin',
             'phone' => ['nullable', 'regex:/^09\d{9}$/'],
-            'position' => 'nullable|string|max:255',
+            'position' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::exists('position_rates', 'name')->where('is_active', true),
+            ],
             'shift_id' => 'required|exists:shifts,id',
-            'department' => 'nullable|string|max:255',
             'date_of_hire' => 'nullable|date',
-            'salary_rate' => 'nullable|numeric|min:0',
         ]);
 
         $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
 
-        $validated['department'] = $this->resolveDepartmentFromPosition($validated['position'] ?? '');
+        $positionRate = PositionRate::with('department')
+            ->where('is_active', true)
+            ->where('name', $validated['position'])
+            ->firstOrFail();
+        $validated['salary_rate'] = $positionRate->daily_rate;
+        $validated['department'] = $positionRate->department?->name;
 
         $account->update($validated);
 
@@ -133,14 +153,5 @@ class AccountController extends Controller
             'success' => true,
             'status' => $account->status,
         ]);
-    }
-
-    private function resolveDepartmentFromPosition(string $position): ?string
-    {
-        $positionRate = PositionRate::with('department')
-            ->where('name', $position)
-            ->first();
-
-        return $positionRate?->department?->name;
     }
 }
