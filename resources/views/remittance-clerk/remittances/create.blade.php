@@ -1,7 +1,7 @@
 @extends('layouts.layout')
 
 @section('content')
-<div class="flex items-start justify-between flex-wrap gap-4 mb-6 fade-up">
+<div class="flex flex-col-reverse items-start gap-3 mb-6 fade-up">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Create Remittance</h1>
             <p class="text-sm text-gray-500 mt-0.5">Encode daily collections and expenses. Short remittance split appears automatically when net is negative.</p>

@@ -1,7 +1,7 @@
 @extends('layouts.layout')
 
 @section('content')
-<div class="flex items-start justify-between flex-wrap gap-4 mb-6 fade-up">
+<div class="flex flex-col-reverse items-start gap-3 mb-6 fade-up">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Edit Remittance</h1>
             <p class="text-sm text-gray-500 mt-0.5">Update remittance details. Edited approved/rejected entries will return to pending for re-approval.</p>

@@ -1,6 +1,6 @@
 @extends('layouts.layout')
 @section('content')
-<div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+<div class="flex flex-col-reverse items-start gap-3 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Edit PAO</h1>
             <p class="text-sm text-gray-500 mt-0.5">Update PAO / Conductor details and status.</p>

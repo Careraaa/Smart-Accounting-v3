@@ -14,21 +14,27 @@
         $rstatus = strtolower($route->status ?? 'active');
     @endphp
 
-    <div class="flex items-start justify-between flex-wrap gap-4 fade-up">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $route->route_name }}</h1>
-
-                <p class="text-sm text-gray-500 mt-0.5">{{ $route->origin }} → {{ $route->destination }}</p>
-            </div>
-        </div>
+    <div class="flex items-center justify-between gap-3 fade-up">
         <a href="{{ route('routes.index') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-xs font-semibold no-underline hover:border-gray-600 hover:text-gray-600 hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Back to Routes
         </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('routes.edit', $route) }}" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-gray-900 text-white hover:bg-gray-800 transition-all no-underline whitespace-nowrap">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Edit Route
+            </a>
+            <button type="button" onclick="openRouteDeleteModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-all border-0 cursor-pointer whitespace-nowrap">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Delete
+            </button>
+            <form id="deleteRouteForm" action="{{ route('routes.destroy', $route) }}" method="POST" class="hidden">@csrf @method('DELETE')</form>
+        </div>
+    </div>
+
+    <div class="fade-up">
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ $route->route_name }}</h1>
+        <p class="text-sm text-gray-500 mt-0.5">{{ $route->origin }} → {{ $route->destination }}</p>
     </div>
 
     <div class="flex flex-wrap gap-3 fade-up">
@@ -89,17 +95,6 @@
             <div class="flex items-center justify-between py-3 border-b border-gray-50">
                 <span class="text-xs font-medium text-gray-400">Weekend Boundary</span>
                 <span class="text-xs font-semibold text-gray-900">₱{{ number_format($route->weekend_boundary, 2) }}</span>
-            </div>
-            <div class="flex items-center gap-2 pt-4 pb-2 mt-2">
-                <a href="{{ route('routes.edit', $route) }}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-gray-900 text-white hover:bg-gray-800 transition-all no-underline">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    Edit Route
-                </a>
-                <button type="button" onclick="openRouteDeleteModal()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-all border-0 cursor-pointer">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    Delete
-                </button>
-                <form id="deleteRouteForm" action="{{ route('routes.destroy', $route) }}" method="POST" class="hidden">@csrf @method('DELETE')</form>
             </div>
         </div>
     </div>
