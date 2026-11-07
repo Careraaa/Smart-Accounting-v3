@@ -8,7 +8,7 @@
 </style>
 @endpush
 @section('content')
-<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6 bg-[#eaeaea] dark:bg-[#0a0a0a]">
 
     @php
         $vstatus = strtolower($vehicle->status ?? 'active');
