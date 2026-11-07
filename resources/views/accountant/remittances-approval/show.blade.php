@@ -174,7 +174,7 @@ $statusInfo = match($remittance->status) {
                 <thead class="bg-gray-50 text-[10px] uppercase tracking-wider text-gray-400">
                     <tr>
                         <th class="px-5 py-3">Internal payment ID</th>
-                        <th class="px-5 py-3">Payment date / shortage share</th>
+                        <th class="px-5 py-3">Payment date</th>
                         <th class="px-5 py-3 text-right">Amount</th>
                         <th class="px-5 py-3">Journal entry</th>
                         <th class="px-5 py-3">Recorded / reviewed by</th>
@@ -200,7 +200,14 @@ $statusInfo = match($remittance->status) {
                                     <span class="text-red-600">Missing journal entry</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3 text-gray-500">{{ $payment->recordedBy?->name ?? '—' }} / {{ $payment->approvedBy?->name ?? '—' }}</td>
+                            <td class="px-5 py-3 text-gray-500">
+                                @if($payment->approved_by !== null && (int) $payment->recorded_by === (int) $payment->approved_by)
+                                    {{ $payment->recordedBy?->name ?? '—' }}
+                                @else
+                                    <span class="block">Recorded: {{ $payment->recordedBy?->name ?? '—' }}</span>
+                                    <span class="block">Reviewed: {{ $payment->approvedBy?->name ?? '—' }}</span>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -289,7 +296,6 @@ $statusInfo = match($remittance->status) {
                     <input type="checkbox" name="confirm_boundary_received" value="1" class="mt-0.5">
                     I confirm this calculated boundary amount was actually received and verified. Only this amount will be posted.
                 </label>
-                <p class="sm:col-span-2 text-[10px] text-gray-400">No receipt is required.</p>
             </div>
             <div class="flex gap-2">
                 <button type="button" onclick="closeApproveModal()"
