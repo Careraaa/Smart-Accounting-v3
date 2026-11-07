@@ -89,10 +89,10 @@ class PAOController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'contact_number' => ['required', 'digits:11', 'regex:/^09\d{9}$/'],
-            'email' => 'required|email|unique:paos,email,' . $pao->id,
-            'gender' => 'required|string',
-            'address' => 'required|string',
-            'date_of_hire' => 'required|date',
+            'email' => 'nullable|email|unique:paos,email,' . $pao->id,
+            'gender' => 'nullable|string',
+            'address' => 'nullable|string',
+            'date_of_hire' => 'nullable|date',
             'status' => 'required|in:active,inactive',
         ]);
 

@@ -41,13 +41,13 @@
                     @error('contact_number') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Email <span class="text-amber-600">*</span></label>
-                    <input type="email" name="email" value="{{ old('email', $pao->email) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('email') border-red-300 @enderror" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Email</label>
+                    <input type="email" name="email" value="{{ old('email', $pao->email) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('email') border-red-300 @enderror">
                     @error('email') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Sex <span class="text-amber-600">*</span></label>
-                    <select name="gender" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Sex</label>
+                    <select name="gender" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all">
                         <option value="">-- Select --</option>
                         <option value="male" {{ old('gender', $pao->gender) === 'male' ? 'selected' : '' }}>Male</option>
                         <option value="female" {{ old('gender', $pao->gender) === 'female' ? 'selected' : '' }}>Female</option>
@@ -64,13 +64,13 @@
                     @error('status') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Date of Hire <span class="text-amber-600">*</span></label>
-                    <input type="date" name="date_of_hire" value="{{ old('date_of_hire', $pao->date_of_hire?->format('Y-m-d')) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('date_of_hire') border-red-300 @enderror" required>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Date of Hire</label>
+                    <input type="date" name="date_of_hire" value="{{ old('date_of_hire', $pao->date_of_hire?->format('Y-m-d')) }}" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all @error('date_of_hire') border-red-300 @enderror">
                     @error('date_of_hire') <p class="text-[10px] text-red-500 mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div class="sm:col-span-2">
-                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Address <span class="text-amber-600">*</span></label>
-                    <textarea name="address" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" required>{{ old('address', $pao->address) }}</textarea>
+                    <label class="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1.5">Address</label>
+                    <textarea name="address" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-xs text-gray-700 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all">{{ old('address', $pao->address) }}</textarea>
                 </div>
             </div>
 
