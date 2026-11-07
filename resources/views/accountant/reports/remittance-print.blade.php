@@ -133,10 +133,10 @@
         @media print {
             body { background: #fff; }
             .controls { display: none !important; }
-            .page { margin: 0; box-shadow: none; max-width: 100%; padding: 12mm; }
+            .page { width: 100%; margin: 0; box-shadow: none; max-width: none; padding: 6mm; }
         }
 
-        @page { size: A4 landscape; margin: 12mm; }
+        @page { size: A4 landscape; margin: 0; }
     </style>
     <link rel="stylesheet" href="{{ asset('css/print-standard.css') }}">
 </head>
@@ -198,17 +198,15 @@
                         <td colspan="4" style="padding: 20px; text-align: center;">No remittances found for the selected period.</td>
                     </tr>
                 @endforelse
+                @if (count($groupedRemittances) > 0)
+                    <tr style="border-top: 2px solid var(--gray-rule); background: var(--gray-bg); font-weight: 700; break-inside: avoid;">
+                        <td style="padding: 10px;">TOTAL</td>
+                        <td class="text-right mono" style="padding: 10px; color: #000000;">₱{{ number_format($totalCollection, 2) }}</td>
+                        <td class="text-right mono" style="padding: 10px;">₱{{ number_format($totalExpenses, 2) }}</td>
+                        <td class="text-right mono" style="padding: 10px;">₱{{ number_format($totalNetRemittance, 2) }}</td>
+                    </tr>
+                @endif
             </tbody>
-            @if (count($groupedRemittances) > 0)
-            <tfoot>
-                <tr style="border-top: 2px solid var(--gray-rule); background: var(--gray-bg); font-weight: 700;">
-                    <td style="padding: 10px;">TOTAL</td>
-                    <td class="text-right mono" style="padding: 10px; color: #000000;">₱{{ number_format($totalCollection, 2) }}</td>
-                    <td class="text-right mono" style="padding: 10px;">₱{{ number_format($totalExpenses, 2) }}</td>
-                    <td class="text-right mono" style="padding: 10px;">₱{{ number_format($totalNetRemittance, 2) }}</td>
-                </tr>
-            </tfoot>
-            @endif
         </table>
 
         {{-- Signatures --}}
