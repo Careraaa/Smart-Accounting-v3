@@ -113,38 +113,39 @@ jobs:
           npm run build
 
       # ---------- Upload everything over FTP ----------
-      - name: Upload to InfinityFree
-        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
-        with:
-          server: ftpupload.net
-          port: 21
-          protocol: ftp
-          security: loose
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ env.SERVER_DIR }}
-          log-level: standard
-          timeout: 300000
-          exclude: |
-            **/.git/**
-            **/.git*
-            **/node_modules/**
-            **/.github/**
-            **/tests/**
-            **/storage/logs/*.log
-            **/storage/framework/cache/data/**
-            **/storage/framework/sessions/*
-            **/storage/framework/views/*
-            **/storage/framework/testing/**
-            **/database/database.sqlite
-            *.md
-            package.json
-            package-lock.json
-            vite.config.js
-            phpunit.xml
-            .env.example
-            check-employees.php
-            username_password.txt
+      # Disabled: InfinityFree upload was blocking the Byet.host deploys.
+      # - name: Upload to InfinityFree
+      #   uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+      #   with:
+      #     server: ftpupload.net
+      #     port: 21
+      #     protocol: ftp
+      #     security: loose
+      #     username: ${{ secrets.FTP_USERNAME }}
+      #     password: ${{ secrets.FTP_PASSWORD }}
+      #     server-dir: ${{ env.SERVER_DIR }}
+      #     log-level: standard
+      #     timeout: 300000
+      #     exclude: |
+      #       **/.git/**
+      #       **/.git*
+      #       **/node_modules/**
+      #       **/.github/**
+      #       **/tests/**
+      #       **/storage/logs/*.log
+      #       **/storage/framework/cache/data/**
+      #       **/storage/framework/sessions/*
+      #       **/storage/framework/views/*
+      #       **/storage/framework/testing/**
+      #       **/database/database.sqlite
+      #       *.md
+      #       package.json
+      #       package-lock.json
+      #       vite.config.js
+      #       phpunit.xml
+      #       .env.example
+      #       check-employees.php
+      #       username_password.txt
 
       # ---------- Also deploy deploy-test-2 to Byet.host ----------
       - name: Create Byet.host Test 2 .env
