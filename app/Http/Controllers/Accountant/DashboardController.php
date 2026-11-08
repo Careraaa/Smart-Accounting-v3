@@ -149,9 +149,11 @@ class DashboardController extends Controller
         $financialOverview['dateFrom'] = $financialDateFrom;
         $financialOverview['dateTo'] = $financialDateTo;
 
+        // Trend uses the same whole-year window as the totals above (Jan through the current month).
         $financialTrend = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $month = now()->subMonths($i);
+        $financialTrendMonths = now()->month;
+        for ($i = 0; $i < $financialTrendMonths; $i++) {
+            $month = now()->startOfYear()->addMonthsNoOverflow($i);
             $monthStatement = $this->accountingReports->incomeStatement(
                 $month->copy()->startOfMonth()->toDateString(),
                 $month->copy()->endOfMonth()->toDateString()

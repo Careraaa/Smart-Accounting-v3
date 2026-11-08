@@ -37,7 +37,7 @@
             <div class="flex items-center justify-between px-2 text-[10px] text-gray-400 dark:text-neutral-500">
                 <span class="flex items-center gap-1.5"><span class="h-0.5 w-3 rounded bg-[#ee765f]"></span>Revenue</span>
                 <span class="flex items-center gap-1.5"><span class="h-0.5 w-3 rounded bg-[#55b995]"></span>Net income</span>
-                <span>Last 6 months</span>
+                <span>This year</span>
             </div>
             @if($financialTrend->count() > 1)
                 @php
@@ -67,7 +67,7 @@
                     $revenuePath = $smoothPath($revenueCoords);
                     $incomePath = $smoothPath($incomeCoords);
                 @endphp
-                <svg viewBox="0 0 {{ $financialChartW }} {{ $financialChartH }}" class="mt-2 h-auto w-full" role="img" aria-label="Revenue and net income for the last six months">
+                <svg viewBox="0 0 {{ $financialChartW }} {{ $financialChartH }}" class="mt-2 h-auto w-full" role="img" aria-label="Revenue and net income for the current year">
                     <defs>
                         <filter id="financialRevenueLineShadow" x="-20%" y="-30%" width="140%" height="170%" color-interpolation-filters="sRGB">
                             <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#ee765f" flood-opacity="0.28" />
