@@ -177,6 +177,7 @@ class PayrollService
         $holidayPay         = $holidayWagesResult['holiday_pay'];
         $holidayOTPay       = $holidayWagesResult['holiday_overtime_pay'] ?? 0.0;
         $holidayOTHours     = $holidayWagesResult['holiday_overtime_hours'] ?? 0.0;
+        $holidayOTMultipliers = $holidayWagesResult['holiday_overtime_multipliers'] ?? [];
         $holidayBreakdown   = $holidayWagesResult['breakdown'];
 
         // Get holiday dates to exclude them from regular OT calculation
@@ -232,9 +233,11 @@ class PayrollService
             // the breakdown already counted, add the difference at holiday OT multipliers.
             $supplementHours = max(0.0, (float) $otRecord->hours - $breakdownOTHours);
             if ($supplementHours > 0) {
-                // Use regular holiday OT multiplier (most common case):
-                // hourlyRate × 2.0 × 1.30 = 260% of hourly rate per OT hour
-                $holidayOTMultiplier = 2.0 * 1.30;
+                $holidayOTMultiplier = $holidayOTMultipliers[$dateStr] ?? null;
+                if ($holidayOTMultiplier === null) {
+                    throw new \LogicException("Missing holiday overtime multiplier for {$dateStr}.");
+                }
+
                 $supplementPay = round($supplementHours * $hourlyRate * $holidayOTMultiplier, 2);
                 $holidayOTPay   += $supplementPay;
                 $holidayOTHours += $supplementHours;

@@ -319,7 +319,7 @@
 
             if ($existing) {
                 return redirect()
-                    ->route('payroll.thirteenth-month-pay.batch.details', $existing)
+                    ->route('payroll.thirteenth-month-pay.batch.confirm', $existing)
                     ->with('info', 'A 13th month pay batch for ' . $year . ' already exists (status: ' . $existing->status . '). Only one batch per year is allowed.');
             }
 
@@ -328,7 +328,7 @@
             $this->logActivity('created', "13th month pay batch #{$batch->id} for {$year}", request()->url(), 'thirteenth_month', $batch->id);
 
             return redirect()
-                ->route('payroll.thirteenth-month-pay.batch.details', $batch)
+                ->route('payroll.thirteenth-month-pay.batch.confirm', $batch)
                 ->with('success', "13th month pay batch for {$year} generated. Review the records below.")
                 ->with('_sound_success', true);
         }

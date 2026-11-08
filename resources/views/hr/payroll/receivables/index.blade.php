@@ -166,9 +166,6 @@
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Requested</th>
                         <th class="text-center text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Status</th>
                         <th class="text-left text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Deducted On</th>
-                        @if($canViewShortRemittances)
-                        <th class="text-end text-[0.55rem] font-semibold uppercase tracking-wide text-gray-400 px-5 py-3">Actions</th>
-                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50" id="caTbody"></tbody>
@@ -360,8 +357,7 @@ window.allSalaryLoans = [];
         });
     });
 
-    const isAcc = {{ auth()->user()->role === 'accountant' ? 'true' : 'false' }};
-    const caColspan = isAcc ? 8 : 7;
+    const caColspan = 7;
 
     // ── Row click handler ──
     document.addEventListener('click', function(e) {
@@ -439,7 +435,6 @@ window.allSalaryLoans = [];
                         </span>
                     </td>
                     <td class="px-5 py-3 text-xs text-gray-700">${r.deducted_payroll ? 'Period ending ' + r.deducted_payroll : '<span class="text-gray-300">—</span>'}</td>
-                    ${isAcc ? '<td class="px-5 py-3 text-end"></td>' : ''}
                 `;
                 caTbody.appendChild(tr);
                 if (r.rejection_reason) {

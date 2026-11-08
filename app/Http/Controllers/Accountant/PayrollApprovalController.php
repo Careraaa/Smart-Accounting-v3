@@ -127,7 +127,11 @@ class PayrollApprovalController extends Controller
 
         $batch->load(['payrolls.user', 'payrolls.deductions', 'payrolls.allowances', 'generatedBy', 'finalizedBy']);
 
-        $payrolls = $batch->payrolls;
+        $payrolls = $batch->payrolls
+            ->sortBy(fn ($payroll) => strtolower(
+                ($payroll->user?->last_name ?? '') . "\0" . ($payroll->user?->first_name ?? '')
+            ))
+            ->values();
         $totalGross = $payrolls->sum(fn ($p) => $p->gross_pay);
         $totalNet = $payrolls->sum(fn ($p) => $p->net_pay);
         $totalDeductions = $payrolls->sum(fn ($p) => $p->total_deductions);
@@ -141,7 +145,11 @@ class PayrollApprovalController extends Controller
     {
         $batch->load(['thirteenthMonthPays.user', 'generatedBy', 'finalizedBy']);
 
-        $records = $batch->thirteenthMonthPays;
+        $records = $batch->thirteenthMonthPays
+            ->sortBy(fn ($record) => strtolower(
+                ($record->user?->last_name ?? '') . "\0" . ($record->user?->first_name ?? '')
+            ))
+            ->values();
         $totalPayable = $records->sum('thirteenth_month_pay');
         $totalPaid = $records->sum('amount_paid');
         $totalRemaining = $records->sum('amount_remaining');

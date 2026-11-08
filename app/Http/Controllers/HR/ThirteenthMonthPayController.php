@@ -48,7 +48,7 @@ class ThirteenthMonthPayController extends Controller
         $this->logActivity('created', "Generated 13th month pay batch #{$batch->id} for {$year}", request()->url(), 'thirteenth_month', $batch->id);
 
         return redirect()
-            ->route('payroll.thirteenth-month-pay.batch.details', $batch)
+            ->route('payroll.thirteenth-month-pay.batch.confirm', $batch)
             ->with('success', "13th month pay batch generated for {$year}. Review the records below.");
     }
 

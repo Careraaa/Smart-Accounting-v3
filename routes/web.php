@@ -517,6 +517,7 @@ Route::middleware(['auth', 'check-status', 'role:accountant,superadmin'])->group
     Route::post('payroll-approval/{payroll}/reject', [PayrollApprovalController::class, 'reject'])->name('payroll-approval.reject');
 
     Route::get('/remittance-approval', [RemittanceApprovalController::class, 'index'])->name('remittance-approval.index');
+    Route::post('/remittance-approval/approve-all', [RemittanceApprovalController::class, 'approveAllPending'])->name('remittance-approval.approve-all');
     Route::get('/remittance-approval/{remittance}', [RemittanceApprovalController::class, 'show'])->name('remittance-approval.show');
     Route::post('/remittance-approval/{remittance}/approve', [RemittanceApprovalController::class, 'approve'])->name('remittance-approval.approve');
     Route::post('/remittance-approval/boundary-payments/{payment}/approve', [RemittanceApprovalController::class, 'approvePayment'])->name('remittance-approval.boundary-payments.approve');
