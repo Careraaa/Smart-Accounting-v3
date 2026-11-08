@@ -2,7 +2,7 @@
     $financialRevenue = (float) ($financialOverview['netRevenue'] ?? 0);
     $financialNetIncome = (float) ($financialOverview['netIncome'] ?? 0);
     $financialExpense = (float) ($financialOverview['netExpenses'] ?? 0);
-    $financialDateFrom = $financialOverview['dateFrom'] ?? now()->startOfMonth()->toDateString();
+    $financialDateFrom = $financialOverview['dateFrom'] ?? now()->startOfYear()->toDateString();
     $financialDateTo = $financialOverview['dateTo'] ?? now()->toDateString();
     $financialTrend = collect($financialTrend ?? []);
     $financialChartMax = max(1, (float) $financialTrend->max('revenue'), (float) $financialTrend->max(fn($point) => max($point['netIncome'], 0)));
@@ -156,7 +156,7 @@
             @endif
         </div>
         <div class="mt-4 flex flex-wrap items-center justify-between gap-3 px-5 pb-5 text-[11px] text-gray-500 dark:text-neutral-400">
-            <span>Posted journal entries for the current month.</span>
+            <span>Posted journal entries for the current year.</span>
             <a href="{{ route('accounting.income-statement.index', ['date_from' => $financialDateFrom, 'date_to' => $financialDateTo]) }}" class="inline-flex items-center gap-1 font-semibold text-gray-600 no-underline transition-colors hover:text-gray-900 dark:text-neutral-300 dark:hover:text-white">View details <span aria-hidden="true">⌄</span></a>
         </div>
     </div>

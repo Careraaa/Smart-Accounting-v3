@@ -174,8 +174,8 @@ class DashboardController extends Controller
 
         // ============ FINANCIAL OVERVIEW ============
         // Use the same posted journal-entry logic as the Income Statement page.
-        $financialDateTo = now()->toDateString();
-        $financialDateFrom = Carbon::parse($financialDateTo)->startOfMonth()->toDateString();
+        $financialDateTo = now()->endOfYear()->toDateString();
+        $financialDateFrom = Carbon::parse($financialDateTo)->startOfYear()->toDateString();
         $financialOverview = $this->accountingReports->incomeStatement($financialDateFrom, $financialDateTo);
         $financialOverview['dateFrom'] = $financialDateFrom;
         $financialOverview['dateTo'] = $financialDateTo;

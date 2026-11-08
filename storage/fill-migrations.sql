@@ -1,0 +1,30 @@
+-- Refresh migrations table from code (26 migrations)
+USE smart_accounting_v3;
+TRUNCATE TABLE migrations;
+INSERT INTO migrations (migration, batch) VALUES
+('2026_02_26_050700_create_full_smart_accounting_tables', 1),
+('2026_06_01_100000_create_additional_tables', 1),
+('2026_06_01_200000_add_columns_to_users_drivers_paos', 1),
+('2026_06_01_300000_add_columns_to_payroll_tables', 1),
+('2026_06_01_400000_add_columns_to_leaves_loans_attendance', 1),
+('2026_06_01_500000_add_columns_to_remittances_routes', 1),
+('2026_06_03_000001_add_work_days_per_week_to_users', 1),
+('2026_06_04_000001_add_type_to_payroll_batches_and_batch_id_to_thirteenth_month_pays', 1),
+('2026_07_20_000001_create_position_rates_table', 1),
+('2026_07_20_000002_create_departments_table', 1),
+('2026_07_20_000003_add_department_id_to_position_rates_table', 1),
+('2026_08_25_000001_create_accounting_tables', 1),
+('2026_08_30_000001_remap_legacy_attachment_keys', 1),
+('2026_09_03_000000_add_shift_id_to_users_table', 1),
+('2026_09_19_000000_make_driver_email_nullable', 1),
+('2026_09_19_000100_make_pao_email_nullable', 1),
+('2026_09_20_000001_add_expense_breakdown_to_daily_remittances', 1),
+('2026_10_16_000001_add_payroll_deductions_account_mapping', 1),
+('2026_10_16_000001_replace_route_boundary_with_weekday_and_weekend_rates', 1),
+('2026_10_16_000002_add_payroll_accounting_classification', 1),
+('2026_10_16_000003_backfill_payroll_account_mappings', 1),
+('2026_10_18_000001_create_boundary_payments_table', 1),
+('2026_10_18_000002_backfill_boundary_account_mappings', 1),
+('2026_10_18_000003_remove_paid_by_from_boundary_payments', 1),
+('2026_10_18_000004_add_partner_allocation_to_boundary_payments', 1),
+('2026_10_19_000001_allow_pending_boundary_payment_approval', 1);

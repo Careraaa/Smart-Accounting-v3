@@ -35,7 +35,7 @@ $td = $attendanceTrend[array_key_last($attendanceTrend)];
 $financialRevenue = (float) ($financialOverview['netRevenue'] ?? 0);
 $financialNetIncome = (float) ($financialOverview['netIncome'] ?? 0);
 $financialExpense = (float) ($financialOverview['netExpenses'] ?? 0);
-$financialDateFrom = $financialOverview['dateFrom'] ?? now()->startOfMonth()->toDateString();
+$financialDateFrom = $financialOverview['dateFrom'] ?? now()->startOfYear()->toDateString();
 $financialDateTo = $financialOverview['dateTo'] ?? now()->toDateString();
 $financialTrend = collect($financialTrend ?? []);
 $financialChartMax = max(1, (float) $financialTrend->max('revenue'), (float) $financialTrend->max(fn($point) => max($point['netIncome'], 0)));
